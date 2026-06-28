@@ -589,15 +589,21 @@
             const accessSnap = await accessRef.once('value');
             const accessData = accessSnap.val();
             const roomSnap = await db.ref(`rooms/${roomCode}`).once('value');
-            const legacyMemberSnap = await db.ref(`roomMembers/${roomCode}/${currentUser.uid}`).once('value');
+            const legacyMembersSnap = await db.ref(`roomMembers/${roomCode}`).once('value');
+            const legacyMembers = legacyMembersSnap.val() || {};
+            const legacyEmails = Object.values(legacyMembers)
+                .map((member) => normalizeEmail(member && member.email))
+                .filter(Boolean);
+            const isLegacyEmailMember = legacyEmails.includes(myEmail);
 
             const updates = {};
 
             if (!accessData) {
-                // 기존 데이터가 있는 방은 기존 멤버만 최초 보호 설정을 만들 수 있게 합니다.
-                // 새 방은 누구나 처음 연결한 사람이 방 주인이 됩니다.
-                if (roomSnap.exists() && !legacyMemberSnap.exists()) {
-                    alert('이미 존재하는 공유코드입니다. 기존 방 주인 계정으로 먼저 연결하거나, 다른 공유코드를 사용해 주세요.');
+                // 기존 데이터가 있는 방은 예전 roomMembers 안에 같은 이메일이 있는 사용자만
+                // 최초 보호 설정을 만들 수 있게 합니다. 프로젝트가 바뀌면 UID가 달라지므로
+                // UID가 아니라 이메일로 기존 멤버 여부를 확인합니다.
+                if (roomSnap.exists() && !isLegacyEmailMember) {
+                    alert('이미 존재하는 공유코드입니다. 기존 방 주인 이메일로 먼저 연결하거나, 다른 공유코드를 사용해 주세요.');
                     showSaveStatus('⛔ 이미 사용 중인 공유코드입니다.');
                     return;
                 }
