@@ -336,6 +336,11 @@
         <textarea id="diary" rows="3" placeholder="오늘 하루는 어땠나요?" oninput="triggerAutoSave()"></textarea>
     </div>
 
+    <div class="input-group">
+        <label>💌 오늘의 답장</label>
+        <textarea id="replyMessage" rows="3" placeholder="오늘의 기록을 읽고 따뜻한 답장을 남겨주세요 💕" oninput="triggerAutoSave()"></textarea>
+    </div>
+
     <div id="chatSection" style="margin: 20px auto; max-width: 500px; padding: 15px; background: #fff; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); font-family: sans-serif;">
         <h3 style="margin-top:0; color: #ff6b6b; display: flex; align-items: center; gap: 8px; font-size: 1.1rem;">
             💖 우리들의 실시간 한줄 톡
@@ -556,6 +561,7 @@
                 safeUpdateField('goingOut', record.goingOut);
                 safeUpdateField('sleepTime', record.sleepTime);
                 safeUpdateField('diary', record.diary);
+                safeUpdateField('replyMessage', record.replyMessage);
 
                 currentWater = parseInt(record.water) || 0;
                 document.getElementById('waterDisplay').innerText = currentWater;
@@ -589,7 +595,7 @@
     }
 
     function clearFormFieldsExceptSync() {
-        const fields = ['wakeTime', 'weight', 'mealBreakfast', 'mealLunch', 'mealDinner', 'goingOut', 'sleepTime', 'diary'];
+        const fields = ['wakeTime', 'weight', 'mealBreakfast', 'mealLunch', 'mealDinner', 'goingOut', 'sleepTime', 'diary', 'replyMessage'];
         fields.forEach(id => {
             if (document.activeElement !== document.getElementById(id)) document.getElementById(id).value = '';
         });
@@ -653,6 +659,7 @@
         const goingOut = document.getElementById('goingOut').value || '기록 없음';
         const sleepTime = document.getElementById('sleepTime').value || '기록 없음';
         const diary = document.getElementById('diary').value || '기록 없음';
+        const replyMessage = document.getElementById('replyMessage').value || '기록 없음';
         const hasPhotoText = uploadedPhotoBase64 ? '📷 사진 첨부 완료' : '사진 없음';
 
         const reportText = `📅 [${date}] 아가의 하루 기록 💕\n\n` +
@@ -666,12 +673,13 @@
                            `🚶‍♀️ 외출 여부: ${goingOut} (${hasPhotoText})\n` +
                            `🌙 취침 예정: ${sleepTime}\n\n` +
                            `📝 오늘의 한 줄:\n"${diary}"\n\n` +
+                           `💌 오늘의 답장:\n"${replyMessage}"\n\n` +
                            `오늘도 건강하게 보내줘서 고마워요 단 한 사람 최고 알라뷰❤️`;
 
         const newRecord = {
             date, wakeTime, water: `${currentWater}ML`, weight,
             mealBreakfast, mealLunch, mealDinner,
-            goingOut, sleepTime, diary, photo: uploadedPhotoBase64, fullText: reportText,
+            goingOut, sleepTime, diary, replyMessage, photo: uploadedPhotoBase64, fullText: reportText,
             updatedBy: currentUser.uid,
             updatedByEmail: currentUser.email,
             updatedAt: firebase.database.ServerValue.TIMESTAMP
@@ -705,11 +713,12 @@
         sortedDates.forEach((date) => {
             const record = daysData[date];
             const shortDiary = record.diary ? record.diary.substring(0, 12) : '기록 없음';
+            const shortReply = record.replyMessage ? record.replyMessage.substring(0, 12) : '';
             const photoIndicator = record.photo ? '📷' : '';
             html += `
                 <div class="history-item" onclick="toggleHistoryItem('${date}')">
                     <div class="history-item-date">📅 ${date}의 기록 ${photoIndicator}</div>
-                    <div>💧물: ${record.water || '0ML'} | ⚖️체중: ${record.weight || '기록 없음'} | 📝한줄: ${shortDiary}...</div>
+                    <div>💧물: ${record.water || '0ML'} | ⚖️체중: ${record.weight || '기록 없음'} | 📝한줄: ${shortDiary}...${shortReply ? ' | 💌답장: ' + shortReply + '...' : ''}</div>
                     <button class="btn-delete" onclick="deleteRecord(event, '${date}')">삭제</button>
                     <div class="history-item-content" id="content-${date}">
                         ${record.fullText ? record.fullText.replace(/\n/g, '<br>') : ''}
