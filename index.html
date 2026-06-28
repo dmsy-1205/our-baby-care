@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>우리만의 실시간 하루 관리 앱</title>
+    
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging-compat.js"></script>
+
+    <style>
+        :root {
+            --primary-color: #ff7675;
+            --bg-color: #f8f9fa;
+            --card-color: #ffffff;
+            --text-color: #2d3436;
+            --border-color: #ffeaa7;
+            --water-color: #0984e3;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 20px 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            background: var(--card-color);
+            width: 100%;
+            max-width: 450px;
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(255, 118, 117, 0.1);
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .autosave-status {
+            position: absolute;
+            top: 25px;
+            right: 25px;
+            font-size: 0.75rem;
+            color: #2ecc71;
+            font-weight: 600;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 1.4rem;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+            font-weight: 700;
+        }
+
+        .sync-box {
+            background: #fff3f3;
+            border: 1px dashed var(--primary-color);
+            padding: 12px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+        .sync-box label {
+            font-size: 0.8rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            display: block;
+            margin-bottom: 4px;
+        }
+        .sync-box input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #fab1a0;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            text-align: center;
+            font-weight: bold;
+            color: #2d3436;
+        }
+
+        .btn-noti-setup {
+            background-color: #4a90e2;
+            color: white;
+            padding: 10px;
+            font-size: 0.85rem;
+            border-radius: 8px;
+            margin-top: 10px;
+            font-weight: bold;
+            width: 100%;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(74, 144, 226, 0.2);
+            transition: background 0.2s;
+        }
+        .btn-noti-setup:active {
+            background-color: #357abd;
+        }
+
+        .input-group {
+            margin-bottom: 18px;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #636e72;
+        }
+
+        .input-group input, .input-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #dfe6e9;
+            border-radius: 10px;
+            font-size: 1rem;
+            background-color: #fafafa;
+            outline: none;
+        }
+
+        .input-group input:focus, .input-group textarea:focus {
+            border-color: var(--primary-color);
+            background-color: #fff;
+        }
+
+        .row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .water-counter-box {
+            background: #f1f7ff;
+            border: 1px solid #d2e4ff;
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .water-display {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: var(--water-color);
+            margin-bottom: 10px;
+        }
+
+        .water-btns {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 6px;
+        }
+
+        .btn-water {
+            background: white;
+            border: 1px solid #99c2ff;
+            color: var(--water-color);
+            padding: 8px 0;
+            font-size: 0.85rem;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .btn-water:active { background: #e3efff; }
+        .btn-water.reset { color: #636e72; border-color: #dfe6e9; }
+
+        .meal-container {
+            background: #fafafa;
+            border: 1px solid #dfe6e9;
+            border-radius: 12px;
+            padding: 12px;
+        }
+
+        .meal-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .meal-row:last-child { margin-bottom: 0; }
+        .meal-row span { font-size: 0.85rem; font-weight: 600; color: #636e72; width: 45px; flex-shrink: 0; }
+        .meal-row input { flex-grow: 1; padding: 10px; font-size: 0.95rem; border: 1px solid #e2e8f0; border-radius: 8px; }
+
+        .file-label {
+            display: inline-block;
+            background: #f1f2f6;
+            color: #2d3436;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            text-align: center;
+            width: 100%;
+            cursor: pointer;
+            border: 1px dashed #b2bec3;
+            margin-top: 5px;
+        }
+
+        .preview-box { margin-top: 8px; display: none; text-align: center; position: relative; }
+        .preview-box img { max-width: 100%; max-height: 180px; border-radius: 10px; object-fit: cover; border: 1px solid #dfe6e9; }
+        .btn-remove-photo { position: absolute; top: 5px; right: 5px; background: rgba(0,0,0,0.6); color: white; border: none; border-radius: 50%; width: 24px; height: 24px; font-size: 0.8rem; cursor: pointer; }
+
+        button { width: 100%; padding: 14px; border: none; border-radius: 12px; font-size: 1rem; font-weight: bold; cursor: pointer; }
+        .btn-main { background-color: var(--primary-color); color: white; margin-top: 10px; margin-bottom: 20px; }
+
+        .result-container { display: none; margin-top: 10px; border-top: 2px dashed #ffeaa7; padding-top: 20px; }
+        .result-title { font-size: 0.95rem; font-weight: bold; color: #2d3436; margin-bottom: 8px; }
+        #resultBox { width: 100%; height: 200px; background-color: #fffaf0; border: 1px solid #ffeaa7; border-radius: 10px; padding: 12px; font-size: 0.95rem; line-height: 1.5; resize: none; outline: none; }
+        .btn-copy { background-color: #55efc4; color: #2d3436; margin-top: 10px; }
+
+        .history-card { background: var(--card-color); width: 100%; max-width: 450px; border-radius: 20px; padding: 25px; box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05); border: 1px solid #dfe6e9; }
+        .history-header { font-size: 1.1rem; font-weight: bold; color: #2d3436; margin-bottom: 15px; }
+        .history-list { max-height: 350px; overflow-y: auto; }
+        .history-item { background: #f1f2f6; padding: 12px; border-radius: 10px; margin-bottom: 10px; font-size: 0.9rem; position: relative; cursor: pointer; }
+        .history-item-date { font-weight: bold; color: var(--primary-color); margin-bottom: 4px; }
+        .history-item-content { white-space: pre-line; color: #636e72; font-size: 0.85rem; display: none; margin-top: 8px; padding-top: 8px; border-top: 1px dashed #cbd5e1; }
+        .history-photo-display { margin-top: 10px; max-width: 100%; max-height: 200px; border-radius: 8px; object-fit: cover; display: block; }
+        .btn-delete { position: absolute; top: 10px; right: 10px; background: #ff7675; color: white; border: none; padding: 4px 8px; font-size: 0.75rem; border-radius: 6px; width: auto; }
+        .empty-message { text-align: center; color: #b2bec3; font-size: 0.9rem; padding: 20px 0; }
+        .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background-color: rgba(45, 52, 54, 0.9); color: white; padding: 10px 20px; border-radius: 20px; font-size: 0.9rem; display: none; z-index: 10; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="autosave-status" id="saveStatus">☁️ 실시간 대기 중</div>
+    <h1>💕 아가의 하루 관리</h1>
+    
+    <div class="sync-box">
+        <label>🔑 우리만의 공유 커플 코드 (두 폰에 똑같이 입력)</label>
+        <input type="text" id="roomCode" placeholder="예: love520" oninput="saveRoomCodeAndConnect()">
+        <button type="button" class="btn-noti-setup" id="notiBtn" onclick="알림_권한_요청_및_토큰받기()">🔔 스마트폰 알림(푸시) 활성화하기</button>
+    </div>
+
+    <div class="input-group">
+        <label>📅 기록 날짜</label>
+        <input type="date" id="recordDate" onchange="connectAndListenFirebase()">
+    </div>
+
+    <div class="row">
+        <div class="input-group">
+            <label>☀️ 기상 시간</label>
+            <input type="text" id="wakeTime" placeholder="오전 7시" oninput="triggerAutoSave()">
+        </div>
+        <div class="input-group">
+            <label>⚖️ 체중</label>
+            <input type="text" id="weight" placeholder="50 kg" oninput="triggerAutoSave()">
+        </div>
+    </div>
+
+    <div class="input-group">
+        <label>💧 오늘 마신 물 누적</label>
+        <div class="water-counter-box">
+            <div class="water-display"><span id="waterDisplay">0</span> ML</div>
+            <div class="water-btns">
+                <button type="button" class="btn-water" onclick="addWater(250)">+250ML</button>
+                <button type="button" class="btn-water" onclick="addWater(500)">+500ML</button>
+                <button type="button" class="btn-water reset" onclick="resetWater()">초기화 🔄</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="input-group">
+        <label>🥗 식사 기록</label>
+        <div class="meal-container">
+            <div class="meal-row"><span>아침</span><input type="text" id="mealBreakfast" placeholder="사과" oninput="triggerAutoSave()"></div>
+            <div class="meal-row"><span>점심</span><input type="text" id="mealLunch" placeholder="일반식" oninput="triggerAutoSave()"></div>
+            <div class="meal-row"><span>저녁</span><input type="text" id="mealDinner" placeholder="샐러드" oninput="triggerAutoSave()"></div>
+        </div>
+    </div>
+
+    <div class="input-group">
+        <label>🚶‍♀️ 외출 체크 & 사진 기록</label>
+        <input type="text" id="goingOut" placeholder="산책 30분" oninput="triggerAutoSave()">
+        <label for="goingOutPhoto" class="file-label">📷 외출 사진 촬영 및 첨부하기</label>
+        <input type="file" id="goingOutPhoto" accept="image/*" style="display:none;" onchange="handlePhotoUpload(this)">
+        <div class="preview-box" id="previewBox">
+            <button type="button" class="btn-remove-photo" onclick="removePhoto()">×</button>
+            <img id="photoPreview" src="" alt="미리보기">
+        </div>
+    </div>
+
+    <div class="input-group">
+        <label>🌙 취침 예정</label>
+        <input type="text" id="sleepTime" placeholder="밤 11시" oninput="triggerAutoSave()">
+    </div>
+
+    <div class="input-group">
+        <label>📝 오늘의 한 줄 (일기)</label>
+        <textarea id="diary" rows="3" placeholder="오늘 하루는 어땠나요?" oninput="triggerAutoSave()"></textarea>
+    </div>
+
+    <div id="chatSection" style="margin: 20px auto; max-width: 500px; padding: 15px; background: #fff; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); font-family: sans-serif;">
+        <h3 style="margin-top:0; color: #ff6b6b; display: flex; align-items: center; gap: 8px; font-size: 1.1rem;">
+            💖 우리들의 실시간 한줄 톡
+        </h3>
+        
+        <div id="chatMessages" style="height: 250px; overflow-y: auto; border: 1px solid #f0f0f0; padding: 12px; border-radius: 12px; margin-bottom: 10px; background: #fafafa; display: flex; flex-direction: column; gap: 8px;">
+            <div style="text-align: center; color: #aaa; font-size: 0.85rem; margin-top: 50px;">공유 코드를 입력하면 채팅방이 연결됩니다. ✨</div>
+        </div>
+        
+        <div style="display: flex; gap: 6px;">
+            <input type="text" id="chatSender" placeholder="이름" style="width: 65px; padding: 10px; border: 1px solid #ddd; border-radius: 8px; text-align: center; font-size: 0.9rem;" oninput="updateChatAlignment()">
+            <input type="text" id="chatInput" placeholder="메시지를 입력하세요..." style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 0.9rem;" onkeypress="if(event.key === 'Enter') sendChatMessage()">
+            <button onclick="sendChatMessage()" style="padding: 10px 16px; background: #ff6b6b; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 0.9rem;">전송</button>
+        </div>
+    </div>
+
+    <button class="btn-main" onclick="finalizeAndGenerateReport()">✨ 오늘 하루 기록 최종 완성 및 복사</button>
+
+    <div class="result-container" id="resultContainer">
+        <div class="result-title">✨ 깔끔하게 정리된 결과</div>
+        <textarea id="resultBox" readonly></textarea>
+        <button class="btn-copy" onclick="copyToClipboard()">📋 결과 복사하기</button>
+    </div>
+</div>
+
+<div class="history-card">
+    <div class="history-header">📜 우리들의 지난 기록실 <span>(클라우드 서버 연동)</span></div>
+    
+    <div style="background: #fff5f5; padding: 12px; margin-bottom: 15px; border-radius: 12px; border: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+        <span style="font-size: 0.85rem; font-weight: bold; color: #636e72;">📅 날짜별 조회:</span>
+        <input type="date" id="historyFilterDate" onchange="applyHistoryFilter()" style="padding: 6px 10px; border: 1px solid var(--primary-color); border-radius: 8px; font-size: 0.85rem; outline: none; background: white;">
+        <button onclick="clearHistoryFilter()" style="width: auto; padding: 6px 14px; background: var(--primary-color); color: white; border-radius: 8px; font-size: 0.85rem; font-weight: bold; margin: 0; height: auto; line-height: 1;">전체보기</button>
+    </div>
+
+    <div class="history-list" id="historyList"></div>
+</div>
+
+<div class="toast" id="toast">기록이 복사되었습니다! 💕</div>
+
+<script>
+    // [설정 통합] 파이어베이스 고유 환경 설정 및 즉시 초기화
+    const firebaseConfig = {
+        apiKey: "AIzaSyDMVl65SWhqPcxrMY7h_ir7OgPbk7P1LAs",
+        authDomain: "our-baby-care.firebaseapp.com", 
+        databaseURL: "https://our-baby-care-default-rtdb.firebaseio.com", 
+        projectId: "our-baby-care",
+        storageBucket: "our-baby-care.appspot.com", 
+        messagingSenderId: "564751165",
+        appId: "1:564751165:web:12012e95e1240e87e27354"
+    };
+
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    }
+
+    let messaging = null;
+    let myDeviceToken = "";
+    try {
+        if (firebase.messaging && window.isSecureContext) {
+            messaging = firebase.messaging();
+        }
+    } catch (e) {
+        console.warn('푸시 알림 초기화는 건너뜁니다. Firebase Database 연결은 계속 진행합니다.', e);
+    }
+
+    let currentWater = 0;
+    let uploadedPhotoBase64 = "";
+    let autoSaveTimeout = null;
+    let currentRoomRef = null;
+    let entireRoomRef = null;
+    let chatRef = null;
+    let cachedDaysData = null; // 달력 필터 작동 유지를 위한 전체 로컬 캐시 변수
+
+    // [마스터 통합 초기화]
+    window.onload = function() {
+        const today = new Date();
+        const dateInput = document.getElementById('recordDate');
+        dateInput.value = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+        
+        const savedRoom = localStorage.getItem('myRoomCode');
+        if(savedRoom) {
+            document.getElementById('roomCode').value = savedRoom;
+        }
+
+        const savedSender = localStorage.getItem('chatSenderName');
+        if (savedSender) {
+            document.getElementById('chatSender').value = savedSender;
+        }
+
+        // 백그라운드 서비스 워커 등록 처리 강제 실행 (안드로이드/iOS 알림 백그라운드 필수 요소)
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/firebase-messaging-sw.js')
+                .then((reg) => console.log('Service Worker 가동 성공:', reg.scope))
+                .catch((err) => console.error('Service Worker 가동 실패:', err));
+        }
+
+        // 실시간 연동 시작
+        connectAndListenFirebase();
+        
+        // 브라우저가 승인상태를 기억할 경우 자동 갱신 시도
+        if (Notification.permission === 'granted') {
+            setTimeout(알림_권한_요청_및_토큰받기, 1500);
+        }
+    };
+
+    function saveRoomCodeAndConnect() {
+        const code = document.getElementById('roomCode').value.trim();
+        localStorage.setItem('myRoomCode', code);
+        connectAndListenFirebase();
+        실시간_토큰_서버_저장(); 
+    }
+
+    function connectAndListenFirebase() {
+        const roomCode = document.getElementById('roomCode').value.trim();
+        const date = document.getElementById('recordDate').value;
+   
+        listenChat();
+
+        if (!roomCode) {
+            showSaveStatus("🔒 공유 코드를 입력하면 실시간 연결됩니다.");
+            return;
+        }
+
+        showSaveStatus("📡 연결 중...");
+
+        if (currentRoomRef) currentRoomRef.off();
+        currentRoomRef = firebase.database().ref('rooms/' + roomCode + '/days/' + date);
+        
+        currentRoomRef.on('value', (snapshot) => {
+            const record = snapshot.val();
+            if (record) {
+                safeUpdateField('wakeTime', record.wakeTime);
+                safeUpdateField('weight', record.weight);
+                safeUpdateField('mealBreakfast', record.mealBreakfast);
+                safeUpdateField('mealLunch', record.mealLunch);
+                safeUpdateField('mealDinner', record.mealDinner);
+                safeUpdateField('goingOut', record.goingOut);
+                safeUpdateField('sleepTime', record.sleepTime);
+                safeUpdateField('diary', record.diary);
+                
+                currentWater = parseInt(record.water) || 0;
+                document.getElementById('waterDisplay').innerText = currentWater;
+
+                if (record.photo) {
+                    uploadedPhotoBase64 = record.photo;
+                    document.getElementById('photoPreview').src = record.photo;
+                    document.getElementById('previewBox').style.display = 'block';
+                } else {
+                    removePhotoUI();
+                }
+            } else {
+                clearFormFieldsExceptSync();
+            }
+            showSaveStatus("☁️ 서버 실시간 동기화 완료");
+        });
+
+        if (entireRoomRef) entireRoomRef.off();
+        entireRoomRef = firebase.database().ref('rooms/' + roomCode + '/days');
+        entireRoomRef.on('value', (snapshot) => {
+            cachedDaysData = snapshot.val(); 
+            displayHistory(cachedDaysData);
+        });
+    }
+
+    function safeUpdateField(id, val) {
+        const el = document.getElementById(id);
+        if (document.activeElement !== el) {
+            el.value = (val === '기록 없음' || !val) ? '' : val;
+        }
+    }
+
+    function clearFormFieldsExceptSync() {
+        const fields = ['wakeTime', 'weight', 'mealBreakfast', 'mealLunch', 'mealDinner', 'goingOut', 'sleepTime', 'diary'];
+        fields.forEach(id => {
+            if(document.activeElement !== document.getElementById(id)) {
+                document.getElementById(id).value = '';
+            }
+        });
+        currentWater = 0;
+        document.getElementById('waterDisplay').innerText = 0;
+        removePhotoUI();
+    }
+
+    function removePhotoUI() {
+        uploadedPhotoBase64 = "";
+        document.getElementById('goingOutPhoto').value = "";
+        document.getElementById('previewBox').style.display = 'none';
+    }
+
+    function addWater(amount) { currentWater += amount; document.getElementById('waterDisplay').innerText = currentWater; executeAutoSave(); }
+    function resetWater() { currentWater = 0; document.getElementById('waterDisplay').innerText = currentWater; executeAutoSave(); }
+    function removePhoto() { removePhotoUI(); executeAutoSave(); }
+
+    function handlePhotoUpload(input) {
+        const file = input.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const img = new Image();
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                const MAX_WIDTH = 350; 
+                let width = img.width;
+                let height = img.height;
+                if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
+                canvas.width = width; canvas.height = height;
+                canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+
+                uploadedPhotoBase64 = canvas.toDataURL('image/jpeg', 0.5);
+                document.getElementById('photoPreview').src = uploadedPhotoBase64;
+                document.getElementById('previewBox').style.display = 'block';
+                executeAutoSave();
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function triggerAutoSave() {
+        showSaveStatus("✍️ 입력 중...");
+        clearTimeout(autoSaveTimeout);
+        autoSaveTimeout = setTimeout(executeAutoSave, 600);
+    }
+
+    function executeAutoSave() {
+        const roomCode = document.getElementById('roomCode').value.trim();
+        const date = document.getElementById('recordDate').value;
+        if (!roomCode || firebaseConfig.apiKey === "YOUR_API_KEY") return;
+
+        const wakeTime = document.getElementById('wakeTime').value || '기록 없음';
+        const weight = document.getElementById('weight').value || '기록 없음';
+        const water = currentWater > 0 ? `${currentWater}ML` : '기록 없음';
+        const mealBreakfast = document.getElementById('mealBreakfast').value || '기록 없음';
+        const mealLunch = document.getElementById('mealLunch').value || '기록 없음';
+        const mealDinner = document.getElementById('mealDinner').value || '기록 없음';
+        const goingOut = document.getElementById('goingOut').value || '기록 없음';
+        const sleepTime = document.getElementById('sleepTime').value || '기록 없음';
+        const diary = document.getElementById('diary').value || '기록 없음';
+        const hasPhotoText = uploadedPhotoBase64 ? "📷 사진 첨부 완료" : "사진 없음";
+
+        const reportText = `📅 [${date}] 아가의 하루 기록 💕\n\n` +
+                           `☀️ 기상 시간: ${wakeTime}\n` +
+                           `💧 물 마시기: ${water}\n` +
+                           `⚖️ 몸무게: ${weight}\n\n` +
+                           `🥗 식사 기록:\n` +
+                           `  - 아침: ${mealBreakfast}\n` +
+                           `  - 점심: ${mealLunch}\n` +
+                           `  - 저녁: ${mealDinner}\n\n` +
+                           `🚶‍♀️ 외출 여부: ${goingOut} (${hasPhotoText})\n` +
+                           `🌙 취침 예정: ${sleepTime}\n\n` +
+                           `📝 오늘의 한 줄:\n"${diary}"\n\n` +
+                           `오늘도 건강하게 보내줘서 고마워요 단 한 사람 최고 알라뷰❤️`;
+
+        const newRecord = { 
+            date, wakeTime, water: `${currentWater}ML`, weight, 
+            mealBreakfast, mealLunch, mealDinner, 
+            goingOut, sleepTime, diary, photo: uploadedPhotoBase64, fullText: reportText 
+        };
+
+        firebase.database().ref('rooms/' + roomCode + '/days/' + date).set(newRecord)
+            .then(() => showSaveStatus("☁️ 서버 자동저장 완료"))
+            .catch(() => showSaveStatus("❌ 저장 실패 (인터넷 연결 확인)"));
+    }
+
+    function showSaveStatus(msg) {
+        document.getElementById('saveStatus').innerText = msg;
+    }
+
+    // [달력 필터 처리 통합 엔진] 지난 기록실 화면 렌더링
+    function displayHistory(daysData) {
+        const historyList = document.getElementById('historyList');
+        if (!daysData) {
+            historyList.innerHTML = '<div class="empty-message">아직 저장된 서버 기록이 없습니다. 코드를 공유해 보세요! ✨</div>';
+            return;
+        }
+
+        const filterInput = document.getElementById('historyFilterDate');
+        const filterValue = filterInput ? filterInput.value : '';
+
+        const allDates = Object.keys(daysData).sort((a, b) => new Date(b) - new Date(a));
+        const sortedDates = allDates.filter(date => !filterValue || date === filterValue);
+
+        if (sortedDates.length === 0) {
+            historyList.innerHTML = '<div class="empty-message">선택하신 날짜의 기록이 서버에 없습니다. 📅</div>';
+            return;
+        }
+
+        let html = '';
+        sortedDates.forEach((date) => {
+            const record = daysData[date];
+            const shortDiary = record.diary ? record.diary.substring(0, 12) : '기록 없음';
+            const photoIndicator = record.photo ? "📷" : "";
+            
+            html += `
+                <div class="history-item" onclick="toggleHistoryItem('${date}')">
+                    <div class="history-item-date">📅 ${date}의 기록 ${photoIndicator}</div>
+                    <div>💧물: ${record.water || '0ML'} | ⚖️체중: ${record.weight} | 📝한줄: ${shortDiary}...</div>
+                    <button class="btn-delete" onclick="deleteRecord(event, '${date}')">삭제</button>
+                    <div class="history-item-content" id="content-${date}">
+                        ${record.fullText ? record.fullText.replace(/\n/g, '<br>') : ''}
+                        ${record.photo ? `<img src="${record.photo}" class="history-photo-display" alt="외출 사진">` : ''}
+                        <button class="btn-copy" style="margin-top:15px; padding:8px; font-size:0.85rem;" onclick="copyDirectText(event, '${date}')">📋 이 기록 복사하기</button>
+                    </div>
+                </div>
+            `;
+        });
+        historyList.innerHTML = html;
+    }
+
+    function applyHistoryFilter() {
+        if (cachedDaysData) displayHistory(cachedDaysData);
+    }
+
+    function clearHistoryFilter() {
+        const filterInput = document.getElementById('historyFilterDate');
+        if (filterInput) filterInput.value = ''; 
+        if (cachedDaysData) displayHistory(cachedDaysData);
+    }
+
+    function toggleHistoryItem(date) {
+        const content = document.getElementById(`content-${date}`);
+        content.style.display = content.style.display === 'block' ? 'none' : 'block';
+    }
+
+    // [이하 기존 핵심 유틸리티 함수 유지]
+    function deleteRecord(event, date) {
+        event.stopPropagation();
+        const roomCode = document.getElementById('roomCode').value.trim();
+        if (confirm(`${date} 기록을 서버에서 완전히 삭제할까요?`)) {
+            firebase.database().ref('rooms/' + roomCode + '/days/' + date).remove();
+        }
+    }
+
+    function copyDirectText(event, date) {
+        event.stopPropagation();
+        const roomCode = document.getElementById('roomCode').value.trim();
+        firebase.database().ref('rooms/' + roomCode + '/days/' + date).once('value').then((snapshot) => {
+            if(snapshot.val()) executeCopy(snapshot.val().fullText);
+        });
+    }
+
+    function finalizeAndGenerateReport() {
+        const roomCode = document.getElementById('roomCode').value.trim();
+        const date = document.getElementById('recordDate').value;
+        if(!roomCode) { alert("공유 코드를 입력해야 전송용 결과가 추출됩니다."); return; }
+
+        firebase.database().ref('rooms/' + roomCode + '/days/' + date).once('value').then((snapshot) => {
+            const record = snapshot.val();
+            if (record) {
+                document.getElementById('resultBox').value = record.fullText;
+                const resultContainer = document.getElementById('resultContainer');
+                resultContainer.style.display = 'block';
+                resultContainer.scrollIntoView({ behavior: 'smooth' });
+            }
+        });
+    }
+
+    function copyToClipboard() { executeCopy(document.getElementById('resultBox').value); }
+    function executeCopy(text) {
+        navigator.clipboard.writeText(text).then(() => { showToast(); }).catch(() => {
+            const tempBox = document.createElement("textarea");
+            tempBox.value = text; document.body.appendChild(tempBox);
+            tempBox.select(); document.execCommand("copy");
+            document.body.removeChild(tempBox); showToast();
+        });
+    }
+    function showToast() {
+        const toast = document.getElementById('toast'); toast.style.display = 'block';
+        setTimeout(() => { toast.style.display = 'none'; }, 2000);
+    }
+
+    function listenChat() {
+        const roomCode = document.getElementById('roomCode').value.trim();
+        if (!roomCode) return;
+        if (chatRef) chatRef.off(); 
+        chatRef = firebase.database().ref('rooms/' + roomCode + '/messages');
+        chatRef.limitToLast(50).on('value', (snapshot) => { renderMessages(snapshot.val()); });
+    }
+
+    function renderMessages(messages) {
+        const chatMessages = document.getElementById('chatMessages');
+        chatMessages.innerHTML = ''; 
+        if (!messages) {
+            chatMessages.innerHTML = '<div style="text-align: center; color: #ccc; font-size: 0.85rem; margin-top: 50px;">첫 메시지를 보내 대화를 시작해보세요! 💬</div>';
+            return;
+        }
+        const myName = document.getElementById('chatSender').value.trim();
+        Object.keys(messages).forEach((key) => {
+            const msg = messages[key];
+            const msgLine = document.createElement('div');
+            const isMe = msg.sender === myName && myName !== ''; 
+            msgLine.style.display = 'flex';
+            msgLine.style.flexDirection = 'column';
+            msgLine.style.alignItems = isMe ? 'flex-end' : 'flex-start';
+            msgLine.style.width = '100%';
+
+            const bubble = document.createElement('div');
+            bubble.style.padding = '8px 12px';
+            bubble.style.borderRadius = '12px';
+            bubble.style.maxWidth = '75%';
+            bubble.style.wordBreak = 'break-all';
+            bubble.style.fontSize = '0.9rem';
+            bubble.style.boxShadow = '0 1px 2px rgba(0,0,0,0.05)';
+            bubble.innerText = msg.text;
+
+            if (isMe) {
+                bubble.style.background = '#ffe3e3'; 
+                bubble.style.color = '#333';
+            } else {
+                bubble.style.background = '#ffffff'; 
+                bubble.style.color = '#333';
+                bubble.style.border = '1px solid #eee';
+                const senderName = document.createElement('span');
+                senderName.style.fontSize = '0.75rem';
+                senderName.style.color = '#888';
+                senderName.style.marginBottom = '2px';
+                senderName.innerText = msg.sender;
+                msgLine.appendChild(senderName);
+            }
+            msgLine.appendChild(bubble);
+            chatMessages.appendChild(msgLine);
+        });
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function sendChatMessage() {
+        const roomCode = document.getElementById('roomCode').value.trim();
+        const sender = document.getElementById('chatSender').value.trim();
+        const text = document.getElementById('chatInput').value.trim();
+        if (!roomCode || !sender || !text) return;
+
+        firebase.database().ref('rooms/' + roomCode + '/messages').push({
+            sender: sender,
+            text: text,
+            timestamp: firebase.database.ServerValue.TIMESTAMP
+        });
+        document.getElementById('chatInput').value = ''; 
+        localStorage.setItem('chatSenderName', sender); 
+        실시간_토큰_서버_저장(); 
+    }
+
+    function updateChatAlignment() {
+        const roomCode = document.getElementById('roomCode').value.trim();
+        if (!roomCode || !chatRef) return;
+        chatRef.once('value', (snapshot) => { renderMessages(snapshot.val()); });
+    }
+
+    // =================================================================
+    // 🔔 [알림 마스터 강제 엔진] 포그라운드 수신 및 토큰 자동 발급 시스템
+    // =================================================================
+
+    if (messaging) {
+        messaging.onMessage((payload) => {
+            console.log('[포그라운드] 알림 도착:', payload);
+            const title = payload?.notification?.title || '알림';
+            const body = payload?.notification?.body || '';
+            alert(`[알림] ${title}\n${body}`);
+        });
+    }
+
+    function 알림_권한_요청_및_토큰받기() {
+        const notiBtn = document.getElementById('notiBtn');
+
+        if (!('Notification' in window)) {
+            alert('이 브라우저는 알림을 지원하지 않습니다.');
+            return;
+        }
+
+        if (!window.isSecureContext) {
+            alert('푸시 알림은 HTTPS 주소에서만 정상 작동합니다. Firebase 저장 기능은 계속 사용할 수 있습니다.');
+            return;
+        }
+
+        if (!messaging) {
+            alert('현재 브라우저에서는 푸시 알림을 사용할 수 없습니다. 기록 저장과 채팅 기능은 정상 사용 가능합니다.');
+            return;
+        }
+
+        showSaveStatus("🔔 알림 권한 연동 진행 중...");
+
+        Notification.requestPermission().then((permission) => {
+            if (permission !== 'granted') {
+                showSaveStatus("🔕 알림 권한이 허용되지 않았습니다");
+                return;
+            }
+
+            if (notiBtn) {
+                notiBtn.innerText = "✅ 알림 기능 연동 완료";
+                notiBtn.style.backgroundColor = "#2ecc71";
+                notiBtn.style.boxShadow = "0 4px 6px rgba(46, 204, 113, 0.2)";
+            }
+
+            if (!('serviceWorker' in navigator)) {
+                showSaveStatus("❌ 서비스 워커 미지원 브라우저");
+                return;
+            }
+
+            navigator.serviceWorker.ready.then((registration) => {
+                return messaging.getToken({
+                    vapidKey: 'BGD9XOgn6daGc5t8I7zzmhnneK5cRbANfJQ1qsadrVJpX-PNTsK_zgwrCtPKydyKnjHhVr0vF2A0XIIl1Q_FvdY',
+                    serviceWorkerRegistration: registration
+                });
+            }).then((currentToken) => {
+                if (currentToken) {
+                    myDeviceToken = currentToken;
+                    실시간_토큰_서버_저장();
+                    showSaveStatus("☁️ 알림 토큰 서버 연동 성공");
+                } else {
+                    showSaveStatus("⚠️ 알림 토큰 발급 실패");
+                }
+            }).catch((err) => {
+                console.error('토큰 획득 에러:', err);
+                showSaveStatus("⚠️ 알림 토큰 저장 실패");
+                alert('알림 토큰 발급 중 문제가 생겼습니다. 기록 저장 기능은 정상 사용 가능합니다.');
+            });
+        }).catch((err) => {
+            console.error('알림 권한 요청 에러:', err);
+            showSaveStatus("⚠️ 알림 권한 요청 실패");
+        });
+    }
+
+    function 실시간_토큰_서버_저장() {
+        const roomCode = document.getElementById('roomCode').value.trim();
+        const sender = document.getElementById('chatSender').value.trim() || '이름없음';
+
+        if (!roomCode || !myDeviceToken) return;
+
+        const safeTokenKey = myDeviceToken.replace(/[.#$/\[\]]/g, '_');
+
+        firebase.database().ref('rooms/' + roomCode + '/tokens/' + safeTokenKey).set({
+            token: myDeviceToken,
+            sender: sender,
+            updatedAt: firebase.database.ServerValue.TIMESTAMP,
+            userAgent: navigator.userAgent
+        }).catch((err) => {
+            console.error('토큰 서버 저장 실패:', err);
+        });
+    }
+</script>
+</body>
+</html>
