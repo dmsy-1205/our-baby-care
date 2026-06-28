@@ -8,7 +8,6 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging-compat.js"></script>
 
     <style>
         :root {
@@ -91,7 +90,7 @@
             color: #2d3436;
         }
 
-        .btn-noti-setup {
+        .btn-connect {
             background-color: #4a90e2;
             color: white;
             padding: 10px;
@@ -105,7 +104,7 @@
             box-shadow: 0 4px 6px rgba(74, 144, 226, 0.2);
             transition: background 0.2s;
         }
-        .btn-noti-setup:active {
+        .btn-connect:active {
             background-color: #357abd;
         }
 
@@ -276,8 +275,7 @@
     <div class="sync-box">
         <label>🔑 우리만의 공유 커플 코드 (두 폰에 똑같이 입력)</label>
         <input type="text" id="roomCode" placeholder="예: love520">
-        <button type="button" class="btn-noti-setup" onclick="joinRoomByCode()">🔗 이 공유코드로 연결하기</button>
-        <button type="button" class="btn-noti-setup" id="notiBtn" onclick="알림_권한_요청_및_토큰받기()">🔔 스마트폰 알림(푸시) 활성화하기</button>
+        <button type="button" class="btn-connect" onclick="joinRoomByCode()">🔗 이 공유코드로 연결하기</button>
     </div>
 
     <div class="input-group">
@@ -396,14 +394,8 @@
 
     const auth = firebase.auth();
     const db = firebase.database();
+    // 푸시 알림 기능은 무료 요금제 유지 및 코드 단순화를 위해 제거했습니다.
 
-    let messaging = null;
-    let myDeviceToken = "";
-    try {
-        if (firebase.messaging && window.isSecureContext) messaging = firebase.messaging();
-    } catch (e) {
-        console.warn('푸시 알림 초기화는 건너뜁니다. Firebase Database 연결은 계속 진행합니다.', e);
-    }
 
     let currentUser = null;
     let activeRoomCode = "";
@@ -424,11 +416,6 @@
         const savedSender = localStorage.getItem('chatSenderName');
         if (savedSender) document.getElementById('chatSender').value = savedSender;
 
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/firebase-messaging-sw.js')
-                .then((reg) => console.log('Service Worker 가동 성공:', reg.scope))
-                .catch((err) => console.error('Service Worker 가동 실패:', err));
-        }
 
         auth.onAuthStateChanged(async (user) => {
             currentUser = user;
@@ -437,9 +424,6 @@
                 document.getElementById('appContent').style.display = 'flex';
                 document.getElementById('userInfoText').innerText = `로그인됨: ${user.email}`;
                 await loadUserActiveRoom();
-                if (Notification.permission === 'granted') {
-                    setTimeout(알림_권한_요청_및_토큰받기, 1500);
-                }
             } else {
                 disconnectAllListeners();
                 activeRoomCode = "";
@@ -498,7 +482,6 @@
             activeRoomCode = savedRoom;
             document.getElementById('roomCode').value = savedRoom;
             connectAndListenFirebase();
-            실시간_토큰_서버_저장();
         } else {
             showSaveStatus('🔑 공유코드를 입력하고 연결 버튼을 눌러 주세요.');
             document.getElementById('historyList').innerHTML = '<div class="empty-message">로그인 후 공유코드를 연결하면 기록이 표시됩니다. ✨</div>';
@@ -528,7 +511,6 @@
             await db.ref().update(updates);
             activeRoomCode = roomCode;
             connectAndListenFirebase();
-            실시간_토큰_서버_저장();
             showSaveStatus('☁️ 공유코드 연결 완료');
         } catch (err) {
             console.error(err);
@@ -866,7 +848,6 @@
         });
         document.getElementById('chatInput').value = '';
         localStorage.setItem('chatSenderName', sender);
-        실시간_토큰_서버_저장();
     }
 
     function updateChatAlignment() {
@@ -875,70 +856,6 @@
         chatRef.once('value', (snapshot) => { renderMessages(snapshot.val()); });
     }
 
-    if (messaging) {
-        messaging.onMessage((payload) => {
-            console.log('[포그라운드] 알림 도착:', payload);
-            const title = payload?.notification?.title || '알림';
-            const body = payload?.notification?.body || '';
-            alert(`[알림] ${title}\n${body}`);
-        });
-    }
-
-    function 알림_권한_요청_및_토큰받기() {
-        const notiBtn = document.getElementById('notiBtn');
-        if (!currentUser) { alert('로그인 후 알림을 연결해 주세요.'); return; }
-        if (!document.getElementById('roomCode').value.trim()) { alert('공유코드 연결 후 알림을 연결해 주세요.'); return; }
-        if (!('Notification' in window)) { alert('이 브라우저는 알림을 지원하지 않습니다.'); return; }
-        if (!window.isSecureContext) { alert('푸시 알림은 HTTPS 주소에서만 정상 작동합니다. Firebase 저장 기능은 계속 사용할 수 있습니다.'); return; }
-        if (!messaging) { alert('현재 브라우저에서는 푸시 알림을 사용할 수 없습니다. 기록 저장과 채팅 기능은 정상 사용 가능합니다.'); return; }
-
-        showSaveStatus('🔔 알림 권한 연동 진행 중...');
-        Notification.requestPermission().then((permission) => {
-            if (permission !== 'granted') { showSaveStatus('🔕 알림 권한이 허용되지 않았습니다'); return; }
-            if (notiBtn) {
-                notiBtn.innerText = '✅ 알림 기능 연동 완료';
-                notiBtn.style.backgroundColor = '#2ecc71';
-                notiBtn.style.boxShadow = '0 4px 6px rgba(46, 204, 113, 0.2)';
-            }
-            if (!('serviceWorker' in navigator)) { showSaveStatus('❌ 서비스 워커 미지원 브라우저'); return; }
-            navigator.serviceWorker.ready.then((registration) => {
-                return messaging.getToken({
-                    vapidKey: 'BGD9XOgn6daGc5t8I7zzmhnneK5cRbANfJQ1qsadrVJpX-PNTsK_zgwrCtPKydyKnjHhVr0vF2A0XIIl1Q_FvdY',
-                    serviceWorkerRegistration: registration
-                });
-            }).then((currentToken) => {
-                if (currentToken) {
-                    myDeviceToken = currentToken;
-                    실시간_토큰_서버_저장();
-                    showSaveStatus('☁️ 알림 토큰 서버 연동 성공');
-                } else {
-                    showSaveStatus('⚠️ 알림 토큰 발급 실패');
-                }
-            }).catch((err) => {
-                console.error('토큰 획득 에러:', err);
-                showSaveStatus('⚠️ 알림 토큰 저장 실패');
-                alert('알림 토큰 발급 중 문제가 생겼습니다. 기록 저장 기능은 정상 사용 가능합니다.');
-            });
-        }).catch((err) => {
-            console.error('알림 권한 요청 에러:', err);
-            showSaveStatus('⚠️ 알림 권한 요청 실패');
-        });
-    }
-
-    function 실시간_토큰_서버_저장() {
-        const roomCode = document.getElementById('roomCode').value.trim();
-        const sender = document.getElementById('chatSender').value.trim() || currentUser?.email || '이름없음';
-        if (!currentUser || !roomCode || !myDeviceToken) return;
-        const safeTokenKey = myDeviceToken.replace(/[.#$/\[\]]/g, '_');
-        db.ref('rooms/' + roomCode + '/tokens/' + safeTokenKey).set({
-            token: myDeviceToken,
-            uid: currentUser.uid,
-            email: currentUser.email,
-            sender: sender,
-            updatedAt: firebase.database.ServerValue.TIMESTAMP,
-            userAgent: navigator.userAgent
-        }).catch((err) => console.error('토큰 서버 저장 실패:', err));
-    }
 </script>
 </body>
 </html>
