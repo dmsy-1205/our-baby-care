@@ -7,6 +7,7 @@
     
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging-compat.js"></script>
 
     <style>
@@ -230,17 +231,52 @@
         .btn-delete { position: absolute; top: 10px; right: 10px; background: #ff7675; color: white; border: none; padding: 4px 8px; font-size: 0.75rem; border-radius: 6px; width: auto; }
         .empty-message { text-align: center; color: #b2bec3; font-size: 0.9rem; padding: 20px 0; }
         .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background-color: rgba(45, 52, 54, 0.9); color: white; padding: 10px 20px; border-radius: 20px; font-size: 0.9rem; display: none; z-index: 10; }
+
+
+        .auth-box { background: #fff; width: 100%; max-width: 450px; border-radius: 20px; padding: 25px; box-shadow: 0 10px 20px rgba(0,0,0,0.05); border: 1px solid rgba(255,118,117,0.1); margin-bottom: 20px; }
+        .auth-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 15px; }
+        .auth-tabs button { padding: 10px; border-radius: 10px; background: #f1f2f6; color: #636e72; }
+        .auth-tabs button.active { background: var(--primary-color); color: #fff; }
+        .auth-help { font-size: 0.82rem; color: #636e72; line-height: 1.45; margin: 10px 0; }
+        .user-bar { background: #fff3f3; border: 1px solid #ffd6d6; border-radius: 12px; padding: 10px; margin-bottom: 15px; font-size: 0.85rem; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+        .btn-small { width: auto; padding: 8px 10px; border-radius: 8px; font-size: 0.8rem; }
+        .btn-secondary { background: #dfe6e9; color: #2d3436; }
     </style>
 </head>
 <body>
 
+<div class="auth-box" id="authBox">
+    <h1>🔐 아가의 하루 관리 로그인</h1>
+    <div class="auth-tabs">
+        <button type="button" id="loginTab" class="active" onclick="setAuthMode('login')">로그인</button>
+        <button type="button" id="signupTab" onclick="setAuthMode('signup')">회원가입</button>
+    </div>
+    <div class="input-group">
+        <label>이메일</label>
+        <input type="email" id="authEmail" placeholder="email@example.com" autocomplete="email">
+    </div>
+    <div class="input-group">
+        <label>비밀번호</label>
+        <input type="password" id="authPassword" placeholder="6자리 이상" autocomplete="current-password" onkeypress="if(event.key === 'Enter') handleAuthSubmit()">
+    </div>
+    <p class="auth-help">먼저 회원가입 또는 로그인을 한 뒤, 공유코드를 연결하세요. 다음 접속부터는 로그인한 내 계정에 저장된 공유코드만 자동 연결됩니다.</p>
+    <button type="button" class="btn-main" id="authSubmitBtn" onclick="handleAuthSubmit()">로그인하기</button>
+</div>
+
+<div id="appContent" style="display:none; width:100%; flex-direction:column; align-items:center;">
 <div class="container">
     <div class="autosave-status" id="saveStatus">☁️ 실시간 대기 중</div>
     <h1>💕 아가의 하루 관리</h1>
+
+    <div class="user-bar">
+        <span id="userInfoText">로그인 확인 중...</span>
+        <button type="button" class="btn-small btn-secondary" onclick="logoutUser()">로그아웃</button>
+    </div>
     
     <div class="sync-box">
         <label>🔑 우리만의 공유 커플 코드 (두 폰에 똑같이 입력)</label>
-        <input type="text" id="roomCode" placeholder="예: love520" oninput="saveRoomCodeAndConnect()">
+        <input type="text" id="roomCode" placeholder="예: love520">
+        <button type="button" class="btn-noti-setup" onclick="joinRoomByCode()">🔗 이 공유코드로 연결하기</button>
         <button type="button" class="btn-noti-setup" id="notiBtn" onclick="알림_권한_요청_및_토큰받기()">🔔 스마트폰 알림(푸시) 활성화하기</button>
     </div>
 
@@ -338,98 +374,195 @@
 
     <div class="history-list" id="historyList"></div>
 </div>
+</div>
 
 <div class="toast" id="toast">기록이 복사되었습니다! 💕</div>
 
 <script>
-    // [설정 통합] 파이어베이스 고유 환경 설정 및 즉시 초기화
+    // =========================================================
+    // Firebase 설정
+    // =========================================================
     const firebaseConfig = {
         apiKey: "AIzaSyDMVl65SWhqPcxrMY7h_ir7OgPbk7P1LAs",
-        authDomain: "our-baby-care.firebaseapp.com", 
-        databaseURL: "https://our-baby-care-default-rtdb.firebaseio.com", 
+        authDomain: "our-baby-care.firebaseapp.com",
+        databaseURL: "https://our-baby-care-default-rtdb.firebaseio.com",
         projectId: "our-baby-care",
-        storageBucket: "our-baby-care.appspot.com", 
+        storageBucket: "our-baby-care.appspot.com",
         messagingSenderId: "564751165",
         appId: "1:564751165:web:12012e95e1240e87e27354"
     };
 
-    if (!firebase.apps.length) {
-        firebase.initializeApp(firebaseConfig);
-    }
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+
+    const auth = firebase.auth();
+    const db = firebase.database();
 
     let messaging = null;
     let myDeviceToken = "";
     try {
-        if (firebase.messaging && window.isSecureContext) {
-            messaging = firebase.messaging();
-        }
+        if (firebase.messaging && window.isSecureContext) messaging = firebase.messaging();
     } catch (e) {
         console.warn('푸시 알림 초기화는 건너뜁니다. Firebase Database 연결은 계속 진행합니다.', e);
     }
 
+    let currentUser = null;
+    let activeRoomCode = "";
     let currentWater = 0;
     let uploadedPhotoBase64 = "";
     let autoSaveTimeout = null;
     let currentRoomRef = null;
     let entireRoomRef = null;
     let chatRef = null;
-    let cachedDaysData = null; // 달력 필터 작동 유지를 위한 전체 로컬 캐시 변수
+    let cachedDaysData = null;
+    let authMode = 'login';
 
-    // [마스터 통합 초기화]
     window.onload = function() {
         const today = new Date();
         const dateInput = document.getElementById('recordDate');
         dateInput.value = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-        
-        const savedRoom = localStorage.getItem('myRoomCode');
-        if(savedRoom) {
-            document.getElementById('roomCode').value = savedRoom;
-        }
 
         const savedSender = localStorage.getItem('chatSenderName');
-        if (savedSender) {
-            document.getElementById('chatSender').value = savedSender;
-        }
+        if (savedSender) document.getElementById('chatSender').value = savedSender;
 
-        // 백그라운드 서비스 워커 등록 처리 강제 실행 (안드로이드/iOS 알림 백그라운드 필수 요소)
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('/firebase-messaging-sw.js')
                 .then((reg) => console.log('Service Worker 가동 성공:', reg.scope))
                 .catch((err) => console.error('Service Worker 가동 실패:', err));
         }
 
-        // 실시간 연동 시작
-        connectAndListenFirebase();
-        
-        // 브라우저가 승인상태를 기억할 경우 자동 갱신 시도
-        if (Notification.permission === 'granted') {
-            setTimeout(알림_권한_요청_및_토큰받기, 1500);
-        }
+        auth.onAuthStateChanged(async (user) => {
+            currentUser = user;
+            if (user) {
+                document.getElementById('authBox').style.display = 'none';
+                document.getElementById('appContent').style.display = 'flex';
+                document.getElementById('userInfoText').innerText = `로그인됨: ${user.email}`;
+                await loadUserActiveRoom();
+                if (Notification.permission === 'granted') {
+                    setTimeout(알림_권한_요청_및_토큰받기, 1500);
+                }
+            } else {
+                disconnectAllListeners();
+                activeRoomCode = "";
+                document.getElementById('roomCode').value = "";
+                document.getElementById('authBox').style.display = 'block';
+                document.getElementById('appContent').style.display = 'none';
+                showSaveStatus("🔒 로그인이 필요합니다.");
+            }
+        });
     };
 
-    function saveRoomCodeAndConnect() {
-        const code = document.getElementById('roomCode').value.trim();
-        localStorage.setItem('myRoomCode', code);
-        connectAndListenFirebase();
-        실시간_토큰_서버_저장(); 
+    function setAuthMode(mode) {
+        authMode = mode;
+        document.getElementById('loginTab').classList.toggle('active', mode === 'login');
+        document.getElementById('signupTab').classList.toggle('active', mode === 'signup');
+        document.getElementById('authSubmitBtn').innerText = mode === 'login' ? '로그인하기' : '회원가입하기';
     }
 
-    function connectAndListenFirebase() {
-        const roomCode = document.getElementById('roomCode').value.trim();
-        const date = document.getElementById('recordDate').value;
-   
-        listenChat();
+    function handleAuthSubmit() {
+        const email = document.getElementById('authEmail').value.trim();
+        const password = document.getElementById('authPassword').value;
+        if (!email || !password) { alert('이메일과 비밀번호를 입력해 주세요.'); return; }
+        if (password.length < 6) { alert('비밀번호는 6자리 이상이어야 합니다.'); return; }
 
-        if (!roomCode) {
-            showSaveStatus("🔒 공유 코드를 입력하면 실시간 연결됩니다.");
+        const job = authMode === 'login'
+            ? auth.signInWithEmailAndPassword(email, password)
+            : auth.createUserWithEmailAndPassword(email, password);
+
+        job.catch((err) => {
+            console.error(err);
+            alert(firebaseAuthErrorToKorean(err.code));
+        });
+    }
+
+    function firebaseAuthErrorToKorean(code) {
+        const map = {
+            'auth/email-already-in-use': '이미 가입된 이메일입니다. 로그인 탭에서 로그인해 주세요.',
+            'auth/invalid-email': '이메일 형식이 올바르지 않습니다.',
+            'auth/user-not-found': '가입되지 않은 이메일입니다. 회원가입을 먼저 해 주세요.',
+            'auth/wrong-password': '비밀번호가 맞지 않습니다.',
+            'auth/invalid-credential': '이메일 또는 비밀번호가 맞지 않습니다.',
+            'auth/network-request-failed': '인터넷 연결을 확인해 주세요.'
+        };
+        return map[code] || `로그인 처리 중 오류가 생겼습니다. (${code})`;
+    }
+
+    function logoutUser() {
+        auth.signOut();
+    }
+
+    async function loadUserActiveRoom() {
+        if (!currentUser) return;
+        const snap = await db.ref(`users/${currentUser.uid}/activeRoom`).once('value');
+        const savedRoom = snap.val();
+        if (savedRoom) {
+            activeRoomCode = savedRoom;
+            document.getElementById('roomCode').value = savedRoom;
+            connectAndListenFirebase();
+            실시간_토큰_서버_저장();
+        } else {
+            showSaveStatus('🔑 공유코드를 입력하고 연결 버튼을 눌러 주세요.');
+            document.getElementById('historyList').innerHTML = '<div class="empty-message">로그인 후 공유코드를 연결하면 기록이 표시됩니다. ✨</div>';
+        }
+    }
+
+    async function joinRoomByCode() {
+        if (!currentUser) { alert('먼저 로그인해 주세요.'); return; }
+        const roomCode = document.getElementById('roomCode').value.trim();
+        if (!roomCode) { alert('공유코드를 입력해 주세요.'); return; }
+        if (!/^[a-zA-Z0-9_-]{4,30}$/.test(roomCode)) {
+            alert('공유코드는 영문, 숫자, _ , - 만 사용해서 4~30자로 입력해 주세요.');
             return;
         }
 
-        showSaveStatus("📡 연결 중...");
+        showSaveStatus('🔗 공유코드 연결 중...');
+        const updates = {};
+        updates[`roomMembers/${roomCode}/${currentUser.uid}`] = {
+            email: currentUser.email,
+            joinedAt: firebase.database.ServerValue.TIMESTAMP
+        };
+        updates[`userRooms/${currentUser.uid}/${roomCode}`] = true;
+        updates[`users/${currentUser.uid}/activeRoom`] = roomCode;
+        updates[`users/${currentUser.uid}/email`] = currentUser.email;
 
+        try {
+            await db.ref().update(updates);
+            activeRoomCode = roomCode;
+            connectAndListenFirebase();
+            실시간_토큰_서버_저장();
+            showSaveStatus('☁️ 공유코드 연결 완료');
+        } catch (err) {
+            console.error(err);
+            alert('공유코드 연결에 실패했습니다. Firebase 보안 규칙을 확인해 주세요.');
+            showSaveStatus('❌ 공유코드 연결 실패');
+        }
+    }
+
+    function disconnectAllListeners() {
         if (currentRoomRef) currentRoomRef.off();
-        currentRoomRef = firebase.database().ref('rooms/' + roomCode + '/days/' + date);
-        
+        if (entireRoomRef) entireRoomRef.off();
+        if (chatRef) chatRef.off();
+        currentRoomRef = null;
+        entireRoomRef = null;
+        chatRef = null;
+        cachedDaysData = null;
+    }
+
+    function connectAndListenFirebase() {
+        if (!currentUser) { showSaveStatus('🔒 로그인이 필요합니다.'); return; }
+        const roomCode = document.getElementById('roomCode').value.trim();
+        const date = document.getElementById('recordDate').value;
+
+        disconnectAllListeners();
+        if (!roomCode) {
+            showSaveStatus('🔑 공유코드를 입력하고 연결해 주세요.');
+            return;
+        }
+
+        activeRoomCode = roomCode;
+        showSaveStatus('📡 연결 중...');
+        listenChat();
+
+        currentRoomRef = db.ref('rooms/' + roomCode + '/days/' + date);
         currentRoomRef.on('value', (snapshot) => {
             const record = snapshot.val();
             if (record) {
@@ -441,7 +574,7 @@
                 safeUpdateField('goingOut', record.goingOut);
                 safeUpdateField('sleepTime', record.sleepTime);
                 safeUpdateField('diary', record.diary);
-                
+
                 currentWater = parseInt(record.water) || 0;
                 document.getElementById('waterDisplay').innerText = currentWater;
 
@@ -455,30 +588,28 @@
             } else {
                 clearFormFieldsExceptSync();
             }
-            showSaveStatus("☁️ 서버 실시간 동기화 완료");
+            showSaveStatus('☁️ 서버 실시간 동기화 완료');
+        }, (err) => {
+            console.error(err);
+            showSaveStatus('❌ 읽기 권한 없음');
         });
 
-        if (entireRoomRef) entireRoomRef.off();
-        entireRoomRef = firebase.database().ref('rooms/' + roomCode + '/days');
+        entireRoomRef = db.ref('rooms/' + roomCode + '/days');
         entireRoomRef.on('value', (snapshot) => {
-            cachedDaysData = snapshot.val(); 
+            cachedDaysData = snapshot.val();
             displayHistory(cachedDaysData);
         });
     }
 
     function safeUpdateField(id, val) {
         const el = document.getElementById(id);
-        if (document.activeElement !== el) {
-            el.value = (val === '기록 없음' || !val) ? '' : val;
-        }
+        if (document.activeElement !== el) el.value = (val === '기록 없음' || !val) ? '' : val;
     }
 
     function clearFormFieldsExceptSync() {
         const fields = ['wakeTime', 'weight', 'mealBreakfast', 'mealLunch', 'mealDinner', 'goingOut', 'sleepTime', 'diary'];
         fields.forEach(id => {
-            if(document.activeElement !== document.getElementById(id)) {
-                document.getElementById(id).value = '';
-            }
+            if (document.activeElement !== document.getElementById(id)) document.getElementById(id).value = '';
         });
         currentWater = 0;
         document.getElementById('waterDisplay').innerText = 0;
@@ -503,13 +634,12 @@
             const img = new Image();
             img.onload = function() {
                 const canvas = document.createElement('canvas');
-                const MAX_WIDTH = 350; 
+                const MAX_WIDTH = 350;
                 let width = img.width;
                 let height = img.height;
                 if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
                 canvas.width = width; canvas.height = height;
                 canvas.getContext('2d').drawImage(img, 0, 0, width, height);
-
                 uploadedPhotoBase64 = canvas.toDataURL('image/jpeg', 0.5);
                 document.getElementById('photoPreview').src = uploadedPhotoBase64;
                 document.getElementById('previewBox').style.display = 'block';
@@ -521,15 +651,16 @@
     }
 
     function triggerAutoSave() {
-        showSaveStatus("✍️ 입력 중...");
+        showSaveStatus('✍️ 입력 중...');
         clearTimeout(autoSaveTimeout);
         autoSaveTimeout = setTimeout(executeAutoSave, 600);
     }
 
     function executeAutoSave() {
+        if (!currentUser) { showSaveStatus('🔒 로그인 후 저장됩니다.'); return; }
         const roomCode = document.getElementById('roomCode').value.trim();
         const date = document.getElementById('recordDate').value;
-        if (!roomCode || firebaseConfig.apiKey === "YOUR_API_KEY") return;
+        if (!roomCode) { showSaveStatus('🔑 공유코드 연결 후 저장됩니다.'); return; }
 
         const wakeTime = document.getElementById('wakeTime').value || '기록 없음';
         const weight = document.getElementById('weight').value || '기록 없음';
@@ -540,7 +671,7 @@
         const goingOut = document.getElementById('goingOut').value || '기록 없음';
         const sleepTime = document.getElementById('sleepTime').value || '기록 없음';
         const diary = document.getElementById('diary').value || '기록 없음';
-        const hasPhotoText = uploadedPhotoBase64 ? "📷 사진 첨부 완료" : "사진 없음";
+        const hasPhotoText = uploadedPhotoBase64 ? '📷 사진 첨부 완료' : '사진 없음';
 
         const reportText = `📅 [${date}] 아가의 하루 기록 💕\n\n` +
                            `☀️ 기상 시간: ${wakeTime}\n` +
@@ -555,90 +686,81 @@
                            `📝 오늘의 한 줄:\n"${diary}"\n\n` +
                            `오늘도 건강하게 보내줘서 고마워요 단 한 사람 최고 알라뷰❤️`;
 
-        const newRecord = { 
-            date, wakeTime, water: `${currentWater}ML`, weight, 
-            mealBreakfast, mealLunch, mealDinner, 
-            goingOut, sleepTime, diary, photo: uploadedPhotoBase64, fullText: reportText 
+        const newRecord = {
+            date, wakeTime, water: `${currentWater}ML`, weight,
+            mealBreakfast, mealLunch, mealDinner,
+            goingOut, sleepTime, diary, photo: uploadedPhotoBase64, fullText: reportText,
+            updatedBy: currentUser.uid,
+            updatedByEmail: currentUser.email,
+            updatedAt: firebase.database.ServerValue.TIMESTAMP
         };
 
-        firebase.database().ref('rooms/' + roomCode + '/days/' + date).set(newRecord)
-            .then(() => showSaveStatus("☁️ 서버 자동저장 완료"))
-            .catch(() => showSaveStatus("❌ 저장 실패 (인터넷 연결 확인)"));
+        db.ref('rooms/' + roomCode + '/days/' + date).set(newRecord)
+            .then(() => showSaveStatus('☁️ 서버 자동저장 완료'))
+            .catch((err) => { console.error(err); showSaveStatus('❌ 저장 실패 또는 권한 없음'); });
     }
 
     function showSaveStatus(msg) {
-        document.getElementById('saveStatus').innerText = msg;
+        const el = document.getElementById('saveStatus');
+        if (el) el.innerText = msg;
     }
 
-    // [달력 필터 처리 통합 엔진] 지난 기록실 화면 렌더링
     function displayHistory(daysData) {
         const historyList = document.getElementById('historyList');
         if (!daysData) {
             historyList.innerHTML = '<div class="empty-message">아직 저장된 서버 기록이 없습니다. 코드를 공유해 보세요! ✨</div>';
             return;
         }
-
         const filterInput = document.getElementById('historyFilterDate');
         const filterValue = filterInput ? filterInput.value : '';
-
         const allDates = Object.keys(daysData).sort((a, b) => new Date(b) - new Date(a));
         const sortedDates = allDates.filter(date => !filterValue || date === filterValue);
-
         if (sortedDates.length === 0) {
             historyList.innerHTML = '<div class="empty-message">선택하신 날짜의 기록이 서버에 없습니다. 📅</div>';
             return;
         }
-
         let html = '';
         sortedDates.forEach((date) => {
             const record = daysData[date];
             const shortDiary = record.diary ? record.diary.substring(0, 12) : '기록 없음';
-            const photoIndicator = record.photo ? "📷" : "";
-            
+            const photoIndicator = record.photo ? '📷' : '';
             html += `
                 <div class="history-item" onclick="toggleHistoryItem('${date}')">
                     <div class="history-item-date">📅 ${date}의 기록 ${photoIndicator}</div>
-                    <div>💧물: ${record.water || '0ML'} | ⚖️체중: ${record.weight} | 📝한줄: ${shortDiary}...</div>
+                    <div>💧물: ${record.water || '0ML'} | ⚖️체중: ${record.weight || '기록 없음'} | 📝한줄: ${shortDiary}...</div>
                     <button class="btn-delete" onclick="deleteRecord(event, '${date}')">삭제</button>
                     <div class="history-item-content" id="content-${date}">
                         ${record.fullText ? record.fullText.replace(/\n/g, '<br>') : ''}
                         ${record.photo ? `<img src="${record.photo}" class="history-photo-display" alt="외출 사진">` : ''}
                         <button class="btn-copy" style="margin-top:15px; padding:8px; font-size:0.85rem;" onclick="copyDirectText(event, '${date}')">📋 이 기록 복사하기</button>
                     </div>
-                </div>
-            `;
+                </div>`;
         });
         historyList.innerHTML = html;
     }
 
-    function applyHistoryFilter() {
-        if (cachedDaysData) displayHistory(cachedDaysData);
-    }
-
+    function applyHistoryFilter() { if (cachedDaysData) displayHistory(cachedDaysData); }
     function clearHistoryFilter() {
         const filterInput = document.getElementById('historyFilterDate');
-        if (filterInput) filterInput.value = ''; 
+        if (filterInput) filterInput.value = '';
         if (cachedDaysData) displayHistory(cachedDaysData);
     }
-
     function toggleHistoryItem(date) {
         const content = document.getElementById(`content-${date}`);
         content.style.display = content.style.display === 'block' ? 'none' : 'block';
     }
 
-    // [이하 기존 핵심 유틸리티 함수 유지]
     function deleteRecord(event, date) {
         event.stopPropagation();
         const roomCode = document.getElementById('roomCode').value.trim();
-        if (confirm(`${date} 기록을 서버에서 완전히 삭제할까요?`)) {
-            firebase.database().ref('rooms/' + roomCode + '/days/' + date).remove();
-        }
+        if (!currentUser || !roomCode) return;
+        if (confirm(`${date} 기록을 서버에서 완전히 삭제할까요?`)) db.ref('rooms/' + roomCode + '/days/' + date).remove();
     }
 
     function copyDirectText(event, date) {
         event.stopPropagation();
         const roomCode = document.getElementById('roomCode').value.trim();
-        firebase.database().ref('rooms/' + roomCode + '/days/' + date).once('value').then((snapshot) => {
+        db.ref('rooms/' + roomCode + '/days/' + date).once('value').then((snapshot) => {
             if(snapshot.val()) executeCopy(snapshot.val().fullText);
         });
     }
@@ -646,15 +768,17 @@
     function finalizeAndGenerateReport() {
         const roomCode = document.getElementById('roomCode').value.trim();
         const date = document.getElementById('recordDate').value;
-        if(!roomCode) { alert("공유 코드를 입력해야 전송용 결과가 추출됩니다."); return; }
-
-        firebase.database().ref('rooms/' + roomCode + '/days/' + date).once('value').then((snapshot) => {
+        if(!currentUser) { alert('로그인이 필요합니다.'); return; }
+        if(!roomCode) { alert('공유 코드를 연결해야 전송용 결과가 추출됩니다.'); return; }
+        db.ref('rooms/' + roomCode + '/days/' + date).once('value').then((snapshot) => {
             const record = snapshot.val();
             if (record) {
                 document.getElementById('resultBox').value = record.fullText;
                 const resultContainer = document.getElementById('resultContainer');
                 resultContainer.style.display = 'block';
                 resultContainer.scrollIntoView({ behavior: 'smooth' });
+            } else {
+                alert('오늘 날짜의 저장된 기록이 아직 없습니다.');
             }
         });
     }
@@ -662,9 +786,9 @@
     function copyToClipboard() { executeCopy(document.getElementById('resultBox').value); }
     function executeCopy(text) {
         navigator.clipboard.writeText(text).then(() => { showToast(); }).catch(() => {
-            const tempBox = document.createElement("textarea");
+            const tempBox = document.createElement('textarea');
             tempBox.value = text; document.body.appendChild(tempBox);
-            tempBox.select(); document.execCommand("copy");
+            tempBox.select(); document.execCommand('copy');
             document.body.removeChild(tempBox); showToast();
         });
     }
@@ -675,15 +799,15 @@
 
     function listenChat() {
         const roomCode = document.getElementById('roomCode').value.trim();
-        if (!roomCode) return;
-        if (chatRef) chatRef.off(); 
-        chatRef = firebase.database().ref('rooms/' + roomCode + '/messages');
+        if (!currentUser || !roomCode) return;
+        if (chatRef) chatRef.off();
+        chatRef = db.ref('rooms/' + roomCode + '/messages');
         chatRef.limitToLast(50).on('value', (snapshot) => { renderMessages(snapshot.val()); });
     }
 
     function renderMessages(messages) {
         const chatMessages = document.getElementById('chatMessages');
-        chatMessages.innerHTML = ''; 
+        chatMessages.innerHTML = '';
         if (!messages) {
             chatMessages.innerHTML = '<div style="text-align: center; color: #ccc; font-size: 0.85rem; margin-top: 50px;">첫 메시지를 보내 대화를 시작해보세요! 💬</div>';
             return;
@@ -692,7 +816,7 @@
         Object.keys(messages).forEach((key) => {
             const msg = messages[key];
             const msgLine = document.createElement('div');
-            const isMe = msg.sender === myName && myName !== ''; 
+            const isMe = msg.sender === myName && myName !== '';
             msgLine.style.display = 'flex';
             msgLine.style.flexDirection = 'column';
             msgLine.style.alignItems = isMe ? 'flex-end' : 'flex-start';
@@ -708,10 +832,10 @@
             bubble.innerText = msg.text;
 
             if (isMe) {
-                bubble.style.background = '#ffe3e3'; 
+                bubble.style.background = '#ffe3e3';
                 bubble.style.color = '#333';
             } else {
-                bubble.style.background = '#ffffff'; 
+                bubble.style.background = '#ffffff';
                 bubble.style.color = '#333';
                 bubble.style.border = '1px solid #eee';
                 const senderName = document.createElement('span');
@@ -731,16 +855,18 @@
         const roomCode = document.getElementById('roomCode').value.trim();
         const sender = document.getElementById('chatSender').value.trim();
         const text = document.getElementById('chatInput').value.trim();
+        if (!currentUser) { alert('로그인이 필요합니다.'); return; }
         if (!roomCode || !sender || !text) return;
 
-        firebase.database().ref('rooms/' + roomCode + '/messages').push({
+        db.ref('rooms/' + roomCode + '/messages').push({
             sender: sender,
+            senderUid: currentUser.uid,
             text: text,
             timestamp: firebase.database.ServerValue.TIMESTAMP
         });
-        document.getElementById('chatInput').value = ''; 
-        localStorage.setItem('chatSenderName', sender); 
-        실시간_토큰_서버_저장(); 
+        document.getElementById('chatInput').value = '';
+        localStorage.setItem('chatSenderName', sender);
+        실시간_토큰_서버_저장();
     }
 
     function updateChatAlignment() {
@@ -748,10 +874,6 @@
         if (!roomCode || !chatRef) return;
         chatRef.once('value', (snapshot) => { renderMessages(snapshot.val()); });
     }
-
-    // =================================================================
-    // 🔔 [알림 마스터 강제 엔진] 포그라운드 수신 및 토큰 자동 발급 시스템
-    // =================================================================
 
     if (messaging) {
         messaging.onMessage((payload) => {
@@ -764,41 +886,21 @@
 
     function 알림_권한_요청_및_토큰받기() {
         const notiBtn = document.getElementById('notiBtn');
+        if (!currentUser) { alert('로그인 후 알림을 연결해 주세요.'); return; }
+        if (!document.getElementById('roomCode').value.trim()) { alert('공유코드 연결 후 알림을 연결해 주세요.'); return; }
+        if (!('Notification' in window)) { alert('이 브라우저는 알림을 지원하지 않습니다.'); return; }
+        if (!window.isSecureContext) { alert('푸시 알림은 HTTPS 주소에서만 정상 작동합니다. Firebase 저장 기능은 계속 사용할 수 있습니다.'); return; }
+        if (!messaging) { alert('현재 브라우저에서는 푸시 알림을 사용할 수 없습니다. 기록 저장과 채팅 기능은 정상 사용 가능합니다.'); return; }
 
-        if (!('Notification' in window)) {
-            alert('이 브라우저는 알림을 지원하지 않습니다.');
-            return;
-        }
-
-        if (!window.isSecureContext) {
-            alert('푸시 알림은 HTTPS 주소에서만 정상 작동합니다. Firebase 저장 기능은 계속 사용할 수 있습니다.');
-            return;
-        }
-
-        if (!messaging) {
-            alert('현재 브라우저에서는 푸시 알림을 사용할 수 없습니다. 기록 저장과 채팅 기능은 정상 사용 가능합니다.');
-            return;
-        }
-
-        showSaveStatus("🔔 알림 권한 연동 진행 중...");
-
+        showSaveStatus('🔔 알림 권한 연동 진행 중...');
         Notification.requestPermission().then((permission) => {
-            if (permission !== 'granted') {
-                showSaveStatus("🔕 알림 권한이 허용되지 않았습니다");
-                return;
-            }
-
+            if (permission !== 'granted') { showSaveStatus('🔕 알림 권한이 허용되지 않았습니다'); return; }
             if (notiBtn) {
-                notiBtn.innerText = "✅ 알림 기능 연동 완료";
-                notiBtn.style.backgroundColor = "#2ecc71";
-                notiBtn.style.boxShadow = "0 4px 6px rgba(46, 204, 113, 0.2)";
+                notiBtn.innerText = '✅ 알림 기능 연동 완료';
+                notiBtn.style.backgroundColor = '#2ecc71';
+                notiBtn.style.boxShadow = '0 4px 6px rgba(46, 204, 113, 0.2)';
             }
-
-            if (!('serviceWorker' in navigator)) {
-                showSaveStatus("❌ 서비스 워커 미지원 브라우저");
-                return;
-            }
-
+            if (!('serviceWorker' in navigator)) { showSaveStatus('❌ 서비스 워커 미지원 브라우저'); return; }
             navigator.serviceWorker.ready.then((registration) => {
                 return messaging.getToken({
                     vapidKey: 'BGD9XOgn6daGc5t8I7zzmhnneK5cRbANfJQ1qsadrVJpX-PNTsK_zgwrCtPKydyKnjHhVr0vF2A0XIIl1Q_FvdY',
@@ -808,37 +910,34 @@
                 if (currentToken) {
                     myDeviceToken = currentToken;
                     실시간_토큰_서버_저장();
-                    showSaveStatus("☁️ 알림 토큰 서버 연동 성공");
+                    showSaveStatus('☁️ 알림 토큰 서버 연동 성공');
                 } else {
-                    showSaveStatus("⚠️ 알림 토큰 발급 실패");
+                    showSaveStatus('⚠️ 알림 토큰 발급 실패');
                 }
             }).catch((err) => {
                 console.error('토큰 획득 에러:', err);
-                showSaveStatus("⚠️ 알림 토큰 저장 실패");
+                showSaveStatus('⚠️ 알림 토큰 저장 실패');
                 alert('알림 토큰 발급 중 문제가 생겼습니다. 기록 저장 기능은 정상 사용 가능합니다.');
             });
         }).catch((err) => {
             console.error('알림 권한 요청 에러:', err);
-            showSaveStatus("⚠️ 알림 권한 요청 실패");
+            showSaveStatus('⚠️ 알림 권한 요청 실패');
         });
     }
 
     function 실시간_토큰_서버_저장() {
         const roomCode = document.getElementById('roomCode').value.trim();
-        const sender = document.getElementById('chatSender').value.trim() || '이름없음';
-
-        if (!roomCode || !myDeviceToken) return;
-
+        const sender = document.getElementById('chatSender').value.trim() || currentUser?.email || '이름없음';
+        if (!currentUser || !roomCode || !myDeviceToken) return;
         const safeTokenKey = myDeviceToken.replace(/[.#$/\[\]]/g, '_');
-
-        firebase.database().ref('rooms/' + roomCode + '/tokens/' + safeTokenKey).set({
+        db.ref('rooms/' + roomCode + '/tokens/' + safeTokenKey).set({
             token: myDeviceToken,
+            uid: currentUser.uid,
+            email: currentUser.email,
             sender: sender,
             updatedAt: firebase.database.ServerValue.TIMESTAMP,
             userAgent: navigator.userAgent
-        }).catch((err) => {
-            console.error('토큰 서버 저장 실패:', err);
-        });
+        }).catch((err) => console.error('토큰 서버 저장 실패:', err));
     }
 </script>
 </body>
