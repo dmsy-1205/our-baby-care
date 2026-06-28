@@ -275,6 +275,10 @@
     <div class="sync-box">
         <label>🔑 우리만의 공유 커플 코드 (두 폰에 똑같이 입력)</label>
         <input type="text" id="roomCode" placeholder="예: love520">
+        <div style="height:8px;"></div>
+        <label>💌 함께 볼 상대 이메일 (처음 방 주인만 입력/수정)</label>
+        <input type="email" id="partnerEmail" placeholder="상대 이메일 예: baby@example.com">
+        <p style="font-size:0.78rem; color:#636e72; line-height:1.4; margin-top:8px;">처음 연결한 이메일이 방 주인이 됩니다. 이후에는 방 주인과 상대 이메일만 같은 공유코드로 접속할 수 있어요.</p>
         <button type="button" class="btn-connect" onclick="joinRoomByCode()">🔗 이 공유코드로 연결하기</button>
     </div>
 
@@ -531,33 +535,109 @@
         }
     }
 
+    function normalizeEmail(email) {
+        return (email || '').trim().toLowerCase();
+    }
+
+    function isRoomEmailAllowed(accessData) {
+        if (!currentUser || !accessData) return false;
+        const myEmail = normalizeEmail(currentUser.email);
+        const ownerEmail = normalizeEmail(accessData.ownerEmail);
+        const partnerEmail = normalizeEmail(accessData.partnerEmail);
+        return myEmail === ownerEmail || myEmail === partnerEmail;
+    }
+
+    async function verifyRoomAccess(roomCode) {
+        if (!currentUser || !roomCode) return false;
+
+        const accessSnap = await db.ref(`roomAccess/${roomCode}`).once('value');
+        const accessData = accessSnap.val();
+
+        // 아직 보호 정보가 없는 기존 방은 기존 사용자 연결을 위해 일단 허용합니다.
+        // 연결 버튼을 누르면 roomAccess가 생성되어 이후부터는 이메일 제한이 걸립니다.
+        if (!accessData) return true;
+
+        if (!isRoomEmailAllowed(accessData)) {
+            alert('이 공유코드는 다른 사용자의 방입니다. 방 주인이 상대 이메일로 등록한 계정만 접속할 수 있습니다.');
+            showSaveStatus('⛔ 허용되지 않은 공유코드입니다.');
+            return false;
+        }
+        return true;
+    }
+
     async function joinRoomByCode() {
         if (!currentUser) { alert('먼저 로그인해 주세요.'); return; }
         const roomCode = document.getElementById('roomCode').value.trim();
+        const partnerEmailInput = document.getElementById('partnerEmail');
+        const partnerEmail = normalizeEmail(partnerEmailInput ? partnerEmailInput.value : '');
+        const myEmail = normalizeEmail(currentUser.email);
+
         if (!roomCode) { alert('공유코드를 입력해 주세요.'); return; }
         if (!/^[a-zA-Z0-9_-]{4,30}$/.test(roomCode)) {
             alert('공유코드는 영문, 숫자, _ , - 만 사용해서 4~30자로 입력해 주세요.');
             return;
         }
+        if (partnerEmail && partnerEmail === myEmail) {
+            alert('상대 이메일에는 내 이메일이 아닌 상대방 이메일을 입력해 주세요.');
+            return;
+        }
 
-        showSaveStatus('🔗 공유코드 연결 중...');
-        const updates = {};
-        updates[`roomMembers/${roomCode}/${currentUser.uid}`] = {
-            email: currentUser.email,
-            joinedAt: firebase.database.ServerValue.TIMESTAMP
-        };
-        updates[`userRooms/${currentUser.uid}/${roomCode}`] = true;
-        updates[`users/${currentUser.uid}/activeRoom`] = roomCode;
-        updates[`users/${currentUser.uid}/email`] = currentUser.email;
+        showSaveStatus('🔐 공유코드 권한 확인 중...');
 
         try {
+            const accessRef = db.ref(`roomAccess/${roomCode}`);
+            const accessSnap = await accessRef.once('value');
+            const accessData = accessSnap.val();
+            const roomSnap = await db.ref(`rooms/${roomCode}`).once('value');
+            const legacyMemberSnap = await db.ref(`roomMembers/${roomCode}/${currentUser.uid}`).once('value');
+
+            const updates = {};
+
+            if (!accessData) {
+                // 기존 데이터가 있는 방은 기존 멤버만 최초 보호 설정을 만들 수 있게 합니다.
+                // 새 방은 누구나 처음 연결한 사람이 방 주인이 됩니다.
+                if (roomSnap.exists() && !legacyMemberSnap.exists()) {
+                    alert('이미 존재하는 공유코드입니다. 기존 방 주인 계정으로 먼저 연결하거나, 다른 공유코드를 사용해 주세요.');
+                    showSaveStatus('⛔ 이미 사용 중인 공유코드입니다.');
+                    return;
+                }
+
+                updates[`roomAccess/${roomCode}`] = {
+                    ownerEmail: myEmail,
+                    partnerEmail: partnerEmail || '',
+                    ownerUid: currentUser.uid,
+                    createdAt: firebase.database.ServerValue.TIMESTAMP,
+                    updatedAt: firebase.database.ServerValue.TIMESTAMP
+                };
+            } else {
+                if (!isRoomEmailAllowed(accessData)) {
+                    alert('이 공유코드는 다른 사용자의 방입니다. 방 주인이 상대 이메일로 등록한 계정만 접속할 수 있습니다.');
+                    showSaveStatus('⛔ 허용되지 않은 공유코드입니다.');
+                    return;
+                }
+
+                // 방 주인만 상대 이메일을 새로 지정/수정할 수 있습니다.
+                if (normalizeEmail(accessData.ownerEmail) === myEmail && partnerEmail) {
+                    updates[`roomAccess/${roomCode}/partnerEmail`] = partnerEmail;
+                    updates[`roomAccess/${roomCode}/updatedAt`] = firebase.database.ServerValue.TIMESTAMP;
+                }
+            }
+
+            updates[`roomMembers/${roomCode}/${currentUser.uid}`] = {
+                email: currentUser.email,
+                joinedAt: firebase.database.ServerValue.TIMESTAMP
+            };
+            updates[`userRooms/${currentUser.uid}/${roomCode}`] = true;
+            updates[`users/${currentUser.uid}/activeRoom`] = roomCode;
+            updates[`users/${currentUser.uid}/email`] = currentUser.email;
+
             await db.ref().update(updates);
             activeRoomCode = roomCode;
             connectAndListenFirebase();
             showSaveStatus('☁️ 공유코드 연결 완료');
         } catch (err) {
             console.error(err);
-            alert('공유코드 연결에 실패했습니다. Firebase 보안 규칙을 확인해 주세요.');
+            alert('공유코드 연결에 실패했습니다. Firebase 보안 규칙 또는 인터넷 연결을 확인해 주세요.');
             showSaveStatus('❌ 공유코드 연결 실패');
         }
     }
@@ -572,7 +652,7 @@
         cachedDaysData = null;
     }
 
-    function connectAndListenFirebase() {
+    async function connectAndListenFirebase() {
         if (!currentUser) { showSaveStatus('🔒 로그인이 필요합니다.'); return; }
         const roomCode = document.getElementById('roomCode').value.trim();
         const date = document.getElementById('recordDate').value;
@@ -580,6 +660,13 @@
         disconnectAllListeners();
         if (!roomCode) {
             showSaveStatus('🔑 공유코드를 입력하고 연결해 주세요.');
+            return;
+        }
+
+        const allowed = await verifyRoomAccess(roomCode);
+        if (!allowed) {
+            disconnectAllListeners();
+            document.getElementById('historyList').innerHTML = '<div class="empty-message">이 공유코드에 접근할 권한이 없습니다. 🔒</div>';
             return;
         }
 
