@@ -273,12 +273,13 @@
     </div>
     
     <div class="sync-box">
-        <label>🔑 우리만의 공유 커플 코드 (두 폰에 똑같이 입력)</label>
+        <label>🔑 우리만의 공유 커플 코드</label>
         <input type="text" id="roomCode" placeholder="예: love520">
-        <div style="height:8px;"></div>
-        <label>💌 함께 볼 상대 이메일 (처음 방 주인만 입력/수정)</label>
-        <input type="email" id="partnerEmail" placeholder="상대 이메일 예: baby@example.com">
-        <p style="font-size:0.78rem; color:#636e72; line-height:1.4; margin-top:8px;">처음 연결한 이메일이 방 주인이 됩니다. 이후에는 방 주인과 상대 이메일만 같은 공유코드로 접속할 수 있어요.</p>
+        <label style="margin-top:10px;">💌 함께 볼 상대방 이메일</label>
+        <input type="email" id="partnerEmail" placeholder="상대방 이메일 (방 주인이 처음 1번만 입력)">
+        <div style="font-size:0.78rem; color:#636e72; line-height:1.45; margin-top:8px;">
+            처음 연결한 이메일이 방 주인이 되고, 상대 이메일로 등록된 사람만 같은 공유코드를 열 수 있습니다.
+        </div>
         <button type="button" class="btn-connect" onclick="joinRoomByCode()">🔗 이 공유코드로 연결하기</button>
     </div>
 
@@ -387,15 +388,14 @@
 
 <script>
     // =========================================================
-    // Firebase 설정
-    // 1) 로그인 확인: master-app-platform
-    // 2) 기존 생활관리 데이터 저장/읽기: our-baby-care
-    //
-    // 핵심:
-    // hearu2nite(2번)에서 가입한 이메일/비밀번호로 먼저 master 로그인을 확인하고,
-    // 같은 이메일/비밀번호로 our-baby-care에도 로그인해서 기존 rooms/dmsy 데이터를 읽습니다.
-    // 그래서 기존 our-baby-care의 rooms 데이터는 그대로 유지됩니다.
+    // hearme2nite 1번 사이트 정리본
+    // - 공유코드는 브라우저 저장소에 저장하지 않음
+    // - 로그인 계정별 users/{uid}/activeRoom 에서만 자동 연결
+    // - 기존 rooms/{공유코드}/days 데이터 그대로 사용
+    // - roomAccess/{공유코드} ownerEmail / partnerEmail 로 접근 제한
+    // - 로그인 확인은 master-app-platform, 생활관리 데이터는 our-baby-care 사용
     // =========================================================
+
     const masterFirebaseConfig = {
         apiKey: "AIzaSyBvTPf5UCzgaB4USvKZ8EyvVJMvO5dqp4A",
         authDomain: "master-app-platform.firebaseapp.com",
@@ -423,10 +423,7 @@
     const masterAuth = firebase.auth(masterApp);
     const babyAuth = firebase.auth(babyApp);
     const db = firebase.database(babyApp);
-
-    // 기존 함수들이 auth.signOut() 형태를 쓰므로, auth는 생활관리 DB용 Auth로 둡니다.
     const auth = babyAuth;
-    // 푸시 알림 기능은 무료 요금제 유지 및 코드 단순화를 위해 제거했습니다.
 
     let currentUser = null;
     let activeRoomCode = "";
@@ -437,28 +434,28 @@
     let entireRoomRef = null;
     let chatRef = null;
     let cachedDaysData = null;
-    // hearme2nite에서는 회원가입을 막고 로그인만 허용합니다.
 
     window.onload = function() {
         const today = new Date();
         const dateInput = document.getElementById('recordDate');
         dateInput.value = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
 
-        const savedSender = localStorage.getItem('chatSenderName');
-        if (savedSender) document.getElementById('chatSender').value = savedSender;
+        // 공유코드/상대이메일/이름은 브라우저 저장소에서 절대 불러오지 않습니다.
+        clearRoomInputs();
 
-        // 생활관리 DB 쪽 로그인 상태를 기준으로 앱을 엽니다.
         babyAuth.onAuthStateChanged(async (user) => {
+            disconnectAllListeners();
+            clearRoomInputs();
+            clearFormFieldsExceptSync();
             currentUser = user;
+
             if (user) {
                 document.getElementById('authBox').style.display = 'none';
                 document.getElementById('appContent').style.display = 'flex';
                 document.getElementById('userInfoText').innerText = `로그인됨: ${user.email}`;
                 await loadUserActiveRoom();
             } else {
-                disconnectAllListeners();
                 activeRoomCode = "";
-                document.getElementById('roomCode').value = "";
                 document.getElementById('authBox').style.display = 'block';
                 document.getElementById('appContent').style.display = 'none';
                 showSaveStatus("🔒 로그인이 필요합니다.");
@@ -466,8 +463,19 @@
         });
     };
 
+    function normalizeEmail(email) {
+        return (email || '').trim().toLowerCase();
+    }
+
+    function clearRoomInputs() {
+        const room = document.getElementById('roomCode');
+        const partner = document.getElementById('partnerEmail');
+        if (room) room.value = '';
+        if (partner) partner.value = '';
+    }
+
     async function handleAuthSubmit() {
-        const email = document.getElementById('authEmail').value.trim();
+        const email = normalizeEmail(document.getElementById('authEmail').value);
         const password = document.getElementById('authPassword').value;
         if (!email || !password) { alert('이메일과 비밀번호를 입력해 주세요.'); return; }
         if (password.length < 6) { alert('비밀번호는 6자리 이상이어야 합니다.'); return; }
@@ -475,20 +483,18 @@
         try {
             showSaveStatus('🔐 로그인 확인 중...');
 
-            // 1단계: 2번 사이트(master-app-platform)에 가입된 계정인지 먼저 확인합니다.
+            // 1단계: 2번 사이트(master-app-platform)에 가입된 계정인지 확인
             await masterAuth.signInWithEmailAndPassword(email, password);
 
-            // 2단계: 기존 생활관리 데이터가 있는 our-baby-care에도 같은 계정으로 로그인합니다.
-            // 기존에 our-baby-care에 같은 이메일 계정이 있으면 기존 UID로 로그인되어 예전 rooms 데이터를 볼 수 있습니다.
+            // 2단계: 기존 rooms 데이터가 있는 our-baby-care에도 로그인
             try {
                 await babyAuth.signInWithEmailAndPassword(email, password);
             } catch (babyErr) {
-                // master에는 가입되어 있지만 our-baby-care에는 아직 없는 새 사용자라면 자동으로 생성합니다.
-                // 이후 공유코드 연결 버튼을 누르면 기존 방의 멤버로 등록됩니다.
                 if (babyErr.code === 'auth/user-not-found' || babyErr.code === 'auth/invalid-credential') {
+                    // master에는 가입되어 있지만 baby 쪽 계정이 없는 경우만 생성
                     await babyAuth.createUserWithEmailAndPassword(email, password);
                 } else if (babyErr.code === 'auth/wrong-password') {
-                    alert('2번 사이트 로그인은 성공했지만, 기존 생활관리앱 계정의 비밀번호가 달라서 기존 UID로 접속하지 못했습니다. our-baby-care Authentication에서 해당 이메일 비밀번호를 재설정하거나, 같은 비밀번호로 맞춰야 기존 기록이 바로 보입니다.');
+                    alert('2번 사이트 로그인은 성공했지만, 기존 생활관리앱 계정의 비밀번호가 달라서 our-baby-care에 로그인하지 못했습니다. 두 프로젝트의 비밀번호를 맞춰 주세요.');
                     return;
                 } else {
                     throw babyErr;
@@ -517,125 +523,135 @@
     }
 
     async function logoutUser() {
+        disconnectAllListeners();
+        activeRoomCode = "";
+        clearRoomInputs();
+        clearFormFieldsExceptSync();
         try { await masterAuth.signOut(); } catch(e) { console.warn(e); }
         try { await babyAuth.signOut(); } catch(e) { console.warn(e); }
     }
 
     async function loadUserActiveRoom() {
         if (!currentUser) return;
-        const snap = await db.ref(`users/${currentUser.uid}/activeRoom`).once('value');
-        const savedRoom = snap.val();
-        if (savedRoom) {
-            activeRoomCode = savedRoom;
-            document.getElementById('roomCode').value = savedRoom;
-            connectAndListenFirebase();
-        } else {
-            showSaveStatus('🔑 공유코드를 입력하고 연결 버튼을 눌러 주세요.');
-            document.getElementById('historyList').innerHTML = '<div class="empty-message">로그인 후 공유코드를 연결하면 기록이 표시됩니다. ✨</div>';
+        try {
+            const snap = await db.ref(`users/${currentUser.uid}/activeRoom`).once('value');
+            const savedRoom = snap.val();
+            if (savedRoom) {
+                // 여기서만 자동 입력합니다. 다른 계정의 브라우저 저장값은 사용하지 않습니다.
+                document.getElementById('roomCode').value = savedRoom;
+                const allowed = await canCurrentUserAccessRoom(savedRoom);
+                if (allowed) {
+                    activeRoomCode = savedRoom;
+                    connectAndListenFirebase();
+                } else {
+                    await db.ref(`users/${currentUser.uid}/activeRoom`).remove();
+                    clearRoomInputs();
+                    showSaveStatus('🔒 이 계정은 저장된 공유코드 방의 허용 사용자가 아닙니다. 공유코드를 다시 연결해 주세요.');
+                    document.getElementById('historyList').innerHTML = '<div class="empty-message">공유코드를 다시 연결해 주세요. ✨</div>';
+                }
+            } else {
+                showSaveStatus('🔑 공유코드를 입력하고 연결 버튼을 눌러 주세요.');
+                document.getElementById('historyList').innerHTML = '<div class="empty-message">로그인 후 공유코드를 연결하면 기록이 표시됩니다. ✨</div>';
+            }
+        } catch (err) {
+            console.error(err);
+            showSaveStatus('❌ 저장된 공유코드 확인 실패');
         }
     }
 
-    function normalizeEmail(email) {
-        return (email || '').trim().toLowerCase();
-    }
-
-    function isRoomEmailAllowed(accessData) {
-        if (!currentUser || !accessData) return false;
-        const myEmail = normalizeEmail(currentUser.email);
-        const ownerEmail = normalizeEmail(accessData.ownerEmail);
-        const partnerEmail = normalizeEmail(accessData.partnerEmail);
-        return myEmail === ownerEmail || myEmail === partnerEmail;
-    }
-
-    async function verifyRoomAccess(roomCode) {
+    async function canCurrentUserAccessRoom(roomCode) {
         if (!currentUser || !roomCode) return false;
-
-        const accessSnap = await db.ref(`roomAccess/${roomCode}`).once('value');
-        const accessData = accessSnap.val();
-
-        // 아직 보호 정보가 없는 기존 방은 기존 사용자 연결을 위해 일단 허용합니다.
-        // 연결 버튼을 누르면 roomAccess가 생성되어 이후부터는 이메일 제한이 걸립니다.
-        if (!accessData) return true;
-
-        if (!isRoomEmailAllowed(accessData)) {
-            alert('이 공유코드는 다른 사용자의 방입니다. 방 주인이 상대 이메일로 등록한 계정만 접속할 수 있습니다.');
-            showSaveStatus('⛔ 허용되지 않은 공유코드입니다.');
+        const myEmail = normalizeEmail(currentUser.email);
+        try {
+            const accessSnap = await db.ref(`roomAccess/${roomCode}`).once('value');
+            if (!accessSnap.exists()) return true; // 아직 잠금정보가 없는 기존 방은 연결 과정에서 처리
+            const access = accessSnap.val() || {};
+            return normalizeEmail(access.ownerEmail) === myEmail || normalizeEmail(access.partnerEmail) === myEmail;
+        } catch (err) {
+            console.error('방 접근 확인 실패:', err);
             return false;
         }
-        return true;
+    }
+
+    async function isLegacyMemberByEmail(roomCode, email) {
+        try {
+            const snap = await db.ref(`roomMembers/${roomCode}`).once('value');
+            const members = snap.val() || {};
+            const target = normalizeEmail(email);
+            return Object.values(members).some(member => normalizeEmail(member && member.email) === target);
+        } catch (err) {
+            console.warn('기존 멤버 확인 실패:', err);
+            return false;
+        }
     }
 
     async function joinRoomByCode() {
         if (!currentUser) { alert('먼저 로그인해 주세요.'); return; }
         const roomCode = document.getElementById('roomCode').value.trim();
-        const partnerEmailInput = document.getElementById('partnerEmail');
-        const partnerEmail = normalizeEmail(partnerEmailInput ? partnerEmailInput.value : '');
+        const partnerEmail = normalizeEmail(document.getElementById('partnerEmail').value);
         const myEmail = normalizeEmail(currentUser.email);
 
         if (!roomCode) { alert('공유코드를 입력해 주세요.'); return; }
-        if (!/^[a-zA-Z0-9_-]{4,30}$/.test(roomCode)) {
-            alert('공유코드는 영문, 숫자, _ , - 만 사용해서 4~30자로 입력해 주세요.');
+        if (!/^[a-zA-Z0-9_-]{3,40}$/.test(roomCode)) {
+            alert('공유코드는 영문, 숫자, _ , - 만 사용해서 3~40자로 입력해 주세요.');
             return;
         }
         if (partnerEmail && partnerEmail === myEmail) {
-            alert('상대 이메일에는 내 이메일이 아닌 상대방 이메일을 입력해 주세요.');
+            alert('상대방 이메일에는 내 이메일이 아닌 상대 이메일을 입력해 주세요.');
             return;
         }
 
-        showSaveStatus('🔐 공유코드 권한 확인 중...');
+        showSaveStatus('🔗 공유코드 연결 중...');
 
         try {
+            const roomSnap = await db.ref(`rooms/${roomCode}`).once('value');
+            const roomExists = roomSnap.exists();
             const accessRef = db.ref(`roomAccess/${roomCode}`);
             const accessSnap = await accessRef.once('value');
-            const accessData = accessSnap.val();
-            const roomSnap = await db.ref(`rooms/${roomCode}`).once('value');
-            const legacyMembersSnap = await db.ref(`roomMembers/${roomCode}`).once('value');
-            const legacyMembers = legacyMembersSnap.val() || {};
-            const legacyEmails = Object.values(legacyMembers)
-                .map((member) => normalizeEmail(member && member.email))
-                .filter(Boolean);
-            const isLegacyEmailMember = legacyEmails.includes(myEmail);
-
             const updates = {};
 
-            if (!accessData) {
-                // 기존 데이터가 있는 방은 예전 roomMembers 안에 같은 이메일이 있는 사용자만
-                // 최초 보호 설정을 만들 수 있게 합니다. 프로젝트가 바뀌면 UID가 달라지므로
-                // UID가 아니라 이메일로 기존 멤버 여부를 확인합니다.
-                if (roomSnap.exists() && !isLegacyEmailMember) {
-                    alert('이미 존재하는 공유코드입니다. 기존 방 주인 이메일로 먼저 연결하거나, 다른 공유코드를 사용해 주세요.');
-                    showSaveStatus('⛔ 이미 사용 중인 공유코드입니다.');
+            if (!accessSnap.exists()) {
+                // 신규 방 또는 잠금정보가 없던 기존 방
+                // 기존 rooms 데이터가 있는 방은 기존 멤버 이메일이거나, roomMembers가 없는 오래된 방만 현재 사용자가 최초 잠금 설정 가능
+                const legacyMembersSnap = await db.ref(`roomMembers/${roomCode}`).once('value');
+                const hasLegacyMembers = legacyMembersSnap.exists();
+                const legacyMember = hasLegacyMembers ? await isLegacyMemberByEmail(roomCode, myEmail) : false;
+
+                if (roomExists && hasLegacyMembers && !legacyMember) {
+                    alert('이미 존재하는 공유코드입니다. 기존 방 멤버 이메일로 먼저 로그인해서 상대 이메일을 등록해 주세요.');
+                    showSaveStatus('🔒 기존 방 접근 차단');
                     return;
                 }
 
-                updates[`roomAccess/${roomCode}`] = {
-                    ownerEmail: myEmail,
-                    partnerEmail: partnerEmail || '',
-                    ownerUid: currentUser.uid,
-                    createdAt: firebase.database.ServerValue.TIMESTAMP,
-                    updatedAt: firebase.database.ServerValue.TIMESTAMP
-                };
+                updates[`roomAccess/${roomCode}/ownerEmail`] = myEmail;
+                updates[`roomAccess/${roomCode}/ownerUid`] = currentUser.uid;
+                updates[`roomAccess/${roomCode}/createdAt`] = firebase.database.ServerValue.TIMESTAMP;
+                if (partnerEmail) updates[`roomAccess/${roomCode}/partnerEmail`] = partnerEmail;
             } else {
-                if (!isRoomEmailAllowed(accessData)) {
-                    alert('이 공유코드는 다른 사용자의 방입니다. 방 주인이 상대 이메일로 등록한 계정만 접속할 수 있습니다.');
-                    showSaveStatus('⛔ 허용되지 않은 공유코드입니다.');
+                const access = accessSnap.val() || {};
+                const ownerEmail = normalizeEmail(access.ownerEmail);
+                const currentPartnerEmail = normalizeEmail(access.partnerEmail);
+
+                if (myEmail !== ownerEmail && myEmail !== currentPartnerEmail) {
+                    alert('이 공유코드는 다른 사용자의 방입니다. 방 주인이 먼저 내 이메일을 상대 이메일로 등록해야 합니다.');
+                    showSaveStatus('🔒 허용되지 않은 공유코드');
                     return;
                 }
 
-                // 방 주인만 상대 이메일을 새로 지정/수정할 수 있습니다.
-                if (normalizeEmail(accessData.ownerEmail) === myEmail && partnerEmail) {
+                // 방 주인만 상대 이메일을 새로 지정/수정할 수 있게 함
+                if (partnerEmail && myEmail === ownerEmail) {
                     updates[`roomAccess/${roomCode}/partnerEmail`] = partnerEmail;
-                    updates[`roomAccess/${roomCode}/updatedAt`] = firebase.database.ServerValue.TIMESTAMP;
+                    updates[`roomAccess/${roomCode}/partnerUpdatedAt`] = firebase.database.ServerValue.TIMESTAMP;
                 }
             }
 
             updates[`roomMembers/${roomCode}/${currentUser.uid}`] = {
-                email: currentUser.email,
+                email: myEmail,
                 joinedAt: firebase.database.ServerValue.TIMESTAMP
             };
             updates[`userRooms/${currentUser.uid}/${roomCode}`] = true;
             updates[`users/${currentUser.uid}/activeRoom`] = roomCode;
-            updates[`users/${currentUser.uid}/email`] = currentUser.email;
+            updates[`users/${currentUser.uid}/email`] = myEmail;
 
             await db.ref().update(updates);
             activeRoomCode = roomCode;
@@ -643,7 +659,7 @@
             showSaveStatus('☁️ 공유코드 연결 완료');
         } catch (err) {
             console.error(err);
-            alert('공유코드 연결에 실패했습니다. Firebase 보안 규칙 또는 인터넷 연결을 확인해 주세요.');
+            alert('공유코드 연결에 실패했습니다. Firebase 보안 규칙 또는 네트워크 상태를 확인해 주세요.');
             showSaveStatus('❌ 공유코드 연결 실패');
         }
     }
@@ -669,10 +685,10 @@
             return;
         }
 
-        const allowed = await verifyRoomAccess(roomCode);
+        const allowed = await canCurrentUserAccessRoom(roomCode);
         if (!allowed) {
-            disconnectAllListeners();
-            document.getElementById('historyList').innerHTML = '<div class="empty-message">이 공유코드에 접근할 권한이 없습니다. 🔒</div>';
+            showSaveStatus('🔒 허용되지 않은 공유코드입니다.');
+            document.getElementById('historyList').innerHTML = '<div class="empty-message">이 계정은 해당 공유코드 방에 접근할 수 없습니다.</div>';
             return;
         }
 
@@ -717,28 +733,35 @@
         entireRoomRef.on('value', (snapshot) => {
             cachedDaysData = snapshot.val();
             displayHistory(cachedDaysData);
+        }, (err) => {
+            console.error(err);
+            showSaveStatus('❌ 기록실 읽기 권한 없음');
         });
     }
 
     function safeUpdateField(id, val) {
         const el = document.getElementById(id);
-        if (document.activeElement !== el) el.value = (val === '기록 없음' || !val) ? '' : val;
+        if (el && document.activeElement !== el) el.value = (val === '기록 없음' || !val) ? '' : val;
     }
 
     function clearFormFieldsExceptSync() {
         const fields = ['wakeTime', 'weight', 'mealBreakfast', 'mealLunch', 'mealDinner', 'goingOut', 'sleepTime', 'diary', 'replyMessage'];
         fields.forEach(id => {
-            if (document.activeElement !== document.getElementById(id)) document.getElementById(id).value = '';
+            const el = document.getElementById(id);
+            if (el && document.activeElement !== el) el.value = '';
         });
         currentWater = 0;
-        document.getElementById('waterDisplay').innerText = 0;
+        const waterDisplay = document.getElementById('waterDisplay');
+        if (waterDisplay) waterDisplay.innerText = 0;
         removePhotoUI();
     }
 
     function removePhotoUI() {
         uploadedPhotoBase64 = "";
-        document.getElementById('goingOutPhoto').value = "";
-        document.getElementById('previewBox').style.display = 'none';
+        const input = document.getElementById('goingOutPhoto');
+        const preview = document.getElementById('previewBox');
+        if (input) input.value = "";
+        if (preview) preview.style.display = 'none';
     }
 
     function addWater(amount) { currentWater += amount; document.getElementById('waterDisplay').innerText = currentWater; executeAutoSave(); }
@@ -775,11 +798,12 @@
         autoSaveTimeout = setTimeout(executeAutoSave, 600);
     }
 
-    function executeAutoSave() {
+    async function executeAutoSave() {
         if (!currentUser) { showSaveStatus('🔒 로그인 후 저장됩니다.'); return; }
         const roomCode = document.getElementById('roomCode').value.trim();
         const date = document.getElementById('recordDate').value;
         if (!roomCode) { showSaveStatus('🔑 공유코드 연결 후 저장됩니다.'); return; }
+        if (!(await canCurrentUserAccessRoom(roomCode))) { showSaveStatus('🔒 저장 권한 없음'); return; }
 
         const wakeTime = document.getElementById('wakeTime').value || '기록 없음';
         const weight = document.getElementById('weight').value || '기록 없음';
@@ -842,7 +866,7 @@
         }
         let html = '';
         sortedDates.forEach((date) => {
-            const record = daysData[date];
+            const record = daysData[date] || {};
             const shortDiary = record.diary ? record.diary.substring(0, 12) : '기록 없음';
             const shortReply = record.replyMessage ? record.replyMessage.substring(0, 12) : '';
             const photoIndicator = record.photo ? '📷' : '';
@@ -869,29 +893,32 @@
     }
     function toggleHistoryItem(date) {
         const content = document.getElementById(`content-${date}`);
-        content.style.display = content.style.display === 'block' ? 'none' : 'block';
+        if (content) content.style.display = content.style.display === 'block' ? 'none' : 'block';
     }
 
-    function deleteRecord(event, date) {
+    async function deleteRecord(event, date) {
         event.stopPropagation();
         const roomCode = document.getElementById('roomCode').value.trim();
         if (!currentUser || !roomCode) return;
+        if (!(await canCurrentUserAccessRoom(roomCode))) { alert('삭제 권한이 없습니다.'); return; }
         if (confirm(`${date} 기록을 서버에서 완전히 삭제할까요?`)) db.ref('rooms/' + roomCode + '/days/' + date).remove();
     }
 
-    function copyDirectText(event, date) {
+    async function copyDirectText(event, date) {
         event.stopPropagation();
         const roomCode = document.getElementById('roomCode').value.trim();
+        if (!(await canCurrentUserAccessRoom(roomCode))) { alert('복사 권한이 없습니다.'); return; }
         db.ref('rooms/' + roomCode + '/days/' + date).once('value').then((snapshot) => {
             if(snapshot.val()) executeCopy(snapshot.val().fullText);
         });
     }
 
-    function finalizeAndGenerateReport() {
+    async function finalizeAndGenerateReport() {
         const roomCode = document.getElementById('roomCode').value.trim();
         const date = document.getElementById('recordDate').value;
         if(!currentUser) { alert('로그인이 필요합니다.'); return; }
         if(!roomCode) { alert('공유 코드를 연결해야 전송용 결과가 추출됩니다.'); return; }
+        if (!(await canCurrentUserAccessRoom(roomCode))) { alert('이 공유코드에 접근할 수 없습니다.'); return; }
         db.ref('rooms/' + roomCode + '/days/' + date).once('value').then((snapshot) => {
             const record = snapshot.val();
             if (record) {
@@ -938,7 +965,7 @@
         Object.keys(messages).forEach((key) => {
             const msg = messages[key];
             const msgLine = document.createElement('div');
-            const isMe = msg.sender === myName && myName !== '';
+            const isMe = msg.senderUid === currentUser.uid || (msg.sender === myName && myName !== '');
             msgLine.style.display = 'flex';
             msgLine.style.flexDirection = 'column';
             msgLine.style.alignItems = isMe ? 'flex-end' : 'flex-start';
@@ -964,7 +991,7 @@
                 senderName.style.fontSize = '0.75rem';
                 senderName.style.color = '#888';
                 senderName.style.marginBottom = '2px';
-                senderName.innerText = msg.sender;
+                senderName.innerText = msg.sender || '상대방';
                 msgLine.appendChild(senderName);
             }
             msgLine.appendChild(bubble);
@@ -973,21 +1000,22 @@
         chatMessages.scrollTop = chatMessages.scrollHeight;
     }
 
-    function sendChatMessage() {
+    async function sendChatMessage() {
         const roomCode = document.getElementById('roomCode').value.trim();
         const sender = document.getElementById('chatSender').value.trim();
         const text = document.getElementById('chatInput').value.trim();
         if (!currentUser) { alert('로그인이 필요합니다.'); return; }
         if (!roomCode || !sender || !text) return;
+        if (!(await canCurrentUserAccessRoom(roomCode))) { alert('채팅 권한이 없습니다.'); return; }
 
         db.ref('rooms/' + roomCode + '/messages').push({
             sender: sender,
             senderUid: currentUser.uid,
+            senderEmail: currentUser.email,
             text: text,
             timestamp: firebase.database.ServerValue.TIMESTAMP
         });
         document.getElementById('chatInput').value = '';
-        localStorage.setItem('chatSenderName', sender);
     }
 
     function updateChatAlignment() {
@@ -995,7 +1023,6 @@
         if (!roomCode || !chatRef) return;
         chatRef.once('value', (snapshot) => { renderMessages(snapshot.val()); });
     }
-
 </script>
 </body>
 </html>
