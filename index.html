@@ -4357,6 +4357,9 @@
     // =========================================================
     // RC2 v2.6.0 STEP 2: JavaScript Developer Comment Map
     // RC2 v2.6.0 STEP 4: Component-Ready Module Map
+    // RC2 v2.7.0 STEP 1: Stability Guard / Error Handling
+    // RC2 v2.7.0 STEP 2: Data Protection Guard / Permission QA
+    // RC2 v2.7.0 STEP 5: Error Log / Final Stability QA
     // ---------------------------------------------------------
     // 현재 파일은 배포 안정성을 위해 단일 HTML을 유지한다.
     // 단, 아래 JS 영역은 파일 분리 직전 상태처럼 모듈 경계를 명확히 표시한다.
@@ -4451,6 +4454,27 @@
     let ownerNoteRef = null;
     let ownerNoteSaveTimeout = null;
     let cachedDaysData = null;
+
+    // RC2.7 안정화: Firebase 연결 상태와 과도한 경고 반복을 제어한다.
+    let hmIsOnline = navigator.onLine;
+    let hmLastErrorMessage = '';
+    const HM_MAX_PHOTO_SIZE_BYTES = 5 * 1024 * 1024;
+    const HM_ROOM_CODE_PATTERN = /^[a-zA-Z0-9_-]{3,60}$/;
+    let hmLastPermissionRoomCode = '';
+    const HM_AUTOSAVE_DELAY_MS = 900;
+    const HM_AUTOSAVE_RETRY_DELAY_MS = 1800;
+    let hmIsAutoSaving = false;
+    let hmAutoSaveQueued = false;
+    let hmLastAutoSaveSignature = '';
+    let hmPendingAutoSaveReason = '';
+    // RC2.7 STEP5: 최종 안정화 QA 상태
+    const HM_APP_VERSION = 'RC2 v2.7.0 STEP5 Final Stability QA';
+    const hmQaState = {
+        bootedAt: new Date().toISOString(),
+        checks: [],
+        warnings: [],
+        errors: []
+    };
     let selectedDailyChoice = '';
     let missionLibraryCache = {};
 
@@ -4757,10 +4781,16 @@
     // daily/room/history/mission 계열 팝업을 동일한 방식으로 중앙 정렬한다.
     function openModalOverlayById(id) {
         const overlay = document.getElementById(id);
-        if (!overlay) return;
+        if (!overlay) {
+            console.warn('[HM Popup] overlay not found:', id);
+            return;
+        }
         hmEnsureOverlayAttachedToBody(overlay);
         if (overlay.style.display !== 'flex') lockBodyForModal();
         overlay.style.display = 'flex';
+        overlay.setAttribute('aria-hidden', 'false');
+        overlay.dataset.hmOpenedAt = String(Date.now());
+        hmFocusFirstModalControl(overlay);
     }
 
     function closeModalOverlayById(id) {
@@ -4768,6 +4798,31 @@
         if (!overlay) return;
         if (overlay.style.display === 'flex') unlockBodyForModal();
         overlay.style.display = 'none';
+        overlay.setAttribute('aria-hidden', 'true');
+        delete overlay.dataset.hmOpenedAt;
+    }
+
+    function hmFocusFirstModalControl(overlay) {
+        // RC2.7 STEP4: 모바일/데스크톱 공통 팝업 사용성 보강
+        // 입력형 팝업은 자동 포커스로 키보드가 갑자기 올라오지 않도록 닫기/버튼 중심으로만 포커스한다.
+        if (!overlay) return;
+        requestAnimationFrame(() => {
+            const target = overlay.querySelector('.modal-close-btn, .guide-close, button:not([disabled])');
+            if (target && typeof target.focus === 'function') {
+                try { target.focus({ preventScroll: true }); } catch (err) { target.focus(); }
+            }
+        });
+    }
+
+    function hmCloseTopModal() {
+        // 가장 최근에 열린 팝업 1개만 닫는다. 중첩 팝업에서 body lock count가 꼬이지 않게 보호한다.
+        const visibleOverlays = Array.from(document.querySelectorAll('.daily-modal-overlay, .room-settings-overlay, .mission-modal-overlay, .guide-modal, .history-panel-overlay, .history-detail-overlay'))
+            .filter(overlay => overlay && overlay.style.display === 'flex')
+            .sort((a, b) => Number(b.dataset.hmOpenedAt || 0) - Number(a.dataset.hmOpenedAt || 0));
+        const top = visibleOverlays[0];
+        if (!top) return false;
+        closeModalOverlayById(top.id);
+        return true;
     }
 
     // =========================================================
@@ -5004,6 +5059,115 @@
         }[ch]));
     }
 
+    // =========================================================
+
+    // MODULE: STABILITY / GUARD UTILITIES
+
+    // Split-ready target: utils.js + stability.js
+
+    // =========================================================
+
+    // RC2.7 안정화 공통 유틸
+    // - 사용자에게는 짧은 안내만 보여주고, 개발자 콘솔에는 상세 오류를 남긴다.
+    // - DB 구조/저장 경로는 변경하지 않는다.
+    function hmReportError(context, err, userMessage) {
+        const detail = err && (err.code || err.message) ? ` (${err.code || err.message})` : '';
+        const payload = {
+            context,
+            code: err && err.code ? err.code : '',
+            message: err && err.message ? err.message : String(err || ''),
+            at: new Date().toISOString()
+        };
+        if (window.hmQaState && Array.isArray(window.hmQaState.errors)) {
+            window.hmQaState.errors.push(payload);
+        }
+        console.warn(`[HearMe2nite][${context}]`, err);
+        if (userMessage && hmLastErrorMessage !== userMessage) {
+            hmLastErrorMessage = userMessage;
+            showSaveStatus(userMessage + detail);
+            setTimeout(() => { if (hmLastErrorMessage === userMessage) hmLastErrorMessage = ''; }, 2500);
+        }
+    }
+
+    function hmRequireLoginAndRoom(actionLabel = '작업') {
+        if (!currentUser) { showSaveStatus(`🔒 로그인 후 ${actionLabel}할 수 있습니다.`); return false; }
+        if (!getRoomCodeForData()) { showSaveStatus(`🔑 방 연결 후 ${actionLabel}할 수 있습니다.`); return false; }
+        return true;
+    }
+
+
+    // RC2.7 STEP2: 데이터 보호 공통 가드
+    // - 방 코드 형식 / 로그인 / roomMembers 권한을 작업 직전에 다시 확인한다.
+    // - Firebase Rules를 우회하는 용도가 아니라, 화면 단계에서 잘못된 읽기/쓰기를 미리 차단한다.
+    function hmIsSafeRoomCode(roomCode) {
+        return !!roomCode && HM_ROOM_CODE_PATTERN.test(String(roomCode).trim());
+    }
+
+    async function hmRequireRoomAccess(actionLabel = '작업', roomCode = getRoomCodeForData()) {
+        if (!currentUser) {
+            showSaveStatus(`🔒 로그인 후 ${actionLabel}할 수 있습니다.`);
+            return false;
+        }
+        if (!hmIsSafeRoomCode(roomCode)) {
+            showSaveStatus(`🔑 올바른 방 연결 후 ${actionLabel}할 수 있습니다.`);
+            return false;
+        }
+        const allowed = await canCurrentUserAccessRoom(roomCode);
+        if (!allowed) {
+            if (hmLastPermissionRoomCode !== roomCode) {
+                hmLastPermissionRoomCode = roomCode;
+                resetProtectedDataUI('이 계정은 해당 방 데이터를 열 수 없습니다.');
+            }
+            showSaveStatus(`🔒 ${actionLabel} 권한 없음`);
+            return false;
+        }
+        return true;
+    }
+
+    function hmIsOwnerRole() {
+        return activeRoomRole === 'owner';
+    }
+
+    function hmIsFirebasePermissionError(err) {
+        return err && (err.code === 'PERMISSION_DENIED' || String(err.message || '').includes('permission'));
+    }
+
+    function hmSetupStabilityListeners() {
+        if (window.__hmStabilityListenersReady) return;
+        window.__hmStabilityListenersReady = true;
+
+        window.addEventListener('online', () => {
+            hmIsOnline = true;
+            showSaveStatus('📡 인터넷 연결 복구됨');
+            if (currentUser && getRoomCodeForData()) triggerAutoSave('online-reconnect');
+        });
+
+        window.addEventListener('offline', () => {
+            hmIsOnline = false;
+            showSaveStatus('📴 인터넷 연결 끊김 - 다시 연결되면 저장됩니다.');
+        });
+
+        window.addEventListener('error', (event) => {
+            hmReportError('window.error', event.error || event.message, '⚠️ 화면 처리 중 오류가 감지되었습니다.');
+        });
+
+        window.addEventListener('unhandledrejection', (event) => {
+            hmReportError('promise', event.reason, '⚠️ 비동기 처리 오류가 감지되었습니다.');
+        });
+
+        try {
+            db.ref('.info/connected').on('value', (snap) => {
+                if (snap.val() === true) {
+                    showSaveStatus('☁️ 서버 연결됨');
+                } else if (currentUser) {
+                    showSaveStatus('📡 서버 재연결 대기 중');
+                }
+            });
+        } catch (err) {
+            hmReportError('firebase.connected', err, '⚠️ 서버 연결 상태 확인 실패');
+        }
+    }
+
 
 
     function formatTimestamp(ts) {
@@ -5163,7 +5327,7 @@
     function selectMood(value) {
         selectedMood = selectedMood === value ? '' : value;
         updateMoodUI();
-        executeAutoSave();
+        triggerAutoSave('mood');
     }
 
     function updateMoodUI() {
@@ -5195,7 +5359,7 @@
     function closeDailyModal(name) {
         closeModalOverlayById(`${name}ModalOverlay`);
         updateDailyCards();
-        executeAutoSave();
+        triggerAutoSave('daily-modal-save');
     }
 
     // =========================================================
@@ -5369,7 +5533,7 @@
         selectedDailyChoice = selectedDailyChoice === choice ? '' : choice;
         updateDailyChoiceButtons();
         updateDailyCards();
-        executeAutoSave();
+        triggerAutoSave('daily-choice');
     }
 
     function updateDailyChoiceButtons() {
@@ -5405,12 +5569,14 @@
     // 관리 전용 메모 저장
     // ownerNote 경로에 별도로 저장되며 일반 날짜 기록과 섞지 않는다.
     async function saveOwnerPrivateNote() {
-        if (!currentUser || !activeRoomCode || !canManageRelationshipCards()) return;
+        if (!canManageRelationshipCards()) return;
+        const roomCode = getRoomCodeForData();
+        if (!(await hmRequireRoomAccess('관리 전용 메모 저장', roomCode))) return;
         const date = document.getElementById('recordDate').value;
         const noteEl = document.getElementById('ownerPrivateNote');
         const note = noteEl ? noteEl.value : '';
         try {
-            await db.ref(`ownerNotes/${activeRoomCode}/${date}`).set({
+            await db.ref(`ownerNotes/${roomCode}/${date}`).set({
                 note,
                 updatedBy: currentUser.uid,
                 updatedByEmail: currentUser.email,
@@ -5418,8 +5584,7 @@
             });
             showSaveStatus('👑 주인 메모 저장 완료');
         } catch (err) {
-            console.error(err);
-            showSaveStatus('❌ 주인 메모 저장 실패 또는 권한 없음');
+            hmReportError('saveOwnerPrivateNote', err, hmIsFirebasePermissionError(err) ? '❌ 관리 메모 권한 없음' : '❌ 주인 메모 저장 실패');
         }
     }
 
@@ -5650,8 +5815,8 @@
     function handleMissionChanged(saveNow) {
         updateMissionAccessControls();
         updateMissionCompactUI();
-        if (saveNow) executeAutoSave();
-        else triggerAutoSave();
+        if (saveNow) triggerAutoSave('mission');
+        else triggerAutoSave('mission');
     }
 
     function sanitizeMissionText(text) {
@@ -5973,7 +6138,7 @@
     // 현재 사용자의 Room 접근 권한 확인
     // roomMembers/{roomCode}/{uid} 기준으로 접근 가능 여부를 판단한다.
     async function canCurrentUserAccessRoom(roomCode) {
-        if (!currentUser || !roomCode) return false;
+        if (!currentUser || !hmIsSafeRoomCode(roomCode)) return false;
         try {
             const memberSnap = await db.ref(`roomMembers/${roomCode}/${currentUser.uid}`).once('value');
             return memberSnap.exists();
@@ -6111,7 +6276,7 @@
     async function createInviteCode() {
         if (!currentUser) { alert('먼저 로그인해 주세요.'); return; }
         if (!activeRoomCode) { alert('먼저 내 방을 만들거나 기존 방에 연결해 주세요.'); return; }
-        const allowed = await canCurrentUserAccessRoom(activeRoomCode);
+        const allowed = await hmRequireRoomAccess('초대코드 생성', activeRoomCode);
         if (!allowed) { alert('현재 방의 초대코드를 만들 권한이 없습니다.'); return; }
         const myRole = await getCurrentUserRoomRole(activeRoomCode);
         if (myRole !== 'owner') {
@@ -6297,7 +6462,7 @@
         }
         const roomCode = document.getElementById('roomCode').value.trim();
         if (!roomCode) { alert('기존 공유코드를 입력해 주세요.'); return; }
-        if (!/^[a-zA-Z0-9_-]{3,60}$/.test(roomCode)) {
+        if (!hmIsSafeRoomCode(roomCode)) {
             alert('공유코드는 영문, 숫자, _ , - 만 사용해서 입력해 주세요.');
             return;
         }
@@ -6348,6 +6513,8 @@
         chatRef = null;
         ownerNoteRef = null;
         cachedDaysData = null;
+        hmLastAutoSaveSignature = '';
+        hmAutoSaveQueued = false;
     }
 
     // =========================================================
@@ -6362,19 +6529,22 @@
     // rooms/{roomCode}/days, chat, ownerNote 등을 구독하고 화면을 갱신한다.
     // 주의: 저장 구조는 기존 rooms/{roomCode}/days/{date} 형태를 유지한다.
     async function connectAndListenFirebase() {
+        try {
         if (!currentUser) { showSaveStatus('🔒 로그인이 필요합니다.'); return; }
         const roomCode = getRoomCodeForData();
         const date = document.getElementById('recordDate').value;
 
+        if (!hmIsOnline) showSaveStatus('📴 오프라인 상태입니다. 연결되면 다시 동기화됩니다.');
+
         disconnectAllListeners();
-        if (!roomCode) {
+        if (!roomCode || !hmIsSafeRoomCode(roomCode)) {
             setDataSectionsVisible(false);
             resetProtectedDataUI();
-            showSaveStatus('🔑 방을 만들거나 초대코드로 참여해 주세요.');
+            showSaveStatus('🔑 방을 만들거나 올바른 초대코드로 참여해 주세요.');
             return;
         }
 
-        const allowed = await canCurrentUserAccessRoom(roomCode);
+        const allowed = await hmRequireRoomAccess('방 연결', roomCode);
         if (!allowed) {
             activeRoomCode = '';
             clearRoomInputs();
@@ -6397,6 +6567,7 @@
 
         currentRoomRef = db.ref('rooms/' + roomCode + '/days/' + date);
         currentRoomRef.on('value', (snapshot) => {
+            if (roomCode !== activeRoomCode) return;
             const record = snapshot.val();
             if (record) {
                 safeUpdateField('wakeTime', record.wakeTime);
@@ -6432,18 +6603,21 @@
             }
             showSaveStatus('☁️ 서버 실시간 동기화 완료');
         }, (err) => {
-            console.error(err);
-            showSaveStatus('❌ 읽기 권한 없음');
+            hmReportError('currentRoomRef.on', err, hmIsFirebasePermissionError(err) ? '❌ 읽기 권한 없음' : '❌ 기록 읽기 실패');
         });
 
         entireRoomRef = db.ref('rooms/' + roomCode + '/days');
         entireRoomRef.on('value', (snapshot) => {
+            if (roomCode !== activeRoomCode) return;
             cachedDaysData = snapshot.val();
             displayHistory(cachedDaysData);
         }, (err) => {
-            console.error(err);
-            showSaveStatus('❌ 기록실 읽기 권한 없음');
+            hmReportError('entireRoomRef.on', err, hmIsFirebasePermissionError(err) ? '❌ 기록실 읽기 권한 없음' : '❌ 기록실 불러오기 실패');
         });
+        } catch (err) {
+            hmReportError('connectAndListenFirebase', err, '❌ 방 연결 실패');
+            setDataSectionsVisible(false);
+        }
     }
 
     // =========================================================
@@ -6511,9 +6685,9 @@
 
     // =========================================================
 
-    function addWater(amount) { currentWater += amount; document.getElementById('waterDisplay').innerText = currentWater; updateDailyCards(); executeAutoSave(); }
-    function resetWater() { currentWater = 0; document.getElementById('waterDisplay').innerText = currentWater; updateDailyCards(); executeAutoSave(); }
-    function removePhoto() { removePhotoUI(); updateDailyCards(); executeAutoSave(); }
+    function addWater(amount) { currentWater += amount; document.getElementById('waterDisplay').innerText = currentWater; updateDailyCards(); triggerAutoSave('water'); }
+    function resetWater() { currentWater = 0; document.getElementById('waterDisplay').innerText = currentWater; updateDailyCards(); triggerAutoSave('water-reset'); }
+    function removePhoto() { removePhotoUI(); updateDailyCards(); triggerAutoSave('photo-remove'); }
 
     // =========================================================
 
@@ -6527,24 +6701,46 @@
     // 업로드 이미지를 Base64로 변환해 날짜 기록과 함께 저장한다.
     // 주의: Storage를 쓰지 않는 현재 구조를 유지한다.
     function handlePhotoUpload(input) {
-        const file = input.files[0];
+        const file = input.files && input.files[0];
         if (!file) return;
+        if (!file.type || !file.type.startsWith('image/')) {
+            alert('이미지 파일만 첨부할 수 있습니다.');
+            input.value = '';
+            return;
+        }
+        if (file.size > HM_MAX_PHOTO_SIZE_BYTES) {
+            alert('사진 용량이 큽니다. 5MB 이하 이미지로 다시 선택해 주세요.');
+            input.value = '';
+            return;
+        }
         const reader = new FileReader();
+        reader.onerror = function(err) {
+            hmReportError('photo.reader', err, '❌ 사진을 불러오지 못했습니다.');
+            input.value = '';
+        };
         reader.onload = function(e) {
             const img = new Image();
+            img.onerror = function(err) {
+                hmReportError('photo.image', err, '❌ 사진 형식을 읽지 못했습니다.');
+                input.value = '';
+            };
             img.onload = function() {
-                const canvas = document.createElement('canvas');
-                const MAX_WIDTH = 350;
-                let width = img.width;
-                let height = img.height;
-                if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
-                canvas.width = width; canvas.height = height;
-                canvas.getContext('2d').drawImage(img, 0, 0, width, height);
-                uploadedPhotoBase64 = canvas.toDataURL('image/jpeg', 0.5);
-                document.getElementById('photoPreview').src = uploadedPhotoBase64;
-                document.getElementById('previewBox').style.display = 'block';
-                updateDailyCards();
-                executeAutoSave();
+                try {
+                    const canvas = document.createElement('canvas');
+                    const MAX_WIDTH = 350;
+                    let width = img.width;
+                    let height = img.height;
+                    if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
+                    canvas.width = width; canvas.height = height;
+                    canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+                    uploadedPhotoBase64 = canvas.toDataURL('image/jpeg', 0.5);
+                    document.getElementById('photoPreview').src = uploadedPhotoBase64;
+                    document.getElementById('previewBox').style.display = 'block';
+                    updateDailyCards();
+                    triggerAutoSave('photo-upload');
+                } catch (err) {
+                    hmReportError('photo.canvas', err, '❌ 사진 처리 실패');
+                }
             };
             img.src = e.target.result;
         };
@@ -6561,10 +6757,17 @@
 
     // 자동저장 debounce 진입점
     // 입력 이벤트가 몰려도 Firebase write가 과도하게 발생하지 않도록 지연 저장한다.
-    function triggerAutoSave() {
-        showSaveStatus('✍️ 입력 중...');
+    function triggerAutoSave(reason = 'input') {
+        hmPendingAutoSaveReason = reason;
+        if (!currentUser) { showSaveStatus('🔒 로그인 후 저장됩니다.'); return; }
+        const roomCode = getRoomCodeForData();
+        if (!roomCode || !hmIsSafeRoomCode(roomCode)) {
+            showSaveStatus('🔑 방 연결 후 저장됩니다.');
+            return;
+        }
+        showSaveStatus(hmIsOnline ? '✍️ 입력 중...' : '📴 오프라인 입력 중...');
         clearTimeout(autoSaveTimeout);
-        autoSaveTimeout = setTimeout(executeAutoSave, 600);
+        autoSaveTimeout = setTimeout(executeAutoSave, HM_AUTOSAVE_DELAY_MS);
     }
 
     // =========================================================
@@ -6585,12 +6788,68 @@
     // 현재 폼 상태를 reportText/newRecord로 조립해 날짜별 Firebase 기록으로 저장한다.
     // 결과 텍스트 형식과 저장 key는 기존 사용자 데이터 호환 때문에 유지한다.
     // =========================================================
+    // RC2.7 STEP3: AUTOSAVE STABILITY HELPERS
+    // - 저장 전 필수 상태를 한 번 더 검증한다.
+    // - 같은 내용의 중복 저장을 건너뛰어 Firebase write를 줄인다.
+    // - 저장 중 추가 입력이 들어오면 한 번 더 큐에 넣어 마지막 상태를 저장한다.
+    // =========================================================
+    function hmCanAttemptAutoSave(roomCode, date) {
+        if (!currentUser) { showSaveStatus('🔒 로그인 후 저장됩니다.'); return false; }
+        if (!roomCode || !hmIsSafeRoomCode(roomCode)) { showSaveStatus('🔑 방 연결 후 저장됩니다.'); return false; }
+        if (!date) { showSaveStatus('📅 날짜 선택 후 저장됩니다.'); return false; }
+        if (!hmIsOnline) {
+            hmAutoSaveQueued = true;
+            showSaveStatus('📴 오프라인 상태입니다. 연결 복구 후 저장됩니다.');
+            return false;
+        }
+        return true;
+    }
+
+    function hmBuildAutoSaveSignature(record) {
+        try {
+            return JSON.stringify({
+                date: record.date,
+                wakeTime: record.wakeTime,
+                water: record.water,
+                weight: record.weight,
+                mealBreakfast: record.mealBreakfast,
+                mealLunch: record.mealLunch,
+                mealDinner: record.mealDinner,
+                goingOut: record.goingOut,
+                sleepTime: record.sleepTime,
+                diary: record.diary,
+                replyMessage: record.replyMessage,
+                missions: record.missions,
+                mood: record.mood,
+                moodNote: record.moodNote,
+                dailyChoice: record.dailyChoice,
+                rewardNote: record.rewardNote,
+                photo: record.photo ? record.photo.slice(0, 80) + ':' + record.photo.length : ''
+            });
+        } catch (err) {
+            console.warn('autosave.signature', err);
+            return String(Date.now());
+        }
+    }
+
+    function hmQueueAutoSaveRetry() {
+        clearTimeout(autoSaveTimeout);
+        autoSaveTimeout = setTimeout(executeAutoSave, HM_AUTOSAVE_RETRY_DELAY_MS);
+    }
+
+    // =========================================================
     async function executeAutoSave() {
-        if (!currentUser) { showSaveStatus('🔒 로그인 후 저장됩니다.'); return; }
+        if (hmIsAutoSaving) {
+            hmAutoSaveQueued = true;
+            showSaveStatus('⏳ 저장 중... 마지막 입력을 이어서 저장합니다.');
+            return;
+        }
+        try {
         const roomCode = getRoomCodeForData();
-        const date = document.getElementById('recordDate').value;
-        if (!roomCode) { showSaveStatus('🔑 방 연결 후 저장됩니다.'); return; }
-        if (!(await canCurrentUserAccessRoom(roomCode))) { showSaveStatus('🔒 저장 권한 없음'); return; }
+        const date = document.getElementById('recordDate')?.value || '';
+        if (!hmCanAttemptAutoSave(roomCode, date)) return;
+        if (!(await hmRequireRoomAccess('저장', roomCode))) return;
+        hmIsAutoSaving = true;
 
         const wakeTime = document.getElementById('wakeTime').value || '기록 없음';
         const weight = document.getElementById('weight').value || '기록 없음';
@@ -6641,9 +6900,27 @@
             updatedAt: firebase.database.ServerValue.TIMESTAMP
         };
 
-        db.ref('rooms/' + roomCode + '/days/' + date).set(newRecord)
-            .then(() => showSaveStatus('☁️ 서버 자동저장 완료'))
-            .catch((err) => { console.error(err); showSaveStatus('❌ 저장 실패 또는 권한 없음'); });
+        const signature = hmBuildAutoSaveSignature(newRecord);
+        if (signature === hmLastAutoSaveSignature && !hmAutoSaveQueued) {
+            showSaveStatus('☁️ 저장됨');
+            return;
+        }
+
+        await db.ref('rooms/' + roomCode + '/days/' + date).set(newRecord);
+        hmLastAutoSaveSignature = signature;
+        hmAutoSaveQueued = false;
+        showSaveStatus('☁️ 서버 자동저장 완료');
+        } catch (err) {
+            hmAutoSaveQueued = true;
+            hmReportError('executeAutoSave', err, hmIsFirebasePermissionError(err) ? '❌ 저장 권한 없음' : '❌ 저장 실패 - 잠시 후 다시 시도합니다.');
+            if (!hmIsFirebasePermissionError(err)) hmQueueAutoSaveRetry();
+        } finally {
+            hmIsAutoSaving = false;
+            if (hmAutoSaveQueued && hmIsOnline && currentUser && getRoomCodeForData()) {
+                hmAutoSaveQueued = false;
+                triggerAutoSave('queued');
+            }
+        }
     }
 
     // =========================================================
@@ -6694,18 +6971,28 @@
     async function deleteRecord(event, date) {
         event.stopPropagation();
         const roomCode = getRoomCodeForData();
-        if (!currentUser || !roomCode) return;
-        if (!(await canCurrentUserAccessRoom(roomCode))) { alert('삭제 권한이 없습니다.'); return; }
-        if (confirm(`${date} 기록을 서버에서 완전히 삭제할까요?`)) db.ref('rooms/' + roomCode + '/days/' + date).remove();
+        if (!date) return;
+        if (!(await hmRequireRoomAccess('기록 삭제', roomCode))) { alert('삭제 권한이 없습니다.'); return; }
+        if (confirm(`${date} 기록을 서버에서 완전히 삭제할까요?`)) {
+            try {
+                await db.ref('rooms/' + roomCode + '/days/' + date).remove();
+                showSaveStatus('🗑️ 기록 삭제 완료');
+            } catch (err) {
+                hmReportError('deleteRecord', err, hmIsFirebasePermissionError(err) ? '❌ 삭제 권한 없음' : '❌ 기록 삭제 실패');
+            }
+        }
     }
 
     async function copyDirectText(event, date) {
         event.stopPropagation();
         const roomCode = getRoomCodeForData();
-        if (!(await canCurrentUserAccessRoom(roomCode))) { alert('복사 권한이 없습니다.'); return; }
-        db.ref('rooms/' + roomCode + '/days/' + date).once('value').then((snapshot) => {
-            if(snapshot.val()) executeCopy(snapshot.val().fullText);
-        });
+        if (!(await hmRequireRoomAccess('기록 복사', roomCode))) { alert('복사 권한이 없습니다.'); return; }
+        try {
+            const snapshot = await db.ref('rooms/' + roomCode + '/days/' + date).once('value');
+            if (snapshot.val()) executeCopy(snapshot.val().fullText);
+        } catch (err) {
+            hmReportError('copyDirectText', err, hmIsFirebasePermissionError(err) ? '❌ 복사 권한 없음' : '❌ 기록 복사 실패');
+        }
     }
 
     // =========================================================
@@ -6780,12 +7067,17 @@
     // 방별 채팅 listener, 메시지 렌더링, 전송, 내 메시지 정렬을 담당한다.
     // chats/{roomCode} 경로는 변경 금지.
     // =========================================================
-    function listenChat() {
+    async function listenChat() {
         const roomCode = getRoomCodeForData();
-        if (!currentUser || !roomCode) return;
+        if (!(await hmRequireRoomAccess('채팅 읽기', roomCode))) return;
         if (chatRef) chatRef.off();
         chatRef = db.ref('rooms/' + roomCode + '/messages');
-        chatRef.limitToLast(50).on('value', (snapshot) => { renderMessages(snapshot.val()); });
+        chatRef.limitToLast(50).on('value', (snapshot) => {
+            if (roomCode !== activeRoomCode) return;
+            renderMessages(snapshot.val());
+        }, (err) => {
+            hmReportError('listenChat', err, hmIsFirebasePermissionError(err) ? '❌ 채팅 읽기 권한 없음' : '❌ 채팅 불러오기 실패');
+        });
     }
 
     // =========================================================
@@ -6839,21 +7131,25 @@
     // Chat 메시지 전송
     // 현재 roomCode/chat 하위에 메시지를 push한다.
     async function sendChatMessage() {
-        const roomCode = getRoomCodeForData();
-        const sender = document.getElementById('chatSender').value.trim();
-        const text = document.getElementById('chatInput').value.trim();
-        if (!currentUser) { alert('로그인이 필요합니다.'); return; }
-        if (!roomCode || !sender || !text) return;
-        if (!(await canCurrentUserAccessRoom(roomCode))) { alert('채팅 권한이 없습니다.'); return; }
+        try {
+            const roomCode = getRoomCodeForData();
+            const sender = document.getElementById('chatSender').value.trim();
+            const text = document.getElementById('chatInput').value.trim();
+            if (!currentUser) { alert('로그인이 필요합니다.'); return; }
+            if (!sender || !text) return;
+            if (!(await hmRequireRoomAccess('채팅 전송', roomCode))) { alert('채팅 권한이 없습니다.'); return; }
 
-        db.ref('rooms/' + roomCode + '/messages').push({
-            sender: sender,
-            senderUid: currentUser.uid,
-            senderEmail: currentUser.email,
-            text: text,
-            timestamp: firebase.database.ServerValue.TIMESTAMP
-        });
-        document.getElementById('chatInput').value = '';
+            await db.ref('rooms/' + roomCode + '/messages').push({
+                sender: sender,
+                senderUid: currentUser.uid,
+                senderEmail: currentUser.email,
+                text: text,
+                timestamp: firebase.database.ServerValue.TIMESTAMP
+            });
+            document.getElementById('chatInput').value = '';
+        } catch (err) {
+            hmReportError('sendChatMessage', err, hmIsFirebasePermissionError(err) ? '❌ 채팅 권한 없음' : '❌ 채팅 전송 실패');
+        }
     }
 
     // =========================================================
@@ -7212,6 +7508,131 @@ function openHistoryPanelModal() {
     }
 
 
+
+
+    // =========================================================
+    // RC2 v2.7.0 STEP5: ERROR LOG + FINAL STABILITY QA
+    // 분리 후보: qa.js 또는 boot.js
+    // 목적: 배포 전 최종 상태를 브라우저 콘솔에서 확인할 수 있게 하고,
+    //       필수 DOM/함수/전역 상태 누락을 조기 감지한다.
+    // =========================================================
+    function hmQaLog(level, context, message, extra) {
+        const entry = { level, context, message, extra: extra || null, at: new Date().toISOString() };
+        if (!window.hmQaState) window.hmQaState = hmQaState;
+        if (level === 'error') window.hmQaState.errors.push(entry);
+        else if (level === 'warn') window.hmQaState.warnings.push(entry);
+        else window.hmQaState.checks.push(entry);
+
+        const prefix = `[HearMe2nite QA][${context}] ${message}`;
+        if (level === 'error') console.error(prefix, extra || '');
+        else if (level === 'warn') console.warn(prefix, extra || '');
+        else console.info(prefix, extra || '');
+    }
+
+    function hmRunFinalStabilityQA() {
+        if (window.__hmFinalStabilityQARan) return;
+        window.__hmFinalStabilityQARan = true;
+        window.hmQaState = hmQaState;
+        window.hmQaVersion = HM_APP_VERSION;
+
+        const requiredElementIds = [
+            'recordDate', 'authEmail', 'authPassword', 'roomCode', 'currentRoomInfo',
+            'saveStatus', 'historyList', 'historyPanelOverlay', 'historyDetailOverlay',
+            'chatMessages', 'chatInput', 'missionModalOverlay'
+        ];
+        requiredElementIds.forEach((id) => {
+            const found = !!document.getElementById(id);
+            hmQaLog(found ? 'info' : 'warn', 'DOM', `${id} ${found ? 'OK' : '누락 확인 필요'}`);
+        });
+
+        const requiredFunctions = [
+            'handleAuthSubmit', 'logoutUser', 'createMyRoom', 'acceptInviteFromInput',
+            'createInviteCode', 'connectAndListenFirebase', 'triggerAutoSave', 'executeAutoSave',
+            'displayHistory', 'renderCalendar', 'openDailyModal', 'closeDailyModal',
+            'openMissionModal', 'closeMissionModal', 'listenChat', 'sendChatMessage'
+        ];
+        requiredFunctions.forEach((name) => {
+            // eval 결과가 function인지 확인한다. 일부 함수는 전역 프로퍼티가 아닌 스크립트 스코프에 존재한다.
+            let isFunction = false;
+            try { isFunction = eval(`typeof ${name}`) === 'function'; } catch (err) { isFunction = false; }
+            hmQaLog(isFunction ? 'info' : 'warn', 'FUNCTION', `${name} ${isFunction ? 'OK' : '누락 확인 필요'}`);
+        });
+
+        const duplicateFunctions = [];
+        try {
+            const scriptText = Array.from(document.scripts).map(script => script.textContent || '').join('\n');
+            const matches = [...scriptText.matchAll(/function\s+([a-zA-Z0-9_$]+)\s*\(/g)].map(match => match[1]);
+            const counts = matches.reduce((acc, name) => { acc[name] = (acc[name] || 0) + 1; return acc; }, {});
+            Object.keys(counts).forEach((name) => { if (counts[name] > 1) duplicateFunctions.push(`${name} x${counts[name]}`); });
+        } catch (err) {
+            hmQaLog('warn', 'DUPLICATE_SCAN', '중복 함수 스캔 중 경고', err);
+        }
+        if (duplicateFunctions.length) hmQaLog('warn', 'DUPLICATE_SCAN', '중복 함수 확인 필요', duplicateFunctions);
+        else hmQaLog('info', 'DUPLICATE_SCAN', '중복 함수 없음');
+
+        hmQaLog('info', 'BOOT', `${HM_APP_VERSION} 로드 완료`, {
+            online: navigator.onLine,
+            firebaseReady: typeof firebase !== 'undefined',
+            currentUser: !!currentUser,
+            activeRoomCode: activeRoomCode || ''
+        });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', hmRunFinalStabilityQA);
+    } else {
+        hmRunFinalStabilityQA();
+    }
+
+
+
+    // =========================================================
+    // RC2 v2.7.0 STEP4: USABILITY QA / BUTTON & POPUP SAFETY
+    // 분리 후보: usability.js 또는 popup.js
+    // 목적: 기능 변경 없이 팝업/버튼 사용 중 발생할 수 있는 UX 오류를 방지한다.
+    // =========================================================
+    function hmSetupUsabilityQA() {
+        if (window.__hmUsabilityQABound) return;
+        window.__hmUsabilityQABound = true;
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') {
+                const closed = hmCloseTopModal();
+                if (closed) event.preventDefault();
+            }
+        });
+
+        document.addEventListener('click', (event) => {
+            const button = event.target.closest('button, .btn-delete, .history-thumb, .calendar-day.has-record');
+            if (!button) return;
+
+            // 빠른 연속 클릭으로 같은 저장/삭제/전송 동작이 중복 실행되는 것을 완화한다.
+            const now = Date.now();
+            const lastClick = Number(button.dataset.hmLastClickAt || 0);
+            const isRapidClick = now - lastClick < 360;
+            button.dataset.hmLastClickAt = String(now);
+
+            const allowRapid = button.classList.contains('btn-water') || button.classList.contains('mood-btn') || button.classList.contains('choice-btn');
+            if (isRapidClick && !allowRapid) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+        }, true);
+
+        document.addEventListener('submit', (event) => {
+            // form이 생기더라도 페이지 리로드로 입력값이 날아가지 않도록 기본 제출을 막는다.
+            event.preventDefault();
+        });
+
+        document.addEventListener('touchmove', (event) => {
+            // 팝업이 열려 있을 때 배경 스크롤 튐을 줄인다. 팝업 내부 스크롤은 허용한다.
+            if (!document.body.classList.contains('hm-modal-open')) return;
+            if (event.target.closest('.daily-modal, .room-settings-modal, .mission-modal, .guide-card, .history-panel-modal, .history-detail-modal')) return;
+            event.preventDefault();
+        }, { passive: false });
+    }
+
+    hmSetupUsabilityQA();
     /* RC2 v2.5.7 Motion + Final UI QA helpers */
 
     // =========================================================
@@ -7219,6 +7640,8 @@ function openHistoryPanelModal() {
     // 분리 후보: boot.js 또는 motion.js
     // 카드 터치감, 모션 바인딩, MutationObserver 기반 동적 UI 보정을 담당한다.
     // =========================================================
+    hmSetupStabilityListeners();
+
     (function initMotionFinalQA() {
         // =========================================================
         // MODULE: MOTION / TAP FEEDBACK
