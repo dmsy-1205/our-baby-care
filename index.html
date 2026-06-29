@@ -456,6 +456,133 @@
             border-color: #ff7675;
             box-shadow: 0 4px 10px rgba(255, 118, 117, 0.2);
         }
+
+
+        /* Ultimate RC: compact mission card + mission modal */
+        .mission-compact-card {
+            background: linear-gradient(135deg, #fff7f7, #fffaf0);
+            border: 1px solid #ffe0e0;
+            border-radius: 18px;
+            padding: 14px;
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 10px;
+            align-items: center;
+            box-shadow: 0 6px 14px rgba(255,118,117,0.08);
+        }
+        .mission-compact-title {
+            font-weight: 800;
+            color: #2d3436;
+            font-size: 0.95rem;
+            margin-bottom: 4px;
+        }
+        .mission-compact-sub {
+            color: #636e72;
+            font-size: 0.8rem;
+            line-height: 1.45;
+        }
+        .mission-progress-mini {
+            margin-top: 8px;
+            width: 100%;
+            height: 8px;
+            background: #ffecec;
+            border-radius: 99px;
+            overflow: hidden;
+        }
+        .mission-progress-mini > span {
+            display: block;
+            height: 100%;
+            width: 0%;
+            background: var(--primary-color);
+            border-radius: 99px;
+            transition: width 0.2s ease;
+        }
+        .mission-open-btn {
+            width: auto;
+            padding: 10px 12px;
+            border-radius: 12px;
+            background: var(--primary-color);
+            color: white;
+            font-size: 0.85rem;
+            white-space: nowrap;
+        }
+        .mission-modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(45,52,54,0.55);
+            z-index: 30;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 18px;
+        }
+        .mission-modal {
+            width: 100%;
+            max-width: 460px;
+            max-height: 86vh;
+            overflow-y: auto;
+            background: #fff;
+            border-radius: 24px;
+            padding: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.18);
+        }
+        .mission-modal-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+        .mission-modal-head h2 {
+            margin: 0;
+            font-size: 1.15rem;
+            color: var(--primary-color);
+        }
+        .modal-close-btn {
+            width: auto;
+            padding: 8px 10px;
+            border-radius: 10px;
+            background: #f1f2f6;
+            color: #636e72;
+            font-size: 0.85rem;
+        }
+        .mission-template-box {
+            background: #fff7f7;
+            border: 1px solid #ffe0e0;
+            border-radius: 16px;
+            padding: 12px;
+            margin-bottom: 12px;
+        }
+        .mission-template-title {
+            font-size: 0.86rem;
+            font-weight: 800;
+            color: #2d3436;
+            margin-bottom: 8px;
+        }
+        .mission-chip-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 7px;
+        }
+        .mission-chip {
+            width: auto;
+            padding: 8px 10px;
+            border-radius: 999px;
+            background: #fff;
+            border: 1px solid #ffd6d6;
+            color: #b26a6a;
+            font-size: 0.78rem;
+            font-weight: 700;
+        }
+        .mission-chip.primary {
+            background: #ff7675;
+            color: #fff;
+            border-color: #ff7675;
+        }
+        .mission-modal .mission-row {
+            grid-template-columns: 26px 1fr;
+        }
+
         .feedback-hint {
             color: #636e72;
             font-size: 0.78rem;
@@ -668,13 +795,13 @@
 
     <div class="input-group">
         <label>🎯 오늘의 미션</label>
-        <div class="mission-box">
-            <div class="mission-helper">주인이 준 미션이나 오늘 지킬 약속을 적고, 완료하면 체크하세요.</div>
-            <div class="mission-row"><input type="checkbox" id="missionDone1" onchange="executeAutoSave()"><input type="text" id="missionText1" placeholder="예: 물 2L 마시기" oninput="triggerAutoSave()"></div>
-            <div class="mission-row"><input type="checkbox" id="missionDone2" onchange="executeAutoSave()"><input type="text" id="missionText2" placeholder="예: 산책 30분" oninput="triggerAutoSave()"></div>
-            <div class="mission-row"><input type="checkbox" id="missionDone3" onchange="executeAutoSave()"><input type="text" id="missionText3" placeholder="예: 식사 기록 남기기" oninput="triggerAutoSave()"></div>
-            <div class="mission-row"><input type="checkbox" id="missionDone4" onchange="executeAutoSave()"><input type="text" id="missionText4" placeholder="예: 자기 전 스트레칭" oninput="triggerAutoSave()"></div>
-            <div class="mission-row"><input type="checkbox" id="missionDone5" onchange="executeAutoSave()"><input type="text" id="missionText5" placeholder="예: 오늘의 한 줄 작성" oninput="triggerAutoSave()"></div>
+        <div class="mission-compact-card">
+            <div>
+                <div class="mission-compact-title" id="missionCompactTitle">오늘 미션 0개</div>
+                <div class="mission-compact-sub" id="missionCompactSub">주인이 정한 오늘의 약속을 필요한 만큼만 열어 확인하세요.</div>
+                <div class="mission-progress-mini"><span id="missionProgressBar"></span></div>
+            </div>
+            <button type="button" class="mission-open-btn" onclick="openMissionModal()">미션 보기</button>
         </div>
     </div>
 
@@ -858,7 +985,7 @@
 
         <div class="guide-step">
             <div class="guide-step-title">🎯 미션 · 기분 · 피드백</div>
-            <div class="guide-flow">🎯 오늘의 미션 체크<br>↓<br>😊 오늘의 기분 선택<br>↓<br>💌 주인의 피드백 기록</div>
+            <div class="guide-flow">🎯 미션 보기<br>↓<br>추천 · 랜덤 · 직접 작성<br>↓<br>😊 기분 선택<br>↓<br>💌 주인의 피드백 기록</div>
             <div class="guide-note">관리는 감시가 아니라 합의된 루틴과 따뜻한 피드백을 쌓는 과정입니다.</div>
         </div>
 
@@ -879,6 +1006,48 @@
             합의된 관리와 신뢰를 쌓기 위한 공간입니다. 🌷
         </div>
         <button type="button" class="guide-primary" onclick="closeGuideModal(true)">시작하기</button>
+    </div>
+</div>
+
+
+<div class="mission-modal-overlay" id="missionModalOverlay" onclick="if(event.target.id==='missionModalOverlay') closeMissionModal()">
+    <div class="mission-modal">
+        <div class="mission-modal-head">
+            <h2>🎯 오늘의 미션</h2>
+            <button type="button" class="modal-close-btn" onclick="closeMissionModal()">닫기</button>
+        </div>
+
+        <div class="mission-template-box">
+            <div class="mission-template-title">💕 추천 미션</div>
+            <div class="mission-chip-grid">
+                <button type="button" class="mission-chip" onclick="addMissionTemplate('오늘의 마음을 주인에게 솔직하게 보고하기')">마음 보고</button>
+                <button type="button" class="mission-chip" onclick="addMissionTemplate('오늘의 셀카 한 장 남기기')">오늘 셀카</button>
+                <button type="button" class="mission-chip" onclick="addMissionTemplate('지정된 호칭으로 하루 보고하기')">호칭 보고</button>
+                <button type="button" class="mission-chip" onclick="addMissionTemplate('오늘의 복장 인증 남기기')">복장 인증</button>
+                <button type="button" class="mission-chip" onclick="addMissionTemplate('주인이 정한 시간에 짧게 체크인하기')">정시 체크인</button>
+                <button type="button" class="mission-chip" onclick="addMissionTemplate('프라이빗한 해피타임 갖고 느낀 점 한 줄 남기기')">해피타임</button>
+            </div>
+        </div>
+
+        <div class="mission-template-box">
+            <div class="mission-template-title">⭐ 즐겨찾기 느낌의 빠른 추가</div>
+            <div class="mission-chip-grid">
+                <button type="button" class="mission-chip" onclick="addMissionTemplate('Morning Report 남기기')">Morning Report</button>
+                <button type="button" class="mission-chip" onclick="addMissionTemplate('Evening Report 남기기')">Evening Report</button>
+                <button type="button" class="mission-chip" onclick="addMissionTemplate('오늘 주인에게 감사한 점 하나 적기')">감사 한 줄</button>
+                <button type="button" class="mission-chip" onclick="addMissionTemplate('오늘의 약속 하나 지키고 체크하기')">오늘의 약속</button>
+                <button type="button" class="mission-chip primary" onclick="addRandomMission()">🎲 랜덤 미션</button>
+            </div>
+        </div>
+
+        <div class="mission-box">
+            <div class="mission-helper">관계 안에서 합의된 미션만 적어주세요. 완료하면 체크하고, 필요 없는 칸은 비워두면 됩니다.</div>
+            <div class="mission-row"><input type="checkbox" id="missionDone1" onchange="handleMissionChanged(true)"><input type="text" id="missionText1" placeholder="직접 미션을 적어주세요" oninput="handleMissionChanged(false)"></div>
+            <div class="mission-row"><input type="checkbox" id="missionDone2" onchange="handleMissionChanged(true)"><input type="text" id="missionText2" placeholder="예: 오늘의 마음 보고" oninput="handleMissionChanged(false)"></div>
+            <div class="mission-row"><input type="checkbox" id="missionDone3" onchange="handleMissionChanged(true)"><input type="text" id="missionText3" placeholder="예: 복장 인증" oninput="handleMissionChanged(false)"></div>
+            <div class="mission-row"><input type="checkbox" id="missionDone4" onchange="handleMissionChanged(true)"><input type="text" id="missionText4" placeholder="예: 정시 체크인" oninput="handleMissionChanged(false)"></div>
+            <div class="mission-row"><input type="checkbox" id="missionDone5" onchange="handleMissionChanged(true)"><input type="text" id="missionText5" placeholder="예: 해피타임 후 한 줄 기록" oninput="handleMissionChanged(false)"></div>
+        </div>
     </div>
 </div>
 
@@ -1427,6 +1596,67 @@
     }
 
 
+
+    function updateMissionCompactUI() {
+        const missions = collectMissions();
+        const total = missions.length;
+        const done = missions.filter(m => m.done).length;
+        const pct = total ? Math.round((done / total) * 100) : 0;
+        const title = document.getElementById('missionCompactTitle');
+        const sub = document.getElementById('missionCompactSub');
+        const bar = document.getElementById('missionProgressBar');
+        if (title) title.innerText = total ? `오늘 미션 ${done}/${total} 완료` : '오늘 미션 0개';
+        if (sub) sub.innerText = total ? `${pct}% 진행 중 · 필요하면 미션 보기를 눌러 수정하세요.` : '주인이 정한 오늘의 약속을 필요한 만큼만 열어 확인하세요.';
+        if (bar) bar.style.width = `${pct}%`;
+    }
+
+    function openMissionModal() {
+        const overlay = document.getElementById('missionModalOverlay');
+        if (overlay) overlay.style.display = 'flex';
+        updateMissionCompactUI();
+    }
+
+    function closeMissionModal() {
+        const overlay = document.getElementById('missionModalOverlay');
+        if (overlay) overlay.style.display = 'none';
+        updateMissionCompactUI();
+    }
+
+    function handleMissionChanged(saveNow) {
+        updateMissionCompactUI();
+        if (saveNow) executeAutoSave();
+        else triggerAutoSave();
+    }
+
+    function addMissionTemplate(text) {
+        for (let i = 1; i <= 5; i++) {
+            const textEl = document.getElementById(`missionText${i}`);
+            const doneEl = document.getElementById(`missionDone${i}`);
+            if (textEl && !textEl.value.trim()) {
+                textEl.value = text;
+                if (doneEl) doneEl.checked = false;
+                handleMissionChanged(false);
+                return;
+            }
+        }
+        alert('미션 칸이 모두 사용 중입니다. 필요 없는 미션을 비우고 다시 추가해 주세요.');
+    }
+
+    function addRandomMission() {
+        const items = [
+            '오늘 가장 솔직했던 마음을 주인에게 한 줄로 보고하기',
+            '오늘의 셀카 한 장 남기기',
+            '지정된 호칭으로 하루 마무리 보고하기',
+            '오늘의 복장 인증 남기기',
+            '주인이 정한 시간에 짧게 체크인하기',
+            '프라이빗한 해피타임 갖고 느낀 점 한 줄 남기기',
+            '오늘 주인에게 듣고 싶은 말 하나 적기',
+            '오늘 지킨 약속 하나와 어려웠던 점 하나 적기'
+        ];
+        const text = items[Math.floor(Math.random() * items.length)];
+        addMissionTemplate(text);
+    }
+
     function collectMissions() {
         const missions = [];
         for (let i = 1; i <= 5; i++) {
@@ -1450,6 +1680,7 @@
             if (textEl && document.activeElement !== textEl) textEl.value = item.text || '';
             if (doneEl) doneEl.checked = !!item.done;
         }
+        updateMissionCompactUI();
     }
 
     function getMissionSummary(missions) {
@@ -1469,6 +1700,7 @@
         updateMoodUI();
         const moodNote = document.getElementById('moodNote');
         if (moodNote && document.activeElement !== moodNote) moodNote.value = '';
+        updateMissionCompactUI();
     }
 
 
