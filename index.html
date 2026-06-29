@@ -2483,6 +2483,173 @@
         }
 
 
+        /* =========================================================
+           RC2 v2.5.2: Modal Layout System Fix
+           - 짧은 입력 팝업 = Bottom Sheet
+           - 긴 관리 팝업 = Center Modal
+           - 모바일 Chrome / Galaxy Fold / Safe Area 대응
+           - Firebase / Room / Role / AutoSave 변경 없음
+           ========================================================= */
+        :root {
+            --hm-modal-viewport: 100dvh;
+            --hm-modal-side-gap: 16px;
+            --hm-sheet-max-height: min(72dvh, 620px);
+            --hm-center-max-height: calc(100dvh - 36px);
+            --hm-center-max-width: 640px;
+        }
+
+        .daily-modal-overlay,
+        .mission-modal-overlay,
+        .room-settings-overlay,
+        .guide-modal,
+        .history-panel-overlay,
+        .history-detail-overlay {
+            position: fixed !important;
+            inset: 0 !important;
+            width: 100vw !important;
+            height: var(--hm-modal-viewport) !important;
+            min-height: var(--hm-modal-viewport) !important;
+            overflow: hidden !important;
+            background: rgba(45, 42, 53, 0.46) !important;
+            backdrop-filter: blur(8px) !important;
+            -webkit-backdrop-filter: blur(8px) !important;
+            overscroll-behavior: contain !important;
+            z-index: 1000 !important;
+        }
+
+        /* 입력용 팝업: 화면 아래에서 올라오는 Bottom Sheet */
+        .daily-modal-overlay {
+            align-items: flex-end !important;
+            justify-content: center !important;
+            padding: 12px 10px max(12px, env(safe-area-inset-bottom)) !important;
+        }
+
+        .daily-modal {
+            width: min(430px, calc(100vw - 20px)) !important;
+            max-height: var(--hm-sheet-max-height) !important;
+            overflow-y: auto !important;
+            -webkit-overflow-scrolling: touch !important;
+            border-radius: 30px 30px 24px 24px !important;
+            padding: 28px 18px 18px !important;
+            animation: hmSheetUp 0.18s ease-out both;
+        }
+
+        /* 관리용 팝업: 화면 중앙 카드형 */
+        .room-settings-overlay,
+        .mission-modal-overlay,
+        .guide-modal,
+        .history-panel-overlay,
+        .history-detail-overlay {
+            align-items: center !important;
+            justify-content: center !important;
+            padding: max(16px, env(safe-area-inset-top)) var(--hm-modal-side-gap) max(16px, env(safe-area-inset-bottom)) !important;
+        }
+
+        .room-settings-modal,
+        .mission-modal,
+        .guide-card,
+        .history-panel-modal,
+        .history-detail-modal {
+            width: min(var(--hm-center-max-width), calc(100vw - 32px)) !important;
+            max-height: var(--hm-center-max-height) !important;
+            overflow-y: auto !important;
+            -webkit-overflow-scrolling: touch !important;
+            border-radius: 30px !important;
+            padding: 28px 22px 22px !important;
+            animation: hmCenterPop 0.16s ease-out both;
+        }
+
+        .daily-modal-head,
+        .room-settings-head,
+        .mission-modal-head,
+        .guide-header,
+        .history-panel-head,
+        .history-detail-head {
+            position: sticky !important;
+            top: -28px !important;
+            z-index: 3 !important;
+            background: rgba(255, 255, 255, 0.96) !important;
+            backdrop-filter: blur(12px) !important;
+            -webkit-backdrop-filter: blur(12px) !important;
+            padding-top: 8px !important;
+            padding-bottom: 12px !important;
+            margin-bottom: 12px !important;
+        }
+
+        .daily-modal input[type="text"],
+        .daily-modal input[type="date"],
+        .daily-modal textarea,
+        .meal-row input,
+        .water-counter-box,
+        .choice-btn,
+        .mood-btn {
+            min-height: 52px;
+        }
+
+        .water-btns {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+        .btn-water {
+            min-width: 0;
+            white-space: nowrap;
+        }
+
+        @keyframes hmSheetUp {
+            from { transform: translateY(18px); opacity: 0.96; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        @keyframes hmCenterPop {
+            from { transform: scale(0.975); opacity: 0.96; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        @media (max-width: 430px) {
+            :root {
+                --hm-modal-side-gap: 10px;
+                --hm-center-max-height: calc(100dvh - 24px);
+                --hm-sheet-max-height: min(74dvh, 620px);
+            }
+
+            .room-settings-modal,
+            .mission-modal,
+            .guide-card,
+            .history-panel-modal,
+            .history-detail-modal {
+                width: calc(100vw - 20px) !important;
+                max-height: calc(100dvh - 24px) !important;
+                border-radius: 28px !important;
+                padding: 28px 17px 18px !important;
+            }
+
+            .daily-modal {
+                width: calc(100vw - 20px) !important;
+                padding: 28px 17px 18px !important;
+            }
+
+            .relationship-role-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 8px;
+            }
+
+            .relationship-role-btn {
+                min-width: 0;
+                padding: 12px 8px;
+                font-size: 0.86rem;
+            }
+        }
+
+        @media (min-width: 700px) {
+            .room-settings-modal,
+            .mission-modal,
+            .guide-card,
+            .history-panel-modal,
+            .history-detail-modal {
+                width: min(640px, calc(100vw - 48px)) !important;
+            }
+        }
+
+
     </style>
 </head>
 <body>
@@ -2514,7 +2681,7 @@
         <div></div>
     </div>
     <div class="app-subtitle">합의된 하루를 신뢰로 기록하고, 따뜻하게 지켜보세요.</div>
-    <div class="app-version-badge">RC2 • v2.5.1 · Build 2026.06.29 · Mobile Fix</div>
+    <div class="app-version-badge">RC2 • v2.5.2 · Build 2026.06.29 · Modal Layout Fix</div>
 
     <div class="user-bar">
         <span id="userInfoText">로그인 확인 중...</span>
@@ -3280,31 +3447,46 @@
 
 
     let hmRoomModalScrollY = 0;
+    let hmOpenModalCount = 0;
 
     function lockBodyForModal() {
-        hmRoomModalScrollY = window.scrollY || document.documentElement.scrollTop || 0;
-        document.body.classList.add('hm-modal-open');
-        document.body.style.top = `-${hmRoomModalScrollY}px`;
+        if (hmOpenModalCount === 0) {
+            hmRoomModalScrollY = window.scrollY || document.documentElement.scrollTop || 0;
+            document.body.classList.add('hm-modal-open');
+            document.body.style.top = `-${hmRoomModalScrollY}px`;
+        }
+        hmOpenModalCount += 1;
     }
 
-    function unlockBodyForModal() {
-        document.body.classList.remove('hm-modal-open');
-        document.body.style.top = '';
-        window.scrollTo(0, hmRoomModalScrollY || 0);
-    }
-
-    function openRoomSettingsModal() {
-        const overlay = document.getElementById('roomSettingsOverlay');
-        if (overlay) {
-            overlay.style.display = 'flex';
-            lockBodyForModal();
+    function unlockBodyForModal(force = false) {
+        hmOpenModalCount = force ? 0 : Math.max(0, hmOpenModalCount - 1);
+        if (hmOpenModalCount === 0) {
+            document.body.classList.remove('hm-modal-open');
+            document.body.style.top = '';
+            window.scrollTo(0, hmRoomModalScrollY || 0);
         }
     }
 
+    function openModalOverlayById(id) {
+        const overlay = document.getElementById(id);
+        if (!overlay) return;
+        if (overlay.style.display !== 'flex') lockBodyForModal();
+        overlay.style.display = 'flex';
+    }
+
+    function closeModalOverlayById(id) {
+        const overlay = document.getElementById(id);
+        if (!overlay) return;
+        if (overlay.style.display === 'flex') unlockBodyForModal();
+        overlay.style.display = 'none';
+    }
+
+    function openRoomSettingsModal() {
+        openModalOverlayById('roomSettingsOverlay');
+    }
+
     function closeRoomSettingsModal() {
-        const overlay = document.getElementById('roomSettingsOverlay');
-        if (overlay) overlay.style.display = 'none';
-        unlockBodyForModal();
+        closeModalOverlayById('roomSettingsOverlay');
     }
 
     function getRelationshipRoleLabel(role) {
@@ -3477,13 +3659,11 @@
     }
 
     function openGuideModal() {
-        const modal = document.getElementById('guideModal');
-        if (modal) modal.style.display = 'flex';
+        openModalOverlayById('guideModal');
     }
 
     async function closeGuideModal(markSeen = false) {
-        const modal = document.getElementById('guideModal');
-        if (modal) modal.style.display = 'none';
+        closeModalOverlayById('guideModal');
         if (markSeen && currentUser) {
             try { await db.ref(`users/${currentUser.uid}/hasSeenGuide`).set(true); } catch(e) { console.warn(e); }
         }
@@ -3601,15 +3781,13 @@
 
 
     function openDailyModal(name) {
-        const overlay = document.getElementById(`${name}ModalOverlay`);
-        if (overlay) overlay.style.display = 'flex';
+        openModalOverlayById(`${name}ModalOverlay`);
         updateManagedFieldAccessControls();
         updateDailyCards();
     }
 
     function closeDailyModal(name) {
-        const overlay = document.getElementById(`${name}ModalOverlay`);
-        if (overlay) overlay.style.display = 'none';
+        closeModalOverlayById(`${name}ModalOverlay`);
         updateDailyCards();
         executeAutoSave();
     }
@@ -3897,8 +4075,7 @@
     }
 
     function openMissionModal() {
-        const overlay = document.getElementById('missionModalOverlay');
-        if (overlay) overlay.style.display = 'flex';
+        openModalOverlayById('missionModalOverlay');
         updateMissionCompactUI();
         updateOwnerOnlySections();
         loadMissionLibrary();
@@ -3906,8 +4083,7 @@
     }
 
     function closeMissionModal() {
-        const overlay = document.getElementById('missionModalOverlay');
-        if (overlay) overlay.style.display = 'none';
+        closeModalOverlayById('missionModalOverlay');
         updateMissionCompactUI();
     }
 
@@ -4846,13 +5022,11 @@
 
 
     function openHistoryPanelModal() {
-        const overlay = document.getElementById('historyPanelOverlay');
-        if (overlay) overlay.style.display = 'flex';
+        openModalOverlayById('historyPanelOverlay');
     }
 
     function closeHistoryPanelModal() {
-        const overlay = document.getElementById('historyPanelOverlay');
-        if (overlay) overlay.style.display = 'none';
+        closeModalOverlayById('historyPanelOverlay');
     }
 
     function updateHistoryLaunchSub(daysData) {
@@ -4981,12 +5155,11 @@
             ${historyDetailBlock('✨ 보상 / 휴식', [record.dailyChoiceLabel, record.rewardNote].filter(Boolean).join('\n'))}
             <button type="button" class="history-detail-copy" onclick="copyDirectText(event, '${date}')">📋 이 기록 복사하기</button>
         `;
-        overlay.style.display = 'flex';
+        openModalOverlayById('historyDetailOverlay');
     }
 
     function closeHistoryDetailModal() {
-        const overlay = document.getElementById('historyDetailOverlay');
-        if (overlay) overlay.style.display = 'none';
+        closeModalOverlayById('historyDetailOverlay');
     }
 
     function toggleHistoryItem(date) {
