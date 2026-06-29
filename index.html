@@ -449,6 +449,7 @@
 
     let currentUser = null;
     let activeRoomCode = "";
+    let activeRoomRole = "";
     let currentWater = 0;
     let uploadedPhotoBase64 = "";
     let autoSaveTimeout = null;
@@ -484,6 +485,7 @@
                 await acceptPendingInviteIfAny();
             } else {
                 activeRoomCode = "";
+                activeRoomRole = "";
                 document.getElementById('authBox').style.display = 'block';
                 document.getElementById('appContent').style.display = 'none';
                 showSaveStatus("🔒 로그인이 필요합니다.");
@@ -501,6 +503,7 @@
         if (room) room.value = '';
         if (invite) invite.value = '';
         activeRoomCode = '';
+        activeRoomRole = '';
         setDataSectionsVisible(false);
         resetProtectedDataUI();
         updateCurrentRoomInfo();
@@ -557,6 +560,7 @@
     async function logoutUser() {
         disconnectAllListeners();
         activeRoomCode = "";
+        activeRoomRole = "";
         clearRoomInputs();
         clearFormFieldsExceptSync();
         try { await masterAuth.signOut(); } catch(e) { console.warn(e); }
@@ -574,6 +578,7 @@
                 const allowed = await canCurrentUserAccessRoom(savedRoom);
                 if (allowed) {
                     activeRoomCode = savedRoom;
+                    activeRoomRole = await getCurrentUserRoomRole(savedRoom) || 'member';
                     updateCurrentRoomInfo();
                     connectAndListenFirebase();
                 } else {
@@ -614,16 +619,26 @@
 
         if (activeRoomCode) {
             setDataSectionsVisible(true);
-            el.innerHTML = `현재 연결된 방: <strong>${escapeHtml(activeRoomCode)}</strong><br>이 방의 기록과 채팅이 실시간으로 동기화됩니다.`;
-            if (createBtn) createBtn.innerText = '🏠 새 방 만들기 / 다른 방으로 시작하기';
-            // 방 연결 후에는 설정 영역을 접고, 받은 초대코드 입력은 숨깁니다.
-            if (invitePanel) { invitePanel.open = false; invitePanel.style.display = ''; }
-            if (joinInvitePanel) { joinInvitePanel.open = false; joinInvitePanel.style.display = 'none'; }
-            if (legacyRoomPanel) { legacyRoomPanel.open = false; legacyRoomPanel.style.display = ''; }
+            const roleLabel = activeRoomRole === 'owner' ? '방주인' : '초대받은 사용자';
+            el.innerHTML = `현재 연결된 방: <strong>${escapeHtml(activeRoomCode)}</strong><br>내 권한: <strong>${roleLabel}</strong><br>이 방의 기록과 채팅이 실시간으로 동기화됩니다.`;
+
+            // 정책: 방을 만든 owner만 방 변경/초대/기존방 재연결을 할 수 있습니다.
+            // partner는 실수로 새 방을 만들거나 다른 사람을 초대할 수 없게 설정 메뉴를 숨깁니다.
+            if (activeRoomRole === 'owner') {
+                if (createBtn) { createBtn.style.display = ''; createBtn.innerText = '🏠 새 방 만들기 / 다른 방으로 시작하기'; }
+                if (invitePanel) { invitePanel.open = false; invitePanel.style.display = ''; }
+                if (joinInvitePanel) { joinInvitePanel.open = false; joinInvitePanel.style.display = ''; }
+                if (legacyRoomPanel) { legacyRoomPanel.open = false; legacyRoomPanel.style.display = ''; }
+            } else {
+                if (createBtn) { createBtn.style.display = 'none'; }
+                if (invitePanel) { invitePanel.open = false; invitePanel.style.display = 'none'; }
+                if (joinInvitePanel) { joinInvitePanel.open = false; joinInvitePanel.style.display = 'none'; }
+                if (legacyRoomPanel) { legacyRoomPanel.open = false; legacyRoomPanel.style.display = 'none'; }
+            }
         } else {
             setDataSectionsVisible(false);
             el.innerHTML = '아직 연결된 방이 없습니다. 혼자 사용할 방을 만들거나 초대코드를 입력해 주세요.';
-            if (createBtn) createBtn.innerText = '✨ 내 방 만들기 / 혼자 시작하기';
+            if (createBtn) { createBtn.style.display = ''; createBtn.innerText = '✨ 내 방 만들기 / 혼자 시작하기'; }
             if (invitePanel) { invitePanel.open = false; invitePanel.style.display = ''; }
             if (joinInvitePanel) { joinInvitePanel.open = false; joinInvitePanel.style.display = ''; }
             if (legacyRoomPanel) { legacyRoomPanel.open = false; legacyRoomPanel.style.display = ''; }
@@ -720,6 +735,7 @@
         await db.ref().update(updates);
 
         activeRoomCode = roomCode;
+        activeRoomRole = role;
         const roomInput = document.getElementById('roomCode');
         if (roomInput) roomInput.value = roomCode;
         updateCurrentRoomInfo();
@@ -728,6 +744,10 @@
     async function createMyRoom() {
         if (!currentUser) { alert('먼저 로그인해 주세요.'); return; }
         if (activeRoomCode) {
+            if (activeRoomRole !== 'owner') {
+                alert('초대받은 사용자는 새 방을 만들 수 없습니다. 방 변경은 방주인만 가능합니다.');
+                return;
+            }
             const ok = confirm('이미 연결된 방이 있습니다. 새 방을 만들면 앞으로 새 방이 기본 방으로 열립니다. 계속할까요?');
             if (!ok) return;
         }
@@ -823,6 +843,15 @@
             return;
         }
 
+        if (activeRoomCode) {
+            if (activeRoomRole !== 'owner') {
+                alert('초대받은 사용자는 다른 방으로 변경할 수 없습니다. 방 변경은 방주인만 가능합니다.');
+                return;
+            }
+            const ok = confirm('현재 연결된 방이 있습니다. 이 초대코드의 방으로 기본 방을 변경할까요?');
+            if (!ok) return;
+        }
+
         showSaveStatus('🤝 초대코드 확인 중...');
         try {
             const inviteRef = db.ref(`invites/${code}`);
@@ -879,6 +908,7 @@
             sessionStorage.removeItem('pendingInviteCode');
             document.getElementById('inviteCodeInput').value = '';
             activeRoomCode = roomCode;
+            activeRoomRole = 'partner';
             const roomInput = document.getElementById('roomCode');
             if (roomInput) roomInput.value = roomCode;
             updateCurrentRoomInfo();
@@ -893,6 +923,10 @@
 
     async function joinExistingRoomByCode() {
         if (!currentUser) { alert('먼저 로그인해 주세요.'); return; }
+        if (activeRoomCode && activeRoomRole !== 'owner') {
+            alert('초대받은 사용자는 기존 방을 다시 연결하거나 방을 변경할 수 없습니다.');
+            return;
+        }
         const roomCode = document.getElementById('roomCode').value.trim();
         if (!roomCode) { alert('기존 공유코드를 입력해 주세요.'); return; }
         if (!/^[a-zA-Z0-9_-]{3,60}$/.test(roomCode)) {
@@ -951,6 +985,8 @@
         }
 
         activeRoomCode = roomCode;
+        activeRoomRole = await getCurrentUserRoomRole(roomCode) || activeRoomRole || 'member';
+        updateCurrentRoomInfo();
         setDataSectionsVisible(true);
         showSaveStatus('📡 연결 중...');
         listenChat();
