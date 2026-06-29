@@ -749,6 +749,86 @@
         }
 
 
+        /* STEP9: compact room settings card + modal */
+        .room-settings-card {
+            width: 100%;
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            align-items: center;
+            gap: 12px;
+            padding: 14px;
+            border-radius: 18px;
+            border: 1px solid #eadcff;
+            background: linear-gradient(135deg, #ffffff, #fbf7ff);
+            box-shadow: 0 8px 22px rgba(142, 92, 244, 0.09);
+            text-align: left;
+            color: var(--text-color);
+            margin-bottom: 18px;
+        }
+        .room-settings-card:active { transform: scale(0.99); }
+        .room-settings-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #fff0f6;
+            font-size: 1.25rem;
+        }
+        .room-settings-title {
+            font-weight: 850;
+            font-size: 0.92rem;
+            margin-bottom: 3px;
+        }
+        .room-settings-sub {
+            color: #636e72;
+            font-size: 0.78rem;
+            line-height: 1.35;
+        }
+        .room-settings-arrow {
+            color: #a29bfe;
+            font-weight: 900;
+            font-size: 1.2rem;
+        }
+        .room-settings-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(45,52,54,0.52);
+            z-index: 34;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 18px;
+        }
+        .room-settings-modal {
+            width: 100%;
+            max-width: 460px;
+            max-height: 86vh;
+            overflow-y: auto;
+            background: #fff;
+            border-radius: 24px;
+            padding: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.18);
+            border: 1px solid rgba(142, 92, 244, 0.15);
+        }
+        .room-settings-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+        .room-settings-head h2 {
+            margin: 0;
+            font-size: 1.12rem;
+            color: var(--accent-purple);
+        }
+        .room-settings-modal .sync-box {
+            margin-bottom: 0;
+        }
+
+
         .feedback-hint {
             color: #636e72;
             font-size: 0.78rem;
@@ -916,42 +996,60 @@
         <button type="button" class="btn-small btn-secondary" onclick="logoutUser()">로그아웃</button>
     </div>
     
-    <div class="sync-box">
-        <label>🏠 우리의 공간</label>
-        <div id="currentRoomInfo" style="font-size:0.82rem; color:#636e72; line-height:1.45; margin-bottom:10px;">
-            아직 연결된 공간이 없습니다. 혼자 사용할 공간을 만들거나 초대코드를 입력해 주세요.
+    <button type="button" class="room-settings-card" onclick="openRoomSettingsModal()">
+        <span class="room-settings-icon">🏠</span>
+        <span>
+            <span class="room-settings-title">방 설정</span>
+            <span class="room-settings-sub" id="roomSettingsCardSub">방을 만들거나 초대코드로 연결하세요.</span>
+        </span>
+        <span class="room-settings-arrow">›</span>
+    </button>
+
+    <div class="room-settings-overlay" id="roomSettingsOverlay" onclick="if(event.target.id==='roomSettingsOverlay') closeRoomSettingsModal()">
+        <div class="room-settings-modal" role="dialog" aria-modal="true" aria-labelledby="roomSettingsTitle">
+            <div class="room-settings-head">
+                <h2 id="roomSettingsTitle">🏠 방 설정</h2>
+                <button type="button" class="modal-close-btn" onclick="closeRoomSettingsModal()">닫기</button>
+            </div>
+
+            <div class="sync-box">
+                <label>🏠 우리의 공간</label>
+                <div id="currentRoomInfo" style="font-size:0.82rem; color:#636e72; line-height:1.45; margin-bottom:10px;">
+                    아직 연결된 공간이 없습니다. 혼자 사용할 공간을 만들거나 초대코드를 입력해 주세요.
+                </div>
+
+                <button type="button" class="btn-connect" id="createRoomBtn" onclick="createMyRoom()">🌱 새로운 공간 시작하기</button>
+
+                <details id="invitePanel" style="margin-top:12px; font-size:0.8rem; color:#636e72;">
+                    <summary style="cursor:pointer; font-weight:bold; color:var(--primary-color);">💌 상대방 초대하기</summary>
+                    <div style="margin-top:8px; line-height:1.45;">
+                        내 방을 만든 뒤 초대코드를 생성하세요. 코드는 문자, 카톡, 이메일로 보내면 됩니다.
+                    </div>
+                    <button type="button" class="btn-connect" onclick="createInviteCode()">🎟️ 초대코드 만들기</button>
+                    <div id="inviteResult" style="display:none; margin-top:10px; background:white; border:1px solid #fab1a0; border-radius:10px; padding:10px; font-size:0.85rem; line-height:1.45; word-break:break-all;"></div>
+                </details>
+
+                <details id="joinInvitePanel" style="margin-top:12px; font-size:0.8rem; color:#636e72;">
+                    <summary style="cursor:pointer; font-weight:bold; color:#636e72;">🎟️ 받은 초대코드 입력</summary>
+                    <div style="margin-top:8px; line-height:1.45;">상대방에게 받은 초대코드를 입력하면 같은 공간에 참여하거나 새 공간으로 이동할 수 있습니다.</div>
+                    <input type="text" id="inviteCodeInput" placeholder="예: A7KD92" style="text-transform:uppercase; margin-top:8px;">
+                    <button type="button" class="btn-connect" onclick="acceptInviteFromInput()">🤝 초대코드로 참여하기</button>
+                </details>
+
+                <details id="legacyRoomPanel" style="margin-top:12px; font-size:0.8rem; color:#636e72;" ontoggle="if(this.open) loadMyRoomList()">
+                    <summary style="cursor:pointer; font-weight:bold; color:#636e72;">📂 이전 공간 불러오기</summary>
+                    <div style="margin-top:8px; line-height:1.45;">방주인이 만들었던 공간 목록을 보여줍니다. 기억하지 못해도 버튼으로 다시 연결할 수 있어요.</div>
+                    <div id="ownedRoomsList" class="room-list-box">
+                        <div class="empty-message">목록을 불러오려면 이 영역을 열어주세요. ✨</div>
+                    </div>
+                    <details style="margin-top:10px;">
+                        <summary style="cursor:pointer; color:#b26a6a; font-weight:bold;">직접 방코드 입력이 필요한 경우</summary>
+                        <input type="text" id="roomCode" placeholder="기존 공유코드 예: dmsy" style="margin-top:8px;">
+                        <button type="button" class="btn-connect" onclick="joinExistingRoomByCode()">🔗 기존 공유코드 연결하기</button>
+                    </details>
+                </details>
+            </div>
         </div>
-
-        <button type="button" class="btn-connect" id="createRoomBtn" onclick="createMyRoom()">🌱 새로운 공간 시작하기</button>
-
-        <details id="invitePanel" style="margin-top:12px; font-size:0.8rem; color:#636e72;">
-            <summary style="cursor:pointer; font-weight:bold; color:var(--primary-color);">💌 상대방 초대하기</summary>
-            <div style="margin-top:8px; line-height:1.45;">
-                내 방을 만든 뒤 초대코드를 생성하세요. 코드는 문자, 카톡, 이메일로 보내면 됩니다.
-            </div>
-            <button type="button" class="btn-connect" onclick="createInviteCode()">🎟️ 초대코드 만들기</button>
-            <div id="inviteResult" style="display:none; margin-top:10px; background:white; border:1px solid #fab1a0; border-radius:10px; padding:10px; font-size:0.85rem; line-height:1.45; word-break:break-all;"></div>
-        </details>
-
-        <details id="joinInvitePanel" style="margin-top:12px; font-size:0.8rem; color:#636e72;">
-            <summary style="cursor:pointer; font-weight:bold; color:#636e72;">🎟️ 받은 초대코드 입력</summary>
-            <div style="margin-top:8px; line-height:1.45;">상대방에게 받은 초대코드를 입력하면 같은 공간에 참여하거나 새 공간으로 이동할 수 있습니다.</div>
-            <input type="text" id="inviteCodeInput" placeholder="예: A7KD92" style="text-transform:uppercase; margin-top:8px;">
-            <button type="button" class="btn-connect" onclick="acceptInviteFromInput()">🤝 초대코드로 참여하기</button>
-        </details>
-
-        <details id="legacyRoomPanel" style="margin-top:12px; font-size:0.8rem; color:#636e72;" ontoggle="if(this.open) loadMyRoomList()">
-            <summary style="cursor:pointer; font-weight:bold; color:#636e72;">📂 이전 공간 불러오기</summary>
-            <div style="margin-top:8px; line-height:1.45;">방주인이 만들었던 공간 목록을 보여줍니다. 기억하지 못해도 버튼으로 다시 연결할 수 있어요.</div>
-            <div id="ownedRoomsList" class="room-list-box">
-                <div class="empty-message">목록을 불러오려면 이 영역을 열어주세요. ✨</div>
-            </div>
-            <details style="margin-top:10px;">
-                <summary style="cursor:pointer; color:#b26a6a; font-weight:bold;">직접 방코드 입력이 필요한 경우</summary>
-                <input type="text" id="roomCode" placeholder="기존 공유코드 예: dmsy" style="margin-top:8px;">
-                <button type="button" class="btn-connect" onclick="joinExistingRoomByCode()">🔗 기존 공유코드 연결하기</button>
-            </details>
-        </details>
     </div>
 
     <div class="input-group">
@@ -1485,18 +1583,31 @@
         }
     }
 
+
+    function openRoomSettingsModal() {
+        const overlay = document.getElementById('roomSettingsOverlay');
+        if (overlay) overlay.style.display = 'flex';
+    }
+
+    function closeRoomSettingsModal() {
+        const overlay = document.getElementById('roomSettingsOverlay');
+        if (overlay) overlay.style.display = 'none';
+    }
+
     function updateCurrentRoomInfo() {
         const el = document.getElementById('currentRoomInfo');
         const createBtn = document.getElementById('createRoomBtn');
         const invitePanel = document.getElementById('invitePanel');
         const joinInvitePanel = document.getElementById('joinInvitePanel');
         const legacyRoomPanel = document.getElementById('legacyRoomPanel');
+        const roomSettingsCardSub = document.getElementById('roomSettingsCardSub');
         if (!el) return;
 
         if (activeRoomCode) {
             setDataSectionsVisible(true);
             const roleLabel = activeRoomRole === 'owner' ? '방주인' : '초대받은 사용자';
             el.innerHTML = `현재 연결된 공간: <strong>${escapeHtml(activeRoomCode)}</strong><br>내 권한: <strong>${roleLabel}</strong><br>이 공간의 기록과 채팅이 실시간으로 동기화됩니다.`;
+            if (roomSettingsCardSub) roomSettingsCardSub.innerText = `현재: ${activeRoomCode} · ${roleLabel}`;
 
             // 정책:
             // - owner: 새 방 만들기, 초대코드 생성, 초대코드 입력, 기존방 재연결 가능
@@ -1517,6 +1628,7 @@
         } else {
             setDataSectionsVisible(false);
             el.innerHTML = '아직 연결된 공간이 없습니다. 혼자 사용할 공간을 만들거나 초대코드를 입력해 주세요.';
+            if (roomSettingsCardSub) roomSettingsCardSub.innerText = '방을 만들거나 초대코드로 연결하세요.';
             if (createBtn) { createBtn.style.display = ''; createBtn.innerText = '🌱 새로운 공간 시작하기'; }
             if (invitePanel) { invitePanel.open = false; invitePanel.style.display = ''; }
             if (joinInvitePanel) { joinInvitePanel.open = false; joinInvitePanel.style.display = ''; }
