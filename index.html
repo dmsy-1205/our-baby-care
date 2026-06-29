@@ -3002,6 +3002,785 @@
         }
 
 
+
+        /* =========================================================
+           RC2 v2.5.7: Chat UI Premium
+           - 저장/삭제/Firebase 구조 변경 없음
+           - 기록실 카드, 캘린더, 사진 썸네일, 선택 기록 UI만 고급화
+           ========================================================= */
+        .history-launch-card {
+            background: linear-gradient(145deg, rgba(255,255,255,0.98), rgba(247,242,255,0.96));
+            border: 1px solid rgba(109,76,255,0.16);
+            box-shadow: 0 18px 46px rgba(109,76,255,0.105);
+        }
+        .history-launch-icon {
+            background: linear-gradient(145deg, #FFF8EE, #F4EDFF);
+        }
+        .history-launch-version {
+            background: linear-gradient(135deg, var(--hm-premium-primary), var(--hm-premium-primary-2));
+            color: #fff;
+            border: 0;
+            box-shadow: 0 8px 18px rgba(109,76,255,0.18);
+        }
+        .history-panel-modal {
+            background: rgba(255,255,255,0.96);
+            overflow-x: hidden;
+        }
+        .history-panel-head {
+            align-items: center;
+            padding: 4px 2px 14px;
+            border-bottom: 1px solid rgba(236,230,255,0.72);
+            margin-bottom: 16px;
+        }
+        .history-detail-kicker {
+            color: var(--hm-premium-muted);
+            letter-spacing: 0.12em;
+        }
+        .history-panel-head h2 {
+            font-size: clamp(1.28rem, 2.4vw, 1.72rem);
+            letter-spacing: -0.04em;
+        }
+        .history-panel-head h2 span {
+            display: inline-flex;
+            align-items: center;
+            margin-left: 8px;
+            padding: 4px 9px;
+            border-radius: 999px;
+            background: #F1ECFF;
+            color: var(--hm-premium-primary);
+            font-size: 0.72rem;
+            vertical-align: middle;
+        }
+        .history-hero {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+        .history-hero-tile {
+            min-height: 82px;
+            border-radius: 22px;
+            padding: 13px;
+            background: linear-gradient(145deg, #FFFFFF, #FAF8FF);
+            border: 1px solid var(--hm-premium-border);
+            box-shadow: 0 10px 26px rgba(109,76,255,0.065);
+        }
+        .history-hero-value {
+            display: block;
+            color: var(--hm-premium-primary);
+            font-size: 1.24rem;
+            font-weight: 820;
+            letter-spacing: -0.03em;
+            line-height: 1.15;
+            margin-bottom: 5px;
+        }
+        .history-hero-label {
+            color: var(--hm-premium-sub);
+            font-size: 0.72rem;
+            font-weight: 720;
+            line-height: 1.35;
+            word-break: keep-all;
+        }
+        #calendarBox.history-calendar-premium {
+            padding: 18px;
+            border-radius: 26px;
+            background: linear-gradient(145deg, rgba(255,255,255,0.98), rgba(250,248,255,0.98));
+        }
+        .history-calendar-title-row {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 13px;
+        }
+        .history-calendar-title-row strong {
+            color: var(--hm-premium-text);
+            font-size: 1.02rem;
+            letter-spacing: -0.03em;
+        }
+        .history-calendar-title-row span {
+            color: var(--hm-premium-muted);
+            font-size: 0.74rem;
+            font-weight: 750;
+        }
+        .calendar-grid.history-calendar-grid {
+            gap: 8px;
+            margin-bottom: 2px;
+        }
+        .history-calendar-grid .calendar-head {
+            color: #A49DB8;
+            font-size: 0.74rem;
+            font-weight: 820;
+            padding: 6px 2px;
+        }
+        .history-calendar-grid .calendar-day {
+            min-height: 58px;
+            border-radius: 18px;
+            background: rgba(255,255,255,0.88);
+            border: 1px solid rgba(236,230,255,0.95);
+            color: #817A94;
+            font-size: 0.88rem;
+            font-weight: 680;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease, background 0.16s ease;
+        }
+        .history-calendar-grid .calendar-day.has-record {
+            color: var(--hm-premium-text);
+            background: linear-gradient(145deg, #FFFFFF, #F7F2FF);
+            border-color: rgba(109,76,255,0.22);
+            box-shadow: 0 8px 20px rgba(109,76,255,0.08);
+        }
+        .history-calendar-grid .calendar-day.has-record:active {
+            transform: scale(0.96);
+        }
+        .history-calendar-grid .calendar-day.today {
+            outline: none;
+            border-color: rgba(255,107,122,0.42);
+        }
+        .history-calendar-grid .calendar-day.selected-record {
+            color: var(--hm-premium-text);
+            background: linear-gradient(145deg, #FFF7FB, #F1ECFF);
+            border-color: rgba(255,107,122,0.78);
+            box-shadow: 0 0 0 2px rgba(255,107,122,0.22), 0 14px 28px rgba(109,76,255,0.12);
+        }
+        .calendar-icons {
+            min-height: 15px;
+            margin-top: 4px;
+            letter-spacing: -0.08em;
+        }
+        #photoThumbs.history-thumb-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            min-height: 98px;
+            padding: 14px;
+            border-radius: 26px;
+            overflow-x: auto;
+            background: linear-gradient(145deg, #FFFDFB, #FAF8FF);
+        }
+        .history-photo-empty,
+        .history-photo-label {
+            flex: 0 0 auto;
+            color: var(--hm-premium-sub);
+            font-size: 0.82rem;
+            font-weight: 750;
+            line-height: 1.35;
+            padding: 0 2px;
+        }
+        .history-photo-label strong {
+            display: block;
+            color: var(--hm-premium-text);
+            font-size: 0.86rem;
+            margin-bottom: 3px;
+        }
+        .history-thumb {
+            width: 76px;
+            height: 76px;
+            border-radius: 20px;
+            border: 1px solid rgba(236,230,255,0.95);
+            box-shadow: 0 10px 22px rgba(109,76,255,0.10);
+            background: #fff;
+        }
+        .history-selected-hint {
+            padding: 22px 18px;
+            border-radius: 26px;
+            background: linear-gradient(145deg, #FFFFFF, #FAF8FF);
+            font-size: 0.92rem;
+        }
+        .history-selected-hint strong {
+            display: block;
+            color: var(--hm-premium-text);
+            font-size: 1.02rem;
+            margin-bottom: 6px;
+        }
+        .history-day-card.history-premium-selected {
+            grid-template-columns: auto 1fr auto;
+            min-height: 112px;
+            border-radius: 26px;
+            padding: 18px;
+            background: linear-gradient(145deg, #FFFFFF, #F8F4FF 66%, #FFF8FB);
+        }
+        .history-day-card.history-premium-selected .history-day-icon {
+            width: 56px;
+            height: 56px;
+            min-width: 56px;
+            border-radius: 22px;
+        }
+        .history-day-card.history-premium-selected .history-day-title {
+            font-size: 1.02rem;
+        }
+        .history-chip {
+            min-height: 24px;
+            background: rgba(241,236,255,0.86);
+            color: var(--hm-premium-primary);
+            border-color: rgba(109,76,255,0.14);
+        }
+        .history-detail-modal {
+            background: rgba(255,255,255,0.97);
+        }
+        .history-detail-content {
+            gap: 12px;
+        }
+        .history-detail-block {
+            border-radius: 22px;
+            background: linear-gradient(145deg, #FFFFFF, #FAF8FF);
+        }
+        .history-detail-block-title {
+            color: var(--hm-premium-primary);
+        }
+        @media (min-width: 768px) {
+            .history-panel-modal {
+                max-width: min(880px, 88vw) !important;
+            }
+            .history-detail-modal {
+                max-width: min(720px, 82vw) !important;
+            }
+        }
+        @media (min-width: 1200px) {
+            .history-panel-modal {
+                max-width: min(960px, 82vw) !important;
+            }
+            .history-detail-modal {
+                max-width: min(760px, 72vw) !important;
+            }
+        }
+        @media (max-width: 767px) {
+            .history-hero {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .history-hero-tile {
+                min-height: 76px;
+                padding: 12px;
+            }
+            .history-calendar-grid .calendar-day {
+                min-height: 52px;
+                border-radius: 16px;
+                font-size: 0.82rem;
+            }
+            .calendar-grid.history-calendar-grid {
+                gap: 6px;
+            }
+            .history-panel-head h2 {
+                font-size: 1.26rem;
+            }
+            .history-panel-head h2 span {
+                margin-left: 0;
+                margin-top: 6px;
+            }
+        }
+        @media (max-width: 380px) {
+            .history-hero {
+                grid-template-columns: 1fr 1fr;
+                gap: 8px;
+            }
+            #calendarBox.history-calendar-premium {
+                padding: 14px 12px;
+            }
+            .history-calendar-grid .calendar-day {
+                min-height: 46px;
+                border-radius: 14px;
+                font-size: 0.78rem;
+            }
+            .history-day-card.history-premium-selected {
+                grid-template-columns: auto 1fr;
+            }
+        }
+
+    
+
+        /* =========================================================
+           RC2 v2.5.7: Chat UI Premium
+           - Firebase messages data structure unchanged
+           - UI-only upgrade for Phone / Fold / Tablet / PC
+           ========================================================= */
+        #chatSection {
+            width: 100% !important;
+            max-width: 450px !important;
+            margin: 22px auto !important;
+            padding: 18px !important;
+            background: linear-gradient(135deg, rgba(255,255,255,0.98), rgba(250,248,255,0.96)) !important;
+            border: 1px solid var(--hm-premium-border) !important;
+            border-radius: 30px !important;
+            box-shadow: 0 18px 42px rgba(109, 76, 255, 0.11) !important;
+            font-family: inherit !important;
+            overflow: hidden !important;
+        }
+
+        #chatSection h3 {
+            margin: 0 0 12px !important;
+            color: var(--hm-premium-text) !important;
+            font-size: 1.02rem !important;
+            font-weight: 800 !important;
+            letter-spacing: -0.02em !important;
+        }
+
+        #chatMessages {
+            height: 270px !important;
+            overflow-y: auto !important;
+            border: 1px solid rgba(109, 76, 255, 0.11) !important;
+            padding: 14px !important;
+            border-radius: 24px !important;
+            margin-bottom: 12px !important;
+            background: linear-gradient(180deg, #fbf8ff 0%, #fff 100%) !important;
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 10px !important;
+            -webkit-overflow-scrolling: touch !important;
+        }
+
+        #chatSection > div:last-child {
+            display: grid !important;
+            grid-template-columns: 72px minmax(0, 1fr) 64px !important;
+            gap: 8px !important;
+            align-items: center !important;
+            width: 100% !important;
+            background: #fff !important;
+            border: 1px solid rgba(109, 76, 255, 0.10) !important;
+            border-radius: 22px !important;
+            padding: 7px !important;
+            box-shadow: inset 0 0 0 1px rgba(255,255,255,0.7) !important;
+        }
+
+        #chatSender,
+        #chatInput {
+            height: 42px !important;
+            min-width: 0 !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
+            border: 0 !important;
+            border-radius: 16px !important;
+            background: #faf8ff !important;
+            color: var(--hm-premium-text) !important;
+            outline: none !important;
+            font-size: 0.88rem !important;
+        }
+
+        #chatSender {
+            text-align: center !important;
+            font-weight: 750 !important;
+            padding: 0 8px !important;
+        }
+
+        #chatInput {
+            padding: 0 12px !important;
+        }
+
+        #chatSender:focus,
+        #chatInput:focus {
+            background: #fff !important;
+            box-shadow: 0 0 0 2px rgba(109, 76, 255, 0.13) !important;
+        }
+
+        #chatSection button {
+            height: 42px !important;
+            width: 100% !important;
+            min-width: 0 !important;
+            padding: 0 10px !important;
+            border-radius: 16px !important;
+            white-space: nowrap !important;
+            background: linear-gradient(135deg, var(--hm-premium-primary) 0%, var(--hm-premium-primary-2) 100%) !important;
+            color: #fff !important;
+            box-shadow: 0 10px 20px rgba(109, 76, 255, 0.20) !important;
+            font-size: 0.84rem !important;
+            font-weight: 800 !important;
+        }
+
+        .chat-message-line {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            animation: hmChatIn 0.16s ease-out;
+        }
+        .chat-message-line.is-me { align-items: flex-end; }
+        .chat-message-line.is-other { align-items: flex-start; }
+        .chat-sender-name {
+            font-size: 0.72rem;
+            color: #8b84a6;
+            font-weight: 750;
+            margin: 0 0 3px 4px;
+        }
+        .chat-bubble {
+            max-width: 78%;
+            padding: 10px 13px;
+            border-radius: 18px;
+            word-break: break-word;
+            font-size: 0.9rem;
+            line-height: 1.42;
+            box-shadow: 0 7px 16px rgba(109, 76, 255, 0.08);
+        }
+        .chat-message-line.is-me .chat-bubble {
+            color: #fff;
+            background: linear-gradient(135deg, var(--hm-premium-primary), var(--hm-premium-primary-2));
+            border-bottom-right-radius: 7px;
+        }
+        .chat-message-line.is-other .chat-bubble {
+            color: var(--hm-premium-text);
+            background: #fff;
+            border: 1px solid rgba(109, 76, 255, 0.12);
+            border-bottom-left-radius: 7px;
+        }
+        @keyframes hmChatIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (min-width: 768px) {
+            #chatSection {
+                max-width: 640px !important;
+                padding: 22px !important;
+            }
+            #chatMessages {
+                height: 320px !important;
+            }
+            #chatSection > div:last-child {
+                grid-template-columns: 88px minmax(0, 1fr) 78px !important;
+                gap: 10px !important;
+                padding: 8px !important;
+            }
+            #chatSender, #chatInput, #chatSection button {
+                height: 46px !important;
+            }
+        }
+
+        @media (min-width: 1200px) {
+            #chatSection {
+                max-width: 760px !important;
+            }
+            #chatMessages {
+                height: 340px !important;
+            }
+        }
+
+        @media (max-width: 380px) {
+            #chatSection {
+                padding: 15px !important;
+                border-radius: 26px !important;
+            }
+            #chatSection > div:last-child {
+                grid-template-columns: 58px minmax(0, 1fr) 54px !important;
+                gap: 6px !important;
+                padding: 6px !important;
+            }
+            #chatSender, #chatInput, #chatSection button {
+                height: 40px !important;
+                font-size: 0.8rem !important;
+            }
+            #chatInput { padding: 0 9px !important; }
+            .chat-bubble { max-width: 84%; font-size: 0.86rem; }
+        }
+
+
+        /* =========================================================
+           RC2 v2.5.7: Motion + Final UI QA
+           - 기능/Firebase/Room/Role/저장 구조 변경 없음
+           - 카드/팝업/채팅/기록실 최종 반응형 보정 + 부드러운 모션
+           ========================================================= */
+        :root {
+            --hm-motion-fast: 140ms;
+            --hm-motion-base: 220ms;
+            --hm-motion-slow: 320ms;
+            --hm-ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+            --hm-ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @media (prefers-reduced-motion: no-preference) {
+            .daily-card,
+            .room-settings-card,
+            .mission-compact-card,
+            .history-launch-card,
+            .history-day-card,
+            .summary-tile,
+            .history-hero-tile,
+            .chat-bubble,
+            .choice-btn,
+            .mood-btn,
+            .mission-chip,
+            .btn-main,
+            .btn-connect,
+            .daily-modal-save,
+            .chat-send-btn {
+                transition:
+                    transform var(--hm-motion-fast) var(--hm-ease-out),
+                    box-shadow var(--hm-motion-base) var(--hm-ease-out),
+                    border-color var(--hm-motion-base) var(--hm-ease-out),
+                    background var(--hm-motion-base) var(--hm-ease-out),
+                    opacity var(--hm-motion-base) var(--hm-ease-out);
+            }
+
+            .daily-card:hover,
+            .room-settings-card:hover,
+            .mission-compact-card:hover,
+            .history-launch-card:hover,
+            .history-day-card:hover {
+                transform: translateY(-2px);
+            }
+
+            .daily-card:active,
+            .room-settings-card:active,
+            .mission-compact-card:active,
+            .history-launch-card:active,
+            .history-day-card:active,
+            .choice-btn:active,
+            .mood-btn:active,
+            .mission-chip:active,
+            .btn-main:active,
+            .btn-connect:active,
+            .daily-modal-save:active,
+            .chat-send-btn:active {
+                transform: scale(0.975);
+            }
+
+            .daily-modal,
+            .room-settings-modal,
+            .mission-modal,
+            .guide-card,
+            .history-panel-modal,
+            .history-detail-modal {
+                animation: hmModalEnter var(--hm-motion-slow) var(--hm-ease-spring) both;
+            }
+
+            .chat-message-line {
+                animation: hmMessageEnter var(--hm-motion-base) var(--hm-ease-out) both;
+            }
+
+            .managed-card.is-filled,
+            .calendar-day.selected-record,
+            .choice-btn.active,
+            .mood-btn.active {
+                animation: hmSoftPulse var(--hm-motion-slow) var(--hm-ease-out) both;
+            }
+        }
+
+        @keyframes hmModalEnter {
+            from { opacity: 0; transform: translateY(10px) scale(0.975); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        @keyframes hmMessageEnter {
+            from { opacity: 0; transform: translateY(6px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        @keyframes hmSoftPulse {
+            0% { box-shadow: 0 0 0 rgba(109, 76, 255, 0); }
+            55% { box-shadow: 0 0 0 5px rgba(109, 76, 255, 0.08); }
+            100% { box-shadow: var(--hm-shadow-card, 0 10px 26px rgba(142, 92, 244, 0.10)); }
+        }
+
+        /* Final card spacing QA */
+        .container {
+            overflow: visible;
+        }
+
+        .input-group {
+            margin-bottom: 16px;
+        }
+
+        .row {
+            gap: 16px;
+            margin-bottom: 4px;
+        }
+
+        .row .input-group {
+            margin-bottom: 16px;
+        }
+
+        .daily-card,
+        .room-settings-card,
+        .mission-compact-card,
+        .history-launch-card {
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .daily-card-sub,
+        .room-settings-sub,
+        .mission-compact-sub,
+        .history-launch-sub,
+        .history-day-sub {
+            word-break: keep-all;
+            overflow-wrap: anywhere;
+        }
+
+        /* Final modal QA: device classes remain responsive */
+        .daily-modal-overlay,
+        .room-settings-overlay,
+        .mission-modal-overlay,
+        .guide-modal,
+        .history-panel-overlay,
+        .history-detail-overlay {
+            min-height: 100dvh;
+            backdrop-filter: blur(7px);
+            -webkit-backdrop-filter: blur(7px);
+        }
+
+        .daily-modal,
+        .room-settings-modal,
+        .mission-modal,
+        .guide-card,
+        .history-panel-modal,
+        .history-detail-modal {
+            overscroll-behavior: contain;
+            scrollbar-width: thin;
+        }
+
+        .daily-modal::before,
+        .room-settings-modal::before,
+        .mission-modal::before,
+        .guide-card::before,
+        .history-panel-modal::before,
+        .history-detail-modal::before {
+            content: '';
+            display: block;
+            width: 38px;
+            height: 4px;
+            border-radius: 999px;
+            background: rgba(109, 76, 255, 0.18);
+            margin: 0 auto 14px;
+        }
+
+        /* Final chat input QA */
+        #chatMessages {
+            scroll-behavior: smooth;
+        }
+
+        .chat-send-btn {
+            width: auto;
+            min-width: 64px;
+            flex: 0 0 auto;
+            padding: 10px 15px;
+            border-radius: 14px;
+            border: none;
+            cursor: pointer;
+            color: #fff;
+            font-weight: 850;
+            font-size: 0.88rem;
+            background: linear-gradient(135deg, #6D4CFF, #8D6BFF);
+            box-shadow: 0 8px 18px rgba(109, 76, 255, 0.16);
+            white-space: nowrap;
+        }
+
+        #chatInput,
+        #chatSender {
+            min-width: 0;
+        }
+
+        /* Completion/filled state: slightly more visible but still premium */
+        .managed-card.is-filled,
+        .history-day-card.has-record,
+        .calendar-day.has-record {
+            border-color: rgba(109, 76, 255, 0.30);
+        }
+
+        .managed-card.is-filled .daily-card-sub::before {
+            content: '완료 · ';
+            color: #6D4CFF;
+            font-weight: 900;
+        }
+
+        /* Phone QA */
+        @media (max-width: 767px) {
+            body {
+                padding: 16px 14px max(20px, env(safe-area-inset-bottom));
+            }
+
+            .container,
+            .auth-box,
+            .history-card {
+                width: 100%;
+                max-width: 460px;
+                padding: 20px 16px;
+            }
+
+            .row {
+                gap: 14px;
+            }
+
+            .row .daily-card {
+                min-height: 126px;
+                padding: 14px 12px;
+            }
+
+            .row .daily-card-title {
+                font-size: 0.86rem;
+                white-space: nowrap;
+            }
+
+            .row .daily-card-sub {
+                font-size: 0.73rem;
+                line-height: 1.32;
+            }
+
+            .daily-modal,
+            .mission-modal,
+            .room-settings-modal,
+            .guide-card,
+            .history-panel-modal,
+            .history-detail-modal {
+                width: calc(100vw - 28px);
+                max-height: calc(100dvh - 36px);
+            }
+
+            .chat-send-btn {
+                min-width: 58px;
+                padding: 10px 12px;
+                font-size: 0.82rem;
+            }
+        }
+
+        /* Small phone fallback */
+        @media (max-width: 360px) {
+            .row {
+                grid-template-columns: 1fr;
+            }
+            .row .daily-card {
+                min-height: 86px;
+                grid-template-columns: auto 1fr auto;
+            }
+        }
+
+        /* Fold / tablet QA */
+        @media (min-width: 768px) and (max-width: 1199px) {
+            .container,
+            .auth-box,
+            .history-launch-card {
+                max-width: 560px;
+            }
+            .daily-modal,
+            .mission-modal,
+            .guide-card {
+                max-width: 560px;
+            }
+            .room-settings-modal,
+            .history-panel-modal,
+            .history-detail-modal {
+                max-width: 680px;
+            }
+        }
+
+        /* Desktop QA */
+        @media (min-width: 1200px) {
+            .container,
+            .auth-box,
+            .history-launch-card {
+                max-width: 520px;
+            }
+            .daily-modal {
+                max-width: 520px;
+            }
+            .mission-modal,
+            .guide-card {
+                max-width: 680px;
+            }
+            .room-settings-modal,
+            .history-panel-modal,
+            .history-detail-modal {
+                max-width: 820px;
+            }
+        }
+
     </style>
 </head>
 <body>
@@ -3033,7 +3812,7 @@
         <div></div>
     </div>
     <div class="app-subtitle">합의된 하루를 신뢰로 기록하고, 따뜻하게 지켜보세요.</div>
-    <div class="app-version-badge">RC2 • v2.5.4 · Build 2026.06.29 · Mobile Center Popup + Card Gap Fix</div>
+    <div class="app-version-badge">RC2 • v2.5.7 · Build 2026.06.29 · Motion + Final UI QA</div>
 
     <div class="user-bar">
         <span id="userInfoText">로그인 확인 중...</span>
@@ -3260,7 +4039,7 @@
         <div style="display: flex; gap: 6px;">
             <input type="text" id="chatSender" placeholder="이름" style="width: 65px; padding: 10px; border: 1px solid #ddd; border-radius: 8px; text-align: center; font-size: 0.9rem;" oninput="updateChatAlignment()">
             <input type="text" id="chatInput" placeholder="메시지를 입력하세요..." style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 0.9rem;" onkeypress="if(event.key === 'Enter') sendChatMessage()">
-            <button onclick="sendChatMessage()" style="padding: 10px 16px; background: #ff6b6b; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 0.9rem;">전송</button>
+            <button type="button" class="chat-send-btn" onclick="sendChatMessage()">전송</button>
         </div>
     </div>
 
@@ -3279,7 +4058,7 @@
         <span class="history-launch-title">우리들의 지난 기록실</span>
         <span class="history-launch-sub" id="historyLaunchSub">캘린더에서 날짜를 선택하면 해당 기록만 보여요.</span>
     </span>
-    <span class="history-launch-version">RC2 v2.3.0</span>
+    <span class="history-launch-version">RC2 v2.5.7</span>
     <span class="history-launch-arrow">›</span>
 </button>
 </div>
@@ -3289,10 +4068,11 @@
         <div class="history-panel-head">
             <div>
                 <div class="history-detail-kicker">History Center</div>
-                <h2 id="historyPanelTitle">📜 우리들의 지난 기록실 <span>RC2 v2.3.1</span></h2>
+                <h2 id="historyPanelTitle">📜 우리들의 지난 기록실 <span>RC2 v2.5.7</span></h2>
             </div>
             <button type="button" class="modal-close-btn" onclick="closeHistoryPanelModal()">닫기</button>
         </div>
+        <div id="historyHero" class="history-hero"></div>
         <div id="calendarBox"></div>
         <div id="photoThumbs" class="history-thumb-row"></div>
         
@@ -5320,31 +6100,15 @@
             const msg = messages[key];
             const msgLine = document.createElement('div');
             const isMe = msg.senderUid === currentUser.uid || (msg.sender === myName && myName !== '');
-            msgLine.style.display = 'flex';
-            msgLine.style.flexDirection = 'column';
-            msgLine.style.alignItems = isMe ? 'flex-end' : 'flex-start';
-            msgLine.style.width = '100%';
+            msgLine.className = 'chat-message-line ' + (isMe ? 'is-me' : 'is-other');
 
             const bubble = document.createElement('div');
-            bubble.style.padding = '8px 12px';
-            bubble.style.borderRadius = '12px';
-            bubble.style.maxWidth = '75%';
-            bubble.style.wordBreak = 'break-all';
-            bubble.style.fontSize = '0.9rem';
-            bubble.style.boxShadow = '0 1px 2px rgba(0,0,0,0.05)';
+            bubble.className = 'chat-bubble';
             bubble.innerText = msg.text;
 
-            if (isMe) {
-                bubble.style.background = '#ffe3e3';
-                bubble.style.color = '#333';
-            } else {
-                bubble.style.background = '#ffffff';
-                bubble.style.color = '#333';
-                bubble.style.border = '1px solid #eee';
+            if (!isMe) {
                 const senderName = document.createElement('span');
-                senderName.style.fontSize = '0.75rem';
-                senderName.style.color = '#888';
-                senderName.style.marginBottom = '2px';
+                senderName.className = 'chat-sender-name';
                 senderName.innerText = msg.sender || '상대방';
                 msgLine.appendChild(senderName);
             }
@@ -5639,6 +6403,145 @@
                 </span>
             </button>`;
     }
+
+
+    /* =========================================================
+       RC2 v2.5.7 Chat UI Premium Override
+       - 기존 daysData / deleteRecord / openHistoryDetailModal 데이터 흐름 유지
+       ========================================================= */
+    function getHistoryOverviewStats(daysData) {
+        const dates = Object.keys(daysData || {}).sort();
+        const records = dates.map(date => daysData[date] || {});
+        const photos = records.filter(record => record.photo).length;
+        const missionDays = records.filter(record => getHistoryMissionText(record)).length;
+        const latest = dates.length ? formatHistoryDateLabel(dates[dates.length - 1]) : '-';
+        return { total: dates.length, photos, missionDays, latest };
+    }
+
+    function renderHistoryHero(daysData) {
+        const box = document.getElementById('historyHero');
+        if (!box) return;
+        const stats = getHistoryOverviewStats(daysData || {});
+        box.innerHTML = `
+            <div class="history-hero-tile"><span class="history-hero-value">${stats.total}</span><span class="history-hero-label">총 기록일</span></div>
+            <div class="history-hero-tile"><span class="history-hero-value">${stats.photos}</span><span class="history-hero-label">사진 기록</span></div>
+            <div class="history-hero-tile"><span class="history-hero-value">${stats.missionDays}</span><span class="history-hero-label">미션 기록일</span></div>
+            <div class="history-hero-tile"><span class="history-hero-value">${escapeHtml(stats.latest)}</span><span class="history-hero-label">최근 기록</span></div>
+        `;
+    }
+
+    function renderCalendar(daysData) {
+        const box = document.getElementById('calendarBox');
+        if (!box) return;
+        box.classList.add('history-calendar-premium');
+        const current = selectedHistoryDate || document.getElementById('recordDate')?.value || '';
+        const base = current ? new Date(current + 'T00:00:00') : new Date();
+        const year = base.getFullYear();
+        const month = base.getMonth();
+        const first = new Date(year, month, 1);
+        const last = new Date(year, month + 1, 0);
+        const today = new Date();
+        const todayYmd = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+        const week = ['일','월','화','수','목','금','토'];
+        const monthRecords = Object.keys(daysData || {}).filter(date => date.startsWith(`${year}-${String(month+1).padStart(2,'0')}-`)).length;
+        let html = `<div class="history-calendar-title-row"><div><strong>📅 ${year}.${String(month+1).padStart(2,'0')} 기록 캘린더</strong><br><span>기록이 있는 날짜를 누르면 아래에 카드가 열립니다.</span></div><span>${monthRecords}일 기록</span></div><div class="calendar-grid history-calendar-grid">`;
+        html += week.map(w => `<div class="calendar-head">${w}</div>`).join('');
+        for (let i = 0; i < first.getDay(); i++) html += '<div class="calendar-day"></div>';
+        for (let day = 1; day <= last.getDate(); day++) {
+            const ymd = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+            const rec = (daysData || {})[ymd];
+            const icons = rec ? `${rec.photo ? '📷' : ''}${getHistoryMissionText(rec) ? '🎯' : ''}${rec.mood === 'hard' || rec.mood === 'veryHard' ? '☁️' : ''}` : '';
+            html += `<div class="calendar-day ${rec ? 'has-record' : ''} ${ymd === todayYmd ? 'today' : ''} ${ymd === selectedHistoryDate ? 'selected-record' : ''}" ${rec ? `onclick="selectHistoryDate('${ymd}')"` : ''}>${day}<span class="calendar-icons">${icons}</span></div>`;
+        }
+        html += '</div>';
+        box.innerHTML = html;
+    }
+
+    function renderPhotoThumbs(daysData) {
+        const box = document.getElementById('photoThumbs');
+        if (!box) return;
+        const photos = Object.keys(daysData || {}).sort((a,b)=>new Date(b)-new Date(a)).filter(date => daysData[date]?.photo).slice(0, 12);
+        if (!photos.length) {
+            box.innerHTML = '<div class="history-photo-empty">📷 아직 사진 기록이 없습니다.</div>';
+            return;
+        }
+        box.innerHTML = `<div class="history-photo-label"><strong>사진 모아보기</strong>최근 사진 ${photos.length}장</div>` + photos.map(date => `<img class="history-thumb" src="${daysData[date].photo}" title="${date}" alt="${date} 사진" onclick="openHistoryDetailModal('${date}')">`).join('');
+    }
+
+    function displayHistory(daysData) {
+        const historyList = document.getElementById('historyList');
+        renderHistoryHero(daysData || {});
+        renderHistorySummary(daysData || {});
+        updateHistoryLaunchSub(daysData || {});
+        renderCalendar(daysData || {});
+        renderPhotoThumbs(daysData || {});
+        if (!historyList) return;
+        if (!daysData || Object.keys(daysData).length === 0) {
+            historyList.innerHTML = '<div class="empty-message">아직 저장된 서버 기록이 없습니다. ✨</div>';
+            return;
+        }
+        if (!selectedHistoryDate) {
+            historyList.innerHTML = '<div class="history-selected-hint"><strong>날짜를 선택해 주세요</strong>캘린더에서 기록이 있는 날짜를 누르면<br>그 날의 상세 카드가 이곳에 표시됩니다.</div>';
+            return;
+        }
+        const record = daysData[selectedHistoryDate];
+        if (!record) {
+            historyList.innerHTML = '<div class="history-selected-hint"><strong>기록이 없습니다</strong>선택한 날짜에는 저장된 기록이 없습니다. 📅</div>';
+            return;
+        }
+        const date = selectedHistoryDate;
+        const icon = getHistoryMoodIcon(record);
+        const missionText = getHistoryMissionText(record);
+        const diaryPreview = record.diary ? record.diary.substring(0, 62) : '오늘의 하루 기록을 열어 확인하세요.';
+        const chips = [
+            record.moodLabel && record.moodLabel !== '기록 없음' ? record.moodLabel : '',
+            record.water ? `💧 ${record.water}` : '',
+            record.weight ? `⚖️ ${record.weight}` : '',
+            missionText ? `🎯 ${missionText}` : '',
+            record.photo ? '📷 사진' : '',
+            record.dailyChoiceLabel && record.dailyChoiceLabel !== '기록 없음' ? record.dailyChoiceLabel : ''
+        ].map(makeHistoryChip).join('');
+        historyList.innerHTML = `
+            <button type="button" class="history-day-card history-premium-selected" onclick="openHistoryDetailModal('${date}')">
+                <span class="history-day-icon">${icon}</span>
+                <span>
+                    <span class="history-day-title">${formatHistoryDateLabel(date)}의 기록</span>
+                    <span class="history-day-sub">${escapeHtml(diaryPreview)}${record.diary && record.diary.length > 62 ? '...' : ''}</span>
+                    <span class="history-day-chips">${chips}</span>
+                </span>
+                <span class="history-day-actions">
+                    <span class="history-card-arrow">›</span>
+                    <span class="btn-delete" onclick="deleteRecord(event, '${date}')">삭제</span>
+                </span>
+            </button>`;
+    }
+
+
+    /* RC2 v2.5.7 Motion + Final UI QA helpers */
+    (function initMotionFinalQA() {
+        function markInteractiveTap(target) {
+            if (!target || target.dataset.hmTapBound === '1') return;
+            target.dataset.hmTapBound = '1';
+            target.addEventListener('pointerdown', () => target.classList.add('hm-pressing'), { passive: true });
+            target.addEventListener('pointerup', () => target.classList.remove('hm-pressing'), { passive: true });
+            target.addEventListener('pointercancel', () => target.classList.remove('hm-pressing'), { passive: true });
+            target.addEventListener('pointerleave', () => target.classList.remove('hm-pressing'), { passive: true });
+        }
+
+        function bindMotionTargets() {
+            document.querySelectorAll('.daily-card, .room-settings-card, .mission-compact-card, .history-launch-card, .history-day-card, .choice-btn, .mood-btn, .mission-chip, .btn-main, .btn-connect, .daily-modal-save, .chat-send-btn')
+                .forEach(markInteractiveTap);
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', bindMotionTargets);
+        } else {
+            bindMotionTargets();
+        }
+
+        const observer = new MutationObserver(bindMotionTargets);
+        observer.observe(document.documentElement, { childList: true, subtree: true });
+    })();
 
 </script>
 </body>
