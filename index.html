@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>우리만의 실시간 하루 관리 앱 - hearme2nite</title>
+    <title>HearMe2nite - D/s 신뢰관리 앱</title>
     <!-- Refactor STEP5: roomMembers 권한 단일화 / 초대 owner 제한 / 방 연결 전 보호영역 차단 강화 -->
     
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
@@ -462,6 +462,130 @@
             line-height: 1.45;
             margin: -3px 0 8px;
         }
+
+        .trust-card {
+            background: #fff7f7;
+            border: 1px solid #ffd6d6;
+            border-radius: 14px;
+            padding: 12px;
+            margin-bottom: 12px;
+        }
+        .trust-card-title {
+            font-size: 0.9rem;
+            font-weight: 800;
+            color: #ff7675;
+            margin-bottom: 8px;
+        }
+        .trust-card-help {
+            color: #636e72;
+            font-size: 0.78rem;
+            line-height: 1.45;
+            margin-bottom: 8px;
+        }
+        .reward-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        .choice-btn {
+            background: #fff;
+            border: 1px solid #ffe0e0;
+            border-radius: 12px;
+            padding: 10px 6px;
+            color: #636e72;
+            font-size: 0.85rem;
+            font-weight: 700;
+        }
+        .choice-btn.active {
+            background: #ff7675;
+            color: #fff;
+            border-color: #ff7675;
+            box-shadow: 0 4px 10px rgba(255, 118, 117, 0.18);
+        }
+        .summary-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        .summary-tile {
+            background: #fff7f7;
+            border: 1px solid #ffd6d6;
+            border-radius: 14px;
+            padding: 12px;
+            text-align: center;
+        }
+        .summary-tile strong {
+            display: block;
+            color: #ff7675;
+            font-size: 1.2rem;
+            margin-bottom: 3px;
+        }
+        .summary-tile span {
+            color: #636e72;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            margin: 10px 0 14px;
+        }
+        .calendar-head, .calendar-day {
+            text-align: center;
+            border-radius: 10px;
+            font-size: 0.72rem;
+            padding: 6px 2px;
+        }
+        .calendar-head {
+            color: #b2bec3;
+            font-weight: 800;
+        }
+        .calendar-day {
+            background: #fafafa;
+            border: 1px solid #edf2f7;
+            color: #b2bec3;
+            min-height: 42px;
+        }
+        .calendar-day.has-record {
+            background: #fff5f5;
+            border-color: #ffcccc;
+            color: #2d3436;
+            cursor: pointer;
+            font-weight: 800;
+        }
+        .calendar-day.today {
+            outline: 2px solid #ff7675;
+        }
+        .calendar-icons {
+            display: block;
+            font-size: 0.68rem;
+            margin-top: 2px;
+            min-height: 12px;
+        }
+        .history-thumb-row {
+            display: flex;
+            gap: 6px;
+            overflow-x: auto;
+            padding: 4px 0 12px;
+            margin-bottom: 8px;
+        }
+        .history-thumb {
+            width: 58px;
+            height: 58px;
+            border-radius: 12px;
+            object-fit: cover;
+            border: 1px solid #ffd6d6;
+            flex: 0 0 auto;
+            cursor: pointer;
+        }
+        .owner-only-note {
+            background: #fffaf0;
+            border-color: #ffeaa7;
+        }
+
     </style>
 </head>
 <body>
@@ -628,6 +752,27 @@
         <textarea id="replyMessage" rows="3" placeholder="오늘의 기록을 읽고 주인의 한마디를 남겨주세요 💕" oninput="triggerAutoSave()"></textarea>
     </div>
 
+    <div class="input-group">
+        <label>✨ 보상 / 휴식</label>
+        <div class="trust-card">
+            <div class="trust-card-help">오늘의 흐름에 맞게 보상이나 휴식을 남겨주세요. 관계가 통제보다 회복과 신뢰로 이어지도록 돕습니다.</div>
+            <div class="reward-grid">
+                <button type="button" class="choice-btn" id="rewardBtn" onclick="toggleDailyChoice('reward')">✨ 보상</button>
+                <button type="button" class="choice-btn" id="restBtn" onclick="toggleDailyChoice('rest')">🌙 휴식</button>
+            </div>
+            <textarea id="rewardNote" rows="2" placeholder="예: 오늘은 충분히 잘했으니 좋아하는 디저트 / 오늘은 쉬는 날" oninput="triggerAutoSave()"></textarea>
+        </div>
+    </div>
+
+    <div class="input-group owner-only-section" id="ownerNoteSection">
+        <label>👑 주인 비공개 메모</label>
+        <div class="trust-card owner-only-note">
+            <div class="trust-card-help">주인만 보는 장기 관찰 메모입니다. 서브의 상태를 이해하고 다음 미션을 조절하기 위한 공간입니다.</div>
+            <textarea id="ownerPrivateNote" rows="3" placeholder="예: 이번 주는 피곤해 보임. 내일은 쉬는 미션 권장." oninput="triggerOwnerNoteSave()"></textarea>
+        </div>
+    </div>
+
+
     <div id="chatSection" style="margin: 20px auto; max-width: 500px; padding: 15px; background: #fff; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); font-family: sans-serif;">
         <h3 style="margin-top:0; color: #ff6b6b; display: flex; align-items: center; gap: 8px; font-size: 1.1rem;">
             💖 우리들의 실시간 한줄 톡
@@ -655,6 +800,15 @@
 
 <div class="history-card">
     <div class="history-header">📜 우리들의 지난 기록실 <span>(클라우드 서버 연동)</span></div>
+
+    <div id="historySummary" class="summary-grid">
+        <div class="summary-tile"><strong>-</strong><span>이번 주 기록</span></div>
+        <div class="summary-tile"><strong>-</strong><span>미션 완료율</span></div>
+        <div class="summary-tile"><strong>-</strong><span>연속 기록</span></div>
+        <div class="summary-tile"><strong>-</strong><span>힘든 날</span></div>
+    </div>
+    <div id="calendarBox"></div>
+    <div id="photoThumbs" class="history-thumb-row"></div>
     
     <div style="background: #fff5f5; padding: 12px; margin-bottom: 15px; border-radius: 12px; border: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; gap: 10px;">
         <span style="font-size: 0.85rem; font-weight: bold; color: #636e72;">📅 날짜별 조회:</span>
@@ -706,6 +860,12 @@
             <div class="guide-step-title">🎯 미션 · 기분 · 피드백</div>
             <div class="guide-flow">🎯 오늘의 미션 체크<br>↓<br>😊 오늘의 기분 선택<br>↓<br>💌 주인의 피드백 기록</div>
             <div class="guide-note">관리는 감시가 아니라 합의된 루틴과 따뜻한 피드백을 쌓는 과정입니다.</div>
+        </div>
+
+        <div class="guide-step">
+            <div class="guide-step-title">✨ 보상 · 휴식 · 주인 메모</div>
+            <div class="guide-flow">좋은 하루엔 보상<br>↓<br>힘든 날엔 휴식<br>↓<br>주인은 비공개 메모로 흐름 확인</div>
+            <div class="guide-note">이 앱의 목표는 통제가 아니라, 합의된 관리 안에서 신뢰를 쌓는 것입니다.</div>
         </div>
 
         <div class="guide-step">
@@ -772,7 +932,10 @@
     let currentRoomRef = null;
     let entireRoomRef = null;
     let chatRef = null;
+    let ownerNoteRef = null;
+    let ownerNoteSaveTimeout = null;
     let cachedDaysData = null;
+    let selectedDailyChoice = '';
 
     window.onload = function() {
         const today = new Date();
@@ -964,6 +1127,7 @@
             if (legacyRoomPanel) { legacyRoomPanel.open = false; legacyRoomPanel.style.display = ''; }
             loadMyRoomList();
         }
+        updateOwnerOnlySections();
     }
 
     function randomCode(length = 6) {
@@ -1111,6 +1275,157 @@
             btn.classList.toggle('active', btn.dataset.mood === selectedMood);
         });
     }
+
+
+
+    function updateOwnerOnlySections() {
+        const sections = document.querySelectorAll('.owner-only-section');
+        sections.forEach((el) => { el.style.display = activeRoomRole === 'owner' ? '' : 'none'; });
+    }
+
+    function toggleDailyChoice(choice) {
+        selectedDailyChoice = selectedDailyChoice === choice ? '' : choice;
+        updateDailyChoiceButtons();
+        executeAutoSave();
+    }
+
+    function updateDailyChoiceButtons() {
+        const rewardBtn = document.getElementById('rewardBtn');
+        const restBtn = document.getElementById('restBtn');
+        if (rewardBtn) rewardBtn.classList.toggle('active', selectedDailyChoice === 'reward');
+        if (restBtn) restBtn.classList.toggle('active', selectedDailyChoice === 'rest');
+    }
+
+    function getDailyChoiceLabel(choice) {
+        if (choice === 'reward') return '✨ 보상';
+        if (choice === 'rest') return '🌙 휴식';
+        return '기록 없음';
+    }
+
+    function triggerOwnerNoteSave() {
+        if (activeRoomRole !== 'owner') return;
+        showSaveStatus('👑 주인 메모 입력 중...');
+        clearTimeout(ownerNoteSaveTimeout);
+        ownerNoteSaveTimeout = setTimeout(saveOwnerPrivateNote, 600);
+    }
+
+    async function saveOwnerPrivateNote() {
+        if (!currentUser || !activeRoomCode || activeRoomRole !== 'owner') return;
+        const date = document.getElementById('recordDate').value;
+        const noteEl = document.getElementById('ownerPrivateNote');
+        const note = noteEl ? noteEl.value : '';
+        try {
+            await db.ref(`ownerNotes/${activeRoomCode}/${date}`).set({
+                note,
+                updatedBy: currentUser.uid,
+                updatedByEmail: currentUser.email,
+                updatedAt: firebase.database.ServerValue.TIMESTAMP
+            });
+            showSaveStatus('👑 주인 메모 저장 완료');
+        } catch (err) {
+            console.error(err);
+            showSaveStatus('❌ 주인 메모 저장 실패 또는 권한 없음');
+        }
+    }
+
+    function listenOwnerPrivateNote() {
+        if (ownerNoteRef) ownerNoteRef.off();
+        ownerNoteRef = null;
+        const noteEl = document.getElementById('ownerPrivateNote');
+        if (!currentUser || !activeRoomCode || activeRoomRole !== 'owner' || !noteEl) return;
+        const date = document.getElementById('recordDate').value;
+        ownerNoteRef = db.ref(`ownerNotes/${activeRoomCode}/${date}`);
+        ownerNoteRef.on('value', (snapshot) => {
+            const data = snapshot.val() || {};
+            if (document.activeElement !== noteEl) noteEl.value = data.note || '';
+        }, (err) => {
+            console.error(err);
+            showSaveStatus('❌ 주인 메모 읽기 권한 없음');
+        });
+    }
+
+    function calculateHistoryStats(daysData) {
+        const dates = Object.keys(daysData || {}).sort();
+        const today = new Date();
+        const weekAgo = new Date(today);
+        weekAgo.setDate(today.getDate() - 6);
+        const toYmd = (d) => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+        const weekDates = dates.filter(date => date >= toYmd(weekAgo) && date <= toYmd(today));
+        let missionDone = 0, missionTotal = 0, hardDays = 0;
+        weekDates.forEach((date) => {
+            const rec = daysData[date] || {};
+            const missions = Array.isArray(rec.missions) ? rec.missions : [];
+            missionTotal += missions.length;
+            missionDone += missions.filter(m => m.done).length;
+            if (rec.mood === 'hard' || rec.mood === 'veryHard') hardDays += 1;
+        });
+        let streak = 0;
+        const dateSet = new Set(dates);
+        for (let d = new Date(today); ; d.setDate(d.getDate() - 1)) {
+            if (dateSet.has(toYmd(d))) streak += 1;
+            else break;
+        }
+        return {
+            weekCount: weekDates.length,
+            missionRate: missionTotal ? Math.round((missionDone / missionTotal) * 100) + '%' : '-',
+            streak: streak ? `${streak}일` : '-',
+            hardDays: `${hardDays}일`
+        };
+    }
+
+    function renderHistorySummary(daysData) {
+        const box = document.getElementById('historySummary');
+        if (!box) return;
+        const stats = calculateHistoryStats(daysData || {});
+        box.innerHTML = `
+            <div class="summary-tile"><strong>${stats.weekCount}/7</strong><span>이번 주 기록</span></div>
+            <div class="summary-tile"><strong>${stats.missionRate}</strong><span>미션 완료율</span></div>
+            <div class="summary-tile"><strong>${stats.streak}</strong><span>연속 기록</span></div>
+            <div class="summary-tile"><strong>${stats.hardDays}</strong><span>힘든 날</span></div>
+        `;
+    }
+
+    function renderCalendar(daysData) {
+        const box = document.getElementById('calendarBox');
+        if (!box) return;
+        const current = document.getElementById('recordDate')?.value || '';
+        const base = current ? new Date(current + 'T00:00:00') : new Date();
+        const year = base.getFullYear();
+        const month = base.getMonth();
+        const first = new Date(year, month, 1);
+        const last = new Date(year, month + 1, 0);
+        const today = new Date();
+        const todayYmd = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+        const week = ['일','월','화','수','목','금','토'];
+        let html = `<div style="font-size:0.9rem;font-weight:800;color:#636e72;margin:6px 0;">📅 ${year}.${String(month+1).padStart(2,'0')} 기록 캘린더</div><div class="calendar-grid">`;
+        html += week.map(w => `<div class="calendar-head">${w}</div>`).join('');
+        for (let i = 0; i < first.getDay(); i++) html += '<div class="calendar-day"></div>';
+        for (let day = 1; day <= last.getDate(); day++) {
+            const ymd = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+            const rec = (daysData || {})[ymd];
+            const icons = rec ? `${rec.photo ? '📷' : ''}${rec.missionSummary && rec.missionSummary !== '기록 없음' ? '🎯' : ''}${rec.mood === 'hard' || rec.mood === 'veryHard' ? '☁️' : ''}` : '';
+            html += `<div class="calendar-day ${rec ? 'has-record' : ''} ${ymd === todayYmd ? 'today' : ''}" ${rec ? `onclick="selectHistoryDate('${ymd}')"` : ''}>${day}<span class="calendar-icons">${icons}</span></div>`;
+        }
+        html += '</div>';
+        box.innerHTML = html;
+    }
+
+    function renderPhotoThumbs(daysData) {
+        const box = document.getElementById('photoThumbs');
+        if (!box) return;
+        const photos = Object.keys(daysData || {}).sort((a,b)=>new Date(b)-new Date(a)).filter(date => daysData[date]?.photo).slice(0, 10);
+        if (!photos.length) { box.innerHTML = ''; return; }
+        box.innerHTML = photos.map(date => `<img class="history-thumb" src="${daysData[date].photo}" title="${date}" alt="${date} 사진" onclick="selectHistoryDate('${date}')">`).join('');
+    }
+
+    function selectHistoryDate(date) {
+        const filterInput = document.getElementById('historyFilterDate');
+        if (filterInput) filterInput.value = date;
+        applyHistoryFilter();
+        const list = document.getElementById('historyList');
+        if (list) list.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
 
     function collectMissions() {
         const missions = [];
@@ -1445,9 +1760,11 @@
         if (currentRoomRef) currentRoomRef.off();
         if (entireRoomRef) entireRoomRef.off();
         if (chatRef) chatRef.off();
+        if (ownerNoteRef) ownerNoteRef.off();
         currentRoomRef = null;
         entireRoomRef = null;
         chatRef = null;
+        ownerNoteRef = null;
         cachedDaysData = null;
     }
 
@@ -1479,7 +1796,9 @@
         updateCurrentRoomInfo();
         setDataSectionsVisible(true);
         showSaveStatus('📡 연결 중...');
+        updateOwnerOnlySections();
         listenChat();
+        listenOwnerPrivateNote();
 
         currentRoomRef = db.ref('rooms/' + roomCode + '/days/' + date);
         currentRoomRef.on('value', (snapshot) => {
@@ -1495,6 +1814,7 @@
                 safeUpdateField('diary', record.diary);
                 safeUpdateField('replyMessage', record.replyMessage);
                 safeUpdateField('moodNote', record.moodNote);
+                safeUpdateField('rewardNote', record.rewardNote);
                 renderMissions(record.missions);
                 selectedMood = record.mood || '';
                 updateMoodUI();
@@ -1534,7 +1854,7 @@
     }
 
     function clearFormFieldsExceptSync() {
-        const fields = ['wakeTime', 'weight', 'mealBreakfast', 'mealLunch', 'mealDinner', 'goingOut', 'sleepTime', 'diary', 'replyMessage', 'moodNote'];
+        const fields = ['wakeTime', 'weight', 'mealBreakfast', 'mealLunch', 'mealDinner', 'goingOut', 'sleepTime', 'diary', 'replyMessage', 'moodNote', 'rewardNote'];
         fields.forEach(id => {
             const el = document.getElementById(id);
             if (el && document.activeElement !== el) el.value = '';
@@ -1611,6 +1931,9 @@
         const mood = selectedMood || '';
         const moodLabel = mood ? MOOD_LABELS[mood] : '기록 없음';
         const moodNote = document.getElementById('moodNote').value || '';
+        const dailyChoice = selectedDailyChoice || '';
+        const dailyChoiceLabel = getDailyChoiceLabel(dailyChoice);
+        const rewardNote = document.getElementById('rewardNote').value || '';
         const hasPhotoText = uploadedPhotoBase64 ? '📷 사진 첨부 완료' : '사진 없음';
 
         const reportText = `📅 [${date}] 아가의 하루 기록 💕\n\n` +
@@ -1632,6 +1955,7 @@
             mealBreakfast, mealLunch, mealDinner,
             goingOut, sleepTime, diary, replyMessage,
             missions, mood, moodLabel, moodNote, missionSummary,
+            dailyChoice, dailyChoiceLabel, rewardNote,
             photo: uploadedPhotoBase64, fullText: reportText,
             updatedBy: currentUser.uid,
             updatedByEmail: currentUser.email,
@@ -1650,6 +1974,9 @@
 
     function displayHistory(daysData) {
         const historyList = document.getElementById('historyList');
+        renderHistorySummary(daysData || {});
+        renderCalendar(daysData || {});
+        renderPhotoThumbs(daysData || {});
         if (!daysData) {
             historyList.innerHTML = '<div class="empty-message">아직 저장된 서버 기록이 없습니다. ✨</div>';
             return;
@@ -1668,12 +1995,13 @@
             const shortDiary = record.diary ? record.diary.substring(0, 12) : '기록 없음';
             const shortReply = record.replyMessage ? record.replyMessage.substring(0, 12) : '';
             const photoIndicator = record.photo ? '📷' : '';
+            const choicePreview = record.dailyChoiceLabel && record.dailyChoiceLabel !== '기록 없음' ? ` | ${record.dailyChoiceLabel}` : '';
             const moodPreview = record.moodLabel && record.moodLabel !== '기록 없음' ? ` | ${record.moodLabel}` : '';
             const missionPreview = record.missionSummary && record.missionSummary !== '기록 없음' ? ` | 🎯 ${record.missionSummary}` : '';
             html += `
                 <div class="history-item" onclick="toggleHistoryItem('${date}')">
                     <div class="history-item-date">📅 ${date}의 기록 ${photoIndicator}</div>
-                    <div>💧물: ${record.water || '0ML'} | ⚖️체중: ${record.weight || '기록 없음'}${moodPreview}${missionPreview} | 📝한줄: ${shortDiary}...${shortReply ? ' | 💌피드백: ' + shortReply + '...' : ''}</div>
+                    <div>💧물: ${record.water || '0ML'} | ⚖️체중: ${record.weight || '기록 없음'}${moodPreview}${missionPreview}${choicePreview} | 📝한줄: ${shortDiary}...${shortReply ? ' | 💌피드백: ' + shortReply + '...' : ''}</div>
                     <button class="btn-delete" onclick="deleteRecord(event, '${date}')">삭제</button>
                     <div class="history-item-content" id="content-${date}">
                         ${record.fullText ? record.fullText.replace(/\n/g, '<br>') : ''}
