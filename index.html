@@ -1207,6 +1207,55 @@
     </div>
 </div>
 
+
+<div class="daily-modal-overlay" id="moodModalOverlay" onclick="if(event.target.id==='moodModalOverlay') closeDailyModal('mood')">
+    <div class="daily-modal" role="dialog" aria-modal="true" aria-labelledby="moodModalTitle">
+        <div class="daily-modal-head">
+            <h2 id="moodModalTitle">😊 오늘의 기분</h2>
+            <button type="button" class="modal-close-btn" onclick="closeDailyModal('mood')">닫기</button>
+        </div>
+        <div class="mood-box">
+            <div class="mood-helper">오늘의 컨디션을 짧게 남겨주세요. 주인이 하루의 흐름을 이해하는 데 도움이 됩니다.</div>
+            <div class="mood-options">
+                <button type="button" class="mood-btn" data-mood="great" onclick="selectMood('great')">😊<br>좋음</button>
+                <button type="button" class="mood-btn" data-mood="okay" onclick="selectMood('okay')">🙂<br>괜찮음</button>
+                <button type="button" class="mood-btn" data-mood="normal" onclick="selectMood('normal')">😐<br>보통</button>
+                <button type="button" class="mood-btn" data-mood="hard" onclick="selectMood('hard')">😞<br>힘듦</button>
+                <button type="button" class="mood-btn" data-mood="veryHard" onclick="selectMood('veryHard')">😭<br>매우 힘듦</button>
+            </div>
+            <textarea id="moodNote" rows="3" placeholder="기분에 대해 한 줄 남기고 싶다면 적어주세요." oninput="handleDailyFieldChanged()"></textarea>
+        </div>
+        <button type="button" class="daily-modal-save" onclick="closeDailyModal('mood')">저장하고 닫기</button>
+    </div>
+</div>
+
+<div class="daily-modal-overlay" id="mealModalOverlay" onclick="if(event.target.id==='mealModalOverlay') closeDailyModal('meal')">
+    <div class="daily-modal" role="dialog" aria-modal="true" aria-labelledby="mealModalTitle">
+        <div class="daily-modal-head">
+            <h2 id="mealModalTitle">🥗 식사 기록</h2>
+            <button type="button" class="modal-close-btn" onclick="closeDailyModal('meal')">닫기</button>
+        </div>
+        <div class="meal-container">
+            <div class="meal-row"><span>아침</span><input type="text" id="mealBreakfast" placeholder="아침 기록" oninput="handleDailyFieldChanged()"></div>
+            <div class="meal-row"><span>점심</span><input type="text" id="mealLunch" placeholder="점심 기록" oninput="handleDailyFieldChanged()"></div>
+            <div class="meal-row"><span>저녁</span><input type="text" id="mealDinner" placeholder="저녁 기록" oninput="handleDailyFieldChanged()"></div>
+        </div>
+        <button type="button" class="daily-modal-save" onclick="closeDailyModal('meal')">저장하고 닫기</button>
+    </div>
+</div>
+
+<div class="daily-modal-overlay" id="feedbackModalOverlay" onclick="if(event.target.id==='feedbackModalOverlay') closeDailyModal('feedback')">
+    <div class="daily-modal" role="dialog" aria-modal="true" aria-labelledby="feedbackModalTitle">
+        <div class="daily-modal-head">
+            <h2 id="feedbackModalTitle">💌 주인의 피드백</h2>
+            <button type="button" class="modal-close-btn" onclick="closeDailyModal('feedback')">닫기</button>
+        </div>
+        <div class="feedback-hint">칭찬, 격려, 내일의 미션, 주의할 점을 따뜻하게 남겨주세요.</div>
+        <textarea id="replyMessage" rows="5" placeholder="오늘의 기록을 읽고 주인의 피드백을 남겨주세요." oninput="handleDailyFieldChanged()"></textarea>
+        <button type="button" class="daily-modal-save" onclick="closeDailyModal('feedback')">저장하고 닫기</button>
+    </div>
+</div>
+
 <div class="toast" id="toast">기록이 복사되었습니다! 💕</div>
 
 <script>
