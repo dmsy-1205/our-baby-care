@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>우리만의 실시간 하루 관리 앱 - hearme2nite</title>
-    <!-- Refactor v1: 로그인/방생성/초대/기록영역 표시 상태를 분리한 배포 후보 -->
+    <!-- Refactor STEP5: roomMembers 권한 단일화 / 초대 owner 제한 / 방 연결 전 보호영역 차단 강화 -->
     
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
@@ -580,10 +580,10 @@
                     await db.ref(`users/${currentUser.uid}/activeRoom`).remove();
                     clearRoomInputs();
                     showSaveStatus('🔒 이 계정은 저장된 공유코드 방의 허용 사용자가 아닙니다. 공유코드를 다시 연결해 주세요.');
-                    resetProtectedDataUI('공유코드를 다시 연결해 주세요. ✨');
+                    resetProtectedDataUI('기존 방 연결 또는 새 초대를 진행해 주세요. ✨');
                 }
             } else {
-                showSaveStatus('🔑 공유코드를 입력하고 연결 버튼을 눌러 주세요.');
+                showSaveStatus('🔑 방을 만들거나 초대코드로 참여해 주세요.');
                 resetProtectedDataUI('방을 만들거나 초대코드로 참여하면 기록이 표시됩니다. ✨');
             }
         } catch (err) {
@@ -616,14 +616,17 @@
             setDataSectionsVisible(true);
             el.innerHTML = `현재 연결된 방: <strong>${escapeHtml(activeRoomCode)}</strong><br>이 방의 기록과 채팅이 실시간으로 동기화됩니다.`;
             if (createBtn) createBtn.innerText = '🏠 새 방 만들기 / 다른 방으로 시작하기';
-            // 평소에는 설정 영역을 모두 접어둡니다.
-            if (invitePanel) invitePanel.open = false;
-            if (joinInvitePanel) joinInvitePanel.open = false;
-            if (legacyRoomPanel) legacyRoomPanel.open = false;
+            // 방 연결 후에는 설정 영역을 접고, 받은 초대코드 입력은 숨깁니다.
+            if (invitePanel) { invitePanel.open = false; invitePanel.style.display = ''; }
+            if (joinInvitePanel) { joinInvitePanel.open = false; joinInvitePanel.style.display = 'none'; }
+            if (legacyRoomPanel) { legacyRoomPanel.open = false; legacyRoomPanel.style.display = ''; }
         } else {
             setDataSectionsVisible(false);
             el.innerHTML = '아직 연결된 방이 없습니다. 혼자 사용할 방을 만들거나 초대코드를 입력해 주세요.';
             if (createBtn) createBtn.innerText = '✨ 내 방 만들기 / 혼자 시작하기';
+            if (invitePanel) { invitePanel.open = false; invitePanel.style.display = ''; }
+            if (joinInvitePanel) { joinInvitePanel.open = false; joinInvitePanel.style.display = ''; }
+            if (legacyRoomPanel) { legacyRoomPanel.open = false; legacyRoomPanel.style.display = ''; }
         }
     }
 
@@ -688,27 +691,33 @@
         }
     }
 
+    async function getCurrentUserRoomRole(roomCode) {
+        if (!currentUser || !roomCode) return '';
+        try {
+            const memberSnap = await db.ref(`roomMembers/${roomCode}/${currentUser.uid}/role`).once('value');
+            return memberSnap.val() || '';
+        } catch (err) {
+            console.error('방 역할 확인 실패:', err);
+            return '';
+        }
+    }
+
     async function saveActiveRoom(roomCode, role = 'member') {
         const myEmail = normalizeEmail(currentUser.email);
 
-        // 보안 규칙이 roomMembers를 기준으로 rooms 접근을 허용할 수 있으므로,
-        // 먼저 roomMembers/userRooms/users를 저장한 뒤 rooms 안의 멤버 정보를 저장합니다.
-        const firstUpdates = {};
-        firstUpdates[`roomMembers/${roomCode}/${currentUser.uid}`] = {
+        // STEP5: 방 권한은 roomMembers 하나만 기준으로 관리합니다.
+        // rooms 내부에 members를 중복 저장하지 않습니다.
+        const updates = {};
+        updates[`roomMembers/${roomCode}/${currentUser.uid}`] = {
             email: myEmail,
             role: role,
             joinedAt: firebase.database.ServerValue.TIMESTAMP
         };
-        firstUpdates[`userRooms/${currentUser.uid}/${roomCode}`] = true;
-        firstUpdates[`users/${currentUser.uid}/activeRoom`] = roomCode;
-        firstUpdates[`users/${currentUser.uid}/email`] = myEmail;
-        await db.ref().update(firstUpdates);
-
-        await db.ref(`rooms/${roomCode}/members/${currentUser.uid}`).set({
-            email: myEmail,
-            role: role,
-            joinedAt: firebase.database.ServerValue.TIMESTAMP
-        });
+        updates[`userRooms/${currentUser.uid}/${roomCode}`] = true;
+        updates[`users/${currentUser.uid}/activeRoom`] = roomCode;
+        updates[`users/${currentUser.uid}/email`] = myEmail;
+        updates[`users/${currentUser.uid}/lastLogin`] = firebase.database.ServerValue.TIMESTAMP;
+        await db.ref().update(updates);
 
         activeRoomCode = roomCode;
         const roomInput = document.getElementById('roomCode');
@@ -747,6 +756,11 @@
         if (!activeRoomCode) { alert('먼저 내 방을 만들거나 기존 방에 연결해 주세요.'); return; }
         const allowed = await canCurrentUserAccessRoom(activeRoomCode);
         if (!allowed) { alert('현재 방의 초대코드를 만들 권한이 없습니다.'); return; }
+        const myRole = await getCurrentUserRoomRole(activeRoomCode);
+        if (myRole !== 'owner') {
+            alert('초대코드는 방을 만든 사람만 생성할 수 있습니다.');
+            return;
+        }
 
         let code = randomCode(6);
         let tries = 0;
@@ -763,6 +777,7 @@
                 ownerUid: currentUser.uid,
                 ownerEmail: normalizeEmail(currentUser.email),
                 createdAt: firebase.database.ServerValue.TIMESTAMP,
+                expiresAt: Date.now() + (1000 * 60 * 60 * 24),
                 used: false
             });
             const box = document.getElementById('inviteResult');
@@ -825,6 +840,12 @@
                 showSaveStatus('🔒 이미 사용된 초대코드');
                 return;
             }
+            if (invite.expiresAt && Date.now() > invite.expiresAt) {
+                if (fromPending) sessionStorage.removeItem('pendingInviteCode');
+                alert('만료된 초대코드입니다. 방 주인에게 새 초대코드를 요청해 주세요.');
+                showSaveStatus('🔒 만료된 초대코드');
+                return;
+            }
             const roomCode = invite.roomCode;
             if (!roomCode) {
                 alert('초대코드에 방 정보가 없습니다.');
@@ -833,7 +854,7 @@
             }
             const myEmail = normalizeEmail(currentUser.email);
 
-            // 먼저 방 멤버로 등록한 뒤 rooms 내부와 초대 상태를 갱신합니다.
+            // STEP5: roomMembers에 등록된 사용자만 rooms 데이터를 읽고 쓸 수 있게 만듭니다.
             const firstUpdates = {};
             firstUpdates[`roomMembers/${roomCode}/${currentUser.uid}`] = {
                 email: myEmail,
@@ -844,15 +865,10 @@
             firstUpdates[`userRooms/${currentUser.uid}/${roomCode}`] = true;
             firstUpdates[`users/${currentUser.uid}/activeRoom`] = roomCode;
             firstUpdates[`users/${currentUser.uid}/email`] = myEmail;
+            firstUpdates[`users/${currentUser.uid}/lastLogin`] = firebase.database.ServerValue.TIMESTAMP;
             await db.ref().update(firstUpdates);
 
             const secondUpdates = {};
-            secondUpdates[`rooms/${roomCode}/members/${currentUser.uid}`] = {
-                email: myEmail,
-                role: 'partner',
-                joinedAt: firebase.database.ServerValue.TIMESTAMP,
-                inviteCode: code
-            };
             secondUpdates[`rooms/${roomCode}/meta/partnerEmail`] = myEmail;
             secondUpdates[`rooms/${roomCode}/meta/partnerUid`] = currentUser.uid;
             secondUpdates[`invites/${code}/used`] = true;
@@ -1161,7 +1177,7 @@
         const date = document.getElementById('recordDate').value;
         if(!currentUser) { alert('로그인이 필요합니다.'); return; }
         if(!roomCode) { alert('방에 연결되어야 전송용 결과가 추출됩니다.'); return; }
-        if (!(await canCurrentUserAccessRoom(roomCode))) { alert('이 공유코드에 접근할 수 없습니다.'); return; }
+        if (!(await canCurrentUserAccessRoom(roomCode))) { alert('이 방에 접근할 수 없습니다.'); return; }
         db.ref('rooms/' + roomCode + '/days/' + date).once('value').then((snapshot) => {
             const record = snapshot.val();
             if (record) {
