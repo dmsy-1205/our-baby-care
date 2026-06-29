@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>HearMe2nite - D/s 신뢰관리 앱</title>
     <!-- Refactor STEP10: card-first UI foundation / 기존 기능 유지 -->
+    <!-- RC2 v2.6.0 STEP5 FINAL QA: component-ready module map / UI and data logic preserved -->
     
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
@@ -4354,6 +4355,44 @@
 
 <script>
     // =========================================================
+    // RC2 v2.6.0 STEP 2: JavaScript Developer Comment Map
+    // RC2 v2.6.0 STEP 4: Component-Ready Module Map
+    // ---------------------------------------------------------
+    // 현재 파일은 배포 안정성을 위해 단일 HTML을 유지한다.
+    // 단, 아래 JS 영역은 파일 분리 직전 상태처럼 모듈 경계를 명확히 표시한다.
+    // 추후 분리 후보:
+    // 01 config.js      - Firebase 설정 / 전역 상태 / 날짜 초기화
+    // 02 utils.js       - 공통 유틸 / HTML escape / toast / copy
+    // 03 auth.js        - 로그인 / 회원가입 / 로그아웃 / 인증 상태
+    // 04 room.js        - Room 생성 / 참여 / 초대코드 / 권한 확인
+    // 05 role.js        - 관리(Dom) / 기록(Sub) 역할 잠금 및 권한 UI
+    // 06 popup.js       - 공통 모달 / 스크롤 잠금 / 카드 팝업
+    // 07 daily.js       - 하루 기록 카드 / 식사 / 물 / 사진 / 기분
+    // 08 mission.js     - 미션 / 미션함 / 달성률
+    // 09 autosave.js    - 날짜별 AutoSave / Firebase listener
+    // 10 history.js     - 지난 기록실 / 캘린더 / 상세 팝업
+    // 11 chat.js        - 채팅 송수신 / 정렬 / 스크롤
+    // 12 boot.js        - 초기 실행 / 이벤트 바인딩 / Motion QA
+    // ---------------------------------------------------------
+    // ---------------------------------------------------------
+    // 목적
+    // - 기존 Firebase/Auth/Room/History/AutoSave/Chat/Role 기능 유지
+    // - 현재 단일 index.html 내부 JS를 기능별 영역으로 읽을 수 있게 정리
+    // - 추후 auth.js / room.js / popup.js / history.js / chat.js / mission.js / autosave.js 분리를 위한 기준선 생성
+    //
+    // 절대 변경 금지
+    // - Firebase DB key / Room 구조 / roomMembers 권한 구조
+    // - 기존 사용자 데이터 / 날짜별 저장 구조 / AutoSave 흐름
+    // - 로그인 및 초대코드 흐름
+    //
+    // 이번 STEP 2 적용 범위
+    // - 실행 로직 변경 없음
+    // - 함수 이동 없음
+    // - 핵심 함수별 역할/주의사항 주석 추가
+    // - 추후 파일 분리를 위한 데이터 흐름 설명 보강
+    // =========================================================
+
+    // =========================================================
     // hearme2nite 1번 사이트 정리본
     // - 공유코드는 브라우저 저장소에 저장하지 않음
     // - 로그인 계정별 users/{uid}/activeRoom 에서만 자동 연결
@@ -4362,6 +4401,13 @@
     // - 로그인 확인은 master-app-platform, 생활관리 데이터는 our-baby-care 사용
     // =========================================================
 
+
+    // =========================================================
+    // MODULE 01. CONFIG / GLOBAL STATE
+    // 분리 후보: config.js
+    // Firebase 앱 2개(master/baby), Auth/DB 참조, 전역 상태값을 관리한다.
+    // DB 구조와 key 이름은 절대 변경하지 않는다.
+    // =========================================================
     const masterFirebaseConfig = {
         apiKey: "AIzaSyBvTPf5UCzgaB4USvKZ8EyvVJMvO5dqp4A",
         authDomain: "master-app-platform.firebaseapp.com",
@@ -4408,6 +4454,10 @@
     let selectedDailyChoice = '';
     let missionLibraryCache = {};
 
+    // App bootstrap
+    // - 오늘 날짜를 기본 기록일로 세팅한다.
+    // - URL 초대코드를 먼저 감지한 뒤, 로그인 상태에 따라 방 연결을 시도한다.
+    // - Firebase listener는 로그인 변경 시 반드시 해제 후 다시 연결한다.
     window.onload = function() {
         const today = new Date();
         const dateInput = document.getElementById('recordDate');
@@ -4446,9 +4496,34 @@
         });
     };
 
+    // =========================================================
+
+    // MODULE: AUTH / USER SESSION HELPERS
+
+    // Split-ready target: normalizeEmail
+
+    // =========================================================
+
+    // 이메일 비교용 정규화 함수
+    // Firebase roomAccess / users 데이터에서 이메일 대소문자 차이로 권한이 어긋나는 것을 방지한다.
+
+    // =========================================================
+    // MODULE 02. COMMON UTILS
+    // 분리 후보: utils.js
+    // 이메일 정규화, 랜덤 코드, HTML escape, 시간 포맷, 복사/토스트 등
+    // 여러 모듈에서 같이 쓰는 작은 순수 함수 영역이다.
+    // =========================================================
     function normalizeEmail(email) {
         return (email || '').trim().toLowerCase();
     }
+
+    // =========================================================
+
+    // MODULE: ROOM INPUT HELPERS
+
+    // Split-ready target: clearRoomInputs
+
+    // =========================================================
 
     function clearRoomInputs() {
         const room = document.getElementById('roomCode');
@@ -4463,6 +4538,24 @@
         updateCurrentRoomInfo();
     }
 
+    // =========================================================
+
+    // MODULE: AUTH / LOGIN / SIGNUP
+
+    // Split-ready target: handleAuthSubmit
+
+    // =========================================================
+
+    // 로그인/회원가입 공통 처리
+    // Auth 탭 상태에 따라 Firebase Auth signIn 또는 createUser를 실행한다.
+    // 주의: 로그인 성공 이후 방 복구는 onAuthStateChanged 흐름에서 처리한다.
+
+    // =========================================================
+    // MODULE 03. AUTH
+    // 분리 후보: auth.js
+    // Firebase Auth 로그인/회원가입/로그아웃, 로그인 후 기본 방 복원을 담당한다.
+    // 로그인 구조와 기존 계정 데이터는 변경하지 않는다.
+    // =========================================================
     async function handleAuthSubmit() {
         const email = normalizeEmail(document.getElementById('authEmail').value);
         const password = document.getElementById('authPassword').value;
@@ -4498,6 +4591,14 @@
         }
     }
 
+    // =========================================================
+
+    // MODULE: AUTH / ERROR MESSAGE MAPPING
+
+    // Split-ready target: firebaseAuthErrorToKorean
+
+    // =========================================================
+
     function firebaseAuthErrorToKorean(code) {
         const map = {
             'auth/email-already-in-use': '이미 가입된 이메일입니다.',
@@ -4511,6 +4612,14 @@
         return map[code] || `로그인 처리 중 오류가 생겼습니다. (${code})`;
     }
 
+    // =========================================================
+
+    // MODULE: AUTH / LOGOUT
+
+    // Split-ready target: logoutUser
+
+    // =========================================================
+
     async function logoutUser() {
         disconnectAllListeners();
         activeRoomCode = "";
@@ -4522,6 +4631,17 @@
         try { await babyAuth.signOut(); } catch(e) { console.warn(e); }
     }
 
+    // =========================================================
+
+    // MODULE: ROOM / ACTIVE ROOM RESTORE
+
+    // Split-ready target: loadUserActiveRoom
+
+    // =========================================================
+
+    // 사용자별 마지막 활성 방 복구
+    // users/{uid}/activeRoom 값을 읽어 기존 방을 자동 연결한다.
+    // 주의: 공유코드를 localStorage에 저장하지 않는 현재 보안 원칙을 유지한다.
     async function loadUserActiveRoom() {
         if (!currentUser) return;
         try {
@@ -4565,6 +4685,17 @@
         }
     }
 
+    // =========================================================
+
+    // MODULE: INVITE / URL CAPTURE
+
+    // Split-ready target: captureInviteFromUrl
+
+    // =========================================================
+
+    // 초대 링크 진입 처리
+    // URL의 invite 파라미터를 로그인 전 임시 입력값으로만 보관한다.
+    // 실제 방 참여/권한 기록은 acceptPendingInviteIfAny 이후 Firebase에 저장된다.
     function captureInviteFromUrl() {
         const params = new URLSearchParams(window.location.search);
         const invite = (params.get('invite') || '').trim().toUpperCase();
@@ -4581,6 +4712,23 @@
     let hmRoomModalScrollY = 0;
     let hmOpenModalCount = 0;
 
+    // =========================================================
+
+    // MODULE: POPUP / MODAL BODY LOCK
+
+    // Split-ready target: lockBodyForModal
+
+    // =========================================================
+
+    // 공통 팝업 스크롤 잠금
+    // 여러 팝업이 겹칠 수 있으므로 body lock count 방식으로 관리한다.
+
+    // =========================================================
+    // MODULE 04. POPUP CORE
+    // 분리 후보: popup.js
+    // 공통 모달 열기/닫기, body scroll lock, overlay body 부착을 담당한다.
+    // modal-sm/md/lg/xl 디자인 시스템과 중앙 정렬 구조를 유지한다.
+    // =========================================================
     function lockBodyForModal() {
         if (hmOpenModalCount === 0) {
             hmRoomModalScrollY = window.scrollY || document.documentElement.scrollTop || 0;
@@ -4605,6 +4753,8 @@
         document.body.appendChild(overlay);
     }
 
+    // 공통 팝업 열기 헬퍼
+    // daily/room/history/mission 계열 팝업을 동일한 방식으로 중앙 정렬한다.
     function openModalOverlayById(id) {
         const overlay = document.getElementById(id);
         if (!overlay) return;
@@ -4620,6 +4770,14 @@
         overlay.style.display = 'none';
     }
 
+    // =========================================================
+
+    // MODULE: POPUP / ROOM SETTINGS MODAL
+
+    // Split-ready target: openRoomSettingsModal
+
+    // =========================================================
+
     function openRoomSettingsModal() {
         openModalOverlayById('roomSettingsOverlay');
     }
@@ -4628,6 +4786,21 @@
         closeModalOverlayById('roomSettingsOverlay');
     }
 
+    // =========================================================
+
+    // MODULE: ROLE / RELATIONSHIP ROLE
+
+    // Split-ready target: getRelationshipRoleLabel
+
+    // =========================================================
+
+
+    // =========================================================
+    // MODULE 05. RELATIONSHIP ROLE
+    // 분리 후보: role.js
+    // 관리(Dom) / 기록(Sub) 역할 표시, 최초 설정, 잠금, 권한 UI를 담당한다.
+    // roomMembers/{roomCode}/{uid}/relationshipRole 경로는 변경 금지.
+    // =========================================================
     function getRelationshipRoleLabel(role) {
         if (role === 'dom') return '관리(Dom)';
         if (role === 'sub') return '기록(Sub)';
@@ -4660,6 +4833,9 @@
         }
     }
 
+    // 관계 역할 설정
+    // 관리(Dom) / 기록(Sub)을 최초 선택 후 고정하는 역할이다.
+    // 주의: 기존 roomMembers 구조를 변경하지 않고 relationshipRole만 기록한다.
     async function setRelationshipRole(role) {
         if (!['dom', 'sub'].includes(role)) return;
         if (activeRelationshipRole) {
@@ -4696,6 +4872,16 @@
         }
     }
 
+    // =========================================================
+
+    // MODULE: ROLE / ROLE UI
+
+    // Split-ready target: updateRelationshipRoleUI
+
+    // =========================================================
+
+    // 관계 역할 UI 동기화
+    // activeRelationshipRole 상태를 버튼/잠금 배지/관리 전용 카드 표시와 맞춘다.
     function updateRelationshipRoleUI() {
         const role = activeRelationshipRole || pendingRelationshipRole || '';
         const box = document.getElementById('relationshipRoleBox');
@@ -4724,6 +4910,20 @@
         }
     }
 
+    // =========================================================
+
+    // MODULE: ROOM / CURRENT ROOM INFO
+
+    // Split-ready target: updateCurrentRoomInfo
+
+    // =========================================================
+
+
+    // =========================================================
+    // MODULE 06. ROOM STATUS / GUIDE
+    // 분리 후보: room.js 일부 + guide.js 선택
+    // 현재 연결된 방 표시, 사용설명서, 내 공간 목록 표시를 담당한다.
+    // =========================================================
     function updateCurrentRoomInfo() {
         const el = document.getElementById('currentRoomInfo');
         const createBtn = document.getElementById('createRoomBtn');
@@ -4771,6 +4971,14 @@
         updateManagedFieldAccessControls();
     }
 
+    // =========================================================
+
+    // MODULE: UTIL / RANDOM ID
+
+    // Split-ready target: randomCode
+
+    // =========================================================
+
     function randomCode(length = 6) {
         const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
         const bytes = new Uint8Array(length);
@@ -4781,6 +4989,14 @@
     function randomRoomId() {
         return 'room_' + randomCode(4).toLowerCase() + '_' + Date.now().toString(36) + '_' + randomCode(4).toLowerCase();
     }
+
+    // =========================================================
+
+    // MODULE: UTIL / FORMAT / SANITIZE
+
+    // Split-ready target: escapeHtml
+
+    // =========================================================
 
     function escapeHtml(text) {
         return String(text || '').replace(/[&<>'"]/g, (ch) => ({
@@ -4796,6 +5012,14 @@
         if (Number.isNaN(d.getTime())) return '날짜 정보 없음';
         return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`;
     }
+
+    // =========================================================
+
+    // MODULE: GUIDE / FIRST USE MODAL
+
+    // Split-ready target: openGuideModal
+
+    // =========================================================
 
     function openGuideModal() {
         openModalOverlayById('guideModal');
@@ -4817,6 +5041,14 @@
             console.warn('사용설명서 확인 실패:', err);
         }
     }
+
+    // =========================================================
+
+    // MODULE: ROOM / MY ROOM LIST
+
+    // Split-ready target: loadMyRoomList
+
+    // =========================================================
 
     async function loadMyRoomList() {
         const box = document.getElementById('ownedRoomsList');
@@ -4872,6 +5104,14 @@
         }
     }
 
+    // =========================================================
+
+    // MODULE: ROOM / OPEN PREVIOUS ROOM
+
+    // Split-ready target: openPreviousRoom
+
+    // =========================================================
+
     async function openPreviousRoom(roomCode) {
         if (!currentUser || !roomCode) return;
         if (roomCode === activeRoomCode) return;
@@ -4896,6 +5136,13 @@
         }
     }
 
+
+    // =========================================================
+    // MODULE 07. DAILY CARDS / FORM UI
+    // 분리 후보: daily.js
+    // 하루 기록 카드, 기분, 식사, 물, 사진, 관리 전용 카드 상태를 담당한다.
+    // 입력 id와 카드 id는 기존 HTML/Firebase 저장 구조와 연결되어 있으므로 변경 금지.
+    // =========================================================
     const MOOD_LABELS = {
         great: '😊 좋음',
         okay: '🙂 괜찮음',
@@ -4904,6 +5151,14 @@
         veryHard: '😭 매우 힘듦'
     };
     let selectedMood = '';
+
+    // =========================================================
+
+    // MODULE: MOOD / DAILY MOOD
+
+    // Split-ready target: selectMood
+
+    // =========================================================
 
     function selectMood(value) {
         selectedMood = selectedMood === value ? '' : value;
@@ -4919,6 +5174,18 @@
     }
 
 
+    // =========================================================
+
+
+    // MODULE: POPUP / DAILY INPUT MODAL
+
+
+    // Split-ready target: openDailyModal
+
+
+    // =========================================================
+
+
     function openDailyModal(name) {
         openModalOverlayById(`${name}ModalOverlay`);
         updateManagedFieldAccessControls();
@@ -4930,6 +5197,14 @@
         updateDailyCards();
         executeAutoSave();
     }
+
+    // =========================================================
+
+    // MODULE: DAILY INPUT / FIELD CHANGE
+
+    // Split-ready target: handleDailyFieldChanged
+
+    // =========================================================
 
     function handleDailyFieldChanged() {
         updateDailyCards();
@@ -4945,6 +5220,16 @@
         return (document.getElementById(id)?.value || '').trim();
     }
 
+    // =========================================================
+
+    // MODULE: DAILY CARD UI
+
+    // Split-ready target: updateDailyCards
+
+    // =========================================================
+
+    // Daily 카드 요약 갱신
+    // 실제 입력값은 그대로 두고 카드 subtitle/완료 상태만 최신화한다.
     function updateDailyCards() {
         const wakeSub = document.getElementById('wakeCardSub');
         if (wakeSub) {
@@ -5029,12 +5314,30 @@
 
 
 
+    // =========================================================
+
+
+
+    // MODULE: ROLE / OWNER ONLY UI
+
+
+
+    // Split-ready target: updateOwnerOnlySections
+
+
+
+    // =========================================================
+
+
+
     function updateOwnerOnlySections() {
         const sections = document.querySelectorAll('.owner-only-section');
         sections.forEach((el) => { el.style.display = canManageRelationshipCards() ? '' : 'none'; });
         updateManagedFieldAccessControls();
     }
 
+    // 관리 전용 카드 접근 제어
+    // 기록(Sub) 사용자가 관리(Dom) 전용 항목을 수정하지 못하도록 UI 입력을 잠근다.
     function updateManagedFieldAccessControls() {
         const canManage = canManageRelationshipCards();
         const replyEl = document.getElementById('replyMessage');
@@ -5049,6 +5352,14 @@
         if (rewardLock) rewardLock.style.display = canManage ? 'none' : 'block';
         updateMissionAccessControls();
     }
+
+    // =========================================================
+
+    // MODULE: DAILY CHOICE / REWARD CHECK
+
+    // Split-ready target: toggleDailyChoice
+
+    // =========================================================
 
     function toggleDailyChoice(choice) {
         if (!canManageRelationshipCards()) {
@@ -5074,6 +5385,16 @@
         return '기록 없음';
     }
 
+    // =========================================================
+
+    // MODULE: OWNER NOTE / PRIVATE NOTE
+
+    // Split-ready target: triggerOwnerNoteSave
+
+    // =========================================================
+
+    // 관리 전용 메모 저장 debounce
+    // 입력 즉시 저장하지 않고 짧은 지연 후 저장해 Firebase write를 줄인다.
     function triggerOwnerNoteSave() {
         if (!canManageRelationshipCards()) return;
         showSaveStatus('👑 주인 메모 입력 중...');
@@ -5081,6 +5402,8 @@
         ownerNoteSaveTimeout = setTimeout(saveOwnerPrivateNote, 600);
     }
 
+    // 관리 전용 메모 저장
+    // ownerNote 경로에 별도로 저장되며 일반 날짜 기록과 섞지 않는다.
     async function saveOwnerPrivateNote() {
         if (!currentUser || !activeRoomCode || !canManageRelationshipCards()) return;
         const date = document.getElementById('recordDate').value;
@@ -5117,6 +5440,20 @@
         });
     }
 
+    // =========================================================
+
+    // MODULE: HISTORY / STATS
+
+    // Split-ready target: calculateHistoryStats
+
+    // =========================================================
+
+
+    // =========================================================
+    // MODULE 08. HISTORY STATS SHARED
+    // 분리 후보: history.js 일부
+    // 지난 기록실에서 쓰는 통계성 계산 함수다. 렌더링과 분리 가능한 순수 계산 영역이다.
+    // =========================================================
     function calculateHistoryStats(daysData) {
         const dates = Object.keys(daysData || {}).sort();
         const today = new Date();
@@ -5146,57 +5483,81 @@
         };
     }
 
-    function renderHistorySummary(daysData) {
-        const box = document.getElementById('historySummary');
-        if (!box) return;
-        const stats = calculateHistoryStats(daysData || {});
-        box.innerHTML = `
-            <div class="summary-tile"><strong>${stats.weekCount}/7</strong><span>이번 주 기록</span></div>
-            <div class="summary-tile"><strong>${stats.missionRate}</strong><span>미션 완료율</span></div>
-            <div class="summary-tile"><strong>${stats.streak}</strong><span>연속 기록</span></div>
-            <div class="summary-tile"><strong>${stats.hardDays}</strong><span>힘든 날</span></div>
-        `;
-    }
+    // =========================================================
 
-    function renderCalendar(daysData) {
-        const box = document.getElementById('calendarBox');
-        if (!box) return;
-        const current = document.getElementById('recordDate')?.value || '';
-        const base = current ? new Date(current + 'T00:00:00') : new Date();
-        const year = base.getFullYear();
-        const month = base.getMonth();
-        const first = new Date(year, month, 1);
-        const last = new Date(year, month + 1, 0);
-        const today = new Date();
-        const todayYmd = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
-        const week = ['일','월','화','수','목','금','토'];
-        let html = `<div style="font-size:0.9rem;font-weight:800;color:#636e72;margin:6px 0;">📅 ${year}.${String(month+1).padStart(2,'0')} 기록 캘린더</div><div class="calendar-grid">`;
-        html += week.map(w => `<div class="calendar-head">${w}</div>`).join('');
-        for (let i = 0; i < first.getDay(); i++) html += '<div class="calendar-day"></div>';
-        for (let day = 1; day <= last.getDate(); day++) {
-            const ymd = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
-            const rec = (daysData || {})[ymd];
-            const icons = rec ? `${rec.photo ? '📷' : ''}${rec.missionSummary && rec.missionSummary !== '기록 없음' ? '🎯' : ''}${rec.mood === 'hard' || rec.mood === 'veryHard' ? '☁️' : ''}` : '';
-            html += `<div class="calendar-day ${rec ? 'has-record' : ''} ${ymd === todayYmd ? 'today' : ''}" ${rec ? `onclick="openHistoryDetailModal('${ymd}')"` : ''}>${day}<span class="calendar-icons">${icons}</span></div>`;
-        }
-        html += '</div>';
-        box.innerHTML = html;
-    }
+    // MODULE: HISTORY / SUMMARY RENDER
 
-    function renderPhotoThumbs(daysData) {
-        const box = document.getElementById('photoThumbs');
-        if (!box) return;
-        const photos = Object.keys(daysData || {}).sort((a,b)=>new Date(b)-new Date(a)).filter(date => daysData[date]?.photo).slice(0, 10);
-        if (!photos.length) { box.innerHTML = ''; return; }
-        box.innerHTML = photos.map(date => `<img class="history-thumb" src="${daysData[date].photo}" title="${date}" alt="${date} 사진" onclick="openHistoryDetailModal('${date}')">`).join('');
-    }
+    // Split-ready target: renderHistorySummary
 
-    function selectHistoryDate(date) {
-        openHistoryDetailModal(date);
-    }
+    // =========================================================
+
+/* RC2 v2.6.0 STEP3: removed duplicate earlier `renderHistorySummary()` implementation; final implementation below is authoritative. */
 
 
+    // =========================================================
 
+    // MODULE: HISTORY / CALENDAR RENDER
+
+    // Split-ready target: renderCalendar
+
+    // =========================================================
+
+    // 기록 캘린더 렌더링
+    // daysData의 key(YYYY-MM-DD)를 기준으로 기록이 있는 날짜만 활성화한다.
+/* RC2 v2.6.0 STEP3: removed duplicate earlier `renderCalendar()` implementation; final implementation below is authoritative. */
+
+
+    // =========================================================
+
+    // MODULE: HISTORY / PHOTO THUMBS
+
+    // Split-ready target: renderPhotoThumbs
+
+    // =========================================================
+
+    // 기록실 사진 썸네일 렌더링
+    // 최신 사진 기록 일부만 가로 썸네일로 노출한다.
+/* RC2 v2.6.0 STEP3: removed duplicate earlier `renderPhotoThumbs()` implementation; final implementation below is authoritative. */
+
+
+    // =========================================================
+
+    // MODULE: HISTORY / DATE SELECT
+
+    // Split-ready target: selectHistoryDate
+
+    // =========================================================
+
+    // 기록실 날짜 선택
+    // 캘린더에서 선택한 날짜를 기준으로 하단 기록 카드만 갱신한다.
+/* RC2 v2.6.0 STEP3: removed duplicate earlier `selectHistoryDate()` implementation; final implementation below is authoritative. */
+
+
+
+
+    // =========================================================
+
+
+
+    // MODULE: MISSION / COMPACT UI
+
+
+
+    // Split-ready target: updateMissionCompactUI
+
+
+
+    // =========================================================
+
+
+
+
+    // =========================================================
+    // MODULE 09. MISSION
+    // 분리 후보: mission.js
+    // 오늘의 미션, 미션함, 미션 권한, 달성률, 미션 리포트 문구를 담당한다.
+    // Mission 저장 배열 구조는 기존 데이터 호환 때문에 변경 금지.
+    // =========================================================
     function updateMissionCompactUI() {
         const missions = collectMissions();
         const total = missions.length;
@@ -5213,6 +5574,16 @@
         if (bar) bar.style.width = `${pct}%`;
     }
 
+    // =========================================================
+
+    // MODULE: MISSION / MODAL
+
+    // Split-ready target: openMissionModal
+
+    // =========================================================
+
+    // 미션 팝업 열기
+    // 현재 역할 권한을 반영한 뒤 미션 라이브러리를 로드한다.
     function openMissionModal() {
         openModalOverlayById('missionModalOverlay');
         updateMissionCompactUI();
@@ -5225,6 +5596,18 @@
         closeModalOverlayById('missionModalOverlay');
         updateMissionCompactUI();
     }
+
+
+    // =========================================================
+
+
+    // MODULE: MISSION / ROLE ACCESS
+
+
+    // Split-ready target: updateMissionAccessControls
+
+
+    // =========================================================
 
 
     function updateMissionAccessControls() {
@@ -5254,6 +5637,16 @@
         if (libInput) libInput.disabled = !canManage;
     }
 
+    // =========================================================
+
+    // MODULE: MISSION / FIELD CHANGE
+
+    // Split-ready target: handleMissionChanged
+
+    // =========================================================
+
+    // 미션 변경 처리
+    // 체크/텍스트 변경 시 미션 요약과 자동저장을 연결한다.
     function handleMissionChanged(saveNow) {
         updateMissionAccessControls();
         updateMissionCompactUI();
@@ -5269,6 +5662,16 @@
         return JSON.stringify(String(value || ''));
     }
 
+    // =========================================================
+
+    // MODULE: MISSION / LIBRARY LOAD
+
+    // Split-ready target: loadMissionLibrary
+
+    // =========================================================
+
+    // 개인 미션 라이브러리 로드
+    // 사용자 UID 하위에 저장된 자주 쓰는 미션을 불러온다.
     async function loadMissionLibrary() {
         const box = document.getElementById('missionLibraryList');
         if (!box) return;
@@ -5285,6 +5688,14 @@
             box.innerHTML = '<div class="empty-message">미션함을 불러오지 못했습니다. Firebase Rules를 확인해 주세요.</div>';
         }
     }
+
+    // =========================================================
+
+    // MODULE: MISSION / LIBRARY RENDER
+
+    // Split-ready target: renderMissionLibrary
+
+    // =========================================================
 
     function renderMissionLibrary() {
         const box = document.getElementById('missionLibraryList');
@@ -5317,6 +5728,14 @@
         }).join('');
         updateMissionAccessControls();
     }
+
+    // =========================================================
+
+    // MODULE: MISSION / LIBRARY SAVE
+
+    // Split-ready target: saveMissionToLibrary
+
+    // =========================================================
 
     async function saveMissionToLibrary() {
         const input = document.getElementById('missionLibraryInput');
@@ -5358,6 +5777,14 @@
         }
     }
 
+    // =========================================================
+
+    // MODULE: MISSION / TEMPLATE
+
+    // Split-ready target: addMissionTemplate
+
+    // =========================================================
+
     function addMissionTemplate(text) {
         if (!canManageRelationshipCards()) {
             alert('오늘의 미션은 관리(Dom)만 작성하거나 수정할 수 있습니다. 기록(Sub)은 완료 체크만 가능합니다.');
@@ -5397,6 +5824,16 @@
         addMissionTemplate(text);
     }
 
+    // =========================================================
+
+    // MODULE: MISSION / COLLECT DATA
+
+    // Split-ready target: collectMissions
+
+    // =========================================================
+
+    // 화면의 미션 입력값 수집
+    // 저장 데이터의 missions 배열 생성 기준 함수이므로 필드명 변경 금지.
     function collectMissions() {
         const missions = [];
         for (let i = 1; i <= 5; i++) {
@@ -5434,6 +5871,14 @@
         return missions.map((m) => `  - ${m.done ? '✅' : '⬜'} ${m.text || '미션'}`).join('\n');
     }
 
+    // =========================================================
+
+    // MODULE: MISSION / RESET UI
+
+    // Split-ready target: clearMissionAndMoodUI
+
+    // =========================================================
+
     function clearMissionAndMoodUI() {
         renderMissions([]);
         selectedMood = '';
@@ -5444,10 +5889,41 @@
     }
 
 
+    // =========================================================
+
+
+    // MODULE: DATA / ROOM CODE RESOLUTION
+
+
+    // Split-ready target: getRoomCodeForData
+
+
+    // =========================================================
+
+
+    // 데이터 접근용 Room Code 확인
+    // activeRoomCode가 없으면 화면 입력값을 fallback으로 사용한다.
+
+    // =========================================================
+    // MODULE 10. DATA GUARD / ROOM ACCESS
+    // 분리 후보: room.js + dataGuard.js 선택
+    // 현재 사용자가 접근 가능한 방인지 확인하고, 보호 데이터 UI 표시를 제어한다.
+    // 사용자 기록 유출 방지를 위한 핵심 영역이므로 경로/조건 변경 금지.
+    // =========================================================
     function getRoomCodeForData() {
         return activeRoomCode || '';
     }
 
+    // =========================================================
+
+    // MODULE: DATA / SECTION VISIBILITY
+
+    // Split-ready target: setDataSectionsVisible
+
+    // =========================================================
+
+    // 방 연결 전/후 데이터 섹션 노출 제어
+    // 미연결 상태에서 다른 사용자의 기록이 보이지 않도록 보호한다.
     function setDataSectionsVisible(visible) {
         const targets = [
             ...document.querySelectorAll('.container > .input-group'),
@@ -5464,6 +5940,16 @@
         });
     }
 
+    // =========================================================
+
+    // MODULE: DATA / PROTECTED UI RESET
+
+    // Split-ready target: resetProtectedDataUI
+
+    // =========================================================
+
+    // 보호 화면 초기화
+    // 로그아웃/방 해제 시 폼, 히스토리, 채팅 표시를 안전한 빈 상태로 되돌린다.
     function resetProtectedDataUI(message = '방을 만들거나 초대코드로 참여하면 기록이 표시됩니다. ✨') {
         clearFormFieldsExceptSync();
         const resultContainer = document.getElementById('resultContainer');
@@ -5476,6 +5962,16 @@
         if (chatMessages) chatMessages.innerHTML = '<div style="text-align: center; color: #aaa; font-size: 0.85rem; margin-top: 50px;">방에 연결되면 채팅이 표시됩니다. ✨</div>';
     }
 
+    // =========================================================
+
+    // MODULE: SECURITY / ROOM ACCESS CHECK
+
+    // Split-ready target: canCurrentUserAccessRoom
+
+    // =========================================================
+
+    // 현재 사용자의 Room 접근 권한 확인
+    // roomMembers/{roomCode}/{uid} 기준으로 접근 가능 여부를 판단한다.
     async function canCurrentUserAccessRoom(roomCode) {
         if (!currentUser || !roomCode) return false;
         try {
@@ -5486,6 +5982,14 @@
             return false;
         }
     }
+
+    // =========================================================
+
+    // MODULE: ROOM / MEMBER ROLE
+
+    // Split-ready target: getCurrentUserRoomRole
+
+    // =========================================================
 
     async function getCurrentUserRoomRole(roomCode) {
         if (!currentUser || !roomCode) return '';
@@ -5498,6 +6002,23 @@
         }
     }
 
+    // =========================================================
+
+    // MODULE: ROOM / SAVE ACTIVE ROOM
+
+    // Split-ready target: saveActiveRoom
+
+    // =========================================================
+
+    // 사용자별 활성 방 저장
+    // users/{uid}/activeRoom에 마지막 사용 방/역할 정보를 저장한다.
+
+    // =========================================================
+    // MODULE 11. ROOM CREATE / INVITE / JOIN
+    // 분리 후보: room.js
+    // 방 생성, 초대코드 생성, 초대 수락, 기존 방 참여, activeRoom 저장을 담당한다.
+    // rooms / roomMembers / userRooms / invites 경로는 변경 금지.
+    // =========================================================
     async function saveActiveRoom(roomCode, role = 'member', relationshipRole = '') {
         const myEmail = normalizeEmail(currentUser.email);
         let existingRelationshipRole = '';
@@ -5535,6 +6056,17 @@
         updateCurrentRoomInfo();
     }
 
+    // =========================================================
+
+    // MODULE: ROOM / CREATE ROOM
+
+    // Split-ready target: createMyRoom
+
+    // =========================================================
+
+    // 새 Room 생성
+    // 방 코드, owner, roomMembers, activeRoom을 생성한다.
+    // 주의: DB key/Room 구조는 Firebase Rules와 연결되어 있으므로 변경 금지.
     async function createMyRoom() {
         if (!currentUser) { alert('먼저 로그인해 주세요.'); return; }
         if (activeRoomCode) {
@@ -5566,6 +6098,16 @@
         }
     }
 
+    // =========================================================
+
+    // MODULE: INVITE / CREATE CODE
+
+    // Split-ready target: createInviteCode
+
+    // =========================================================
+
+    // 초대코드 생성
+    // 현재 방 기준으로 초대 링크와 코드를 만들고 roomAccess 권한 흐름과 연결한다.
     async function createInviteCode() {
         if (!currentUser) { alert('먼저 로그인해 주세요.'); return; }
         if (!activeRoomCode) { alert('먼저 내 방을 만들거나 기존 방에 연결해 주세요.'); return; }
@@ -5610,10 +6152,26 @@
         }
     }
 
+    // =========================================================
+
+    // MODULE: INVITE / COPY TEXT
+
+    // Split-ready target: copyInviteText
+
+    // =========================================================
+
     function copyInviteText(code, link) {
         const text = `HearMe2nite 초대코드: ${code}\n초대링크: ${link}\n\nHearU2nite 계정으로 로그인한 뒤 초대코드를 입력하면 같은 방을 사용할 수 있어요.\n이미 다른 방에 연결되어 있어도 이 초대코드로 새 방으로 이동할 수 있어요.`;
         executeCopy(text);
     }
+
+    // =========================================================
+
+    // MODULE: INVITE / ACCEPT PENDING
+
+    // Split-ready target: acceptPendingInviteIfAny
+
+    // =========================================================
 
     async function acceptPendingInviteIfAny() {
         const pending = (sessionStorage.getItem('pendingInviteCode') || '').trim().toUpperCase();
@@ -5627,6 +6185,9 @@
         await acceptInviteCodeValue(code, false);
     }
 
+    // 초대코드 수락 핵심 함수
+    // 입력/URL에서 들어온 코드를 검증하고 roomMembers에 현재 사용자를 등록한다.
+    // 주의: 기존 사용자 데이터가 다른 방에 섞이지 않도록 activeRoom 저장 순서를 유지한다.
     async function acceptInviteCodeValue(code, fromPending) {
         if (!currentUser) {
             sessionStorage.setItem('pendingInviteCode', code);
@@ -5720,6 +6281,14 @@
         }
     }
 
+    // =========================================================
+
+    // MODULE: ROOM / JOIN ROOM
+
+    // Split-ready target: joinExistingRoomByCode
+
+    // =========================================================
+
     async function joinExistingRoomByCode() {
         if (!currentUser) { alert('먼저 로그인해 주세요.'); return; }
         if (activeRoomCode && activeRoomRole !== 'owner') {
@@ -5752,6 +6321,23 @@
         }
     }
 
+    // =========================================================
+
+    // MODULE: FIREBASE / LISTENER CLEANUP
+
+    // Split-ready target: disconnectAllListeners
+
+    // =========================================================
+
+    // Firebase listener 정리
+    // 로그인 전환/방 변경 시 이전 방의 days/chat/ownerNote 리스너를 반드시 해제한다.
+
+    // =========================================================
+    // MODULE 12. AUTOSAVE / FIREBASE LISTENERS
+    // 분리 후보: autosave.js
+    // 날짜별 기록 listener 연결/해제, 입력값 복원, AutoSave 저장을 담당한다.
+    // records/{roomCode}/days/{date} 구조는 변경 금지.
+    // =========================================================
     function disconnectAllListeners() {
         if (currentRoomRef) currentRoomRef.off();
         if (entireRoomRef) entireRoomRef.off();
@@ -5764,6 +6350,17 @@
         cachedDaysData = null;
     }
 
+    // =========================================================
+
+    // MODULE: FIREBASE / CONNECT LISTENERS
+
+    // Split-ready target: connectAndListenFirebase
+
+    // =========================================================
+
+    // 현재 Room 데이터 실시간 연결
+    // rooms/{roomCode}/days, chat, ownerNote 등을 구독하고 화면을 갱신한다.
+    // 주의: 저장 구조는 기존 rooms/{roomCode}/days/{date} 형태를 유지한다.
     async function connectAndListenFirebase() {
         if (!currentUser) { showSaveStatus('🔒 로그인이 필요합니다.'); return; }
         const roomCode = getRoomCodeForData();
@@ -5849,10 +6446,32 @@
         });
     }
 
+    // =========================================================
+
+    // MODULE: AUTOSAVE / SAFE FIELD UPDATE
+
+    // Split-ready target: safeUpdateField
+
+    // =========================================================
+
+
+    // =========================================================
+    // MODULE 13. FORM RESTORE / PHOTO / WATER HELPERS
+    // 분리 후보: daily.js 일부
+    // Firebase에서 읽은 데이터를 화면 필드로 복원하고 사진/물 UI를 동기화한다.
+    // =========================================================
     function safeUpdateField(id, val) {
         const el = document.getElementById(id);
         if (el && document.activeElement !== el) el.value = (val === '기록 없음' || !val) ? '' : val;
     }
+
+    // =========================================================
+
+    // MODULE: FORM / CLEAR FIELDS
+
+    // Split-ready target: clearFormFieldsExceptSync
+
+    // =========================================================
 
     function clearFormFieldsExceptSync() {
         const fields = ['wakeTime', 'weight', 'mealBreakfast', 'mealLunch', 'mealDinner', 'goingOut', 'sleepTime', 'diary', 'replyMessage', 'moodNote', 'rewardNote'];
@@ -5868,6 +6487,14 @@
         removePhotoUI();
     }
 
+    // =========================================================
+
+    // MODULE: PHOTO / UI
+
+    // Split-ready target: removePhotoUI
+
+    // =========================================================
+
     function removePhotoUI() {
         uploadedPhotoBase64 = "";
         const input = document.getElementById('goingOutPhoto');
@@ -5876,10 +6503,29 @@
         if (preview) preview.style.display = 'none';
     }
 
+    // =========================================================
+
+    // MODULE: WATER / COUNTER
+
+    // Split-ready target: addWater
+
+    // =========================================================
+
     function addWater(amount) { currentWater += amount; document.getElementById('waterDisplay').innerText = currentWater; updateDailyCards(); executeAutoSave(); }
     function resetWater() { currentWater = 0; document.getElementById('waterDisplay').innerText = currentWater; updateDailyCards(); executeAutoSave(); }
     function removePhoto() { removePhotoUI(); updateDailyCards(); executeAutoSave(); }
 
+    // =========================================================
+
+    // MODULE: PHOTO / UPLOAD PREVIEW
+
+    // Split-ready target: handlePhotoUpload
+
+    // =========================================================
+
+    // 사진 업로드 처리
+    // 업로드 이미지를 Base64로 변환해 날짜 기록과 함께 저장한다.
+    // 주의: Storage를 쓰지 않는 현재 구조를 유지한다.
     function handlePhotoUpload(input) {
         const file = input.files[0];
         if (!file) return;
@@ -5905,12 +6551,40 @@
         reader.readAsDataURL(file);
     }
 
+    // =========================================================
+
+    // MODULE: AUTOSAVE / TRIGGER
+
+    // Split-ready target: triggerAutoSave
+
+    // =========================================================
+
+    // 자동저장 debounce 진입점
+    // 입력 이벤트가 몰려도 Firebase write가 과도하게 발생하지 않도록 지연 저장한다.
     function triggerAutoSave() {
         showSaveStatus('✍️ 입력 중...');
         clearTimeout(autoSaveTimeout);
         autoSaveTimeout = setTimeout(executeAutoSave, 600);
     }
 
+    // =========================================================
+
+    // MODULE: AUTOSAVE / EXECUTE
+
+    // Split-ready target: executeAutoSave
+
+    // =========================================================
+
+    // 날짜별 기록 자동저장
+    // rooms/{roomCode}/days/{recordDate}에 현재 폼 데이터를 저장한다.
+    // 주의: 기존 DB Key와 필드명을 바꾸면 과거 기록 호환이 깨진다.
+
+    // =========================================================
+    // MODULE 14. REPORT BUILD / SAVE
+    // 분리 후보: autosave.js + report.js 선택
+    // 현재 폼 상태를 reportText/newRecord로 조립해 날짜별 Firebase 기록으로 저장한다.
+    // 결과 텍스트 형식과 저장 key는 기존 사용자 데이터 호환 때문에 유지한다.
+    // =========================================================
     async function executeAutoSave() {
         if (!currentUser) { showSaveStatus('🔒 로그인 후 저장됩니다.'); return; }
         const roomCode = getRoomCodeForData();
@@ -5972,64 +6646,51 @@
             .catch((err) => { console.error(err); showSaveStatus('❌ 저장 실패 또는 권한 없음'); });
     }
 
+    // =========================================================
+
+    // MODULE: AUTOSAVE / STATUS UI
+
+    // Split-ready target: showSaveStatus
+
+    // =========================================================
+
     function showSaveStatus(msg) {
         const el = document.getElementById('saveStatus');
         if (el) el.innerText = msg;
     }
 
-    function displayHistory(daysData) {
-        const historyList = document.getElementById('historyList');
-        renderHistorySummary(daysData || {});
-        updateHistoryLaunchSub(daysData || {});
-        renderCalendar(daysData || {});
-        renderPhotoThumbs(daysData || {});
-        if (!daysData) {
-            historyList.innerHTML = '<div class="empty-message">아직 저장된 서버 기록이 없습니다. ✨</div>';
-            return;
-        }
-        const filterInput = document.getElementById('historyFilterDate');
-        const filterValue = filterInput ? filterInput.value : '';
-        const allDates = Object.keys(daysData).sort((a, b) => new Date(b) - new Date(a));
-        const sortedDates = allDates.filter(date => !filterValue || date === filterValue);
-        if (sortedDates.length === 0) {
-            historyList.innerHTML = '<div class="empty-message">선택하신 날짜의 기록이 서버에 없습니다. 📅</div>';
-            return;
-        }
-        let html = '';
-        sortedDates.forEach((date) => {
-            const record = daysData[date] || {};
-            const shortDiary = record.diary ? record.diary.substring(0, 12) : '기록 없음';
-            const shortReply = record.replyMessage ? record.replyMessage.substring(0, 12) : '';
-            const photoIndicator = record.photo ? '📷' : '';
-            const choicePreview = record.dailyChoiceLabel && record.dailyChoiceLabel !== '기록 없음' ? ` | ${record.dailyChoiceLabel}` : '';
-            const moodPreview = record.moodLabel && record.moodLabel !== '기록 없음' ? ` | ${record.moodLabel}` : '';
-            const missionPreview = record.missionSummary && record.missionSummary !== '기록 없음' ? ` | 🎯 ${record.missionSummary}` : '';
-            html += `
-                <div class="history-item" onclick="toggleHistoryItem('${date}')">
-                    <div class="history-item-date">📅 ${date}의 기록 ${photoIndicator}</div>
-                    <div>💧물: ${record.water || '0ML'} | ⚖️체중: ${record.weight || '기록 없음'}${moodPreview}${missionPreview}${choicePreview} | 📝한줄: ${shortDiary}...${shortReply ? ' | 💌피드백: ' + shortReply + '...' : ''}</div>
-                    <button class="btn-delete" onclick="deleteRecord(event, '${date}')">삭제</button>
-                    <div class="history-item-content" id="content-${date}">
-                        ${record.fullText ? record.fullText.replace(/\n/g, '<br>') : ''}
-                        ${record.photo ? `<img src="${record.photo}" class="history-photo-display" alt="외출 사진">` : ''}
-                        <button class="btn-copy" style="margin-top:15px; padding:8px; font-size:0.85rem;" onclick="copyDirectText(event, '${date}')">📋 이 기록 복사하기</button>
-                    </div>
-                </div>`;
-        });
-        historyList.innerHTML = html;
-    }
+    // =========================================================
 
-    function applyHistoryFilter() { if (cachedDaysData) displayHistory(cachedDaysData); }
-    function clearHistoryFilter() {
-        const filterInput = document.getElementById('historyFilterDate');
-        if (filterInput) filterInput.value = '';
-        if (cachedDaysData) displayHistory(cachedDaysData);
-    }
-    function toggleHistoryItem(date) {
-        const content = document.getElementById(`content-${date}`);
-        if (content) content.style.display = content.style.display === 'block' ? 'none' : 'block';
-    }
+    // MODULE: HISTORY / DISPLAY RECORDS
 
+    // Split-ready target: displayHistory
+
+    // =========================================================
+
+/* RC2 v2.6.0 STEP3: removed duplicate earlier `displayHistory()` implementation; final implementation below is authoritative. */
+
+
+/* RC2 v2.6.0 STEP3: removed duplicate earlier `applyHistoryFilter()` implementation; final implementation below is authoritative. */
+
+/* RC2 v2.6.0 STEP3: removed duplicate earlier `clearHistoryFilter()` implementation; final implementation below is authoritative. */
+
+/* RC2 v2.6.0 STEP3: removed duplicate earlier `toggleHistoryItem()` implementation; final implementation below is authoritative. */
+
+
+    // =========================================================
+
+    // MODULE: HISTORY / DELETE RECORD
+
+    // Split-ready target: deleteRecord
+
+    // =========================================================
+
+
+    // =========================================================
+    // MODULE 15. RECORD ACTIONS / COPY
+    // 분리 후보: history.js + clipboard.js 선택
+    // 기록 삭제, 결과 생성, 클립보드 복사, 토스트 표시를 담당한다.
+    // =========================================================
     async function deleteRecord(event, date) {
         event.stopPropagation();
         const roomCode = getRoomCodeForData();
@@ -6047,6 +6708,16 @@
         });
     }
 
+    // =========================================================
+
+    // MODULE: REPORT / GENERATE RESULT
+
+    // Split-ready target: finalizeAndGenerateReport
+
+    // =========================================================
+
+    // 결과문 생성 및 명시 저장
+    // 자동저장과 별개로 사용자가 복사할 수 있는 하루 보고 문구를 생성한다.
     async function finalizeAndGenerateReport() {
         const roomCode = getRoomCodeForData();
         const date = document.getElementById('recordDate').value;
@@ -6066,6 +6737,14 @@
         });
     }
 
+    // =========================================================
+
+    // MODULE: REPORT / COPY
+
+    // Split-ready target: copyToClipboard
+
+    // =========================================================
+
     function copyToClipboard() { executeCopy(document.getElementById('resultBox').value); }
     function executeCopy(text) {
         navigator.clipboard.writeText(text).then(() => { showToast(); }).catch(() => {
@@ -6075,11 +6754,32 @@
             document.body.removeChild(tempBox); showToast();
         });
     }
+    // =========================================================
+    // MODULE: UI / TOAST
+    // Split-ready target: showToast
+    // =========================================================
     function showToast() {
         const toast = document.getElementById('toast'); toast.style.display = 'block';
         setTimeout(() => { toast.style.display = 'none'; }, 2000);
     }
 
+    // =========================================================
+
+    // MODULE: CHAT / LISTEN
+
+    // Split-ready target: listenChat
+
+    // =========================================================
+
+    // Chat listener 연결
+    // 현재 방의 chat 경로를 실시간 구독한다.
+
+    // =========================================================
+    // MODULE 16. CHAT
+    // 분리 후보: chat.js
+    // 방별 채팅 listener, 메시지 렌더링, 전송, 내 메시지 정렬을 담당한다.
+    // chats/{roomCode} 경로는 변경 금지.
+    // =========================================================
     function listenChat() {
         const roomCode = getRoomCodeForData();
         if (!currentUser || !roomCode) return;
@@ -6088,6 +6788,16 @@
         chatRef.limitToLast(50).on('value', (snapshot) => { renderMessages(snapshot.val()); });
     }
 
+    // =========================================================
+
+    // MODULE: CHAT / RENDER
+
+    // Split-ready target: renderMessages
+
+    // =========================================================
+
+    // Chat 메시지 렌더링
+    // sender uid를 기준으로 내 메시지/상대 메시지 정렬을 결정한다.
     function renderMessages(messages) {
         const chatMessages = document.getElementById('chatMessages');
         chatMessages.innerHTML = '';
@@ -6118,6 +6828,16 @@
         chatMessages.scrollTop = chatMessages.scrollHeight;
     }
 
+    // =========================================================
+
+    // MODULE: CHAT / SEND
+
+    // Split-ready target: sendChatMessage
+
+    // =========================================================
+
+    // Chat 메시지 전송
+    // 현재 roomCode/chat 하위에 메시지를 push한다.
     async function sendChatMessage() {
         const roomCode = getRoomCodeForData();
         const sender = document.getElementById('chatSender').value.trim();
@@ -6136,6 +6856,14 @@
         document.getElementById('chatInput').value = '';
     }
 
+    // =========================================================
+
+    // MODULE: CHAT / ALIGNMENT
+
+    // Split-ready target: updateChatAlignment
+
+    // =========================================================
+
     function updateChatAlignment() {
         const roomCode = getRoomCodeForData();
         if (!roomCode || !chatRef) return;
@@ -6144,7 +6872,45 @@
 
 
 
-    function openHistoryPanelModal() {
+    // =========================================================
+
+
+
+    // MODULE: HISTORY / PANEL MODAL
+
+
+
+    // Split-ready target: openHistoryPanelModal
+
+
+
+    // =========================================================
+
+
+
+    
+    // =========================================================
+    // RC2 v2.6.0 STEP2 QA NOTE
+    // 아래 History 영역에는 과거 RC 누적 과정에서 동일 이름 함수(displayHistory/renderCalendar 등)가 여러 번 선언되어 있다.
+    // 브라우저에서는 마지막 선언이 실제로 적용되므로 이번 STEP2에서는 제거하지 않는다.
+    // STEP3에서 기능 검증 후 중복 제거/통합 대상으로 다룬다.
+    // RC2 v2.6.0 QA NOTE: duplicate history renderer names
+    // ---------------------------------------------------------
+    // 이 파일은 기존 RC 단계 누적 과정에서 displayHistory / renderCalendar 등
+    // 일부 History 함수명이 뒤쪽에서 재정의되는 구조를 포함한다.
+    // JS 동작상 마지막 선언이 최종 적용되므로, STEP 1에서는 기능 보존을 위해
+    // 중복 제거를 하지 않는다. STEP 3에서 QA 후 안전하게 통합한다.
+    // =========================================================
+// 기록실 메인 팝업 열기
+// Calendar/사진 썸네일/선택 날짜 카드가 한 패널 안에서 동작한다.
+
+    // =========================================================
+    // MODULE 17. HISTORY PANEL / CALENDAR / DETAIL POPUP
+    // 분리 후보: history.js
+    // 지난 기록실 팝업, 캘린더, 사진 썸네일, 날짜별 상세 팝업을 담당한다.
+    // STEP3에서 중복 렌더 함수 정리 완료.
+    // =========================================================
+function openHistoryPanelModal() {
         openModalOverlayById('historyPanelOverlay');
     }
 
@@ -6152,18 +6918,26 @@
         closeModalOverlayById('historyPanelOverlay');
     }
 
-    function updateHistoryLaunchSub(daysData) {
-        const sub = document.getElementById('historyLaunchSub');
-        if (!sub) return;
-        const stats = calculateHistoryStats(daysData || {});
-        const photos = Object.values(daysData || {}).filter(record => record && record.photo).length;
-        sub.textContent = `이번 주 ${stats.weekCount}/7 · 미션 ${stats.missionRate} · 사진 ${photos}장`;
-    }
+/* RC2 v2.6.0 STEP3: removed duplicate earlier `updateHistoryLaunchSub()` implementation; final implementation below is authoritative. */
+
+
+
+    /* =========================================================
+       RC2 v2.6.0 STEP3: 중복 함수 정리 완료
+       - displayHistory / renderCalendar / renderPhotoThumbs 등 History 중복 선언 제거
+       - 브라우저에서 실제 적용되던 '마지막 선언'만 보존
+       - Firebase / Room / DB Key / AutoSave / 저장 구조 변경 없음
+       - 기존 onclick/API 함수명은 유지하여 HTML 이벤트 연결 보호
+       ========================================================= */
 
     /* =========================================================
        RC2 v2.3.0 History Popup UI Override
        - 저장/삭제/권한/데이터 구조는 기존 함수 재사용
        ========================================================= */
+    // =========================================================
+    // MODULE: HISTORY / FORMAT HELPERS
+    // Split-ready target: formatHistoryDateLabel
+    // =========================================================
     function formatHistoryDateLabel(date) {
         if (!date) return '날짜 없음';
         const parts = date.split('-');
@@ -6193,59 +6967,32 @@
         return text ? `<span class="history-chip">${escapeHtml(String(text))}</span>` : '';
     }
 
-    function displayHistory(daysData) {
-        const historyList = document.getElementById('historyList');
-        renderHistorySummary(daysData || {});
-        updateHistoryLaunchSub(daysData || {});
-        renderCalendar(daysData || {});
-        renderPhotoThumbs(daysData || {});
-        if (!historyList) return;
-        if (!daysData) {
-            historyList.innerHTML = '<div class="empty-message">아직 저장된 서버 기록이 없습니다. ✨</div>';
-            return;
-        }
-        const filterInput = document.getElementById('historyFilterDate');
-        const filterValue = filterInput ? filterInput.value : '';
-        const allDates = Object.keys(daysData).sort((a, b) => new Date(b) - new Date(a));
-        const sortedDates = allDates.filter(date => !filterValue || date === filterValue);
-        if (sortedDates.length === 0) {
-            historyList.innerHTML = '<div class="empty-message">선택하신 날짜의 기록이 서버에 없습니다. 📅</div>';
-            return;
-        }
-        historyList.innerHTML = sortedDates.map((date) => {
-            const record = daysData[date] || {};
-            const icon = getHistoryMoodIcon(record);
-            const missionText = getHistoryMissionText(record);
-            const diaryPreview = record.diary ? record.diary.substring(0, 34) : '오늘의 하루 기록을 열어 확인하세요.';
-            const chips = [
-                record.moodLabel && record.moodLabel !== '기록 없음' ? record.moodLabel : '',
-                record.water ? `💧 ${record.water}` : '',
-                record.weight ? `⚖️ ${record.weight}` : '',
-                missionText ? `🎯 ${missionText}` : '',
-                record.photo ? '📷 사진' : '',
-                record.dailyChoiceLabel && record.dailyChoiceLabel !== '기록 없음' ? record.dailyChoiceLabel : ''
-            ].map(makeHistoryChip).join('');
-            return `
-                <button type="button" class="history-day-card" onclick="openHistoryDetailModal('${date}')">
-                    <span class="history-day-icon">${icon}</span>
-                    <span>
-                        <span class="history-day-title">${formatHistoryDateLabel(date)}의 기록</span>
-                        <span class="history-day-sub">${escapeHtml(diaryPreview)}${record.diary && record.diary.length > 34 ? '...' : ''}</span>
-                        <span class="history-day-chips">${chips}</span>
-                    </span>
-                    <span class="history-day-actions">
-                        <span class="history-card-arrow">›</span>
-                        <span class="btn-delete" onclick="deleteRecord(event, '${date}')">삭제</span>
-                    </span>
-                </button>`;
-        }).join('');
-    }
+/* RC2 v2.6.0 STEP3: removed duplicate earlier `displayHistory()` implementation; final implementation below is authoritative. */
+
+
+    // =========================================================
+
+    // MODULE: HISTORY / DETAIL BLOCK
+
+    // Split-ready target: historyDetailBlock
+
+    // =========================================================
 
     function historyDetailBlock(title, body) {
         if (!body || body === '기록 없음') return '';
         return `<div class="history-detail-block"><div class="history-detail-block-title">${title}</div><div class="history-detail-block-body">${escapeHtml(String(body))}</div></div>`;
     }
 
+    // =========================================================
+
+    // MODULE: HISTORY / DETAIL MODAL
+
+    // Split-ready target: openHistoryDetailModal
+
+    // =========================================================
+
+    // 기록 상세 팝업 열기
+    // 선택한 날짜의 저장 필드를 읽기 전용 상세 카드로 렌더링한다.
     function openHistoryDetailModal(date) {
         const record = cachedDaysData && cachedDaysData[date] ? cachedDaysData[date] : null;
         if (!record) return;
@@ -6304,30 +7051,8 @@
         if (box) box.innerHTML = '';
     }
 
-    function renderCalendar(daysData) {
-        const box = document.getElementById('calendarBox');
-        if (!box) return;
-        const current = selectedHistoryDate || document.getElementById('recordDate')?.value || '';
-        const base = current ? new Date(current + 'T00:00:00') : new Date();
-        const year = base.getFullYear();
-        const month = base.getMonth();
-        const first = new Date(year, month, 1);
-        const last = new Date(year, month + 1, 0);
-        const today = new Date();
-        const todayYmd = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
-        const week = ['일','월','화','수','목','금','토'];
-        let html = `<div style="font-size:0.9rem;font-weight:800;color:#636e72;margin:6px 0 10px;">📅 ${year}.${String(month+1).padStart(2,'0')} 기록 캘린더</div><div class="calendar-grid">`;
-        html += week.map(w => `<div class="calendar-head">${w}</div>`).join('');
-        for (let i = 0; i < first.getDay(); i++) html += '<div class="calendar-day"></div>';
-        for (let day = 1; day <= last.getDate(); day++) {
-            const ymd = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
-            const rec = (daysData || {})[ymd];
-            const icons = rec ? `${rec.photo ? '📷' : ''}${rec.missionSummary && rec.missionSummary !== '기록 없음' ? '🎯' : ''}${rec.mood === 'hard' || rec.mood === 'veryHard' ? '☁️' : ''}` : '';
-            html += `<div class="calendar-day ${rec ? 'has-record' : ''} ${ymd === todayYmd ? 'today' : ''} ${ymd === selectedHistoryDate ? 'selected-record' : ''}" ${rec ? `onclick="selectHistoryDate('${ymd}')"` : ''}>${day}<span class="calendar-icons">${icons}</span></div>`;
-        }
-        html += '</div>';
-        box.innerHTML = html;
-    }
+/* RC2 v2.6.0 STEP3: removed duplicate earlier `renderCalendar()` implementation; final implementation below is authoritative. */
+
 
     function updateHistoryLaunchSub(daysData) {
         const sub = document.getElementById('historyLaunchSub');
@@ -6357,58 +7082,18 @@
         if (cachedDaysData) displayHistory(cachedDaysData);
     }
 
-    function displayHistory(daysData) {
-        const historyList = document.getElementById('historyList');
-        renderHistorySummary(daysData || {});
-        updateHistoryLaunchSub(daysData || {});
-        renderCalendar(daysData || {});
-        renderPhotoThumbs(daysData || {});
-        if (!historyList) return;
-        if (!daysData || Object.keys(daysData).length === 0) {
-            historyList.innerHTML = '<div class="empty-message">아직 저장된 서버 기록이 없습니다. ✨</div>';
-            return;
-        }
-        if (!selectedHistoryDate) {
-            historyList.innerHTML = '<div class="history-selected-hint">캘린더에서 기록이 있는 날짜를 누르면<br>아래에 그 날짜 카드만 표시됩니다.</div>';
-            return;
-        }
-        const record = daysData[selectedHistoryDate];
-        if (!record) {
-            historyList.innerHTML = '<div class="history-selected-hint">선택한 날짜에는 저장된 기록이 없습니다. 📅</div>';
-            return;
-        }
-        const date = selectedHistoryDate;
-        const icon = getHistoryMoodIcon(record);
-        const missionText = getHistoryMissionText(record);
-        const diaryPreview = record.diary ? record.diary.substring(0, 42) : '오늘의 하루 기록을 열어 확인하세요.';
-        const chips = [
-            record.moodLabel && record.moodLabel !== '기록 없음' ? record.moodLabel : '',
-            record.water ? `💧 ${record.water}` : '',
-            record.weight ? `⚖️ ${record.weight}` : '',
-            missionText ? `🎯 ${missionText}` : '',
-            record.photo ? '📷 사진' : '',
-            record.dailyChoiceLabel && record.dailyChoiceLabel !== '기록 없음' ? record.dailyChoiceLabel : ''
-        ].map(makeHistoryChip).join('');
-        historyList.innerHTML = `
-            <button type="button" class="history-day-card" onclick="openHistoryDetailModal('${date}')">
-                <span class="history-day-icon">${icon}</span>
-                <span>
-                    <span class="history-day-title">${formatHistoryDateLabel(date)}의 기록</span>
-                    <span class="history-day-sub">${escapeHtml(diaryPreview)}${record.diary && record.diary.length > 42 ? '...' : ''}</span>
-                    <span class="history-day-chips">${chips}</span>
-                </span>
-                <span class="history-day-actions">
-                    <span class="history-card-arrow">›</span>
-                    <span class="btn-delete" onclick="deleteRecord(event, '${date}')">삭제</span>
-                </span>
-            </button>`;
-    }
+/* RC2 v2.6.0 STEP3: removed duplicate earlier `displayHistory()` implementation; final implementation below is authoritative. */
+
 
 
     /* =========================================================
        RC2 v2.5.7 Chat UI Premium Override
        - 기존 daysData / deleteRecord / openHistoryDetailModal 데이터 흐름 유지
        ========================================================= */
+    // =========================================================
+    // MODULE: HISTORY / OVERVIEW STATS
+    // Split-ready target: getHistoryOverviewStats
+    // =========================================================
     function getHistoryOverviewStats(daysData) {
         const dates = Object.keys(daysData || {}).sort();
         const records = dates.map(date => daysData[date] || {});
@@ -6418,6 +7103,16 @@
         return { total: dates.length, photos, missionDays, latest };
     }
 
+    // =========================================================
+
+    // MODULE: HISTORY / HERO RENDER
+
+    // Split-ready target: renderHistoryHero
+
+    // =========================================================
+
+    // 기록실 상단 요약 렌더링
+    // 총 기록일/사진/미션/최근 기록 정보를 카드로 보여준다.
     function renderHistoryHero(daysData) {
         const box = document.getElementById('historyHero');
         if (!box) return;
@@ -6518,7 +7213,17 @@
 
 
     /* RC2 v2.5.7 Motion + Final UI QA helpers */
+
+    // =========================================================
+    // MODULE 18. BOOT / MOTION QA
+    // 분리 후보: boot.js 또는 motion.js
+    // 카드 터치감, 모션 바인딩, MutationObserver 기반 동적 UI 보정을 담당한다.
+    // =========================================================
     (function initMotionFinalQA() {
+        // =========================================================
+        // MODULE: MOTION / TAP FEEDBACK
+        // Split-ready target: markInteractiveTap
+        // =========================================================
         function markInteractiveTap(target) {
             if (!target || target.dataset.hmTapBound === '1') return;
             target.dataset.hmTapBound = '1';
@@ -6527,6 +7232,14 @@
             target.addEventListener('pointercancel', () => target.classList.remove('hm-pressing'), { passive: true });
             target.addEventListener('pointerleave', () => target.classList.remove('hm-pressing'), { passive: true });
         }
+
+        // =========================================================
+
+        // MODULE: MOTION / BIND TARGETS
+
+        // Split-ready target: bindMotionTargets
+
+        // =========================================================
 
         function bindMotionTargets() {
             document.querySelectorAll('.daily-card, .room-settings-card, .mission-compact-card, .history-launch-card, .history-day-card, .choice-btn, .mood-btn, .mission-chip, .btn-main, .btn-connect, .daily-modal-save, .chat-send-btn')
