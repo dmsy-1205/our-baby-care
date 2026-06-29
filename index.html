@@ -999,7 +999,7 @@
     <button type="button" class="room-settings-card" onclick="openRoomSettingsModal()">
         <span class="room-settings-icon">🏠</span>
         <span>
-            <span class="room-settings-title">방 설정</span>
+            <span class="room-settings-title">우리의 공간</span>
             <span class="room-settings-sub" id="roomSettingsCardSub">방을 만들거나 초대코드로 연결하세요.</span>
         </span>
         <span class="room-settings-arrow">›</span>
@@ -1008,7 +1008,7 @@
     <div class="room-settings-overlay" id="roomSettingsOverlay" onclick="if(event.target.id==='roomSettingsOverlay') closeRoomSettingsModal()">
         <div class="room-settings-modal" role="dialog" aria-modal="true" aria-labelledby="roomSettingsTitle">
             <div class="room-settings-head">
-                <h2 id="roomSettingsTitle">🏠 방 설정</h2>
+                <h2 id="roomSettingsTitle">🏡 우리의 공간</h2>
                 <button type="button" class="modal-close-btn" onclick="closeRoomSettingsModal()">닫기</button>
             </div>
 
@@ -1131,8 +1131,14 @@
     </div>
 
     <div class="input-group">
-        <label>📝 오늘의 한 줄 (일기)</label>
-        <textarea id="diary" rows="3" placeholder="오늘 하루는 어땠나요?" oninput="triggerAutoSave()"></textarea>
+        <button type="button" class="daily-card" onclick="openDailyModal('diary')">
+            <span class="daily-card-icon">📝</span>
+            <span>
+                <span class="daily-card-title">오늘의 하루</span>
+                <span class="daily-card-sub" id="diaryCardSub">오늘 하루를 기록해 보세요.</span>
+            </span>
+            <span class="daily-card-arrow">›</span>
+        </button>
     </div>
 
     <div class="input-group">
@@ -1360,6 +1366,18 @@
             <div class="meal-row"><span>저녁</span><input type="text" id="mealDinner" placeholder="저녁 기록" oninput="handleDailyFieldChanged()"></div>
         </div>
         <button type="button" class="daily-modal-save" onclick="closeDailyModal('meal')">저장하고 닫기</button>
+    </div>
+</div>
+
+<div class="daily-modal-overlay" id="diaryModalOverlay" onclick="if(event.target.id==='diaryModalOverlay') closeDailyModal('diary')">
+    <div class="daily-modal" role="dialog" aria-modal="true" aria-labelledby="diaryModalTitle">
+        <div class="daily-modal-head">
+            <h2 id="diaryModalTitle">📝 오늘의 하루</h2>
+            <button type="button" class="modal-close-btn" onclick="closeDailyModal('diary')">닫기</button>
+        </div>
+        <div class="feedback-hint">오늘 하루의 흐름, 마음, 기억하고 싶은 일을 편하게 남겨주세요.</div>
+        <textarea id="diary" rows="5" placeholder="오늘 하루는 어땠나요?" oninput="handleDailyFieldChanged()"></textarea>
+        <button type="button" class="daily-modal-save" onclick="closeDailyModal('diary')">저장하고 닫기</button>
     </div>
 </div>
 
@@ -1820,6 +1838,12 @@
         if (mealSub) {
             const filled = ['mealBreakfast', 'mealLunch', 'mealDinner'].filter(id => getTrimmedValue(id)).length;
             mealSub.innerText = filled ? `${filled}/3 입력 완료` : '아침 · 점심 · 저녁을 필요할 때 입력하세요.';
+        }
+
+        const diarySub = document.getElementById('diaryCardSub');
+        if (diarySub) {
+            const text = getTrimmedValue('diary');
+            diarySub.innerText = text ? (text.length > 28 ? `${text.slice(0, 28)}...` : text) : '오늘 하루를 기록해 보세요.';
         }
 
         const feedbackSub = document.getElementById('feedbackCardSub');
