@@ -1,0 +1,3774 @@
+/* HearMe2nite RC2 v2.8.0 STEP1 - CSS 분리본
+   - 기존 UI CSS를 index.html에서 추출
+   - 기능/JS/Firebase/DB 구조 변경 없음
+*/
+
+:root {
+            --primary-color: #ff7675;
+            --accent-purple: #8e5cf4;
+            --soft-purple: #f3ecff;
+            --soft-pink: #fff3f7;
+            --bg-color: #fbf7ff;
+            --card-color: #ffffff;
+            --text-color: #2d3436;
+            --border-color: #eadcff;
+            --water-color: #0984e3;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+
+        body {
+            background: radial-gradient(circle at top left, #fff0f6 0, transparent 32%), linear-gradient(135deg, #fff7fb 0%, #f4ecff 52%, #fffaf2 100%);
+            color: var(--text-color);
+            padding: 20px 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            background: var(--card-color);
+            width: 100%;
+            max-width: 450px;
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 16px 40px rgba(142, 92, 244, 0.10);
+            border: 1px solid rgba(142, 92, 244, 0.12);
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .autosave-status {
+            position: absolute;
+            top: 25px;
+            right: 25px;
+            font-size: 0.75rem;
+            color: #2ecc71;
+            font-weight: 600;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 1.4rem;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+            font-weight: 700;
+        }
+
+        .sync-box {
+            background: linear-gradient(135deg, #fff5f8, #f7f0ff);
+            border: 1px dashed #d7c3ff;
+            padding: 12px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+        .sync-box label {
+            font-size: 0.8rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            display: block;
+            margin-bottom: 4px;
+        }
+        .sync-box input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #fab1a0;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            text-align: center;
+            font-weight: bold;
+            color: #2d3436;
+        }
+
+        .btn-connect {
+            background-color: #4a90e2;
+            color: white;
+            padding: 10px;
+            font-size: 0.85rem;
+            border-radius: 8px;
+            margin-top: 10px;
+            font-weight: bold;
+            width: 100%;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(74, 144, 226, 0.2);
+            transition: background 0.2s;
+        }
+        .btn-connect:active {
+            background-color: #357abd;
+        }
+
+        .input-group {
+            margin-bottom: 18px;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #636e72;
+        }
+
+        .input-group input, .input-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #dfe6e9;
+            border-radius: 10px;
+            font-size: 1rem;
+            background-color: #fafafa;
+            outline: none;
+        }
+
+        .input-group input:focus, .input-group textarea:focus {
+            border-color: var(--primary-color);
+            background-color: #fff;
+        }
+
+        .row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .water-counter-box {
+            background: #f1f7ff;
+            border: 1px solid #d2e4ff;
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .water-display {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: var(--water-color);
+            margin-bottom: 10px;
+        }
+
+        .water-btns {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 6px;
+        }
+
+        .btn-water {
+            background: white;
+            border: 1px solid #99c2ff;
+            color: var(--water-color);
+            padding: 8px 0;
+            font-size: 0.85rem;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .btn-water:active { background: #e3efff; }
+        .btn-water.reset { color: #636e72; border-color: #dfe6e9; }
+
+        .meal-container {
+            background: #fafafa;
+            border: 1px solid #dfe6e9;
+            border-radius: 12px;
+            padding: 12px;
+        }
+
+        .meal-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .meal-row:last-child { margin-bottom: 0; }
+        .meal-row span { font-size: 0.85rem; font-weight: 600; color: #636e72; width: 45px; flex-shrink: 0; }
+        .meal-row input { flex-grow: 1; padding: 10px; font-size: 0.95rem; border: 1px solid #e2e8f0; border-radius: 8px; }
+
+        .file-label {
+            display: inline-block;
+            background: #f1f2f6;
+            color: #2d3436;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            text-align: center;
+            width: 100%;
+            cursor: pointer;
+            border: 1px dashed #b2bec3;
+            margin-top: 5px;
+        }
+
+        .preview-box { margin-top: 8px; display: none; text-align: center; position: relative; }
+        .preview-box img { max-width: 100%; max-height: 180px; border-radius: 10px; object-fit: cover; border: 1px solid #dfe6e9; }
+        .btn-remove-photo { position: absolute; top: 5px; right: 5px; background: rgba(0,0,0,0.6); color: white; border: none; border-radius: 50%; width: 24px; height: 24px; font-size: 0.8rem; cursor: pointer; }
+
+        button { width: 100%; padding: 14px; border: none; border-radius: 12px; font-size: 1rem; font-weight: bold; cursor: pointer; }
+        .btn-main { background-color: var(--primary-color); color: white; margin-top: 10px; margin-bottom: 20px; }
+
+        .result-container { display: none; margin-top: 10px; border-top: 2px dashed #ffeaa7; padding-top: 20px; }
+        .result-title { font-size: 0.95rem; font-weight: bold; color: #2d3436; margin-bottom: 8px; }
+        #resultBox { width: 100%; height: 200px; background-color: #fffaf0; border: 1px solid #ffeaa7; border-radius: 10px; padding: 12px; font-size: 0.95rem; line-height: 1.5; resize: none; outline: none; }
+        .btn-copy { background-color: #55efc4; color: #2d3436; margin-top: 10px; }
+
+        .history-card { background: var(--card-color); width: 100%; max-width: 450px; border-radius: 20px; padding: 25px; box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05); border: 1px solid #dfe6e9; }
+        .history-header { font-size: 1.1rem; font-weight: bold; color: #2d3436; margin-bottom: 15px; }
+        .history-list { max-height: 350px; overflow-y: auto; }
+        .history-item { background: #f1f2f6; padding: 12px; border-radius: 10px; margin-bottom: 10px; font-size: 0.9rem; position: relative; cursor: pointer; }
+        .history-item-date { font-weight: bold; color: var(--primary-color); margin-bottom: 4px; }
+        .history-item-content { white-space: pre-line; color: #636e72; font-size: 0.85rem; display: none; margin-top: 8px; padding-top: 8px; border-top: 1px dashed #cbd5e1; }
+        .history-photo-display { margin-top: 10px; max-width: 100%; max-height: 200px; border-radius: 8px; object-fit: cover; display: block; }
+        .btn-delete { position: absolute; top: 10px; right: 10px; background: #ff7675; color: white; border: none; padding: 4px 8px; font-size: 0.75rem; border-radius: 6px; width: auto; }
+        .empty-message { text-align: center; color: #b2bec3; font-size: 0.9rem; padding: 20px 0; }
+        .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background-color: rgba(45, 52, 54, 0.9); color: white; padding: 10px 20px; border-radius: 20px; font-size: 0.9rem; display: none; z-index: 10; }
+
+
+        .auth-box { background: #fff; width: 100%; max-width: 450px; border-radius: 20px; padding: 25px; box-shadow: 0 10px 20px rgba(0,0,0,0.05); border: 1px solid rgba(255,118,117,0.1); margin-bottom: 20px; }
+        .auth-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 15px; }
+        .auth-tabs button { padding: 10px; border-radius: 10px; background: #f1f2f6; color: #636e72; }
+        .auth-tabs button.active { background: var(--primary-color); color: #fff; }
+        .auth-help { font-size: 0.82rem; color: #636e72; line-height: 1.45; margin: 10px 0; }
+        .user-bar { background: #fff3f3; border: 1px solid #ffd6d6; border-radius: 12px; padding: 10px; margin-bottom: 15px; font-size: 0.85rem; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+        .btn-small { width: auto; padding: 8px 10px; border-radius: 8px; font-size: 0.8rem; }
+        .btn-secondary { background: #dfe6e9; color: #2d3436; }
+
+
+        /* STEP7 RC: 사용설명서 / 공간 목록 UX */
+        .app-title-row {
+            display: grid;
+            grid-template-columns: 42px 1fr 42px;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 6px;
+        }
+        .app-title-row h1 { margin: 0; }
+        .guide-btn {
+            width: 38px;
+            height: 38px;
+            border-radius: 14px;
+            padding: 0;
+            background: #fff3f3;
+            color: var(--primary-color);
+            border: 1px solid #ffd6d6;
+            box-shadow: 0 4px 10px rgba(255, 118, 117, 0.12);
+            font-size: 1.05rem;
+        }
+        .app-subtitle {
+            text-align: center;
+            color: #636e72;
+            font-size: 0.82rem;
+            line-height: 1.45;
+            margin-bottom: 16px;
+        }
+        .room-list-box {
+            margin-top: 10px;
+            display: grid;
+            gap: 8px;
+        }
+        .room-list-item {
+            background: #fff;
+            border: 1px solid #ffe0e0;
+            border-radius: 12px;
+            padding: 10px;
+            display: grid;
+            gap: 6px;
+        }
+        .room-list-title {
+            font-weight: 800;
+            color: #2d3436;
+            font-size: 0.82rem;
+            word-break: break-all;
+        }
+        .room-list-meta {
+            color: #636e72;
+            font-size: 0.75rem;
+            line-height: 1.35;
+        }
+        .room-open-btn {
+            padding: 8px 10px;
+            border-radius: 9px;
+            font-size: 0.78rem;
+            background: #ff7675;
+            color: #fff;
+        }
+        .guide-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(45, 52, 54, 0.45);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 18px;
+            z-index: 1000;
+        }
+        .guide-card {
+            width: 100%;
+            max-width: 440px;
+            max-height: 88vh;
+            overflow-y: auto;
+            background: #fff;
+            border-radius: 24px;
+            padding: 20px;
+            box-shadow: 0 18px 45px rgba(0,0,0,0.18);
+            border: 1px solid #ffe0e0;
+        }
+        .guide-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+        .guide-header h2 {
+            font-size: 1.18rem;
+            color: var(--primary-color);
+            margin: 0;
+        }
+        .guide-close {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            padding: 0;
+            background: #f1f2f6;
+            color: #636e72;
+            font-size: 1rem;
+        }
+        .guide-intro {
+            background: linear-gradient(135deg, #fff3f3, #fffaf0);
+            border: 1px solid #ffe0e0;
+            border-radius: 18px;
+            padding: 14px;
+            color: #636e72;
+            font-size: 0.88rem;
+            line-height: 1.55;
+            margin-bottom: 12px;
+        }
+        .guide-step {
+            background: #fff;
+            border: 1px solid #f1f2f6;
+            border-radius: 18px;
+            padding: 14px;
+            margin-bottom: 10px;
+            box-shadow: 0 6px 14px rgba(0,0,0,0.035);
+        }
+        .guide-step-title {
+            font-weight: 900;
+            color: #2d3436;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+        .guide-flow {
+            background: #fafafa;
+            border-radius: 14px;
+            padding: 10px;
+            text-align: center;
+            line-height: 1.8;
+            font-size: 0.88rem;
+            color: #2d3436;
+            font-weight: 700;
+        }
+        .guide-note {
+            margin-top: 8px;
+            color: #636e72;
+            font-size: 0.8rem;
+            line-height: 1.45;
+        }
+        .guide-footer {
+            background: #fff3f3;
+            color: #2d3436;
+            border-radius: 18px;
+            padding: 14px;
+            text-align: center;
+            font-size: 0.88rem;
+            line-height: 1.55;
+            margin-top: 12px;
+            font-weight: 700;
+        }
+        .guide-primary {
+            margin-top: 12px;
+            background: var(--primary-color);
+            color: white;
+        }
+
+
+        /* STEP8-1: 미션 / 기분 / 주인의 피드백 */
+        .mission-box, .mood-box {
+            background: #fffaf0;
+            border: 1px solid #ffeaa7;
+            border-radius: 14px;
+            padding: 12px;
+        }
+        .mission-helper, .mood-helper {
+            color: #636e72;
+            font-size: 0.78rem;
+            line-height: 1.45;
+            margin-bottom: 10px;
+        }
+        .mission-row {
+            display: grid;
+            grid-template-columns: 28px 1fr;
+            gap: 8px;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .mission-row:last-child { margin-bottom: 0; }
+        .mission-row input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            accent-color: var(--primary-color);
+        }
+        .mission-row input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #f6d365;
+            border-radius: 10px;
+            background: #fff;
+            font-size: 0.9rem;
+        }
+        .mood-options {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 6px;
+            margin-bottom: 10px;
+        }
+        .mood-btn {
+            padding: 9px 4px;
+            border-radius: 12px;
+            background: #fff;
+            border: 1px solid #ffe0e0;
+            color: #636e72;
+            font-size: 0.75rem;
+            line-height: 1.25;
+        }
+        .mood-btn.active {
+            background: #ff7675;
+            color: #fff;
+            border-color: #ff7675;
+            box-shadow: 0 4px 10px rgba(255, 118, 117, 0.2);
+        }
+
+
+        /* Ultimate RC: compact mission card + mission modal */
+        .mission-compact-card {
+            background: linear-gradient(135deg, #fff7f7, #fffaf0);
+            border: 1px solid #ffe0e0;
+            border-radius: 18px;
+            padding: 14px;
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 10px;
+            align-items: center;
+            box-shadow: 0 6px 14px rgba(255,118,117,0.08);
+        }
+        .mission-compact-title {
+            font-weight: 800;
+            color: #2d3436;
+            font-size: 0.95rem;
+            margin-bottom: 4px;
+        }
+        .mission-compact-sub {
+            color: #636e72;
+            font-size: 0.8rem;
+            line-height: 1.45;
+        }
+        .mission-progress-mini {
+            margin-top: 8px;
+            width: 100%;
+            height: 8px;
+            background: #ffecec;
+            border-radius: 99px;
+            overflow: hidden;
+        }
+        .mission-progress-mini > span {
+            display: block;
+            height: 100%;
+            width: 0%;
+            background: var(--primary-color);
+            border-radius: 99px;
+            transition: width 0.2s ease;
+        }
+        .mission-open-btn {
+            width: auto;
+            padding: 10px 12px;
+            border-radius: 12px;
+            background: var(--primary-color);
+            color: white;
+            font-size: 0.85rem;
+            white-space: nowrap;
+        }
+        .mission-modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(45,52,54,0.55);
+            z-index: 30;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 18px;
+        }
+        .mission-modal {
+            width: 100%;
+            max-width: 460px;
+            max-height: 86vh;
+            overflow-y: auto;
+            background: #fff;
+            border-radius: 24px;
+            padding: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.18);
+        }
+        .mission-modal-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+        .mission-modal-head h2 {
+            margin: 0;
+            font-size: 1.15rem;
+            color: var(--primary-color);
+        }
+        .modal-close-btn {
+            width: auto;
+            padding: 8px 10px;
+            border-radius: 10px;
+            background: #f1f2f6;
+            color: #636e72;
+            font-size: 0.85rem;
+        }
+        .mission-template-box {
+            background: #fff7f7;
+            border: 1px solid #ffe0e0;
+            border-radius: 16px;
+            padding: 12px;
+            margin-bottom: 12px;
+        }
+        .mission-template-title {
+            font-size: 0.86rem;
+            font-weight: 800;
+            color: #2d3436;
+            margin-bottom: 8px;
+        }
+        .mission-chip-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 7px;
+        }
+        .mission-chip {
+            width: auto;
+            padding: 8px 10px;
+            border-radius: 999px;
+            background: #fff;
+            border: 1px solid #ffd6d6;
+            color: #b26a6a;
+            font-size: 0.78rem;
+            font-weight: 700;
+        }
+        .mission-chip.primary {
+            background: #ff7675;
+            color: #fff;
+            border-color: #ff7675;
+        }
+        .mission-library-add {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        .mission-library-add input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ffd6d6;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            outline: none;
+            background: #fff;
+        }
+        .mission-library-add button {
+            width: auto;
+            padding: 10px 12px;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            background: var(--primary-color);
+            color: #fff;
+        }
+        .mission-library-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        .mission-library-item {
+            display: grid;
+            grid-template-columns: 1fr auto auto;
+            gap: 6px;
+            align-items: center;
+            padding: 9px 10px;
+            background: #fff;
+            border: 1px solid #ffe1e1;
+            border-radius: 12px;
+        }
+        .mission-library-text {
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: #2d3436;
+            line-height: 1.35;
+        }
+        .mission-mini-btn {
+            width: auto;
+            padding: 7px 9px;
+            border-radius: 9px;
+            font-size: 0.76rem;
+            background: #f1f2f6;
+            color: #2d3436;
+        }
+        .mission-mini-btn.delete {
+            background: #fff0f0;
+            color: #d63031;
+        }
+        .mission-modal .mission-row {
+            grid-template-columns: 26px 1fr;
+        }
+
+        /* Compact daily cards + input popups */
+        .daily-card {
+            width: 100%;
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            align-items: center;
+            gap: 12px;
+            padding: 14px;
+            border-radius: 18px;
+            border: 1px solid #eadcff;
+            background: linear-gradient(135deg, #ffffff, #fbf7ff);
+            box-shadow: 0 8px 22px rgba(142, 92, 244, 0.09);
+            text-align: left;
+            color: var(--text-color);
+        }
+        .daily-card:active { transform: scale(0.99); }
+        .daily-card-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #fff0f6;
+            font-size: 1.25rem;
+        }
+        .daily-card-title {
+            font-weight: 850;
+            font-size: 0.92rem;
+            margin-bottom: 3px;
+        }
+        .daily-card-sub {
+            color: #636e72;
+            font-size: 0.78rem;
+            line-height: 1.35;
+        }
+        .daily-card-arrow {
+            color: #a29bfe;
+            font-weight: 900;
+            font-size: 1.2rem;
+        }
+        .daily-modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(45,52,54,0.52);
+            z-index: 32;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 18px;
+        }
+        .daily-modal {
+            width: 100%;
+            max-width: 460px;
+            max-height: 86vh;
+            overflow-y: auto;
+            background: #fff;
+            border-radius: 24px;
+            padding: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.18);
+            border: 1px solid rgba(142, 92, 244, 0.15);
+        }
+        .daily-modal-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+        .daily-modal-head h2 {
+            margin: 0;
+            font-size: 1.12rem;
+            color: var(--accent-purple);
+        }
+        /* RC popup fix: modal input fields must use the full popup width */
+        .daily-modal textarea,
+        .daily-modal input[type="text"] {
+            width: 100%;
+            display: block;
+            padding: 12px;
+            border: 1px solid #dfe6e9;
+            border-radius: 12px;
+            background: #fff;
+            font-size: 0.95rem;
+            line-height: 1.45;
+            color: var(--text-color);
+            outline: none;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+        .daily-modal textarea {
+            min-height: 96px;
+            resize: vertical;
+        }
+        .daily-modal textarea:focus,
+        .daily-modal input[type="text"]:focus {
+            border-color: var(--accent-purple);
+            box-shadow: 0 0 0 3px rgba(142, 92, 244, 0.10);
+        }
+        .daily-modal-save {
+            margin-top: 12px;
+            background: var(--primary-color);
+            color: #fff;
+        }
+
+
+        /* STEP9: compact room settings card + modal */
+        .room-settings-card {
+            width: 100%;
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            align-items: center;
+            gap: 12px;
+            padding: 14px;
+            border-radius: 18px;
+            border: 1px solid #eadcff;
+            background: linear-gradient(135deg, #ffffff, #fbf7ff);
+            box-shadow: 0 8px 22px rgba(142, 92, 244, 0.09);
+            text-align: left;
+            color: var(--text-color);
+            margin-bottom: 18px;
+        }
+        .room-settings-card:active { transform: scale(0.99); }
+        .room-settings-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #fff0f6;
+            font-size: 1.25rem;
+        }
+        .room-settings-title {
+            font-weight: 850;
+            font-size: 0.92rem;
+            margin-bottom: 3px;
+        }
+        .room-settings-sub {
+            color: #636e72;
+            font-size: 0.78rem;
+            line-height: 1.35;
+        }
+        .room-settings-arrow {
+            color: #a29bfe;
+            font-weight: 900;
+            font-size: 1.2rem;
+        }
+        .room-settings-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(45,52,54,0.52);
+            z-index: 34;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 18px;
+        }
+        .room-settings-modal {
+            width: 100%;
+            max-width: 460px;
+            max-height: 86vh;
+            overflow-y: auto;
+            background: #fff;
+            border-radius: 24px;
+            padding: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.18);
+            border: 1px solid rgba(142, 92, 244, 0.15);
+        }
+        .room-settings-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+        .room-settings-head h2 {
+            margin: 0;
+            font-size: 1.12rem;
+            color: var(--accent-purple);
+        }
+        .room-settings-modal .sync-box {
+            margin-bottom: 0;
+        }
+
+
+        .feedback-hint {
+            color: #636e72;
+            font-size: 0.78rem;
+            line-height: 1.45;
+            margin: -3px 0 8px;
+        }
+
+        .trust-card {
+            background: #fff7f7;
+            border: 1px solid #ffd6d6;
+            border-radius: 14px;
+            padding: 12px;
+            margin-bottom: 12px;
+        }
+        .trust-card-title {
+            font-size: 0.9rem;
+            font-weight: 800;
+            color: #ff7675;
+            margin-bottom: 8px;
+        }
+        .trust-card-help {
+            color: #636e72;
+            font-size: 0.78rem;
+            line-height: 1.45;
+            margin-bottom: 8px;
+        }
+        .reward-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        .choice-btn {
+            background: #fff;
+            border: 1px solid #ffe0e0;
+            border-radius: 12px;
+            padding: 10px 6px;
+            color: #636e72;
+            font-size: 0.85rem;
+            font-weight: 700;
+        }
+        .choice-btn.active {
+            background: #ff7675;
+            color: #fff;
+            border-color: #ff7675;
+            box-shadow: 0 4px 10px rgba(255, 118, 117, 0.18);
+        }
+        .summary-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        .summary-tile {
+            background: #fff7f7;
+            border: 1px solid #ffd6d6;
+            border-radius: 14px;
+            padding: 12px;
+            text-align: center;
+        }
+        .summary-tile strong {
+            display: block;
+            color: #ff7675;
+            font-size: 1.2rem;
+            margin-bottom: 3px;
+        }
+        .summary-tile span {
+            color: #636e72;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            margin: 10px 0 14px;
+        }
+        .calendar-head, .calendar-day {
+            text-align: center;
+            border-radius: 10px;
+            font-size: 0.72rem;
+            padding: 6px 2px;
+        }
+        .calendar-head {
+            color: #b2bec3;
+            font-weight: 800;
+        }
+        .calendar-day {
+            background: #fafafa;
+            border: 1px solid #edf2f7;
+            color: #b2bec3;
+            min-height: 42px;
+        }
+        .calendar-day.has-record {
+            background: #fff5f5;
+            border-color: #ffcccc;
+            color: #2d3436;
+            cursor: pointer;
+            font-weight: 800;
+        }
+        .calendar-day.today {
+            outline: 2px solid #ff7675;
+        }
+        .calendar-icons {
+            display: block;
+            font-size: 0.68rem;
+            margin-top: 2px;
+            min-height: 12px;
+        }
+        .history-thumb-row {
+            display: flex;
+            gap: 6px;
+            overflow-x: auto;
+            padding: 4px 0 12px;
+            margin-bottom: 8px;
+        }
+        .history-thumb {
+            width: 58px;
+            height: 58px;
+            border-radius: 12px;
+            object-fit: cover;
+            border: 1px solid #ffd6d6;
+            flex: 0 0 auto;
+            cursor: pointer;
+        }
+        .owner-only-note {
+            background: #fffaf0;
+            border-color: #ffeaa7;
+        }
+
+
+        /* =========================================================
+           RC2 STEP 1: HearMe2nite Card Design System
+           - Firebase / Auth / Room / AutoSave / 데이터 구조 변경 없음
+           - 기존 클래스 위에 안전한 CSS override 방식 적용
+           ========================================================= */
+        :root {
+            --hm-card-radius-lg: 22px;
+            --hm-card-radius-md: 18px;
+            --hm-card-padding-lg: 16px;
+            --hm-card-padding-md: 14px;
+            --hm-card-min-height: 82px;
+            --hm-half-card-min-height: 112px;
+            --hm-icon-size: 44px;
+            --hm-icon-radius: 16px;
+            --hm-shadow-card: 0 10px 26px rgba(142, 92, 244, 0.10);
+            --hm-shadow-card-hover: 0 14px 32px rgba(142, 92, 244, 0.14);
+            --hm-border-soft: 1px solid rgba(142, 92, 244, 0.16);
+            --hm-card-bg: linear-gradient(135deg, #ffffff 0%, #fbf7ff 100%);
+            --hm-card-bg-warm: linear-gradient(135deg, #fff8fb 0%, #fbf5ff 58%, #fffaf2 100%);
+            --hm-title-size: 0.94rem;
+            --hm-sub-size: 0.78rem;
+            --hm-title-weight: 850;
+            --hm-arrow-color: #a78bfa;
+        }
+
+        .container,
+        .auth-box,
+        .history-card {
+            border-radius: 24px;
+            border: var(--hm-border-soft);
+            box-shadow: 0 18px 44px rgba(142, 92, 244, 0.11);
+        }
+
+        .input-group {
+            margin-bottom: 14px;
+        }
+
+        .row {
+            align-items: stretch;
+        }
+
+        .row .input-group {
+            height: 100%;
+            display: flex;
+        }
+
+        .row .daily-card {
+            min-height: var(--hm-half-card-min-height);
+            height: 100%;
+        }
+
+        .daily-card,
+        .room-settings-card,
+        .mission-compact-card {
+            min-height: var(--hm-card-min-height);
+            padding: var(--hm-card-padding-lg);
+            border-radius: var(--hm-card-radius-md);
+            border: var(--hm-border-soft);
+            background: var(--hm-card-bg);
+            box-shadow: var(--hm-shadow-card);
+            transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease;
+        }
+
+        .daily-card:hover,
+        .room-settings-card:hover,
+        .mission-compact-card:hover {
+            box-shadow: var(--hm-shadow-card-hover);
+            border-color: rgba(142, 92, 244, 0.25);
+        }
+
+        .daily-card:active,
+        .room-settings-card:active,
+        .mission-compact-card:active {
+            transform: scale(0.985);
+        }
+
+        .daily-card-icon,
+        .room-settings-icon {
+            width: var(--hm-icon-size);
+            height: var(--hm-icon-size);
+            min-width: var(--hm-icon-size);
+            border-radius: var(--hm-icon-radius);
+            background: linear-gradient(135deg, #fff0f6, #f3ecff);
+            box-shadow: inset 0 0 0 1px rgba(255,255,255,0.75);
+            font-size: 1.24rem;
+        }
+
+        .daily-card-title,
+        .room-settings-title,
+        .mission-compact-title {
+            display: block;
+            font-size: var(--hm-title-size);
+            font-weight: var(--hm-title-weight);
+            letter-spacing: -0.01em;
+            color: var(--text-color);
+            line-height: 1.25;
+            margin-bottom: 4px;
+        }
+
+        .daily-card-sub,
+        .room-settings-sub,
+        .mission-compact-sub {
+            display: block;
+            font-size: var(--hm-sub-size);
+            color: #6b7280;
+            line-height: 1.38;
+            word-break: keep-all;
+        }
+
+        .daily-card-arrow,
+        .room-settings-arrow {
+            width: 24px;
+            text-align: right;
+            color: var(--hm-arrow-color);
+            font-size: 1.28rem;
+            line-height: 1;
+        }
+
+        .mission-compact-card {
+            grid-template-columns: 1fr auto;
+            background: var(--hm-card-bg-warm);
+        }
+
+        .mission-progress-mini {
+            height: 8px;
+            background: rgba(255, 118, 117, 0.14);
+        }
+
+        .mission-open-btn,
+        .daily-modal-save,
+        .room-open-btn,
+        .btn-main,
+        .btn-connect {
+            border-radius: 14px;
+            box-shadow: 0 8px 18px rgba(255, 118, 117, 0.13);
+        }
+
+        .daily-modal,
+        .room-settings-modal,
+        .mission-modal,
+        .guide-card {
+            border-radius: 26px;
+            border: var(--hm-border-soft);
+            box-shadow: 0 24px 70px rgba(45, 52, 54, 0.22);
+        }
+
+        .history-card {
+            background: rgba(255, 255, 255, 0.96);
+        }
+
+        .history-header {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 8px;
+            font-size: 1.08rem;
+            letter-spacing: -0.02em;
+        }
+
+        .history-header span {
+            font-size: 0.72rem;
+            color: #a1a1aa;
+            font-weight: 700;
+        }
+
+        .summary-grid {
+            gap: 10px;
+        }
+
+        .summary-tile {
+            min-height: 78px;
+            border-radius: var(--hm-card-radius-md);
+            border: var(--hm-border-soft);
+            background: var(--hm-card-bg-warm);
+            box-shadow: 0 8px 20px rgba(142, 92, 244, 0.07);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .summary-tile strong {
+            color: var(--accent-purple);
+            font-size: 1.18rem;
+        }
+
+        .summary-tile span {
+            color: #6b7280;
+            font-size: 0.74rem;
+        }
+
+        .calendar-day,
+        .calendar-head {
+            border-radius: 12px;
+        }
+
+        .calendar-day {
+            min-height: 46px;
+            background: #ffffff;
+            border: 1px solid #f0e7ff;
+        }
+
+        .calendar-day.has-record {
+            background: linear-gradient(135deg, #fff5f7, #f7f0ff);
+            border-color: #e4d4ff;
+            box-shadow: 0 6px 14px rgba(142, 92, 244, 0.08);
+        }
+
+        .history-thumb {
+            width: 62px;
+            height: 62px;
+            border-radius: 16px;
+            border: 1px solid #e4d4ff;
+            box-shadow: 0 6px 14px rgba(142, 92, 244, 0.08);
+        }
+
+        .history-item {
+            border-radius: var(--hm-card-radius-md);
+            border: var(--hm-border-soft);
+            background: var(--hm-card-bg);
+            box-shadow: 0 8px 18px rgba(142, 92, 244, 0.07);
+            padding: 14px 44px 14px 14px;
+        }
+
+        .history-item-date {
+            color: var(--accent-purple);
+            font-size: 0.88rem;
+        }
+
+        .btn-delete {
+            border-radius: 10px;
+            box-shadow: none;
+        }
+
+        @media (max-width: 380px) {
+            body {
+                padding: 14px 10px;
+            }
+            .container,
+            .auth-box,
+            .history-card {
+                padding: 20px 16px;
+            }
+            .daily-card,
+            .room-settings-card,
+            .mission-compact-card {
+                padding: 13px;
+                gap: 10px;
+            }
+            .daily-card-icon,
+            .room-settings-icon {
+                width: 40px;
+                height: 40px;
+                min-width: 40px;
+            }
+            .row {
+                gap: 8px;
+            }
+            .row .daily-card {
+                min-height: 118px;
+            }
+        }
+
+
+        /* =========================================================
+           RC2 v2.3.1: Locked Relationship Role Permissions + Managed Cards
+           - 기존 Firebase / Room / 저장 구조 변경 없음
+           - displayHistory UI 렌더링만 카드 + 팝업으로 override
+           ========================================================= */
+        .app-version-badge {
+            text-align: center;
+            font-size: 0.66rem;
+            line-height: 1.35;
+            letter-spacing: 0.04em;
+            color: #9ca3af;
+            font-weight: 800;
+            margin: -8px 0 16px;
+            text-transform: uppercase;
+        }
+
+        .relationship-role-box {
+            background: #fff;
+            border: 1px solid #eadcff;
+            border-radius: 16px;
+            padding: 12px;
+            margin: 10px 0 12px;
+        }
+        .relationship-role-title {
+            font-size: 0.84rem;
+            font-weight: 900;
+            color: #2d3436;
+            margin-bottom: 8px;
+        }
+        .relationship-role-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+        .relationship-role-btn {
+            background: #fbf7ff;
+            border: 1px solid #eadcff;
+            color: #636e72;
+            border-radius: 14px;
+            padding: 11px 8px;
+            font-size: 0.82rem;
+            line-height: 1.35;
+        }
+        .relationship-role-btn.active {
+            background: linear-gradient(135deg, #fff0f6, #f3ecff);
+            border-color: #8e5cf4;
+            color: #6c3ce9;
+            box-shadow: 0 6px 16px rgba(142,92,244,0.13);
+        }
+        .relationship-role-help {
+            margin-top: 8px;
+            color: #636e72;
+            font-size: 0.76rem;
+            line-height: 1.45;
+        }
+        .relationship-role-note {
+            background: #fffaf0;
+            border: 1px solid #ffeaa7;
+            border-radius: 12px;
+            padding: 10px;
+            color: #636e72;
+            font-size: 0.75rem;
+            line-height: 1.45;
+            margin-bottom: 9px;
+        }
+        .relationship-role-btn[disabled] {
+            cursor: not-allowed;
+            opacity: 0.62;
+        }
+        .relationship-role-btn.active[disabled] {
+            opacity: 1;
+        }
+        .relationship-role-box.is-locked {
+            background: linear-gradient(135deg, #ffffff, #fbf7ff);
+        }
+        .relationship-role-locked-badge {
+            display: inline-block;
+            margin-left: 6px;
+            padding: 2px 7px;
+            border-radius: 999px;
+            background: #f3ecff;
+            color: #8e5cf4;
+            font-size: 0.64rem;
+            font-weight: 900;
+            vertical-align: middle;
+        }
+        .managed-card.is-filled {
+            border-color: #8e5cf4;
+            background: linear-gradient(135deg, #fff8fb 0%, #f3ecff 100%);
+            box-shadow: 0 10px 26px rgba(142,92,244,0.14);
+        }
+        .managed-card.is-locked {
+            opacity: 0.9;
+        }
+        .managed-card .daily-card-title::after {
+            content: ' 관리 전용';
+            display: inline-block;
+            margin-left: 5px;
+            padding: 2px 6px;
+            border-radius: 999px;
+            background: #f3ecff;
+            color: #8e5cf4;
+            font-size: 0.62rem;
+            font-weight: 900;
+            vertical-align: middle;
+        }
+        .manager-lock-note {
+            background: #fffaf0;
+            border: 1px solid #ffeaa7;
+            border-radius: 14px;
+            padding: 10px 12px;
+            color: #636e72;
+            font-size: 0.8rem;
+            line-height: 1.45;
+            margin-bottom: 10px;
+            display: none;
+        }
+
+        /* RC2 v2.4.0: Role UX polish / 작성 완료 상태 / 기록(Sub) 안내 */
+        .manager-lock-note strong {
+            color: #8e5cf4;
+        }
+        .managed-card.is-filled .daily-card-sub {
+            color: #6c3ce9;
+            font-weight: 800;
+        }
+        .managed-card.is-filled .daily-card-arrow::before {
+            content: '작성완료';
+            display: inline-block;
+            margin-right: 6px;
+            padding: 4px 7px;
+            border-radius: 999px;
+            background: #f3ecff;
+            color: #8e5cf4;
+            font-size: 0.64rem;
+            font-weight: 900;
+            vertical-align: middle;
+        }
+        .mission-role-note {
+            background: linear-gradient(135deg, #fffaf0, #fbf7ff);
+            border: 1px solid #eadcff;
+            border-radius: 14px;
+            padding: 10px 12px;
+            color: #636e72;
+            font-size: 0.8rem;
+            line-height: 1.45;
+            margin-bottom: 10px;
+        }
+        .mission-text-locked {
+            background: #f9fafb !important;
+            color: #6b7280 !important;
+            cursor: not-allowed;
+        }
+
+        .history-card {
+            padding: 22px;
+            overflow: hidden;
+        }
+
+        .history-header {
+            margin-bottom: 14px;
+        }
+
+        .history-section-card {
+            border-radius: 20px;
+            border: var(--hm-border-soft);
+            background: linear-gradient(135deg, #ffffff 0%, #fbf7ff 100%);
+            box-shadow: 0 10px 24px rgba(142, 92, 244, 0.08);
+            padding: 14px;
+            margin-bottom: 14px;
+        }
+
+        .history-section-title {
+            font-size: 0.88rem;
+            font-weight: 900;
+            color: #4b5563;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .history-section-title small {
+            font-size: 0.68rem;
+            color: #a1a1aa;
+            font-weight: 800;
+        }
+
+        #historySummary.summary-grid {
+            background: linear-gradient(135deg, #fff8fb, #f6efff);
+            border: var(--hm-border-soft);
+            border-radius: 20px;
+            padding: 12px;
+            box-shadow: 0 10px 24px rgba(142, 92, 244, 0.08);
+        }
+
+        #calendarBox {
+            background: linear-gradient(135deg, #ffffff, #fbf7ff);
+            border: var(--hm-border-soft);
+            border-radius: 20px;
+            padding: 14px;
+            margin-bottom: 14px;
+            box-shadow: 0 10px 24px rgba(142, 92, 244, 0.08);
+        }
+
+        #photoThumbs.history-thumb-row {
+            background: linear-gradient(135deg, #fffaf2, #fff7fb);
+            border: var(--hm-border-soft);
+            border-radius: 20px;
+            padding: 12px;
+            margin-bottom: 14px;
+            min-height: 76px;
+        }
+
+        .history-filter-card {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 8px;
+            align-items: center;
+            background: linear-gradient(135deg, #fff8fb, #fbf7ff);
+            border: var(--hm-border-soft);
+            border-radius: 18px;
+            padding: 12px;
+            margin-bottom: 14px;
+            box-shadow: 0 8px 20px rgba(142, 92, 244, 0.07);
+        }
+
+        .history-filter-card label {
+            font-size: 0.82rem;
+            font-weight: 900;
+            color: #6b7280;
+        }
+
+        .history-filter-card input[type="date"] {
+            width: 100%;
+            margin-top: 7px;
+            padding: 10px;
+            border-radius: 12px;
+            border: 1px solid #e4d4ff;
+            background: #fff;
+            color: #374151;
+            font-size: 0.86rem;
+            outline: none;
+        }
+
+        .history-filter-card button {
+            width: auto;
+            padding: 11px 13px;
+            border-radius: 12px;
+            background: var(--primary-color);
+            color: #fff;
+            font-size: 0.82rem;
+            white-space: nowrap;
+        }
+
+        .history-list {
+            max-height: none;
+            overflow-y: visible;
+            display: grid;
+            gap: 10px;
+        }
+
+        .history-day-card {
+            width: 100%;
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            gap: 12px;
+            align-items: center;
+            min-height: 86px;
+            padding: 14px;
+            border-radius: 20px;
+            border: var(--hm-border-soft);
+            background: linear-gradient(135deg, #ffffff 0%, #fbf7ff 100%);
+            box-shadow: 0 10px 24px rgba(142, 92, 244, 0.08);
+            text-align: left;
+            color: var(--text-color);
+            cursor: pointer;
+            transition: transform 0.16s ease, box-shadow 0.16s ease;
+        }
+
+        .history-day-card:active { transform: scale(0.985); }
+
+        .history-day-icon {
+            width: 46px;
+            height: 46px;
+            min-width: 46px;
+            border-radius: 17px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #fff0f6, #f3ecff);
+            font-size: 1.3rem;
+        }
+
+        .history-day-title {
+            display: block;
+            font-size: 0.92rem;
+            font-weight: 900;
+            color: #2d3436;
+            margin-bottom: 5px;
+            letter-spacing: -0.01em;
+        }
+
+        .history-day-sub {
+            display: block;
+            font-size: 0.76rem;
+            color: #6b7280;
+            line-height: 1.38;
+            word-break: keep-all;
+        }
+
+        .history-day-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-top: 7px;
+        }
+
+        .history-chip {
+            display: inline-flex;
+            align-items: center;
+            height: 22px;
+            padding: 0 8px;
+            border-radius: 999px;
+            background: #fff7fb;
+            border: 1px solid #eadcff;
+            color: #7c3aed;
+            font-size: 0.68rem;
+            font-weight: 850;
+        }
+
+        .history-day-actions {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 8px;
+        }
+
+        .history-card-arrow {
+            color: var(--hm-arrow-color);
+            font-size: 1.28rem;
+            font-weight: 900;
+        }
+
+        .history-day-card .btn-delete {
+            position: static;
+            width: auto;
+            padding: 5px 9px;
+            font-size: 0.7rem;
+            background: #fff0f0;
+            color: #d63031;
+            border: 1px solid #ffd6d6;
+            border-radius: 999px;
+        }
+
+        .history-detail-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(45, 52, 54, 0.52);
+            z-index: 36;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 18px;
+        }
+
+        .history-detail-modal {
+            width: 100%;
+            max-width: 460px;
+            max-height: 86vh;
+            overflow-y: auto;
+            background: #fff;
+            border-radius: 26px;
+            padding: 20px;
+            border: var(--hm-border-soft);
+            box-shadow: 0 24px 70px rgba(45, 52, 54, 0.22);
+        }
+
+        .history-detail-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+
+        .history-detail-kicker {
+            font-size: 0.68rem;
+            color: #a1a1aa;
+            font-weight: 900;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+
+        .history-detail-head h2 {
+            margin: 0;
+            font-size: 1.12rem;
+            color: var(--accent-purple);
+        }
+
+        .history-detail-content {
+            display: grid;
+            gap: 10px;
+        }
+
+        .history-detail-block {
+            background: linear-gradient(135deg, #ffffff, #fbf7ff);
+            border: var(--hm-border-soft);
+            border-radius: 18px;
+            padding: 13px;
+        }
+
+        .history-detail-block-title {
+            font-size: 0.78rem;
+            color: #6b7280;
+            font-weight: 900;
+            margin-bottom: 7px;
+        }
+
+        .history-detail-block-body {
+            font-size: 0.9rem;
+            color: #374151;
+            line-height: 1.55;
+            white-space: pre-line;
+            word-break: break-word;
+        }
+
+        .history-detail-photo {
+            width: 100%;
+            max-height: 260px;
+            object-fit: cover;
+            border-radius: 16px;
+            border: 1px solid #eadcff;
+        }
+
+        .history-detail-copy {
+            margin-top: 2px;
+            background: #55efc4;
+            color: #2d3436;
+        }
+
+        @media (max-width: 380px) {
+            .history-day-card {
+                grid-template-columns: auto 1fr;
+            }
+            .history-day-actions {
+                grid-column: 1 / -1;
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+            }
+        }
+
+
+        /* RC2 v2.3.0: History as compact launcher card + popup center */
+        .history-launch-card {
+            width: 100%;
+            max-width: 450px;
+            display: grid;
+            grid-template-columns: auto 1fr auto auto;
+            align-items: center;
+            gap: 12px;
+            padding: 16px;
+            border-radius: 22px;
+            border: 1px solid #eadcff;
+            background: linear-gradient(135deg, #ffffff, #fbf7ff 58%, #fffaf2);
+            box-shadow: 0 12px 30px rgba(142, 92, 244, 0.12);
+            text-align: left;
+            color: var(--text-color);
+            margin-bottom: 20px;
+        }
+        .history-launch-card:active { transform: scale(0.99); }
+        .history-launch-icon {
+            width: 46px;
+            height: 46px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #fff0f6;
+            font-size: 1.28rem;
+        }
+        .history-launch-title {
+            display: block;
+            font-size: 0.98rem;
+            font-weight: 900;
+            margin-bottom: 4px;
+        }
+        .history-launch-sub {
+            display: block;
+            color: #636e72;
+            font-size: 0.78rem;
+            line-height: 1.4;
+        }
+        .history-launch-version {
+            color: #8e5cf4;
+            background: #f3ecff;
+            border: 1px solid #eadcff;
+            border-radius: 999px;
+            padding: 5px 8px;
+            font-size: 0.68rem;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+        .history-launch-arrow {
+            color: #a29bfe;
+            font-size: 1.35rem;
+            font-weight: 900;
+        }
+        .history-panel-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(45,52,54,0.52);
+            z-index: 31;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 18px;
+        }
+        .history-panel-modal {
+            width: 100%;
+            max-width: 460px;
+            max-height: 88vh;
+            overflow-y: auto;
+            background: #fff;
+            border-radius: 26px;
+            padding: 20px;
+            box-shadow: 0 22px 65px rgba(0,0,0,0.20);
+            border: 1px solid rgba(142, 92, 244, 0.15);
+        }
+        .history-panel-head {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+        .history-panel-head h2 {
+            margin: 0;
+            font-size: 1.06rem;
+            color: #2d3436;
+            line-height: 1.35;
+        }
+        .history-panel-head h2 span {
+            color: #8e5cf4;
+            font-size: 0.72rem;
+            font-weight: 800;
+            margin-left: 4px;
+        }
+        .calendar-day.has-record {
+            cursor: pointer;
+        }
+        .history-detail-photo {
+            width: 100%;
+            max-height: 360px;
+            object-fit: contain;
+            object-position: center center;
+            background: #fff7fb;
+        }
+        .history-thumb {
+            object-fit: contain;
+            object-position: center center;
+            background: #fff7fb;
+        }
+        @media (max-width: 420px) {
+            .history-launch-card { grid-template-columns: auto 1fr auto; }
+            .history-launch-version { display: none; }
+        }
+
+
+        /* RC2 v2.3.0: 기록실 팝업 정리 - 요약/날짜입력 제거, 선택한 날짜 1개만 표시 */
+        #historySummary.summary-grid,
+        .history-filter-card {
+            display: none !important;
+        }
+        .history-panel-modal #calendarBox {
+            margin-top: 4px;
+        }
+        .history-list {
+            margin-top: 10px;
+        }
+        .history-selected-hint {
+            background: linear-gradient(135deg, #fffaf2, #fbf7ff);
+            border: var(--hm-border-soft);
+            border-radius: 18px;
+            padding: 13px;
+            color: #6b7280;
+            font-size: 0.82rem;
+            line-height: 1.45;
+            text-align: center;
+            font-weight: 750;
+        }
+        .calendar-day.selected-record {
+            outline: 2px solid #8e5cf4;
+            background: #f3ecff;
+            color: #2d3436;
+        }
+
+
+        /* =========================================================
+           RC2 v2.5.0: Premium UI Design System
+           - 기능 / Firebase / Room / Role / AutoSave 변경 없음
+           - 색상, 카드, 버튼, 팝업, 타이포그래피만 안전 override
+           ========================================================= */
+        :root {
+            --hm-premium-bg: #FAF8FF;
+            --hm-premium-bg-2: #FFF9FC;
+            --hm-premium-surface: #FFFFFF;
+            --hm-premium-surface-soft: #F7F2FF;
+            --hm-premium-primary: #6D4CFF;
+            --hm-premium-primary-2: #8E6CFF;
+            --hm-premium-primary-soft: #F1ECFF;
+            --hm-premium-accent: #C7B6FF;
+            --hm-premium-border: #ECE6FF;
+            --hm-premium-text: #2D2A35;
+            --hm-premium-sub: #7D7694;
+            --hm-premium-muted: #A49DB8;
+            --hm-premium-danger: #FF6B7A;
+            --hm-premium-success: #5ED6B3;
+            --hm-premium-radius-card: 24px;
+            --hm-premium-radius-modal: 30px;
+            --hm-premium-radius-button: 16px;
+            --hm-premium-shadow-card: 0 12px 34px rgba(109, 76, 255, 0.085);
+            --hm-premium-shadow-card-hover: 0 18px 42px rgba(109, 76, 255, 0.13);
+            --hm-premium-shadow-modal: 0 28px 80px rgba(45, 42, 53, 0.24);
+
+            --primary-color: var(--hm-premium-primary);
+            --accent-purple: var(--hm-premium-primary);
+            --soft-purple: var(--hm-premium-primary-soft);
+            --soft-pink: #FFF4FA;
+            --bg-color: var(--hm-premium-bg);
+            --card-color: var(--hm-premium-surface);
+            --text-color: var(--hm-premium-text);
+            --border-color: var(--hm-premium-border);
+            --water-color: var(--hm-premium-primary);
+        }
+
+        body {
+            background:
+                radial-gradient(circle at 12% 0%, rgba(199, 182, 255, 0.34) 0, transparent 30%),
+                radial-gradient(circle at 88% 14%, rgba(255, 221, 236, 0.45) 0, transparent 28%),
+                linear-gradient(135deg, var(--hm-premium-bg-2) 0%, var(--hm-premium-bg) 48%, #F6F0FF 100%);
+            color: var(--hm-premium-text);
+            letter-spacing: -0.012em;
+        }
+
+        .container,
+        .auth-box,
+        .history-card {
+            background: rgba(255, 255, 255, 0.88);
+            border: 1px solid rgba(236, 230, 255, 0.96);
+            border-radius: 30px;
+            box-shadow: 0 24px 70px rgba(109, 76, 255, 0.105);
+            backdrop-filter: blur(14px);
+        }
+
+        h1,
+        .app-title-row h1 {
+            color: var(--hm-premium-text);
+            font-weight: 750;
+            letter-spacing: -0.035em;
+        }
+
+        .app-subtitle,
+        .daily-card-sub,
+        .room-settings-sub,
+        .mission-compact-sub,
+        .history-launch-sub,
+        .relationship-role-help,
+        .auth-help,
+        .feedback-hint,
+        .trust-card-help {
+            color: var(--hm-premium-sub);
+            font-weight: 430;
+        }
+
+        .app-version-badge {
+            color: var(--hm-premium-muted);
+            letter-spacing: 0.055em;
+            font-weight: 750;
+        }
+
+        .autosave-status {
+            color: var(--hm-premium-success);
+            font-weight: 750;
+        }
+
+        .user-bar,
+        .sync-box,
+        .relationship-role-box,
+        .relationship-role-note,
+        .mission-template-box,
+        .trust-card,
+        .water-counter-box,
+        .meal-container,
+        .owner-only-note,
+        .manager-lock-note,
+        .history-selected-hint,
+        #calendarBox,
+        #photoThumbs.history-thumb-row,
+        .history-section-card {
+            background: rgba(255, 255, 255, 0.72);
+            border: 1px solid var(--hm-premium-border);
+            border-radius: 22px;
+            box-shadow: 0 8px 26px rgba(109, 76, 255, 0.055);
+        }
+
+        .daily-card,
+        .room-settings-card,
+        .mission-compact-card,
+        .history-launch-card,
+        .history-day-card,
+        .summary-tile,
+        .history-item {
+            border-radius: var(--hm-premium-radius-card);
+            border: 1px solid var(--hm-premium-border);
+            background: linear-gradient(145deg, rgba(255,255,255,0.98) 0%, rgba(250,248,255,0.98) 100%);
+            box-shadow: var(--hm-premium-shadow-card);
+            transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease, background 0.16s ease;
+        }
+
+        .daily-card,
+        .room-settings-card,
+        .history-launch-card {
+            min-height: 92px;
+            padding: 18px;
+        }
+
+        .mission-compact-card {
+            padding: 18px;
+            min-height: 108px;
+        }
+
+        .daily-card:hover,
+        .room-settings-card:hover,
+        .mission-compact-card:hover,
+        .history-launch-card:hover,
+        .history-day-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--hm-premium-shadow-card-hover);
+            border-color: rgba(109, 76, 255, 0.26);
+        }
+
+        .daily-card:active,
+        .room-settings-card:active,
+        .mission-compact-card:active,
+        .history-launch-card:active,
+        .history-day-card:active {
+            transform: scale(0.982);
+        }
+
+        .daily-card-icon,
+        .room-settings-icon,
+        .history-launch-icon,
+        .history-day-icon {
+            width: 48px;
+            height: 48px;
+            min-width: 48px;
+            border-radius: 18px;
+            background: linear-gradient(145deg, #F5F0FF 0%, #FFF4FA 100%);
+            box-shadow: inset 0 0 0 1px rgba(255,255,255,0.95), 0 8px 20px rgba(109, 76, 255, 0.08);
+        }
+
+        .daily-card-title,
+        .room-settings-title,
+        .mission-compact-title,
+        .history-launch-title,
+        .history-day-title,
+        .relationship-role-title,
+        .trust-card-title,
+        .history-section-title {
+            color: var(--hm-premium-text);
+            font-weight: 730;
+            letter-spacing: -0.025em;
+        }
+
+        .daily-card-arrow,
+        .room-settings-arrow,
+        .history-launch-arrow,
+        .history-card-arrow {
+            color: var(--hm-premium-accent);
+        }
+
+        button,
+        .btn-main,
+        .btn-connect,
+        .mission-open-btn,
+        .daily-modal-save,
+        .room-open-btn,
+        .history-filter-card button,
+        .guide-primary {
+            border-radius: var(--hm-premium-radius-button);
+            transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+        }
+
+        .btn-main,
+        .btn-connect,
+        .mission-open-btn,
+        .daily-modal-save,
+        .room-open-btn,
+        .history-filter-card button,
+        .guide-primary,
+        .mission-library-add button {
+            background: linear-gradient(135deg, var(--hm-premium-primary) 0%, var(--hm-premium-primary-2) 100%) !important;
+            color: #fff !important;
+            box-shadow: 0 12px 26px rgba(109, 76, 255, 0.22);
+        }
+
+        .btn-main:hover,
+        .btn-connect:hover,
+        .mission-open-btn:hover,
+        .daily-modal-save:hover,
+        .room-open-btn:hover,
+        .guide-primary:hover,
+        .mission-library-add button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 16px 34px rgba(109, 76, 255, 0.28);
+        }
+
+        .btn-secondary,
+        .modal-close-btn,
+        .guide-close,
+        .mission-mini-btn {
+            background: var(--hm-premium-primary-soft) !important;
+            color: var(--hm-premium-primary) !important;
+            border: 1px solid var(--hm-premium-border);
+            box-shadow: none;
+        }
+
+        .daily-modal-overlay,
+        .mission-modal-overlay,
+        .room-settings-overlay,
+        .guide-modal,
+        .history-panel-overlay,
+        .history-detail-overlay {
+            background: rgba(45, 42, 53, 0.42);
+            backdrop-filter: blur(8px);
+        }
+
+        .daily-modal,
+        .mission-modal,
+        .room-settings-modal,
+        .guide-card,
+        .history-panel-modal,
+        .history-detail-modal {
+            position: relative;
+            border-radius: var(--hm-premium-radius-modal);
+            border: 1px solid rgba(236, 230, 255, 0.96);
+            box-shadow: var(--hm-premium-shadow-modal);
+            background: rgba(255, 255, 255, 0.97);
+            padding-top: 26px;
+        }
+
+        .daily-modal::before,
+        .mission-modal::before,
+        .room-settings-modal::before,
+        .guide-card::before,
+        .history-panel-modal::before,
+        .history-detail-modal::before {
+            content: '';
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 44px;
+            height: 5px;
+            border-radius: 999px;
+            background: #DED6F7;
+        }
+
+        .daily-modal-head h2,
+        .mission-modal-head h2,
+        .room-settings-head h2,
+        .history-detail-head h2,
+        .guide-header h2 {
+            color: var(--hm-premium-text);
+            font-weight: 750;
+            letter-spacing: -0.03em;
+        }
+
+        .daily-modal textarea,
+        .daily-modal input[type="text"],
+        .input-group input,
+        .input-group textarea,
+        .meal-row input,
+        .mission-row input[type="text"],
+        .mission-library-add input,
+        .history-filter-card input[type="date"],
+        .sync-box input {
+            border: 1px solid var(--hm-premium-border);
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.9);
+            color: var(--hm-premium-text);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.95);
+        }
+
+        .daily-modal textarea:focus,
+        .daily-modal input[type="text"]:focus,
+        .input-group input:focus,
+        .input-group textarea:focus,
+        .meal-row input:focus,
+        .mission-row input[type="text"]:focus,
+        .mission-library-add input:focus,
+        .sync-box input:focus {
+            border-color: rgba(109, 76, 255, 0.5);
+            box-shadow: 0 0 0 4px rgba(109, 76, 255, 0.10);
+        }
+
+        .relationship-role-btn,
+        .mood-btn,
+        .choice-btn,
+        .mission-chip,
+        .mission-library-item,
+        .calendar-day,
+        .history-detail-block {
+            border: 1px solid var(--hm-premium-border);
+            background: rgba(255, 255, 255, 0.86);
+            color: var(--hm-premium-sub);
+            border-radius: 16px;
+        }
+
+        .relationship-role-btn.active,
+        .mood-btn.active,
+        .choice-btn.active,
+        .mission-chip.primary,
+        .calendar-day.selected-record {
+            background: linear-gradient(135deg, var(--hm-premium-primary) 0%, var(--hm-premium-primary-2) 100%);
+            border-color: transparent;
+            color: #fff;
+            box-shadow: 0 10px 24px rgba(109, 76, 255, 0.22);
+        }
+
+        .mission-progress-mini {
+            background: rgba(109, 76, 255, 0.12);
+        }
+        .mission-progress-mini > span {
+            background: linear-gradient(90deg, var(--hm-premium-primary), var(--hm-premium-primary-2));
+        }
+
+        .managed-card.is-filled {
+            border-color: rgba(109, 76, 255, 0.42);
+            background: linear-gradient(145deg, #FFFFFF 0%, #F3EEFF 100%);
+            box-shadow: 0 16px 40px rgba(109, 76, 255, 0.16);
+        }
+
+        .managed-card .daily-card-title::after,
+        .relationship-role-locked-badge,
+        .history-launch-version,
+        .history-chip {
+            background: var(--hm-premium-primary-soft);
+            color: var(--hm-premium-primary);
+            border: 1px solid var(--hm-premium-border);
+        }
+
+        .btn-delete,
+        .history-day-card .btn-delete,
+        .mission-mini-btn.delete {
+            background: #FFF0F4 !important;
+            color: var(--hm-premium-danger) !important;
+            border: 1px solid #FFD8E2 !important;
+            box-shadow: none !important;
+        }
+
+        .btn-copy,
+        .history-detail-copy {
+            background: linear-gradient(135deg, #5ED6B3, #8EE8CF) !important;
+            color: #23332F !important;
+            box-shadow: 0 10px 24px rgba(94, 214, 179, 0.20);
+        }
+
+        .calendar-day.has-record {
+            background: linear-gradient(145deg, #FFFFFF 0%, #F4F0FF 100%);
+            border-color: rgba(109, 76, 255, 0.22);
+            color: var(--hm-premium-text);
+        }
+
+        .history-detail-photo,
+        .history-thumb {
+            background: var(--hm-premium-primary-soft);
+            border: 1px solid var(--hm-premium-border);
+        }
+
+        @media (max-width: 380px) {
+            .daily-card,
+            .room-settings-card,
+            .history-launch-card {
+                min-height: 96px;
+                padding: 16px;
+            }
+            .daily-card-icon,
+            .room-settings-icon,
+            .history-launch-icon,
+            .history-day-icon {
+                width: 44px;
+                height: 44px;
+                min-width: 44px;
+            }
+        }
+
+
+        /* =========================================================
+           RC2 v2.5.1: Mobile Optimization Hotfix
+           - 기능 / Firebase / Room / Role / AutoSave 변경 없음
+           - 모바일 팝업 위치, 2열 카드 깨짐, 채팅 입력창 overflow 수정
+           ========================================================= */
+        html, body {
+            width: 100%;
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+
+        body.hm-modal-open {
+            overflow: hidden;
+            position: fixed;
+            left: 0;
+            right: 0;
+            width: 100%;
+        }
+
+        #appContent,
+        .container,
+        .history-launch-card {
+            max-width: min(450px, calc(100vw - 24px));
+        }
+
+        .daily-card,
+        .room-settings-card,
+        .mission-compact-card,
+        .history-launch-card {
+            overflow: hidden;
+        }
+
+        .daily-card-title,
+        .room-settings-title {
+            word-break: keep-all;
+            overflow-wrap: normal;
+        }
+
+        .daily-card-sub,
+        .room-settings-sub,
+        .mission-compact-sub {
+            overflow-wrap: anywhere;
+        }
+
+        .daily-modal-overlay,
+        .mission-modal-overlay,
+        .room-settings-overlay,
+        .guide-modal,
+        .history-panel-overlay,
+        .history-detail-overlay {
+            position: fixed;
+            inset: 0;
+            width: 100vw;
+            height: 100dvh;
+            overflow: hidden;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+
+        .daily-modal,
+        .mission-modal,
+        .room-settings-modal,
+        .guide-card,
+        .history-panel-modal,
+        .history-detail-modal {
+            width: min(430px, calc(100vw - 28px));
+            max-height: calc(100dvh - 32px);
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        #chatSection {
+            width: 100% !important;
+            max-width: 450px !important;
+            margin: 20px auto !important;
+            padding: 18px !important;
+            border: 1px solid var(--hm-premium-border) !important;
+            border-radius: 28px !important;
+            box-shadow: var(--hm-premium-shadow-card) !important;
+            overflow: hidden !important;
+        }
+
+        #chatSection > div:last-child {
+            display: grid !important;
+            grid-template-columns: minmax(56px, 0.9fr) minmax(0, 2.6fr) auto;
+            gap: 8px !important;
+            align-items: stretch;
+            width: 100%;
+        }
+
+        #chatSender,
+        #chatInput {
+            min-width: 0 !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
+            border-color: var(--hm-premium-border) !important;
+            border-radius: 16px !important;
+        }
+
+        #chatSection button {
+            width: auto !important;
+            min-width: 58px !important;
+            padding: 10px 12px !important;
+            border-radius: 16px !important;
+            white-space: nowrap !important;
+            background: linear-gradient(135deg, var(--hm-premium-primary) 0%, var(--hm-premium-primary-2) 100%) !important;
+            box-shadow: 0 10px 22px rgba(109, 76, 255, 0.20) !important;
+        }
+
+        @media (max-width: 430px) {
+            body {
+                padding: 14px 11px calc(22px + env(safe-area-inset-bottom));
+            }
+
+            .container,
+            .auth-box,
+            .history-card {
+                width: 100%;
+                max-width: calc(100vw - 22px);
+                padding: 20px 16px;
+                border-radius: 28px;
+            }
+
+            .row {
+                grid-template-columns: 1fr;
+                gap: 14px;
+            }
+
+            .row .input-group {
+                height: auto;
+            }
+
+            .row .daily-card,
+            .daily-card,
+            .room-settings-card,
+            .history-launch-card {
+                grid-template-columns: auto minmax(0, 1fr) auto;
+                min-height: 94px;
+                padding: 16px;
+                gap: 13px;
+            }
+
+            .daily-card-icon,
+            .room-settings-icon,
+            .history-launch-icon,
+            .history-day-icon {
+                width: 46px;
+                height: 46px;
+                min-width: 46px;
+            }
+
+            .daily-card-title,
+            .room-settings-title {
+                font-size: 1rem;
+                line-height: 1.25;
+                white-space: normal;
+            }
+
+            .daily-card-sub,
+            .room-settings-sub {
+                font-size: 0.86rem;
+                line-height: 1.38;
+            }
+
+            .mission-compact-card {
+                grid-template-columns: 1fr;
+                gap: 14px;
+            }
+
+            .mission-open-btn {
+                width: 100%;
+                padding: 12px 14px;
+            }
+
+            .daily-modal-overlay,
+            .mission-modal-overlay,
+            .room-settings-overlay,
+            .guide-modal,
+            .history-panel-overlay,
+            .history-detail-overlay {
+                align-items: flex-end;
+                justify-content: center;
+                padding: 12px 10px calc(12px + env(safe-area-inset-bottom));
+            }
+
+            .daily-modal,
+            .mission-modal,
+            .room-settings-modal,
+            .guide-card,
+            .history-panel-modal,
+            .history-detail-modal {
+                width: min(430px, calc(100vw - 20px));
+                max-height: min(86dvh, 760px);
+                border-radius: 30px 30px 24px 24px;
+                padding: 26px 17px 18px;
+            }
+
+            .room-settings-head,
+            .daily-modal-head,
+            .mission-modal-head,
+            .history-panel-head,
+            .history-detail-head {
+                position: sticky;
+                top: -26px;
+                z-index: 2;
+                background: rgba(255,255,255,0.96);
+                padding-top: 8px;
+                padding-bottom: 10px;
+                backdrop-filter: blur(10px);
+            }
+
+            .modal-close-btn {
+                width: auto !important;
+                min-width: 62px;
+                padding: 10px 13px;
+            }
+
+            #chatSection {
+                max-width: calc(100vw - 22px) !important;
+                padding: 17px !important;
+                border-radius: 28px !important;
+            }
+
+            #chatSection h3 {
+                font-size: 1.04rem !important;
+                line-height: 1.3;
+            }
+
+            #chatSection > div:last-child {
+                grid-template-columns: 62px minmax(0, 1fr) 56px;
+                gap: 6px !important;
+            }
+
+            #chatSender,
+            #chatInput {
+                padding: 10px 9px !important;
+                font-size: 0.86rem !important;
+            }
+
+            #chatSection button {
+                min-width: 56px !important;
+                padding: 10px 8px !important;
+                font-size: 0.84rem !important;
+            }
+        }
+
+        @media (max-width: 340px) {
+            #chatSection > div:last-child {
+                grid-template-columns: 1fr;
+            }
+            #chatSection button {
+                width: 100% !important;
+            }
+        }
+
+
+        /* =========================================================
+           RC2 v2.5.2: Modal Layout System Fix
+           - 짧은 입력 팝업 = Bottom Sheet
+           - 긴 관리 팝업 = Center Modal
+           - 모바일 Chrome / Galaxy Fold / Safe Area 대응
+           - Firebase / Room / Role / AutoSave 변경 없음
+           ========================================================= */
+        :root {
+            --hm-modal-viewport: 100dvh;
+            --hm-modal-side-gap: 16px;
+            --hm-sheet-max-height: min(72dvh, 620px);
+            --hm-center-max-height: calc(100dvh - 36px);
+            --hm-center-max-width: 640px;
+        }
+
+        .daily-modal-overlay,
+        .mission-modal-overlay,
+        .room-settings-overlay,
+        .guide-modal,
+        .history-panel-overlay,
+        .history-detail-overlay {
+            position: fixed !important;
+            inset: 0 !important;
+            width: 100vw !important;
+            height: var(--hm-modal-viewport) !important;
+            min-height: var(--hm-modal-viewport) !important;
+            overflow: hidden !important;
+            background: rgba(45, 42, 53, 0.46) !important;
+            backdrop-filter: blur(8px) !important;
+            -webkit-backdrop-filter: blur(8px) !important;
+            overscroll-behavior: contain !important;
+            z-index: 1000 !important;
+        }
+
+        /* 입력용 팝업: 화면 아래에서 올라오는 Bottom Sheet */
+        .daily-modal-overlay {
+            align-items: flex-end !important;
+            justify-content: center !important;
+            padding: 12px 10px max(12px, env(safe-area-inset-bottom)) !important;
+        }
+
+        .daily-modal {
+            width: min(430px, calc(100vw - 20px)) !important;
+            max-height: var(--hm-sheet-max-height) !important;
+            overflow-y: auto !important;
+            -webkit-overflow-scrolling: touch !important;
+            border-radius: 30px 30px 24px 24px !important;
+            padding: 28px 18px 18px !important;
+            animation: hmSheetUp 0.18s ease-out both;
+        }
+
+        /* 관리용 팝업: 화면 중앙 카드형 */
+        .room-settings-overlay,
+        .mission-modal-overlay,
+        .guide-modal,
+        .history-panel-overlay,
+        .history-detail-overlay {
+            align-items: center !important;
+            justify-content: center !important;
+            padding: max(16px, env(safe-area-inset-top)) var(--hm-modal-side-gap) max(16px, env(safe-area-inset-bottom)) !important;
+        }
+
+        .room-settings-modal,
+        .mission-modal,
+        .guide-card,
+        .history-panel-modal,
+        .history-detail-modal {
+            width: min(var(--hm-center-max-width), calc(100vw - 32px)) !important;
+            max-height: var(--hm-center-max-height) !important;
+            overflow-y: auto !important;
+            -webkit-overflow-scrolling: touch !important;
+            border-radius: 30px !important;
+            padding: 28px 22px 22px !important;
+            animation: hmCenterPop 0.16s ease-out both;
+        }
+
+        .daily-modal-head,
+        .room-settings-head,
+        .mission-modal-head,
+        .guide-header,
+        .history-panel-head,
+        .history-detail-head {
+            position: sticky !important;
+            top: -28px !important;
+            z-index: 3 !important;
+            background: rgba(255, 255, 255, 0.96) !important;
+            backdrop-filter: blur(12px) !important;
+            -webkit-backdrop-filter: blur(12px) !important;
+            padding-top: 8px !important;
+            padding-bottom: 12px !important;
+            margin-bottom: 12px !important;
+        }
+
+        .daily-modal input[type="text"],
+        .daily-modal input[type="date"],
+        .daily-modal textarea,
+        .meal-row input,
+        .water-counter-box,
+        .choice-btn,
+        .mood-btn {
+            min-height: 52px;
+        }
+
+        .water-btns {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+        .btn-water {
+            min-width: 0;
+            white-space: nowrap;
+        }
+
+        @keyframes hmSheetUp {
+            from { transform: translateY(18px); opacity: 0.96; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        @keyframes hmCenterPop {
+            from { transform: scale(0.975); opacity: 0.96; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        @media (max-width: 430px) {
+            :root {
+                --hm-modal-side-gap: 10px;
+                --hm-center-max-height: calc(100dvh - 24px);
+                --hm-sheet-max-height: min(74dvh, 620px);
+            }
+
+            .room-settings-modal,
+            .mission-modal,
+            .guide-card,
+            .history-panel-modal,
+            .history-detail-modal {
+                width: calc(100vw - 20px) !important;
+                max-height: calc(100dvh - 24px) !important;
+                border-radius: 28px !important;
+                padding: 28px 17px 18px !important;
+            }
+
+            .daily-modal {
+                width: calc(100vw - 20px) !important;
+                padding: 28px 17px 18px !important;
+            }
+
+            .relationship-role-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 8px;
+            }
+
+            .relationship-role-btn {
+                min-width: 0;
+                padding: 12px 8px;
+                font-size: 0.86rem;
+            }
+        }
+
+        @media (min-width: 700px) {
+            .room-settings-modal,
+            .mission-modal,
+            .guide-card,
+            .history-panel-modal,
+            .history-detail-modal {
+                width: min(640px, calc(100vw - 48px)) !important;
+            }
+        }
+
+
+    
+
+        /* =========================================================
+           RC2 v2.5.3: Responsive Modal System
+           - Device 기준 분리: Phone / Fold-Tablet / PC
+           - Size 기준 분리: sm / md / lg
+           - 팝업 DOM을 body 기준으로 띄우는 JS와 함께 사용
+           - Firebase / Room / Role / AutoSave 변경 없음
+           ========================================================= */
+        :root {
+            --hm-rmodal-phone-gap: 22px;
+            --hm-rmodal-tablet-gap: 28px;
+            --hm-rmodal-pc-gap: 36px;
+            --hm-rmodal-sm: 460px;
+            --hm-rmodal-md: 640px;
+            --hm-rmodal-lg: 820px;
+            --hm-rmodal-xl: 920px;
+        }
+
+        body.hm-modal-open {
+            position: fixed !important;
+            left: 0 !important;
+            right: 0 !important;
+            width: 100% !important;
+            overflow: hidden !important;
+            touch-action: none !important;
+        }
+
+        body > .daily-modal-overlay,
+        body > .mission-modal-overlay,
+        body > .room-settings-overlay,
+        body > .guide-modal,
+        body > .history-panel-overlay,
+        body > .history-detail-overlay {
+            position: fixed !important;
+            inset: 0 !important;
+            width: 100vw !important;
+            height: 100dvh !important;
+            min-height: 100dvh !important;
+            display: none;
+            overflow: hidden !important;
+            background: rgba(35, 33, 43, 0.45) !important;
+            backdrop-filter: blur(9px) !important;
+            -webkit-backdrop-filter: blur(9px) !important;
+            overscroll-behavior: contain !important;
+            z-index: 9999 !important;
+        }
+
+        body > .daily-modal-overlay[style*="display: flex"],
+        body > .mission-modal-overlay[style*="display: flex"],
+        body > .room-settings-overlay[style*="display: flex"],
+        body > .guide-modal[style*="display: flex"],
+        body > .history-panel-overlay[style*="display: flex"],
+        body > .history-detail-overlay[style*="display: flex"] {
+            display: flex !important;
+        }
+
+        .daily-modal,
+        .mission-modal,
+        .room-settings-modal,
+        .guide-card,
+        .history-panel-modal,
+        .history-detail-modal {
+            position: relative !important;
+            box-sizing: border-box !important;
+            background: rgba(255, 255, 255, 0.98) !important;
+            border: 1px solid rgba(236, 230, 255, 0.98) !important;
+            box-shadow: 0 28px 80px rgba(31, 24, 58, 0.22) !important;
+            overflow-y: auto !important;
+            -webkit-overflow-scrolling: touch !important;
+            overscroll-behavior: contain !important;
+        }
+
+        /* Phone: 입력 팝업은 Bottom Sheet, 관리 팝업은 거의 전체폭 Center Modal */
+        @media (max-width: 767px) {
+            body > .daily-modal-overlay {
+                align-items: flex-end !important;
+                justify-content: center !important;
+                padding: 0 10px max(10px, env(safe-area-inset-bottom)) !important;
+            }
+            body > .mission-modal-overlay,
+            body > .room-settings-overlay,
+            body > .guide-modal,
+            body > .history-panel-overlay,
+            body > .history-detail-overlay {
+                align-items: center !important;
+                justify-content: center !important;
+                padding: max(12px, env(safe-area-inset-top)) 10px max(12px, env(safe-area-inset-bottom)) !important;
+            }
+            .daily-modal {
+                width: min(430px, calc(100vw - 20px)) !important;
+                max-height: min(78dvh, 680px) !important;
+                border-radius: 32px 32px 26px 26px !important;
+                padding: 30px 18px 18px !important;
+                animation: hmSheetUp 0.18s ease-out both !important;
+            }
+            .mission-modal,
+            .room-settings-modal,
+            .guide-card,
+            .history-panel-modal,
+            .history-detail-modal {
+                width: min(430px, calc(100vw - 20px)) !important;
+                max-height: calc(100dvh - 24px) !important;
+                border-radius: 32px !important;
+                padding: 30px 18px 18px !important;
+                animation: hmCenterPop 0.16s ease-out both !important;
+            }
+            .history-panel-modal {
+                max-height: calc(100dvh - 20px) !important;
+            }
+        }
+
+        /* Fold / Tablet: 전부 Center Modal, 등급별 폭 */
+        @media (min-width: 768px) and (max-width: 1199px) {
+            body > .daily-modal-overlay,
+            body > .mission-modal-overlay,
+            body > .room-settings-overlay,
+            body > .guide-modal,
+            body > .history-panel-overlay,
+            body > .history-detail-overlay {
+                align-items: center !important;
+                justify-content: center !important;
+                padding: max(24px, env(safe-area-inset-top)) var(--hm-rmodal-tablet-gap) max(24px, env(safe-area-inset-bottom)) !important;
+            }
+            #wakeModalOverlay .daily-modal,
+            #weightModalOverlay .daily-modal,
+            #waterModalOverlay .daily-modal,
+            #sleepModalOverlay .daily-modal {
+                width: min(var(--hm-rmodal-sm), calc(100vw - 56px)) !important;
+            }
+            #moodModalOverlay .daily-modal,
+            #mealModalOverlay .daily-modal,
+            #outingModalOverlay .daily-modal,
+            #diaryModalOverlay .daily-modal,
+            #feedbackModalOverlay .daily-modal,
+            #rewardModalOverlay .daily-modal,
+            #ownerNoteModalOverlay .daily-modal,
+            .mission-modal,
+            .guide-card {
+                width: min(var(--hm-rmodal-md), calc(100vw - 56px)) !important;
+            }
+            .room-settings-modal,
+            .history-panel-modal,
+            .history-detail-modal {
+                width: min(720px, calc(100vw - 56px)) !important;
+            }
+            .daily-modal,
+            .mission-modal,
+            .room-settings-modal,
+            .guide-card,
+            .history-panel-modal,
+            .history-detail-modal {
+                max-height: calc(100dvh - 56px) !important;
+                border-radius: 34px !important;
+                padding: 30px 24px 24px !important;
+                animation: hmCenterPop 0.16s ease-out both !important;
+            }
+        }
+
+        /* PC: 넓은 화면에 맞는 Center Modal. 앱 컨테이너가 아닌 viewport 중앙 기준 */
+        @media (min-width: 1200px) {
+            body > .daily-modal-overlay,
+            body > .mission-modal-overlay,
+            body > .room-settings-overlay,
+            body > .guide-modal,
+            body > .history-panel-overlay,
+            body > .history-detail-overlay {
+                align-items: center !important;
+                justify-content: center !important;
+                padding: var(--hm-rmodal-pc-gap) !important;
+            }
+            #wakeModalOverlay .daily-modal,
+            #weightModalOverlay .daily-modal,
+            #waterModalOverlay .daily-modal,
+            #sleepModalOverlay .daily-modal {
+                width: var(--hm-rmodal-sm) !important;
+            }
+            #moodModalOverlay .daily-modal,
+            #mealModalOverlay .daily-modal,
+            #outingModalOverlay .daily-modal,
+            #diaryModalOverlay .daily-modal,
+            #feedbackModalOverlay .daily-modal,
+            #rewardModalOverlay .daily-modal,
+            #ownerNoteModalOverlay .daily-modal,
+            .mission-modal,
+            .guide-card {
+                width: var(--hm-rmodal-md) !important;
+            }
+            .room-settings-modal {
+                width: var(--hm-rmodal-lg) !important;
+            }
+            .history-panel-modal,
+            .history-detail-modal {
+                width: var(--hm-rmodal-xl) !important;
+            }
+            .daily-modal,
+            .mission-modal,
+            .room-settings-modal,
+            .guide-card,
+            .history-panel-modal,
+            .history-detail-modal {
+                max-height: calc(100dvh - 72px) !important;
+                border-radius: 34px !important;
+                padding: 30px 28px 26px !important;
+                animation: hmCenterPop 0.16s ease-out both !important;
+            }
+        }
+
+        /* 공통 헤더 안정화 */
+        .daily-modal-head,
+        .room-settings-head,
+        .mission-modal-head,
+        .guide-header,
+        .history-panel-head,
+        .history-detail-head {
+            position: sticky !important;
+            top: -30px !important;
+            z-index: 5 !important;
+            background: rgba(255, 255, 255, 0.97) !important;
+            backdrop-filter: blur(14px) !important;
+            -webkit-backdrop-filter: blur(14px) !important;
+            padding-top: 10px !important;
+            padding-bottom: 14px !important;
+            margin-bottom: 14px !important;
+        }
+
+        .daily-modal input[type="text"],
+        .daily-modal input[type="date"],
+        .daily-modal textarea,
+        .daily-modal input:not([type]),
+        .meal-row input {
+            min-height: 54px !important;
+            font-size: 0.95rem !important;
+        }
+
+        .daily-modal-save,
+        .btn-main,
+        .btn-connect {
+            min-height: 54px !important;
+        }
+
+        /* PC/Fold에서 채팅 입력줄 안정화 */
+        .chat-input-row,
+        #chatInputRow {
+            display: grid !important;
+            grid-template-columns: minmax(92px, 0.8fr) minmax(0, 2.6fr) minmax(86px, 0.8fr) !important;
+            gap: 10px !important;
+            align-items: stretch !important;
+        }
+        .chat-input-row input,
+        #chatInputRow input {
+            min-width: 0 !important;
+        }
+        .chat-input-row button,
+        #chatInputRow button {
+            width: 100% !important;
+            min-width: 0 !important;
+            white-space: nowrap !important;
+        }
+        @media (max-width: 380px) {
+            .chat-input-row,
+            #chatInputRow {
+                grid-template-columns: 74px minmax(0, 1fr) 68px !important;
+                gap: 6px !important;
+            }
+        }
+
+
+        /* =========================================================
+           RC2 v2.5.4: Mobile Center Popup + Card Gap Fix
+           - Phone에서도 입력 팝업을 화면 하단 고정이 아닌 중앙 Sheet로 표시
+           - 기상/체중 2열 카드와 다음 카드 사이 간격 보정
+           - Firebase / Room / Role / AutoSave / 저장 구조 변경 없음
+           ========================================================= */
+        @media (max-width: 767px) {
+            body > .daily-modal-overlay {
+                align-items: center !important;
+                justify-content: center !important;
+                padding: max(18px, env(safe-area-inset-top)) 14px max(18px, env(safe-area-inset-bottom)) !important;
+            }
+            .daily-modal {
+                width: min(430px, calc(100vw - 28px)) !important;
+                max-height: calc(100dvh - 36px) !important;
+                border-radius: 32px !important;
+                padding: 30px 18px 18px !important;
+                animation: hmCenterPop 0.16s ease-out both !important;
+            }
+            #wakeModalOverlay .daily-modal,
+            #weightModalOverlay .daily-modal,
+            #waterModalOverlay .daily-modal,
+            #sleepModalOverlay .daily-modal {
+                max-height: min(520px, calc(100dvh - 36px)) !important;
+            }
+            #moodModalOverlay .daily-modal,
+            #mealModalOverlay .daily-modal,
+            #feedbackModalOverlay .daily-modal,
+            #rewardModalOverlay .daily-modal,
+            #ownerNoteModalOverlay .daily-modal,
+            #diaryModalOverlay .daily-modal,
+            #outingModalOverlay .daily-modal {
+                max-height: calc(100dvh - 36px) !important;
+            }
+        }
+
+        /* 2열 카드 간격 안정화: 기상 시간 / 체중 카드가 아래 카드와 붙어 보이는 문제 해결 */
+        .container > .row {
+            gap: 14px !important;
+            margin-bottom: 14px !important;
+        }
+        .container > .row + .input-group {
+            margin-top: 2px !important;
+        }
+        .container > .row .input-group {
+            margin-bottom: 0 !important;
+        }
+        .container > .row .daily-card {
+            min-height: 134px !important;
+            padding: 18px !important;
+            gap: 12px !important;
+        }
+        .container > .row .daily-card-title {
+            word-break: keep-all !important;
+            overflow-wrap: normal !important;
+        }
+        @media (max-width: 430px) {
+            .container > .row {
+                gap: 12px !important;
+                margin-bottom: 16px !important;
+            }
+            .container > .row .daily-card {
+                min-height: 142px !important;
+                padding: 16px !important;
+            }
+            .container > .row .daily-card-title {
+                font-size: 0.9rem !important;
+                line-height: 1.22 !important;
+            }
+            .container > .row .daily-card-sub {
+                font-size: 0.76rem !important;
+                line-height: 1.34 !important;
+            }
+        }
+        @media (max-width: 360px) {
+            .container > .row {
+                grid-template-columns: 1fr !important;
+            }
+            .container > .row .daily-card {
+                min-height: 96px !important;
+            }
+        }
+
+
+
+        /* =========================================================
+           RC2 v2.5.7: Chat UI Premium
+           - 저장/삭제/Firebase 구조 변경 없음
+           - 기록실 카드, 캘린더, 사진 썸네일, 선택 기록 UI만 고급화
+           ========================================================= */
+        .history-launch-card {
+            background: linear-gradient(145deg, rgba(255,255,255,0.98), rgba(247,242,255,0.96));
+            border: 1px solid rgba(109,76,255,0.16);
+            box-shadow: 0 18px 46px rgba(109,76,255,0.105);
+        }
+        .history-launch-icon {
+            background: linear-gradient(145deg, #FFF8EE, #F4EDFF);
+        }
+        .history-launch-version {
+            background: linear-gradient(135deg, var(--hm-premium-primary), var(--hm-premium-primary-2));
+            color: #fff;
+            border: 0;
+            box-shadow: 0 8px 18px rgba(109,76,255,0.18);
+        }
+        .history-panel-modal {
+            background: rgba(255,255,255,0.96);
+            overflow-x: hidden;
+        }
+        .history-panel-head {
+            align-items: center;
+            padding: 4px 2px 14px;
+            border-bottom: 1px solid rgba(236,230,255,0.72);
+            margin-bottom: 16px;
+        }
+        .history-detail-kicker {
+            color: var(--hm-premium-muted);
+            letter-spacing: 0.12em;
+        }
+        .history-panel-head h2 {
+            font-size: clamp(1.28rem, 2.4vw, 1.72rem);
+            letter-spacing: -0.04em;
+        }
+        .history-panel-head h2 span {
+            display: inline-flex;
+            align-items: center;
+            margin-left: 8px;
+            padding: 4px 9px;
+            border-radius: 999px;
+            background: #F1ECFF;
+            color: var(--hm-premium-primary);
+            font-size: 0.72rem;
+            vertical-align: middle;
+        }
+        .history-hero {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+        .history-hero-tile {
+            min-height: 82px;
+            border-radius: 22px;
+            padding: 13px;
+            background: linear-gradient(145deg, #FFFFFF, #FAF8FF);
+            border: 1px solid var(--hm-premium-border);
+            box-shadow: 0 10px 26px rgba(109,76,255,0.065);
+        }
+        .history-hero-value {
+            display: block;
+            color: var(--hm-premium-primary);
+            font-size: 1.24rem;
+            font-weight: 820;
+            letter-spacing: -0.03em;
+            line-height: 1.15;
+            margin-bottom: 5px;
+        }
+        .history-hero-label {
+            color: var(--hm-premium-sub);
+            font-size: 0.72rem;
+            font-weight: 720;
+            line-height: 1.35;
+            word-break: keep-all;
+        }
+        #calendarBox.history-calendar-premium {
+            padding: 18px;
+            border-radius: 26px;
+            background: linear-gradient(145deg, rgba(255,255,255,0.98), rgba(250,248,255,0.98));
+        }
+        .history-calendar-title-row {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 13px;
+        }
+        .history-calendar-title-row strong {
+            color: var(--hm-premium-text);
+            font-size: 1.02rem;
+            letter-spacing: -0.03em;
+        }
+        .history-calendar-title-row span {
+            color: var(--hm-premium-muted);
+            font-size: 0.74rem;
+            font-weight: 750;
+        }
+        .calendar-grid.history-calendar-grid {
+            gap: 8px;
+            margin-bottom: 2px;
+        }
+        .history-calendar-grid .calendar-head {
+            color: #A49DB8;
+            font-size: 0.74rem;
+            font-weight: 820;
+            padding: 6px 2px;
+        }
+        .history-calendar-grid .calendar-day {
+            min-height: 58px;
+            border-radius: 18px;
+            background: rgba(255,255,255,0.88);
+            border: 1px solid rgba(236,230,255,0.95);
+            color: #817A94;
+            font-size: 0.88rem;
+            font-weight: 680;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease, background 0.16s ease;
+        }
+        .history-calendar-grid .calendar-day.has-record {
+            color: var(--hm-premium-text);
+            background: linear-gradient(145deg, #FFFFFF, #F7F2FF);
+            border-color: rgba(109,76,255,0.22);
+            box-shadow: 0 8px 20px rgba(109,76,255,0.08);
+        }
+        .history-calendar-grid .calendar-day.has-record:active {
+            transform: scale(0.96);
+        }
+        .history-calendar-grid .calendar-day.today {
+            outline: none;
+            border-color: rgba(255,107,122,0.42);
+        }
+        .history-calendar-grid .calendar-day.selected-record {
+            color: var(--hm-premium-text);
+            background: linear-gradient(145deg, #FFF7FB, #F1ECFF);
+            border-color: rgba(255,107,122,0.78);
+            box-shadow: 0 0 0 2px rgba(255,107,122,0.22), 0 14px 28px rgba(109,76,255,0.12);
+        }
+        .calendar-icons {
+            min-height: 15px;
+            margin-top: 4px;
+            letter-spacing: -0.08em;
+        }
+        #photoThumbs.history-thumb-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            min-height: 98px;
+            padding: 14px;
+            border-radius: 26px;
+            overflow-x: auto;
+            background: linear-gradient(145deg, #FFFDFB, #FAF8FF);
+        }
+        .history-photo-empty,
+        .history-photo-label {
+            flex: 0 0 auto;
+            color: var(--hm-premium-sub);
+            font-size: 0.82rem;
+            font-weight: 750;
+            line-height: 1.35;
+            padding: 0 2px;
+        }
+        .history-photo-label strong {
+            display: block;
+            color: var(--hm-premium-text);
+            font-size: 0.86rem;
+            margin-bottom: 3px;
+        }
+        .history-thumb {
+            width: 76px;
+            height: 76px;
+            border-radius: 20px;
+            border: 1px solid rgba(236,230,255,0.95);
+            box-shadow: 0 10px 22px rgba(109,76,255,0.10);
+            background: #fff;
+        }
+        .history-selected-hint {
+            padding: 22px 18px;
+            border-radius: 26px;
+            background: linear-gradient(145deg, #FFFFFF, #FAF8FF);
+            font-size: 0.92rem;
+        }
+        .history-selected-hint strong {
+            display: block;
+            color: var(--hm-premium-text);
+            font-size: 1.02rem;
+            margin-bottom: 6px;
+        }
+        .history-day-card.history-premium-selected {
+            grid-template-columns: auto 1fr auto;
+            min-height: 112px;
+            border-radius: 26px;
+            padding: 18px;
+            background: linear-gradient(145deg, #FFFFFF, #F8F4FF 66%, #FFF8FB);
+        }
+        .history-day-card.history-premium-selected .history-day-icon {
+            width: 56px;
+            height: 56px;
+            min-width: 56px;
+            border-radius: 22px;
+        }
+        .history-day-card.history-premium-selected .history-day-title {
+            font-size: 1.02rem;
+        }
+        .history-chip {
+            min-height: 24px;
+            background: rgba(241,236,255,0.86);
+            color: var(--hm-premium-primary);
+            border-color: rgba(109,76,255,0.14);
+        }
+        .history-detail-modal {
+            background: rgba(255,255,255,0.97);
+        }
+        .history-detail-content {
+            gap: 12px;
+        }
+        .history-detail-block {
+            border-radius: 22px;
+            background: linear-gradient(145deg, #FFFFFF, #FAF8FF);
+        }
+        .history-detail-block-title {
+            color: var(--hm-premium-primary);
+        }
+        @media (min-width: 768px) {
+            .history-panel-modal {
+                max-width: min(880px, 88vw) !important;
+            }
+            .history-detail-modal {
+                max-width: min(720px, 82vw) !important;
+            }
+        }
+        @media (min-width: 1200px) {
+            .history-panel-modal {
+                max-width: min(960px, 82vw) !important;
+            }
+            .history-detail-modal {
+                max-width: min(760px, 72vw) !important;
+            }
+        }
+        @media (max-width: 767px) {
+            .history-hero {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .history-hero-tile {
+                min-height: 76px;
+                padding: 12px;
+            }
+            .history-calendar-grid .calendar-day {
+                min-height: 52px;
+                border-radius: 16px;
+                font-size: 0.82rem;
+            }
+            .calendar-grid.history-calendar-grid {
+                gap: 6px;
+            }
+            .history-panel-head h2 {
+                font-size: 1.26rem;
+            }
+            .history-panel-head h2 span {
+                margin-left: 0;
+                margin-top: 6px;
+            }
+        }
+        @media (max-width: 380px) {
+            .history-hero {
+                grid-template-columns: 1fr 1fr;
+                gap: 8px;
+            }
+            #calendarBox.history-calendar-premium {
+                padding: 14px 12px;
+            }
+            .history-calendar-grid .calendar-day {
+                min-height: 46px;
+                border-radius: 14px;
+                font-size: 0.78rem;
+            }
+            .history-day-card.history-premium-selected {
+                grid-template-columns: auto 1fr;
+            }
+        }
+
+    
+
+        /* =========================================================
+           RC2 v2.5.7: Chat UI Premium
+           - Firebase messages data structure unchanged
+           - UI-only upgrade for Phone / Fold / Tablet / PC
+           ========================================================= */
+        #chatSection {
+            width: 100% !important;
+            max-width: 450px !important;
+            margin: 22px auto !important;
+            padding: 18px !important;
+            background: linear-gradient(135deg, rgba(255,255,255,0.98), rgba(250,248,255,0.96)) !important;
+            border: 1px solid var(--hm-premium-border) !important;
+            border-radius: 30px !important;
+            box-shadow: 0 18px 42px rgba(109, 76, 255, 0.11) !important;
+            font-family: inherit !important;
+            overflow: hidden !important;
+        }
+
+        #chatSection h3 {
+            margin: 0 0 12px !important;
+            color: var(--hm-premium-text) !important;
+            font-size: 1.02rem !important;
+            font-weight: 800 !important;
+            letter-spacing: -0.02em !important;
+        }
+
+        #chatMessages {
+            height: 270px !important;
+            overflow-y: auto !important;
+            border: 1px solid rgba(109, 76, 255, 0.11) !important;
+            padding: 14px !important;
+            border-radius: 24px !important;
+            margin-bottom: 12px !important;
+            background: linear-gradient(180deg, #fbf8ff 0%, #fff 100%) !important;
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 10px !important;
+            -webkit-overflow-scrolling: touch !important;
+        }
+
+        #chatSection > div:last-child {
+            display: grid !important;
+            grid-template-columns: 72px minmax(0, 1fr) 64px !important;
+            gap: 8px !important;
+            align-items: center !important;
+            width: 100% !important;
+            background: #fff !important;
+            border: 1px solid rgba(109, 76, 255, 0.10) !important;
+            border-radius: 22px !important;
+            padding: 7px !important;
+            box-shadow: inset 0 0 0 1px rgba(255,255,255,0.7) !important;
+        }
+
+        #chatSender,
+        #chatInput {
+            height: 42px !important;
+            min-width: 0 !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
+            border: 0 !important;
+            border-radius: 16px !important;
+            background: #faf8ff !important;
+            color: var(--hm-premium-text) !important;
+            outline: none !important;
+            font-size: 0.88rem !important;
+        }
+
+        #chatSender {
+            text-align: center !important;
+            font-weight: 750 !important;
+            padding: 0 8px !important;
+        }
+
+        #chatInput {
+            padding: 0 12px !important;
+        }
+
+        #chatSender:focus,
+        #chatInput:focus {
+            background: #fff !important;
+            box-shadow: 0 0 0 2px rgba(109, 76, 255, 0.13) !important;
+        }
+
+        #chatSection button {
+            height: 42px !important;
+            width: 100% !important;
+            min-width: 0 !important;
+            padding: 0 10px !important;
+            border-radius: 16px !important;
+            white-space: nowrap !important;
+            background: linear-gradient(135deg, var(--hm-premium-primary) 0%, var(--hm-premium-primary-2) 100%) !important;
+            color: #fff !important;
+            box-shadow: 0 10px 20px rgba(109, 76, 255, 0.20) !important;
+            font-size: 0.84rem !important;
+            font-weight: 800 !important;
+        }
+
+        .chat-message-line {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            animation: hmChatIn 0.16s ease-out;
+        }
+        .chat-message-line.is-me { align-items: flex-end; }
+        .chat-message-line.is-other { align-items: flex-start; }
+        .chat-sender-name {
+            font-size: 0.72rem;
+            color: #8b84a6;
+            font-weight: 750;
+            margin: 0 0 3px 4px;
+        }
+        .chat-bubble {
+            max-width: 78%;
+            padding: 10px 13px;
+            border-radius: 18px;
+            word-break: break-word;
+            font-size: 0.9rem;
+            line-height: 1.42;
+            box-shadow: 0 7px 16px rgba(109, 76, 255, 0.08);
+        }
+        .chat-message-line.is-me .chat-bubble {
+            color: #fff;
+            background: linear-gradient(135deg, var(--hm-premium-primary), var(--hm-premium-primary-2));
+            border-bottom-right-radius: 7px;
+        }
+        .chat-message-line.is-other .chat-bubble {
+            color: var(--hm-premium-text);
+            background: #fff;
+            border: 1px solid rgba(109, 76, 255, 0.12);
+            border-bottom-left-radius: 7px;
+        }
+        @keyframes hmChatIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (min-width: 768px) {
+            #chatSection {
+                max-width: 640px !important;
+                padding: 22px !important;
+            }
+            #chatMessages {
+                height: 320px !important;
+            }
+            #chatSection > div:last-child {
+                grid-template-columns: 88px minmax(0, 1fr) 78px !important;
+                gap: 10px !important;
+                padding: 8px !important;
+            }
+            #chatSender, #chatInput, #chatSection button {
+                height: 46px !important;
+            }
+        }
+
+        @media (min-width: 1200px) {
+            #chatSection {
+                max-width: 760px !important;
+            }
+            #chatMessages {
+                height: 340px !important;
+            }
+        }
+
+        @media (max-width: 380px) {
+            #chatSection {
+                padding: 15px !important;
+                border-radius: 26px !important;
+            }
+            #chatSection > div:last-child {
+                grid-template-columns: 58px minmax(0, 1fr) 54px !important;
+                gap: 6px !important;
+                padding: 6px !important;
+            }
+            #chatSender, #chatInput, #chatSection button {
+                height: 40px !important;
+                font-size: 0.8rem !important;
+            }
+            #chatInput { padding: 0 9px !important; }
+            .chat-bubble { max-width: 84%; font-size: 0.86rem; }
+        }
+
+
+        /* =========================================================
+           RC2 v2.5.7: Motion + Final UI QA
+           - 기능/Firebase/Room/Role/저장 구조 변경 없음
+           - 카드/팝업/채팅/기록실 최종 반응형 보정 + 부드러운 모션
+           ========================================================= */
+        :root {
+            --hm-motion-fast: 140ms;
+            --hm-motion-base: 220ms;
+            --hm-motion-slow: 320ms;
+            --hm-ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+            --hm-ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @media (prefers-reduced-motion: no-preference) {
+            .daily-card,
+            .room-settings-card,
+            .mission-compact-card,
+            .history-launch-card,
+            .history-day-card,
+            .summary-tile,
+            .history-hero-tile,
+            .chat-bubble,
+            .choice-btn,
+            .mood-btn,
+            .mission-chip,
+            .btn-main,
+            .btn-connect,
+            .daily-modal-save,
+            .chat-send-btn {
+                transition:
+                    transform var(--hm-motion-fast) var(--hm-ease-out),
+                    box-shadow var(--hm-motion-base) var(--hm-ease-out),
+                    border-color var(--hm-motion-base) var(--hm-ease-out),
+                    background var(--hm-motion-base) var(--hm-ease-out),
+                    opacity var(--hm-motion-base) var(--hm-ease-out);
+            }
+
+            .daily-card:hover,
+            .room-settings-card:hover,
+            .mission-compact-card:hover,
+            .history-launch-card:hover,
+            .history-day-card:hover {
+                transform: translateY(-2px);
+            }
+
+            .daily-card:active,
+            .room-settings-card:active,
+            .mission-compact-card:active,
+            .history-launch-card:active,
+            .history-day-card:active,
+            .choice-btn:active,
+            .mood-btn:active,
+            .mission-chip:active,
+            .btn-main:active,
+            .btn-connect:active,
+            .daily-modal-save:active,
+            .chat-send-btn:active {
+                transform: scale(0.975);
+            }
+
+            .daily-modal,
+            .room-settings-modal,
+            .mission-modal,
+            .guide-card,
+            .history-panel-modal,
+            .history-detail-modal {
+                animation: hmModalEnter var(--hm-motion-slow) var(--hm-ease-spring) both;
+            }
+
+            .chat-message-line {
+                animation: hmMessageEnter var(--hm-motion-base) var(--hm-ease-out) both;
+            }
+
+            .managed-card.is-filled,
+            .calendar-day.selected-record,
+            .choice-btn.active,
+            .mood-btn.active {
+                animation: hmSoftPulse var(--hm-motion-slow) var(--hm-ease-out) both;
+            }
+        }
+
+        @keyframes hmModalEnter {
+            from { opacity: 0; transform: translateY(10px) scale(0.975); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        @keyframes hmMessageEnter {
+            from { opacity: 0; transform: translateY(6px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        @keyframes hmSoftPulse {
+            0% { box-shadow: 0 0 0 rgba(109, 76, 255, 0); }
+            55% { box-shadow: 0 0 0 5px rgba(109, 76, 255, 0.08); }
+            100% { box-shadow: var(--hm-shadow-card, 0 10px 26px rgba(142, 92, 244, 0.10)); }
+        }
+
+        /* Final card spacing QA */
+        .container {
+            overflow: visible;
+        }
+
+        .input-group {
+            margin-bottom: 16px;
+        }
+
+        .row {
+            gap: 16px;
+            margin-bottom: 4px;
+        }
+
+        .row .input-group {
+            margin-bottom: 16px;
+        }
+
+        .daily-card,
+        .room-settings-card,
+        .mission-compact-card,
+        .history-launch-card {
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .daily-card-sub,
+        .room-settings-sub,
+        .mission-compact-sub,
+        .history-launch-sub,
+        .history-day-sub {
+            word-break: keep-all;
+            overflow-wrap: anywhere;
+        }
+
+        /* Final modal QA: device classes remain responsive */
+        .daily-modal-overlay,
+        .room-settings-overlay,
+        .mission-modal-overlay,
+        .guide-modal,
+        .history-panel-overlay,
+        .history-detail-overlay {
+            min-height: 100dvh;
+            backdrop-filter: blur(7px);
+            -webkit-backdrop-filter: blur(7px);
+        }
+
+        .daily-modal,
+        .room-settings-modal,
+        .mission-modal,
+        .guide-card,
+        .history-panel-modal,
+        .history-detail-modal {
+            overscroll-behavior: contain;
+            scrollbar-width: thin;
+        }
+
+        .daily-modal::before,
+        .room-settings-modal::before,
+        .mission-modal::before,
+        .guide-card::before,
+        .history-panel-modal::before,
+        .history-detail-modal::before {
+            content: '';
+            display: block;
+            width: 38px;
+            height: 4px;
+            border-radius: 999px;
+            background: rgba(109, 76, 255, 0.18);
+            margin: 0 auto 14px;
+        }
+
+        /* Final chat input QA */
+        #chatMessages {
+            scroll-behavior: smooth;
+        }
+
+        .chat-send-btn {
+            width: auto;
+            min-width: 64px;
+            flex: 0 0 auto;
+            padding: 10px 15px;
+            border-radius: 14px;
+            border: none;
+            cursor: pointer;
+            color: #fff;
+            font-weight: 850;
+            font-size: 0.88rem;
+            background: linear-gradient(135deg, #6D4CFF, #8D6BFF);
+            box-shadow: 0 8px 18px rgba(109, 76, 255, 0.16);
+            white-space: nowrap;
+        }
+
+        #chatInput,
+        #chatSender {
+            min-width: 0;
+        }
+
+        /* Completion/filled state: slightly more visible but still premium */
+        .managed-card.is-filled,
+        .history-day-card.has-record,
+        .calendar-day.has-record {
+            border-color: rgba(109, 76, 255, 0.30);
+        }
+
+        .managed-card.is-filled .daily-card-sub::before {
+            content: '완료 · ';
+            color: #6D4CFF;
+            font-weight: 900;
+        }
+
+        /* Phone QA */
+        @media (max-width: 767px) {
+            body {
+                padding: 16px 14px max(20px, env(safe-area-inset-bottom));
+            }
+
+            .container,
+            .auth-box,
+            .history-card {
+                width: 100%;
+                max-width: 460px;
+                padding: 20px 16px;
+            }
+
+            .row {
+                gap: 14px;
+            }
+
+            .row .daily-card {
+                min-height: 126px;
+                padding: 14px 12px;
+            }
+
+            .row .daily-card-title {
+                font-size: 0.86rem;
+                white-space: nowrap;
+            }
+
+            .row .daily-card-sub {
+                font-size: 0.73rem;
+                line-height: 1.32;
+            }
+
+            .daily-modal,
+            .mission-modal,
+            .room-settings-modal,
+            .guide-card,
+            .history-panel-modal,
+            .history-detail-modal {
+                width: calc(100vw - 28px);
+                max-height: calc(100dvh - 36px);
+            }
+
+            .chat-send-btn {
+                min-width: 58px;
+                padding: 10px 12px;
+                font-size: 0.82rem;
+            }
+        }
+
+        /* Small phone fallback */
+        @media (max-width: 360px) {
+            .row {
+                grid-template-columns: 1fr;
+            }
+            .row .daily-card {
+                min-height: 86px;
+                grid-template-columns: auto 1fr auto;
+            }
+        }
+
+        /* Fold / tablet QA */
+        @media (min-width: 768px) and (max-width: 1199px) {
+            .container,
+            .auth-box,
+            .history-launch-card {
+                max-width: 560px;
+            }
+            .daily-modal,
+            .mission-modal,
+            .guide-card {
+                max-width: 560px;
+            }
+            .room-settings-modal,
+            .history-panel-modal,
+            .history-detail-modal {
+                max-width: 680px;
+            }
+        }
+
+        /* Desktop QA */
+        @media (min-width: 1200px) {
+            .container,
+            .auth-box,
+            .history-launch-card {
+                max-width: 520px;
+            }
+            .daily-modal {
+                max-width: 520px;
+            }
+            .mission-modal,
+            .guide-card {
+                max-width: 680px;
+            }
+            .room-settings-modal,
+            .history-panel-modal,
+            .history-detail-modal {
+                max-width: 820px;
+            }
+        }
