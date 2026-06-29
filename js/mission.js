@@ -59,6 +59,7 @@
 
     function closeMissionModal() {
         closeModalOverlayById('missionModalOverlay');
+        ensureMissionClearButtons();
         updateMissionCompactUI();
     }
 
@@ -272,6 +273,33 @@
         handleMissionChanged(true);
     }
 
+
+
+    // RC2 v2.9.1 HOTFIX
+    // 일부 배포/캐시 환경에서 index.html의 미션 삭제 버튼이 누락되어도
+    // 런타임에서 5개 미션 row에 X 버튼을 반드시 주입한다.
+    function ensureMissionClearButtons() {
+        for (let i = 1; i <= 5; i++) {
+            const textEl = document.getElementById(`missionText${i}`);
+            if (!textEl) continue;
+            const row = textEl.closest('.mission-row');
+            if (!row) continue;
+            let btn = document.getElementById(`missionClear${i}`);
+            if (!btn) {
+                btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'mission-clear-btn';
+                btn.id = `missionClear${i}`;
+                btn.setAttribute('aria-label', `${i}번 미션 삭제`);
+                btn.textContent = '×';
+                btn.addEventListener('click', () => clearMissionRow(i));
+                row.appendChild(btn);
+            }
+            btn.style.display = 'inline-flex';
+        }
+        updateMissionAccessControls();
+    }
+
     function addMissionTemplate(text) {
         if (!canManageRelationshipCards()) {
             alert('오늘의 미션은 관리(Dom)만 작성하거나 수정할 수 있습니다. 기록(Sub)은 완료 체크만 가능합니다.');
@@ -380,3 +408,15 @@
 
 
 
+
+
+// RC2 v2.9.1 HOTFIX: 미션 삭제 버튼 누락 방지 초기화
+if (typeof window !== 'undefined') {
+    window.addEventListener('DOMContentLoaded', () => {
+        try {
+            if (typeof ensureMissionClearButtons === 'function') ensureMissionClearButtons();
+        } catch (err) {
+            console.warn('[RC2.9.1] mission clear button init failed', err);
+        }
+    });
+}

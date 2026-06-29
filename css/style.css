@@ -3827,3 +3827,56 @@
 /* RC2 v2.9.0 STEP5: Mission Delete UX touch target */
 .mission-clear-btn { min-width: 36px !important; min-height: 36px !important; border-radius: 12px !important; }
 .mission-row { grid-template-columns: 26px 1fr auto !important; }
+
+
+/* =========================================================
+   RC2 v2.9.1 HOTFIX: Mission row delete button visible on mobile
+   - 체크박스 / 입력칸 / 삭제버튼 3칸 구조 고정
+   - 모바일에서도 오른쪽 X 버튼이 줄 밖으로 밀리지 않도록 보호
+   ========================================================= */
+.mission-modal .mission-row,
+.mission-row {
+    display: grid !important;
+    grid-template-columns: 26px minmax(0, 1fr) 40px !important;
+    gap: 8px !important;
+    align-items: center !important;
+}
+.mission-row input[type="text"] {
+    min-width: 0 !important;
+}
+.mission-clear-btn {
+    width: 38px !important;
+    min-width: 38px !important;
+    height: 38px !important;
+    min-height: 38px !important;
+    padding: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 13px !important;
+    border: 1px solid #ffd6d6 !important;
+    background: #fff0f0 !important;
+    color: #d63031 !important;
+    font-size: 1.08rem !important;
+    font-weight: 900 !important;
+    line-height: 1 !important;
+    box-shadow: none !important;
+    white-space: nowrap !important;
+}
+.mission-clear-btn:disabled {
+    opacity: 0.38 !important;
+    filter: grayscale(0.2);
+}
+@media (max-width: 380px) {
+    .mission-modal .mission-row,
+    .mission-row {
+        grid-template-columns: 24px minmax(0, 1fr) 38px !important;
+        gap: 7px !important;
+    }
+    .mission-clear-btn {
+        width: 36px !important;
+        min-width: 36px !important;
+        height: 36px !important;
+        min-height: 36px !important;
+    }
+}
