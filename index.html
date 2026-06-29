@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>우리만의 실시간 하루 관리 앱 - hearme2nite</title>
+    <!-- Refactor v1: 로그인/방생성/초대/기록영역 표시 상태를 분리한 배포 후보 -->
     
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
@@ -258,7 +259,7 @@
         <label>비밀번호</label>
         <input type="password" id="authPassword" placeholder="6자리 이상" autocomplete="current-password" onkeypress="if(event.key === 'Enter') handleAuthSubmit()">
     </div>
-    <p class="auth-help">로그인 후 공유코드를 연결하세요. 다음 접속부터는 로그인한 내 계정에 저장된 공유코드만 자동 연결됩니다.</p>
+    <p class="auth-help">로그인 후 내 방을 만들거나 받은 초대코드로 참여하세요. 방에 연결된 사용자에게만 기록이 표시됩니다.</p>
     <button type="button" class="btn-main" id="authSubmitBtn" onclick="handleAuthSubmit()">로그인하기</button>
 </div>
 
@@ -373,7 +374,7 @@
         </h3>
         
         <div id="chatMessages" style="height: 250px; overflow-y: auto; border: 1px solid #f0f0f0; padding: 12px; border-radius: 12px; margin-bottom: 10px; background: #fafafa; display: flex; flex-direction: column; gap: 8px;">
-            <div style="text-align: center; color: #aaa; font-size: 0.85rem; margin-top: 50px;">공유 코드를 입력하면 채팅방이 연결됩니다. ✨</div>
+            <div style="text-align: center; color: #aaa; font-size: 0.85rem; margin-top: 50px;">방에 연결되면 채팅방이 연결됩니다. ✨</div>
         </div>
         
         <div style="display: flex; gap: 6px;">
@@ -1095,7 +1096,7 @@
     function displayHistory(daysData) {
         const historyList = document.getElementById('historyList');
         if (!daysData) {
-            historyList.innerHTML = '<div class="empty-message">아직 저장된 서버 기록이 없습니다. 코드를 공유해 보세요! ✨</div>';
+            historyList.innerHTML = '<div class="empty-message">아직 저장된 서버 기록이 없습니다. ✨</div>';
             return;
         }
         const filterInput = document.getElementById('historyFilterDate');
@@ -1159,7 +1160,7 @@
         const roomCode = getRoomCodeForData();
         const date = document.getElementById('recordDate').value;
         if(!currentUser) { alert('로그인이 필요합니다.'); return; }
-        if(!roomCode) { alert('공유 코드를 연결해야 전송용 결과가 추출됩니다.'); return; }
+        if(!roomCode) { alert('방에 연결되어야 전송용 결과가 추출됩니다.'); return; }
         if (!(await canCurrentUserAccessRoom(roomCode))) { alert('이 공유코드에 접근할 수 없습니다.'); return; }
         db.ref('rooms/' + roomCode + '/days/' + date).once('value').then((snapshot) => {
             const record = snapshot.val();
