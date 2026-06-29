@@ -622,8 +622,10 @@
             const roleLabel = activeRoomRole === 'owner' ? '방주인' : '초대받은 사용자';
             el.innerHTML = `현재 연결된 방: <strong>${escapeHtml(activeRoomCode)}</strong><br>내 권한: <strong>${roleLabel}</strong><br>이 방의 기록과 채팅이 실시간으로 동기화됩니다.`;
 
-            // 정책: 방을 만든 owner만 방 변경/초대/기존방 재연결을 할 수 있습니다.
-            // partner는 실수로 새 방을 만들거나 다른 사람을 초대할 수 없게 설정 메뉴를 숨깁니다.
+            // 정책:
+            // - owner: 새 방 만들기, 초대코드 생성, 초대코드 입력, 기존방 재연결 가능
+            // - partner: 새 방 만들기/초대코드 생성/기존 공유코드 연결은 금지
+            // - partner도 방주인이 새로 보낸 초대코드로는 방 이동 가능
             if (activeRoomRole === 'owner') {
                 if (createBtn) { createBtn.style.display = ''; createBtn.innerText = '🏠 새 방 만들기 / 다른 방으로 시작하기'; }
                 if (invitePanel) { invitePanel.open = false; invitePanel.style.display = ''; }
@@ -632,7 +634,7 @@
             } else {
                 if (createBtn) { createBtn.style.display = 'none'; }
                 if (invitePanel) { invitePanel.open = false; invitePanel.style.display = 'none'; }
-                if (joinInvitePanel) { joinInvitePanel.open = false; joinInvitePanel.style.display = 'none'; }
+                if (joinInvitePanel) { joinInvitePanel.open = false; joinInvitePanel.style.display = ''; }
                 if (legacyRoomPanel) { legacyRoomPanel.open = false; legacyRoomPanel.style.display = 'none'; }
             }
         } else {
@@ -816,7 +818,7 @@
     }
 
     function copyInviteText(code, link) {
-        const text = `HearMe2nite 초대코드: ${code}\n초대링크: ${link}\n\nHearU2nite 계정으로 로그인한 뒤 초대코드를 입력하면 같은 방을 사용할 수 있어요.`;
+        const text = `HearMe2nite 초대코드: ${code}\n초대링크: ${link}\n\nHearU2nite 계정으로 로그인한 뒤 초대코드를 입력하면 같은 방을 사용할 수 있어요.\n이미 다른 방에 연결되어 있어도 이 초대코드로 새 방으로 이동할 수 있어요.`;
         executeCopy(text);
     }
 
@@ -844,10 +846,6 @@
         }
 
         if (activeRoomCode) {
-            if (activeRoomRole !== 'owner') {
-                alert('초대받은 사용자는 다른 방으로 변경할 수 없습니다. 방 변경은 방주인만 가능합니다.');
-                return;
-            }
             const ok = confirm('현재 연결된 방이 있습니다. 이 초대코드의 방으로 기본 방을 변경할까요?');
             if (!ok) return;
         }
