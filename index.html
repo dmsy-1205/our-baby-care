@@ -464,11 +464,15 @@
         captureInviteFromUrl();
         // 공유코드는 브라우저 저장소에서 불러오지 않습니다. 초대코드는 로그인 전 임시 보관만 합니다.
         clearRoomInputs();
+        setDataSectionsVisible(false);
+        resetProtectedDataUI();
 
         babyAuth.onAuthStateChanged(async (user) => {
             disconnectAllListeners();
             clearRoomInputs();
             clearFormFieldsExceptSync();
+            setDataSectionsVisible(false);
+            resetProtectedDataUI();
             currentUser = user;
 
             if (user) {
@@ -496,6 +500,8 @@
         if (room) room.value = '';
         if (invite) invite.value = '';
         activeRoomCode = '';
+        setDataSectionsVisible(false);
+        resetProtectedDataUI();
         updateCurrentRoomInfo();
     }
 
@@ -573,11 +579,11 @@
                     await db.ref(`users/${currentUser.uid}/activeRoom`).remove();
                     clearRoomInputs();
                     showSaveStatus('🔒 이 계정은 저장된 공유코드 방의 허용 사용자가 아닙니다. 공유코드를 다시 연결해 주세요.');
-                    document.getElementById('historyList').innerHTML = '<div class="empty-message">공유코드를 다시 연결해 주세요. ✨</div>';
+                    resetProtectedDataUI('공유코드를 다시 연결해 주세요. ✨');
                 }
             } else {
                 showSaveStatus('🔑 공유코드를 입력하고 연결 버튼을 눌러 주세요.');
-                document.getElementById('historyList').innerHTML = '<div class="empty-message">로그인 후 공유코드를 연결하면 기록이 표시됩니다. ✨</div>';
+                resetProtectedDataUI('방을 만들거나 초대코드로 참여하면 기록이 표시됩니다. ✨');
             }
         } catch (err) {
             console.error(err);
@@ -606,6 +612,7 @@
         if (!el) return;
 
         if (activeRoomCode) {
+            setDataSectionsVisible(true);
             el.innerHTML = `현재 연결된 방: <strong>${escapeHtml(activeRoomCode)}</strong><br>이 방의 기록과 채팅이 실시간으로 동기화됩니다.`;
             if (createBtn) createBtn.innerText = '🏠 새 방 만들기 / 다른 방으로 시작하기';
             // 평소에는 설정 영역을 모두 접어둡니다.
@@ -613,6 +620,7 @@
             if (joinInvitePanel) joinInvitePanel.open = false;
             if (legacyRoomPanel) legacyRoomPanel.open = false;
         } else {
+            setDataSectionsVisible(false);
             el.innerHTML = '아직 연결된 방이 없습니다. 혼자 사용할 방을 만들거나 초대코드를 입력해 주세요.';
             if (createBtn) createBtn.innerText = '✨ 내 방 만들기 / 혼자 시작하기';
         }
@@ -633,6 +641,39 @@
         return String(text || '').replace(/[&<>'"]/g, (ch) => ({
             '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
         }[ch]));
+    }
+
+
+    function getRoomCodeForData() {
+        return activeRoomCode || '';
+    }
+
+    function setDataSectionsVisible(visible) {
+        const targets = [
+            ...document.querySelectorAll('.container > .input-group'),
+            ...document.querySelectorAll('.container > .row'),
+            document.getElementById('chatSection'),
+            document.querySelector('.container > .btn-main'),
+            document.getElementById('resultContainer'),
+            document.querySelector('.history-card')
+        ].filter(Boolean);
+
+        targets.forEach((el) => {
+            if (el.id === 'resultContainer' && visible) return;
+            el.style.display = visible ? '' : 'none';
+        });
+    }
+
+    function resetProtectedDataUI(message = '방을 만들거나 초대코드로 참여하면 기록이 표시됩니다. ✨') {
+        clearFormFieldsExceptSync();
+        const resultContainer = document.getElementById('resultContainer');
+        const resultBox = document.getElementById('resultBox');
+        const historyList = document.getElementById('historyList');
+        const chatMessages = document.getElementById('chatMessages');
+        if (resultContainer) resultContainer.style.display = 'none';
+        if (resultBox) resultBox.value = '';
+        if (historyList) historyList.innerHTML = `<div class="empty-message">${escapeHtml(message)}</div>`;
+        if (chatMessages) chatMessages.innerHTML = '<div style="text-align: center; color: #aaa; font-size: 0.85rem; margin-top: 50px;">방에 연결되면 채팅이 표시됩니다. ✨</div>';
     }
 
     async function canCurrentUserAccessRoom(roomCode) {
@@ -871,23 +912,29 @@
 
     async function connectAndListenFirebase() {
         if (!currentUser) { showSaveStatus('🔒 로그인이 필요합니다.'); return; }
-        const roomCode = document.getElementById('roomCode').value.trim();
+        const roomCode = getRoomCodeForData();
         const date = document.getElementById('recordDate').value;
 
         disconnectAllListeners();
         if (!roomCode) {
-            showSaveStatus('🔑 공유코드를 입력하고 연결해 주세요.');
+            setDataSectionsVisible(false);
+            resetProtectedDataUI();
+            showSaveStatus('🔑 방을 만들거나 초대코드로 참여해 주세요.');
             return;
         }
 
         const allowed = await canCurrentUserAccessRoom(roomCode);
         if (!allowed) {
-            showSaveStatus('🔒 허용되지 않은 공유코드입니다.');
-            document.getElementById('historyList').innerHTML = '<div class="empty-message">이 계정은 해당 공유코드 방에 접근할 수 없습니다.</div>';
+            activeRoomCode = '';
+            clearRoomInputs();
+            setDataSectionsVisible(false);
+            resetProtectedDataUI('이 계정은 해당 방에 접근할 수 없습니다.');
+            showSaveStatus('🔒 허용되지 않은 방입니다.');
             return;
         }
 
         activeRoomCode = roomCode;
+        setDataSectionsVisible(true);
         showSaveStatus('📡 연결 중...');
         listenChat();
 
@@ -995,9 +1042,9 @@
 
     async function executeAutoSave() {
         if (!currentUser) { showSaveStatus('🔒 로그인 후 저장됩니다.'); return; }
-        const roomCode = document.getElementById('roomCode').value.trim();
+        const roomCode = getRoomCodeForData();
         const date = document.getElementById('recordDate').value;
-        if (!roomCode) { showSaveStatus('🔑 공유코드 연결 후 저장됩니다.'); return; }
+        if (!roomCode) { showSaveStatus('🔑 방 연결 후 저장됩니다.'); return; }
         if (!(await canCurrentUserAccessRoom(roomCode))) { showSaveStatus('🔒 저장 권한 없음'); return; }
 
         const wakeTime = document.getElementById('wakeTime').value || '기록 없음';
@@ -1093,7 +1140,7 @@
 
     async function deleteRecord(event, date) {
         event.stopPropagation();
-        const roomCode = document.getElementById('roomCode').value.trim();
+        const roomCode = getRoomCodeForData();
         if (!currentUser || !roomCode) return;
         if (!(await canCurrentUserAccessRoom(roomCode))) { alert('삭제 권한이 없습니다.'); return; }
         if (confirm(`${date} 기록을 서버에서 완전히 삭제할까요?`)) db.ref('rooms/' + roomCode + '/days/' + date).remove();
@@ -1101,7 +1148,7 @@
 
     async function copyDirectText(event, date) {
         event.stopPropagation();
-        const roomCode = document.getElementById('roomCode').value.trim();
+        const roomCode = getRoomCodeForData();
         if (!(await canCurrentUserAccessRoom(roomCode))) { alert('복사 권한이 없습니다.'); return; }
         db.ref('rooms/' + roomCode + '/days/' + date).once('value').then((snapshot) => {
             if(snapshot.val()) executeCopy(snapshot.val().fullText);
@@ -1109,7 +1156,7 @@
     }
 
     async function finalizeAndGenerateReport() {
-        const roomCode = document.getElementById('roomCode').value.trim();
+        const roomCode = getRoomCodeForData();
         const date = document.getElementById('recordDate').value;
         if(!currentUser) { alert('로그인이 필요합니다.'); return; }
         if(!roomCode) { alert('공유 코드를 연결해야 전송용 결과가 추출됩니다.'); return; }
@@ -1142,7 +1189,7 @@
     }
 
     function listenChat() {
-        const roomCode = document.getElementById('roomCode').value.trim();
+        const roomCode = getRoomCodeForData();
         if (!currentUser || !roomCode) return;
         if (chatRef) chatRef.off();
         chatRef = db.ref('rooms/' + roomCode + '/messages');
@@ -1196,7 +1243,7 @@
     }
 
     async function sendChatMessage() {
-        const roomCode = document.getElementById('roomCode').value.trim();
+        const roomCode = getRoomCodeForData();
         const sender = document.getElementById('chatSender').value.trim();
         const text = document.getElementById('chatInput').value.trim();
         if (!currentUser) { alert('로그인이 필요합니다.'); return; }
@@ -1214,7 +1261,7 @@
     }
 
     function updateChatAlignment() {
-        const roomCode = document.getElementById('roomCode').value.trim();
+        const roomCode = getRoomCodeForData();
         if (!roomCode || !chatRef) return;
         chatRef.once('value', (snapshot) => { renderMessages(snapshot.val()); });
     }
