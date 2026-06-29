@@ -1223,6 +1223,324 @@
             }
         }
 
+
+        /* =========================================================
+           RC2 v2.1.0: History Card UI + App Version Badge
+           - 기존 Firebase / Room / 저장 구조 변경 없음
+           - displayHistory UI 렌더링만 카드 + 팝업으로 override
+           ========================================================= */
+        .app-version-badge {
+            text-align: center;
+            font-size: 0.66rem;
+            line-height: 1.35;
+            letter-spacing: 0.04em;
+            color: #9ca3af;
+            font-weight: 800;
+            margin: -8px 0 16px;
+            text-transform: uppercase;
+        }
+
+        .history-card {
+            padding: 22px;
+            overflow: hidden;
+        }
+
+        .history-header {
+            margin-bottom: 14px;
+        }
+
+        .history-section-card {
+            border-radius: 20px;
+            border: var(--hm-border-soft);
+            background: linear-gradient(135deg, #ffffff 0%, #fbf7ff 100%);
+            box-shadow: 0 10px 24px rgba(142, 92, 244, 0.08);
+            padding: 14px;
+            margin-bottom: 14px;
+        }
+
+        .history-section-title {
+            font-size: 0.88rem;
+            font-weight: 900;
+            color: #4b5563;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .history-section-title small {
+            font-size: 0.68rem;
+            color: #a1a1aa;
+            font-weight: 800;
+        }
+
+        #historySummary.summary-grid {
+            background: linear-gradient(135deg, #fff8fb, #f6efff);
+            border: var(--hm-border-soft);
+            border-radius: 20px;
+            padding: 12px;
+            box-shadow: 0 10px 24px rgba(142, 92, 244, 0.08);
+        }
+
+        #calendarBox {
+            background: linear-gradient(135deg, #ffffff, #fbf7ff);
+            border: var(--hm-border-soft);
+            border-radius: 20px;
+            padding: 14px;
+            margin-bottom: 14px;
+            box-shadow: 0 10px 24px rgba(142, 92, 244, 0.08);
+        }
+
+        #photoThumbs.history-thumb-row {
+            background: linear-gradient(135deg, #fffaf2, #fff7fb);
+            border: var(--hm-border-soft);
+            border-radius: 20px;
+            padding: 12px;
+            margin-bottom: 14px;
+            min-height: 76px;
+        }
+
+        .history-filter-card {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 8px;
+            align-items: center;
+            background: linear-gradient(135deg, #fff8fb, #fbf7ff);
+            border: var(--hm-border-soft);
+            border-radius: 18px;
+            padding: 12px;
+            margin-bottom: 14px;
+            box-shadow: 0 8px 20px rgba(142, 92, 244, 0.07);
+        }
+
+        .history-filter-card label {
+            font-size: 0.82rem;
+            font-weight: 900;
+            color: #6b7280;
+        }
+
+        .history-filter-card input[type="date"] {
+            width: 100%;
+            margin-top: 7px;
+            padding: 10px;
+            border-radius: 12px;
+            border: 1px solid #e4d4ff;
+            background: #fff;
+            color: #374151;
+            font-size: 0.86rem;
+            outline: none;
+        }
+
+        .history-filter-card button {
+            width: auto;
+            padding: 11px 13px;
+            border-radius: 12px;
+            background: var(--primary-color);
+            color: #fff;
+            font-size: 0.82rem;
+            white-space: nowrap;
+        }
+
+        .history-list {
+            max-height: none;
+            overflow-y: visible;
+            display: grid;
+            gap: 10px;
+        }
+
+        .history-day-card {
+            width: 100%;
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            gap: 12px;
+            align-items: center;
+            min-height: 86px;
+            padding: 14px;
+            border-radius: 20px;
+            border: var(--hm-border-soft);
+            background: linear-gradient(135deg, #ffffff 0%, #fbf7ff 100%);
+            box-shadow: 0 10px 24px rgba(142, 92, 244, 0.08);
+            text-align: left;
+            color: var(--text-color);
+            cursor: pointer;
+            transition: transform 0.16s ease, box-shadow 0.16s ease;
+        }
+
+        .history-day-card:active { transform: scale(0.985); }
+
+        .history-day-icon {
+            width: 46px;
+            height: 46px;
+            min-width: 46px;
+            border-radius: 17px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #fff0f6, #f3ecff);
+            font-size: 1.3rem;
+        }
+
+        .history-day-title {
+            display: block;
+            font-size: 0.92rem;
+            font-weight: 900;
+            color: #2d3436;
+            margin-bottom: 5px;
+            letter-spacing: -0.01em;
+        }
+
+        .history-day-sub {
+            display: block;
+            font-size: 0.76rem;
+            color: #6b7280;
+            line-height: 1.38;
+            word-break: keep-all;
+        }
+
+        .history-day-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-top: 7px;
+        }
+
+        .history-chip {
+            display: inline-flex;
+            align-items: center;
+            height: 22px;
+            padding: 0 8px;
+            border-radius: 999px;
+            background: #fff7fb;
+            border: 1px solid #eadcff;
+            color: #7c3aed;
+            font-size: 0.68rem;
+            font-weight: 850;
+        }
+
+        .history-day-actions {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 8px;
+        }
+
+        .history-card-arrow {
+            color: var(--hm-arrow-color);
+            font-size: 1.28rem;
+            font-weight: 900;
+        }
+
+        .history-day-card .btn-delete {
+            position: static;
+            width: auto;
+            padding: 5px 9px;
+            font-size: 0.7rem;
+            background: #fff0f0;
+            color: #d63031;
+            border: 1px solid #ffd6d6;
+            border-radius: 999px;
+        }
+
+        .history-detail-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(45, 52, 54, 0.52);
+            z-index: 36;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 18px;
+        }
+
+        .history-detail-modal {
+            width: 100%;
+            max-width: 460px;
+            max-height: 86vh;
+            overflow-y: auto;
+            background: #fff;
+            border-radius: 26px;
+            padding: 20px;
+            border: var(--hm-border-soft);
+            box-shadow: 0 24px 70px rgba(45, 52, 54, 0.22);
+        }
+
+        .history-detail-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+
+        .history-detail-kicker {
+            font-size: 0.68rem;
+            color: #a1a1aa;
+            font-weight: 900;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+
+        .history-detail-head h2 {
+            margin: 0;
+            font-size: 1.12rem;
+            color: var(--accent-purple);
+        }
+
+        .history-detail-content {
+            display: grid;
+            gap: 10px;
+        }
+
+        .history-detail-block {
+            background: linear-gradient(135deg, #ffffff, #fbf7ff);
+            border: var(--hm-border-soft);
+            border-radius: 18px;
+            padding: 13px;
+        }
+
+        .history-detail-block-title {
+            font-size: 0.78rem;
+            color: #6b7280;
+            font-weight: 900;
+            margin-bottom: 7px;
+        }
+
+        .history-detail-block-body {
+            font-size: 0.9rem;
+            color: #374151;
+            line-height: 1.55;
+            white-space: pre-line;
+            word-break: break-word;
+        }
+
+        .history-detail-photo {
+            width: 100%;
+            max-height: 260px;
+            object-fit: cover;
+            border-radius: 16px;
+            border: 1px solid #eadcff;
+        }
+
+        .history-detail-copy {
+            margin-top: 2px;
+            background: #55efc4;
+            color: #2d3436;
+        }
+
+        @media (max-width: 380px) {
+            .history-day-card {
+                grid-template-columns: auto 1fr;
+            }
+            .history-day-actions {
+                grid-column: 1 / -1;
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+            }
+        }
+
     </style>
 </head>
 <body>
@@ -1254,6 +1572,7 @@
         <div></div>
     </div>
     <div class="app-subtitle">합의된 하루를 신뢰로 기록하고, 따뜻하게 지켜보세요.</div>
+    <div class="app-version-badge">RC2 • v2.1.0 · Build 2026.06.29 · History Card UI</div>
 
     <div class="user-bar">
         <span id="userInfoText">로그인 확인 중...</span>
@@ -1482,7 +1801,7 @@
 </div>
 
 <div class="history-card">
-    <div class="history-header">📜 우리들의 지난 기록실 <span>(클라우드 서버 연동)</span></div>
+    <div class="history-header">📜 우리들의 지난 기록실 <span>RC2 v2.1.0</span></div>
 
     <div id="historySummary" class="summary-grid">
         <div class="summary-tile"><strong>-</strong><span>이번 주 기록</span></div>
@@ -1493,14 +1812,28 @@
     <div id="calendarBox"></div>
     <div id="photoThumbs" class="history-thumb-row"></div>
     
-    <div style="background: #fff5f5; padding: 12px; margin-bottom: 15px; border-radius: 12px; border: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; gap: 10px;">
-        <span style="font-size: 0.85rem; font-weight: bold; color: #636e72;">📅 날짜별 조회:</span>
-        <input type="date" id="historyFilterDate" onchange="applyHistoryFilter()" style="padding: 6px 10px; border: 1px solid var(--primary-color); border-radius: 8px; font-size: 0.85rem; outline: none; background: white;">
-        <button onclick="clearHistoryFilter()" style="width: auto; padding: 6px 14px; background: var(--primary-color); color: white; border-radius: 8px; font-size: 0.85rem; font-weight: bold; margin: 0; height: auto; line-height: 1;">전체보기</button>
+    <div class="history-filter-card">
+        <label>📅 날짜별 조회
+            <input type="date" id="historyFilterDate" onchange="applyHistoryFilter()">
+        </label>
+        <button type="button" onclick="clearHistoryFilter()">전체보기</button>
     </div>
 
     <div class="history-list" id="historyList"></div>
 </div>
+</div>
+
+<div class="history-detail-overlay" id="historyDetailOverlay" onclick="if(event.target.id==='historyDetailOverlay') closeHistoryDetailModal()">
+    <div class="history-detail-modal" role="dialog" aria-modal="true" aria-labelledby="historyDetailTitle">
+        <div class="history-detail-head">
+            <div>
+                <div class="history-detail-kicker">지난 기록 상세</div>
+                <h2 id="historyDetailTitle">📅 기록</h2>
+            </div>
+            <button type="button" class="modal-close-btn" onclick="closeHistoryDetailModal()">닫기</button>
+        </div>
+        <div id="historyDetailContent" class="history-detail-content"></div>
+    </div>
 </div>
 
 
@@ -3305,6 +3638,137 @@
         if (!roomCode || !chatRef) return;
         chatRef.once('value', (snapshot) => { renderMessages(snapshot.val()); });
     }
+
+
+    /* =========================================================
+       RC2 v2.1.0 History Card UI Override
+       - 저장/삭제/권한/데이터 구조는 기존 함수 재사용
+       ========================================================= */
+    function formatHistoryDateLabel(date) {
+        if (!date) return '날짜 없음';
+        const parts = date.split('-');
+        if (parts.length !== 3) return date;
+        return `${parts[0]}.${parts[1]}.${parts[2]}`;
+    }
+
+    function getHistoryMoodIcon(record) {
+        const mood = record?.mood || '';
+        if (mood === 'great') return '😊';
+        if (mood === 'okay') return '🙂';
+        if (mood === 'normal') return '😐';
+        if (mood === 'hard') return '😞';
+        if (mood === 'veryHard') return '😭';
+        return record?.photo ? '🖼️' : '📝';
+    }
+
+    function getHistoryMissionText(record) {
+        if (record?.missionSummary && record.missionSummary !== '기록 없음') return record.missionSummary;
+        const missions = Array.isArray(record?.missions) ? record.missions : [];
+        if (!missions.length) return '';
+        const done = missions.filter(m => m.done).length;
+        return `${done}/${missions.length} 완료`;
+    }
+
+    function makeHistoryChip(text) {
+        return text ? `<span class="history-chip">${escapeHtml(String(text))}</span>` : '';
+    }
+
+    function displayHistory(daysData) {
+        const historyList = document.getElementById('historyList');
+        renderHistorySummary(daysData || {});
+        renderCalendar(daysData || {});
+        renderPhotoThumbs(daysData || {});
+        if (!historyList) return;
+        if (!daysData) {
+            historyList.innerHTML = '<div class="empty-message">아직 저장된 서버 기록이 없습니다. ✨</div>';
+            return;
+        }
+        const filterInput = document.getElementById('historyFilterDate');
+        const filterValue = filterInput ? filterInput.value : '';
+        const allDates = Object.keys(daysData).sort((a, b) => new Date(b) - new Date(a));
+        const sortedDates = allDates.filter(date => !filterValue || date === filterValue);
+        if (sortedDates.length === 0) {
+            historyList.innerHTML = '<div class="empty-message">선택하신 날짜의 기록이 서버에 없습니다. 📅</div>';
+            return;
+        }
+        historyList.innerHTML = sortedDates.map((date) => {
+            const record = daysData[date] || {};
+            const icon = getHistoryMoodIcon(record);
+            const missionText = getHistoryMissionText(record);
+            const diaryPreview = record.diary ? record.diary.substring(0, 34) : '오늘의 하루 기록을 열어 확인하세요.';
+            const chips = [
+                record.moodLabel && record.moodLabel !== '기록 없음' ? record.moodLabel : '',
+                record.water ? `💧 ${record.water}` : '',
+                record.weight ? `⚖️ ${record.weight}` : '',
+                missionText ? `🎯 ${missionText}` : '',
+                record.photo ? '📷 사진' : '',
+                record.dailyChoiceLabel && record.dailyChoiceLabel !== '기록 없음' ? record.dailyChoiceLabel : ''
+            ].map(makeHistoryChip).join('');
+            return `
+                <button type="button" class="history-day-card" onclick="openHistoryDetailModal('${date}')">
+                    <span class="history-day-icon">${icon}</span>
+                    <span>
+                        <span class="history-day-title">${formatHistoryDateLabel(date)}의 기록</span>
+                        <span class="history-day-sub">${escapeHtml(diaryPreview)}${record.diary && record.diary.length > 34 ? '...' : ''}</span>
+                        <span class="history-day-chips">${chips}</span>
+                    </span>
+                    <span class="history-day-actions">
+                        <span class="history-card-arrow">›</span>
+                        <span class="btn-delete" onclick="deleteRecord(event, '${date}')">삭제</span>
+                    </span>
+                </button>`;
+        }).join('');
+    }
+
+    function historyDetailBlock(title, body) {
+        if (!body || body === '기록 없음') return '';
+        return `<div class="history-detail-block"><div class="history-detail-block-title">${title}</div><div class="history-detail-block-body">${escapeHtml(String(body))}</div></div>`;
+    }
+
+    function openHistoryDetailModal(date) {
+        const record = cachedDaysData && cachedDaysData[date] ? cachedDaysData[date] : null;
+        if (!record) return;
+        const overlay = document.getElementById('historyDetailOverlay');
+        const title = document.getElementById('historyDetailTitle');
+        const content = document.getElementById('historyDetailContent');
+        if (!overlay || !title || !content) return;
+        title.innerText = `${getHistoryMoodIcon(record)} ${formatHistoryDateLabel(date)}`;
+        const missionText = getHistoryMissionText(record);
+        const meals = [
+            record.mealBreakfast ? `아침: ${record.mealBreakfast}` : '',
+            record.mealLunch ? `점심: ${record.mealLunch}` : '',
+            record.mealDinner ? `저녁: ${record.mealDinner}` : ''
+        ].filter(Boolean).join('\n');
+        const dailyBase = [
+            record.wakeTime ? `☀️ 기상: ${record.wakeTime}` : '',
+            record.sleepTime ? `🌙 취침 예정: ${record.sleepTime}` : '',
+            record.water ? `💧 수분: ${record.water}` : '',
+            record.weight ? `⚖️ 체중: ${record.weight}` : ''
+        ].filter(Boolean).join('\n');
+        content.innerHTML = `
+            ${record.photo ? `<img src="${record.photo}" class="history-detail-photo" alt="${date} 사진">` : ''}
+            ${historyDetailBlock('😊 오늘의 기분', [record.moodLabel, record.moodNote].filter(Boolean).join('\n'))}
+            ${historyDetailBlock('🎯 오늘의 미션', missionText)}
+            ${historyDetailBlock('☀️ 기본 기록', dailyBase)}
+            ${historyDetailBlock('🥗 식사 기록', meals)}
+            ${historyDetailBlock('🚶 외출 기록', record.goingOut)}
+            ${historyDetailBlock('📝 오늘의 하루', record.diary)}
+            ${historyDetailBlock('💌 주인의 피드백', record.replyMessage)}
+            ${historyDetailBlock('✨ 보상 / 휴식', [record.dailyChoiceLabel, record.rewardNote].filter(Boolean).join('\n'))}
+            <button type="button" class="history-detail-copy" onclick="copyDirectText(event, '${date}')">📋 이 기록 복사하기</button>
+        `;
+        overlay.style.display = 'flex';
+    }
+
+    function closeHistoryDetailModal() {
+        const overlay = document.getElementById('historyDetailOverlay');
+        if (overlay) overlay.style.display = 'none';
+    }
+
+    function toggleHistoryItem(date) {
+        openHistoryDetailModal(date);
+    }
+
 </script>
 </body>
 </html>
