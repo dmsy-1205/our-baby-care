@@ -717,9 +717,30 @@
             font-size: 1.12rem;
             color: var(--accent-purple);
         }
+        /* RC popup fix: modal input fields must use the full popup width */
         .daily-modal textarea,
         .daily-modal input[type="text"] {
+            width: 100%;
+            display: block;
+            padding: 12px;
+            border: 1px solid #dfe6e9;
+            border-radius: 12px;
             background: #fff;
+            font-size: 0.95rem;
+            line-height: 1.45;
+            color: var(--text-color);
+            outline: none;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+        .daily-modal textarea {
+            min-height: 96px;
+            resize: vertical;
+        }
+        .daily-modal textarea:focus,
+        .daily-modal input[type="text"]:focus {
+            border-color: var(--accent-purple);
+            box-shadow: 0 0 0 3px rgba(142, 92, 244, 0.10);
         }
         .daily-modal-save {
             margin-top: 12px;
