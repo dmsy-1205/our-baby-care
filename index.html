@@ -1225,7 +1225,7 @@
 
 
         /* =========================================================
-           RC2 v2.1.0: History Card UI + App Version Badge
+           RC2 v2.2.0: History Popup UI + App Version Badge
            - 기존 Firebase / Room / 저장 구조 변경 없음
            - displayHistory UI 렌더링만 카드 + 팝업으로 override
            ========================================================= */
@@ -1541,6 +1541,122 @@
             }
         }
 
+
+        /* RC2 v2.2.0: History as compact launcher card + popup center */
+        .history-launch-card {
+            width: 100%;
+            max-width: 450px;
+            display: grid;
+            grid-template-columns: auto 1fr auto auto;
+            align-items: center;
+            gap: 12px;
+            padding: 16px;
+            border-radius: 22px;
+            border: 1px solid #eadcff;
+            background: linear-gradient(135deg, #ffffff, #fbf7ff 58%, #fffaf2);
+            box-shadow: 0 12px 30px rgba(142, 92, 244, 0.12);
+            text-align: left;
+            color: var(--text-color);
+            margin-bottom: 20px;
+        }
+        .history-launch-card:active { transform: scale(0.99); }
+        .history-launch-icon {
+            width: 46px;
+            height: 46px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #fff0f6;
+            font-size: 1.28rem;
+        }
+        .history-launch-title {
+            display: block;
+            font-size: 0.98rem;
+            font-weight: 900;
+            margin-bottom: 4px;
+        }
+        .history-launch-sub {
+            display: block;
+            color: #636e72;
+            font-size: 0.78rem;
+            line-height: 1.4;
+        }
+        .history-launch-version {
+            color: #8e5cf4;
+            background: #f3ecff;
+            border: 1px solid #eadcff;
+            border-radius: 999px;
+            padding: 5px 8px;
+            font-size: 0.68rem;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+        .history-launch-arrow {
+            color: #a29bfe;
+            font-size: 1.35rem;
+            font-weight: 900;
+        }
+        .history-panel-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(45,52,54,0.52);
+            z-index: 31;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 18px;
+        }
+        .history-panel-modal {
+            width: 100%;
+            max-width: 460px;
+            max-height: 88vh;
+            overflow-y: auto;
+            background: #fff;
+            border-radius: 26px;
+            padding: 20px;
+            box-shadow: 0 22px 65px rgba(0,0,0,0.20);
+            border: 1px solid rgba(142, 92, 244, 0.15);
+        }
+        .history-panel-head {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+        .history-panel-head h2 {
+            margin: 0;
+            font-size: 1.06rem;
+            color: #2d3436;
+            line-height: 1.35;
+        }
+        .history-panel-head h2 span {
+            color: #8e5cf4;
+            font-size: 0.72rem;
+            font-weight: 800;
+            margin-left: 4px;
+        }
+        .calendar-day.has-record {
+            cursor: pointer;
+        }
+        .history-detail-photo {
+            width: 100%;
+            max-height: 360px;
+            object-fit: contain;
+            object-position: center center;
+            background: #fff7fb;
+        }
+        .history-thumb {
+            object-fit: contain;
+            object-position: center center;
+            background: #fff7fb;
+        }
+        @media (max-width: 420px) {
+            .history-launch-card { grid-template-columns: auto 1fr auto; }
+            .history-launch-version { display: none; }
+        }
+
     </style>
 </head>
 <body>
@@ -1572,7 +1688,7 @@
         <div></div>
     </div>
     <div class="app-subtitle">합의된 하루를 신뢰로 기록하고, 따뜻하게 지켜보세요.</div>
-    <div class="app-version-badge">RC2 • v2.1.0 · Build 2026.06.29 · History Card UI</div>
+    <div class="app-version-badge">RC2 • v2.2.0 · Build 2026.06.29 · History Popup UI</div>
 
     <div class="user-bar">
         <span id="userInfoText">로그인 확인 중...</span>
@@ -1800,27 +1916,45 @@
     </div>
 </div>
 
-<div class="history-card">
-    <div class="history-header">📜 우리들의 지난 기록실 <span>RC2 v2.1.0</span></div>
-
-    <div id="historySummary" class="summary-grid">
-        <div class="summary-tile"><strong>-</strong><span>이번 주 기록</span></div>
-        <div class="summary-tile"><strong>-</strong><span>미션 완료율</span></div>
-        <div class="summary-tile"><strong>-</strong><span>연속 기록</span></div>
-        <div class="summary-tile"><strong>-</strong><span>힘든 날</span></div>
-    </div>
-    <div id="calendarBox"></div>
-    <div id="photoThumbs" class="history-thumb-row"></div>
-    
-    <div class="history-filter-card">
-        <label>📅 날짜별 조회
-            <input type="date" id="historyFilterDate" onchange="applyHistoryFilter()">
-        </label>
-        <button type="button" onclick="clearHistoryFilter()">전체보기</button>
-    </div>
-
-    <div class="history-list" id="historyList"></div>
+<button type="button" class="history-launch-card" onclick="openHistoryPanelModal()" aria-label="지난 기록실 열기">
+    <span class="history-launch-icon">📜</span>
+    <span>
+        <span class="history-launch-title">우리들의 지난 기록실</span>
+        <span class="history-launch-sub" id="historyLaunchSub">이번 주 기록 · 캘린더 · 사진을 한 번에 확인하세요.</span>
+    </span>
+    <span class="history-launch-version">RC2 v2.2.0</span>
+    <span class="history-launch-arrow">›</span>
+</button>
 </div>
+
+<div class="history-panel-overlay" id="historyPanelOverlay" onclick="if(event.target.id==='historyPanelOverlay') closeHistoryPanelModal()">
+    <div class="history-panel-modal" role="dialog" aria-modal="true" aria-labelledby="historyPanelTitle">
+        <div class="history-panel-head">
+            <div>
+                <div class="history-detail-kicker">History Center</div>
+                <h2 id="historyPanelTitle">📜 우리들의 지난 기록실 <span>RC2 v2.2.0</span></h2>
+            </div>
+            <button type="button" class="modal-close-btn" onclick="closeHistoryPanelModal()">닫기</button>
+        </div>
+
+        <div id="historySummary" class="summary-grid">
+            <div class="summary-tile"><strong>-</strong><span>이번 주 기록</span></div>
+            <div class="summary-tile"><strong>-</strong><span>미션 완료율</span></div>
+            <div class="summary-tile"><strong>-</strong><span>연속 기록</span></div>
+            <div class="summary-tile"><strong>-</strong><span>힘든 날</span></div>
+        </div>
+        <div id="calendarBox"></div>
+        <div id="photoThumbs" class="history-thumb-row"></div>
+        
+        <div class="history-filter-card">
+            <label>📅 날짜별 조회
+                <input type="date" id="historyFilterDate" onchange="applyHistoryFilter()">
+            </label>
+            <button type="button" onclick="clearHistoryFilter()">전체보기</button>
+        </div>
+
+        <div class="history-list" id="historyList"></div>
+    </div>
 </div>
 
 <div class="history-detail-overlay" id="historyDetailOverlay" onclick="if(event.target.id==='historyDetailOverlay') closeHistoryDetailModal()">
@@ -2726,7 +2860,7 @@
             const ymd = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
             const rec = (daysData || {})[ymd];
             const icons = rec ? `${rec.photo ? '📷' : ''}${rec.missionSummary && rec.missionSummary !== '기록 없음' ? '🎯' : ''}${rec.mood === 'hard' || rec.mood === 'veryHard' ? '☁️' : ''}` : '';
-            html += `<div class="calendar-day ${rec ? 'has-record' : ''} ${ymd === todayYmd ? 'today' : ''}" ${rec ? `onclick="selectHistoryDate('${ymd}')"` : ''}>${day}<span class="calendar-icons">${icons}</span></div>`;
+            html += `<div class="calendar-day ${rec ? 'has-record' : ''} ${ymd === todayYmd ? 'today' : ''}" ${rec ? `onclick="openHistoryDetailModal('${ymd}')"` : ''}>${day}<span class="calendar-icons">${icons}</span></div>`;
         }
         html += '</div>';
         box.innerHTML = html;
@@ -2737,15 +2871,11 @@
         if (!box) return;
         const photos = Object.keys(daysData || {}).sort((a,b)=>new Date(b)-new Date(a)).filter(date => daysData[date]?.photo).slice(0, 10);
         if (!photos.length) { box.innerHTML = ''; return; }
-        box.innerHTML = photos.map(date => `<img class="history-thumb" src="${daysData[date].photo}" title="${date}" alt="${date} 사진" onclick="selectHistoryDate('${date}')">`).join('');
+        box.innerHTML = photos.map(date => `<img class="history-thumb" src="${daysData[date].photo}" title="${date}" alt="${date} 사진" onclick="openHistoryDetailModal('${date}')">`).join('');
     }
 
     function selectHistoryDate(date) {
-        const filterInput = document.getElementById('historyFilterDate');
-        if (filterInput) filterInput.value = date;
-        applyHistoryFilter();
-        const list = document.getElementById('historyList');
-        if (list) list.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        openHistoryDetailModal(date);
     }
 
 
@@ -3462,6 +3592,7 @@
     function displayHistory(daysData) {
         const historyList = document.getElementById('historyList');
         renderHistorySummary(daysData || {});
+        updateHistoryLaunchSub(daysData || {});
         renderCalendar(daysData || {});
         renderPhotoThumbs(daysData || {});
         if (!daysData) {
@@ -3640,8 +3771,27 @@
     }
 
 
+
+    function openHistoryPanelModal() {
+        const overlay = document.getElementById('historyPanelOverlay');
+        if (overlay) overlay.style.display = 'flex';
+    }
+
+    function closeHistoryPanelModal() {
+        const overlay = document.getElementById('historyPanelOverlay');
+        if (overlay) overlay.style.display = 'none';
+    }
+
+    function updateHistoryLaunchSub(daysData) {
+        const sub = document.getElementById('historyLaunchSub');
+        if (!sub) return;
+        const stats = calculateHistoryStats(daysData || {});
+        const photos = Object.values(daysData || {}).filter(record => record && record.photo).length;
+        sub.textContent = `이번 주 ${stats.weekCount}/7 · 미션 ${stats.missionRate} · 사진 ${photos}장`;
+    }
+
     /* =========================================================
-       RC2 v2.1.0 History Card UI Override
+       RC2 v2.2.0 History Popup UI Override
        - 저장/삭제/권한/데이터 구조는 기존 함수 재사용
        ========================================================= */
     function formatHistoryDateLabel(date) {
@@ -3676,6 +3826,7 @@
     function displayHistory(daysData) {
         const historyList = document.getElementById('historyList');
         renderHistorySummary(daysData || {});
+        updateHistoryLaunchSub(daysData || {});
         renderCalendar(daysData || {});
         renderPhotoThumbs(daysData || {});
         if (!historyList) return;
