@@ -2650,6 +2650,273 @@
         }
 
 
+    
+
+        /* =========================================================
+           RC2 v2.5.3: Responsive Modal System
+           - Device 기준 분리: Phone / Fold-Tablet / PC
+           - Size 기준 분리: sm / md / lg
+           - 팝업 DOM을 body 기준으로 띄우는 JS와 함께 사용
+           - Firebase / Room / Role / AutoSave 변경 없음
+           ========================================================= */
+        :root {
+            --hm-rmodal-phone-gap: 22px;
+            --hm-rmodal-tablet-gap: 28px;
+            --hm-rmodal-pc-gap: 36px;
+            --hm-rmodal-sm: 460px;
+            --hm-rmodal-md: 640px;
+            --hm-rmodal-lg: 820px;
+            --hm-rmodal-xl: 920px;
+        }
+
+        body.hm-modal-open {
+            position: fixed !important;
+            left: 0 !important;
+            right: 0 !important;
+            width: 100% !important;
+            overflow: hidden !important;
+            touch-action: none !important;
+        }
+
+        body > .daily-modal-overlay,
+        body > .mission-modal-overlay,
+        body > .room-settings-overlay,
+        body > .guide-modal,
+        body > .history-panel-overlay,
+        body > .history-detail-overlay {
+            position: fixed !important;
+            inset: 0 !important;
+            width: 100vw !important;
+            height: 100dvh !important;
+            min-height: 100dvh !important;
+            display: none;
+            overflow: hidden !important;
+            background: rgba(35, 33, 43, 0.45) !important;
+            backdrop-filter: blur(9px) !important;
+            -webkit-backdrop-filter: blur(9px) !important;
+            overscroll-behavior: contain !important;
+            z-index: 9999 !important;
+        }
+
+        body > .daily-modal-overlay[style*="display: flex"],
+        body > .mission-modal-overlay[style*="display: flex"],
+        body > .room-settings-overlay[style*="display: flex"],
+        body > .guide-modal[style*="display: flex"],
+        body > .history-panel-overlay[style*="display: flex"],
+        body > .history-detail-overlay[style*="display: flex"] {
+            display: flex !important;
+        }
+
+        .daily-modal,
+        .mission-modal,
+        .room-settings-modal,
+        .guide-card,
+        .history-panel-modal,
+        .history-detail-modal {
+            position: relative !important;
+            box-sizing: border-box !important;
+            background: rgba(255, 255, 255, 0.98) !important;
+            border: 1px solid rgba(236, 230, 255, 0.98) !important;
+            box-shadow: 0 28px 80px rgba(31, 24, 58, 0.22) !important;
+            overflow-y: auto !important;
+            -webkit-overflow-scrolling: touch !important;
+            overscroll-behavior: contain !important;
+        }
+
+        /* Phone: 입력 팝업은 Bottom Sheet, 관리 팝업은 거의 전체폭 Center Modal */
+        @media (max-width: 767px) {
+            body > .daily-modal-overlay {
+                align-items: flex-end !important;
+                justify-content: center !important;
+                padding: 0 10px max(10px, env(safe-area-inset-bottom)) !important;
+            }
+            body > .mission-modal-overlay,
+            body > .room-settings-overlay,
+            body > .guide-modal,
+            body > .history-panel-overlay,
+            body > .history-detail-overlay {
+                align-items: center !important;
+                justify-content: center !important;
+                padding: max(12px, env(safe-area-inset-top)) 10px max(12px, env(safe-area-inset-bottom)) !important;
+            }
+            .daily-modal {
+                width: min(430px, calc(100vw - 20px)) !important;
+                max-height: min(78dvh, 680px) !important;
+                border-radius: 32px 32px 26px 26px !important;
+                padding: 30px 18px 18px !important;
+                animation: hmSheetUp 0.18s ease-out both !important;
+            }
+            .mission-modal,
+            .room-settings-modal,
+            .guide-card,
+            .history-panel-modal,
+            .history-detail-modal {
+                width: min(430px, calc(100vw - 20px)) !important;
+                max-height: calc(100dvh - 24px) !important;
+                border-radius: 32px !important;
+                padding: 30px 18px 18px !important;
+                animation: hmCenterPop 0.16s ease-out both !important;
+            }
+            .history-panel-modal {
+                max-height: calc(100dvh - 20px) !important;
+            }
+        }
+
+        /* Fold / Tablet: 전부 Center Modal, 등급별 폭 */
+        @media (min-width: 768px) and (max-width: 1199px) {
+            body > .daily-modal-overlay,
+            body > .mission-modal-overlay,
+            body > .room-settings-overlay,
+            body > .guide-modal,
+            body > .history-panel-overlay,
+            body > .history-detail-overlay {
+                align-items: center !important;
+                justify-content: center !important;
+                padding: max(24px, env(safe-area-inset-top)) var(--hm-rmodal-tablet-gap) max(24px, env(safe-area-inset-bottom)) !important;
+            }
+            #wakeModalOverlay .daily-modal,
+            #weightModalOverlay .daily-modal,
+            #waterModalOverlay .daily-modal,
+            #sleepModalOverlay .daily-modal {
+                width: min(var(--hm-rmodal-sm), calc(100vw - 56px)) !important;
+            }
+            #moodModalOverlay .daily-modal,
+            #mealModalOverlay .daily-modal,
+            #outingModalOverlay .daily-modal,
+            #diaryModalOverlay .daily-modal,
+            #feedbackModalOverlay .daily-modal,
+            #rewardModalOverlay .daily-modal,
+            #ownerNoteModalOverlay .daily-modal,
+            .mission-modal,
+            .guide-card {
+                width: min(var(--hm-rmodal-md), calc(100vw - 56px)) !important;
+            }
+            .room-settings-modal,
+            .history-panel-modal,
+            .history-detail-modal {
+                width: min(720px, calc(100vw - 56px)) !important;
+            }
+            .daily-modal,
+            .mission-modal,
+            .room-settings-modal,
+            .guide-card,
+            .history-panel-modal,
+            .history-detail-modal {
+                max-height: calc(100dvh - 56px) !important;
+                border-radius: 34px !important;
+                padding: 30px 24px 24px !important;
+                animation: hmCenterPop 0.16s ease-out both !important;
+            }
+        }
+
+        /* PC: 넓은 화면에 맞는 Center Modal. 앱 컨테이너가 아닌 viewport 중앙 기준 */
+        @media (min-width: 1200px) {
+            body > .daily-modal-overlay,
+            body > .mission-modal-overlay,
+            body > .room-settings-overlay,
+            body > .guide-modal,
+            body > .history-panel-overlay,
+            body > .history-detail-overlay {
+                align-items: center !important;
+                justify-content: center !important;
+                padding: var(--hm-rmodal-pc-gap) !important;
+            }
+            #wakeModalOverlay .daily-modal,
+            #weightModalOverlay .daily-modal,
+            #waterModalOverlay .daily-modal,
+            #sleepModalOverlay .daily-modal {
+                width: var(--hm-rmodal-sm) !important;
+            }
+            #moodModalOverlay .daily-modal,
+            #mealModalOverlay .daily-modal,
+            #outingModalOverlay .daily-modal,
+            #diaryModalOverlay .daily-modal,
+            #feedbackModalOverlay .daily-modal,
+            #rewardModalOverlay .daily-modal,
+            #ownerNoteModalOverlay .daily-modal,
+            .mission-modal,
+            .guide-card {
+                width: var(--hm-rmodal-md) !important;
+            }
+            .room-settings-modal {
+                width: var(--hm-rmodal-lg) !important;
+            }
+            .history-panel-modal,
+            .history-detail-modal {
+                width: var(--hm-rmodal-xl) !important;
+            }
+            .daily-modal,
+            .mission-modal,
+            .room-settings-modal,
+            .guide-card,
+            .history-panel-modal,
+            .history-detail-modal {
+                max-height: calc(100dvh - 72px) !important;
+                border-radius: 34px !important;
+                padding: 30px 28px 26px !important;
+                animation: hmCenterPop 0.16s ease-out both !important;
+            }
+        }
+
+        /* 공통 헤더 안정화 */
+        .daily-modal-head,
+        .room-settings-head,
+        .mission-modal-head,
+        .guide-header,
+        .history-panel-head,
+        .history-detail-head {
+            position: sticky !important;
+            top: -30px !important;
+            z-index: 5 !important;
+            background: rgba(255, 255, 255, 0.97) !important;
+            backdrop-filter: blur(14px) !important;
+            -webkit-backdrop-filter: blur(14px) !important;
+            padding-top: 10px !important;
+            padding-bottom: 14px !important;
+            margin-bottom: 14px !important;
+        }
+
+        .daily-modal input[type="text"],
+        .daily-modal input[type="date"],
+        .daily-modal textarea,
+        .daily-modal input:not([type]),
+        .meal-row input {
+            min-height: 54px !important;
+            font-size: 0.95rem !important;
+        }
+
+        .daily-modal-save,
+        .btn-main,
+        .btn-connect {
+            min-height: 54px !important;
+        }
+
+        /* PC/Fold에서 채팅 입력줄 안정화 */
+        .chat-input-row,
+        #chatInputRow {
+            display: grid !important;
+            grid-template-columns: minmax(92px, 0.8fr) minmax(0, 2.6fr) minmax(86px, 0.8fr) !important;
+            gap: 10px !important;
+            align-items: stretch !important;
+        }
+        .chat-input-row input,
+        #chatInputRow input {
+            min-width: 0 !important;
+        }
+        .chat-input-row button,
+        #chatInputRow button {
+            width: 100% !important;
+            min-width: 0 !important;
+            white-space: nowrap !important;
+        }
+        @media (max-width: 380px) {
+            .chat-input-row,
+            #chatInputRow {
+                grid-template-columns: 74px minmax(0, 1fr) 68px !important;
+                gap: 6px !important;
+            }
+        }
+
     </style>
 </head>
 <body>
@@ -2681,7 +2948,7 @@
         <div></div>
     </div>
     <div class="app-subtitle">합의된 하루를 신뢰로 기록하고, 따뜻하게 지켜보세요.</div>
-    <div class="app-version-badge">RC2 • v2.5.2 · Build 2026.06.29 · Modal Layout Fix</div>
+    <div class="app-version-badge">RC2 • v2.5.3 · Build 2026.06.29 · Responsive Modal System</div>
 
     <div class="user-bar">
         <span id="userInfoText">로그인 확인 중...</span>
@@ -3467,9 +3734,16 @@
         }
     }
 
+    function hmEnsureOverlayAttachedToBody(overlay) {
+        // RC2 v2.5.3: fixed overlay가 app container 폭에 갇히지 않도록 body 직속으로 이동
+        if (!overlay || overlay.parentElement === document.body) return;
+        document.body.appendChild(overlay);
+    }
+
     function openModalOverlayById(id) {
         const overlay = document.getElementById(id);
         if (!overlay) return;
+        hmEnsureOverlayAttachedToBody(overlay);
         if (overlay.style.display !== 'flex') lockBodyForModal();
         overlay.style.display = 'flex';
     }
