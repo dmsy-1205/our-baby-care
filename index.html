@@ -1225,7 +1225,7 @@
 
 
         /* =========================================================
-           RC2 v2.2.0: History Popup UI + App Version Badge
+           RC2 v2.2.1: History Popup UI Cleanup + App Version Badge
            - 기존 Firebase / Room / 저장 구조 변경 없음
            - displayHistory UI 렌더링만 카드 + 팝업으로 override
            ========================================================= */
@@ -1542,7 +1542,7 @@
         }
 
 
-        /* RC2 v2.2.0: History as compact launcher card + popup center */
+        /* RC2 v2.2.1: History as compact launcher card + popup center */
         .history-launch-card {
             width: 100%;
             max-width: 450px;
@@ -1657,6 +1657,35 @@
             .history-launch-version { display: none; }
         }
 
+
+        /* RC2 v2.2.1: 기록실 팝업 정리 - 요약/날짜입력 제거, 선택한 날짜 1개만 표시 */
+        #historySummary.summary-grid,
+        .history-filter-card {
+            display: none !important;
+        }
+        .history-panel-modal #calendarBox {
+            margin-top: 4px;
+        }
+        .history-list {
+            margin-top: 10px;
+        }
+        .history-selected-hint {
+            background: linear-gradient(135deg, #fffaf2, #fbf7ff);
+            border: var(--hm-border-soft);
+            border-radius: 18px;
+            padding: 13px;
+            color: #6b7280;
+            font-size: 0.82rem;
+            line-height: 1.45;
+            text-align: center;
+            font-weight: 750;
+        }
+        .calendar-day.selected-record {
+            outline: 2px solid #8e5cf4;
+            background: #f3ecff;
+            color: #2d3436;
+        }
+
     </style>
 </head>
 <body>
@@ -1688,7 +1717,7 @@
         <div></div>
     </div>
     <div class="app-subtitle">합의된 하루를 신뢰로 기록하고, 따뜻하게 지켜보세요.</div>
-    <div class="app-version-badge">RC2 • v2.2.0 · Build 2026.06.29 · History Popup UI</div>
+    <div class="app-version-badge">RC2 • v2.2.1 · Build 2026.06.29 · History Popup Cleanup</div>
 
     <div class="user-bar">
         <span id="userInfoText">로그인 확인 중...</span>
@@ -1920,9 +1949,9 @@
     <span class="history-launch-icon">📜</span>
     <span>
         <span class="history-launch-title">우리들의 지난 기록실</span>
-        <span class="history-launch-sub" id="historyLaunchSub">이번 주 기록 · 캘린더 · 사진을 한 번에 확인하세요.</span>
+        <span class="history-launch-sub" id="historyLaunchSub">캘린더에서 날짜를 선택하면 해당 기록만 보여요.</span>
     </span>
-    <span class="history-launch-version">RC2 v2.2.0</span>
+    <span class="history-launch-version">RC2 v2.2.1</span>
     <span class="history-launch-arrow">›</span>
 </button>
 </div>
@@ -1932,27 +1961,13 @@
         <div class="history-panel-head">
             <div>
                 <div class="history-detail-kicker">History Center</div>
-                <h2 id="historyPanelTitle">📜 우리들의 지난 기록실 <span>RC2 v2.2.0</span></h2>
+                <h2 id="historyPanelTitle">📜 우리들의 지난 기록실 <span>RC2 v2.2.1</span></h2>
             </div>
             <button type="button" class="modal-close-btn" onclick="closeHistoryPanelModal()">닫기</button>
-        </div>
-
-        <div id="historySummary" class="summary-grid">
-            <div class="summary-tile"><strong>-</strong><span>이번 주 기록</span></div>
-            <div class="summary-tile"><strong>-</strong><span>미션 완료율</span></div>
-            <div class="summary-tile"><strong>-</strong><span>연속 기록</span></div>
-            <div class="summary-tile"><strong>-</strong><span>힘든 날</span></div>
         </div>
         <div id="calendarBox"></div>
         <div id="photoThumbs" class="history-thumb-row"></div>
         
-        <div class="history-filter-card">
-            <label>📅 날짜별 조회
-                <input type="date" id="historyFilterDate" onchange="applyHistoryFilter()">
-            </label>
-            <button type="button" onclick="clearHistoryFilter()">전체보기</button>
-        </div>
-
         <div class="history-list" id="historyList"></div>
     </div>
 </div>
@@ -3791,7 +3806,7 @@
     }
 
     /* =========================================================
-       RC2 v2.2.0 History Popup UI Override
+       RC2 v2.2.1 History Popup UI Override
        - 저장/삭제/권한/데이터 구조는 기존 함수 재사용
        ========================================================= */
     function formatHistoryDateLabel(date) {
@@ -3918,6 +3933,121 @@
 
     function toggleHistoryItem(date) {
         openHistoryDetailModal(date);
+    }
+
+
+    /* =========================================================
+       RC2 v2.2.1 History Popup Cleanup Override
+       - 기록실 팝업 상단 요약 제거
+       - 날짜별 전체 리스트 제거
+       - 캘린더에서 선택한 날짜 1개만 카드로 표시
+       - Firebase / Room / 저장 / 삭제 구조 변경 없음
+       ========================================================= */
+    let selectedHistoryDate = '';
+
+    function renderHistorySummary(daysData) {
+        const box = document.getElementById('historySummary');
+        if (box) box.innerHTML = '';
+    }
+
+    function renderCalendar(daysData) {
+        const box = document.getElementById('calendarBox');
+        if (!box) return;
+        const current = selectedHistoryDate || document.getElementById('recordDate')?.value || '';
+        const base = current ? new Date(current + 'T00:00:00') : new Date();
+        const year = base.getFullYear();
+        const month = base.getMonth();
+        const first = new Date(year, month, 1);
+        const last = new Date(year, month + 1, 0);
+        const today = new Date();
+        const todayYmd = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+        const week = ['일','월','화','수','목','금','토'];
+        let html = `<div style="font-size:0.9rem;font-weight:800;color:#636e72;margin:6px 0 10px;">📅 ${year}.${String(month+1).padStart(2,'0')} 기록 캘린더</div><div class="calendar-grid">`;
+        html += week.map(w => `<div class="calendar-head">${w}</div>`).join('');
+        for (let i = 0; i < first.getDay(); i++) html += '<div class="calendar-day"></div>';
+        for (let day = 1; day <= last.getDate(); day++) {
+            const ymd = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+            const rec = (daysData || {})[ymd];
+            const icons = rec ? `${rec.photo ? '📷' : ''}${rec.missionSummary && rec.missionSummary !== '기록 없음' ? '🎯' : ''}${rec.mood === 'hard' || rec.mood === 'veryHard' ? '☁️' : ''}` : '';
+            html += `<div class="calendar-day ${rec ? 'has-record' : ''} ${ymd === todayYmd ? 'today' : ''} ${ymd === selectedHistoryDate ? 'selected-record' : ''}" ${rec ? `onclick="selectHistoryDate('${ymd}')"` : ''}>${day}<span class="calendar-icons">${icons}</span></div>`;
+        }
+        html += '</div>';
+        box.innerHTML = html;
+    }
+
+    function updateHistoryLaunchSub(daysData) {
+        const sub = document.getElementById('historyLaunchSub');
+        if (!sub) return;
+        const dates = Object.keys(daysData || {});
+        const photos = Object.values(daysData || {}).filter(record => record && record.photo).length;
+        sub.textContent = dates.length ? `총 ${dates.length}일 기록 · 사진 ${photos}장 · 날짜를 눌러 확인` : '캘린더에서 날짜를 선택하면 해당 기록만 보여요.';
+    }
+
+    function selectHistoryDate(date) {
+        selectedHistoryDate = date;
+        const filterInput = document.getElementById('historyFilterDate');
+        if (filterInput) filterInput.value = date;
+        if (cachedDaysData) displayHistory(cachedDaysData);
+    }
+
+    function applyHistoryFilter() {
+        const filterInput = document.getElementById('historyFilterDate');
+        selectedHistoryDate = filterInput ? filterInput.value : selectedHistoryDate;
+        if (cachedDaysData) displayHistory(cachedDaysData);
+    }
+
+    function clearHistoryFilter() {
+        selectedHistoryDate = '';
+        const filterInput = document.getElementById('historyFilterDate');
+        if (filterInput) filterInput.value = '';
+        if (cachedDaysData) displayHistory(cachedDaysData);
+    }
+
+    function displayHistory(daysData) {
+        const historyList = document.getElementById('historyList');
+        renderHistorySummary(daysData || {});
+        updateHistoryLaunchSub(daysData || {});
+        renderCalendar(daysData || {});
+        renderPhotoThumbs(daysData || {});
+        if (!historyList) return;
+        if (!daysData || Object.keys(daysData).length === 0) {
+            historyList.innerHTML = '<div class="empty-message">아직 저장된 서버 기록이 없습니다. ✨</div>';
+            return;
+        }
+        if (!selectedHistoryDate) {
+            historyList.innerHTML = '<div class="history-selected-hint">캘린더에서 기록이 있는 날짜를 누르면<br>아래에 그 날짜 카드만 표시됩니다.</div>';
+            return;
+        }
+        const record = daysData[selectedHistoryDate];
+        if (!record) {
+            historyList.innerHTML = '<div class="history-selected-hint">선택한 날짜에는 저장된 기록이 없습니다. 📅</div>';
+            return;
+        }
+        const date = selectedHistoryDate;
+        const icon = getHistoryMoodIcon(record);
+        const missionText = getHistoryMissionText(record);
+        const diaryPreview = record.diary ? record.diary.substring(0, 42) : '오늘의 하루 기록을 열어 확인하세요.';
+        const chips = [
+            record.moodLabel && record.moodLabel !== '기록 없음' ? record.moodLabel : '',
+            record.water ? `💧 ${record.water}` : '',
+            record.weight ? `⚖️ ${record.weight}` : '',
+            missionText ? `🎯 ${missionText}` : '',
+            record.photo ? '📷 사진' : '',
+            record.dailyChoiceLabel && record.dailyChoiceLabel !== '기록 없음' ? record.dailyChoiceLabel : ''
+        ].map(makeHistoryChip).join('');
+        historyList.innerHTML = `
+            <button type="button" class="history-day-card" onclick="openHistoryDetailModal('${date}')">
+                <span class="history-day-icon">${icon}</span>
+                <span>
+                    <span class="history-day-title">${formatHistoryDateLabel(date)}의 기록</span>
+                    <span class="history-day-sub">${escapeHtml(diaryPreview)}${record.diary && record.diary.length > 42 ? '...' : ''}</span>
+                    <span class="history-day-chips">${chips}</span>
+                </span>
+                <span class="history-day-actions">
+                    <span class="history-card-arrow">›</span>
+                    <span class="btn-delete" onclick="deleteRecord(event, '${date}')">삭제</span>
+                </span>
+            </button>`;
     }
 
 </script>
