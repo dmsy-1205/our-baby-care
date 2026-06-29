@@ -241,6 +241,164 @@
         .user-bar { background: #fff3f3; border: 1px solid #ffd6d6; border-radius: 12px; padding: 10px; margin-bottom: 15px; font-size: 0.85rem; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
         .btn-small { width: auto; padding: 8px 10px; border-radius: 8px; font-size: 0.8rem; }
         .btn-secondary { background: #dfe6e9; color: #2d3436; }
+
+
+        /* STEP7 RC: 사용설명서 / 공간 목록 UX */
+        .app-title-row {
+            display: grid;
+            grid-template-columns: 42px 1fr 42px;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 6px;
+        }
+        .app-title-row h1 { margin: 0; }
+        .guide-btn {
+            width: 38px;
+            height: 38px;
+            border-radius: 14px;
+            padding: 0;
+            background: #fff3f3;
+            color: var(--primary-color);
+            border: 1px solid #ffd6d6;
+            box-shadow: 0 4px 10px rgba(255, 118, 117, 0.12);
+            font-size: 1.05rem;
+        }
+        .app-subtitle {
+            text-align: center;
+            color: #636e72;
+            font-size: 0.82rem;
+            line-height: 1.45;
+            margin-bottom: 16px;
+        }
+        .room-list-box {
+            margin-top: 10px;
+            display: grid;
+            gap: 8px;
+        }
+        .room-list-item {
+            background: #fff;
+            border: 1px solid #ffe0e0;
+            border-radius: 12px;
+            padding: 10px;
+            display: grid;
+            gap: 6px;
+        }
+        .room-list-title {
+            font-weight: 800;
+            color: #2d3436;
+            font-size: 0.82rem;
+            word-break: break-all;
+        }
+        .room-list-meta {
+            color: #636e72;
+            font-size: 0.75rem;
+            line-height: 1.35;
+        }
+        .room-open-btn {
+            padding: 8px 10px;
+            border-radius: 9px;
+            font-size: 0.78rem;
+            background: #ff7675;
+            color: #fff;
+        }
+        .guide-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(45, 52, 54, 0.45);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 18px;
+            z-index: 1000;
+        }
+        .guide-card {
+            width: 100%;
+            max-width: 440px;
+            max-height: 88vh;
+            overflow-y: auto;
+            background: #fff;
+            border-radius: 24px;
+            padding: 20px;
+            box-shadow: 0 18px 45px rgba(0,0,0,0.18);
+            border: 1px solid #ffe0e0;
+        }
+        .guide-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+        .guide-header h2 {
+            font-size: 1.18rem;
+            color: var(--primary-color);
+            margin: 0;
+        }
+        .guide-close {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            padding: 0;
+            background: #f1f2f6;
+            color: #636e72;
+            font-size: 1rem;
+        }
+        .guide-intro {
+            background: linear-gradient(135deg, #fff3f3, #fffaf0);
+            border: 1px solid #ffe0e0;
+            border-radius: 18px;
+            padding: 14px;
+            color: #636e72;
+            font-size: 0.88rem;
+            line-height: 1.55;
+            margin-bottom: 12px;
+        }
+        .guide-step {
+            background: #fff;
+            border: 1px solid #f1f2f6;
+            border-radius: 18px;
+            padding: 14px;
+            margin-bottom: 10px;
+            box-shadow: 0 6px 14px rgba(0,0,0,0.035);
+        }
+        .guide-step-title {
+            font-weight: 900;
+            color: #2d3436;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+        .guide-flow {
+            background: #fafafa;
+            border-radius: 14px;
+            padding: 10px;
+            text-align: center;
+            line-height: 1.8;
+            font-size: 0.88rem;
+            color: #2d3436;
+            font-weight: 700;
+        }
+        .guide-note {
+            margin-top: 8px;
+            color: #636e72;
+            font-size: 0.8rem;
+            line-height: 1.45;
+        }
+        .guide-footer {
+            background: #fff3f3;
+            color: #2d3436;
+            border-radius: 18px;
+            padding: 14px;
+            text-align: center;
+            font-size: 0.88rem;
+            line-height: 1.55;
+            margin-top: 12px;
+            font-weight: 700;
+        }
+        .guide-primary {
+            margin-top: 12px;
+            background: var(--primary-color);
+            color: white;
+        }
     </style>
 </head>
 <body>
@@ -266,7 +424,12 @@
 <div id="appContent" style="display:none; width:100%; flex-direction:column; align-items:center;">
 <div class="container">
     <div class="autosave-status" id="saveStatus">☁️ 실시간 대기 중</div>
-    <h1>💕 아가의 하루 관리</h1>
+    <div class="app-title-row">
+        <button type="button" class="guide-btn" onclick="openGuideModal()" aria-label="사용설명서 열기">❓</button>
+        <h1>💕 HearMe2nite</h1>
+        <div></div>
+    </div>
+    <div class="app-subtitle">오늘도 서로의 하루를 조금 더 가까이 기록해보세요.</div>
 
     <div class="user-bar">
         <span id="userInfoText">로그인 확인 중...</span>
@@ -274,12 +437,12 @@
     </div>
     
     <div class="sync-box">
-        <label>🏠 내 생활관리 방</label>
+        <label>🏠 우리의 공간</label>
         <div id="currentRoomInfo" style="font-size:0.82rem; color:#636e72; line-height:1.45; margin-bottom:10px;">
-            아직 연결된 방이 없습니다. 혼자 사용할 방을 만들거나 초대코드를 입력해 주세요.
+            아직 연결된 공간이 없습니다. 혼자 사용할 공간을 만들거나 초대코드를 입력해 주세요.
         </div>
 
-        <button type="button" class="btn-connect" id="createRoomBtn" onclick="createMyRoom()">✨ 내 방 만들기 / 혼자 시작하기</button>
+        <button type="button" class="btn-connect" id="createRoomBtn" onclick="createMyRoom()">🌱 새로운 공간 시작하기</button>
 
         <details id="invitePanel" style="margin-top:12px; font-size:0.8rem; color:#636e72;">
             <summary style="cursor:pointer; font-weight:bold; color:var(--primary-color);">💌 상대방 초대하기</summary>
@@ -292,16 +455,22 @@
 
         <details id="joinInvitePanel" style="margin-top:12px; font-size:0.8rem; color:#636e72;">
             <summary style="cursor:pointer; font-weight:bold; color:#636e72;">🎟️ 받은 초대코드 입력</summary>
-            <div style="margin-top:8px; line-height:1.45;">상대방에게 받은 초대코드를 입력하면 같은 방에 참여할 수 있습니다.</div>
+            <div style="margin-top:8px; line-height:1.45;">상대방에게 받은 초대코드를 입력하면 같은 공간에 참여하거나 새 공간으로 이동할 수 있습니다.</div>
             <input type="text" id="inviteCodeInput" placeholder="예: A7KD92" style="text-transform:uppercase; margin-top:8px;">
             <button type="button" class="btn-connect" onclick="acceptInviteFromInput()">🤝 초대코드로 참여하기</button>
         </details>
 
-        <details id="legacyRoomPanel" style="margin-top:12px; font-size:0.8rem; color:#636e72;">
-            <summary style="cursor:pointer; font-weight:bold; color:#636e72;">⚙️ 기존 사용자 데이터 가져오기</summary>
-            <div style="margin-top:8px; line-height:1.45;">기존에 사용하던 dmsy 같은 공유코드가 이미 내 계정에 연결되어 있으면 여기서 다시 연결할 수 있습니다.</div>
-            <input type="text" id="roomCode" placeholder="기존 공유코드 예: dmsy" style="margin-top:8px;">
-            <button type="button" class="btn-connect" onclick="joinExistingRoomByCode()">🔗 기존 공유코드 연결하기</button>
+        <details id="legacyRoomPanel" style="margin-top:12px; font-size:0.8rem; color:#636e72;" ontoggle="if(this.open) loadMyRoomList()">
+            <summary style="cursor:pointer; font-weight:bold; color:#636e72;">📂 이전 공간 불러오기</summary>
+            <div style="margin-top:8px; line-height:1.45;">방주인이 만들었던 공간 목록을 보여줍니다. 기억하지 못해도 버튼으로 다시 연결할 수 있어요.</div>
+            <div id="ownedRoomsList" class="room-list-box">
+                <div class="empty-message">목록을 불러오려면 이 영역을 열어주세요. ✨</div>
+            </div>
+            <details style="margin-top:10px;">
+                <summary style="cursor:pointer; color:#b26a6a; font-weight:bold;">직접 방코드 입력이 필요한 경우</summary>
+                <input type="text" id="roomCode" placeholder="기존 공유코드 예: dmsy" style="margin-top:8px;">
+                <button type="button" class="btn-connect" onclick="joinExistingRoomByCode()">🔗 기존 공유코드 연결하기</button>
+            </details>
         </details>
     </div>
 
@@ -406,6 +575,56 @@
 </div>
 </div>
 
+
+<div class="guide-modal" id="guideModal" onclick="if(event.target.id==='guideModal') closeGuideModal(true)">
+    <div class="guide-card" role="dialog" aria-modal="true" aria-labelledby="guideTitle">
+        <div class="guide-header">
+            <h2 id="guideTitle">💕 HearMe2nite 사용 안내</h2>
+            <button type="button" class="guide-close" onclick="closeGuideModal(true)">×</button>
+        </div>
+        <div class="guide-intro">
+            둘만의 하루를 함께 기록하는 공간입니다.<br>
+            아래 순서만 알면 1분 안에 바로 시작할 수 있어요 😊
+        </div>
+
+        <div class="guide-step">
+            <div class="guide-step-title">🌱 처음 시작하기</div>
+            <div class="guide-flow">👤 로그인<br>↓<br>🏠 공간 만들기<br>↓<br>📝 기록 시작</div>
+            <div class="guide-note">혼자서도 기록, 사진, 기록실, 채팅 기능을 사용할 수 있습니다.</div>
+        </div>
+
+        <div class="guide-step">
+            <div class="guide-step-title">💌 상대와 함께 쓰기</div>
+            <div class="guide-flow">🏠 내 공간 만들기<br>↓<br>💌 초대코드 만들기<br>↓<br>📱 카톡 · 문자 · 이메일로 전달<br>↓<br>🤝 상대가 초대코드 입력<br>↓<br>💕 같은 공간 연결 완료</div>
+            <div class="guide-note">연결 후에는 하루 기록과 채팅이 실시간으로 함께 공유됩니다.</div>
+        </div>
+
+        <div class="guide-step">
+            <div class="guide-step-title">🔄 새로운 공간으로 이동하기</div>
+            <div class="guide-flow">👑 방주인이 새 공간 생성<br>↓<br>🎟 새 초대코드 전달<br>↓<br>상대가 초대코드 입력<br>↓<br>둘 다 새 공간으로 이동</div>
+            <div class="guide-note">기존 기록은 삭제되지 않습니다. 방주인은 이전 공간 목록에서 다시 열 수 있어요.</div>
+        </div>
+
+        <div class="guide-step">
+            <div class="guide-step-title">📂 예전 공간 다시 열기</div>
+            <div class="guide-flow">📂 이전 공간 불러오기<br>↓<br>사용했던 공간 선택<br>↓<br>이 공간 열기</div>
+            <div class="guide-note">방코드를 외우지 않아도 방주인이 사용했던 공간 목록을 확인할 수 있습니다.</div>
+        </div>
+
+        <div class="guide-step">
+            <div class="guide-step-title">🔒 개인정보 보호</div>
+            <div class="guide-flow">같은 공간 사용자만<br>📝 기록 · 📷 사진 · 💬 채팅 · 📜 기록실<br>확인 가능</div>
+            <div class="guide-note">공간에 연결되지 않은 사용자는 기록 화면을 볼 수 없습니다.</div>
+        </div>
+
+        <div class="guide-footer">
+            이 앱은 서로를 관리하기 위한 앱이 아니라<br>
+            서로를 더 이해하기 위한 공간입니다. 🌷
+        </div>
+        <button type="button" class="guide-primary" onclick="closeGuideModal(true)">시작하기</button>
+    </div>
+</div>
+
 <div class="toast" id="toast">기록이 복사되었습니다! 💕</div>
 
 <script>
@@ -483,6 +702,7 @@
                 document.getElementById('userInfoText').innerText = `로그인됨: ${user.email}`;
                 await loadUserActiveRoom();
                 await acceptPendingInviteIfAny();
+                await showGuideForFirstLogin();
             } else {
                 activeRoomCode = "";
                 activeRoomRole = "";
@@ -620,17 +840,18 @@
         if (activeRoomCode) {
             setDataSectionsVisible(true);
             const roleLabel = activeRoomRole === 'owner' ? '방주인' : '초대받은 사용자';
-            el.innerHTML = `현재 연결된 방: <strong>${escapeHtml(activeRoomCode)}</strong><br>내 권한: <strong>${roleLabel}</strong><br>이 방의 기록과 채팅이 실시간으로 동기화됩니다.`;
+            el.innerHTML = `현재 연결된 공간: <strong>${escapeHtml(activeRoomCode)}</strong><br>내 권한: <strong>${roleLabel}</strong><br>이 공간의 기록과 채팅이 실시간으로 동기화됩니다.`;
 
             // 정책:
             // - owner: 새 방 만들기, 초대코드 생성, 초대코드 입력, 기존방 재연결 가능
             // - partner: 새 방 만들기/초대코드 생성/기존 공유코드 연결은 금지
             // - partner도 방주인이 새로 보낸 초대코드로는 방 이동 가능
             if (activeRoomRole === 'owner') {
-                if (createBtn) { createBtn.style.display = ''; createBtn.innerText = '🏠 새 방 만들기 / 다른 방으로 시작하기'; }
+                if (createBtn) { createBtn.style.display = ''; createBtn.innerText = '🌱 새 공간 만들기 / 다른 공간으로 시작하기'; }
                 if (invitePanel) { invitePanel.open = false; invitePanel.style.display = ''; }
                 if (joinInvitePanel) { joinInvitePanel.open = false; joinInvitePanel.style.display = ''; }
                 if (legacyRoomPanel) { legacyRoomPanel.open = false; legacyRoomPanel.style.display = ''; }
+                loadMyRoomList();
             } else {
                 if (createBtn) { createBtn.style.display = 'none'; }
                 if (invitePanel) { invitePanel.open = false; invitePanel.style.display = 'none'; }
@@ -639,11 +860,12 @@
             }
         } else {
             setDataSectionsVisible(false);
-            el.innerHTML = '아직 연결된 방이 없습니다. 혼자 사용할 방을 만들거나 초대코드를 입력해 주세요.';
-            if (createBtn) { createBtn.style.display = ''; createBtn.innerText = '✨ 내 방 만들기 / 혼자 시작하기'; }
+            el.innerHTML = '아직 연결된 공간이 없습니다. 혼자 사용할 공간을 만들거나 초대코드를 입력해 주세요.';
+            if (createBtn) { createBtn.style.display = ''; createBtn.innerText = '🌱 새로운 공간 시작하기'; }
             if (invitePanel) { invitePanel.open = false; invitePanel.style.display = ''; }
             if (joinInvitePanel) { joinInvitePanel.open = false; joinInvitePanel.style.display = ''; }
             if (legacyRoomPanel) { legacyRoomPanel.open = false; legacyRoomPanel.style.display = ''; }
+            loadMyRoomList();
         }
     }
 
@@ -664,6 +886,113 @@
         }[ch]));
     }
 
+
+
+    function formatTimestamp(ts) {
+        if (!ts) return '날짜 정보 없음';
+        const d = new Date(ts);
+        if (Number.isNaN(d.getTime())) return '날짜 정보 없음';
+        return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`;
+    }
+
+    function openGuideModal() {
+        const modal = document.getElementById('guideModal');
+        if (modal) modal.style.display = 'flex';
+    }
+
+    async function closeGuideModal(markSeen = false) {
+        const modal = document.getElementById('guideModal');
+        if (modal) modal.style.display = 'none';
+        if (markSeen && currentUser) {
+            try { await db.ref(`users/${currentUser.uid}/hasSeenGuide`).set(true); } catch(e) { console.warn(e); }
+        }
+    }
+
+    async function showGuideForFirstLogin() {
+        if (!currentUser) return;
+        try {
+            const snap = await db.ref(`users/${currentUser.uid}/hasSeenGuide`).once('value');
+            if (snap.val() !== true) openGuideModal();
+        } catch (err) {
+            console.warn('사용설명서 확인 실패:', err);
+        }
+    }
+
+    async function loadMyRoomList() {
+        const box = document.getElementById('ownedRoomsList');
+        if (!box || !currentUser) return;
+        box.innerHTML = '<div class="empty-message">이전 공간을 불러오는 중입니다...</div>';
+        try {
+            const snap = await db.ref(`userRooms/${currentUser.uid}`).once('value');
+            const rooms = snap.val() || {};
+            const roomCodes = Object.keys(rooms).filter(Boolean);
+            if (roomCodes.length === 0) {
+                box.innerHTML = '<div class="empty-message">아직 불러올 이전 공간이 없습니다. ✨</div>';
+                return;
+            }
+
+            const items = [];
+            for (const roomCode of roomCodes) {
+                const memberSnap = await db.ref(`roomMembers/${roomCode}/${currentUser.uid}`).once('value');
+                if (!memberSnap.exists()) continue;
+                const member = memberSnap.val() || {};
+                const metaSnap = await db.ref(`rooms/${roomCode}/meta`).once('value');
+                const meta = metaSnap.val() || {};
+                items.push({
+                    roomCode,
+                    role: member.role || 'member',
+                    joinedAt: member.joinedAt || 0,
+                    createdAt: meta.createdAt || member.joinedAt || 0,
+                    isActive: roomCode === activeRoomCode
+                });
+            }
+
+            items.sort((a, b) => (b.createdAt || b.joinedAt || 0) - (a.createdAt || a.joinedAt || 0));
+            if (items.length === 0) {
+                box.innerHTML = '<div class="empty-message">연결 가능한 이전 공간이 없습니다.</div>';
+                return;
+            }
+
+            box.innerHTML = items.map(item => {
+                const roleLabel = item.role === 'owner' ? '👑 방주인' : '🤝 참여자';
+                const activeLabel = item.isActive ? ' · 현재 연결됨' : '';
+                const disabled = item.isActive ? 'disabled style="opacity:.55; cursor:default;"' : '';
+                const btnText = item.isActive ? '현재 공간' : '이 공간 열기';
+                return `
+                    <div class="room-list-item">
+                        <div class="room-list-title">💕 ${escapeHtml(item.roomCode)}</div>
+                        <div class="room-list-meta">${roleLabel}${activeLabel}<br>생성/참여일: ${formatTimestamp(item.createdAt || item.joinedAt)}</div>
+                        <button type="button" class="room-open-btn" ${disabled} onclick="openPreviousRoom('${escapeHtml(item.roomCode)}')">${btnText}</button>
+                    </div>
+                `;
+            }).join('');
+        } catch (err) {
+            console.error(err);
+            box.innerHTML = '<div class="empty-message">이전 공간 목록을 불러오지 못했습니다. Firebase Rules를 확인해 주세요.</div>';
+        }
+    }
+
+    async function openPreviousRoom(roomCode) {
+        if (!currentUser || !roomCode) return;
+        if (roomCode === activeRoomCode) return;
+        const ok = confirm('이전 공간으로 다시 연결할까요? 현재 기본 공간이 변경됩니다.');
+        if (!ok) return;
+        try {
+            const memberSnap = await db.ref(`roomMembers/${roomCode}/${currentUser.uid}`).once('value');
+            if (!memberSnap.exists()) {
+                alert('이 계정은 해당 공간의 멤버가 아닙니다.');
+                return;
+            }
+            await saveActiveRoom(roomCode, memberSnap.val()?.role || 'member');
+            connectAndListenFirebase();
+            loadMyRoomList();
+            showSaveStatus('☁️ 이전 공간 연결 완료');
+        } catch (err) {
+            console.error(err);
+            alert('이전 공간 연결에 실패했습니다.');
+            showSaveStatus('❌ 이전 공간 연결 실패');
+        }
+    }
 
     function getRoomCodeForData() {
         return activeRoomCode || '';
