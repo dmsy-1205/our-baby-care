@@ -278,25 +278,26 @@
             아직 연결된 방이 없습니다. 혼자 사용할 방을 만들거나 초대코드를 입력해 주세요.
         </div>
 
-        <button type="button" class="btn-connect" onclick="createMyRoom()">✨ 내 방 만들기 / 혼자 시작하기</button>
+        <button type="button" class="btn-connect" id="createRoomBtn" onclick="createMyRoom()">✨ 내 방 만들기 / 혼자 시작하기</button>
 
-        <div style="height:1px; background:#ffd6d6; margin:14px 0;"></div>
+        <details id="invitePanel" style="margin-top:12px; font-size:0.8rem; color:#636e72;">
+            <summary style="cursor:pointer; font-weight:bold; color:var(--primary-color);">💌 상대방 초대하기</summary>
+            <div style="margin-top:8px; line-height:1.45;">
+                내 방을 만든 뒤 초대코드를 생성하세요. 코드는 문자, 카톡, 이메일로 보내면 됩니다.
+            </div>
+            <button type="button" class="btn-connect" onclick="createInviteCode()">🎟️ 초대코드 만들기</button>
+            <div id="inviteResult" style="display:none; margin-top:10px; background:white; border:1px solid #fab1a0; border-radius:10px; padding:10px; font-size:0.85rem; line-height:1.45; word-break:break-all;"></div>
+        </details>
 
-        <label>💌 상대방 초대하기</label>
-        <div style="font-size:0.78rem; color:#636e72; line-height:1.45; margin-bottom:8px;">
-            먼저 내 방을 만든 뒤 초대코드를 생성하세요. 코드는 문자, 카톡, 이메일로 보내면 됩니다.
-        </div>
-        <button type="button" class="btn-connect" onclick="createInviteCode()">🎟️ 초대코드 만들기</button>
-        <div id="inviteResult" style="display:none; margin-top:10px; background:white; border:1px solid #fab1a0; border-radius:10px; padding:10px; font-size:0.85rem; line-height:1.45; word-break:break-all;"></div>
+        <details id="joinInvitePanel" style="margin-top:12px; font-size:0.8rem; color:#636e72;">
+            <summary style="cursor:pointer; font-weight:bold; color:#636e72;">🎟️ 받은 초대코드 입력</summary>
+            <div style="margin-top:8px; line-height:1.45;">상대방에게 받은 초대코드를 입력하면 같은 방에 참여할 수 있습니다.</div>
+            <input type="text" id="inviteCodeInput" placeholder="예: A7KD92" style="text-transform:uppercase; margin-top:8px;">
+            <button type="button" class="btn-connect" onclick="acceptInviteFromInput()">🤝 초대코드로 참여하기</button>
+        </details>
 
-        <div style="height:1px; background:#ffd6d6; margin:14px 0;"></div>
-
-        <label>🎟️ 받은 초대코드 입력</label>
-        <input type="text" id="inviteCodeInput" placeholder="예: A7KD92" style="text-transform:uppercase;">
-        <button type="button" class="btn-connect" onclick="acceptInviteFromInput()">🤝 초대코드로 참여하기</button>
-
-        <details style="margin-top:12px; font-size:0.8rem; color:#636e72;">
-            <summary style="cursor:pointer; font-weight:bold; color:#636e72;">기존 공유코드 복구용</summary>
+        <details id="legacyRoomPanel" style="margin-top:12px; font-size:0.8rem; color:#636e72;">
+            <summary style="cursor:pointer; font-weight:bold; color:#636e72;">⚙️ 기존 사용자 데이터 가져오기</summary>
             <div style="margin-top:8px; line-height:1.45;">기존에 사용하던 dmsy 같은 공유코드가 이미 내 계정에 연결되어 있으면 여기서 다시 연결할 수 있습니다.</div>
             <input type="text" id="roomCode" placeholder="기존 공유코드 예: dmsy" style="margin-top:8px;">
             <button type="button" class="btn-connect" onclick="joinExistingRoomByCode()">🔗 기존 공유코드 연결하기</button>
@@ -598,11 +599,22 @@
 
     function updateCurrentRoomInfo() {
         const el = document.getElementById('currentRoomInfo');
+        const createBtn = document.getElementById('createRoomBtn');
+        const invitePanel = document.getElementById('invitePanel');
+        const joinInvitePanel = document.getElementById('joinInvitePanel');
+        const legacyRoomPanel = document.getElementById('legacyRoomPanel');
         if (!el) return;
+
         if (activeRoomCode) {
             el.innerHTML = `현재 연결된 방: <strong>${escapeHtml(activeRoomCode)}</strong><br>이 방의 기록과 채팅이 실시간으로 동기화됩니다.`;
+            if (createBtn) createBtn.innerText = '🏠 새 방 만들기 / 다른 방으로 시작하기';
+            // 평소에는 설정 영역을 모두 접어둡니다.
+            if (invitePanel) invitePanel.open = false;
+            if (joinInvitePanel) joinInvitePanel.open = false;
+            if (legacyRoomPanel) legacyRoomPanel.open = false;
         } else {
             el.innerHTML = '아직 연결된 방이 없습니다. 혼자 사용할 방을 만들거나 초대코드를 입력해 주세요.';
+            if (createBtn) createBtn.innerText = '✨ 내 방 만들기 / 혼자 시작하기';
         }
     }
 
