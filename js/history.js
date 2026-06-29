@@ -729,6 +729,7 @@ function openHistoryPanelModal() {
         const missionText = getHistoryMissionText(record);
         const anniversaryText = historyAnniversaryData?.startDate ? formatAnniversaryLabel(historyAnniversaryData.startDate, date) : '';
         const anniversaryMilestone = historyAnniversaryData?.startDate ? getAnniversaryMilestone(getDaysBetweenInclusive(historyAnniversaryData.startDate, date)) : '';
+        const customEvents = getCustomAnniversaryEventsForDate(date);
         const diaryPreview = record.diary ? record.diary.substring(0, 62) : '오늘의 하루 기록을 열어 확인하세요.';
         const chips = [
             record.moodLabel && record.moodLabel !== '기록 없음' ? record.moodLabel : '',
