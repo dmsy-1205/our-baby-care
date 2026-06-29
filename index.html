@@ -1824,6 +1824,408 @@
             color: #2d3436;
         }
 
+
+        /* =========================================================
+           RC2 v2.5.0: Premium UI Design System
+           - 기능 / Firebase / Room / Role / AutoSave 변경 없음
+           - 색상, 카드, 버튼, 팝업, 타이포그래피만 안전 override
+           ========================================================= */
+        :root {
+            --hm-premium-bg: #FAF8FF;
+            --hm-premium-bg-2: #FFF9FC;
+            --hm-premium-surface: #FFFFFF;
+            --hm-premium-surface-soft: #F7F2FF;
+            --hm-premium-primary: #6D4CFF;
+            --hm-premium-primary-2: #8E6CFF;
+            --hm-premium-primary-soft: #F1ECFF;
+            --hm-premium-accent: #C7B6FF;
+            --hm-premium-border: #ECE6FF;
+            --hm-premium-text: #2D2A35;
+            --hm-premium-sub: #7D7694;
+            --hm-premium-muted: #A49DB8;
+            --hm-premium-danger: #FF6B7A;
+            --hm-premium-success: #5ED6B3;
+            --hm-premium-radius-card: 24px;
+            --hm-premium-radius-modal: 30px;
+            --hm-premium-radius-button: 16px;
+            --hm-premium-shadow-card: 0 12px 34px rgba(109, 76, 255, 0.085);
+            --hm-premium-shadow-card-hover: 0 18px 42px rgba(109, 76, 255, 0.13);
+            --hm-premium-shadow-modal: 0 28px 80px rgba(45, 42, 53, 0.24);
+
+            --primary-color: var(--hm-premium-primary);
+            --accent-purple: var(--hm-premium-primary);
+            --soft-purple: var(--hm-premium-primary-soft);
+            --soft-pink: #FFF4FA;
+            --bg-color: var(--hm-premium-bg);
+            --card-color: var(--hm-premium-surface);
+            --text-color: var(--hm-premium-text);
+            --border-color: var(--hm-premium-border);
+            --water-color: var(--hm-premium-primary);
+        }
+
+        body {
+            background:
+                radial-gradient(circle at 12% 0%, rgba(199, 182, 255, 0.34) 0, transparent 30%),
+                radial-gradient(circle at 88% 14%, rgba(255, 221, 236, 0.45) 0, transparent 28%),
+                linear-gradient(135deg, var(--hm-premium-bg-2) 0%, var(--hm-premium-bg) 48%, #F6F0FF 100%);
+            color: var(--hm-premium-text);
+            letter-spacing: -0.012em;
+        }
+
+        .container,
+        .auth-box,
+        .history-card {
+            background: rgba(255, 255, 255, 0.88);
+            border: 1px solid rgba(236, 230, 255, 0.96);
+            border-radius: 30px;
+            box-shadow: 0 24px 70px rgba(109, 76, 255, 0.105);
+            backdrop-filter: blur(14px);
+        }
+
+        h1,
+        .app-title-row h1 {
+            color: var(--hm-premium-text);
+            font-weight: 750;
+            letter-spacing: -0.035em;
+        }
+
+        .app-subtitle,
+        .daily-card-sub,
+        .room-settings-sub,
+        .mission-compact-sub,
+        .history-launch-sub,
+        .relationship-role-help,
+        .auth-help,
+        .feedback-hint,
+        .trust-card-help {
+            color: var(--hm-premium-sub);
+            font-weight: 430;
+        }
+
+        .app-version-badge {
+            color: var(--hm-premium-muted);
+            letter-spacing: 0.055em;
+            font-weight: 750;
+        }
+
+        .autosave-status {
+            color: var(--hm-premium-success);
+            font-weight: 750;
+        }
+
+        .user-bar,
+        .sync-box,
+        .relationship-role-box,
+        .relationship-role-note,
+        .mission-template-box,
+        .trust-card,
+        .water-counter-box,
+        .meal-container,
+        .owner-only-note,
+        .manager-lock-note,
+        .history-selected-hint,
+        #calendarBox,
+        #photoThumbs.history-thumb-row,
+        .history-section-card {
+            background: rgba(255, 255, 255, 0.72);
+            border: 1px solid var(--hm-premium-border);
+            border-radius: 22px;
+            box-shadow: 0 8px 26px rgba(109, 76, 255, 0.055);
+        }
+
+        .daily-card,
+        .room-settings-card,
+        .mission-compact-card,
+        .history-launch-card,
+        .history-day-card,
+        .summary-tile,
+        .history-item {
+            border-radius: var(--hm-premium-radius-card);
+            border: 1px solid var(--hm-premium-border);
+            background: linear-gradient(145deg, rgba(255,255,255,0.98) 0%, rgba(250,248,255,0.98) 100%);
+            box-shadow: var(--hm-premium-shadow-card);
+            transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease, background 0.16s ease;
+        }
+
+        .daily-card,
+        .room-settings-card,
+        .history-launch-card {
+            min-height: 92px;
+            padding: 18px;
+        }
+
+        .mission-compact-card {
+            padding: 18px;
+            min-height: 108px;
+        }
+
+        .daily-card:hover,
+        .room-settings-card:hover,
+        .mission-compact-card:hover,
+        .history-launch-card:hover,
+        .history-day-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--hm-premium-shadow-card-hover);
+            border-color: rgba(109, 76, 255, 0.26);
+        }
+
+        .daily-card:active,
+        .room-settings-card:active,
+        .mission-compact-card:active,
+        .history-launch-card:active,
+        .history-day-card:active {
+            transform: scale(0.982);
+        }
+
+        .daily-card-icon,
+        .room-settings-icon,
+        .history-launch-icon,
+        .history-day-icon {
+            width: 48px;
+            height: 48px;
+            min-width: 48px;
+            border-radius: 18px;
+            background: linear-gradient(145deg, #F5F0FF 0%, #FFF4FA 100%);
+            box-shadow: inset 0 0 0 1px rgba(255,255,255,0.95), 0 8px 20px rgba(109, 76, 255, 0.08);
+        }
+
+        .daily-card-title,
+        .room-settings-title,
+        .mission-compact-title,
+        .history-launch-title,
+        .history-day-title,
+        .relationship-role-title,
+        .trust-card-title,
+        .history-section-title {
+            color: var(--hm-premium-text);
+            font-weight: 730;
+            letter-spacing: -0.025em;
+        }
+
+        .daily-card-arrow,
+        .room-settings-arrow,
+        .history-launch-arrow,
+        .history-card-arrow {
+            color: var(--hm-premium-accent);
+        }
+
+        button,
+        .btn-main,
+        .btn-connect,
+        .mission-open-btn,
+        .daily-modal-save,
+        .room-open-btn,
+        .history-filter-card button,
+        .guide-primary {
+            border-radius: var(--hm-premium-radius-button);
+            transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+        }
+
+        .btn-main,
+        .btn-connect,
+        .mission-open-btn,
+        .daily-modal-save,
+        .room-open-btn,
+        .history-filter-card button,
+        .guide-primary,
+        .mission-library-add button {
+            background: linear-gradient(135deg, var(--hm-premium-primary) 0%, var(--hm-premium-primary-2) 100%) !important;
+            color: #fff !important;
+            box-shadow: 0 12px 26px rgba(109, 76, 255, 0.22);
+        }
+
+        .btn-main:hover,
+        .btn-connect:hover,
+        .mission-open-btn:hover,
+        .daily-modal-save:hover,
+        .room-open-btn:hover,
+        .guide-primary:hover,
+        .mission-library-add button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 16px 34px rgba(109, 76, 255, 0.28);
+        }
+
+        .btn-secondary,
+        .modal-close-btn,
+        .guide-close,
+        .mission-mini-btn {
+            background: var(--hm-premium-primary-soft) !important;
+            color: var(--hm-premium-primary) !important;
+            border: 1px solid var(--hm-premium-border);
+            box-shadow: none;
+        }
+
+        .daily-modal-overlay,
+        .mission-modal-overlay,
+        .room-settings-overlay,
+        .guide-modal,
+        .history-panel-overlay,
+        .history-detail-overlay {
+            background: rgba(45, 42, 53, 0.42);
+            backdrop-filter: blur(8px);
+        }
+
+        .daily-modal,
+        .mission-modal,
+        .room-settings-modal,
+        .guide-card,
+        .history-panel-modal,
+        .history-detail-modal {
+            position: relative;
+            border-radius: var(--hm-premium-radius-modal);
+            border: 1px solid rgba(236, 230, 255, 0.96);
+            box-shadow: var(--hm-premium-shadow-modal);
+            background: rgba(255, 255, 255, 0.97);
+            padding-top: 26px;
+        }
+
+        .daily-modal::before,
+        .mission-modal::before,
+        .room-settings-modal::before,
+        .guide-card::before,
+        .history-panel-modal::before,
+        .history-detail-modal::before {
+            content: '';
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 44px;
+            height: 5px;
+            border-radius: 999px;
+            background: #DED6F7;
+        }
+
+        .daily-modal-head h2,
+        .mission-modal-head h2,
+        .room-settings-head h2,
+        .history-detail-head h2,
+        .guide-header h2 {
+            color: var(--hm-premium-text);
+            font-weight: 750;
+            letter-spacing: -0.03em;
+        }
+
+        .daily-modal textarea,
+        .daily-modal input[type="text"],
+        .input-group input,
+        .input-group textarea,
+        .meal-row input,
+        .mission-row input[type="text"],
+        .mission-library-add input,
+        .history-filter-card input[type="date"],
+        .sync-box input {
+            border: 1px solid var(--hm-premium-border);
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.9);
+            color: var(--hm-premium-text);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.95);
+        }
+
+        .daily-modal textarea:focus,
+        .daily-modal input[type="text"]:focus,
+        .input-group input:focus,
+        .input-group textarea:focus,
+        .meal-row input:focus,
+        .mission-row input[type="text"]:focus,
+        .mission-library-add input:focus,
+        .sync-box input:focus {
+            border-color: rgba(109, 76, 255, 0.5);
+            box-shadow: 0 0 0 4px rgba(109, 76, 255, 0.10);
+        }
+
+        .relationship-role-btn,
+        .mood-btn,
+        .choice-btn,
+        .mission-chip,
+        .mission-library-item,
+        .calendar-day,
+        .history-detail-block {
+            border: 1px solid var(--hm-premium-border);
+            background: rgba(255, 255, 255, 0.86);
+            color: var(--hm-premium-sub);
+            border-radius: 16px;
+        }
+
+        .relationship-role-btn.active,
+        .mood-btn.active,
+        .choice-btn.active,
+        .mission-chip.primary,
+        .calendar-day.selected-record {
+            background: linear-gradient(135deg, var(--hm-premium-primary) 0%, var(--hm-premium-primary-2) 100%);
+            border-color: transparent;
+            color: #fff;
+            box-shadow: 0 10px 24px rgba(109, 76, 255, 0.22);
+        }
+
+        .mission-progress-mini {
+            background: rgba(109, 76, 255, 0.12);
+        }
+        .mission-progress-mini > span {
+            background: linear-gradient(90deg, var(--hm-premium-primary), var(--hm-premium-primary-2));
+        }
+
+        .managed-card.is-filled {
+            border-color: rgba(109, 76, 255, 0.42);
+            background: linear-gradient(145deg, #FFFFFF 0%, #F3EEFF 100%);
+            box-shadow: 0 16px 40px rgba(109, 76, 255, 0.16);
+        }
+
+        .managed-card .daily-card-title::after,
+        .relationship-role-locked-badge,
+        .history-launch-version,
+        .history-chip {
+            background: var(--hm-premium-primary-soft);
+            color: var(--hm-premium-primary);
+            border: 1px solid var(--hm-premium-border);
+        }
+
+        .btn-delete,
+        .history-day-card .btn-delete,
+        .mission-mini-btn.delete {
+            background: #FFF0F4 !important;
+            color: var(--hm-premium-danger) !important;
+            border: 1px solid #FFD8E2 !important;
+            box-shadow: none !important;
+        }
+
+        .btn-copy,
+        .history-detail-copy {
+            background: linear-gradient(135deg, #5ED6B3, #8EE8CF) !important;
+            color: #23332F !important;
+            box-shadow: 0 10px 24px rgba(94, 214, 179, 0.20);
+        }
+
+        .calendar-day.has-record {
+            background: linear-gradient(145deg, #FFFFFF 0%, #F4F0FF 100%);
+            border-color: rgba(109, 76, 255, 0.22);
+            color: var(--hm-premium-text);
+        }
+
+        .history-detail-photo,
+        .history-thumb {
+            background: var(--hm-premium-primary-soft);
+            border: 1px solid var(--hm-premium-border);
+        }
+
+        @media (max-width: 380px) {
+            .daily-card,
+            .room-settings-card,
+            .history-launch-card {
+                min-height: 96px;
+                padding: 16px;
+            }
+            .daily-card-icon,
+            .room-settings-icon,
+            .history-launch-icon,
+            .history-day-icon {
+                width: 44px;
+                height: 44px;
+                min-width: 44px;
+            }
+        }
+
+
     </style>
 </head>
 <body>
@@ -1855,7 +2257,7 @@
         <div></div>
     </div>
     <div class="app-subtitle">합의된 하루를 신뢰로 기록하고, 따뜻하게 지켜보세요.</div>
-    <div class="app-version-badge">RC2 • v2.4.0 · Build 2026.06.29 · Role UX Polish</div>
+    <div class="app-version-badge">RC2 • v2.5.0 · Build 2026.06.29 · Premium UI</div>
 
     <div class="user-bar">
         <span id="userInfoText">로그인 확인 중...</span>
