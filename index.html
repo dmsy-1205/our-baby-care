@@ -1225,7 +1225,7 @@
 
 
         /* =========================================================
-           RC2 v2.3.0: Relationship Role Permissions + Managed Cards
+           RC2 v2.3.1: Locked Relationship Role Permissions + Managed Cards
            - 기존 Firebase / Room / 저장 구조 변경 없음
            - displayHistory UI 렌더링만 카드 + 팝업으로 override
            ========================================================= */
@@ -1278,6 +1278,37 @@
             color: #636e72;
             font-size: 0.76rem;
             line-height: 1.45;
+        }
+        .relationship-role-note {
+            background: #fffaf0;
+            border: 1px solid #ffeaa7;
+            border-radius: 12px;
+            padding: 10px;
+            color: #636e72;
+            font-size: 0.75rem;
+            line-height: 1.45;
+            margin-bottom: 9px;
+        }
+        .relationship-role-btn[disabled] {
+            cursor: not-allowed;
+            opacity: 0.62;
+        }
+        .relationship-role-btn.active[disabled] {
+            opacity: 1;
+        }
+        .relationship-role-box.is-locked {
+            background: linear-gradient(135deg, #ffffff, #fbf7ff);
+        }
+        .relationship-role-locked-badge {
+            display: inline-block;
+            margin-left: 6px;
+            padding: 2px 7px;
+            border-radius: 999px;
+            background: #f3ecff;
+            color: #8e5cf4;
+            font-size: 0.64rem;
+            font-weight: 900;
+            vertical-align: middle;
         }
         .managed-card.is-filled {
             border-color: #8e5cf4;
@@ -1788,7 +1819,7 @@
         <div></div>
     </div>
     <div class="app-subtitle">합의된 하루를 신뢰로 기록하고, 따뜻하게 지켜보세요.</div>
-    <div class="app-version-badge">RC2 • v2.2.1 · Build 2026.06.29 · Role Permissions</div>
+    <div class="app-version-badge">RC2 • v2.3.1 · Build 2026.06.29 · Locked Role Permissions</div>
 
     <div class="user-bar">
         <span id="userInfoText">로그인 확인 중...</span>
@@ -1818,10 +1849,13 @@
                 </div>
 
                 <div class="relationship-role-box" id="relationshipRoleBox">
-                    <div class="relationship-role-title">👥 내 관계 역할 선택</div>
+                    <div class="relationship-role-title">👥 내 관계 역할 선택 <span id="relationshipRoleLockedBadge"></span></div>
+                    <div class="relationship-role-note" id="relationshipRoleNote">
+                        이 설정은 앱 설치 순서나 방 생성 순서가 아니라, 두 사람의 관계 역할을 의미합니다. 최초 1회 선택 후 일반 화면에서는 변경할 수 없습니다.
+                    </div>
                     <div class="relationship-role-grid">
-                        <button type="button" class="relationship-role-btn" id="relationshipDomBtn" onclick="setRelationshipRole('dom')">👑 관리하는 사람<br><small>피드백 / 보상 작성</small></button>
-                        <button type="button" class="relationship-role-btn" id="relationshipSubBtn" onclick="setRelationshipRole('sub')">🌷 기록하는 사람<br><small>하루 기록 작성</small></button>
+                        <button type="button" class="relationship-role-btn" id="relationshipDomBtn" onclick="setRelationshipRole('dom')">👑 관리(Dom)<br><small>피드백 / 보상 / 휴식 작성</small></button>
+                        <button type="button" class="relationship-role-btn" id="relationshipSubBtn" onclick="setRelationshipRole('sub')">📝 기록(Sub)<br><small>하루 기록 작성 / 피드백 확인</small></button>
                     </div>
                     <div class="relationship-role-help" id="relationshipRoleHelp">처음 공간을 만들거나 초대코드로 참여하기 전에 역할을 선택해 주세요.</div>
                 </div>
@@ -2041,7 +2075,7 @@
         <div class="history-panel-head">
             <div>
                 <div class="history-detail-kicker">History Center</div>
-                <h2 id="historyPanelTitle">📜 우리들의 지난 기록실 <span>RC2 v2.3.0</span></h2>
+                <h2 id="historyPanelTitle">📜 우리들의 지난 기록실 <span>RC2 v2.3.1</span></h2>
             </div>
             <button type="button" class="modal-close-btn" onclick="closeHistoryPanelModal()">닫기</button>
         </div>
@@ -2287,7 +2321,7 @@
             <h2 id="feedbackModalTitle">💌 주인의 피드백</h2>
             <button type="button" class="modal-close-btn" onclick="closeDailyModal('feedback')">닫기</button>
         </div>
-        <div class="manager-lock-note" id="feedbackLockNote">이 카드는 관리하는 사람만 작성할 수 있어요. 기록하는 사람은 내용을 확인만 할 수 있습니다.</div>
+        <div class="manager-lock-note" id="feedbackLockNote">이 카드는 관리(Dom)만 작성할 수 있어요. 기록(Sub)은 내용을 확인만 할 수 있습니다.</div>
         <div class="feedback-hint">칭찬, 격려, 내일의 미션, 주의할 점을 따뜻하게 남겨주세요.</div>
         <textarea id="replyMessage" rows="5" placeholder="오늘의 기록을 읽고 주인의 피드백을 남겨주세요." oninput="handleDailyFieldChanged()"></textarea>
         <button type="button" class="daily-modal-save" onclick="closeDailyModal('feedback')">저장하고 닫기</button>
@@ -2495,6 +2529,13 @@
     async function loadUserActiveRoom() {
         if (!currentUser) return;
         try {
+            const defaultRelationshipRole = await getUserDefaultRelationshipRole();
+            if (defaultRelationshipRole) {
+                activeRelationshipRole = defaultRelationshipRole;
+                pendingRelationshipRole = defaultRelationshipRole;
+                updateRelationshipRoleUI();
+                updateOwnerOnlySections();
+            }
             const snap = await db.ref(`users/${currentUser.uid}/activeRoom`).once('value');
             const savedRoom = snap.val();
             if (savedRoom) {
@@ -2504,8 +2545,11 @@
                 if (allowed) {
                     activeRoomCode = savedRoom;
                     activeRoomRole = await getCurrentUserRoomRole(savedRoom) || 'member';
-                    activeRelationshipRole = await getCurrentUserRelationshipRole(savedRoom) || (activeRoomRole === 'owner' ? 'dom' : 'sub');
+                    activeRelationshipRole = await getCurrentUserRelationshipRole(savedRoom) || defaultRelationshipRole || (activeRoomRole === 'owner' ? 'dom' : 'sub');
                     pendingRelationshipRole = activeRelationshipRole;
+                    if (activeRelationshipRole && !defaultRelationshipRole) {
+                        await db.ref(`users/${currentUser.uid}/relationshipRole`).set(activeRelationshipRole);
+                    }
                     updateCurrentRoomInfo();
                     connectAndListenFirebase();
                 } else {
@@ -2517,6 +2561,7 @@
             } else {
                 showSaveStatus('🔑 방을 만들거나 초대코드로 참여해 주세요.');
                 resetProtectedDataUI('방을 만들거나 초대코드로 참여하면 기록이 표시됩니다. ✨');
+                updateRelationshipRoleUI();
             }
         } catch (err) {
             console.error(err);
@@ -2548,13 +2593,13 @@
     }
 
     function getRelationshipRoleLabel(role) {
-        if (role === 'dom') return '관리하는 사람';
-        if (role === 'sub') return '기록하는 사람';
+        if (role === 'dom') return '관리(Dom)';
+        if (role === 'sub') return '기록(Sub)';
         return '역할 미선택';
     }
 
     function canManageRelationshipCards() {
-        return activeRelationshipRole === 'dom' || (!activeRelationshipRole && activeRoomRole === 'owner');
+        return activeRelationshipRole === 'dom';
     }
 
     async function getCurrentUserRelationshipRole(roomCode) {
@@ -2568,8 +2613,29 @@
         }
     }
 
+    async function getUserDefaultRelationshipRole() {
+        if (!currentUser) return '';
+        try {
+            const snap = await db.ref(`users/${currentUser.uid}/relationshipRole`).once('value');
+            return snap.val() || '';
+        } catch (err) {
+            console.error('기본 관계 역할 확인 실패:', err);
+            return '';
+        }
+    }
+
     async function setRelationshipRole(role) {
         if (!['dom', 'sub'].includes(role)) return;
+        if (activeRelationshipRole) {
+            alert('관계 역할은 최초 1회 설정 후 변경할 수 없습니다. 변경이 필요하면 새 공간/초기화 절차로 진행해 주세요.');
+            updateRelationshipRoleUI();
+            return;
+        }
+        const ok = confirm(`${getRelationshipRoleLabel(role)} 역할로 설정할까요?
+
+이 설정은 앱 설치 순서나 방 생성 순서와 관계없으며, 최초 1회 선택 후 일반 화면에서는 변경할 수 없습니다.`);
+        if (!ok) return;
+
         pendingRelationshipRole = role;
         activeRelationshipRole = role;
         updateRelationshipRoleUI();
@@ -2577,11 +2643,16 @@
         updateDailyCards();
         updateManagedFieldAccessControls();
 
-        if (currentUser && activeRoomCode) {
+        if (currentUser) {
             try {
-                await db.ref(`roomMembers/${activeRoomCode}/${currentUser.uid}/relationshipRole`).set(role);
-                await db.ref(`userRooms/${currentUser.uid}/${activeRoomCode}/relationshipRole`).set(role);
-                showSaveStatus(`👥 역할 저장 완료: ${getRelationshipRoleLabel(role)}`);
+                const updates = {};
+                updates[`users/${currentUser.uid}/relationshipRole`] = role;
+                if (activeRoomCode) {
+                    updates[`roomMembers/${activeRoomCode}/${currentUser.uid}/relationshipRole`] = role;
+                    updates[`userRooms/${currentUser.uid}/${activeRoomCode}/relationshipRole`] = role;
+                }
+                await db.ref().update(updates);
+                showSaveStatus(`👥 역할 고정 완료: ${getRelationshipRoleLabel(role)}`);
             } catch (err) {
                 console.error(err);
                 showSaveStatus('❌ 역할 저장 실패');
@@ -2591,15 +2662,29 @@
 
     function updateRelationshipRoleUI() {
         const role = activeRelationshipRole || pendingRelationshipRole || '';
+        const box = document.getElementById('relationshipRoleBox');
         const domBtn = document.getElementById('relationshipDomBtn');
         const subBtn = document.getElementById('relationshipSubBtn');
         const help = document.getElementById('relationshipRoleHelp');
-        if (domBtn) domBtn.classList.toggle('active', role === 'dom');
-        if (subBtn) subBtn.classList.toggle('active', role === 'sub');
+        const note = document.getElementById('relationshipRoleNote');
+        const badge = document.getElementById('relationshipRoleLockedBadge');
+        const isLocked = !!activeRelationshipRole;
+
+        if (box) box.classList.toggle('is-locked', isLocked);
+        if (domBtn) {
+            domBtn.classList.toggle('active', role === 'dom');
+            domBtn.disabled = isLocked;
+        }
+        if (subBtn) {
+            subBtn.classList.toggle('active', role === 'sub');
+            subBtn.disabled = isLocked;
+        }
+        if (badge) badge.innerHTML = isLocked ? '<span class="relationship-role-locked-badge">고정됨</span>' : '';
+        if (note) note.style.display = isLocked ? 'none' : 'block';
         if (help) {
-            help.innerText = activeRoomCode
-                ? `현재 역할: ${getRelationshipRoleLabel(role)} · 피드백/보상/휴식은 관리하는 사람만 작성합니다.`
-                : '처음 공간을 만들거나 초대코드로 참여하기 전에 역할을 선택해 주세요.';
+            help.innerText = isLocked
+                ? `현재 역할: ${getRelationshipRoleLabel(role)} · 이 역할은 고정되어 일반 화면에서는 변경할 수 없습니다.`
+                : '관리(Dom) 또는 기록(Sub)을 먼저 선택해 주세요. 앱 설치 순서/방 생성 순서와는 관계가 없습니다.';
         }
     }
 
@@ -2934,7 +3019,7 @@
 
     function toggleDailyChoice(choice) {
         if (!canManageRelationshipCards()) {
-            alert('보상 / 휴식은 관리하는 사람만 작성할 수 있습니다.');
+            alert('보상 / 휴식은 관리(Dom)만 작성할 수 있습니다.');
             return;
         }
         selectedDailyChoice = selectedDailyChoice === choice ? '' : choice;
@@ -3346,7 +3431,8 @@
         } catch (e) {
             console.warn(e);
         }
-        const finalRelationshipRole = relationshipRole || existingRelationshipRole || pendingRelationshipRole || (role === 'owner' ? 'dom' : 'sub');
+        const userDefaultRelationshipRole = await getUserDefaultRelationshipRole();
+        const finalRelationshipRole = relationshipRole || existingRelationshipRole || pendingRelationshipRole || userDefaultRelationshipRole || (role === 'owner' ? 'dom' : 'sub');
 
         // STEP5: 방 권한은 roomMembers 하나만 기준으로 관리합니다.
         // rooms 내부에 members를 중복 저장하지 않습니다.
@@ -3361,6 +3447,7 @@
         updates[`users/${currentUser.uid}/activeRoom`] = roomCode;
         updates[`users/${currentUser.uid}/email`] = myEmail;
         updates[`users/${currentUser.uid}/lastLogin`] = firebase.database.ServerValue.TIMESTAMP;
+        updates[`users/${currentUser.uid}/relationshipRole`] = finalRelationshipRole;
         await db.ref().update(updates);
 
         activeRoomCode = roomCode;
@@ -3382,7 +3469,7 @@
             const ok = confirm('이미 연결된 방이 있습니다. 새 방을 만들면 앞으로 새 방이 기본 방으로 열립니다. 계속할까요?');
             if (!ok) return;
         }
-        if (!pendingRelationshipRole) { alert('먼저 내 관계 역할을 선택해 주세요.'); return; }
+        if (!pendingRelationshipRole && !activeRelationshipRole) { alert('먼저 관리(Dom) 또는 기록(Sub) 역할을 선택해 주세요.'); return; }
         const roomCode = randomRoomId();
         const myEmail = normalizeEmail(currentUser.email);
         showSaveStatus('🏠 새 방 생성 중...');
@@ -3471,7 +3558,7 @@
             return;
         }
         if (!pendingRelationshipRole && !activeRelationshipRole) {
-            alert('초대코드로 참여하기 전에 내 관계 역할을 선택해 주세요.');
+            alert('초대코드로 참여하기 전에 관리(Dom) 또는 기록(Sub) 역할을 선택해 주세요.');
             return;
         }
         if (!/^[A-Z0-9]{5,10}$/.test(code)) {
@@ -3528,6 +3615,7 @@
             firstUpdates[`users/${currentUser.uid}/activeRoom`] = roomCode;
             firstUpdates[`users/${currentUser.uid}/email`] = myEmail;
             firstUpdates[`users/${currentUser.uid}/lastLogin`] = firebase.database.ServerValue.TIMESTAMP;
+            firstUpdates[`users/${currentUser.uid}/relationshipRole`] = pendingRelationshipRole || activeRelationshipRole || 'sub';
             await db.ref().update(firstUpdates);
 
             const secondUpdates = {};
