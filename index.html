@@ -13,10 +13,13 @@
     <style>
         :root {
             --primary-color: #ff7675;
-            --bg-color: #f8f9fa;
+            --accent-purple: #8e5cf4;
+            --soft-purple: #f3ecff;
+            --soft-pink: #fff3f7;
+            --bg-color: #fbf7ff;
             --card-color: #ffffff;
             --text-color: #2d3436;
-            --border-color: #ffeaa7;
+            --border-color: #eadcff;
             --water-color: #0984e3;
         }
 
@@ -28,7 +31,7 @@
         }
 
         body {
-            background-color: var(--bg-color);
+            background: radial-gradient(circle at top left, #fff0f6 0, transparent 32%), linear-gradient(135deg, #fff7fb 0%, #f4ecff 52%, #fffaf2 100%);
             color: var(--text-color);
             padding: 20px 15px;
             display: flex;
@@ -43,8 +46,8 @@
             max-width: 450px;
             border-radius: 20px;
             padding: 25px;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
-            border: 1px solid rgba(255, 118, 117, 0.1);
+            box-shadow: 0 16px 40px rgba(142, 92, 244, 0.10);
+            border: 1px solid rgba(142, 92, 244, 0.12);
             margin-bottom: 20px;
             position: relative;
         }
@@ -67,8 +70,8 @@
         }
 
         .sync-box {
-            background: #fff3f3;
-            border: 1px dashed var(--primary-color);
+            background: linear-gradient(135deg, #fff5f8, #f7f0ff);
+            border: 1px dashed #d7c3ff;
             padding: 12px;
             border-radius: 12px;
             margin-bottom: 20px;
@@ -579,9 +582,151 @@
             color: #fff;
             border-color: #ff7675;
         }
+        .mission-library-add {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        .mission-library-add input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ffd6d6;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            outline: none;
+            background: #fff;
+        }
+        .mission-library-add button {
+            width: auto;
+            padding: 10px 12px;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            background: var(--primary-color);
+            color: #fff;
+        }
+        .mission-library-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        .mission-library-item {
+            display: grid;
+            grid-template-columns: 1fr auto auto;
+            gap: 6px;
+            align-items: center;
+            padding: 9px 10px;
+            background: #fff;
+            border: 1px solid #ffe1e1;
+            border-radius: 12px;
+        }
+        .mission-library-text {
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: #2d3436;
+            line-height: 1.35;
+        }
+        .mission-mini-btn {
+            width: auto;
+            padding: 7px 9px;
+            border-radius: 9px;
+            font-size: 0.76rem;
+            background: #f1f2f6;
+            color: #2d3436;
+        }
+        .mission-mini-btn.delete {
+            background: #fff0f0;
+            color: #d63031;
+        }
         .mission-modal .mission-row {
             grid-template-columns: 26px 1fr;
         }
+
+        /* Compact daily cards + input popups */
+        .daily-card {
+            width: 100%;
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            align-items: center;
+            gap: 12px;
+            padding: 14px;
+            border-radius: 18px;
+            border: 1px solid #eadcff;
+            background: linear-gradient(135deg, #ffffff, #fbf7ff);
+            box-shadow: 0 8px 22px rgba(142, 92, 244, 0.09);
+            text-align: left;
+            color: var(--text-color);
+        }
+        .daily-card:active { transform: scale(0.99); }
+        .daily-card-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #fff0f6;
+            font-size: 1.25rem;
+        }
+        .daily-card-title {
+            font-weight: 850;
+            font-size: 0.92rem;
+            margin-bottom: 3px;
+        }
+        .daily-card-sub {
+            color: #636e72;
+            font-size: 0.78rem;
+            line-height: 1.35;
+        }
+        .daily-card-arrow {
+            color: #a29bfe;
+            font-weight: 900;
+            font-size: 1.2rem;
+        }
+        .daily-modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(45,52,54,0.52);
+            z-index: 32;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 18px;
+        }
+        .daily-modal {
+            width: 100%;
+            max-width: 460px;
+            max-height: 86vh;
+            overflow-y: auto;
+            background: #fff;
+            border-radius: 24px;
+            padding: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.18);
+            border: 1px solid rgba(142, 92, 244, 0.15);
+        }
+        .daily-modal-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+        .daily-modal-head h2 {
+            margin: 0;
+            font-size: 1.12rem;
+            color: var(--accent-purple);
+        }
+        .daily-modal textarea,
+        .daily-modal input[type="text"] {
+            background: #fff;
+        }
+        .daily-modal-save {
+            margin-top: 12px;
+            background: var(--primary-color);
+            color: #fff;
+        }
+
 
         .feedback-hint {
             color: #636e72;
@@ -806,18 +951,14 @@
     </div>
 
     <div class="input-group">
-        <label>😊 오늘의 기분</label>
-        <div class="mood-box">
-            <div class="mood-helper">오늘의 마음 상태를 하나만 선택해 주세요. 주인이 하루를 이해하는 데 도움이 됩니다.</div>
-            <div class="mood-options">
-                <button type="button" class="mood-btn" data-mood="great" onclick="selectMood('great')">😊<br>좋음</button>
-                <button type="button" class="mood-btn" data-mood="okay" onclick="selectMood('okay')">🙂<br>괜찮음</button>
-                <button type="button" class="mood-btn" data-mood="normal" onclick="selectMood('normal')">😐<br>보통</button>
-                <button type="button" class="mood-btn" data-mood="hard" onclick="selectMood('hard')">😞<br>힘듦</button>
-                <button type="button" class="mood-btn" data-mood="veryHard" onclick="selectMood('veryHard')">😭<br>매우 힘듦</button>
-            </div>
-            <textarea id="moodNote" rows="2" placeholder="기분에 대해 남기고 싶은 말이 있으면 적어주세요." oninput="triggerAutoSave()"></textarea>
-        </div>
+        <button type="button" class="daily-card" onclick="openDailyModal('mood')">
+            <span class="daily-card-icon">😊</span>
+            <span>
+                <span class="daily-card-title">오늘의 기분</span>
+                <span class="daily-card-sub" id="moodCardSub">아직 선택하지 않았어요.</span>
+            </span>
+            <span class="daily-card-arrow">›</span>
+        </button>
     </div>
 
     <div class="row">
@@ -844,12 +985,14 @@
     </div>
 
     <div class="input-group">
-        <label>🥗 식사 기록</label>
-        <div class="meal-container">
-            <div class="meal-row"><span>아침</span><input type="text" id="mealBreakfast" placeholder="사과" oninput="triggerAutoSave()"></div>
-            <div class="meal-row"><span>점심</span><input type="text" id="mealLunch" placeholder="일반식" oninput="triggerAutoSave()"></div>
-            <div class="meal-row"><span>저녁</span><input type="text" id="mealDinner" placeholder="샐러드" oninput="triggerAutoSave()"></div>
-        </div>
+        <button type="button" class="daily-card" onclick="openDailyModal('meal')">
+            <span class="daily-card-icon">🥗</span>
+            <span>
+                <span class="daily-card-title">식사 기록</span>
+                <span class="daily-card-sub" id="mealCardSub">아침 · 점심 · 저녁을 필요할 때 입력하세요.</span>
+            </span>
+            <span class="daily-card-arrow">›</span>
+        </button>
     </div>
 
     <div class="input-group">
@@ -874,9 +1017,14 @@
     </div>
 
     <div class="input-group">
-        <label>💌 주인의 피드백</label>
-        <div class="feedback-hint">칭찬, 격려, 내일의 미션, 주의할 점을 따뜻하게 남기는 공간입니다.</div>
-        <textarea id="replyMessage" rows="3" placeholder="오늘의 기록을 읽고 주인의 한마디를 남겨주세요 💕" oninput="triggerAutoSave()"></textarea>
+        <button type="button" class="daily-card" onclick="openDailyModal('feedback')">
+            <span class="daily-card-icon">💌</span>
+            <span>
+                <span class="daily-card-title">주인의 피드백</span>
+                <span class="daily-card-sub" id="feedbackCardSub">아직 피드백이 없습니다.</span>
+            </span>
+            <span class="daily-card-arrow">›</span>
+        </button>
     </div>
 
     <div class="input-group">
@@ -1030,13 +1178,21 @@
         </div>
 
         <div class="mission-template-box">
-            <div class="mission-template-title">⭐ 즐겨찾기 느낌의 빠른 추가</div>
-            <div class="mission-chip-grid">
-                <button type="button" class="mission-chip" onclick="addMissionTemplate('Morning Report 남기기')">Morning Report</button>
-                <button type="button" class="mission-chip" onclick="addMissionTemplate('Evening Report 남기기')">Evening Report</button>
-                <button type="button" class="mission-chip" onclick="addMissionTemplate('오늘 주인에게 감사한 점 하나 적기')">감사 한 줄</button>
-                <button type="button" class="mission-chip" onclick="addMissionTemplate('오늘의 약속 하나 지키고 체크하기')">오늘의 약속</button>
-                <button type="button" class="mission-chip primary" onclick="addRandomMission()">🎲 랜덤 미션</button>
+            <div class="mission-template-title">👑 주인의 미션함</div>
+            <div class="mission-helper">자주 쓰는 미션을 저장해두고 오늘의 미션에 빠르게 추가하세요. 방주인만 저장/삭제할 수 있습니다.</div>
+            <div class="mission-chip-grid" id="defaultMissionChips">
+                <button type="button" class="mission-chip" onclick="addMissionTemplate('아침 보고 남기기')">🌅 아침 보고</button>
+                <button type="button" class="mission-chip" onclick="addMissionTemplate('저녁 보고 남기기')">🌙 저녁 보고</button>
+                <button type="button" class="mission-chip" onclick="addMissionTemplate('오늘 주인에게 감사한 점 하나 적기')">🤍 감사 한 줄</button>
+                <button type="button" class="mission-chip" onclick="addMissionTemplate('오늘의 약속 하나 지키고 체크하기')">🎯 오늘의 약속</button>
+                <button type="button" class="mission-chip primary" onclick="addRandomMission()">🎲 추천 미션</button>
+            </div>
+            <div class="mission-library-add owner-only-section">
+                <input type="text" id="missionLibraryInput" placeholder="예: 오늘의 복장 인증 / 정해진 시간 보고">
+                <button type="button" onclick="saveMissionToLibrary()">저장</button>
+            </div>
+            <div class="mission-library-list" id="missionLibraryList">
+                <div class="empty-message">저장된 미션을 불러오는 중입니다...</div>
             </div>
         </div>
 
@@ -1105,6 +1261,7 @@
     let ownerNoteSaveTimeout = null;
     let cachedDaysData = null;
     let selectedDailyChoice = '';
+    let missionLibraryCache = {};
 
     window.onload = function() {
         const today = new Date();
@@ -1443,6 +1600,51 @@
         document.querySelectorAll('.mood-btn').forEach((btn) => {
             btn.classList.toggle('active', btn.dataset.mood === selectedMood);
         });
+        updateDailyCards();
+    }
+
+
+    function openDailyModal(name) {
+        const overlay = document.getElementById(`${name}ModalOverlay`);
+        if (overlay) overlay.style.display = 'flex';
+        updateDailyCards();
+    }
+
+    function closeDailyModal(name) {
+        const overlay = document.getElementById(`${name}ModalOverlay`);
+        if (overlay) overlay.style.display = 'none';
+        updateDailyCards();
+        executeAutoSave();
+    }
+
+    function handleDailyFieldChanged() {
+        updateDailyCards();
+        triggerAutoSave();
+    }
+
+    function getTrimmedValue(id) {
+        return (document.getElementById(id)?.value || '').trim();
+    }
+
+    function updateDailyCards() {
+        const moodSub = document.getElementById('moodCardSub');
+        const moodNoteText = getTrimmedValue('moodNote');
+        if (moodSub) {
+            const moodLabel = selectedMood ? MOOD_LABELS[selectedMood] : '';
+            moodSub.innerText = moodLabel ? `${moodLabel}${moodNoteText ? ' · 메모 있음' : ''}` : '아직 선택하지 않았어요.';
+        }
+
+        const mealSub = document.getElementById('mealCardSub');
+        if (mealSub) {
+            const filled = ['mealBreakfast', 'mealLunch', 'mealDinner'].filter(id => getTrimmedValue(id)).length;
+            mealSub.innerText = filled ? `${filled}/3 입력 완료` : '아침 · 점심 · 저녁을 필요할 때 입력하세요.';
+        }
+
+        const feedbackSub = document.getElementById('feedbackCardSub');
+        if (feedbackSub) {
+            const text = getTrimmedValue('replyMessage');
+            feedbackSub.innerText = text ? (text.length > 28 ? `${text.slice(0, 28)}...` : text) : '아직 피드백이 없습니다.';
+        }
     }
 
 
@@ -1614,6 +1816,8 @@
         const overlay = document.getElementById('missionModalOverlay');
         if (overlay) overlay.style.display = 'flex';
         updateMissionCompactUI();
+        updateOwnerOnlySections();
+        loadMissionLibrary();
     }
 
     function closeMissionModal() {
@@ -1626,6 +1830,101 @@
         updateMissionCompactUI();
         if (saveNow) executeAutoSave();
         else triggerAutoSave();
+    }
+
+    function sanitizeMissionText(text) {
+        return String(text || '').replace(/[\n\r\t]+/g, ' ').trim().slice(0, 80);
+    }
+
+    function jsStringLiteral(value) {
+        return JSON.stringify(String(value || ''));
+    }
+
+    async function loadMissionLibrary() {
+        const box = document.getElementById('missionLibraryList');
+        if (!box) return;
+        if (!currentUser || !activeRoomCode) {
+            box.innerHTML = '<div class="empty-message">방에 연결되면 주인의 미션함을 사용할 수 있습니다.</div>';
+            return;
+        }
+        try {
+            const snap = await db.ref(`rooms/${activeRoomCode}/missionLibrary`).once('value');
+            missionLibraryCache = snap.val() || {};
+            renderMissionLibrary();
+        } catch (err) {
+            console.error(err);
+            box.innerHTML = '<div class="empty-message">미션함을 불러오지 못했습니다. Firebase Rules를 확인해 주세요.</div>';
+        }
+    }
+
+    function renderMissionLibrary() {
+        const box = document.getElementById('missionLibraryList');
+        if (!box) return;
+        const items = Object.keys(missionLibraryCache || {}).map((id) => ({
+            id,
+            ...(missionLibraryCache[id] || {})
+        })).filter(item => sanitizeMissionText(item.text));
+
+        items.sort((a, b) => (b.updatedAt || b.createdAt || 0) - (a.updatedAt || a.createdAt || 0));
+        if (items.length === 0) {
+            box.innerHTML = '<div class="empty-message">아직 저장된 커스텀 미션이 없습니다. 방주인이 자주 쓰는 미션을 저장해두면 여기에 표시됩니다.</div>';
+            return;
+        }
+
+        box.innerHTML = items.map((item) => {
+            const cleanText = sanitizeMissionText(item.text);
+            const safeText = escapeHtml(cleanText);
+            const deleteBtn = activeRoomRole === 'owner'
+                ? `<button type="button" class="mission-mini-btn delete" onclick="deleteMissionFromLibrary('${item.id}')">삭제</button>`
+                : '';
+            return `
+                <div class="mission-library-item">
+                    <div class="mission-library-text">⭐ ${safeText}</div>
+                    <button type="button" class="mission-mini-btn" onclick='addMissionTemplate(${jsStringLiteral(cleanText)})'>추가</button>
+                    ${deleteBtn}
+                </div>
+            `;
+        }).join('');
+    }
+
+    async function saveMissionToLibrary() {
+        const input = document.getElementById('missionLibraryInput');
+        const text = sanitizeMissionText(input?.value || '');
+        if (!currentUser || !activeRoomCode) { alert('먼저 방에 연결해 주세요.'); return; }
+        if (activeRoomRole !== 'owner') { alert('주인의 미션함은 방주인만 저장할 수 있습니다.'); return; }
+        if (!text) { alert('저장할 미션을 입력해 주세요.'); return; }
+        try {
+            const ref = db.ref(`rooms/${activeRoomCode}/missionLibrary`).push();
+            await ref.set({
+                text,
+                createdBy: currentUser.uid,
+                createdByEmail: currentUser.email,
+                createdAt: firebase.database.ServerValue.TIMESTAMP,
+                updatedAt: firebase.database.ServerValue.TIMESTAMP
+            });
+            if (input) input.value = '';
+            showSaveStatus('👑 미션함 저장 완료');
+            await loadMissionLibrary();
+        } catch (err) {
+            console.error(err);
+            alert('미션함 저장에 실패했습니다. Firebase Rules를 확인해 주세요.');
+            showSaveStatus('❌ 미션함 저장 실패');
+        }
+    }
+
+    async function deleteMissionFromLibrary(missionId) {
+        if (!currentUser || !activeRoomCode || activeRoomRole !== 'owner') return;
+        const ok = confirm('이 미션을 주인의 미션함에서 삭제할까요? 오늘의 미션에 이미 추가된 내용은 삭제되지 않습니다.');
+        if (!ok) return;
+        try {
+            await db.ref(`rooms/${activeRoomCode}/missionLibrary/${missionId}`).remove();
+            showSaveStatus('👑 미션함 삭제 완료');
+            await loadMissionLibrary();
+        } catch (err) {
+            console.error(err);
+            alert('미션 삭제에 실패했습니다.');
+            showSaveStatus('❌ 미션함 삭제 실패');
+        }
     }
 
     function addMissionTemplate(text) {
@@ -2050,6 +2349,7 @@
                 renderMissions(record.missions);
                 selectedMood = record.mood || '';
                 updateMoodUI();
+                updateDailyCards();
 
                 currentWater = parseInt(record.water) || 0;
                 document.getElementById('waterDisplay').innerText = currentWater;
@@ -2095,6 +2395,7 @@
         const waterDisplay = document.getElementById('waterDisplay');
         if (waterDisplay) waterDisplay.innerText = 0;
         clearMissionAndMoodUI();
+        updateDailyCards();
         removePhotoUI();
     }
 
@@ -2181,6 +2482,8 @@
                            `📝 오늘의 한 줄:\n"${diary}"\n\n` +
                            `💌 오늘의 답장:\n"${replyMessage}"\n\n` +
                            `오늘도 건강하게 보내줘서 고마워요 단 한 사람 최고 알라뷰❤️`;
+
+        updateDailyCards();
 
         const newRecord = {
             date, wakeTime, water: `${currentWater}ML`, weight,
