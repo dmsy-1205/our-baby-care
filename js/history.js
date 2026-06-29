@@ -200,7 +200,6 @@
     // =========================================================
 function openHistoryPanelModal() {
         openModalOverlayById('historyPanelOverlay');
-        loadHistoryAnniversaryData();
     }
 
     function closeHistoryPanelModal() {
@@ -291,9 +290,6 @@ function openHistoryPanelModal() {
         if (!overlay || !title || !content) return;
         title.innerText = `${getHistoryMoodIcon(record)} ${formatHistoryDateLabel(date)}`;
         const missionText = getHistoryMissionText(record);
-        const anniversaryText = historyAnniversaryData?.startDate ? formatAnniversaryLabel(historyAnniversaryData.startDate, date) : '';
-        const anniversaryMilestone = historyAnniversaryData?.startDate ? getAnniversaryMilestone(getDaysBetweenInclusive(historyAnniversaryData.startDate, date)) : '';
-        const customEvents = getCustomAnniversaryEventsForDate(date);
         const meals = [
             record.mealBreakfast ? `아침: ${record.mealBreakfast}` : '',
             record.mealLunch ? `점심: ${record.mealLunch}` : '',
@@ -307,8 +303,6 @@ function openHistoryPanelModal() {
         ].filter(Boolean).join('\n');
         content.innerHTML = `
             ${record.photo ? `<img src="${record.photo}" class="history-detail-photo" alt="${date} 사진">` : ''}
-            ${historyDetailBlock('💕 기념일', [anniversaryText, anniversaryMilestone].filter(Boolean).join(' · '))}
-            ${customAnniversaryText ? historyDetailBlock('🎁 둘만의 기념일', customAnniversaryText) : ''}
             ${historyDetailBlock('😊 오늘의 기분', [record.moodLabel, record.moodNote].filter(Boolean).join('\n'))}
             ${historyDetailBlock('🎯 오늘의 미션', missionText)}
             ${historyDetailBlock('☀️ 기본 기록', dailyBase)}
@@ -339,9 +333,6 @@ function openHistoryPanelModal() {
        - Firebase / Room / 저장 / 삭제 구조 변경 없음
        ========================================================= */
     let selectedHistoryDate = '';
-    let historyAnniversaryData = null;
-    let hmHistoryAnniversaryLoadedForRoom = '';
-    let hmHistoryAnniversaryLoading = false;
 
     function renderHistorySummary(daysData) {
         const box = document.getElementById('historySummary');
@@ -387,239 +378,6 @@ function openHistoryPanelModal() {
        RC2 v2.5.7 Chat UI Premium Override
        - 기존 daysData / deleteRecord / openHistoryDetailModal 데이터 흐름 유지
        ========================================================= */
-
-    // =========================================================
-    // MODULE: HISTORY / ANNIVERSARY
-    // Split-ready target: timeline.js
-    // 처음 만난 날을 room meta에 저장하고 캘린더 날짜 선택 시 D+를 계산한다.
-    // DB 추가 경로: rooms/{roomCode}/meta/anniversaryStartDate
-    // =========================================================
-    function parseYmdDate(ymd) {
-        if (!ymd || typeof ymd !== 'string') return null;
-        const parts = ymd.split('-').map(Number);
-        if (parts.length !== 3 || parts.some(Number.isNaN)) return null;
-        return new Date(parts[0], parts[1] - 1, parts[2]);
-    }
-
-    function getDaysBetweenInclusive(startYmd, targetYmd) {
-        const start = parseYmdDate(startYmd);
-        const target = parseYmdDate(targetYmd);
-        if (!start || !target) return null;
-        const oneDay = 24 * 60 * 60 * 1000;
-        return Math.floor((target - start) / oneDay) + 1;
-    }
-
-    function formatAnniversaryLabel(startYmd, targetYmd) {
-        const days = getDaysBetweenInclusive(startYmd, targetYmd);
-        if (days === null) return '';
-        if (days < 1) return `만나기 ${Math.abs(days - 1)}일 전`;
-        if (days === 1) return '처음 만난 날';
-        return `만난 지 ${days}일`;
-    }
-
-    function getAnniversaryMilestone(days) {
-        if (!days || days < 1) return '';
-        if (days === 1) return '처음 만난 날';
-        const milestones = [30, 50, 100, 200, 300, 365, 500, 700, 1000, 1500, 2000];
-        if (milestones.includes(days)) return `${days}일 기념일`;
-        if (days > 0 && days % 100 === 0) return `${days}일 기념일`;
-        if (days > 0 && days % 365 === 0) return `${Math.round(days / 365)}주년`; 
-        return '';
-    }
-
-    function getNextAnniversaryMilestones(startYmd, targetYmd) {
-        const currentDays = getDaysBetweenInclusive(startYmd, targetYmd);
-        if (!currentDays || currentDays < 1) return [];
-        const base = [30, 50, 100, 200, 300, 365, 500, 700, 1000, 1500, 2000];
-        return base.filter(day => day >= currentDays).slice(0, 4);
-    }
-
-    async function loadHistoryAnniversaryData() {
-        const roomCode = getRoomCodeForData();
-        if (!roomCode || !hmIsSafeRoomCode(roomCode) || hmHistoryAnniversaryLoading) return;
-        if (hmHistoryAnniversaryLoadedForRoom === roomCode) return;
-        hmHistoryAnniversaryLoading = true;
-        try {
-            const [startSnap, customSnap] = await Promise.all([
-                db.ref(`rooms/${roomCode}/meta/anniversaryStartDate`).once('value'),
-                db.ref(`rooms/${roomCode}/meta/customAnniversaries`).once('value')
-            ]);
-            historyAnniversaryData = {
-                startDate: startSnap.val() || '',
-                customEvents: customSnap.val() || {}
-            };
-            hmHistoryAnniversaryLoadedForRoom = roomCode;
-            if (cachedDaysData) displayHistory(cachedDaysData);
-        } catch (err) {
-            hmReportError('loadHistoryAnniversaryData', err, '기념일 정보를 불러오지 못했어요.');
-        } finally {
-            hmHistoryAnniversaryLoading = false;
-        }
-    }
-
-    async function saveAnniversaryStartDate() {
-        const input = document.getElementById('anniversaryStartDate');
-        const value = input ? input.value : '';
-        const roomCode = getRoomCodeForData();
-        if (!value) { alert('처음 만난 날을 선택해 주세요.'); return; }
-        if (!(await hmRequireRoomAccess('기념일 저장', roomCode))) { alert('기념일 저장 권한이 없습니다.'); return; }
-        try {
-            await db.ref(`rooms/${roomCode}/meta/anniversaryStartDate`).set(value);
-            historyAnniversaryData = { ...(historyAnniversaryData || {}), startDate: value };
-            hmHistoryAnniversaryLoadedForRoom = roomCode;
-            showSaveStatus('💕 처음 만난 날 저장 완료');
-            if (cachedDaysData) displayHistory(cachedDaysData);
-        } catch (err) {
-            hmReportError('saveAnniversaryStartDate', err, '기념일 저장에 실패했어요.');
-        }
-    }
-
-
-    function getCustomAnniversaryEventsForDate(date) {
-        const events = historyAnniversaryData?.customEvents || {};
-        return Object.keys(events)
-            .map(key => ({ id: key, ...(events[key] || {}) }))
-            .filter(event => event.date === date)
-            .sort((a, b) => String(a.title || '').localeCompare(String(b.title || ''), 'ko'));
-    }
-
-    function renderCustomAnniversaryList() {
-        const events = historyAnniversaryData?.customEvents || {};
-        const items = Object.keys(events)
-            .map(id => ({ id, ...(events[id] || {}) }))
-            .filter(event => event.date && event.title)
-            .sort((a, b) => String(a.date).localeCompare(String(b.date)));
-        if (!items.length) {
-            return '<div class="anniversary-empty">아직 직접 등록한 기념일이 없습니다. 생일, 첫 여행, 약속한 날처럼 둘만의 날짜를 추가해 보세요.</div>';
-        }
-        return `<div class="anniversary-custom-list">${items.map(event => `
-            <div class="anniversary-custom-item">
-                <span class="anniversary-custom-emoji">${escapeHtml(event.emoji || '💕')}</span>
-                <span><strong>${escapeHtml(event.title)}</strong><small>${escapeHtml(formatHistoryDateLabel(event.date))}</small></span>
-                <button type="button" onclick="deleteCustomAnniversary('${escapeHtml(event.id)}')">삭제</button>
-            </div>`).join('')}</div>`;
-    }
-
-    async function saveCustomAnniversary() {
-        const titleInput = document.getElementById('customAnniversaryTitle');
-        const dateInput = document.getElementById('customAnniversaryDate');
-        const emojiInput = document.getElementById('customAnniversaryEmoji');
-        const title = titleInput ? titleInput.value.trim() : '';
-        const date = dateInput ? dateInput.value : '';
-        const emoji = emojiInput ? emojiInput.value : '💕';
-        const roomCode = getRoomCodeForData();
-        if (!title) { alert('기념일 이름을 입력해 주세요.'); return; }
-        if (!date) { alert('기념일 날짜를 선택해 주세요.'); return; }
-        if (!(await hmRequireRoomAccess('기념일 추가', roomCode))) { alert('기념일 추가 권한이 없습니다.'); return; }
-        try {
-            const id = `event_${Date.now()}`;
-            const event = { title, date, emoji, createdAt: Date.now() };
-            await db.ref(`rooms/${roomCode}/meta/customAnniversaries/${id}`).set(event);
-            historyAnniversaryData = {
-                ...(historyAnniversaryData || {}),
-                customEvents: { ...((historyAnniversaryData || {}).customEvents || {}), [id]: event }
-            };
-            if (titleInput) titleInput.value = '';
-            showSaveStatus('💕 기념일 추가 완료');
-            if (cachedDaysData) displayHistory(cachedDaysData);
-        } catch (err) {
-            hmReportError('saveCustomAnniversary', err, '기념일 추가에 실패했어요.');
-        }
-    }
-
-    async function deleteCustomAnniversary(eventId) {
-        const roomCode = getRoomCodeForData();
-        if (!eventId) return;
-        if (!(await hmRequireRoomAccess('기념일 삭제', roomCode))) { alert('기념일 삭제 권한이 없습니다.'); return; }
-        if (!confirm('이 기념일을 삭제할까요?')) return;
-        try {
-            await db.ref(`rooms/${roomCode}/meta/customAnniversaries/${eventId}`).remove();
-            if (historyAnniversaryData?.customEvents) delete historyAnniversaryData.customEvents[eventId];
-            showSaveStatus('기념일 삭제 완료');
-            if (cachedDaysData) displayHistory(cachedDaysData);
-        } catch (err) {
-            hmReportError('deleteCustomAnniversary', err, '기념일 삭제에 실패했어요.');
-        }
-    }
-
-
-    function addDaysToYmd(startYmd, daysToAdd) {
-        const date = parseYmdDate(startYmd);
-        if (!date) return '';
-        date.setDate(date.getDate() + daysToAdd);
-        const y = date.getFullYear();
-        const m = String(date.getMonth() + 1).padStart(2, '0');
-        const d = String(date.getDate()).padStart(2, '0');
-        return `${y}-${m}-${d}`;
-    }
-
-    function renderUpcomingAnniversaryCards(startYmd, targetYmd) {
-        const next = getNextAnniversaryMilestones(startYmd, targetYmd);
-        if (!next.length) return '';
-        return `<div class="anniversary-upcoming"><div class="anniversary-title">🌷 다가오는 기념일</div>${next.map(day => {
-            const ymd = addDaysToYmd(startYmd, day - 1);
-            return `<button type="button" class="anniversary-upcoming-item" onclick="selectHistoryDate('${ymd}')"><strong>D+${day}</strong><span>${escapeHtml(formatHistoryDateLabel(ymd))}</span></button>`;
-        }).join('')}</div>`;
-    }
-
-    function renderAnniversaryBox() {
-        const box = document.getElementById('anniversaryBox');
-        if (!box) return;
-        const startDate = historyAnniversaryData?.startDate || '';
-        const targetDate = selectedHistoryDate || document.getElementById('recordDate')?.value || new Date().toISOString().slice(0, 10);
-        if (!startDate) {
-            box.innerHTML = `
-                <div class="anniversary-head">
-                    <div>
-                        <div class="anniversary-title">💕 처음 만난 날</div>
-                        <div class="anniversary-sub">처음 만난 날을 저장하면 캘린더 날짜를 누를 때마다 D+와 100일, 200일 같은 기념일을 자동 계산합니다.</div>
-                    </div>
-                </div>
-                <div class="anniversary-form">
-                    <input type="date" id="anniversaryStartDate" aria-label="처음 만난 날 선택">
-                    <button type="button" onclick="saveAnniversaryStartDate()">저장</button>
-                </div>`;
-            return;
-        }
-        const days = getDaysBetweenInclusive(startDate, targetDate);
-        const milestone = getAnniversaryMilestone(days);
-        const label = formatAnniversaryLabel(startDate, targetDate);
-        const next = getNextAnniversaryMilestones(startDate, targetDate);
-        box.innerHTML = `
-            <div class="anniversary-head">
-                <div>
-                    <div class="anniversary-title">💕 우리의 기념일</div>
-                    <div class="anniversary-sub">처음 만난 날: ${escapeHtml(formatHistoryDateLabel(startDate))}</div>
-                </div>
-                <button type="button" class="anniversary-mini-btn" onclick="document.getElementById('anniversaryEditRow').style.display='grid'">수정</button>
-            </div>
-            <div class="anniversary-result">
-                <div class="anniversary-badge">${milestone ? '🎉' : '💕'}</div>
-                <div>
-                    <span class="anniversary-value">${escapeHtml(formatHistoryDateLabel(targetDate))} · ${escapeHtml(label)}</span>
-                    <div class="anniversary-note">${milestone ? `오늘은 ${escapeHtml(milestone)}입니다.` : '캘린더의 다른 날짜를 누르면 그날 기준으로 자동 계산됩니다.'}</div>
-                </div>
-            </div>
-            ${renderUpcomingAnniversaryCards(startDate, targetDate)}
-            <div class="anniversary-form" id="anniversaryEditRow" style="display:none;">
-                <input type="date" id="anniversaryStartDate" value="${escapeHtml(startDate)}" aria-label="처음 만난 날 수정">
-                <button type="button" onclick="saveAnniversaryStartDate()">다시 저장</button>
-            </div>
-            <div class="anniversary-custom-box">
-                <div class="anniversary-title">🎁 둘만의 기념일</div>
-                <div class="anniversary-sub">생일, 첫 여행, 약속한 날처럼 캘린더에 함께 표시할 날짜를 추가할 수 있습니다.</div>
-                <div class="anniversary-custom-form">
-                    <input type="date" id="customAnniversaryDate" aria-label="기념일 날짜">
-                    <input type="text" id="customAnniversaryTitle" placeholder="예: 200일 여행, 생일, 첫 만남 장소" maxlength="30" aria-label="기념일 이름">
-                    <select id="customAnniversaryEmoji" aria-label="기념일 아이콘">
-                        <option value="💕">💕</option><option value="🎂">🎂</option><option value="🎉">🎉</option><option value="✈️">✈️</option><option value="💍">💍</option><option value="⭐">⭐</option>
-                    </select>
-                    <button type="button" onclick="saveCustomAnniversary()">추가</button>
-                </div>
-                ${renderCustomAnniversaryList()}
-            </div>`;
-    }
-
     // =========================================================
     // MODULE: HISTORY / OVERVIEW STATS
     // Split-ready target: getHistoryOverviewStats
@@ -669,23 +427,14 @@ function openHistoryPanelModal() {
         const todayYmd = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
         const week = ['일','월','화','수','목','금','토'];
         const monthRecords = Object.keys(daysData || {}).filter(date => date.startsWith(`${year}-${String(month+1).padStart(2,'0')}-`)).length;
-        const anniversaryStartDate = historyAnniversaryData?.startDate || '';
-        let html = `<div class="history-calendar-title-row"><div><strong>📅 ${year}.${String(month+1).padStart(2,'0')} 기록 캘린더</strong><br><span>날짜를 누르면 기록과 D+ 기념일을 함께 확인합니다.</span></div><span>${monthRecords}일 기록</span></div><div class="calendar-grid history-calendar-grid">`;
+        let html = `<div class="history-calendar-title-row"><div><strong>📅 ${year}.${String(month+1).padStart(2,'0')} 기록 캘린더</strong><br><span>기록이 있는 날짜를 누르면 아래에 카드가 열립니다.</span></div><span>${monthRecords}일 기록</span></div><div class="calendar-grid history-calendar-grid">`;
         html += week.map(w => `<div class="calendar-head">${w}</div>`).join('');
         for (let i = 0; i < first.getDay(); i++) html += '<div class="calendar-day"></div>';
         for (let day = 1; day <= last.getDate(); day++) {
             const ymd = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
             const rec = (daysData || {})[ymd];
-            const dday = anniversaryStartDate ? getDaysBetweenInclusive(anniversaryStartDate, ymd) : null;
-            const anniversaryLabel = getAnniversaryMilestone(dday);
-            const hasAnniversary = Boolean(anniversaryStartDate && dday && dday >= 1);
-            const isMilestone = Boolean(anniversaryLabel);
-            const recordIcons = rec ? `${rec.photo ? '📷' : ''}${getHistoryMissionText(rec) ? '🎯' : ''}${rec.mood === 'hard' || rec.mood === 'veryHard' ? '☁️' : ''}` : '';
-            const customEvents = getCustomAnniversaryEventsForDate(ymd);
-            const customIcon = customEvents.length ? escapeHtml(customEvents[0].emoji || '💕') : '';
-            const anniversaryIcon = isMilestone ? '🎉' : (ymd === anniversaryStartDate ? '💕' : '');
-            const icons = `${recordIcons}${anniversaryIcon}${customIcon}`;
-            html += `<div class="calendar-day ${rec ? 'has-record' : ''} ${hasAnniversary ? 'anniversary-day' : ''} ${isMilestone ? 'anniversary-milestone' : ''} ${ymd === todayYmd ? 'today' : ''} ${ymd === selectedHistoryDate ? 'selected-record' : ''}" onclick="selectHistoryDate('${ymd}')">${day}<span class="calendar-icons">${icons}</span></div>`;
+            const icons = rec ? `${rec.photo ? '📷' : ''}${getHistoryMissionText(rec) ? '🎯' : ''}${rec.mood === 'hard' || rec.mood === 'veryHard' ? '☁️' : ''}` : '';
+            html += `<div class="calendar-day ${rec ? 'has-record' : ''} ${ymd === todayYmd ? 'today' : ''} ${ymd === selectedHistoryDate ? 'selected-record' : ''}" ${rec ? `onclick="selectHistoryDate('${ymd}')"` : ''}>${day}<span class="calendar-icons">${icons}</span></div>`;
         }
         html += '</div>';
         box.innerHTML = html;
@@ -704,7 +453,6 @@ function openHistoryPanelModal() {
 
     function displayHistory(daysData) {
         const historyList = document.getElementById('historyList');
-        renderAnniversaryBox();
         renderHistoryHero(daysData || {});
         renderHistorySummary(daysData || {});
         updateHistoryLaunchSub(daysData || {});
@@ -727,9 +475,6 @@ function openHistoryPanelModal() {
         const date = selectedHistoryDate;
         const icon = getHistoryMoodIcon(record);
         const missionText = getHistoryMissionText(record);
-        const anniversaryText = historyAnniversaryData?.startDate ? formatAnniversaryLabel(historyAnniversaryData.startDate, date) : '';
-        const anniversaryMilestone = historyAnniversaryData?.startDate ? getAnniversaryMilestone(getDaysBetweenInclusive(historyAnniversaryData.startDate, date)) : '';
-        const customEvents = getCustomAnniversaryEventsForDate(date);
         const diaryPreview = record.diary ? record.diary.substring(0, 62) : '오늘의 하루 기록을 열어 확인하세요.';
         const chips = [
             record.moodLabel && record.moodLabel !== '기록 없음' ? record.moodLabel : '',
@@ -737,7 +482,6 @@ function openHistoryPanelModal() {
             record.weight ? `⚖️ ${record.weight}` : '',
             missionText ? `🎯 ${missionText}` : '',
             record.photo ? '📷 사진' : '',
-            customEvents.length ? `${customEvents[0].emoji || '💕'} ${customEvents[0].title}` : '',
             record.dailyChoiceLabel && record.dailyChoiceLabel !== '기록 없음' ? record.dailyChoiceLabel : ''
         ].map(makeHistoryChip).join('');
         historyList.innerHTML = `
