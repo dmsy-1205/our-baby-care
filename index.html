@@ -1342,6 +1342,42 @@
             display: none;
         }
 
+        /* RC2 v2.4.0: Role UX polish / 작성 완료 상태 / 기록(Sub) 안내 */
+        .manager-lock-note strong {
+            color: #8e5cf4;
+        }
+        .managed-card.is-filled .daily-card-sub {
+            color: #6c3ce9;
+            font-weight: 800;
+        }
+        .managed-card.is-filled .daily-card-arrow::before {
+            content: '작성완료';
+            display: inline-block;
+            margin-right: 6px;
+            padding: 4px 7px;
+            border-radius: 999px;
+            background: #f3ecff;
+            color: #8e5cf4;
+            font-size: 0.64rem;
+            font-weight: 900;
+            vertical-align: middle;
+        }
+        .mission-role-note {
+            background: linear-gradient(135deg, #fffaf0, #fbf7ff);
+            border: 1px solid #eadcff;
+            border-radius: 14px;
+            padding: 10px 12px;
+            color: #636e72;
+            font-size: 0.8rem;
+            line-height: 1.45;
+            margin-bottom: 10px;
+        }
+        .mission-text-locked {
+            background: #f9fafb !important;
+            color: #6b7280 !important;
+            cursor: not-allowed;
+        }
+
         .history-card {
             padding: 22px;
             overflow: hidden;
@@ -1819,7 +1855,7 @@
         <div></div>
     </div>
     <div class="app-subtitle">합의된 하루를 신뢰로 기록하고, 따뜻하게 지켜보세요.</div>
-    <div class="app-version-badge">RC2 • v2.3.1 · Build 2026.06.29 · Locked Role Permissions</div>
+    <div class="app-version-badge">RC2 • v2.4.0 · Build 2026.06.29 · Role UX Polish</div>
 
     <div class="user-bar">
         <span id="userInfoText">로그인 확인 중...</span>
@@ -2183,7 +2219,7 @@
 
         <div class="mission-template-box">
             <div class="mission-template-title">👑 주인의 미션함</div>
-            <div class="mission-helper">자주 쓰는 미션을 저장해두고 오늘의 미션에 빠르게 추가하세요. 방주인만 저장/삭제할 수 있습니다.</div>
+            <div class="mission-helper">자주 쓰는 미션을 저장해두고 오늘의 미션에 빠르게 추가하세요. 관리(Dom)만 저장/삭제할 수 있습니다.</div>
             <div class="mission-chip-grid" id="defaultMissionChips">
                 <button type="button" class="mission-chip" onclick="addMissionTemplate('아침 보고 남기기')">🌅 아침 보고</button>
                 <button type="button" class="mission-chip" onclick="addMissionTemplate('저녁 보고 남기기')">🌙 저녁 보고</button>
@@ -2201,6 +2237,7 @@
         </div>
 
         <div class="mission-box">
+            <div class="mission-role-note" id="missionRoleNote">관리(Dom)는 미션을 작성하고, 기록(Sub)은 완료 체크만 할 수 있어요.</div>
             <div class="mission-helper">관계 안에서 합의된 미션만 적어주세요. 완료하면 체크하고, 필요 없는 칸은 비워두면 됩니다.</div>
             <div class="mission-row"><input type="checkbox" id="missionDone1" onchange="handleMissionChanged(true)"><input type="text" id="missionText1" placeholder="직접 미션을 적어주세요" oninput="handleMissionChanged(false)"></div>
             <div class="mission-row"><input type="checkbox" id="missionDone2" onchange="handleMissionChanged(true)"><input type="text" id="missionText2" placeholder="예: 오늘의 마음 보고" oninput="handleMissionChanged(false)"></div>
@@ -2321,7 +2358,7 @@
             <h2 id="feedbackModalTitle">💌 주인의 피드백</h2>
             <button type="button" class="modal-close-btn" onclick="closeDailyModal('feedback')">닫기</button>
         </div>
-        <div class="manager-lock-note" id="feedbackLockNote">이 카드는 관리(Dom)만 작성할 수 있어요. 기록(Sub)은 내용을 확인만 할 수 있습니다.</div>
+        <div class="manager-lock-note" id="feedbackLockNote"><strong>관리(Dom)가 작성하는 영역입니다.</strong><br>기록(Sub)은 피드백 내용을 확인만 할 수 있어요.</div>
         <div class="feedback-hint">칭찬, 격려, 내일의 미션, 주의할 점을 따뜻하게 남겨주세요.</div>
         <textarea id="replyMessage" rows="5" placeholder="오늘의 기록을 읽고 주인의 피드백을 남겨주세요." oninput="handleDailyFieldChanged()"></textarea>
         <button type="button" class="daily-modal-save" onclick="closeDailyModal('feedback')">저장하고 닫기</button>
@@ -2331,6 +2368,7 @@
 <div class="daily-modal-overlay" id="rewardModalOverlay" onclick="if(event.target.id==='rewardModalOverlay') closeDailyModal('reward')">
     <div class="daily-modal" role="dialog" aria-modal="true" aria-labelledby="rewardModalTitle">
         <div class="daily-modal-head"><h2 id="rewardModalTitle">✨ 보상 / 휴식</h2><button type="button" class="modal-close-btn" onclick="closeDailyModal('reward')">닫기</button></div>
+        <div class="manager-lock-note" id="rewardLockNote"><strong>관리(Dom)가 작성하는 영역입니다.</strong><br>기록(Sub)은 보상과 휴식 내용을 확인만 할 수 있어요.</div>
         <div class="trust-card">
             <div class="trust-card-help">오늘의 흐름에 맞게 보상이나 휴식을 남겨주세요. 관계가 통제보다 회복과 신뢰로 이어지도록 돕습니다.</div>
             <div class="reward-grid">
@@ -3015,6 +3053,7 @@
         [replyEl, rewardEl, ownerNoteEl, rewardBtn, restBtn].forEach((el) => { if (el) el.disabled = !canManage; });
         if (feedbackLock) feedbackLock.style.display = canManage ? 'none' : 'block';
         if (rewardLock) rewardLock.style.display = canManage ? 'none' : 'block';
+        updateMissionAccessControls();
     }
 
     function toggleDailyChoice(choice) {
@@ -3173,7 +3212,10 @@
         const sub = document.getElementById('missionCompactSub');
         const bar = document.getElementById('missionProgressBar');
         if (title) title.innerText = total ? `오늘 미션 ${done}/${total} 완료` : '오늘 미션 0개';
-        if (sub) sub.innerText = total ? `${pct}% 진행 중 · 필요하면 미션 보기를 눌러 수정하세요.` : '주인이 정한 오늘의 약속을 필요한 만큼만 열어 확인하세요.';
+        if (sub) {
+            if (total) sub.innerText = canManageRelationshipCards() ? `${pct}% 진행 중 · 관리(Dom)는 미션을 수정할 수 있어요.` : `${pct}% 진행 중 · 기록(Sub)은 완료 체크만 할 수 있어요.`;
+            else sub.innerText = canManageRelationshipCards() ? '관리(Dom)가 오늘의 약속을 정해 주세요.' : '관리(Dom)가 미션을 작성하면 여기서 확인할 수 있어요.';
+        }
         if (bar) bar.style.width = `${pct}%`;
     }
 
@@ -3183,6 +3225,7 @@
         updateMissionCompactUI();
         updateOwnerOnlySections();
         loadMissionLibrary();
+        updateMissionAccessControls();
     }
 
     function closeMissionModal() {
@@ -3191,7 +3234,36 @@
         updateMissionCompactUI();
     }
 
+
+    function updateMissionAccessControls() {
+        const canManage = canManageRelationshipCards();
+        const roleNote = document.getElementById('missionRoleNote');
+        if (roleNote) {
+            roleNote.innerHTML = canManage
+                ? '<strong>관리(Dom) 모드</strong><br>오늘의 미션을 작성하고 수정할 수 있어요. 기록(Sub)은 체크만 할 수 있습니다.'
+                : '<strong>기록(Sub) 모드</strong><br>관리(Dom)가 작성한 미션은 수정할 수 없고, 완료 체크만 할 수 있어요.';
+        }
+        for (let i = 1; i <= 5; i++) {
+            const textEl = document.getElementById(`missionText${i}`);
+            const doneEl = document.getElementById(`missionDone${i}`);
+            if (textEl) {
+                textEl.disabled = !canManage;
+                textEl.classList.toggle('mission-text-locked', !canManage);
+                textEl.placeholder = canManage ? textEl.getAttribute('data-dom-placeholder') || textEl.placeholder : '관리(Dom)가 작성하는 영역입니다.';
+                if (canManage && !textEl.getAttribute('data-dom-placeholder')) textEl.setAttribute('data-dom-placeholder', textEl.placeholder);
+            }
+            if (doneEl) doneEl.disabled = false;
+        }
+        document.querySelectorAll('.mission-chip').forEach((btn) => {
+            btn.disabled = !canManage;
+            btn.title = canManage ? '' : '관리(Dom)만 미션을 추가하거나 수정할 수 있어요.';
+        });
+        const libInput = document.getElementById('missionLibraryInput');
+        if (libInput) libInput.disabled = !canManage;
+    }
+
     function handleMissionChanged(saveNow) {
+        updateMissionAccessControls();
         updateMissionCompactUI();
         if (saveNow) executeAutoSave();
         else triggerAutoSave();
@@ -3232,14 +3304,15 @@
 
         items.sort((a, b) => (b.updatedAt || b.createdAt || 0) - (a.updatedAt || a.createdAt || 0));
         if (items.length === 0) {
-            box.innerHTML = '<div class="empty-message">아직 저장된 커스텀 미션이 없습니다. 방주인이 자주 쓰는 미션을 저장해두면 여기에 표시됩니다.</div>';
+            box.innerHTML = '<div class="empty-message">아직 저장된 커스텀 미션이 없습니다. 관리(Dom)가 자주 쓰는 미션을 저장해두면 여기에 표시됩니다.</div>';
+            updateMissionAccessControls();
             return;
         }
 
         box.innerHTML = items.map((item) => {
             const cleanText = sanitizeMissionText(item.text);
             const safeText = escapeHtml(cleanText);
-            const deleteBtn = activeRoomRole === 'owner'
+            const deleteBtn = canManageRelationshipCards()
                 ? `<button type="button" class="mission-mini-btn delete" onclick="deleteMissionFromLibrary('${item.id}')">삭제</button>`
                 : '';
             return `
@@ -3250,13 +3323,14 @@
                 </div>
             `;
         }).join('');
+        updateMissionAccessControls();
     }
 
     async function saveMissionToLibrary() {
         const input = document.getElementById('missionLibraryInput');
         const text = sanitizeMissionText(input?.value || '');
         if (!currentUser || !activeRoomCode) { alert('먼저 방에 연결해 주세요.'); return; }
-        if (activeRoomRole !== 'owner') { alert('주인의 미션함은 방주인만 저장할 수 있습니다.'); return; }
+        if (!canManageRelationshipCards()) { alert('주인의 미션함은 관리(Dom)만 저장할 수 있습니다.'); return; }
         if (!text) { alert('저장할 미션을 입력해 주세요.'); return; }
         try {
             const ref = db.ref(`rooms/${activeRoomCode}/missionLibrary`).push();
@@ -3293,6 +3367,11 @@
     }
 
     function addMissionTemplate(text) {
+        if (!canManageRelationshipCards()) {
+            alert('오늘의 미션은 관리(Dom)만 작성하거나 수정할 수 있습니다. 기록(Sub)은 완료 체크만 가능합니다.');
+            updateMissionAccessControls();
+            return;
+        }
         for (let i = 1; i <= 5; i++) {
             const textEl = document.getElementById(`missionText${i}`);
             const doneEl = document.getElementById(`missionDone${i}`);
@@ -3307,6 +3386,11 @@
     }
 
     function addRandomMission() {
+        if (!canManageRelationshipCards()) {
+            alert('추천 미션 추가는 관리(Dom)만 사용할 수 있습니다.');
+            updateMissionAccessControls();
+            return;
+        }
         const items = [
             '오늘 가장 솔직했던 마음을 주인에게 한 줄로 보고하기',
             '오늘의 셀카 한 장 남기기',
