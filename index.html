@@ -399,6 +399,69 @@
             background: var(--primary-color);
             color: white;
         }
+
+
+        /* STEP8-1: 미션 / 기분 / 주인의 피드백 */
+        .mission-box, .mood-box {
+            background: #fffaf0;
+            border: 1px solid #ffeaa7;
+            border-radius: 14px;
+            padding: 12px;
+        }
+        .mission-helper, .mood-helper {
+            color: #636e72;
+            font-size: 0.78rem;
+            line-height: 1.45;
+            margin-bottom: 10px;
+        }
+        .mission-row {
+            display: grid;
+            grid-template-columns: 28px 1fr;
+            gap: 8px;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .mission-row:last-child { margin-bottom: 0; }
+        .mission-row input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            accent-color: var(--primary-color);
+        }
+        .mission-row input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #f6d365;
+            border-radius: 10px;
+            background: #fff;
+            font-size: 0.9rem;
+        }
+        .mood-options {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 6px;
+            margin-bottom: 10px;
+        }
+        .mood-btn {
+            padding: 9px 4px;
+            border-radius: 12px;
+            background: #fff;
+            border: 1px solid #ffe0e0;
+            color: #636e72;
+            font-size: 0.75rem;
+            line-height: 1.25;
+        }
+        .mood-btn.active {
+            background: #ff7675;
+            color: #fff;
+            border-color: #ff7675;
+            box-shadow: 0 4px 10px rgba(255, 118, 117, 0.2);
+        }
+        .feedback-hint {
+            color: #636e72;
+            font-size: 0.78rem;
+            line-height: 1.45;
+            margin: -3px 0 8px;
+        }
     </style>
 </head>
 <body>
@@ -429,7 +492,7 @@
         <h1>💕 HearMe2nite</h1>
         <div></div>
     </div>
-    <div class="app-subtitle">오늘도 서로의 하루를 조금 더 가까이 기록해보세요.</div>
+    <div class="app-subtitle">합의된 하루를 신뢰로 기록하고, 따뜻하게 지켜보세요.</div>
 
     <div class="user-bar">
         <span id="userInfoText">로그인 확인 중...</span>
@@ -477,6 +540,33 @@
     <div class="input-group">
         <label>📅 기록 날짜</label>
         <input type="date" id="recordDate" onchange="connectAndListenFirebase()">
+    </div>
+
+    <div class="input-group">
+        <label>🎯 오늘의 미션</label>
+        <div class="mission-box">
+            <div class="mission-helper">주인이 준 미션이나 오늘 지킬 약속을 적고, 완료하면 체크하세요.</div>
+            <div class="mission-row"><input type="checkbox" id="missionDone1" onchange="executeAutoSave()"><input type="text" id="missionText1" placeholder="예: 물 2L 마시기" oninput="triggerAutoSave()"></div>
+            <div class="mission-row"><input type="checkbox" id="missionDone2" onchange="executeAutoSave()"><input type="text" id="missionText2" placeholder="예: 산책 30분" oninput="triggerAutoSave()"></div>
+            <div class="mission-row"><input type="checkbox" id="missionDone3" onchange="executeAutoSave()"><input type="text" id="missionText3" placeholder="예: 식사 기록 남기기" oninput="triggerAutoSave()"></div>
+            <div class="mission-row"><input type="checkbox" id="missionDone4" onchange="executeAutoSave()"><input type="text" id="missionText4" placeholder="예: 자기 전 스트레칭" oninput="triggerAutoSave()"></div>
+            <div class="mission-row"><input type="checkbox" id="missionDone5" onchange="executeAutoSave()"><input type="text" id="missionText5" placeholder="예: 오늘의 한 줄 작성" oninput="triggerAutoSave()"></div>
+        </div>
+    </div>
+
+    <div class="input-group">
+        <label>😊 오늘의 기분</label>
+        <div class="mood-box">
+            <div class="mood-helper">오늘의 마음 상태를 하나만 선택해 주세요. 주인이 하루를 이해하는 데 도움이 됩니다.</div>
+            <div class="mood-options">
+                <button type="button" class="mood-btn" data-mood="great" onclick="selectMood('great')">😊<br>좋음</button>
+                <button type="button" class="mood-btn" data-mood="okay" onclick="selectMood('okay')">🙂<br>괜찮음</button>
+                <button type="button" class="mood-btn" data-mood="normal" onclick="selectMood('normal')">😐<br>보통</button>
+                <button type="button" class="mood-btn" data-mood="hard" onclick="selectMood('hard')">😞<br>힘듦</button>
+                <button type="button" class="mood-btn" data-mood="veryHard" onclick="selectMood('veryHard')">😭<br>매우 힘듦</button>
+            </div>
+            <textarea id="moodNote" rows="2" placeholder="기분에 대해 남기고 싶은 말이 있으면 적어주세요." oninput="triggerAutoSave()"></textarea>
+        </div>
     </div>
 
     <div class="row">
@@ -533,8 +623,9 @@
     </div>
 
     <div class="input-group">
-        <label>💌 오늘의 답장</label>
-        <textarea id="replyMessage" rows="3" placeholder="오늘의 기록을 읽고 따뜻한 답장을 남겨주세요 💕" oninput="triggerAutoSave()"></textarea>
+        <label>💌 주인의 피드백</label>
+        <div class="feedback-hint">칭찬, 격려, 내일의 미션, 주의할 점을 따뜻하게 남기는 공간입니다.</div>
+        <textarea id="replyMessage" rows="3" placeholder="오늘의 기록을 읽고 주인의 한마디를 남겨주세요 💕" oninput="triggerAutoSave()"></textarea>
     </div>
 
     <div id="chatSection" style="margin: 20px auto; max-width: 500px; padding: 15px; background: #fff; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); font-family: sans-serif;">
@@ -612,14 +703,20 @@
         </div>
 
         <div class="guide-step">
+            <div class="guide-step-title">🎯 미션 · 기분 · 피드백</div>
+            <div class="guide-flow">🎯 오늘의 미션 체크<br>↓<br>😊 오늘의 기분 선택<br>↓<br>💌 주인의 피드백 기록</div>
+            <div class="guide-note">관리는 감시가 아니라 합의된 루틴과 따뜻한 피드백을 쌓는 과정입니다.</div>
+        </div>
+
+        <div class="guide-step">
             <div class="guide-step-title">🔒 개인정보 보호</div>
             <div class="guide-flow">같은 공간 사용자만<br>📝 기록 · 📷 사진 · 💬 채팅 · 📜 기록실<br>확인 가능</div>
             <div class="guide-note">공간에 연결되지 않은 사용자는 기록 화면을 볼 수 없습니다.</div>
         </div>
 
         <div class="guide-footer">
-            이 앱은 서로를 관리하기 위한 앱이 아니라<br>
-            서로를 더 이해하기 위한 공간입니다. 🌷
+            이 앱은 일방적으로 감시하기 위한 앱이 아니라<br>
+            합의된 관리와 신뢰를 쌓기 위한 공간입니다. 🌷
         </div>
         <button type="button" class="guide-primary" onclick="closeGuideModal(true)">시작하기</button>
     </div>
@@ -994,6 +1091,72 @@
         }
     }
 
+    const MOOD_LABELS = {
+        great: '😊 좋음',
+        okay: '🙂 괜찮음',
+        normal: '😐 보통',
+        hard: '😞 힘듦',
+        veryHard: '😭 매우 힘듦'
+    };
+    let selectedMood = '';
+
+    function selectMood(value) {
+        selectedMood = selectedMood === value ? '' : value;
+        updateMoodUI();
+        executeAutoSave();
+    }
+
+    function updateMoodUI() {
+        document.querySelectorAll('.mood-btn').forEach((btn) => {
+            btn.classList.toggle('active', btn.dataset.mood === selectedMood);
+        });
+    }
+
+    function collectMissions() {
+        const missions = [];
+        for (let i = 1; i <= 5; i++) {
+            const textEl = document.getElementById(`missionText${i}`);
+            const doneEl = document.getElementById(`missionDone${i}`);
+            const text = (textEl?.value || '').trim();
+            const done = !!doneEl?.checked;
+            if (text || done) {
+                missions.push({ text: text || `미션 ${i}`, done });
+            }
+        }
+        return missions;
+    }
+
+    function renderMissions(missions) {
+        const list = Array.isArray(missions) ? missions : [];
+        for (let i = 1; i <= 5; i++) {
+            const item = list[i - 1] || {};
+            const textEl = document.getElementById(`missionText${i}`);
+            const doneEl = document.getElementById(`missionDone${i}`);
+            if (textEl && document.activeElement !== textEl) textEl.value = item.text || '';
+            if (doneEl) doneEl.checked = !!item.done;
+        }
+    }
+
+    function getMissionSummary(missions) {
+        if (!Array.isArray(missions) || missions.length === 0) return '기록 없음';
+        const doneCount = missions.filter(m => m.done).length;
+        return `${doneCount}/${missions.length} 완료`;
+    }
+
+    function getMissionReportText(missions) {
+        if (!Array.isArray(missions) || missions.length === 0) return '기록 없음';
+        return missions.map((m) => `  - ${m.done ? '✅' : '⬜'} ${m.text || '미션'}`).join('\n');
+    }
+
+    function clearMissionAndMoodUI() {
+        renderMissions([]);
+        selectedMood = '';
+        updateMoodUI();
+        const moodNote = document.getElementById('moodNote');
+        if (moodNote && document.activeElement !== moodNote) moodNote.value = '';
+    }
+
+
     function getRoomCodeForData() {
         return activeRoomCode || '';
     }
@@ -1331,6 +1494,10 @@
                 safeUpdateField('sleepTime', record.sleepTime);
                 safeUpdateField('diary', record.diary);
                 safeUpdateField('replyMessage', record.replyMessage);
+                safeUpdateField('moodNote', record.moodNote);
+                renderMissions(record.missions);
+                selectedMood = record.mood || '';
+                updateMoodUI();
 
                 currentWater = parseInt(record.water) || 0;
                 document.getElementById('waterDisplay').innerText = currentWater;
@@ -1367,7 +1534,7 @@
     }
 
     function clearFormFieldsExceptSync() {
-        const fields = ['wakeTime', 'weight', 'mealBreakfast', 'mealLunch', 'mealDinner', 'goingOut', 'sleepTime', 'diary', 'replyMessage'];
+        const fields = ['wakeTime', 'weight', 'mealBreakfast', 'mealLunch', 'mealDinner', 'goingOut', 'sleepTime', 'diary', 'replyMessage', 'moodNote'];
         fields.forEach(id => {
             const el = document.getElementById(id);
             if (el && document.activeElement !== el) el.value = '';
@@ -1375,6 +1542,7 @@
         currentWater = 0;
         const waterDisplay = document.getElementById('waterDisplay');
         if (waterDisplay) waterDisplay.innerText = 0;
+        clearMissionAndMoodUI();
         removePhotoUI();
     }
 
@@ -1437,6 +1605,12 @@
         const sleepTime = document.getElementById('sleepTime').value || '기록 없음';
         const diary = document.getElementById('diary').value || '기록 없음';
         const replyMessage = document.getElementById('replyMessage').value || '기록 없음';
+        const missions = collectMissions();
+        const missionSummary = getMissionSummary(missions);
+        const missionReport = getMissionReportText(missions);
+        const mood = selectedMood || '';
+        const moodLabel = mood ? MOOD_LABELS[mood] : '기록 없음';
+        const moodNote = document.getElementById('moodNote').value || '';
         const hasPhotoText = uploadedPhotoBase64 ? '📷 사진 첨부 완료' : '사진 없음';
 
         const reportText = `📅 [${date}] 아가의 하루 기록 💕\n\n` +
@@ -1456,7 +1630,9 @@
         const newRecord = {
             date, wakeTime, water: `${currentWater}ML`, weight,
             mealBreakfast, mealLunch, mealDinner,
-            goingOut, sleepTime, diary, replyMessage, photo: uploadedPhotoBase64, fullText: reportText,
+            goingOut, sleepTime, diary, replyMessage,
+            missions, mood, moodLabel, moodNote, missionSummary,
+            photo: uploadedPhotoBase64, fullText: reportText,
             updatedBy: currentUser.uid,
             updatedByEmail: currentUser.email,
             updatedAt: firebase.database.ServerValue.TIMESTAMP
@@ -1492,10 +1668,12 @@
             const shortDiary = record.diary ? record.diary.substring(0, 12) : '기록 없음';
             const shortReply = record.replyMessage ? record.replyMessage.substring(0, 12) : '';
             const photoIndicator = record.photo ? '📷' : '';
+            const moodPreview = record.moodLabel && record.moodLabel !== '기록 없음' ? ` | ${record.moodLabel}` : '';
+            const missionPreview = record.missionSummary && record.missionSummary !== '기록 없음' ? ` | 🎯 ${record.missionSummary}` : '';
             html += `
                 <div class="history-item" onclick="toggleHistoryItem('${date}')">
                     <div class="history-item-date">📅 ${date}의 기록 ${photoIndicator}</div>
-                    <div>💧물: ${record.water || '0ML'} | ⚖️체중: ${record.weight || '기록 없음'} | 📝한줄: ${shortDiary}...${shortReply ? ' | 💌답장: ' + shortReply + '...' : ''}</div>
+                    <div>💧물: ${record.water || '0ML'} | ⚖️체중: ${record.weight || '기록 없음'}${moodPreview}${missionPreview} | 📝한줄: ${shortDiary}...${shortReply ? ' | 💌피드백: ' + shortReply + '...' : ''}</div>
                     <button class="btn-delete" onclick="deleteRecord(event, '${date}')">삭제</button>
                     <div class="history-item-content" id="content-${date}">
                         ${record.fullText ? record.fullText.replace(/\n/g, '<br>') : ''}
