@@ -149,7 +149,9 @@
         const roomSettingsCardSub = document.getElementById('roomSettingsCardSub');
         if (!el) return;
 
+        const emptyState = document.getElementById('roomEmptyState');
         if (activeRoomCode) {
+            if (emptyState) emptyState.style.display = 'none';
             setDataSectionsVisible(true);
             const roleLabel = activeRoomRole === 'owner' ? '방주인' : '초대받은 사용자';
             const relationshipLabel = getRelationshipRoleLabel(activeRelationshipRole || pendingRelationshipRole);
@@ -173,6 +175,7 @@
                 if (legacyRoomPanel) { legacyRoomPanel.open = false; legacyRoomPanel.style.display = 'none'; }
             }
         } else {
+            if (emptyState) emptyState.style.display = 'block';
             setDataSectionsVisible(false);
             el.innerHTML = '아직 연결된 공간이 없습니다. 혼자 사용할 공간을 만들거나 초대코드를 입력해 주세요.';
             if (roomSettingsCardSub) roomSettingsCardSub.innerText = '방을 만들거나 초대코드로 연결하세요.';
@@ -305,7 +308,33 @@
 
     // =========================================================
 
+
+    function openOnboardingModal() {
+        openModalOverlayById('onboardingModal');
+    }
+
+    async function closeOnboardingModal(markSeen = false) {
+        closeModalOverlayById('onboardingModal');
+        const dontShow = document.getElementById('dontShowOnboardingAgain');
+        if ((markSeen || (dontShow && dontShow.checked)) && currentUser) {
+            try { await db.ref(`users/${currentUser.uid}/hasSeenOnboarding`).set(true); } catch(e) { console.warn(e); }
+        }
+    }
+
+    async function startSoloOnboarding() {
+        await closeOnboardingModal(true);
+        openRoomSettingsModal();
+        showToast('먼저 새로운 공간을 만들면 혼자 바로 사용할 수 있어요.');
+    }
+
+    async function startTogetherOnboarding() {
+        await closeOnboardingModal(true);
+        openRoomSettingsModal();
+        showToast('공간을 만든 뒤 초대코드를 만들어 상대에게 보내세요.');
+    }
+
     function openGuideModal() {
+        closeModalOverlayById('onboardingModal');
         openModalOverlayById('guideModal');
     }
 
@@ -319,10 +348,10 @@
     async function showGuideForFirstLogin() {
         if (!currentUser) return;
         try {
-            const snap = await db.ref(`users/${currentUser.uid}/hasSeenGuide`).once('value');
-            if (snap.val() !== true) openGuideModal();
+            const snap = await db.ref(`users/${currentUser.uid}/hasSeenOnboarding`).once('value');
+            if (snap.val() !== true && !activeRoomCode) openOnboardingModal();
         } catch (err) {
-            console.warn('사용설명서 확인 실패:', err);
+            console.warn('온보딩 확인 실패:', err);
         }
     }
 

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>HearMe2nite - D/s 신뢰관리 앱</title>
-    <!-- RC2 v2.8.0 STEP7: release-candidate-qa / 기존 기능 유지 -->
+    <!-- RC2 v2.9.0 STEP7 FINAL: onboarding-ux-qa / 기존 기능 유지 -->
     <!-- RC2 v2.6.0 STEP5 FINAL QA: component-ready module map / UI and data logic preserved -->
     
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
@@ -42,7 +42,7 @@
         <div></div>
     </div>
     <div class="app-subtitle">합의된 하루를 신뢰로 기록하고, 따뜻하게 지켜보세요.</div>
-    <div class="app-version-badge">RC2 • v2.5.7 · Build 2026.06.29 · Motion + Final UI QA</div>
+    <div class="app-version-badge">RC2 • v2.9.0 FINAL · First Experience UX</div>
 
     <div class="user-bar">
         <span id="userInfoText">로그인 확인 중...</span>
@@ -114,6 +114,16 @@
                     </details>
                 </details>
             </div>
+        </div>
+    </div>
+
+    <div class="room-empty-state" id="roomEmptyState">
+        <div class="room-empty-icon">📦</div>
+        <div class="room-empty-title">아직 공간이 없습니다</div>
+        <div class="room-empty-text">HearMe2nite는 공간을 만든 후 사용할 수 있어요.<br>혼자 사용도 가능하고, 상대는 나중에 초대해도 됩니다.</div>
+        <div class="room-empty-actions">
+            <button type="button" class="guide-primary" onclick="openRoomSettingsModal()">혼자 공간 만들기</button>
+            <button type="button" class="btn-secondary" onclick="openGuideModal()">사용설명서 보기</button>
         </div>
     </div>
 
@@ -324,67 +334,62 @@
 </div>
 
 
-<div class="guide-modal" id="guideModal" onclick="if(event.target.id==='guideModal') closeGuideModal(true)">
-    <div class="guide-card" role="dialog" aria-modal="true" aria-labelledby="guideTitle">
+<div class="onboarding-modal" id="onboardingModal" onclick="if(event.target.id==='onboardingModal') closeOnboardingModal(false)">
+    <div class="onboarding-card" role="dialog" aria-modal="true" aria-labelledby="onboardingTitle">
         <div class="guide-header">
-            <h2 id="guideTitle">💕 HearMe2nite 사용 안내</h2>
-            <button type="button" class="guide-close" onclick="closeGuideModal(true)">×</button>
+            <h2 id="onboardingTitle">💕 처음 오셨나요?</h2>
+            <button type="button" class="guide-close" onclick="closeOnboardingModal(false)">×</button>
         </div>
         <div class="guide-intro">
-            둘만의 하루를 함께 기록하는 공간입니다.<br>
-            아래 순서만 알면 1분 안에 바로 시작할 수 있어요 😊
+            HearMe2nite는 <strong>혼자 기록</strong>할 수도 있고, <strong>두 사람이 함께</strong> 사용할 수도 있어요.<br>
+            먼저 공간을 만들어야 오늘 기록 카드들이 나타납니다.
         </div>
-
-        <div class="guide-step">
-            <div class="guide-step-title">🌱 처음 시작하기</div>
-            <div class="guide-flow">👤 로그인<br>↓<br>🏠 공간 만들기<br>↓<br>📝 기록 시작</div>
-            <div class="guide-note">혼자서도 기록, 사진, 기록실, 채팅 기능을 사용할 수 있습니다.</div>
+        <div class="onboarding-choice-grid">
+            <button type="button" class="onboarding-choice-card" onclick="startSoloOnboarding()">
+                <span class="onboarding-choice-icon">👤</span>
+                <strong>혼자 시작하기</strong>
+                <small>상대 초대 없이 나만의 공간을 만들고 바로 기록합니다.</small>
+            </button>
+            <button type="button" class="onboarding-choice-card" onclick="startTogetherOnboarding()">
+                <span class="onboarding-choice-icon">💌</span>
+                <strong>함께 시작하기</strong>
+                <small>공간을 만든 뒤 초대코드를 보내 같은 공간을 사용합니다.</small>
+            </button>
         </div>
-
-        <div class="guide-step">
-            <div class="guide-step-title">💌 상대와 함께 쓰기</div>
-            <div class="guide-flow">🏠 내 공간 만들기<br>↓<br>💌 초대코드 만들기<br>↓<br>📱 카톡 · 문자 · 이메일로 전달<br>↓<br>🤝 상대가 초대코드 입력<br>↓<br>💕 같은 공간 연결 완료</div>
-            <div class="guide-note">연결 후에는 하루 기록과 채팅이 실시간으로 함께 공유됩니다.</div>
-        </div>
-
-        <div class="guide-step">
-            <div class="guide-step-title">🔄 새로운 공간으로 이동하기</div>
-            <div class="guide-flow">👑 방주인이 새 공간 생성<br>↓<br>🎟 새 초대코드 전달<br>↓<br>상대가 초대코드 입력<br>↓<br>둘 다 새 공간으로 이동</div>
-            <div class="guide-note">기존 기록은 삭제되지 않습니다. 방주인은 이전 공간 목록에서 다시 열 수 있어요.</div>
-        </div>
-
-        <div class="guide-step">
-            <div class="guide-step-title">📂 예전 공간 다시 열기</div>
-            <div class="guide-flow">📂 이전 공간 불러오기<br>↓<br>사용했던 공간 선택<br>↓<br>이 공간 열기</div>
-            <div class="guide-note">방코드를 외우지 않아도 방주인이 사용했던 공간 목록을 확인할 수 있습니다.</div>
-        </div>
-
-        <div class="guide-step">
-            <div class="guide-step-title">🎯 미션 · 기분 · 피드백</div>
-            <div class="guide-flow">🎯 미션 보기<br>↓<br>추천 · 랜덤 · 직접 작성<br>↓<br>😊 기분 선택<br>↓<br>💌 주인의 피드백 기록</div>
-            <div class="guide-note">관리는 감시가 아니라 합의된 루틴과 따뜻한 피드백을 쌓는 과정입니다.</div>
-        </div>
-
-        <div class="guide-step">
-            <div class="guide-step-title">✨ 보상 · 휴식 · 주인 메모</div>
-            <div class="guide-flow">좋은 하루엔 보상<br>↓<br>힘든 날엔 휴식<br>↓<br>주인은 비공개 메모로 흐름 확인</div>
-            <div class="guide-note">이 앱의 목표는 통제가 아니라, 합의된 관리 안에서 신뢰를 쌓는 것입니다.</div>
-        </div>
-
-        <div class="guide-step">
-            <div class="guide-step-title">🔒 개인정보 보호</div>
-            <div class="guide-flow">같은 공간 사용자만<br>📝 기록 · 📷 사진 · 💬 채팅 · 📜 기록실<br>확인 가능</div>
-            <div class="guide-note">공간에 연결되지 않은 사용자는 기록 화면을 볼 수 없습니다.</div>
-        </div>
-
-        <div class="guide-footer">
-            이 앱은 일방적으로 감시하기 위한 앱이 아니라<br>
-            합의된 관리와 신뢰를 쌓기 위한 공간입니다. 🌷
-        </div>
-        <button type="button" class="guide-primary" onclick="closeGuideModal(true)">시작하기</button>
+        <label class="onboarding-check"><input type="checkbox" id="dontShowOnboardingAgain"> 다음 로그인부터 자동으로 보지 않기</label>
+        <button type="button" class="guide-primary" onclick="openGuideModal()">자세한 사용설명서 보기</button>
     </div>
 </div>
 
+<div class="guide-modal" id="guideModal" onclick="if(event.target.id==='guideModal') closeGuideModal(true)">
+    <div class="guide-card" role="dialog" aria-modal="true" aria-labelledby="guideTitle">
+        <div class="guide-header">
+            <h2 id="guideTitle">💕 HearMe2nite 사용설명서 v2.0</h2>
+            <button type="button" class="guide-close" onclick="closeGuideModal(true)">×</button>
+        </div>
+        <div class="guide-intro">
+            처음 쓰는 분을 위한 안내입니다. <strong>로그인 후 공간을 만들어야</strong> 오늘 기록 카드, 미션, 기록실, 채팅이 나타납니다.
+        </div>
+        <div class="guide-step"><div class="guide-step-title">1. HearMe2nite란?</div><div class="guide-note">하루 기록, 미션, 사진, 채팅, 기록실을 한 공간에 저장하는 신뢰 기록 앱입니다. 혼자 기록용으로도 사용할 수 있고, 상대를 초대해 함께 사용할 수도 있습니다.</div></div>
+        <div class="guide-step"><div class="guide-step-title">2. 혼자 사용하는 방법</div><div class="guide-flow">로그인<br>↓<br>우리의 공간<br>↓<br>새로운 공간 시작하기<br>↓<br>오늘 기록 시작</div><div class="guide-note">혼자 쓰는 경우에도 반드시 공간을 하나 만들어야 합니다. 나중에 원하면 같은 공간에 상대를 초대할 수 있습니다.</div></div>
+        <div class="guide-step"><div class="guide-step-title">3. 함께 사용하는 방법</div><div class="guide-flow">공간 생성<br>↓<br>초대코드 만들기<br>↓<br>카톡·문자·이메일로 전달<br>↓<br>상대가 초대코드 입력<br>↓<br>역할 선택 후 시작</div><div class="guide-note">같은 공간에 연결된 사용자만 기록과 채팅을 볼 수 있습니다.</div></div>
+        <div class="guide-step"><div class="guide-step-title">4. 역할 선택</div><div class="guide-note"><strong>관리(Dom)</strong>은 미션, 피드백, 보상, 휴식, 관리 메모를 작성합니다.<br><strong>기록(Sub)</strong>은 하루 기록을 작성하고 피드백을 확인합니다. 역할은 최초 선택 후 일반 화면에서는 잠깁니다.</div></div>
+        <div class="guide-step"><div class="guide-step-title">5. 오늘 기록</div><div class="guide-note">기분, 기상 시간, 체중, 물, 식사, 외출, 취침, 하루 기록은 카드를 눌러 팝업에서 입력합니다. 입력 내용은 자동 저장됩니다.</div></div>
+        <div class="guide-step"><div class="guide-step-title">6. 미션</div><div class="guide-note">관리(Dom)가 미션을 작성하고 기록(Sub)이 체크합니다. 미션 오른쪽의 <strong>× 버튼</strong>으로 모바일에서도 쉽게 미션을 비울 수 있습니다.</div></div>
+        <div class="guide-step"><div class="guide-step-title">7. 기록실</div><div class="guide-note">기록실 카드를 누르면 캘린더와 저장된 날짜가 팝업으로 열립니다. 날짜를 누르면 해당 날짜 기록을 바로 확인할 수 있습니다.</div></div>
+        <div class="guide-step"><div class="guide-step-title">8. 채팅</div><div class="guide-note">같은 공간에 연결된 사용자끼리 실시간 채팅을 사용할 수 있습니다. 방이 없으면 채팅도 표시되지 않습니다.</div></div>
+
+        <div class="guide-step guide-faq"><div class="guide-step-title">9. FAQ</div>
+            <div class="faq-item"><strong>Q. 카드가 안 보여요.</strong><br>A. 공간을 먼저 만들어야 합니다. 우리의 공간 → 새로운 공간 시작하기를 눌러 주세요.</div>
+            <div class="faq-item"><strong>Q. 혼자도 사용할 수 있나요?</strong><br>A. 네. 혼자 공간을 만든 뒤 바로 기록할 수 있고, 상대는 나중에 초대할 수 있습니다.</div>
+            <div class="faq-item"><strong>Q. 초대는 나중에도 가능한가요?</strong><br>A. 가능합니다. 공간을 만든 뒤 언제든 초대코드를 만들어 전달하면 됩니다.</div>
+            <div class="faq-item"><strong>Q. 자동 저장되나요?</strong><br>A. 네. 입력 내용은 자동 저장됩니다. 다만 인터넷 연결이 불안정하면 연결 복구 후 확인해 주세요.</div>
+            <div class="faq-item"><strong>Q. 역할은 무슨 뜻인가요?</strong><br>A. 관리(Dom)는 미션과 피드백 중심, 기록(Sub)은 하루 기록 중심입니다.</div>
+        </div>
+        <div class="guide-footer">핵심: 로그인 후 <strong>공간 만들기</strong>가 먼저입니다. 공간이 없으면 메뉴 카드가 나타나지 않습니다. 🌷</div>
+        <button type="button" class="guide-primary" onclick="closeGuideModal(true)">확인했어요</button>
+    </div>
+</div>
 
 <div class="mission-modal-overlay" id="missionModalOverlay" onclick="if(event.target.id==='missionModalOverlay') closeMissionModal()">
     <div class="mission-modal">
@@ -407,7 +412,7 @@
 
         <div class="mission-template-box">
             <div class="mission-template-title">👑 주인의 미션함</div>
-            <div class="mission-helper">자주 쓰는 미션을 저장해두고 오늘의 미션에 빠르게 추가하세요. 관리(Dom)만 저장/삭제할 수 있습니다.</div>
+            <div class="mission-helper">자주 쓰는 미션을 저장해두고 오늘의 미션에 빠르게 추가하세요. 관리(Dom)만 저장/삭제할 수 있습니다. 각 미션 오른쪽 × 버튼으로 모바일에서도 쉽게 비울 수 있어요.</div>
             <div class="mission-chip-grid" id="defaultMissionChips">
                 <button type="button" class="mission-chip" onclick="addMissionTemplate('아침 보고 남기기')">🌅 아침 보고</button>
                 <button type="button" class="mission-chip" onclick="addMissionTemplate('저녁 보고 남기기')">🌙 저녁 보고</button>
@@ -427,11 +432,11 @@
         <div class="mission-box">
             <div class="mission-role-note" id="missionRoleNote">관리(Dom)는 미션을 작성하고, 기록(Sub)은 완료 체크만 할 수 있어요.</div>
             <div class="mission-helper">관계 안에서 합의된 미션만 적어주세요. 완료하면 체크하고, 필요 없는 칸은 비워두면 됩니다.</div>
-            <div class="mission-row"><input type="checkbox" id="missionDone1" onchange="handleMissionChanged(true)"><input type="text" id="missionText1" placeholder="직접 미션을 적어주세요" oninput="handleMissionChanged(false)"></div>
-            <div class="mission-row"><input type="checkbox" id="missionDone2" onchange="handleMissionChanged(true)"><input type="text" id="missionText2" placeholder="예: 오늘의 마음 보고" oninput="handleMissionChanged(false)"></div>
-            <div class="mission-row"><input type="checkbox" id="missionDone3" onchange="handleMissionChanged(true)"><input type="text" id="missionText3" placeholder="예: 복장 인증" oninput="handleMissionChanged(false)"></div>
-            <div class="mission-row"><input type="checkbox" id="missionDone4" onchange="handleMissionChanged(true)"><input type="text" id="missionText4" placeholder="예: 정시 체크인" oninput="handleMissionChanged(false)"></div>
-            <div class="mission-row"><input type="checkbox" id="missionDone5" onchange="handleMissionChanged(true)"><input type="text" id="missionText5" placeholder="예: 해피타임 후 한 줄 기록" oninput="handleMissionChanged(false)"></div>
+            <div class="mission-row"><input type="checkbox" id="missionDone1" onchange="handleMissionChanged(true)"><input type="text" id="missionText1" placeholder="직접 미션을 적어주세요" oninput="handleMissionChanged(false)"><button type="button" class="mission-clear-btn" id="missionClear1" onclick="clearMissionRow(1)" aria-label="1번 미션 삭제">×</button></div>
+            <div class="mission-row"><input type="checkbox" id="missionDone2" onchange="handleMissionChanged(true)"><input type="text" id="missionText2" placeholder="예: 오늘의 마음 보고" oninput="handleMissionChanged(false)"><button type="button" class="mission-clear-btn" id="missionClear2" onclick="clearMissionRow(2)" aria-label="2번 미션 삭제">×</button></div>
+            <div class="mission-row"><input type="checkbox" id="missionDone3" onchange="handleMissionChanged(true)"><input type="text" id="missionText3" placeholder="예: 복장 인증" oninput="handleMissionChanged(false)"><button type="button" class="mission-clear-btn" id="missionClear3" onclick="clearMissionRow(3)" aria-label="3번 미션 삭제">×</button></div>
+            <div class="mission-row"><input type="checkbox" id="missionDone4" onchange="handleMissionChanged(true)"><input type="text" id="missionText4" placeholder="예: 정시 체크인" oninput="handleMissionChanged(false)"><button type="button" class="mission-clear-btn" id="missionClear4" onclick="clearMissionRow(4)" aria-label="4번 미션 삭제">×</button></div>
+            <div class="mission-row"><input type="checkbox" id="missionDone5" onchange="handleMissionChanged(true)"><input type="text" id="missionText5" placeholder="예: 해피타임 후 한 줄 기록" oninput="handleMissionChanged(false)"><button type="button" class="mission-clear-btn" id="missionClear5" onclick="clearMissionRow(5)" aria-label="5번 미션 삭제">×</button></div>
         </div>
     </div>
 </div>

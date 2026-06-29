@@ -93,6 +93,11 @@
                 if (canManage && !textEl.getAttribute('data-dom-placeholder')) textEl.setAttribute('data-dom-placeholder', textEl.placeholder);
             }
             if (doneEl) doneEl.disabled = false;
+            const clearEl = document.getElementById(`missionClear${i}`);
+            if (clearEl) {
+                clearEl.disabled = !canManage;
+                clearEl.title = canManage ? '이 미션 칸을 비웁니다.' : '관리(Dom)만 미션을 삭제할 수 있어요.';
+            }
         }
         document.querySelectorAll('.mission-chip').forEach((btn) => {
             btn.disabled = !canManage;
@@ -249,6 +254,23 @@
     // Split-ready target: addMissionTemplate
 
     // =========================================================
+
+    function clearMissionRow(index) {
+        if (!canManageRelationshipCards()) {
+            alert('오늘의 미션 삭제는 관리(Dom)만 할 수 있습니다. 기록(Sub)은 완료 체크만 가능합니다.');
+            updateMissionAccessControls();
+            return;
+        }
+        const textEl = document.getElementById(`missionText${index}`);
+        const doneEl = document.getElementById(`missionDone${index}`);
+        if (!textEl && !doneEl) return;
+        const hasValue = !!(textEl?.value || '').trim() || !!doneEl?.checked;
+        if (!hasValue) return;
+        if (textEl) textEl.value = '';
+        if (doneEl) doneEl.checked = false;
+        showSaveStatus('🗑️ 미션 삭제 완료');
+        handleMissionChanged(true);
+    }
 
     function addMissionTemplate(text) {
         if (!canManageRelationshipCards()) {
