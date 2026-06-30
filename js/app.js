@@ -85,6 +85,8 @@
             currentUser = user;
 
             if (user) {
+                document.body.classList.add('hm-authenticated');
+                document.getElementById('authBox').classList.add('is-hidden');
                 document.getElementById('authBox').style.display = 'none';
                 document.getElementById('appContent').style.display = 'flex';
                 document.getElementById('userInfoText').innerText = `로그인됨: ${user.email}`;
@@ -96,7 +98,9 @@
                 activeRoomRole = "";
                 activeRelationshipRole = "";
                 pendingRelationshipRole = "";
-                document.getElementById('authBox').style.display = 'block';
+                document.body.classList.remove('hm-authenticated');
+                document.getElementById('authBox').classList.remove('is-hidden');
+                document.getElementById('authBox').style.display = 'grid';
                 document.getElementById('appContent').style.display = 'none';
                 showSaveStatus("🔒 로그인이 필요합니다.");
             }

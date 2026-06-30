@@ -1,13 +1,14 @@
-# HearMe2nite v0.9.51 Login Final One-Line Hotfix
+# HearMe2nite v0.9.52 Login/Home Visibility Hotfix
 
-## 변경 사항
-- PC/Fold 로그인 Hero 영역에서 `HearMe2nite`가 두 줄로 줄바꿈되는 문제 수정.
-- 데스크톱 로그인 컨테이너 최대 폭과 좌우 비율 조정.
-- Hero 제목에 한 줄 유지 규칙 적용.
-- 모바일은 기존 세로형 로그인 구조 유지.
+## 수정 내용
+- 로그인 성공 후 로그인 화면 아래에 홈 화면이 같이 보이는 문제 수정
+- `display:grid !important`가 `display:none`을 덮어쓰는 CSS 우선순위 문제 해결
+- 로그인 상태에서는 `body.hm-authenticated`로 화면 상태를 명확하게 분리
 
-## 보호 영역
-- Firebase Auth 변경 없음
-- Room 구조 변경 없음
-- History/AutoSave 변경 없음
-- 기존 사용자 데이터 변경 없음
+## 변경하지 않은 영역
+- Firebase Auth 구조
+- Room 구조
+- History 저장/로드
+- AutoSave
+- DB Key
+- 기존 사용자 데이터

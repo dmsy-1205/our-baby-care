@@ -5775,3 +5775,24 @@ body:has(#authBox.hm-login-shell:not([style*="display: none"])) {
         line-height: 1.48;
     }
 }
+
+/* =========================================================
+   v0.9.52 Login/Home Visibility Hotfix
+   Fix: Login shell used display:grid !important, which overrode
+   inline display:none after authentication. Keep auth hidden when
+   appContent is active. UI-only; Firebase/Room/History unchanged.
+   ========================================================= */
+#authBox.hm-login-shell[style*="display: none"],
+#authBox.hm-login-shell.is-hidden,
+body.hm-authenticated #authBox.hm-login-shell {
+    display: none !important;
+}
+body.hm-authenticated {
+    justify-content: flex-start !important;
+}
+body.hm-authenticated #appContent {
+    display: flex !important;
+}
+body:not(.hm-authenticated) #appContent[style*="display: none"] {
+    display: none !important;
+}
