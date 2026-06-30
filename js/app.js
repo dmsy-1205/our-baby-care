@@ -144,3 +144,17 @@
 
 // RC2 v2.8.0 STEP7: module code extracted to external js files.
 
+
+
+// v0.10.10 Home Visibility QA guard - UI only
+(function() {
+  function syncAuthVisibility() {
+    var authBox = document.getElementById('authBox');
+    var appContent = document.getElementById('appContent');
+    if (!authBox || !appContent) return;
+    var loggedIn = appContent.style.display !== 'none' && appContent.offsetParent !== null;
+    document.body.classList.toggle('hm-app-ready', loggedIn);
+  }
+  window.addEventListener('load', syncAuthVisibility);
+  setTimeout(syncAuthVisibility, 500);
+})();

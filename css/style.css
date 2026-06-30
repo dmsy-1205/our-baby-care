@@ -5796,3 +5796,307 @@ body.hm-authenticated #appContent {
 body:not(.hm-authenticated) #appContent[style*="display: none"] {
     display: none !important;
 }
+
+
+/* =========================================================
+   HearMe2nite v0.10.10 Home Visibility QA
+   UI only. Firebase / data structure preserved.
+   ========================================================= */
+body.hm-authenticated #authBox,
+body.is-authenticated #authBox,
+#authBox.hm-hidden {
+    display: none !important;
+}
+#appContent.hm-visible {
+    display: flex !important;
+}
+.container {
+    max-width: 640px;
+}
+.app-title-row {
+    gap: 12px;
+}
+.user-bar, .room-settings-card {
+    border-radius: 26px;
+}
+.daily-card {
+    min-height: 92px;
+    padding: 20px 22px;
+}
+.daily-card-icon {
+    width: 56px;
+    height: 56px;
+    flex: 0 0 56px;
+}
+.daily-card-title {
+    line-height: 1.2;
+}
+.daily-card-sub {
+    line-height: 1.35;
+}
+@media (max-width: 520px) {
+    .container {
+        max-width: 100%;
+        border-radius: 0;
+        padding-left: 22px;
+        padding-right: 22px;
+    }
+    .daily-card {
+        min-height: 88px;
+        padding: 18px 20px;
+    }
+    .daily-card-icon {
+        width: 52px;
+        height: 52px;
+        flex-basis: 52px;
+    }
+}
+
+
+/* =========================================================
+   HearMe2nite v0.10.11 Home Layout Polish
+   UI only. Firebase / data structure preserved.
+   ========================================================= */
+body.hm-authenticated #authBox,
+body.is-authenticated #authBox,
+#authBox.hm-hidden {
+    display: none !important;
+}
+#appContent.hm-visible {
+    display: flex !important;
+}
+.container {
+    max-width: 640px;
+}
+.app-title-row {
+    gap: 12px;
+}
+.user-bar, .room-settings-card {
+    border-radius: 26px;
+}
+.daily-card {
+    min-height: 92px;
+    padding: 20px 22px;
+}
+.daily-card-icon {
+    width: 56px;
+    height: 56px;
+    flex: 0 0 56px;
+}
+.daily-card-title {
+    line-height: 1.2;
+}
+.daily-card-sub {
+    line-height: 1.35;
+}
+@media (max-width: 520px) {
+    .container {
+        max-width: 100%;
+        border-radius: 0;
+        padding-left: 22px;
+        padding-right: 22px;
+    }
+    .daily-card {
+        min-height: 88px;
+        padding: 18px 20px;
+    }
+    .daily-card-icon {
+        width: 52px;
+        height: 52px;
+        flex-basis: 52px;
+    }
+}
+
+/* Home layout polish */
+.app-title-row h1 { letter-spacing: -0.04em; }
+.app-subtitle { max-width: 420px; margin-left: auto; margin-right: auto; }
+.room-settings-card { margin-top: 22px; }
+.mission-compact-card { border-radius: 28px; }
+.input-group { margin-bottom: 16px; }
+
+
+/* =========================================================
+   HearMe2nite v0.10.12 Record Card Polish
+   UI only. Firebase / data structure preserved.
+   ========================================================= */
+body.hm-authenticated #authBox,
+body.is-authenticated #authBox,
+#authBox.hm-hidden {
+    display: none !important;
+}
+#appContent.hm-visible {
+    display: flex !important;
+}
+.container {
+    max-width: 640px;
+}
+.app-title-row {
+    gap: 12px;
+}
+.user-bar, .room-settings-card {
+    border-radius: 26px;
+}
+.daily-card {
+    min-height: 92px;
+    padding: 20px 22px;
+}
+.daily-card-icon {
+    width: 56px;
+    height: 56px;
+    flex: 0 0 56px;
+}
+.daily-card-title {
+    line-height: 1.2;
+}
+.daily-card-sub {
+    line-height: 1.35;
+}
+@media (max-width: 520px) {
+    .container {
+        max-width: 100%;
+        border-radius: 0;
+        padding-left: 22px;
+        padding-right: 22px;
+    }
+    .daily-card {
+        min-height: 88px;
+        padding: 18px 20px;
+    }
+    .daily-card-icon {
+        width: 52px;
+        height: 52px;
+        flex-basis: 52px;
+    }
+}
+
+/* Home layout polish */
+.app-title-row h1 { letter-spacing: -0.04em; }
+.app-subtitle { max-width: 420px; margin-left: auto; margin-right: auto; }
+.room-settings-card { margin-top: 22px; }
+.mission-compact-card { border-radius: 28px; }
+.input-group { margin-bottom: 16px; }
+
+/* Record card polish */
+.home-section-title {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 12px;
+    margin: 26px 4px 12px;
+    color: #2b2938;
+}
+.home-section-title span {
+    font-weight: 900;
+    font-size: 1.05rem;
+    letter-spacing: -0.03em;
+}
+.home-section-title small {
+    font-size: 0.76rem;
+    font-weight: 800;
+    color: #9a91b9;
+    white-space: nowrap;
+}
+.compact-metrics-row .input-group { margin-bottom: 0; }
+.daily-card-arrow { opacity: .75; }
+@media (max-width: 520px) {
+    .home-section-title { margin-top: 24px; }
+    .home-section-title small { display:none; }
+}
+
+
+/* =========================================================
+   HearMe2nite v0.10.13 Home Final Candidate
+   UI only. Firebase / data structure preserved.
+   ========================================================= */
+body.hm-authenticated #authBox,
+body.is-authenticated #authBox,
+#authBox.hm-hidden {
+    display: none !important;
+}
+#appContent.hm-visible {
+    display: flex !important;
+}
+.container {
+    max-width: 640px;
+}
+.app-title-row {
+    gap: 12px;
+}
+.user-bar, .room-settings-card {
+    border-radius: 26px;
+}
+.daily-card {
+    min-height: 92px;
+    padding: 20px 22px;
+}
+.daily-card-icon {
+    width: 56px;
+    height: 56px;
+    flex: 0 0 56px;
+}
+.daily-card-title {
+    line-height: 1.2;
+}
+.daily-card-sub {
+    line-height: 1.35;
+}
+@media (max-width: 520px) {
+    .container {
+        max-width: 100%;
+        border-radius: 0;
+        padding-left: 22px;
+        padding-right: 22px;
+    }
+    .daily-card {
+        min-height: 88px;
+        padding: 18px 20px;
+    }
+    .daily-card-icon {
+        width: 52px;
+        height: 52px;
+        flex-basis: 52px;
+    }
+}
+
+/* Home layout polish */
+.app-title-row h1 { letter-spacing: -0.04em; }
+.app-subtitle { max-width: 420px; margin-left: auto; margin-right: auto; }
+.room-settings-card { margin-top: 22px; }
+.mission-compact-card { border-radius: 28px; }
+.input-group { margin-bottom: 16px; }
+
+/* Record card polish */
+.home-section-title {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 12px;
+    margin: 26px 4px 12px;
+    color: #2b2938;
+}
+.home-section-title span {
+    font-weight: 900;
+    font-size: 1.05rem;
+    letter-spacing: -0.03em;
+}
+.home-section-title small {
+    font-size: 0.76rem;
+    font-weight: 800;
+    color: #9a91b9;
+    white-space: nowrap;
+}
+.compact-metrics-row .input-group { margin-bottom: 0; }
+.daily-card-arrow { opacity: .75; }
+@media (max-width: 520px) {
+    .home-section-title { margin-top: 24px; }
+    .home-section-title small { display:none; }
+}
+
+/* Final candidate QA lock */
+:root { --hm-home-final: 'v0.10.13'; }
+.daily-card:focus-visible,
+.room-settings-card:focus-visible,
+.mission-open-btn:focus-visible {
+    outline: 3px solid rgba(124, 82, 255, .28);
+    outline-offset: 3px;
+}
