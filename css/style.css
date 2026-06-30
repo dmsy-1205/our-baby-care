@@ -4804,3 +4804,256 @@ body > .anniversary-settings-overlay .anniversary-settings-modal {
         font-size: 0.78rem !important;
     }
 }
+
+
+/* =========================================================
+   HearMe2nite v0.9.12 Beta - Card System
+   Scope: UI CSS only. Firebase / Room / AutoSave / History JS untouched.
+   ========================================================= */
+:root {
+  --h2n-card-radius: 24px;
+  --h2n-card-pad-x: 18px;
+  --h2n-card-pad-y: 16px;
+  --h2n-card-min: 92px;
+  --h2n-card-icon: 48px;
+  --h2n-card-gap: 16px;
+  --h2n-card-border: 1px solid rgba(225, 215, 255, 0.92);
+  --h2n-card-shadow: 0 12px 34px rgba(109, 76, 255, 0.08);
+}
+.daily-card,
+.room-settings-card,
+.history-launch-card {
+  min-height: var(--h2n-card-min) !important;
+  padding: var(--h2n-card-pad-y) var(--h2n-card-pad-x) !important;
+  border-radius: var(--h2n-card-radius) !important;
+  gap: var(--h2n-card-gap) !important;
+  align-items: center !important;
+}
+.daily-card-icon,
+.room-settings-icon,
+.history-launch-icon {
+  width: var(--h2n-card-icon) !important;
+  height: var(--h2n-card-icon) !important;
+  min-width: var(--h2n-card-icon) !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+.daily-card-sub,
+.room-settings-sub,
+.history-launch-sub {
+  overflow: hidden !important;
+  display: -webkit-box !important;
+  -webkit-box-orient: vertical !important;
+  -webkit-line-clamp: 1 !important;
+}
+.row .daily-card.metric-daily-card {
+  min-height: var(--h2n-card-min) !important;
+  height: 100% !important;
+}
+@media (max-width: 560px) {
+  :root { --h2n-card-pad-x: 16px; --h2n-card-pad-y: 15px; --h2n-card-gap: 14px; }
+  .daily-card-title,.room-settings-title,.history-launch-title { font-size: clamp(1.02rem, 4.3vw, 1.22rem) !important; }
+  .daily-card-sub,.room-settings-sub,.history-launch-sub { font-size: clamp(.88rem, 3.65vw, 1rem) !important; }
+}
+
+
+/* =========================================================
+   HearMe2nite v0.9.13 Beta - Popup System
+   ========================================================= */
+:root {
+  --h2n-popup-radius: 30px;
+  --h2n-popup-max: 620px;
+  --h2n-popup-pad: 24px;
+  --h2n-popup-z: 12000;
+}
+.daily-modal-overlay,
+.mission-modal-overlay,
+.room-settings-overlay,
+.history-panel-overlay,
+.history-detail-overlay,
+.anniversary-settings-overlay,
+.guide-modal {
+  z-index: var(--h2n-popup-z) !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: max(16px, env(safe-area-inset-top)) 16px max(16px, env(safe-area-inset-bottom)) !important;
+}
+.daily-modal,
+.mission-modal,
+.room-settings-modal,
+.history-detail-modal,
+.guide-card,
+.anniversary-settings-modal {
+  width: min(var(--h2n-popup-max), calc(100vw - 28px)) !important;
+  max-height: min(86vh, 760px) !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  border-radius: var(--h2n-popup-radius) !important;
+}
+.history-panel-modal {
+  max-height: min(88vh, 820px) !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+.modal-close-btn,
+.guide-close,
+.anniversary-close-btn {
+  min-width: 44px !important;
+  min-height: 44px !important;
+}
+@media (max-width: 560px) {
+  :root { --h2n-popup-pad: 20px; --h2n-popup-radius: 26px; }
+  .daily-modal,.mission-modal,.room-settings-modal,.history-detail-modal,.guide-card,.anniversary-settings-modal {
+    width: calc(100vw - 22px) !important;
+    max-height: calc(100dvh - 30px) !important;
+  }
+}
+
+
+/* =========================================================
+   HearMe2nite v0.9.14 Beta - Form System
+   ========================================================= */
+:root {
+  --h2n-input-height: 54px;
+  --h2n-input-radius: 16px;
+  --h2n-input-pad: 14px 16px;
+  --h2n-focus-ring: 0 0 0 4px rgba(109, 76, 255, 0.11);
+}
+input[type="text"], input[type="email"], input[type="password"], input[type="date"], input[type="time"], input[type="number"], select, textarea,
+.daily-modal input, .daily-modal textarea, .room-settings-modal input, .anniversary-settings-modal input, .anniversary-settings-modal textarea {
+  border-radius: var(--h2n-input-radius) !important;
+  min-height: var(--h2n-input-height);
+  padding: var(--h2n-input-pad) !important;
+  border: 1px solid rgba(225, 215, 255, 0.95) !important;
+  background: rgba(255,255,255,0.94) !important;
+  box-sizing: border-box !important;
+}
+textarea { min-height: 116px; line-height: 1.55; }
+input:focus, select:focus, textarea:focus {
+  outline: none !important;
+  border-color: rgba(109, 76, 255, 0.52) !important;
+  box-shadow: var(--h2n-focus-ring) !important;
+}
+label, .input-group label, .anniversary-field-label {
+  font-weight: 750 !important;
+  color: #5f5874 !important;
+  margin-bottom: 8px !important;
+}
+
+
+/* =========================================================
+   HearMe2nite v0.9.15 Beta - Button / Animation System
+   ========================================================= */
+:root {
+  --h2n-btn-radius: 16px;
+  --h2n-motion-fast: 150ms;
+  --h2n-motion-normal: 220ms;
+}
+button, .btn-main, .btn-connect, .daily-modal-save, .mission-open-btn, .room-open-btn, .guide-primary,
+.anniversary-save-btn, .anniversary-add-btn {
+  min-height: 44px;
+  border-radius: var(--h2n-btn-radius) !important;
+  transition: transform var(--h2n-motion-fast) ease, box-shadow var(--h2n-motion-fast) ease, opacity var(--h2n-motion-fast) ease !important;
+}
+button:active, .btn-main:active, .daily-card:active, .room-settings-card:active, .history-launch-card:active {
+  transform: scale(0.985) !important;
+}
+.daily-modal-overlay.is-open .daily-modal,
+.mission-modal-overlay.is-open .mission-modal,
+.room-settings-overlay.is-open .room-settings-modal,
+.history-panel-overlay.is-open .history-panel-modal,
+.anniversary-settings-overlay.is-open .anniversary-settings-modal {
+  animation: h2nPopupIn var(--h2n-motion-normal) ease both;
+}
+@keyframes h2nPopupIn {
+  from { opacity: 0; transform: translateY(10px) scale(.985); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; scroll-behavior: auto !important; }
+}
+
+
+/* =========================================================
+   HearMe2nite v0.9.16 Beta - Dashboard Polish
+   ========================================================= */
+.home-summary-card, .summary-tile, .dashboard-card, .today-summary-card {
+  border-radius: 22px !important;
+  border: 1px solid rgba(225, 215, 255, 0.92) !important;
+  background: rgba(255,255,255,0.86) !important;
+  box-shadow: 0 10px 28px rgba(109, 76, 255, 0.065) !important;
+}
+.summary-grid { gap: 12px !important; }
+.summary-tile { min-height: 86px !important; padding: 14px !important; }
+.summary-tile strong { line-height: 1.25 !important; }
+@media (max-width: 560px) { .summary-grid { grid-template-columns: 1fr !important; } }
+
+
+/* =========================================================
+   HearMe2nite v0.9.17 Beta - Timeline Polish
+   ========================================================= */
+.anniversary-timeline, .timeline-list { gap: 12px !important; }
+.anniversary-item, .timeline-item, .anniversary-card {
+  border-radius: 22px !important;
+  border: 1px solid rgba(225, 215, 255, 0.92) !important;
+  background: linear-gradient(145deg, rgba(255,255,255,.96), rgba(250,248,255,.96)) !important;
+  box-shadow: 0 10px 28px rgba(109, 76, 255, 0.065) !important;
+}
+.anniversary-icon, .timeline-icon {
+  width: 42px !important; height: 42px !important; min-width: 42px !important;
+  border-radius: 16px !important;
+  display: inline-flex !important; align-items: center !important; justify-content: center !important;
+}
+
+
+/* =========================================================
+   HearMe2nite v0.9.18 Beta - Statistics Polish
+   ========================================================= */
+#historySummary.summary-grid, .history-stats-grid, .stats-grid { gap: 12px !important; }
+#historySummary .summary-tile, .history-stat-card, .stat-card {
+  min-height: 82px !important;
+  border-radius: 20px !important;
+  padding: 14px !important;
+}
+.history-filter-card, .history-section-card {
+  border-radius: 24px !important;
+  border: 1px solid rgba(225, 215, 255, 0.92) !important;
+}
+
+
+/* =========================================================
+   HearMe2nite v0.9.19 Beta - Accessibility
+   ========================================================= */
+a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible, [tabindex]:focus-visible {
+  outline: 3px solid rgba(109, 76, 255, 0.5) !important;
+  outline-offset: 3px !important;
+}
+button, .daily-card, .room-settings-card, .history-launch-card, .calendar-day {
+  touch-action: manipulation;
+}
+.daily-card-title, .room-settings-title, .history-launch-title, h1, h2, h3 {
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+.daily-card-sub, .room-settings-sub, .history-launch-sub, p, .help-text {
+  overflow-wrap: anywhere;
+}
+@media (max-width: 360px) {
+  .daily-card, .room-settings-card, .history-launch-card { gap: 12px !important; padding: 14px !important; }
+  .daily-card-icon, .room-settings-icon, .history-launch-icon { width: 44px !important; height: 44px !important; min-width: 44px !important; }
+}
+
+
+/* =========================================================
+   HearMe2nite v0.9.20 Beta Release Candidate
+   Final CSS lock for v0.9 design system line.
+   ========================================================= */
+.app-version-badge, .history-launch-version, #historyPanelTitle span { letter-spacing: .04em; }
+.daily-card, .room-settings-card, .mission-compact-card, .history-launch-card {
+  will-change: transform;
+}
+@media print {
+  body { background: #fff !important; }
+  .modal-close-btn, .daily-card-arrow, .room-settings-arrow, .history-launch-arrow { display: none !important; }
+}
