@@ -1,7 +1,7 @@
-# QA Checklist v0.10.14
+# v0.10.17 QA Checklist
 
-1. 기존 사용자 로그인 가능 확인
-2. F12 Console에서 `[Access Monitor]` 로그 확인
-3. 승인 사용자 result가 PASS인지 확인
-4. 승인 정보가 없어도 앱이 막히지 않는지 확인
-5. 방 생성/방 참여/기록실/채팅/자동저장 정상 확인
+1. 승인된 기존 사용자 로그인 가능
+2. 로그인 후 Home만 표시되고 Login 화면은 숨김
+3. 기록실 / 채팅 / AutoSave 정상
+4. 미승인 MasterOS 계정은 권한 없음 화면 표시
+5. Console에 `[Access Gate] MasterOS approval check` 출력 확인

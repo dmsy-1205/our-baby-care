@@ -85,6 +85,13 @@
             currentUser = user;
 
             if (user) {
+                showSaveStatus('🔐 앱 승인 상태 확인 중...');
+                const access = await verifyMasterAppAccess({ timeoutMs: 5000 });
+                if (!access.approved) {
+                    await blockCurrentSession(access.reason || 'NO_APPROVED_ACCESS_RECORD');
+                    return;
+                }
+
                 document.body.classList.add('hm-authenticated');
                 document.getElementById('authBox').classList.add('is-hidden');
                 document.getElementById('authBox').style.display = 'none';

@@ -45,42 +45,117 @@
 
 
     // =========================================================
-    // MODULE: MASTEROS ACCESS MONITOR
-    // v0.10.14 Access Monitor
-    // - 기존 사용자 로그인을 막지 않고 MasterOS 승인 상태만 확인한다.
-    // - 승인 경로: master-app-platform Realtime Database
-    //   userAppAccess/{masterUid}/baby-care-secure
-    // - 이 버전은 차단(enforce)하지 않는다. 콘솔과 상태 메시지만 남긴다.
+    // MODULE: MASTEROS APP ACCESS GATE
+    // v0.10.17 Master UID Access Gate
+    // 승인 확인은 babyAuth UID가 아니라 MasterOS(masterAuth) UID 기준으로 한다.
+    // MasterOS DB 경로: userAppAccess/{masterUid}/baby-care-secure
+    // 보조 확인 경로: appAccessRequests/baby-care-secure/{masterUid}
     // =========================================================
-    async function checkMasterAppAccessMonitor(masterUser) {
-        const appId = 'baby-care-secure';
-        if (!masterUser || !masterUser.uid || typeof masterDb === 'undefined') {
-            console.warn('[Access Monitor] MasterOS 연결 정보가 없어 승인 상태를 확인하지 못했습니다. 앱은 계속 실행합니다.');
-            return { ok: false, reason: 'missing-master-context' };
+
+    function waitForMasterUser(timeoutMs = 5000) {
+        if (masterAuth.currentUser) return Promise.resolve(masterAuth.currentUser);
+        return new Promise((resolve) => {
+            let resolved = false;
+            const timer = setTimeout(() => {
+                if (resolved) return;
+                resolved = true;
+                unsubscribe();
+                resolve(masterAuth.currentUser || null);
+            }, timeoutMs);
+            const unsubscribe = masterAuth.onAuthStateChanged((user) => {
+                if (resolved) return;
+                resolved = true;
+                clearTimeout(timer);
+                unsubscribe();
+                resolve(user || null);
+            });
+        });
+    }
+
+    function isMasterAccessApproved(accessData) {
+        return !!accessData && accessData.status === 'approved' && accessData.active === true;
+    }
+
+    function isMasterAccessExplicitlyBlocked(accessData) {
+        return !!accessData && (accessData.status === 'rejected' || accessData.status === 'blocked' || accessData.active === false);
+    }
+
+    async function readMasterAccess(masterUid) {
+        if (!masterUid) {
+            return { approved: false, blocked: false, reason: 'NO_MASTER_UID', source: 'none', data: null };
+        }
+
+        const appId = HM_MASTER_APP_ID || 'baby-care-secure';
+        const primarySnap = await masterDb.ref(`userAppAccess/${masterUid}/${appId}`).once('value');
+        const primaryData = primarySnap.val();
+
+        if (isMasterAccessApproved(primaryData)) {
+            return { approved: true, blocked: false, reason: 'APPROVED_USER_ACCESS', source: 'userAppAccess', data: primaryData };
+        }
+        if (isMasterAccessExplicitlyBlocked(primaryData)) {
+            return { approved: false, blocked: true, reason: 'EXPLICITLY_BLOCKED_USER_ACCESS', source: 'userAppAccess', data: primaryData };
+        }
+
+        // 기존 MasterOS 데이터에는 승인 신청 경로도 남아 있으므로 보조 확인한다.
+        const requestSnap = await masterDb.ref(`appAccessRequests/${appId}/${masterUid}`).once('value');
+        const requestData = requestSnap.val();
+        if (requestData && requestData.status === 'approved') {
+            return { approved: true, blocked: false, reason: 'APPROVED_ACCESS_REQUEST', source: 'appAccessRequests', data: requestData };
+        }
+        if (requestData && (requestData.status === 'rejected' || requestData.status === 'blocked')) {
+            return { approved: false, blocked: true, reason: 'EXPLICITLY_BLOCKED_ACCESS_REQUEST', source: 'appAccessRequests', data: requestData };
+        }
+
+        return { approved: false, blocked: false, reason: 'NO_APPROVED_ACCESS_RECORD', source: 'none', data: primaryData || requestData || null };
+    }
+
+    async function verifyMasterAppAccess(options = {}) {
+        const masterUser = await waitForMasterUser(options.timeoutMs || 5000);
+        if (!masterUser) {
+            return { approved: false, blocked: false, reason: 'MASTER_AUTH_NOT_READY', source: 'auth', masterUid: '' };
         }
 
         try {
-            const accessSnap = await masterDb.ref(`userAppAccess/${masterUser.uid}/${appId}`).once('value');
-            const access = accessSnap.val();
-            const passed = !!access && access.status === 'approved' && access.active === true;
-
-            console.groupCollapsed('[Access Monitor] HearMe2nite MasterOS approval check');
-            console.log('masterUid:', masterUser.uid);
-            console.log('appId:', appId);
-            console.log('status:', access && access.status);
-            console.log('active:', access && access.active);
-            console.log('result:', passed ? 'PASS' : 'FAIL - monitor only');
-            console.groupEnd();
-
-            if (!passed) {
-                showSaveStatus('⚠️ MasterOS 승인 상태 확인 필요 · 앱은 계속 실행됩니다.');
-            }
-            return { ok: passed, access };
+            const result = await readMasterAccess(masterUser.uid);
+            result.masterUid = masterUser.uid;
+            result.masterEmail = masterUser.email || '';
+            console.log('[Access Gate] MasterOS approval check', result);
+            return result;
         } catch (err) {
-            console.warn('[Access Monitor] 승인 상태 확인 중 오류가 발생했습니다. 앱은 계속 실행합니다.', err);
-            showSaveStatus('⚠️ 승인 확인 오류 · 앱은 계속 실행됩니다.');
-            return { ok: false, reason: err && err.code ? err.code : 'unknown-error' };
+            console.error('[Access Gate] MasterOS approval read failed', err);
+            return { approved: false, blocked: false, reason: 'MASTER_ACCESS_READ_FAILED', source: 'error', error: err, masterUid: masterUser.uid, masterEmail: masterUser.email || '' };
         }
+    }
+
+    function showAccessDeniedScreen(reason) {
+        const authBox = document.getElementById('authBox');
+        const appContent = document.getElementById('appContent');
+        if (appContent) appContent.style.display = 'none';
+        if (authBox) {
+            authBox.classList.remove('is-hidden');
+            authBox.style.display = 'grid';
+            authBox.innerHTML = `
+                <section class="hm-login-panel" style="max-width:520px;margin:auto;text-align:center;">
+                    <div class="hm-login-panel-head" style="justify-content:center;">
+                        <span class="hm-login-lock" aria-hidden="true">🔒</span>
+                        <div><p class="hm-login-kicker">ACCESS REQUIRED</p><h2>앱 사용 권한이 없습니다</h2></div>
+                    </div>
+                    <div class="hm-login-trust" style="text-align:center;">
+                        <strong>MasterOS Platform 승인이 필요합니다.</strong>
+                        <span>HearMe2nite는 승인된 사용자만 사용할 수 있습니다.<br>플랫폼에서 앱 사용 승인을 받은 뒤 다시 로그인해 주세요.</span>
+                    </div>
+                    <p class="hm-login-small">오류 코드: ${escapeHtml(reason || 'NO_APPROVED_ACCESS_RECORD')}</p>
+                    <button type="button" class="btn-main hm-login-button" onclick="location.href='https://hearu2nite.netlify.app/'">플랫폼으로 이동</button>
+                </section>`;
+        }
+    }
+
+    async function blockCurrentSession(reason) {
+        disconnectAllListeners();
+        try { await babyAuth.signOut(); } catch(e) { console.warn(e); }
+        try { await masterAuth.signOut(); } catch(e) { console.warn(e); }
+        currentUser = null;
+        showAccessDeniedScreen(reason);
     }
 
     // =========================================================
@@ -108,15 +183,21 @@
         if (password.length < 6) { alert('비밀번호는 6자리 이상이어야 합니다.'); return; }
 
         try {
-            showSaveStatus('🔐 로그인 확인 중...');
+            showSaveStatus('🔐 MasterOS 로그인 확인 중...');
 
-            // 1단계: 2번 사이트(master-app-platform)에 가입된 계정인지 확인
-            const masterCredential = await masterAuth.signInWithEmailAndPassword(email, password);
+            // 1단계: MasterOS 계정 로그인
+            await masterAuth.signInWithEmailAndPassword(email, password);
 
-            // v0.10.14 Access Monitor: 차단하지 않고 승인 상태만 확인한다.
-            await checkMasterAppAccessMonitor(masterCredential.user);
+            // 2단계: MasterOS 승인 확인. 승인되지 않으면 babyAuth 로그인 전에 차단한다.
+            showSaveStatus('🔐 앱 승인 상태 확인 중...');
+            const access = await verifyMasterAppAccess({ timeoutMs: 5000 });
+            if (!access.approved) {
+                await masterAuth.signOut();
+                showAccessDeniedScreen(access.reason);
+                return;
+            }
 
-            // 2단계: 기존 rooms 데이터가 있는 our-baby-care에도 로그인
+            // 3단계: 기존 rooms 데이터가 있는 our-baby-care에도 로그인
             try {
                 await babyAuth.signInWithEmailAndPassword(email, password);
             } catch (babyErr) {
@@ -124,7 +205,7 @@
                     // master에는 가입되어 있지만 baby 쪽 계정이 없는 경우만 생성
                     await babyAuth.createUserWithEmailAndPassword(email, password);
                 } else if (babyErr.code === 'auth/wrong-password') {
-                    alert('2번 사이트 로그인은 성공했지만, 기존 생활관리앱 계정의 비밀번호가 달라서 our-baby-care에 로그인하지 못했습니다. 두 프로젝트의 비밀번호를 맞춰 주세요.');
+                    alert('MasterOS 로그인과 앱 승인은 확인됐지만, 기존 HearMe2nite 계정의 비밀번호가 달라 로그인하지 못했습니다. 두 프로젝트의 비밀번호를 맞춰 주세요.');
                     return;
                 } else {
                     throw babyErr;

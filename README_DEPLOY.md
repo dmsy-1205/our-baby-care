@@ -1,4 +1,4 @@
-# Deploy v0.10.14
+# Deploy
 
-GitHub/Netlify에 전체 업로드하세요. 파일 수는 100개 미만입니다.
-승인 차단은 아직 활성화하지 않았고, Console 모니터링만 수행합니다.
+GitHub/Netlify에는 이 폴더 내용을 그대로 업로드한다.
+기준 버전: v0.10.13 Home Final Candidate + Master UID Access Gate.
