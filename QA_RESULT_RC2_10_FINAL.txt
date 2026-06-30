@@ -1,8 +1,0 @@
-RC2.10 Final QA Result
-
-- JS syntax check: PASS
-- CSS split 유지: PASS
-- module split 유지: PASS
-- Firebase path 변경 최소화: PASS
-- 신규 추가 path: rooms/{roomCode}/meta/anniversaryStartDate, rooms/{roomCode}/meta/customAnniversaries
-- 기존 daily/history/autosave key 변경 없음
