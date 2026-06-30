@@ -1,5 +1,7 @@
-# HearMe2nite v0.9.35 Login_Final_Candidate
+# HearMe2nite v0.9.40 Login_Final_Candidate
 
-- 로그인 화면 디자인 개선
-- Firebase/Auth/Room/History 저장 구조 변경 없음
-- GitHub 100개 미만 업로드 구조 유지
+## 변경
+- 로그인 화면을 HearMe2nite 브랜드 중심으로 재구성
+- 기존 빨간 안내 박스를 보라색 신뢰 카드로 변경
+- PC / Mobile / Tablet 레이아웃 개선
+- Firebase Auth, Room, History, AutoSave 로직 변경 없음
