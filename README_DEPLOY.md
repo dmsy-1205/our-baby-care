@@ -1,8 +1,4 @@
-# Deploy
+# Deploy v0.10.14
 
-GitHub/Netlify 업로드용 패키지입니다.
-
-필수 조건:
-- MasterOS Realtime Database에 `userAppAccess/{UID}/baby-care-secure`가 존재해야 합니다.
-- 값은 `status: approved`, `active: true`여야 합니다.
-- 승인 정보가 없는 사용자는 앱 실행이 차단됩니다.
+GitHub/Netlify에 전체 업로드하세요. 파일 수는 100개 미만입니다.
+승인 차단은 아직 활성화하지 않았고, Console 모니터링만 수행합니다.
