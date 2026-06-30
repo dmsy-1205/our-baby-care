@@ -1,4 +1,5 @@
-# Deploy v0.9.40
+# HearMe2nite v0.9.50 Login Final Candidate
 
-GitHub / Netlify 업로드용 Lite 구조입니다.
-파일 수는 100개 미만으로 유지합니다.
+- GitHub Lite 구조 유지
+- Firebase / Room / History / AutoSave 저장 구조 변경 없음
+- PC / Mobile / Fold / Tablet 검수 대상

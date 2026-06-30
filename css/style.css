@@ -5692,3 +5692,29 @@ body:has(#authBox.hm-login-shell:not([style*="display: none"])) {
 /* v0.9.40 Final candidate marker */
 #authBox.hm-login-shell { isolation: isolate; }
 #authBox.hm-login-shell * { -webkit-tap-highlight-color: transparent; }
+
+
+
+/* =========================================================
+   v0.9 Login Final Polish Pack
+   - Typography / Spacing / Responsive / Brand / Motion / A11y
+   - Firebase/Auth logic untouched
+   ========================================================= */
+.hm-login-copy{line-height:1.55!important;word-break:keep-all!important;letter-spacing:-.03em!important}
+.hm-login-panel-head{align-items:center!important;gap:18px!important;margin-bottom:22px!important}
+.hm-login-lock{width:64px!important;height:64px!important;flex:0 0 64px!important;font-size:1.55rem!important}
+.hm-login-kicker{letter-spacing:.22em!important;margin-bottom:4px!important;color:#9c8abc!important}
+.hm-login-panel-head h2{line-height:1.05!important;letter-spacing:-.04em!important}
+.hm-login-field{margin-bottom:18px!important}.hm-login-field label{margin-bottom:9px!important;font-size:.92rem!important;letter-spacing:-.02em!important}
+.hm-login-field input{height:54px!important;min-height:54px!important;padding:0 18px!important;font-size:1rem!important;border-radius:18px!important;background:#fff!important;box-sizing:border-box!important}
+.hm-login-button{height:58px!important;min-height:58px!important;border-radius:18px!important;font-size:1.08rem!important;font-weight:900!important;letter-spacing:-.02em!important}
+.hm-login-trust{padding:22px!important;border-radius:24px!important;line-height:1.6!important}.hm-login-trust strong{margin-bottom:8px!important}.hm-login-trust span{word-break:keep-all!important}
+.hm-login-points{gap:12px!important}.hm-login-points span{min-height:38px!important;display:inline-flex!important;align-items:center!important}
+.hm-login-shell{max-width:1080px!important}.hm-login-hero,.hm-login-panel{min-width:0!important}
+.hm-login-title{letter-spacing:-.075em!important}.hm-login-mark{transform:scale(.92)!important}
+.hm-login-button:hover{filter:brightness(1.02);transform:translateY(-1px)}.hm-login-button:active{transform:translateY(1px) scale(.995)}
+.hm-login-field input:focus{outline:3px solid rgba(124,92,255,.18)!important;border-color:rgba(124,92,255,.55)!important;box-shadow:0 0 0 6px rgba(124,92,255,.08)!important}
+@media (max-width:760px){.hm-login-shell{width:100%!important;border-radius:0!important}.hm-login-hero{padding:34px 22px 28px!important}.hm-login-panel{padding:32px 22px 36px!important}.hm-login-title{font-size:clamp(3.1rem,13vw,4.35rem)!important;line-height:.96!important}.hm-login-copy{font-size:1.18rem!important;max-width:330px!important;margin-left:auto!important;margin-right:auto!important}.hm-login-pill{font-size:.76rem!important;padding:9px 14px!important}.hm-login-mark{width:92px!important;height:92px!important;font-size:2.25rem!important}.hm-login-panel-head{justify-content:flex-start!important}.hm-login-trust{padding:20px!important}.hm-login-field input{height:56px!important}.hm-login-button{height:60px!important}.hm-login-small{padding-bottom:max(14px,env(safe-area-inset-bottom))!important}}
+@media (min-width:761px) and (max-width:1180px){.hm-login-shell{width:min(880px,88vw)!important}.hm-login-title{font-size:clamp(3.8rem,7vw,5.5rem)!important}.hm-login-copy{font-size:1.08rem!important}.hm-login-panel{padding:56px 54px!important}.hm-login-hero{padding:56px 48px!important}}
+@media (min-width:1181px){.hm-login-shell{width:min(1080px,76vw)!important}.hm-login-panel{padding:62px 56px!important}.hm-login-hero{padding:62px 54px!important}.hm-login-title{font-size:4.9rem!important}}
+
