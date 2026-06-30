@@ -4106,3 +4106,46 @@
     .anniversary-modal-close { width: 100%; }
     .anniversary-settings-head { flex-direction: column; }
 }
+
+/* =========================================================
+   RC2.10.4 HOTFIX: Anniversary settings popup layer order
+   - 기록실 팝업 위에서 기념일 설정 팝업이 항상 최상단에 표시되도록 보정
+   - History Render / displayHistory() / 저장 구조 변경 없음
+   ========================================================= */
+body > .anniversary-settings-overlay {
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100vw !important;
+    height: 100dvh !important;
+    min-height: 100dvh !important;
+    display: none;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 18px max(12px, env(safe-area-inset-right)) max(18px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left)) !important;
+    overflow: hidden !important;
+    background: rgba(35, 33, 43, 0.50) !important;
+    backdrop-filter: blur(9px) !important;
+    -webkit-backdrop-filter: blur(9px) !important;
+    overscroll-behavior: contain !important;
+    z-index: 10050 !important;
+}
+
+body > .anniversary-settings-overlay[style*="display: flex"] {
+    display: flex !important;
+}
+
+body > .anniversary-settings-overlay .anniversary-settings-modal {
+    position: relative !important;
+    z-index: 10051 !important;
+    margin: auto !important;
+}
+
+@media (max-width: 560px) {
+    body > .anniversary-settings-overlay {
+        align-items: center !important;
+        padding: 12px 10px max(12px, env(safe-area-inset-bottom)) !important;
+    }
+    body > .anniversary-settings-overlay .anniversary-settings-modal {
+        max-height: calc(100dvh - 24px) !important;
+    }
+}
