@@ -1,7 +1,7 @@
-# v0.10.19 QA Checklist
+# v0.10.20 QA Checklist
 
-- 기존 승인 사용자 로그인 가능
-- Console에 `[Access Diagnostic / Login]` 출력
-- 결과가 PASS / PASS_BY_EMAIL_USER_ACCESS / PASS_BY_EMAIL_REQUEST 중 하나인지 확인
-- NO_ACCESS_RECORD이면 Full diagnostic object에서 masterEmail, matchedUserUids, requestsByEmail 확인
-- Room / History / AutoSave / Chat 정상 확인
+1. 승인된 기존 사용자 로그인 → 앱 정상 진입
+2. Console: `[Access Gate / Login] ... PASS` 확인
+3. 기록실 / 방 / 채팅 / AutoSave 정상 확인
+4. 미승인 계정 로그인 → 권한 없음 화면 확인
+5. 문제 발생 시 즉시 v0.10.13 또는 v0.10.19로 롤백
