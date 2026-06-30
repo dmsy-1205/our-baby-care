@@ -36,7 +36,6 @@
     const babyApp = firebase.apps.find(app => app.name === 'babyApp') || firebase.initializeApp(babyFirebaseConfig, 'babyApp');
 
     const masterAuth = firebase.auth(masterApp);
-    const masterFirestore = firebase.firestore(masterApp);
     const babyAuth = firebase.auth(babyApp);
     const db = firebase.database(babyApp);
     const auth = babyAuth;
@@ -69,7 +68,7 @@
     let hmLastAutoSaveSignature = '';
     let hmPendingAutoSaveReason = '';
     // RC2.7 STEP5: 최종 안정화 QA 상태
-    const HM_APP_VERSION = 'v0.10.14 app-access-gate';
+    const HM_APP_VERSION = 'RC2 v2.8.0 STEP7 release-candidate-qa';
     const hmQaState = {
         bootedAt: new Date().toISOString(),
         checks: [],
