@@ -1,7 +1,8 @@
-# v0.10.17 QA Checklist
+# QA Checklist v0.10.13
 
-1. 승인된 기존 사용자 로그인 가능
-2. 로그인 후 Home만 표시되고 Login 화면은 숨김
-3. 기록실 / 채팅 / AutoSave 정상
-4. 미승인 MasterOS 계정은 권한 없음 화면 표시
-5. Console에 `[Access Gate] MasterOS approval check` 출력 확인
+- [ ] 로그인 전 로그인 화면만 표시
+- [ ] 로그인 후 홈 화면만 표시
+- [ ] 로그아웃 후 로그인 화면 복귀
+- [ ] PC / Mobile / Fold / Tablet 확인
+- [ ] 기록 날짜, 미션, 기록 카드 클릭 정상
+- [ ] 채팅/기록실/기념일 기존 기능 정상
