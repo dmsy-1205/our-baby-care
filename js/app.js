@@ -85,6 +85,14 @@
             currentUser = user;
 
             if (user) {
+                // v0.10.15 Access Gate: 새로고침/자동 로그인 상태에서도 MasterOS 앱 승인 여부를 다시 확인한다.
+                const masterUser = await waitForMasterAuthUser();
+                const accessResult = await checkMasterAppAccessEnforced(masterUser);
+                if (!accessResult.ok) {
+                    await denyAccessAndSignOut();
+                    return;
+                }
+
                 document.body.classList.add('hm-authenticated');
                 document.getElementById('authBox').classList.add('is-hidden');
                 document.getElementById('authBox').style.display = 'none';

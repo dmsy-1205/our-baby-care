@@ -45,42 +45,101 @@
 
 
     // =========================================================
-    // MODULE: MASTEROS ACCESS MONITOR
-    // v0.10.14 Access Monitor
-    // - 기존 사용자 로그인을 막지 않고 MasterOS 승인 상태만 확인한다.
-    // - 승인 경로: master-app-platform Realtime Database
-    //   userAppAccess/{masterUid}/baby-care-secure
-    // - 이 버전은 차단(enforce)하지 않는다. 콘솔과 상태 메시지만 남긴다.
+    // MODULE: MASTEROS ACCESS GATE
+    // v0.10.15 Access Gate Enforced
+    // - MasterOS 승인 경로: userAppAccess/{masterUid}/baby-care-secure
+    // - status === "approved" 그리고 active === true 인 사용자만 앱 실행
+    // - 생활기록 DB/Room/History 구조는 변경하지 않는다.
     // =========================================================
-    async function checkMasterAppAccessMonitor(masterUser) {
-        const appId = 'baby-care-secure';
+    const HM_MASTER_APP_ID = 'baby-care-secure';
+
+    function waitForMasterAuthUser() {
+        return new Promise((resolve) => {
+            if (masterAuth.currentUser) {
+                resolve(masterAuth.currentUser);
+                return;
+            }
+            const unsubscribe = masterAuth.onAuthStateChanged((user) => {
+                unsubscribe();
+                resolve(user || null);
+            });
+        });
+    }
+
+    async function checkMasterAppAccessEnforced(masterUser) {
         if (!masterUser || !masterUser.uid || typeof masterDb === 'undefined') {
-            console.warn('[Access Monitor] MasterOS 연결 정보가 없어 승인 상태를 확인하지 못했습니다. 앱은 계속 실행합니다.');
+            console.warn('[Access Gate] MasterOS 로그인 또는 DB 연결 정보가 없습니다.');
             return { ok: false, reason: 'missing-master-context' };
         }
 
         try {
-            const accessSnap = await masterDb.ref(`userAppAccess/${masterUser.uid}/${appId}`).once('value');
+            const accessSnap = await masterDb.ref(`userAppAccess/${masterUser.uid}/${HM_MASTER_APP_ID}`).once('value');
             const access = accessSnap.val();
             const passed = !!access && access.status === 'approved' && access.active === true;
 
-            console.groupCollapsed('[Access Monitor] HearMe2nite MasterOS approval check');
+            console.groupCollapsed('[Access Gate] HearMe2nite MasterOS approval check');
             console.log('masterUid:', masterUser.uid);
-            console.log('appId:', appId);
+            console.log('appId:', HM_MASTER_APP_ID);
             console.log('status:', access && access.status);
             console.log('active:', access && access.active);
-            console.log('result:', passed ? 'PASS' : 'FAIL - monitor only');
+            console.log('result:', passed ? 'PASS' : 'BLOCK');
             console.groupEnd();
 
-            if (!passed) {
-                showSaveStatus('⚠️ MasterOS 승인 상태 확인 필요 · 앱은 계속 실행됩니다.');
-            }
-            return { ok: passed, access };
+            return { ok: passed, access, reason: passed ? 'approved' : 'not-approved' };
         } catch (err) {
-            console.warn('[Access Monitor] 승인 상태 확인 중 오류가 발생했습니다. 앱은 계속 실행합니다.', err);
-            showSaveStatus('⚠️ 승인 확인 오류 · 앱은 계속 실행됩니다.');
-            return { ok: false, reason: err && err.code ? err.code : 'unknown-error' };
+            console.error('[Access Gate] 승인 상태 확인 중 오류가 발생했습니다.', err);
+            return { ok: false, reason: err && err.code ? err.code : 'access-check-error', error: err };
         }
+    }
+
+    function showAccessDeniedMessage() {
+        const authBox = document.getElementById('authBox');
+        const appContent = document.getElementById('appContent');
+        if (appContent) appContent.style.display = 'none';
+        if (!authBox) {
+            alert('앱 사용 권한이 없습니다. MasterOS Platform에서 앱 승인을 받은 후 사용할 수 있습니다.');
+            return;
+        }
+
+        document.body.classList.remove('hm-authenticated');
+        authBox.classList.remove('is-hidden');
+        authBox.style.display = 'grid';
+        authBox.innerHTML = `
+            <section class="hm-login-hero" aria-label="서비스 소개">
+                <div class="hm-login-pill">ACCESS REQUIRED</div>
+                <div class="hm-login-mark" aria-hidden="true">🔒</div>
+                <h1 class="hm-login-title">HearMe2nite</h1>
+                <p class="hm-login-copy">승인된 사용자만<br>둘만의 기록 공간에 들어갈 수 있어요.</p>
+            </section>
+            <section class="hm-login-panel" aria-label="앱 승인 안내">
+                <div class="hm-login-panel-head">
+                    <span class="hm-login-lock" aria-hidden="true">⛔</span>
+                    <div>
+                        <p class="hm-login-kicker">ACCESS</p>
+                        <h2>앱 사용 권한이 없습니다</h2>
+                    </div>
+                </div>
+                <div class="hm-login-trust">
+                    <strong>MasterOS 승인이 필요합니다</strong>
+                    <span>MasterOS Platform에서 HearMe2nite 앱 승인을 받은 후 다시 로그인해 주세요.</span>
+                </div>
+                <button type="button" class="btn-main hm-login-button" onclick="location.href='https://hearu2nite.netlify.app/'">플랫폼으로 이동</button>
+                <p class="hm-login-small">이미 승인을 받았다면 잠시 후 다시 로그인해 주세요.</p>
+            </section>
+        `;
+    }
+
+    async function denyAccessAndSignOut() {
+        try { await babyAuth.signOut(); } catch(e) { console.warn(e); }
+        try { await masterAuth.signOut(); } catch(e) { console.warn(e); }
+        currentUser = null;
+        activeRoomCode = '';
+        activeRoomRole = '';
+        activeRelationshipRole = '';
+        pendingRelationshipRole = '';
+        disconnectAllListeners();
+        showAccessDeniedMessage();
+        showSaveStatus('🔒 MasterOS 앱 승인이 필요합니다.');
     }
 
     // =========================================================
@@ -113,8 +172,12 @@
             // 1단계: 2번 사이트(master-app-platform)에 가입된 계정인지 확인
             const masterCredential = await masterAuth.signInWithEmailAndPassword(email, password);
 
-            // v0.10.14 Access Monitor: 차단하지 않고 승인 상태만 확인한다.
-            await checkMasterAppAccessMonitor(masterCredential.user);
+            // v0.10.15 Access Gate: MasterOS 승인 사용자만 생활관리 앱 로그인을 진행한다.
+            const accessResult = await checkMasterAppAccessEnforced(masterCredential.user);
+            if (!accessResult.ok) {
+                await denyAccessAndSignOut();
+                return;
+            }
 
             // 2단계: 기존 rooms 데이터가 있는 our-baby-care에도 로그인
             try {
