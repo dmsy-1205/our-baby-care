@@ -4665,3 +4665,142 @@ body > .anniversary-settings-overlay .anniversary-settings-modal {
         min-height: 84px !important;
     }
 }
+
+
+/* =========================================================
+   HearMe2nite v0.9.11 Card Layout Normalize Hotfix
+   목표: PC / Tablet / Fold / Mobile 에서 홈 기록 카드 높이와 여백을 일률적으로 정리.
+   영향 범위: CSS only. Firebase / 저장 / History / Anniversary 로직 변경 없음.
+   ========================================================= */
+:root {
+    --hm-v0911-card-height: 96px;
+    --hm-v0911-card-padding-y: 16px;
+    --hm-v0911-card-padding-x: 18px;
+    --hm-v0911-icon-size: 52px;
+    --hm-v0911-card-gap: 14px;
+}
+
+/* 홈 입력 카드 기본 크기 통일 */
+.container .daily-card {
+    box-sizing: border-box !important;
+    width: 100% !important;
+    min-height: var(--hm-v0911-card-height) !important;
+    height: var(--hm-v0911-card-height) !important;
+    padding: var(--hm-v0911-card-padding-y) var(--hm-v0911-card-padding-x) !important;
+    display: grid !important;
+    grid-template-columns: auto minmax(0, 1fr) auto !important;
+    align-items: center !important;
+    column-gap: 14px !important;
+    overflow: hidden !important;
+}
+
+/* 기상/체중이 들어있는 row도 다른 카드와 같은 흐름으로 */
+.container > .row,
+.compact-metrics-row {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: var(--hm-v0911-card-gap) !important;
+    margin-bottom: var(--hm-v0911-card-gap) !important;
+    align-items: stretch !important;
+}
+
+.container > .row .input-group,
+.compact-metrics-row .input-group {
+    width: 100% !important;
+    margin: 0 !important;
+    height: auto !important;
+    display: block !important;
+}
+
+.container > .row .daily-card,
+.compact-metrics-row .metric-daily-card {
+    min-height: var(--hm-v0911-card-height) !important;
+    height: var(--hm-v0911-card-height) !important;
+    padding: var(--hm-v0911-card-padding-y) var(--hm-v0911-card-padding-x) !important;
+}
+
+.container .daily-card-icon {
+    width: var(--hm-v0911-icon-size) !important;
+    height: var(--hm-v0911-icon-size) !important;
+    min-width: var(--hm-v0911-icon-size) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 1.26rem !important;
+}
+
+.container .daily-card-title {
+    display: block !important;
+    margin: 0 0 4px 0 !important;
+    font-size: 1rem !important;
+    line-height: 1.22 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+}
+
+.container .daily-card-sub {
+    display: block !important;
+    margin: 0 !important;
+    font-size: 0.86rem !important;
+    line-height: 1.28 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    word-break: keep-all !important;
+}
+
+.container .daily-card-arrow {
+    align-self: center !important;
+    justify-self: end !important;
+    width: 22px !important;
+    min-width: 22px !important;
+}
+
+/* 태블릿/PC에서도 불필요하게 카드가 커지지 않게 고정 */
+@media (min-width: 768px) {
+    :root {
+        --hm-v0911-card-height: 92px;
+        --hm-v0911-card-padding-y: 16px;
+        --hm-v0911-card-padding-x: 18px;
+        --hm-v0911-icon-size: 50px;
+    }
+    .container > .row,
+    .compact-metrics-row {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+/* 모바일: 글자가 너무 커져 카드 높이를 밀지 않게 제한 */
+@media (max-width: 430px) {
+    :root {
+        --hm-v0911-card-height: 92px;
+        --hm-v0911-card-padding-y: 15px;
+        --hm-v0911-card-padding-x: 16px;
+        --hm-v0911-icon-size: 50px;
+    }
+    .container .daily-card {
+        column-gap: 12px !important;
+    }
+    .container .daily-card-title {
+        font-size: 0.95rem !important;
+    }
+    .container .daily-card-sub {
+        font-size: 0.82rem !important;
+    }
+}
+
+/* 아주 좁은 화면: 터치 영역은 유지하되 글자만 살짝 줄임 */
+@media (max-width: 360px) {
+    :root {
+        --hm-v0911-card-height: 90px;
+        --hm-v0911-card-padding-x: 14px;
+        --hm-v0911-icon-size: 48px;
+    }
+    .container .daily-card-title {
+        font-size: 0.9rem !important;
+    }
+    .container .daily-card-sub {
+        font-size: 0.78rem !important;
+    }
+}
