@@ -4570,3 +4570,29 @@ body > .anniversary-settings-overlay .anniversary-settings-modal {
         max-height: calc(100dvh - 36px) !important;
     }
 }
+
+/* =========================================================
+   RC2.10.13 HOTFIX: Auto anniversary card layout
+   - 자동 계산 기념일 안내문이 좁은 칸에 갇히는 문제 수정
+   - 저장 구조 / History Render / displayHistory() 변경 없음
+   ========================================================= */
+.anniversary-auto-list > .anniversary-empty-note {
+    grid-column: 1 / -1 !important;
+    width: 100% !important;
+    min-height: 0 !important;
+    padding: 18px 16px !important;
+    text-align: left !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    line-height: 1.6 !important;
+}
+.anniversary-auto-list:has(> .anniversary-empty-note) {
+    grid-template-columns: 1fr !important;
+}
+@media (max-width: 640px) {
+    .anniversary-auto-list > .anniversary-empty-note {
+        text-align: center !important;
+        padding: 16px 14px !important;
+    }
+}
