@@ -85,6 +85,15 @@
             currentUser = user;
 
             if (user) {
+                // MasterOS Platform 앱 승인 확인 후에만 HearMe2nite 화면을 연다.
+                const masterUser = await waitForMasterAuthUser();
+                const approved = await hasApprovedMasterAppAccess(masterUser);
+                if (!approved) {
+                    try { await babyAuth.signOut(); } catch(e) { console.warn(e); }
+                    showNoAppAccessScreen('MasterOS Platform에서 HearMe2nite 앱 승인을 받은 계정만 사용할 수 있습니다.');
+                    return;
+                }
+
                 document.body.classList.add('hm-authenticated');
                 document.getElementById('authBox').classList.add('is-hidden');
                 document.getElementById('authBox').style.display = 'none';

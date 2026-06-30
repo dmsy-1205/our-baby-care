@@ -1,0 +1,64 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+
+    "appAccess": {
+      "$accessId": {
+        ".read": "auth != null && $accessId === auth.uid + '_hearme2nite'",
+        ".write": false
+      }
+    },
+
+    "users": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid && root.child('appAccess').child(auth.uid + '_hearme2nite').child('status').val() === 'approved'",
+        ".write": "auth != null && auth.uid === $uid && root.child('appAccess').child(auth.uid + '_hearme2nite').child('status').val() === 'approved'"
+      }
+    },
+
+    "userRooms": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid && root.child('appAccess').child(auth.uid + '_hearme2nite').child('status').val() === 'approved'",
+        ".write": "auth != null && auth.uid === $uid && root.child('appAccess').child(auth.uid + '_hearme2nite').child('status').val() === 'approved'"
+      }
+    },
+
+    "roomMembers": {
+      "$roomCode": {
+        ".read": "auth != null && root.child('appAccess').child(auth.uid + '_hearme2nite').child('status').val() === 'approved' && root.child('roomMembers').child($roomCode).child(auth.uid).exists()",
+        "$uid": {
+          ".write": "auth != null && root.child('appAccess').child(auth.uid + '_hearme2nite').child('status').val() === 'approved' && (auth.uid === $uid || !data.exists() || root.child('roomMembers').child($roomCode).child(auth.uid).child('role').val() === 'owner')"
+        }
+      }
+    },
+
+    "rooms": {
+      "$roomCode": {
+        ".read": "auth != null && root.child('appAccess').child(auth.uid + '_hearme2nite').child('status').val() === 'approved' && root.child('roomMembers').child($roomCode).child(auth.uid).exists()",
+        ".write": "auth != null && root.child('appAccess').child(auth.uid + '_hearme2nite').child('status').val() === 'approved' && root.child('roomMembers').child($roomCode).child(auth.uid).exists()"
+      }
+    },
+
+    "invites": {
+      "$inviteCode": {
+        ".read": "auth != null && root.child('appAccess').child(auth.uid + '_hearme2nite').child('status').val() === 'approved'",
+        ".write": "auth != null && root.child('appAccess').child(auth.uid + '_hearme2nite').child('status').val() === 'approved'"
+      }
+    },
+
+    "roomAccess": {
+      "$roomCode": {
+        ".read": "auth != null && root.child('appAccess').child(auth.uid + '_hearme2nite').child('status').val() === 'approved' && root.child('roomMembers').child($roomCode).child(auth.uid).exists()",
+        ".write": "auth != null && root.child('appAccess').child(auth.uid + '_hearme2nite').child('status').val() === 'approved' && root.child('roomMembers').child($roomCode).child(auth.uid).exists()"
+      }
+    },
+
+    "missionLibrary": {
+      "$roomCode": {
+        ".read": "auth != null && root.child('appAccess').child(auth.uid + '_hearme2nite').child('status').val() === 'approved' && root.child('roomMembers').child($roomCode).child(auth.uid).exists()",
+        ".write": "auth != null && root.child('appAccess').child(auth.uid + '_hearme2nite').child('status').val() === 'approved' && root.child('roomMembers').child($roomCode).child(auth.uid).child('role').val() === 'owner'"
+      }
+    }
+  }
+}
