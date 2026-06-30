@@ -5057,3 +5057,41 @@ button, .daily-card, .room-settings-card, .history-launch-card, .calendar-day {
   body { background: #fff !important; }
   .modal-close-btn, .daily-card-arrow, .room-settings-arrow, .history-launch-arrow { display: none !important; }
 }
+
+
+/* v0.9.22 Chat Timestamp */
+.chat-message-line{display:flex;flex-direction:column;gap:3px;max-width:82%;}
+.chat-message-line.is-me{align-self:flex-end;align-items:flex-end;}
+.chat-message-line.is-other{align-self:flex-start;align-items:flex-start;}
+.chat-message-time{font-size:11px;line-height:1.2;color:#a39ab9;padding:0 4px;}
+.chat-message-line.is-me .chat-message-time{text-align:right;}
+.chat-message-line.is-other .chat-message-time{text-align:left;}
+
+
+/* v0.9.23 History Detail Polish */
+.history-detail-summary-card{display:flex;align-items:center;gap:14px;padding:16px;border:1px solid rgba(124,92,255,.14);border-radius:20px;background:linear-gradient(135deg,#fff,#f8f5ff);margin-bottom:14px;}
+.history-detail-summary-icon{width:52px;height:52px;border-radius:18px;background:#f7f0ff;display:flex;align-items:center;justify-content:center;font-size:24px;flex:0 0 auto;}
+.history-detail-summary-card strong{display:block;font-size:1rem;color:#2f2a3d;margin-bottom:6px;}
+.history-detail-summary-card span{display:flex;flex-wrap:wrap;gap:6px;color:#8c83a8;font-size:.82rem;}
+.history-detail-polished-block{border:1px solid rgba(124,92,255,.12)!important;border-radius:18px!important;background:#fff!important;padding:14px 15px!important;margin:10px 0!important;}
+.history-selected-hint{border-radius:20px!important;background:linear-gradient(135deg,#fff,#faf8ff)!important;border:1px solid rgba(124,92,255,.14)!important;}
+.history-day-card.history-premium-selected{min-height:92px!important;align-items:center!important;}
+
+
+/* v0.9.24 Home Header Polish */
+.container > .app-title-row{display:grid!important;grid-template-columns:54px 1fr 54px!important;align-items:center!important;gap:10px!important;margin-bottom:8px!important;}
+.container > .app-title-row h1{margin:0!important;font-size:clamp(1.55rem,4vw,2rem)!important;color:#2f2a3d!important;letter-spacing:-.04em!important;white-space:nowrap!important;}
+.container > .app-subtitle{text-align:center!important;color:#817895!important;font-weight:700!important;line-height:1.45!important;margin:10px auto 8px!important;max-width:92%!important;}
+.app-version-badge{display:block!important;width:max-content!important;margin:0 auto 18px!important;padding:6px 12px!important;border-radius:999px!important;background:#f2edff!important;color:#7c5cff!important;font-size:.76rem!important;font-weight:900!important;letter-spacing:.04em!important;}
+.user-bar{border-radius:22px!important;border:1px solid rgba(124,92,255,.14)!important;background:rgba(255,255,255,.92)!important;box-shadow:0 8px 24px rgba(93,69,180,.06)!important;}
+.room-settings-card{border-radius:24px!important;min-height:104px!important;}
+.room-settings-icon{width:58px!important;height:58px!important;border-radius:20px!important;}
+@media(max-width:520px){.container{padding:20px 18px!important;border-radius:28px!important}.container > .app-title-row{grid-template-columns:48px 1fr 48px!important}.container > .app-title-row h1{font-size:1.62rem!important}.user-bar{gap:10px!important}.user-bar .btn-small{width:auto!important;min-width:96px!important;padding-left:14px!important;padding-right:14px!important}}
+
+
+/* v0.9.25 Beta Stable Candidate Final UI Guard */
+.daily-card,.room-settings-card,.history-launch-card,.history-day-card{transition:transform .16s ease, box-shadow .16s ease, border-color .16s ease;}
+.daily-card:active,.room-settings-card:active,.history-launch-card:active,.history-day-card:active{transform:scale(.992);}
+button,input,textarea,select{-webkit-tap-highlight-color:transparent;}
+@media (prefers-reduced-motion: reduce){*,*::before,*::after{transition:none!important;animation:none!important;scroll-behavior:auto!important;}}
+@media(max-width:420px){body{padding-left:10px!important;padding-right:10px!important}.daily-card{padding-left:18px!important;padding-right:18px!important}.daily-card-title{font-size:1.02rem!important}.daily-card-sub{font-size:.84rem!important}}

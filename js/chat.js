@@ -44,6 +44,24 @@
 
     // Chat 메시지 렌더링
     // sender uid를 기준으로 내 메시지/상대 메시지 정렬을 결정한다.
+    function hmFormatChatTimestamp(value) {
+        if (!value) return '';
+        const date = new Date(value);
+        if (Number.isNaN(date.getTime())) return '';
+        const now = new Date();
+        const isToday = date.getFullYear() === now.getFullYear() && date.getMonth() === now.getMonth() && date.getDate() === now.getDate();
+        const yesterday = new Date(now);
+        yesterday.setDate(now.getDate() - 1);
+        const isYesterday = date.getFullYear() === yesterday.getFullYear() && date.getMonth() === yesterday.getMonth() && date.getDate() === yesterday.getDate();
+        const ampm = date.getHours() < 12 ? '오전' : '오후';
+        const hour12 = date.getHours() % 12 || 12;
+        const minute = String(date.getMinutes()).padStart(2, '0');
+        const time = `${ampm} ${hour12}:${minute}`;
+        if (isToday) return time;
+        if (isYesterday) return `어제 ${time}`;
+        return `${String(date.getMonth()+1).padStart(2,'0')}.${String(date.getDate()).padStart(2,'0')} ${time}`;
+    }
+
     function renderMessages(messages) {
         const chatMessages = document.getElementById('chatMessages');
         chatMessages.innerHTML = '';
@@ -69,6 +87,13 @@
                 msgLine.appendChild(senderName);
             }
             msgLine.appendChild(bubble);
+            const timeText = hmFormatChatTimestamp(msg.timestamp || msg.createdAt || msg.sentAt);
+            if (timeText) {
+                const timeEl = document.createElement('span');
+                timeEl.className = 'chat-message-time';
+                timeEl.innerText = timeText;
+                msgLine.appendChild(timeEl);
+            }
             chatMessages.appendChild(msgLine);
         });
         chatMessages.scrollTop = chatMessages.scrollHeight;
