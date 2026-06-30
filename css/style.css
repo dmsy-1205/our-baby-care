@@ -3929,3 +3929,180 @@
 .anniversary-pill strong { color: var(--hm-premium-primary, #6D4CFF); }
 .anniversary-selected-note { border: 1px solid var(--hm-premium-border, #ECE6FF); border-radius: 16px; padding: 10px 12px; margin-bottom: 10px; background: #fff; color: var(--hm-premium-sub, #7D7694); font-size: 0.8rem; line-height: 1.45; }
 @media (max-width: 430px) { .anniversary-form { grid-template-columns: 1fr; } .anniversary-head { flex-direction: column; } .anniversary-toggle-btn { width: 100%; } }
+
+/* =========================================================
+   RC2.10.3 SAFE: Anniversary Settings Popup
+   - 기록실/캘린더 렌더링 구조는 건드리지 않고 기념일 설정만 팝업으로 분리
+   ========================================================= */
+.anniversary-card-compact .anniversary-head { margin-bottom: 10px; }
+.anniversary-today.compact { margin-bottom: 0; }
+.anniversary-settings-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(45, 42, 53, 0.48);
+    z-index: 60;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 18px;
+}
+.anniversary-settings-modal {
+    width: 100%;
+    max-width: 520px;
+    max-height: 88vh;
+    overflow-y: auto;
+    background: #fff;
+    border: 1px solid var(--hm-premium-border, #ECE6FF);
+    border-radius: 30px;
+    padding: 20px;
+    box-shadow: 0 28px 80px rgba(45, 42, 53, 0.24);
+}
+.anniversary-settings-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 14px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--hm-premium-border, #ECE6FF);
+}
+.anniversary-settings-kicker {
+    color: var(--hm-premium-muted, #A49DB8);
+    font-size: 0.68rem;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    margin-bottom: 5px;
+}
+.anniversary-settings-head h2 {
+    margin: 0;
+    color: var(--hm-premium-text, #2D2A35);
+    font-size: 1.15rem;
+    letter-spacing: -0.03em;
+}
+.anniversary-modal-close {
+    width: auto;
+    padding: 9px 12px;
+    border-radius: 14px;
+    font-size: 0.8rem;
+    background: var(--hm-premium-primary-soft, #F1ECFF) !important;
+    color: var(--hm-premium-primary, #6D4CFF) !important;
+    border: 1px solid var(--hm-premium-border, #ECE6FF);
+}
+.anniversary-settings-section {
+    background: linear-gradient(145deg, rgba(255,255,255,0.98), rgba(250,248,255,0.98));
+    border: 1px solid var(--hm-premium-border, #ECE6FF);
+    border-radius: 22px;
+    padding: 14px;
+    margin-bottom: 12px;
+    box-shadow: 0 8px 22px rgba(109, 76, 255, 0.055);
+}
+.anniversary-settings-title {
+    font-size: 0.9rem;
+    font-weight: 850;
+    color: var(--hm-premium-text, #2D2A35);
+    margin-bottom: 5px;
+}
+.anniversary-settings-help {
+    color: var(--hm-premium-sub, #7D7694);
+    font-size: 0.78rem;
+    line-height: 1.45;
+    margin-bottom: 10px;
+}
+.anniversary-settings-row,
+.anniversary-add-grid {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 8px;
+    align-items: center;
+}
+.anniversary-add-grid {
+    grid-template-columns: 150px 1fr 120px auto;
+}
+.anniversary-settings-modal input,
+.anniversary-settings-modal select {
+    width: 100%;
+    border: 1px solid var(--hm-premium-border, #ECE6FF);
+    background: #fff;
+    border-radius: 14px;
+    padding: 11px 12px;
+    color: var(--hm-premium-text, #2D2A35);
+    font-size: 0.86rem;
+    outline: none;
+}
+.anniversary-settings-modal input:focus,
+.anniversary-settings-modal select:focus {
+    border-color: var(--hm-premium-primary, #6D4CFF);
+    box-shadow: 0 0 0 3px rgba(109, 76, 255, 0.10);
+}
+.anniversary-primary-btn {
+    width: auto;
+    padding: 11px 14px;
+    border-radius: 14px;
+    font-size: 0.84rem;
+    background: linear-gradient(135deg, var(--hm-premium-primary, #6D4CFF), var(--hm-premium-primary-2, #8E6CFF)) !important;
+    color: #fff !important;
+    box-shadow: 0 10px 22px rgba(109, 76, 255, 0.2);
+    white-space: nowrap;
+}
+.anniversary-custom-list {
+    display: grid;
+    gap: 8px;
+}
+.anniversary-custom-item {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 10px;
+    align-items: center;
+    background: #fff;
+    border: 1px solid var(--hm-premium-border, #ECE6FF);
+    border-radius: 18px;
+    padding: 10px;
+}
+.anniversary-custom-icon {
+    width: 42px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 15px;
+    background: linear-gradient(145deg, #F5F0FF, #FFF4FA);
+    font-size: 1.18rem;
+}
+.anniversary-custom-title {
+    color: var(--hm-premium-text, #2D2A35);
+    font-weight: 850;
+    font-size: 0.86rem;
+    margin-bottom: 3px;
+}
+.anniversary-custom-date {
+    color: var(--hm-premium-sub, #7D7694);
+    font-size: 0.76rem;
+}
+.anniversary-delete-btn {
+    width: auto;
+    padding: 8px 10px;
+    border-radius: 12px;
+    background: #fff0f4 !important;
+    color: #ff4d6d !important;
+    border: 1px solid #ffd6df;
+    font-size: 0.76rem;
+    box-shadow: none;
+}
+.anniversary-empty-note {
+    color: var(--hm-premium-sub, #7D7694);
+    font-size: 0.8rem;
+    line-height: 1.5;
+    text-align: center;
+    padding: 16px 10px;
+    border: 1px dashed var(--hm-premium-border, #ECE6FF);
+    border-radius: 18px;
+    background: rgba(255,255,255,0.6);
+}
+@media (max-width: 640px) {
+    .anniversary-settings-modal { max-height: 84vh; padding: 18px; border-radius: 26px; }
+    .anniversary-settings-row,
+    .anniversary-add-grid { grid-template-columns: 1fr; }
+    .anniversary-primary-btn,
+    .anniversary-modal-close { width: 100%; }
+    .anniversary-settings-head { flex-direction: column; }
+}
