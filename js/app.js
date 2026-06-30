@@ -85,6 +85,11 @@
             currentUser = user;
 
             if (user) {
+                // v0.10.18 Access Diagnostic Only
+                // 승인 상태는 Console에 상세 출력하지만, 기존 사용자가 막히지 않도록 앱은 계속 실행한다.
+                showSaveStatus('🔐 앱 승인 상태 진단 중...');
+                await verifyMasterAppAccess({ timeoutMs: 5000, label: 'Access Diagnostic / Session' });
+
                 document.body.classList.add('hm-authenticated');
                 document.getElementById('authBox').classList.add('is-hidden');
                 document.getElementById('authBox').style.display = 'none';

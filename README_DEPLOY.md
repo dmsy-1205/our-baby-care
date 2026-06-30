@@ -1,3 +1,5 @@
-# HearMe2nite v0.10.13
+# v0.10.18 배포 안내
 
-GitHub/Netlify Lite deploy package.
+이 버전은 차단 버전이 아닙니다. 기존 사용자를 막지 않고 Console 로그로 MasterOS 승인 경로를 진단합니다.
+
+배포 후 기존 승인 사용자 1명으로 로그인하여 Console 로그를 복사해 확인하세요.
