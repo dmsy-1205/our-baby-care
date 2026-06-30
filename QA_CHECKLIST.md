@@ -1,5 +1,8 @@
-# HearMe2nite v0.9.50 Login Final Candidate
+# v0.9.51 QA Checklist
 
-- GitHub Lite 구조 유지
-- Firebase / Room / History / AutoSave 저장 구조 변경 없음
-- PC / Mobile / Fold / Tablet 검수 대상
+- [ ] PC에서 HearMe2nite가 한 줄로 보이는지 확인
+- [ ] Fold/태블릿 가로 화면에서 줄바꿈이 없는지 확인
+- [ ] 모바일 세로 화면에서 레이아웃이 깨지지 않는지 확인
+- [ ] 이메일/비밀번호 입력 가능 여부 확인
+- [ ] 로그인 버튼 동작 확인
+- [ ] 로그인 성공 후 기존 홈/Room/기록 기능 정상 확인
