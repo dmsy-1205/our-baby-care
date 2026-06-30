@@ -43,6 +43,46 @@
         updateCurrentRoomInfo();
     }
 
+
+    // =========================================================
+    // MODULE: MASTEROS ACCESS MONITOR
+    // v0.10.14 Access Monitor
+    // - 기존 사용자 로그인을 막지 않고 MasterOS 승인 상태만 확인한다.
+    // - 승인 경로: master-app-platform Realtime Database
+    //   userAppAccess/{masterUid}/baby-care-secure
+    // - 이 버전은 차단(enforce)하지 않는다. 콘솔과 상태 메시지만 남긴다.
+    // =========================================================
+    async function checkMasterAppAccessMonitor(masterUser) {
+        const appId = 'baby-care-secure';
+        if (!masterUser || !masterUser.uid || typeof masterDb === 'undefined') {
+            console.warn('[Access Monitor] MasterOS 연결 정보가 없어 승인 상태를 확인하지 못했습니다. 앱은 계속 실행합니다.');
+            return { ok: false, reason: 'missing-master-context' };
+        }
+
+        try {
+            const accessSnap = await masterDb.ref(`userAppAccess/${masterUser.uid}/${appId}`).once('value');
+            const access = accessSnap.val();
+            const passed = !!access && access.status === 'approved' && access.active === true;
+
+            console.groupCollapsed('[Access Monitor] HearMe2nite MasterOS approval check');
+            console.log('masterUid:', masterUser.uid);
+            console.log('appId:', appId);
+            console.log('status:', access && access.status);
+            console.log('active:', access && access.active);
+            console.log('result:', passed ? 'PASS' : 'FAIL - monitor only');
+            console.groupEnd();
+
+            if (!passed) {
+                showSaveStatus('⚠️ MasterOS 승인 상태 확인 필요 · 앱은 계속 실행됩니다.');
+            }
+            return { ok: passed, access };
+        } catch (err) {
+            console.warn('[Access Monitor] 승인 상태 확인 중 오류가 발생했습니다. 앱은 계속 실행합니다.', err);
+            showSaveStatus('⚠️ 승인 확인 오류 · 앱은 계속 실행됩니다.');
+            return { ok: false, reason: err && err.code ? err.code : 'unknown-error' };
+        }
+    }
+
     // =========================================================
 
     // MODULE: AUTH / LOGIN / SIGNUP
@@ -71,7 +111,10 @@
             showSaveStatus('🔐 로그인 확인 중...');
 
             // 1단계: 2번 사이트(master-app-platform)에 가입된 계정인지 확인
-            await masterAuth.signInWithEmailAndPassword(email, password);
+            const masterCredential = await masterAuth.signInWithEmailAndPassword(email, password);
+
+            // v0.10.14 Access Monitor: 차단하지 않고 승인 상태만 확인한다.
+            await checkMasterAppAccessMonitor(masterCredential.user);
 
             // 2단계: 기존 rooms 데이터가 있는 our-baby-care에도 로그인
             try {
