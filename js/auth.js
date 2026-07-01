@@ -46,8 +46,8 @@
 
     // =========================================================
     // MODULE: MASTEROS APP ACCESS DIAGNOSTIC
-    // v0.10.20 Safe Enforced Access Gate
-    // 목적: MasterOS 승인 사용자만 HearMe2nite 앱 실행을 허용한다. 기존 사용자 보호를 위해 READ_ERROR는 임시 통과한다.
+    // v0.10.19 Email Fallback Diagnostic Only
+    // 목적: 기존 사용자를 절대 차단하지 않고, UID 불일치 / 앱ID 불일치 / email 기반 승인 가능성을 확인한다.
     // MasterOS DB 기준 경로:
     // - userAppAccess/{masterUid}/baby-care-secure
     // - appAccessRequests/baby-care-secure/{masterUid}
@@ -268,74 +268,7 @@
         }
     }
 
-
-    // =========================================================
-    // MODULE: MASTEROS APP ACCESS ENFORCEMENT
-    // v0.10.20 Safe Enforced Access Gate
-    // 정책:
-    // - PASS / PASS_BY_EMAIL_* : 앱 실행 허용
-    // - NO_ACCESS_RECORD / BLOCKED : 앱 실행 차단
-    // - READ_ERROR / MASTER_AUTH_NOT_READY : 기존 사용자 보호를 위해 임시 통과 + 콘솔 경고
-    // =========================================================
-
-    function isAccessGateAllowed(result) {
-        if (!result) return true; // 예외적 상황은 기존 사용자 보호를 위해 통과
-        if (result.approved === true) return true;
-        if (result.result === 'PASS' || result.result === 'PASS_BY_EMAIL_USER_ACCESS' || result.result === 'PASS_BY_EMAIL_REQUEST') return true;
-        if (result.result === 'READ_ERROR' || result.result === 'MASTER_AUTH_NOT_READY') {
-            console.warn('[Access Gate] approval check unavailable, fail-open for existing-user safety', result);
-            return true;
-        }
-        return false;
-    }
-
-    function showAccessDeniedScreen(result) {
-        try {
-            disconnectAllListeners();
-            clearRoomInputs();
-            clearFormFieldsExceptSync();
-            setDataSectionsVisible(false);
-            resetProtectedDataUI();
-        } catch (err) {
-            console.warn('[Access Gate] cleanup warning', err);
-        }
-
-        const authBox = document.getElementById('authBox');
-        const appContent = document.getElementById('appContent');
-        if (appContent) appContent.style.display = 'none';
-        if (authBox) {
-            authBox.classList.remove('is-hidden');
-            authBox.style.display = 'grid';
-            let denied = document.getElementById('accessDeniedNotice');
-            if (!denied) {
-                denied = document.createElement('div');
-                denied.id = 'accessDeniedNotice';
-                denied.setAttribute('role', 'alert');
-                denied.style.cssText = 'grid-column:1/-1;max-width:620px;margin:0 auto 16px;padding:18px 20px;border-radius:22px;background:rgba(255,255,255,.94);box-shadow:0 18px 45px rgba(88,60,120,.18);border:1px solid rgba(166,121,214,.28);text-align:center;color:#3c3150;line-height:1.55;';
-                authBox.insertBefore(denied, authBox.firstChild);
-            }
-            denied.innerHTML = `
-                <strong style="display:block;font-size:1.08rem;margin-bottom:6px;">앱 사용 권한이 없습니다</strong>
-                <span style="display:block;font-size:.92rem;color:#6f6380;">MasterOS Platform에서 HearMe2nite 앱 승인을 받은 후 사용할 수 있습니다.</span>
-                <button type="button" onclick="location.href='https://hearu2nite.netlify.app/'" style="margin-top:12px;border:0;border-radius:999px;padding:10px 16px;background:linear-gradient(135deg,#ff7ab6,#8b5cf6);color:white;font-weight:800;cursor:pointer;">플랫폼으로 이동</button>
-            `;
-        }
-        showSaveStatus('🔒 앱 승인이 필요합니다.');
-        console.warn('[Access Gate] blocked user access', result);
-    }
-
-    async function enforceMasterAppAccess(options = {}) {
-        const result = await verifyMasterAppAccess(options);
-        const allowed = isAccessGateAllowed(result);
-        if (!allowed) {
-            showAccessDeniedScreen(result);
-            try { await babyAuth.signOut(); } catch(e) { console.warn(e); }
-            return { allowed: false, result };
-        }
-        const oldNotice = document.getElementById('accessDeniedNotice');
-        if (oldNotice) oldNotice.remove();
-        return { allowed: true, result };
-    }
+    // v0.10.19는 진단 전용입니다. 기존 사용자 보호를 위해 차단 UI/세션 차단 함수는 호출하지 않습니다.
 
     // =========================================================
 
@@ -367,13 +300,9 @@
             // 1단계: MasterOS 계정 로그인
             await masterAuth.signInWithEmailAndPassword(email, password);
 
-            // 2단계: MasterOS 승인 상태 확인. 승인된 사용자만 HearMe2nite 로그인 진행.
-            showSaveStatus('🔐 앱 승인 상태 확인 중...');
-            const gate = await enforceMasterAppAccess({ timeoutMs: 5000, label: 'Access Gate / Login' });
-            if (!gate.allowed) {
-                try { await masterAuth.signOut(); } catch(e) { console.warn(e); }
-                return;
-            }
+            // 2단계: MasterOS 승인 상태 진단만 수행한다. v0.10.18은 절대 로그인을 차단하지 않는다.
+            showSaveStatus('🔐 앱 승인 상태 진단 중...');
+            await verifyMasterAppAccess({ timeoutMs: 5000, label: 'Access Diagnostic / Login' });
 
             // 3단계: 기존 rooms 데이터가 있는 our-baby-care에도 로그인
             try {

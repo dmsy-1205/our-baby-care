@@ -85,14 +85,10 @@
             currentUser = user;
 
             if (user) {
-                // v0.10.20 Safe Enforced Access Gate
-                // 승인된 사용자만 앱 화면을 표시한다. READ_ERROR는 기존 사용자 보호를 위해 임시 통과한다.
-                showSaveStatus('🔐 앱 승인 상태 확인 중...');
-                const gate = await enforceMasterAppAccess({ timeoutMs: 5000, label: 'Access Gate / Session' });
-                if (!gate.allowed) {
-                    currentUser = null;
-                    return;
-                }
+                // v0.10.18 Access Diagnostic Only
+                // 승인 상태는 Console에 상세 출력하지만, 기존 사용자가 막히지 않도록 앱은 계속 실행한다.
+                showSaveStatus('🔐 앱 승인 상태 진단 중...');
+                await verifyMasterAppAccess({ timeoutMs: 5000, label: 'Access Diagnostic / Session' });
 
                 document.body.classList.add('hm-authenticated');
                 document.getElementById('authBox').classList.add('is-hidden');
