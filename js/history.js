@@ -300,6 +300,7 @@ function openHistoryPanelModal() {
             record.wakeTime ? `☀️ 기상: ${record.wakeTime}` : '',
             record.sleepTime ? `🌙 취침 예정: ${record.sleepTime}` : '',
             record.water ? `💧 수분: ${record.water}` : '',
+            record.exercise ? `🏃 운동: ${record.exercise}` : '',
             record.weight ? `⚖️ 체중: ${record.weight}` : ''
         ].filter(Boolean).join('\n');
         content.innerHTML = `
@@ -632,7 +633,7 @@ function openHistoryDetailModal(date) {
     title.innerText = `${getHistoryMoodIcon(record)} ${formatHistoryDateLabel(date)}`;
     const missionText = getHistoryMissionText(record);
     const meals = [record.mealBreakfast ? `아침: ${record.mealBreakfast}` : '', record.mealLunch ? `점심: ${record.mealLunch}` : '', record.mealDinner ? `저녁: ${record.mealDinner}` : ''].filter(Boolean).join('\n');
-    const dailyBase = [record.wakeTime ? `☀️ 기상: ${record.wakeTime}` : '', record.sleepTime ? `🌙 취침 예정: ${record.sleepTime}` : '', record.water ? `💧 수분: ${record.water}` : '', record.weight ? `⚖️ 체중: ${record.weight}` : ''].filter(Boolean).join('\n');
+    const dailyBase = [record.wakeTime ? `☀️ 기상: ${record.wakeTime}` : '', record.sleepTime ? `🌙 취침 예정: ${record.sleepTime}` : '', record.water ? `💧 수분: ${record.water}` : '', record.exercise ? `🏃 운동: ${record.exercise}` : '', record.weight ? `⚖️ 체중: ${record.weight}` : ''].filter(Boolean).join('\n');
     const customRoutineText = buildHistoryCustomRoutineText(record);
     const summaryChips = [record.moodLabel && record.moodLabel !== '기록 없음' ? record.moodLabel : '', missionText ? `🎯 ${missionText}` : '', customRoutineText ? '🧩 맞춤 루틴' : '', record.photo ? '📷 사진 있음' : '', record.dailyChoiceLabel && record.dailyChoiceLabel !== '기록 없음' ? record.dailyChoiceLabel : ''].filter(Boolean).map(makeHistoryChip).join('');
     content.innerHTML = `
@@ -674,7 +675,7 @@ function hmHistoryRecordText(record) {
     if (!record) return '';
     const customText = typeof buildHistoryCustomRoutineText === 'function' ? buildHistoryCustomRoutineText(record) : '';
     const parts = [
-        record.date, record.wakeTime, record.water, record.weight,
+        record.date, record.wakeTime, record.water, record.exercise, record.weight,
         record.mealBreakfast, record.mealLunch, record.mealDinner,
         record.goingOut, record.sleepTime, record.diary, record.replyMessage,
         record.moodLabel, record.moodNote, record.missionSummary,
@@ -725,6 +726,7 @@ function hmHistorySummaryChips(record) {
     return [
         record?.moodLabel && record.moodLabel !== '기록 없음' ? record.moodLabel : '',
         record?.water ? `💧 ${record.water}` : '',
+        record?.exercise ? `🏃 ${record.exercise}` : '',
         record?.weight ? `⚖️ ${record.weight}` : '',
         missionText ? `🎯 ${missionText}` : '',
         hmHistoryRecordHasRoutine(record) ? '🧩 맞춤 루틴' : '',

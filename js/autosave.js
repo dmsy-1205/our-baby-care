@@ -90,6 +90,7 @@
             if (record) {
                 safeUpdateField('wakeTime', record.wakeTime);
                 safeUpdateField('weight', record.weight);
+                safeUpdateField('exercise', record.exercise);
                 safeUpdateField('mealBreakfast', record.mealBreakfast);
                 safeUpdateField('mealLunch', record.mealLunch);
                 safeUpdateField('mealDinner', record.mealDinner);
@@ -217,6 +218,7 @@
                 wakeTime: record.wakeTime,
                 water: record.water,
                 weight: record.weight,
+                exercise: record.exercise,
                 mealBreakfast: record.mealBreakfast,
                 mealLunch: record.mealLunch,
                 mealDinner: record.mealDinner,
@@ -259,6 +261,7 @@
 
         const wakeTime = document.getElementById('wakeTime').value || '기록 없음';
         const weight = document.getElementById('weight').value || '기록 없음';
+        const exercise = document.getElementById('exercise').value || '기록 없음';
         const water = currentWater > 0 ? `${currentWater}ML` : '기록 없음';
         const mealBreakfast = document.getElementById('mealBreakfast').value || '기록 없음';
         const mealLunch = document.getElementById('mealLunch').value || '기록 없음';
@@ -283,6 +286,7 @@
         const reportText = `📅 [${date}] 아가의 하루 기록 💕\n\n` +
                            `☀️ 기상 시간: ${wakeTime}\n` +
                            `💧 물 마시기: ${water}\n` +
+                           `🏃 운동: ${exercise}\n` +
                            `⚖️ 몸무게: ${weight}\n\n` +
                            `🥗 식사 기록:\n` +
                            `  - 아침: ${mealBreakfast}\n` +
@@ -298,7 +302,7 @@
         updateDailyCards();
 
         const newRecord = {
-            date, wakeTime, water: `${currentWater}ML`, weight,
+            date, wakeTime, water: `${currentWater}ML`, weight, exercise,
             mealBreakfast, mealLunch, mealDinner,
             goingOut, sleepTime, diary, replyMessage,
             missions, mood, moodLabel, moodNote, missionSummary,

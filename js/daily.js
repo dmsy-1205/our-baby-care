@@ -86,6 +86,12 @@
             weightSub.innerText = text || '아직 입력하지 않았어요.';
         }
 
+        const exerciseSub = document.getElementById('exerciseCardSub');
+        if (exerciseSub) {
+            const text = getTrimmedValue('exercise');
+            exerciseSub.innerText = text || '아직 기록하지 않았어요.';
+        }
+
         const waterSub = document.getElementById('waterCardSub');
         if (waterSub) waterSub.innerText = `${currentWater || 0}ML · 눌러서 추가하세요.`;
 
@@ -307,7 +313,7 @@
     // =========================================================
 
     function clearFormFieldsExceptSync() {
-        const fields = ['wakeTime', 'weight', 'mealBreakfast', 'mealLunch', 'mealDinner', 'goingOut', 'sleepTime', 'diary', 'replyMessage', 'moodNote', 'rewardNote'];
+        const fields = ['wakeTime', 'exercise', 'weight', 'mealBreakfast', 'mealLunch', 'mealDinner', 'goingOut', 'sleepTime', 'diary', 'replyMessage', 'moodNote', 'rewardNote'];
         fields.forEach(id => {
             const el = document.getElementById(id);
             if (el && document.activeElement !== el) el.value = '';
