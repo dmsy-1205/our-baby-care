@@ -25,7 +25,6 @@
         if (typeof hmStopCustomRoutineCards === 'function') hmStopCustomRoutineCards();
         if (chatRef) chatRef.off();
         if (ownerNoteRef) ownerNoteRef.off();
-        if (typeof hmStopPresence === 'function') hmStopPresence();
         currentRoomRef = null;
         entireRoomRef = null;
         chatRef = null;
