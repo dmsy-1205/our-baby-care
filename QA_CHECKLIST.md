@@ -1,7 +1,11 @@
-# v0.10.20 QA Checklist
+# QA Checklist v0.10.22
 
-1. 승인된 기존 사용자 로그인 → 앱 정상 진입
-2. Console: `[Access Gate / Login] ... PASS` 확인
-3. 기록실 / 방 / 채팅 / AutoSave 정상 확인
-4. 미승인 계정 로그인 → 권한 없음 화면 확인
-5. 문제 발생 시 즉시 v0.10.13 또는 v0.10.19로 롤백
+- [ ] 승인 owner 로그인 PASS
+- [ ] owner 기존 방 자동 복구
+- [ ] owner 새로고침 후 로그인 화면 깜빡임 없음
+- [ ] 승인 partner 로그인 PASS
+- [ ] partner 기존 방 자동 복구
+- [ ] partner 새로고침 후 기존 방 유지
+- [ ] 로그아웃 시 room.js uid/null 오류 없음
+- [ ] 미승인 사용자 차단 유지
+- [ ] 기록실/채팅/AutoSave 정상

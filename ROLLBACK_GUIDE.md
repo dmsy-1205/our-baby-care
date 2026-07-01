@@ -1,4 +1,4 @@
 # Rollback
 
-기존 사용자가 차단되면 즉시 v0.10.13 Home Final Candidate로 롤백하세요.
-진단이 필요하면 v0.10.19 Email Fallback Diagnostic을 사용하세요.
+기존 방 복구에 문제가 있으면 v0.10.20 또는 v0.10.13 zip으로 즉시 되돌립니다.
+DB는 추가 수정하지 말고 콘솔 로그를 확인합니다.

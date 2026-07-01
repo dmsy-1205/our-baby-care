@@ -167,7 +167,7 @@
                 if (invitePanel) { invitePanel.open = false; invitePanel.style.display = ''; }
                 if (joinInvitePanel) { joinInvitePanel.open = false; joinInvitePanel.style.display = ''; }
                 if (legacyRoomPanel) { legacyRoomPanel.open = false; legacyRoomPanel.style.display = ''; }
-                loadMyRoomList();
+                if (currentUser) loadMyRoomList();
             } else {
                 if (createBtn) { createBtn.style.display = 'none'; }
                 if (invitePanel) { invitePanel.open = false; invitePanel.style.display = 'none'; }
@@ -183,7 +183,7 @@
             if (invitePanel) { invitePanel.open = false; invitePanel.style.display = ''; }
             if (joinInvitePanel) { joinInvitePanel.open = false; joinInvitePanel.style.display = ''; }
             if (legacyRoomPanel) { legacyRoomPanel.open = false; legacyRoomPanel.style.display = ''; }
-            loadMyRoomList();
+            if (currentUser) loadMyRoomList();
         }
         updateRelationshipRoleUI();
         updateOwnerOnlySections();
@@ -365,7 +365,8 @@
 
     async function loadMyRoomList() {
         const box = document.getElementById('ownedRoomsList');
-        if (!box || !currentUser) return;
+        const uid = currentUser && currentUser.uid;
+        if (!box || !uid) return;
         box.innerHTML = '<div class="empty-message">이전 공간을 불러오는 중입니다...</div>';
         try {
             const snap = await db.ref(`userRooms/${currentUser.uid}`).once('value');
@@ -440,7 +441,7 @@
             pendingRelationshipRole = memberData.relationshipRole || pendingRelationshipRole || '';
             await saveActiveRoom(roomCode, memberData.role || 'member', memberData.relationshipRole || pendingRelationshipRole);
             connectAndListenFirebase();
-            loadMyRoomList();
+            if (currentUser) loadMyRoomList();
             showSaveStatus('☁️ 이전 공간 연결 완료');
         } catch (err) {
             console.error(err);

@@ -290,6 +290,7 @@
     }
 
     function showAccessDeniedScreen(result) {
+        document.body.classList.remove('hm-booting');
         try {
             disconnectAllListeners();
             clearRoomInputs();
@@ -449,6 +450,61 @@
     // 사용자별 마지막 활성 방 복구
     // users/{uid}/activeRoom 값을 읽어 기존 방을 자동 연결한다.
     // 주의: 공유코드를 localStorage에 저장하지 않는 현재 보안 원칙을 유지한다.
+    async function hmActivateRecoveredRoom(roomCode, defaultRelationshipRole = '') {
+        if (!currentUser || !roomCode) return false;
+        const allowed = await canCurrentUserAccessRoom(roomCode);
+        if (!allowed) return false;
+
+        activeRoomCode = roomCode;
+        activeRoomRole = await getCurrentUserRoomRole(roomCode) || 'member';
+        activeRelationshipRole = await getCurrentUserRelationshipRole(roomCode) || defaultRelationshipRole || (activeRoomRole === 'owner' ? 'dom' : 'sub');
+        pendingRelationshipRole = activeRelationshipRole;
+
+        const roomInput = document.getElementById('roomCode');
+        if (roomInput) roomInput.value = roomCode;
+
+        const updates = {};
+        updates[`users/${currentUser.uid}/activeRoom`] = roomCode;
+        updates[`users/${currentUser.uid}/email`] = normalizeEmail(currentUser.email);
+        updates[`users/${currentUser.uid}/lastLogin`] = firebase.database.ServerValue.TIMESTAMP;
+        if (activeRelationshipRole) updates[`users/${currentUser.uid}/relationshipRole`] = activeRelationshipRole;
+        updates[`userRooms/${currentUser.uid}/${roomCode}`] = true;
+        await db.ref().update(updates);
+
+        updateCurrentRoomInfo();
+        connectAndListenFirebase();
+        return true;
+    }
+
+    async function hmRecoverRoomFromMembership(defaultRelationshipRole = '') {
+        if (!currentUser) return false;
+        try {
+            const userRoomsSnap = await db.ref(`userRooms/${currentUser.uid}`).once('value');
+            const userRooms = userRoomsSnap.val() || {};
+            for (const roomCode of Object.keys(userRooms).filter(Boolean)) {
+                if (await hmActivateRecoveredRoom(roomCode, defaultRelationshipRole)) {
+                    showSaveStatus('☁️ 기존 공간 자동 복구 완료');
+                    return true;
+                }
+            }
+
+            // Legacy fallback: userRooms가 비어 있거나 손상된 경우 roomMembers에서 내 UID를 역검색한다.
+            const membersSnap = await db.ref('roomMembers').once('value');
+            const allMembers = membersSnap.val() || {};
+            for (const roomCode of Object.keys(allMembers)) {
+                if (allMembers[roomCode] && allMembers[roomCode][currentUser.uid]) {
+                    if (await hmActivateRecoveredRoom(roomCode, defaultRelationshipRole)) {
+                        showSaveStatus('☁️ 기존 공간 자동 복구 완료');
+                        return true;
+                    }
+                }
+            }
+        } catch (err) {
+            console.warn('[Room Recovery] 기존 공간 자동 복구 실패:', err);
+        }
+        return false;
+    }
+
     async function loadUserActiveRoom() {
         if (!currentUser) return;
         try {
@@ -459,33 +515,21 @@
                 updateRelationshipRoleUI();
                 updateOwnerOnlySections();
             }
+
             const snap = await db.ref(`users/${currentUser.uid}/activeRoom`).once('value');
             const savedRoom = snap.val();
             if (savedRoom) {
-                // 여기서만 자동 입력합니다. 다른 계정의 브라우저 저장값은 사용하지 않습니다.
-                document.getElementById('roomCode').value = savedRoom;
-                const allowed = await canCurrentUserAccessRoom(savedRoom);
-                if (allowed) {
-                    activeRoomCode = savedRoom;
-                    activeRoomRole = await getCurrentUserRoomRole(savedRoom) || 'member';
-                    activeRelationshipRole = await getCurrentUserRelationshipRole(savedRoom) || defaultRelationshipRole || (activeRoomRole === 'owner' ? 'dom' : 'sub');
-                    pendingRelationshipRole = activeRelationshipRole;
-                    if (activeRelationshipRole && !defaultRelationshipRole) {
-                        await db.ref(`users/${currentUser.uid}/relationshipRole`).set(activeRelationshipRole);
-                    }
-                    updateCurrentRoomInfo();
-                    connectAndListenFirebase();
-                } else {
-                    await db.ref(`users/${currentUser.uid}/activeRoom`).remove();
-                    clearRoomInputs();
-                    showSaveStatus('🔒 이 계정은 저장된 공유코드 방의 허용 사용자가 아닙니다. 공유코드를 다시 연결해 주세요.');
-                    resetProtectedDataUI('기존 방 연결 또는 새 초대를 진행해 주세요. ✨');
-                }
-            } else {
-                showSaveStatus('🔑 방을 만들거나 초대코드로 참여해 주세요.');
-                resetProtectedDataUI('방을 만들거나 초대코드로 참여하면 기록이 표시됩니다. ✨');
-                updateRelationshipRoleUI();
+                const restored = await hmActivateRecoveredRoom(savedRoom, defaultRelationshipRole);
+                if (restored) return;
+                console.warn('[Room Recovery] activeRoom 접근 실패, membership 기반 복구를 시도합니다:', savedRoom);
             }
+
+            const recovered = await hmRecoverRoomFromMembership(defaultRelationshipRole);
+            if (recovered) return;
+
+            showSaveStatus('🔑 방을 만들거나 초대코드로 참여해 주세요.');
+            resetProtectedDataUI('방을 만들거나 초대코드로 참여하면 기록이 표시됩니다. ✨');
+            updateRelationshipRoleUI();
         } catch (err) {
             console.error(err);
             showSaveStatus('❌ 저장된 공유코드 확인 실패');

@@ -1,7 +1,19 @@
-# HearMe2nite v0.10.20 Safe Enforced Access Gate
+# HearMe2nite v0.10.22 Room Boot Recovery Hotfix
 
-- MasterOS 승인 판정 PASS 계정만 앱 실행 허용
-- NO_ACCESS_RECORD / BLOCKED 계정은 권한 없음 화면 표시
-- READ_ERROR / MASTER_AUTH_NOT_READY는 기존 사용자 보호를 위해 임시 통과
-- 승인 확인 기준: MasterOS Realtime DB `userAppAccess` + `appAccessRequests` + email fallback
-- Room / History / AutoSave / Chat 저장 구조 변경 없음
+## 목적
+- 기존 방에서 사용자가 튕겨나가거나 새 방 생성 화면으로 떨어지는 문제를 안정화합니다.
+- 로그인/승인/방 복구 순서를 안전하게 정리합니다.
+
+## 수정
+- room.js 내부 일부 함수에서 정의되지 않은 uid 참조를 currentUser.uid로 수정했습니다.
+- users/{uid}/activeRoom이 비어 있거나 접근 실패해도 userRooms와 roomMembers 기준으로 기존 방을 자동 복구합니다.
+- 복구 성공 시 users/{uid}/activeRoom, userRooms/{uid}/{roomCode}, users/{uid}/relationshipRole을 다시 보정합니다.
+- Access Gate, History Render, AutoSave 저장 구조는 변경하지 않았습니다.
+
+## 테스트 순서
+1. 승인된 owner 계정 로그인
+2. 새로고침 후 dmsy 방 유지 확인
+3. 승인된 partner 계정 로그인
+4. 새로고침 후 dmsy 방 유지 확인
+5. 로그아웃 후 재로그인 확인
+6. 미승인 계정 차단 확인
