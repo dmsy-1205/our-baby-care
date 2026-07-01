@@ -103,6 +103,7 @@
         resetProtectedDataUI();
 
         babyAuth.onAuthStateChanged(async (user) => {
+            try { if (window.hmPresenceStop) window.hmPresenceStop(); } catch(e) { console.warn(e); }
             disconnectAllListeners();
             clearRoomInputs();
             clearFormFieldsExceptSync();

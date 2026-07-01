@@ -429,6 +429,7 @@
     // =========================================================
 
     async function logoutUser() {
+        try { if (window.hmPresenceStop) window.hmPresenceStop(); } catch(e) { console.warn(e); }
         disconnectAllListeners();
         activeRoomCode = "";
         activeRoomRole = "";

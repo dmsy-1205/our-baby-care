@@ -12,6 +12,7 @@
     let membersRef = null;
     let selfRef = null;
     let activePresenceRoom = null;
+    let activePresenceUid = null;
 
     const $ = (id) => document.getElementById(id);
     const safe = (value) => String(value == null ? '' : value).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
@@ -103,15 +104,27 @@
     function stop(){
         try { if (selfRef) selfRef.update({ online:false, lastSeen: firebase.database.ServerValue.TIMESTAMP }); } catch(e) {}
         try { if (membersRef) membersRef.off(); } catch(e) {}
-        membersRef = null; selfRef = null; activePresenceRoom = null;
+        membersRef = null; selfRef = null; activePresenceRoom = null; activePresenceUid = null;
     }
     function start(){
         const roomCode = getRoomCode();
         const user = getUser();
         if (!roomCode || !user || typeof db === 'undefined' || !db) { render(null); return; }
-        if (activePresenceRoom === roomCode && membersRef) return;
+        if (activePresenceRoom === roomCode && activePresenceUid === user.uid && membersRef) {
+            try {
+                if (selfRef) selfRef.update({
+                    online: true,
+                    lastSeen: firebase.database.ServerValue.TIMESTAMP,
+                    updatedAt: firebase.database.ServerValue.TIMESTAMP,
+                    email: emailOf(user),
+                    relationshipRole: getRole()
+                });
+            } catch(e) {}
+            return;
+        }
         stop();
         activePresenceRoom = roomCode;
+        activePresenceUid = user.uid;
         try {
             selfRef = db.ref(`roomMembers/${roomCode}/${user.uid}/presence`);
             selfRef.update({
