@@ -6644,3 +6644,23 @@ body.hm-phone-viewport .daily-modal {
         gap: 3px;
     }
 }
+
+
+/* =========================================================
+   RC2.14 Home UX Refactoring
+   - 기존 오늘의 미션은 삭제하지 않고 홈에서만 숨김 처리합니다.
+   - 오늘의 약속을 오늘의 요약 바로 아래로 이동합니다.
+   - 요약 카드는 모바일에서도 한눈에 보이도록 3열 기준을 유지합니다.
+   ========================================================= */
+.hm-legacy-mission-hidden { display: none !important; }
+.hm-today-promise-section { margin: 0 0 18px; }
+.hm-today-promise-section .custom-routine-title { margin-top: 0; }
+.hm-home-summary-grid { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+.hm-home-summary-grid .hm-beta-tile { min-height: 66px; display: flex; flex-direction: column; justify-content: center; }
+.hm-home-summary-grid .hm-beta-tile strong { font-size: .9rem; }
+@media (max-width: 640px) {
+    .hm-home-summary-grid { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; gap: 8px; }
+    .hm-home-summary-grid .hm-beta-tile { border-radius: 16px; padding: 10px 9px; min-height: 64px; }
+    .hm-home-summary-grid .hm-beta-tile small { font-size: .69rem; margin-bottom: 5px; }
+    .hm-home-summary-grid .hm-beta-tile strong { font-size: .82rem; }
+}

@@ -18,6 +18,40 @@
         const done = arr.filter(m => m && m.done).length;
         return { done, total: arr.length, pct: Math.round(done / arr.length * 100) };
     }
+    function routineRatio(){
+        try {
+            const cards = (typeof hmCustomCardRows === 'function') ? hmCustomCardRows(false) : [];
+            let total = 0; let done = 0;
+            cards.forEach(card => {
+                const items = (typeof hmCustomItemRows === 'function') ? hmCustomItemRows(card) : [];
+                items.forEach(item => {
+                    total += 1;
+                    const saved = (window.hmCustomValues || hmCustomValues || {})?.[card.id]?.[item.id];
+                    if (!saved) return;
+                    if (item.type === 'checkbox') { if (saved.value === true) done += 1; return; }
+                    if (saved.value !== undefined && saved.value !== null && String(saved.value).trim() !== '') done += 1;
+                });
+            });
+            return { cards: cards.length, done, total, pct: total ? Math.round(done / total * 100) : 0 };
+        } catch(e) { return { cards: 0, done: 0, total: 0, pct: 0 }; }
+    }
+    function moveTodayPromiseSection(){
+        try {
+            const dash = $('hmProductDashboard');
+            const title = $('customRoutineHomeTitle');
+            const wrap = document.querySelector('.custom-routine-home-wrap');
+            const toolbar = $('customRoutineToolbar');
+            if (!dash || !title || !wrap || title.dataset.hmMoved === '1') return;
+            const holder = document.createElement('section');
+            holder.id = 'hmTodayPromiseSection';
+            holder.className = 'hm-today-promise-section';
+            dash.insertAdjacentElement('afterend', holder);
+            holder.appendChild(title);
+            holder.appendChild(wrap);
+            if (toolbar) holder.appendChild(toolbar);
+            title.dataset.hmMoved = '1';
+        } catch(e) {}
+    }
     function getNextAnniversary(){
         try {
             const items = typeof hmGetAllAnniversaryItems === 'function' ? hmGetAllAnniversaryItems() : [];
@@ -32,19 +66,25 @@
         const box = document.createElement('section');
         box.id='hmProductDashboard'; box.className='hm-beta-dashboard';
         box.innerHTML=`<div class="hm-beta-dashboard-head"><div><span>Home</span><strong>오늘의 요약</strong></div></div>
-        <div class="hm-beta-dashboard-grid">
+        <div class="hm-beta-dashboard-grid hm-home-summary-grid">
         <div class="hm-beta-tile"><small>오늘 기록</small><strong id="hmProductTodayStatus">대기중</strong></div>
-        <div class="hm-beta-tile"><small>미션</small><strong id="hmProductMissionStatus">-</strong></div>
+        <div class="hm-beta-tile"><small>수분</small><strong id="hmProductWaterStatus">0ML</strong></div>
+        <div class="hm-beta-tile"><small>체중</small><strong id="hmProductWeightStatus">-</strong></div>
+        <div class="hm-beta-tile"><small>오늘의 약속</small><strong id="hmProductPromiseStatus">-</strong></div>
         <div class="hm-beta-tile"><small>다음 기념일</small><strong id="hmProductNextAnniversary">-</strong></div></div>`;
         anchor.insertAdjacentElement('afterend', box);
+        setTimeout(moveTodayPromiseSection, 0);
     }
     function updateDashboard(){
         if (HM_STAGE < 2) return;
         buildDashboard();
         const rec=getCurrentRecord();
         const todayStatus=$('hmProductTodayStatus'); if(todayStatus) todayStatus.textContent = rec ? '저장됨' : (($('recordDate')?.value||'') ? '작성 중' : '날짜 선택');
-        const ratio=missionRatio(rec); const missionStatus=$('hmProductMissionStatus'); if(missionStatus) missionStatus.textContent = ratio ? `${ratio.done}/${ratio.total} · ${ratio.pct}%` : '기록 없음';
+        const water=$('hmProductWaterStatus'); if(water) { let w = 0; try { w = Number(window.currentWater || currentWater || 0); } catch(e) { w = 0; } water.textContent = w ? `${w}ML` : '0ML'; }
+        const weight=$('hmProductWeightStatus'); if(weight) { const value = (($('weight')?.value || rec?.weight || '') + '').trim(); weight.textContent = value || '-'; }
+        const promise=routineRatio(); const promiseStatus=$('hmProductPromiseStatus'); if(promiseStatus) promiseStatus.textContent = promise.total ? `${promise.done}/${promise.total}` : (promise.cards ? '항목 없음' : '등록 없음');
         const next=getNextAnniversary(); const ann=$('hmProductNextAnniversary'); if(ann) ann.textContent = next ? `${next.icon || '💕'} ${next.title || '기념일'}` : '등록 없음';
+        moveTodayPromiseSection();
     }
     function renderMonthlyStats(){
         if (!HM_HISTORY_TOOLS_ENABLED || HM_STAGE < 3) return;
@@ -90,10 +130,12 @@
         document.documentElement.setAttribute('data-hm-version','0.9.9');
         if (HM_STAGE >= 7) document.body.classList.add('hm-accessibility-polish');
         updateDashboard();
+        moveTodayPromiseSection();
         const oldHistoryTools = $('hmProductHistoryTools');
         if (oldHistoryTools) oldHistoryTools.remove();
         if (HM_HISTORY_TOOLS_ENABLED) { buildHistoryTools(); renderMonthlyStats(); renderTimeline(); }
     }
+    window.hmUpdateHomeSummary = updateDashboard;
     document.addEventListener('DOMContentLoaded',()=>setTimeout(applyPolish,200));
     document.addEventListener('input',e=>{ if(e.target && e.target.closest('#appContent')) setTimeout(updateDashboard,0); },true);
     document.addEventListener('change',e=>{ if(e.target && e.target.closest('#appContent')) setTimeout(updateDashboard,0); },true);
