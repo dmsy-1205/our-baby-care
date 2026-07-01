@@ -37,13 +37,8 @@
 
     const masterAuth = firebase.auth(masterApp);
     const babyAuth = firebase.auth(babyApp);
-    const masterDb = firebase.database(masterApp);
     const db = firebase.database(babyApp);
     const auth = babyAuth;
-
-    // MasterOS App Access Gate
-    // 승인 확인은 MasterOS UID 기준으로 userAppAccess/{masterUid}/baby-care-secure를 읽는다.
-    const HM_MASTER_APP_ID = 'baby-care-secure';
 
     let currentUser = null;
     let activeRoomCode = "";

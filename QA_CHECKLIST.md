@@ -1,7 +1,8 @@
-# v0.10.19 QA Checklist
+# QA Checklist v0.10.13
 
-- 기존 승인 사용자 로그인 가능
-- Console에 `[Access Diagnostic / Login]` 출력
-- 결과가 PASS / PASS_BY_EMAIL_USER_ACCESS / PASS_BY_EMAIL_REQUEST 중 하나인지 확인
-- NO_ACCESS_RECORD이면 Full diagnostic object에서 masterEmail, matchedUserUids, requestsByEmail 확인
-- Room / History / AutoSave / Chat 정상 확인
+- [ ] 로그인 전 로그인 화면만 표시
+- [ ] 로그인 후 홈 화면만 표시
+- [ ] 로그아웃 후 로그인 화면 복귀
+- [ ] PC / Mobile / Fold / Tablet 확인
+- [ ] 기록 날짜, 미션, 기록 카드 클릭 정상
+- [ ] 채팅/기록실/기념일 기존 기능 정상
