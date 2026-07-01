@@ -7796,3 +7796,138 @@ button:active {
     .history-launch-icon,
     .history-day-icon { width: 46px; height: 46px; min-width: 46px; }
 }
+
+/* =========================================================
+   RC2.17 Pixel Polish
+   Scope: CSS-only spacing polish. No Firebase / Room / Presence / History JS changes.
+   - Keep "우리의 공간" card unchanged.
+   - Slightly reduce chat height and vertical heaviness.
+   - Tighten header/login spacing.
+   - Normalize card gaps without changing layout structure.
+   ========================================================= */
+:root {
+    --hm-rc217-gap-tight: 12px;
+    --hm-rc217-gap-normal: 16px;
+    --hm-rc217-chat-height: 205px;
+}
+
+/* Header: keep current branding, reduce floating vertical space only */
+.container > .app-title-row {
+    margin-bottom: 4px !important;
+}
+.container > .app-subtitle {
+    margin-top: 6px !important;
+    margin-bottom: 4px !important;
+}
+.container > .app-meta-row {
+    margin-top: 3px !important;
+    margin-bottom: 10px !important;
+}
+
+/* Login/session card: slightly slimmer, not redesigned */
+.user-bar {
+    min-height: 54px !important;
+    padding: 10px 13px !important;
+    margin: 8px 0 13px !important;
+}
+.user-bar .btn-small,
+.user-bar .btn-secondary {
+    min-height: 42px !important;
+    padding-top: 9px !important;
+    padding-bottom: 9px !important;
+}
+
+/* Keep room card stable; only protect it from broad polish overrides */
+.room-settings-card {
+    min-height: 88px !important;
+}
+
+/* Overall rhythm: reduce empty vertical gaps but keep one-column emotional layout */
+.container .input-group {
+    margin-bottom: var(--hm-rc217-gap-normal) !important;
+}
+.container > .row,
+.compact-metrics-row {
+    gap: var(--hm-rc217-gap-normal) !important;
+    margin-bottom: var(--hm-rc217-gap-normal) !important;
+}
+.mission-compact-card,
+.history-launch-card,
+.daily-card {
+    box-shadow: 0 10px 26px rgba(67, 53, 105, 0.07) !important;
+}
+
+/* Today promise: subtle emphasis without layout change */
+#todayPromiseCard,
+.mission-compact-card {
+    min-height: 98px !important;
+}
+
+/* Chat: reduce height and input bulk. Keep all chat JS / DOM unchanged. */
+#chatSection {
+    margin-top: 16px !important;
+    margin-bottom: 16px !important;
+    padding: 16px !important;
+}
+#chatMessages {
+    height: var(--hm-rc217-chat-height) !important;
+    max-height: var(--hm-rc217-chat-height) !important;
+    padding: 10px !important;
+    margin-bottom: 9px !important;
+}
+#chatSection > div:last-child {
+    gap: 7px !important;
+}
+#chatSender,
+#chatInput {
+    min-height: 42px !important;
+    padding-top: 9px !important;
+    padding-bottom: 9px !important;
+}
+#chatSection button {
+    min-height: 42px !important;
+    padding-top: 9px !important;
+    padding-bottom: 9px !important;
+}
+
+/* Final copy button: slightly less tall so it does not overpower the page */
+.btn-main {
+    min-height: 48px !important;
+}
+
+@media (min-width: 900px) {
+    body {
+        padding-top: 18px !important;
+    }
+    .container {
+        margin-bottom: 18px !important;
+    }
+    #chatMessages {
+        height: 195px !important;
+        max-height: 195px !important;
+    }
+}
+
+@media (max-width: 430px) {
+    :root {
+        --hm-rc217-chat-height: 210px;
+    }
+    .container > .app-title-row {
+        margin-bottom: 5px !important;
+    }
+    .container > .app-subtitle {
+        margin-bottom: 5px !important;
+    }
+    .user-bar {
+        min-height: 56px !important;
+    }
+    #chatSection {
+        padding: 15px !important;
+        margin-top: 14px !important;
+        margin-bottom: 14px !important;
+    }
+    #chatMessages {
+        height: var(--hm-rc217-chat-height) !important;
+        max-height: var(--hm-rc217-chat-height) !important;
+    }
+}

@@ -40,3 +40,9 @@
 - 하루 기록 날짜별 카드 리스트 정리
 - 기록실 여백/카드 간격 정리
 - Firebase/Room/History 데이터 구조 변경 없음
+
+## RC2.17 Pixel Polish
+
+- CSS-only polish based on RC2.16 Branding STEP1.
+- Reduced chat height and tightened header/login spacing.
+- Kept room, Firebase, Presence, History, Invite logic unchanged.
