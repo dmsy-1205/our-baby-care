@@ -1,3 +1,9 @@
+
+## RC2.14.3 Home Summary Fixed Modal
+- 오늘의 요약 아이템 폭 고정
+- 단위 제거 및 짧은 표시로 모바일 잘림 방지
+- 오늘의 요약 클릭 시 읽기 전용 중앙 모달 추가
+
 # HearMe2nite v0.10.22 Room Boot Recovery Hotfix
 
 ## 목적
@@ -17,3 +23,24 @@
 4. 새로고침 후 dmsy 방 유지 확인
 5. 로그아웃 후 재로그인 확인
 6. 미승인 계정 차단 확인
+
+
+## RC2.14.2
+- 오늘의 요약을 얇은 아이콘 상태바로 축소.
+- 오늘의 약속 카드 크기 유지 및 홈 높이 절감.
+
+
+## RC2.15.1 History Cleanup Step 1
+- 기록실 중복/저가치 정보 제거.
+
+
+## RC2.15.2 Anniversary Upcoming Step 2
+- 기념일 패널을 다가오는 일정 중심으로 재구성.
+
+
+## RC2.15.3 Calendar Anniversary Markers Step 3
+- 캘린더 헤더 D+ 표시 및 일정 아이콘 보강.
+
+
+## RC2.15.4 History UX Final
+- 기록실 UX 최종 안내 문구 및 누적 안정화.

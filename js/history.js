@@ -402,18 +402,12 @@ function openHistoryPanelModal() {
 
     // =========================================================
 
-    // 기록실 상단 요약 렌더링
-    // 총 기록일/사진/미션/최근 기록 정보를 카드로 보여준다.
+    // RC2.15.1: 사용 가치가 낮은 하단 통계 카드(총 기록일/사진/미션/최근 기록)는 숨긴다.
     function renderHistoryHero(daysData) {
         const box = document.getElementById('historyHero');
         if (!box) return;
-        const stats = getHistoryOverviewStats(daysData || {});
-        box.innerHTML = `
-            <div class="history-hero-tile"><span class="history-hero-value">${stats.total}</span><span class="history-hero-label">총 기록일</span></div>
-            <div class="history-hero-tile"><span class="history-hero-value">${stats.photos}</span><span class="history-hero-label">사진 기록</span></div>
-            <div class="history-hero-tile"><span class="history-hero-value">${stats.missionDays}</span><span class="history-hero-label">미션 기록일</span></div>
-            <div class="history-hero-tile"><span class="history-hero-value">${escapeHtml(stats.latest)}</span><span class="history-hero-label">최근 기록</span></div>
-        `;
+        box.innerHTML = '';
+        box.style.display = 'none';
     }
 
     function renderCalendar(daysData) {

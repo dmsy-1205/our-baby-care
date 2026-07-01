@@ -107,7 +107,7 @@ function hmBuildCustomRoutineReportText() {
             if (value === undefined || value === null || value === '') value = '기록 없음';
             lines.push(`  - ${item.label || '항목'}: ${value}`);
         });
-        if (lines.length) blocks.push(`💜 ${card.title || '오늘의 약속'}\n${lines.join('\n')}`);
+        if (lines.length) blocks.push(`💜 ${hmPromiseDisplayTitle(card.title)}\n${lines.join('\n')}`);
     });
     return blocks.length ? `\n\n${blocks.join('\n\n')}` : '';
 }
@@ -177,7 +177,7 @@ function renderCustomRoutineHub() {
         const sub = items.length ? `${doneCount}/${items.length} 입력 완료` : '항목이 없습니다.';
         return `<button type="button" class="custom-routine-hub-row" onclick="openCustomRoutineInput('${escapeHtml(card.id)}')">
             <span class="custom-routine-hub-icon">${escapeHtml(card.icon || '💜')}</span>
-            <span class="custom-routine-hub-text"><strong>${escapeHtml(card.title || '오늘의 약속')}</strong><small>${escapeHtml(card.description || sub)} · ${escapeHtml(sub)}</small></span>
+            <span class="custom-routine-hub-text"><strong>${escapeHtml(hmPromiseDisplayTitle(card.title))}</strong><small>${escapeHtml(card.description || sub)} · ${escapeHtml(sub)}</small></span>
             <span class="custom-routine-hub-arrow">›</span>
         </button>`;
     }).join('');
@@ -314,7 +314,7 @@ function renderCustomRoutineManager() {
         return `
             <article class="custom-routine-manager-item ${card.active === false ? 'is-inactive' : ''}">
                 <div>
-                    <strong>${escapeHtml(card.title || '오늘의 약속')}</strong>
+                    <strong>${escapeHtml(hmPromiseDisplayTitle(card.title))}</strong>
                     <small>${escapeHtml(card.description || '설명 없음')} · 항목 ${items.length}/${HM_CUSTOM_MAX_ITEMS}</small>
                 </div>
                 <div class="custom-routine-manager-actions">
@@ -447,7 +447,7 @@ function renderCustomRoutineInput(cardId) {
     const desc = document.getElementById('customRoutineInputDesc');
     const body = document.getElementById('customRoutineInputBody');
     if (!card || !body) return;
-    if (title) title.innerText = `💜 ${card.title || '오늘의 약속'}`;
+    if (title) title.innerText = `💜 ${hmPromiseDisplayTitle(card.title)}`;
     if (desc) desc.innerText = card.description || '오늘의 기록을 남겨 주세요.';
     const items = hmCustomItemRows(card);
     if (!items.length) {
@@ -483,7 +483,7 @@ function saveCustomRoutineInput() {
             label: item.label || '',
             type: item.type || 'text',
             order: Number(item.order || 0),
-            cardTitle: card.title || '오늘의 약속',
+            cardTitle: hmPromiseDisplayTitle(card.title),
             cardDescription: card.description || '',
             updatedBy: currentUser?.uid || '',
             updatedAt: Date.now()

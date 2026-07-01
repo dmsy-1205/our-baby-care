@@ -6982,3 +6982,22 @@ body.hm-phone-viewport .daily-modal {
     .hm-summary-dot span{ font-size:.64rem !important; }
     .hm-summary-dot b{ font-size:.9rem !important; }
 }
+
+
+/* RC2.15.2 History Anniversary Upcoming Schedule */
+.anniversary-schedule-card .anniversary-today-line { margin-bottom: 12px; }
+.anniversary-upcoming-title { margin: 10px 0 8px; font-size: 0.78rem; font-weight: 900; color: var(--hm-premium-text, #2D2A35); }
+.anniversary-upcoming-list { display: grid; gap: 8px; }
+.anniversary-upcoming-row { display: grid; grid-template-columns: 38px 1fr auto; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid var(--hm-premium-border, #ECE6FF); border-radius: 17px; background: rgba(255,255,255,0.78); }
+.anniversary-upcoming-icon { width: 38px; height: 38px; border-radius: 14px; display: inline-flex; align-items: center; justify-content: center; background: #fff; font-size: 1.05rem; }
+.anniversary-upcoming-body strong { display: block; font-size: 0.88rem; color: var(--hm-premium-text, #2D2A35); font-weight: 900; line-height: 1.25; }
+.anniversary-upcoming-body small { display: block; margin-top: 2px; font-size: 0.72rem; color: var(--hm-premium-sub, #7D7694); font-weight: 750; }
+.anniversary-upcoming-row b { color: var(--hm-premium-primary, #6D4CFF); font-size: 0.86rem; font-weight: 950; white-space: nowrap; }
+.anniversary-upcoming-empty { margin-top: 0; }
+@media (max-width: 430px) { .anniversary-upcoming-row { grid-template-columns: 34px 1fr auto; padding: 9px 10px; } .anniversary-upcoming-icon { width: 34px; height: 34px; } }
+
+
+/* RC2.15.3 Calendar D-day badge */
+.history-calendar-title-row > span.history-calendar-dday-badge { color: var(--hm-premium-primary, #6D4CFF); background: var(--hm-premium-primary-soft, #F1ECFF); border: 1px solid var(--hm-premium-border, #ECE6FF); padding: 7px 10px; border-radius: 999px; font-weight: 900; white-space: nowrap; }
+.history-calendar-grid .calendar-day.anniversary-clickable-date { cursor: pointer; }
+.history-calendar-grid .calendar-day.has-anniversary .anniversary-calendar-icons { margin-left: 1px; }

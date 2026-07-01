@@ -365,37 +365,82 @@ function hmRenderAnniversaryModal() {
         </div>`;
 }
 
+function hmGetUpcomingAnniversaryItems(limit) {
+    const today = hmGetTodayYmd();
+    const firstMetDate = hmAnniversaryState.firstMetDate || '';
+    const custom = hmGetAnniversaryList()
+        .filter(item => item.date >= today)
+        .map(item => {
+            const meta = hmGetAnniversaryTypeMeta(item.type);
+            const d = hmDateFromYmd(item.date);
+            const t = hmDateFromYmd(today);
+            const diff = d && t ? Math.ceil((d.getTime() - t.getTime()) / 86400000) : null;
+            return {
+                id: item.id,
+                title: item.title || meta.label,
+                date: item.date,
+                icon: meta.icon || '💕',
+                label: meta.label || '기념일',
+                ddayText: diff === 0 ? 'D-Day' : `D-${diff}`,
+                source: 'custom'
+            };
+        });
+    const nextAuto = hmGetNextAutoMilestone(firstMetDate, today);
+    const auto = nextAuto ? [{
+        id: nextAuto.id,
+        title: nextAuto.title,
+        date: nextAuto.date,
+        icon: nextAuto.icon || '❤️',
+        label: '자동 기념일',
+        ddayText: (() => {
+            const d = hmDateFromYmd(nextAuto.date);
+            const t = hmDateFromYmd(today);
+            const diff = d && t ? Math.ceil((d.getTime() - t.getTime()) / 86400000) : null;
+            return diff === 0 ? 'D-Day' : `D-${diff}`;
+        })(),
+        source: 'auto'
+    }] : [];
+    return custom.concat(auto)
+        .sort((a, b) => String(a.date).localeCompare(String(b.date)))
+        .slice(0, limit || 4);
+}
+
 function hmRenderAnniversaryPanel() {
     const box = document.getElementById('anniversaryPanel');
     if (!box) return;
     const firstMetDate = hmAnniversaryState.firstMetDate || '';
-    const selectedDate = hmGetSelectedHistoryDateSafe();
-    const selectedDday = firstMetDate ? hmCalculateDday(firstMetDate, selectedDate) : null;
     const todayDday = firstMetDate ? hmCalculateDday(firstMetDate, hmGetTodayYmd()) : null;
+    const upcoming = hmGetUpcomingAnniversaryItems(4);
     const customCount = hmGetAnniversaryList().length;
-    const autoMilestones = hmGetAutoMilestones(firstMetDate);
-    const nextMilestone = hmGetNextAutoMilestone(firstMetDate);
-    const selectedAutoMilestones = hmGetAutoMilestonesForDate(selectedDate);
-    const selectedAutoText = selectedAutoMilestones.length ? ` · 자동 기념일 <strong>${selectedAutoMilestones.map(item => item.title).join(', ')}</strong>` : '';
-    const selectedNote = firstMetDate && selectedDday ? `<div class="anniversary-selected-note">📅 선택한 날짜 <strong>${hmFormatKoreanDate(selectedDate)}</strong>는 만난 지 <strong>D+${selectedDday}</strong>입니다${selectedAutoText}.</div>` : '';
-    const summaryText = firstMetDate
-        ? `처음 만난 날: ${hmFormatKoreanDate(firstMetDate)}${nextMilestone ? ` · 다음 D+${nextMilestone.day}: ${hmFormatKoreanDate(nextMilestone.date)}` : ''}`
+    const todayText = firstMetDate
+        ? `처음 만난 날 ${hmFormatKoreanDate(firstMetDate)} · 오늘 D+${todayDday}`
         : '처음 만난 날을 설정하면 D+가 자동 계산됩니다.';
-    const autoPreview = firstMetDate ? `<div class="anniversary-auto-preview">${autoMilestones.map(item => `<span>${item.icon} ${item.title} <b>${hmFormatKoreanDate(item.date)}</b></span>`).join('')}</div>` : '';
-    const todayBox = firstMetDate
-        ? `<div class="anniversary-today compact"><span class="anniversary-icon">🎉</span><span><div class="anniversary-main">오늘은 만난 지 D+${todayDday}</div><div class="anniversary-caption">자동 기념일 5개 · 직접 등록한 기념일 ${customCount}개</div></span></div>`
-        : `<div class="anniversary-today compact"><span class="anniversary-icon">💕</span><span><div class="anniversary-main">처음 만난 날을 설정해 주세요</div><div class="anniversary-caption">설정 버튼에서 기념일 종류도 함께 관리할 수 있어요.</div></span></div>`;
-    box.innerHTML = `<div class="anniversary-card anniversary-card-compact">
+    const upcomingHtml = upcoming.length ? upcoming.map(item => `
+        <div class="anniversary-upcoming-row">
+            <span class="anniversary-upcoming-icon">${item.icon || '💕'}</span>
+            <span class="anniversary-upcoming-body">
+                <strong>${escapeHtml(item.title || '기념일')}</strong>
+                <small>${hmFormatKoreanDate(item.date)} · ${escapeHtml(item.label || '')}</small>
+            </span>
+            <b>${escapeHtml(item.ddayText || '')}</b>
+        </div>`).join('') : '<div class="anniversary-empty-note anniversary-upcoming-empty">등록된 다가오는 일정이 없습니다. 설정에서 여행, 생일, 약속을 추가해 보세요.</div>';
+    box.innerHTML = `<div class="anniversary-card anniversary-card-compact anniversary-schedule-card">
         <div class="anniversary-head">
             <div>
                 <div class="anniversary-title">💕 우리의 기념일</div>
-                <div class="anniversary-sub">${escapeHtml(summaryText)}</div>
+                <div class="anniversary-sub">${escapeHtml(todayText)}</div>
             </div>
             <button type="button" class="anniversary-toggle-btn" onclick="hmOpenAnniversarySettings()">설정</button>
         </div>
-        ${selectedNote}${todayBox}${autoPreview}
+        <div class="anniversary-today compact anniversary-today-line">
+            <span class="anniversary-icon">${firstMetDate ? '💕' : '📌'}</span>
+            <span><div class="anniversary-main">${firstMetDate ? `오늘은 만난 지 D+${todayDday}` : '처음 만난 날을 설정해 주세요'}</div><div class="anniversary-caption">직접 등록한 일정 ${customCount}개 · 다가오는 일정 ${upcoming.length}개</div></span>
+        </div>
+        <div class="anniversary-upcoming-title">다가오는 일정</div>
+        <div class="anniversary-upcoming-list">${upcomingHtml}</div>
     </div>`;
 }
+
 
 async function hmRefreshAnniversaryPanel() {
     await hmLoadAnniversarySettings();
@@ -410,52 +455,14 @@ async function hmRefreshAnniversaryPanel() {
 // - 선택 날짜의 기존 기록 아래에 기념일 요약 카드를 독립 append
 // =========================================================
 function hmRenderSelectedDateAnniversaryDetail() {
+    // RC2.15.1: 선택 날짜의 기념일 안내 카드는 기록실 상단을 중복으로 차지하여 제거한다.
+    // 기념일/일정 정보는 우리의 기념일 패널과 캘린더 아이콘에서만 보여준다.
     const historyList = document.getElementById('historyList');
     if (!historyList) return;
-
-    const selectedDate = hmGetSelectedHistoryDateSafe();
-    if (!selectedDate) return;
-
     const oldDetail = historyList.querySelector('.anniversary-selected-detail-card');
     if (oldDetail) oldDetail.remove();
-
-    const items = hmGetAnniversariesForDate(selectedDate);
-    const firstMetDate = hmAnniversaryState.firstMetDate || '';
-    const dday = firstMetDate ? hmCalculateDday(firstMetDate, selectedDate) : null;
-    const hasDdayOnly = dday && !items.length;
-
-    if (!items.length && !hasDdayOnly) return;
-
-    const card = document.createElement('div');
-    card.className = 'anniversary-selected-detail-card';
-
-    const itemHtml = items.length ? items.map(item => {
-        const sourceLabel = item.source === 'auto' ? '자동 계산' : (item.source === 'firstMet' ? '처음 만난 날' : '직접 등록');
-        return `<div class="anniversary-selected-detail-item">
-            <span class="anniversary-selected-detail-icon">${item.icon || '💕'}</span>
-            <span>
-                <strong>${escapeHtml(item.title || '기념일')}</strong>
-                <small>${escapeHtml(sourceLabel)}</small>
-            </span>
-        </div>`;
-    }).join('') : '<div class="anniversary-selected-detail-empty">이 날짜에는 별도 등록된 기념일은 없지만, 만난 날 기준 D-day를 확인할 수 있어요.</div>';
-
-    const ddayHtml = dday ? `<div class="anniversary-selected-dday-line">💕 처음 만난 날 기준 <strong>D+${dday}</strong></div>` : '';
-
-    card.innerHTML = `
-        <div class="anniversary-selected-detail-head">
-            <span>🎉</span>
-            <div>
-                <strong>${hmFormatKoreanDate(selectedDate)}의 기념일</strong>
-                <small>선택한 날짜의 기록과 함께 표시됩니다.</small>
-            </div>
-        </div>
-        ${ddayHtml}
-        <div class="anniversary-selected-detail-list">${itemHtml}</div>
-    `;
-
-    historyList.appendChild(card);
 }
+
 
 function hmEnableAnniversaryCalendarDateClicks() {
     const grid = document.querySelector('#calendarBox .history-calendar-grid');
@@ -485,10 +492,32 @@ function hmEnableAnniversaryCalendarDateClicks() {
 // - History Render 원본 직접 수정 없음
 // - displayHistory/selectHistoryDate/openHistoryPanelModal 후처리만 수행
 // =========================================================
+
+
+function hmUpdateHistoryCalendarTitleDday() {
+    const titleRow = document.querySelector('#calendarBox .history-calendar-title-row');
+    if (!titleRow) return;
+    const countSlot = titleRow.querySelector(':scope > span');
+    if (!countSlot) return;
+    const firstMetDate = hmAnniversaryState.firstMetDate || '';
+    if (!firstMetDate) return;
+    const { year, month } = hmGetCalendarBaseYearMonth();
+    const today = hmGetTodayYmd();
+    let target = today;
+    if (!today.startsWith(`${year}-${String(month + 1).padStart(2, '0')}-`)) {
+        target = `${year}-${String(month + 1).padStart(2, '0')}-01`;
+    }
+    const dday = hmCalculateDday(firstMetDate, target);
+    if (dday) {
+        countSlot.textContent = `만난 지 D+${dday}`;
+        countSlot.classList.add('history-calendar-dday-badge');
+    }
+}
 function hmAfterHistoryRenderSafe() {
     try { hmRenderAnniversaryPanel(); } catch (err) { console.warn('[Anniversary] panel render skipped', err); }
     try { hmRenderAnniversaryCalendarMarkers(); } catch (err) { console.warn('[Anniversary] calendar markers skipped', err); }
     try { hmEnableAnniversaryCalendarDateClicks(); } catch (err) { console.warn('[Anniversary] date clicks skipped', err); }
+    try { hmUpdateHistoryCalendarTitleDday(); } catch (err) { console.warn('[Anniversary] title D-day skipped', err); }
     try { hmRenderSelectedDateAnniversaryDetail(); } catch (err) { console.warn('[Anniversary] detail render skipped', err); }
 }
 
