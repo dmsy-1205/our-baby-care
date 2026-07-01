@@ -524,79 +524,119 @@
     <div class="guide-card help-center-card" role="dialog" aria-modal="true" aria-labelledby="guideTitle">
         <div class="guide-header help-center-header">
             <div>
-                <p class="help-center-kicker">RC2.18 Documentation</p>
-                <h2 id="guideTitle">❓ HearMe2nite 도움말 센터</h2>
+                <p class="help-center-kicker">30초 사용 가이드</p>
+                <h2 id="guideTitle">✨ HearMe2nite 사용 가이드</h2>
             </div>
-            <button type="button" class="guide-close" onclick="closeGuideModal(true)" aria-label="도움말 센터 닫기">×</button>
+            <button type="button" class="guide-close" onclick="closeGuideModal(true)" aria-label="사용 가이드 닫기">×</button>
         </div>
 
-        <div class="guide-intro help-center-intro">
-            처음 시작하는 방법부터 우리의 공간, 운동, 기념일, 기록실까지 앱 안에서 바로 확인할 수 있습니다.
+        <div class="help-hero">
+            <p>안녕하세요 👋</p>
+            <strong>무엇이 궁금하신가요?</strong>
+            <span>긴 설명 없이, 필요한 기능만 바로 확인할 수 있어요.</span>
         </div>
 
-        <div class="help-center-tabs" role="tablist" aria-label="도움말 주제">
-            <button type="button" class="help-tab active" data-help-tab="start" onclick="selectHelpTab('start')">시작하기</button>
+        <div class="help-search-wrap">
+            <label class="help-search-label" for="helpSearchInput">🔍 궁금한 기능 검색</label>
+            <input id="helpSearchInput" class="help-search-input" type="search" placeholder="예: 약속, 미션, 운동, 기념일, 기록실" oninput="searchHelpCenter(this.value)">
+        </div>
+
+        <div class="help-center-tabs" role="tablist" aria-label="사용 가이드 메뉴">
+            <button type="button" class="help-tab active" data-help-tab="home" onclick="selectHelpTab('home')">홈</button>
+            <button type="button" class="help-tab" data-help-tab="start" onclick="selectHelpTab('start')">시작하기</button>
             <button type="button" class="help-tab" data-help-tab="room" onclick="selectHelpTab('room')">우리의 공간</button>
             <button type="button" class="help-tab" data-help-tab="daily" onclick="selectHelpTab('daily')">오늘의 기록</button>
-            <button type="button" class="help-tab" data-help-tab="exercise" onclick="selectHelpTab('exercise')">오늘의 운동</button>
-            <button type="button" class="help-tab" data-help-tab="anniversary" onclick="selectHelpTab('anniversary')">우리의 기념일</button>
+            <button type="button" class="help-tab" data-help-tab="anniversary" onclick="selectHelpTab('anniversary')">기념일</button>
+            <button type="button" class="help-tab" data-help-tab="exercise" onclick="selectHelpTab('exercise')">운동</button>
             <button type="button" class="help-tab" data-help-tab="history" onclick="selectHelpTab('history')">기록실</button>
-            <button type="button" class="help-tab" data-help-tab="faq" onclick="selectHelpTab('faq')">FAQ</button>
+            <button type="button" class="help-tab" data-help-tab="faq" onclick="selectHelpTab('faq')">Q&A</button>
+            <button type="button" class="help-tab" data-help-tab="tips" onclick="selectHelpTab('tips')">활용 팁</button>
             <button type="button" class="help-tab" data-help-tab="updates" onclick="selectHelpTab('updates')">업데이트</button>
         </div>
 
+        <div id="helpSearchResults" class="help-search-results" hidden></div>
+
         <div class="help-center-panels">
-            <section class="help-panel active" data-help-panel="start">
-                <div class="guide-step"><div class="guide-step-title">1. 시작 순서</div><div class="guide-flow">로그인<br>↓<br>우리의 공간 만들기 또는 초대코드 입장<br>↓<br>역할 선택<br>↓<br>오늘의 기록 시작</div></div>
-                <div class="guide-step"><div class="guide-step-title">2. 가장 먼저 해야 할 일</div><div class="guide-note">HearMe2nite는 Room 기반 앱입니다. 로그인 후 반드시 <strong>우리의 공간</strong>을 만들거나 초대코드로 참여해야 기록, 기록실, 채팅이 정상적으로 보입니다.</div></div>
-                <div class="guide-step"><div class="guide-step-title">3. 혼자 사용 가능</div><div class="guide-note">혼자 공간을 만들고 바로 기록할 수 있습니다. 상대방은 나중에 초대해도 됩니다.</div></div>
+            <section class="help-panel active" data-help-panel="home">
+                <div class="help-card-grid">
+                    <button type="button" class="help-menu-card" onclick="selectHelpTab('start')"><span>🚀</span><strong>시작하기</strong><small>방 만들기와 초대코드</small></button>
+                    <button type="button" class="help-menu-card" onclick="selectHelpTab('room')"><span>🏠</span><strong>우리의 공간</strong><small>약속과 커스텀 미션</small></button>
+                    <button type="button" class="help-menu-card" onclick="selectHelpTab('daily')"><span>📝</span><strong>오늘의 기록</strong><small>컨디션, 사진, 피드백</small></button>
+                    <button type="button" class="help-menu-card" onclick="selectHelpTab('anniversary')"><span>❤️</span><strong>우리의 기념일</strong><small>소중한 날짜 등록</small></button>
+                    <button type="button" class="help-menu-card" onclick="selectHelpTab('exercise')"><span>🏃</span><strong>오늘의 운동</strong><small>운동 기록 저장</small></button>
+                    <button type="button" class="help-menu-card" onclick="selectHelpTab('history')"><span>📅</span><strong>기록실</strong><small>날짜별 추억 보기</small></button>
+                    <button type="button" class="help-menu-card" onclick="selectHelpTab('faq')"><span>❓</span><strong>Q&A</strong><small>자주 묻는 질문</small></button>
+                    <button type="button" class="help-menu-card" onclick="selectHelpTab('tips')"><span>💡</span><strong>활용 팁</strong><small>더 예쁘게 쓰는 법</small></button>
+                </div>
+            </section>
+
+            <section class="help-panel" data-help-panel="start">
+                <article class="help-mini-card" data-help-keywords="시작 로그인 승인 방 만들기 초대코드 입장 복구"><h3>🚀 시작하기</h3><p>로그인 후 우리의 공간을 만들거나 초대코드로 입장하세요. 같은 공간에 있어야 기록과 채팅을 함께 볼 수 있어요.</p><div class="help-tip">💡 한 사람만 방을 만들고, 상대는 초대코드로 들어오면 됩니다.</div></article>
+                <article class="help-mini-card" data-help-keywords="혼자 사용 공간 나중 초대"><h3>👤 혼자 사용하기</h3><p>상대가 아직 없어도 혼자 공간을 만들고 기록을 시작할 수 있어요. 상대는 나중에 초대해도 됩니다.</p><div class="help-tip">💡 먼저 내 기록을 쌓아두면 나중에 함께 보기 좋아요.</div></article>
             </section>
 
             <section class="help-panel" data-help-panel="room">
-                <div class="guide-step"><div class="guide-step-title">우리의 공간이란?</div><div class="guide-note">모든 기록이 저장되는 둘만의 Room입니다. 같은 Room에 연결된 사용자만 기록과 채팅을 볼 수 있습니다.</div></div>
-                <div class="guide-step"><div class="guide-step-title">초대 방법</div><div class="guide-flow">우리의 공간<br>↓<br>상대방 초대하기<br>↓<br>초대코드 만들기<br>↓<br>상대방이 받은 초대코드 입력</div></div>
-                <div class="guide-step"><div class="guide-step-title">이전 공간 복구</div><div class="guide-note">기존 공간은 <strong>이전 공간 불러오기</strong>에서 다시 연결할 수 있습니다. 필요한 경우 직접 방코드를 입력합니다.</div></div>
+                <article class="help-mini-card" data-help-keywords="오늘의 약속 일정 데이트 병원 여행 커스텀"><h3>📌 오늘의 약속</h3><p>오늘 함께할 약속을 등록하는 공간입니다. 등록한 약속은 두 사람 모두에게 표시됩니다.</p><div class="help-tip">💡 데이트, 병원, 여행처럼 잊으면 안 되는 일정을 적어보세요.</div></article>
+                <article class="help-mini-card" data-help-keywords="커스텀 미션 미션 루틴 습관 물 산책 스트레칭 완료 체크"><h3>🎯 커스텀 미션</h3><p>원하는 미션을 자유롭게 추가할 수 있습니다. 물 마시기, 산책, 스트레칭처럼 작은 습관을 기록해 보세요.</p><div class="help-tip">💡 매일 반복하는 미션은 짧고 구체적으로 쓰는 것이 좋아요.</div></article>
+                <article class="help-mini-card" data-help-keywords="초대코드 상대방 방 입장"><h3>💌 상대 초대</h3><p>초대코드를 공유하면 상대방이 같은 공간에 들어올 수 있습니다. 초대코드가 달라지면 서로의 기록이 보이지 않아요.</p><div class="help-tip">💡 상대가 안 보이면 같은 초대코드로 입장했는지 먼저 확인하세요.</div></article>
             </section>
 
             <section class="help-panel" data-help-panel="daily">
-                <div class="guide-step"><div class="guide-step-title">오늘의 컨디션</div><div class="guide-note">기분, 기상시간, 운동, 체중, 수분을 카드로 입력합니다. 각 카드를 누르면 모바일에서도 보기 좋은 팝업이 열립니다.</div></div>
-                <div class="guide-step"><div class="guide-step-title">오늘의 기록</div><div class="guide-note">하루 기록, 식사, 외출, 취침, 관리 및 피드백을 남길 수 있습니다. 입력 내용은 자동 저장됩니다.</div></div>
-                <div class="guide-step"><div class="guide-step-title">최종 복사</div><div class="guide-note">하루 기록을 정리해서 복사할 수 있으며, RC2.17.3부터 운동 기록도 함께 포함됩니다.</div></div>
-            </section>
-
-            <section class="help-panel" data-help-panel="exercise">
-                <div class="guide-step"><div class="guide-step-title">오늘의 운동</div><div class="guide-note">홈 화면의 운동 카드를 눌러 오늘 한 운동을 기록합니다. 운동 내용은 History 저장과 최종 복사에 반영됩니다.</div></div>
-                <div class="guide-step"><div class="guide-step-title">기록 예시</div><div class="guide-note">예: 산책 30분, 스트레칭 10분, 헬스 1시간, 요가, 가벼운 홈트 등 자유롭게 작성하면 됩니다.</div></div>
+                <article class="help-mini-card" data-help-keywords="컨디션 기분 기상시간 체중 수분 물"><h3>😊 오늘의 컨디션</h3><p>기분, 기상시간, 체중, 수분을 간단히 남기는 공간입니다. 하루의 흐름을 서로 이해하는 데 도움이 됩니다.</p><div class="help-tip">💡 매일 같은 시간에 입력하면 변화를 보기 쉬워요.</div></article>
+                <article class="help-mini-card" data-help-keywords="오늘의 기록 사진 메모 하루 정리"><h3>📝 오늘의 기록</h3><p>오늘 있었던 일을 메모와 사진으로 남길 수 있습니다. 작성한 내용은 기록실에서 다시 볼 수 있어요.</p><div class="help-tip">💡 특별한 일이 없어도 한 줄만 남겨보세요.</div></article>
+                <article class="help-mini-card" data-help-keywords="관리 피드백 칭찬 응원"><h3>💬 관리 및 피드백</h3><p>서로에게 전하고 싶은 응원, 칭찬, 조정이 필요한 내용을 남기는 공간입니다.</p><div class="help-tip">💡 지적보다 칭찬을 먼저 적으면 더 따뜻하게 전달돼요.</div></article>
             </section>
 
             <section class="help-panel" data-help-panel="anniversary">
-                <div class="guide-step"><div class="guide-step-title">우리의 기념일</div><div class="guide-note">생일, 여행, 데이트, 휴가, 사용자 지정 기념일을 등록할 수 있습니다. 등록된 기념일은 캘린더에 아이콘으로 표시됩니다.</div></div>
-                <div class="guide-step"><div class="guide-step-title">개선 예정</div><div class="guide-note">다가오는 순 정렬, 대표 날짜 지정, 함께한 지 n일 표시, 카드 최대 3개 표시, + n개 더보기, 관리 모달은 다음 개선 후보입니다.</div></div>
+                <article class="help-mini-card" data-help-keywords="기념일 생일 여행 데이트 휴가 사용자 지정 첫만남 함께한 지"><h3>❤️ 우리의 기념일</h3><p>두 사람의 소중한 날짜를 등록합니다. 생일, 여행, 데이트, 첫 만남 같은 날을 함께 기록할 수 있어요.</p><div class="help-tip">💡 대표 기념일은 첫 만남처럼 함께한 날짜로 설정하는 것을 추천합니다.</div></article>
+                <article class="help-mini-card" data-help-keywords="다가오는 순 정렬 캘린더 아이콘"><h3>📅 캘린더 표시</h3><p>등록한 기념일은 캘린더에 아이콘으로 표시됩니다. 다가오는 일정은 홈에서 더 쉽게 확인할 수 있어요.</p><div class="help-tip">💡 너무 많은 기념일보다 자주 보고 싶은 날짜부터 등록해 보세요.</div></article>
+            </section>
+
+            <section class="help-panel" data-help-panel="exercise">
+                <article class="help-mini-card" data-help-keywords="운동 오늘의 운동 산책 스트레칭 헬스 요가 홈트 기록실 최종 복사"><h3>🏃 오늘의 운동</h3><p>오늘 한 운동을 기록합니다. 운동 기록은 기록실에도 저장되고, 최종 복사 내용에도 함께 포함됩니다.</p><div class="help-tip">💡 산책 20분처럼 가벼운 운동도 충분히 기록할 가치가 있어요.</div></article>
             </section>
 
             <section class="help-panel" data-help-panel="history">
-                <div class="guide-step"><div class="guide-step-title">기록실 사용법</div><div class="guide-flow">기록실 열기<br>↓<br>Calendar에서 날짜 클릭<br>↓<br>하루 기록 팝업 확인<br>↓<br>사진 모아보기 확인</div></div>
-                <div class="guide-step"><div class="guide-step-title">기록이 없을 때</div><div class="guide-note">해당 날짜에 저장된 내용이 없거나 다른 날짜로 저장했을 수 있습니다. 홈 화면의 기록 날짜를 확인하세요.</div></div>
+                <article class="help-mini-card" data-help-keywords="기록실 캘린더 날짜 하루 기록 사진 모아보기"><h3>📅 기록실</h3><p>달력에서 날짜를 선택하면 그날의 기록과 사진을 다시 확인할 수 있습니다.</p><div class="help-tip">💡 좋은 추억은 사진과 함께 남기면 나중에 더 잘 떠올라요.</div></article>
+                <article class="help-mini-card" data-help-keywords="기록 안보임 저장 날짜"><h3>🔎 기록이 안 보일 때</h3><p>선택한 날짜에 저장된 내용이 없을 수 있습니다. 홈에서 기록한 날짜와 기록실 날짜가 같은지 확인하세요.</p><div class="help-tip">💡 기록실은 날짜를 눌러 확인하는 방식입니다.</div></article>
             </section>
 
             <section class="help-panel guide-faq" data-help-panel="faq">
-                <div class="faq-item"><strong>Q. 카드가 안 보여요.</strong><br>A. 먼저 우리의 공간을 만들어야 합니다.</div>
-                <div class="faq-item"><strong>Q. 상대방이 안 보여요.</strong><br>A. 같은 Room에 연결되어 있는지 확인하세요.</div>
-                <div class="faq-item"><strong>Q. 온라인 표시가 이상해요.</strong><br>A. 네트워크나 Heartbeat 지연일 수 있습니다. 잠시 후 새로고침해 주세요.</div>
-                <div class="faq-item"><strong>Q. 운동은 어디서 입력하나요?</strong><br>A. 오늘의 컨디션 영역의 운동 카드를 누르면 됩니다.</div>
-                <div class="faq-item"><strong>Q. 기념일은 어떻게 등록하나요?</strong><br>A. 우리의 기념일 영역에서 원하는 유형을 선택해 등록합니다.</div>
-                <div class="faq-item"><strong>Q. 기존 방을 복구하고 싶어요.</strong><br>A. 우리의 공간 → 이전 공간 불러오기를 사용하세요.</div>
+                <div class="faq-accordion" data-help-keywords="질문 답변 Q&A FAQ">
+                    <button type="button" class="faq-question" onclick="toggleHelpFaq(this)">상대방이 안 보여요.<span>⌄</span></button>
+                    <div class="faq-answer">같은 공간에 입장했는지 확인해 주세요. 초대코드가 다르면 서로의 기록이 보이지 않습니다.</div>
+                    <button type="button" class="faq-question" onclick="toggleHelpFaq(this)">온라인 표시가 회색이에요.<span>⌄</span></button>
+                    <div class="faq-answer">상대방이 앱을 종료했거나 인터넷 연결이 끊어진 상태일 수 있습니다. 잠시 후 다시 확인해 주세요.</div>
+                    <button type="button" class="faq-question" onclick="toggleHelpFaq(this)">오늘 작성한 기록은 어디서 다시 보나요?<span>⌄</span></button>
+                    <div class="faq-answer">기록실에서 날짜를 선택하면 그날의 기록과 사진을 다시 볼 수 있습니다.</div>
+                    <button type="button" class="faq-question" onclick="toggleHelpFaq(this)">커스텀 미션은 어디에 쓰나요?<span>⌄</span></button>
+                    <div class="faq-answer">매일 반복하고 싶은 작은 습관이나 오늘만 필요한 미션을 적는 공간입니다.</div>
+                    <button type="button" class="faq-question" onclick="toggleHelpFaq(this)">운동 기록도 저장되나요?<span>⌄</span></button>
+                    <div class="faq-answer">네. 오늘의 운동에 입력한 내용은 기록실과 최종 복사 내용에 함께 반영됩니다.</div>
+                    <button type="button" class="faq-question" onclick="toggleHelpFaq(this)">기념일은 몇 개까지 등록할 수 있나요?<span>⌄</span></button>
+                    <div class="faq-answer">원하는 만큼 등록할 수 있습니다. 홈에는 중요한 기념일을 보기 쉽게 표시하는 방향으로 정리됩니다.</div>
+                    <button type="button" class="faq-question" onclick="toggleHelpFaq(this)">기존 공간을 다시 불러오고 싶어요.<span>⌄</span></button>
+                    <div class="faq-answer">우리의 공간에서 이전 공간 불러오기를 사용하세요. 필요한 경우 방코드를 직접 입력하면 됩니다.</div>
+                </div>
+            </section>
+
+            <section class="help-panel" data-help-panel="tips">
+                <article class="help-mini-card help-random-tip" data-help-keywords="활용 팁 추천"><h3>💡 오늘의 추천</h3><p id="helpRandomTip">매일 한 줄이라도 기록을 남겨보세요.</p><button type="button" class="help-small-btn" onclick="showRandomHelpTip()">다른 팁 보기</button></article>
+                <div class="help-tip-list">
+                    <div>💡 커스텀 미션은 “물 2L 마시기”처럼 짧게 쓰면 좋아요.</div>
+                    <div>💡 첫 여행, 첫 데이트도 기념일로 남겨보세요.</div>
+                    <div>💡 기록실은 사진과 메모를 함께 볼 때 가장 예뻐요.</div>
+                    <div>💡 운동은 거창하지 않아도 괜찮아요. 산책도 기록해 보세요.</div>
+                </div>
             </section>
 
             <section class="help-panel" data-help-panel="updates">
-                <div class="guide-step"><div class="guide-step-title">RC2.18</div><div class="guide-note">Documentation & Help Center 버전입니다. docs 폴더, README 개편, 앱 내부 도움말 센터가 추가되었습니다.</div></div>
-                <div class="guide-step"><div class="guide-step-title">RC2.17.3</div><div class="guide-note">오늘의 운동 카드가 추가되었고 History 저장 및 최종 복사에 반영되었습니다.</div></div>
-                <div class="guide-step"><div class="guide-step-title">RC2.16</div><div class="guide-note">Branding, Header, Card, Shadow, Radius, Online Indicator가 정리되었습니다.</div></div>
-                <div class="guide-step"><div class="guide-step-title">다음 단계 RC2.19</div><div class="guide-note">PC, Tablet, Fold, Mobile, Firebase, GitHub, Netlify, 사용설명서, README, Help Center 전체 QA를 진행합니다.</div></div>
+                <article class="help-mini-card" data-help-keywords="업데이트 RC2.18 도움말 사용가이드"><h3>📝 RC2.18</h3><p>사용 가이드를 짧고 읽기 쉽게 리모델링했습니다. 검색, Q&A, 활용 팁이 추가되었습니다.</p><div class="help-tip">💡 이번 버전은 설명서보다 앱 안의 도움말을 더 쉽게 만드는 버전입니다.</div></article>
+                <article class="help-mini-card" data-help-keywords="RC2.17.3 운동"><h3>🏃 RC2.17.3</h3><p>오늘의 운동 카드가 추가되었고, 기록실 저장과 최종 복사에 반영되었습니다.</p></article>
             </section>
         </div>
 
-        <div class="guide-footer help-center-footer">문서 파일은 GitHub의 <strong>/docs</strong> 폴더에서도 확인할 수 있습니다.</div>
+        <div class="guide-footer help-center-footer">필요한 설명만 짧게 읽고 바로 사용하세요.</div>
         <button type="button" class="guide-primary" onclick="closeGuideModal(true)">확인했어요</button>
     </div>
 </div>

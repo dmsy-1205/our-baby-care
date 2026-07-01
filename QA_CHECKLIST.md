@@ -73,3 +73,13 @@
 - [ ] docs/UI_GUIDELINE.md
 - [ ] docs/DEPLOY_CHECKLIST.md
 - [ ] docs/ROADMAP.md
+
+## RC2.18 Help Center UX 추가 QA
+- [x] ❓ 버튼 클릭 시 사용 가이드 모달 열림
+- [x] 홈 카드 메뉴 표시
+- [x] 오늘의 약속 설명 포함
+- [x] 커스텀 미션 설명 포함
+- [x] Q&A 아코디언 동작 함수 추가
+- [x] 검색 입력창 및 결과 영역 추가
+- [x] 활용 팁 랜덤 출력 함수 추가
+- [x] Firebase / Room / History / Presence 구조 변경 없음
