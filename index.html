@@ -443,12 +443,13 @@
         <div class="history-panel-head">
             <div>
                 <div class="history-detail-kicker">History Center</div>
-                <h2 id="historyPanelTitle">📜 우리들의 지난 기록실 <span>RC2.12.1</span></h2>
+                <h2 id="historyPanelTitle">📖 우리의 이야기 <span>RC2.15</span></h2>
             </div>
             <button type="button" class="modal-close-btn" onclick="closeHistoryPanelModal()">닫기</button>
         </div>
-        <div class="history-intro-note">캘린더에서 날짜를 먼저 선택하면, 아래에 해당 날짜의 기록만 표시됩니다.</div>
+        <div class="history-intro-note">달을 넘기며 기록과 기념일을 확인하고, 날짜를 누르면 하루 기록이 열립니다.</div>
         <div id="calendarBox"></div>
+        <div id="anniversaryPanel" class="anniversary-panel"></div>
         <div class="history-v2-toolbar history-v2-toolbar-below" aria-label="History 2.0 controls">
             <input type="search" id="historySearchInput" placeholder="기록 검색: 미션, 메모, 루틴, 식사" oninput="hmHistoryApplySearch()">
             <select id="historyTypeFilter" onchange="hmHistoryApplySearch()" aria-label="기록 필터">
@@ -460,11 +461,10 @@
             </select>
             <button type="button" onclick="hmHistoryClearSearch()">초기화</button>
         </div>
+        <div id="photoThumbs" class="history-thumb-row"></div>
         <div class="history-selected-section-title">선택한 날짜의 기록</div>
         <div class="history-list" id="historyList"></div>
-        <div id="photoThumbs" class="history-thumb-row"></div>
-        <div id="anniversaryPanel" class="anniversary-panel"></div>
-        <div id="historyHero" class="history-hero history-hero-bottom"></div>
+        <div id="historyHero" class="history-hero history-hero-bottom" hidden></div>
     </div>
 </div>
 

@@ -334,6 +334,44 @@ function openHistoryPanelModal() {
        - Firebase / Room / 저장 / 삭제 구조 변경 없음
        ========================================================= */
     let selectedHistoryDate = '';
+    let hmHistoryCalendarViewDate = '';
+
+    function hmHistoryTodayYmd() {
+        const d = new Date();
+        return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    }
+
+    function hmHistorySetCalendarViewFromDate(date) {
+        const base = date ? new Date(date + 'T00:00:00') : new Date();
+        if (Number.isNaN(base.getTime())) return;
+        hmHistoryCalendarViewDate = `${base.getFullYear()}-${String(base.getMonth()+1).padStart(2,'0')}-01`;
+        window.hmHistoryCalendarViewDate = hmHistoryCalendarViewDate;
+    }
+
+    function hmHistoryGetCalendarViewBase(daysData) {
+        if (!hmHistoryCalendarViewDate) {
+            const current = selectedHistoryDate || document.getElementById('recordDate')?.value || hmHistoryTodayYmd();
+            hmHistorySetCalendarViewFromDate(current);
+        }
+        const base = new Date(hmHistoryCalendarViewDate + 'T00:00:00');
+        return Number.isNaN(base.getTime()) ? new Date() : base;
+    }
+
+    function hmHistoryChangeMonth(delta) {
+        const base = hmHistoryGetCalendarViewBase(cachedDaysData || {});
+        base.setMonth(base.getMonth() + Number(delta || 0));
+        hmHistorySetCalendarViewFromDate(`${base.getFullYear()}-${String(base.getMonth()+1).padStart(2,'0')}-01`);
+        if (cachedDaysData) displayHistory(cachedDaysData);
+    }
+
+    function hmHistoryGoToday() {
+        hmHistorySetCalendarViewFromDate(hmHistoryTodayYmd());
+        selectedHistoryDate = hmHistoryTodayYmd();
+        if (cachedDaysData) displayHistory(cachedDaysData);
+    }
+
+    window.hmHistoryChangeMonth = hmHistoryChangeMonth;
+    window.hmHistoryGoToday = hmHistoryGoToday;
 
     function renderHistorySummary(daysData) {
         const box = document.getElementById('historySummary');
@@ -353,6 +391,7 @@ function openHistoryPanelModal() {
 
     function selectHistoryDate(date) {
         selectedHistoryDate = date;
+        hmHistorySetCalendarViewFromDate(date);
         const filterInput = document.getElementById('historyFilterDate');
         if (filterInput) filterInput.value = date;
         if (cachedDaysData) displayHistory(cachedDaysData);
@@ -407,13 +446,9 @@ function openHistoryPanelModal() {
     function renderHistoryHero(daysData) {
         const box = document.getElementById('historyHero');
         if (!box) return;
-        const stats = getHistoryOverviewStats(daysData || {});
-        box.innerHTML = `
-            <div class="history-hero-tile"><span class="history-hero-value">${stats.total}</span><span class="history-hero-label">총 기록일</span></div>
-            <div class="history-hero-tile"><span class="history-hero-value">${stats.photos}</span><span class="history-hero-label">사진 기록</span></div>
-            <div class="history-hero-tile"><span class="history-hero-value">${stats.missionDays}</span><span class="history-hero-label">미션 기록일</span></div>
-            <div class="history-hero-tile"><span class="history-hero-value">${escapeHtml(stats.latest)}</span><span class="history-hero-label">최근 기록</span></div>
-        `;
+        // RC2.15: 기록실 하단 통계 카드는 삭제한다. 데이터 계산 함수는 호환을 위해 남겨두되 화면에는 출력하지 않는다.
+        box.innerHTML = '';
+        box.style.display = 'none';
     }
 
     function renderCalendar(daysData) {
@@ -667,8 +702,7 @@ function renderCalendar(daysData) {
     box.classList.add('history-calendar-premium');
     const filtered = hmHistoryFilteredDates(daysData || {});
     const visibleSet = new Set(filtered);
-    const current = selectedHistoryDate || filtered[0] || document.getElementById('recordDate')?.value || '';
-    const base = current ? new Date(current + 'T00:00:00') : new Date();
+    const base = hmHistoryGetCalendarViewBase(daysData || {});
     const year = base.getFullYear();
     const month = base.getMonth();
     const first = new Date(year, month, 1);
@@ -676,21 +710,31 @@ function renderCalendar(daysData) {
     const today = new Date();
     const todayYmd = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
     const week = ['일','월','화','수','목','금','토'];
-    const monthRecords = filtered.filter(date => date.startsWith(`${year}-${String(month+1).padStart(2,'0')}-`)).length;
-    let html = `<div class="history-calendar-title-row"><div><strong>📅 ${year}.${String(month+1).padStart(2,'0')} 기록 캘린더</strong><br><span>검색/필터 조건에 맞는 날짜만 활성화됩니다.</span></div><span>${monthRecords}일 기록</span></div><div class="calendar-grid history-calendar-grid">`;
+    const monthPrefix = `${year}-${String(month+1).padStart(2,'0')}-`;
+    const monthRecords = filtered.filter(date => date.startsWith(monthPrefix)).length;
+    let html = `<div class="history-calendar-title-row history-calendar-nav-row">
+        <button type="button" class="history-month-nav-btn" onclick="hmHistoryChangeMonth(-1)" aria-label="이전 달">‹</button>
+        <div class="history-calendar-current-month">
+            <strong>📅 ${year}년 ${String(month+1).padStart(2,'0')}월</strong>
+            <span>달을 넘기며 기록과 기념일을 확인하세요.</span>
+        </div>
+        <button type="button" class="history-month-nav-btn" onclick="hmHistoryChangeMonth(1)" aria-label="다음 달">›</button>
+        <button type="button" class="history-today-btn" onclick="hmHistoryGoToday()">오늘</button>
+        <span class="history-month-count">${monthRecords}일 기록</span>
+    </div><div class="calendar-grid history-calendar-grid">`;
     html += week.map(w => `<div class="calendar-head">${w}</div>`).join('');
-    for (let i = 0; i < first.getDay(); i++) html += '<div class="calendar-day"></div>';
+    for (let i = 0; i < first.getDay(); i++) html += '<div class="calendar-day empty-day" aria-hidden="true"></div>';
     for (let day = 1; day <= last.getDate(); day++) {
         const ymd = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
         const rec = (daysData || {})[ymd];
         const visible = rec && visibleSet.has(ymd);
         const icons = visible ? `${rec.photo ? '📷' : ''}${getHistoryMissionText(rec) ? '🎯' : ''}${hmHistoryRecordHasRoutine(rec) ? '🧩' : ''}${rec.mood === 'hard' || rec.mood === 'veryHard' ? '☁️' : ''}` : '';
-        html += `<div class="calendar-day ${visible ? 'has-record' : ''} ${ymd === todayYmd ? 'today' : ''} ${ymd === selectedHistoryDate ? 'selected-record' : ''}" ${visible ? `onclick="selectHistoryDate('${ymd}')"` : ''}>${day}<span class="calendar-icons">${icons}</span></div>`;
+        const clickable = visible ? `onclick="selectHistoryDate('${ymd}')"` : '';
+        html += `<div class="calendar-day ${visible ? 'has-record' : ''} ${ymd === todayYmd ? 'today' : ''} ${ymd === selectedHistoryDate ? 'selected-record' : ''}" ${clickable}>${day}<span class="calendar-icons">${icons}</span></div>`;
     }
     html += '</div>';
     box.innerHTML = html;
 }
-
 function displayHistory(daysData) {
     const historyList = document.getElementById('historyList');
     renderHistoryHero(daysData || {});
@@ -708,6 +752,7 @@ function displayHistory(daysData) {
     if (!selectedHistoryDate) {
         const recordDate = document.getElementById('recordDate')?.value || '';
         selectedHistoryDate = filtered.includes(recordDate) ? recordDate : (filtered[0] || '');
+        if (selectedHistoryDate && !hmHistoryCalendarViewDate) hmHistorySetCalendarViewFromDate(selectedHistoryDate);
     }
     if (selectedHistoryDate && !filtered.includes(selectedHistoryDate) && filtered.length) selectedHistoryDate = filtered[0];
     if (!filtered.length) {

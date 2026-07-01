@@ -7121,3 +7121,74 @@ body.hm-phone-viewport .daily-modal {
         padding: 0 2px !important;
     }
 }
+
+/* =========================================================
+   RC2.15 History UX Remodel STEP1
+   - Calendar month navigation
+   - Anniversary custom-only panel
+   - Hide statistics section
+   ========================================================= */
+.history-calendar-nav-row {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto auto auto;
+    align-items: center;
+    gap: 8px;
+}
+.history-calendar-current-month {
+    min-width: 0;
+}
+.history-month-nav-btn,
+.history-today-btn {
+    border: 0;
+    border-radius: 999px;
+    background: rgba(255,255,255,.88);
+    box-shadow: 0 8px 22px rgba(102, 75, 135, .12);
+    color: #72548f;
+    font-weight: 900;
+    cursor: pointer;
+}
+.history-month-nav-btn {
+    width: 34px;
+    height: 34px;
+    font-size: 1.35rem;
+    line-height: 1;
+}
+.history-today-btn {
+    padding: 8px 12px;
+    font-size: .82rem;
+}
+.history-month-count {
+    justify-self: end;
+    white-space: nowrap;
+}
+.calendar-day.empty-day {
+    box-shadow: none !important;
+    background: transparent !important;
+    cursor: default !important;
+}
+#historyHero[hidden],
+.history-hero:empty {
+    display: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+.anniversary-panel {
+    margin-top: 12px;
+}
+.anniversary-card-compact .anniversary-auto-preview span {
+    white-space: normal;
+}
+@media (max-width: 560px) {
+    .history-calendar-nav-row {
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        gap: 6px;
+    }
+    .history-today-btn,
+    .history-month-count {
+        grid-column: span 3;
+        justify-self: center;
+    }
+    .history-month-count {
+        font-size: .78rem;
+    }
+}

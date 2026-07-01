@@ -80,18 +80,8 @@ function hmSetCustomAnniversaryType(type) {
 
 
 function hmGetAutoMilestones(firstMetDate) {
-    const milestones = [100, 200, 300, 365, 500];
-    if (!firstMetDate) return [];
-    return milestones
-        .map(day => ({
-            id: `auto_d_${day}`,
-            day,
-            date: hmMilestoneDate(firstMetDate, day),
-            title: `D+${day}`,
-            type: 'auto',
-            icon: day === 365 ? '💍' : '❤️'
-        }))
-        .filter(item => item.date);
+    // RC2.15: 자동 D+ 계산 기념일은 화면에서 사용하지 않는다. 기존 데이터는 보존하지만 새 UI에는 직접 등록한 기념일만 표시한다.
+    return [];
 }
 
 function hmGetNextAutoMilestone(firstMetDate, baseDate) {
@@ -115,17 +105,12 @@ function hmGetAnniversaryList() {
 
 function hmGetAnniversariesForDate(date) {
     if (!date) return [];
-    const customItems = hmGetAnniversaryList()
+    return hmGetAnniversaryList()
         .filter(item => item.date === date)
         .map(item => {
             const meta = hmGetAnniversaryTypeMeta(item.type);
             return { id: item.id, date: item.date, title: item.title, icon: meta.icon, type: item.type, source: 'custom' };
         });
-    const autoItems = hmGetAutoMilestonesForDate(date).map(item => ({ ...item, source: 'auto' }));
-    const firstMetItem = hmAnniversaryState.firstMetDate === date
-        ? [{ id: 'first_met_date', date, title: '처음 만난 날', icon: '❤️', type: 'firstMet', source: 'firstMet' }]
-        : [];
-    return [...firstMetItem, ...customItems, ...autoItems];
 }
 
 function hmUniqueCalendarIcons(items) {
@@ -137,7 +122,7 @@ function hmUniqueCalendarIcons(items) {
 }
 
 function hmGetCalendarBaseYearMonth() {
-    const current = hmGetSelectedHistoryDateSafe();
+    const current = window.hmHistoryCalendarViewDate || hmGetSelectedHistoryDateSafe();
     const base = hmDateFromYmd(current) || new Date();
     return { year: base.getFullYear(), month: base.getMonth() };
 }
@@ -306,7 +291,6 @@ function hmRenderAnniversaryModal() {
     hmEnsureAnniversaryModal();
     const modal = document.getElementById('anniversarySettingsModal');
     if (!modal) return;
-    const firstMetDate = hmAnniversaryState.firstMetDate || '';
     const list = hmGetAnniversaryList();
     const typeChips = HM_ANNIVERSARY_TYPES.map((item, index) => `<button type="button" class="anniversary-type-chip${index === 0 ? ' is-selected' : ''}" data-type="${escapeHtml(item.value)}" onclick="hmSetCustomAnniversaryType('${escapeHtml(item.value)}')" aria-label="${escapeHtml(item.label)} 선택"><span>${item.icon}</span><small>${escapeHtml(item.label)}</small></button>`).join('');
     const listHtml = list.length ? list.map(item => {
@@ -319,43 +303,25 @@ function hmRenderAnniversaryModal() {
             </div>
             <button type="button" class="anniversary-delete-btn" onclick="hmDeleteCustomAnniversary('${escapeHtml(item.id)}')">삭제</button>
         </div>`;
-    }).join('') : '<div class="anniversary-empty-note">아직 직접 등록한 기념일이 없습니다. 생일, 첫 여행, 약속한 날처럼 둘만의 날짜를 추가해 보세요.</div>';
-    const autoMilestones = hmGetAutoMilestones(firstMetDate);
-    const autoListHtml = autoMilestones.length ? autoMilestones.map(item => `<div class="anniversary-auto-item">
-            <span class="anniversary-auto-icon">${item.icon}</span>
-            <span><strong>${item.title}</strong><small>${hmFormatKoreanDate(item.date)}</small></span>
-        </div>`).join('') : '<div class="anniversary-empty-note">처음 만난 날을 저장하면 D+100, D+200, D+300, D+365, D+500이 자동 계산됩니다.</div>';
+    }).join('') : '<div class="anniversary-empty-note">아직 등록한 기념일이 없습니다. 생일, 여행, 데이트, 휴가처럼 캘린더에 표시할 날짜를 추가해 보세요.</div>';
 
     modal.innerHTML = `
         <div class="anniversary-settings-head anniversary-settings-hero">
             <div>
-                <div class="anniversary-settings-kicker">MEMORY SETTINGS</div>
-                <h2>우리의 기념일 설정</h2>
-                <p>둘만의 날짜를 예쁘게 정리해 두면 기록실에서 함께 확인할 수 있어요.</p>
+                <div class="anniversary-settings-kicker">OUR DAYS</div>
+                <h2>우리의 기념일</h2>
+                <p>둘만의 날짜를 등록하면 기록실 캘린더에 작은 아이콘으로 표시됩니다.</p>
             </div>
             <button type="button" class="anniversary-modal-close" onclick="hmCloseAnniversarySettings()" aria-label="기념일 설정 닫기">×</button>
         </div>
         <div class="anniversary-settings-section anniversary-feature-card">
-            <div class="anniversary-section-label"><span>❤️</span><strong>처음 만난 날</strong></div>
-            <div class="anniversary-settings-help">이 날짜를 기준으로 D+100, D+200 같은 기념일이 자동 계산됩니다.</div>
-            <div class="anniversary-settings-row">
-                <label class="anniversary-field"><span>날짜</span><input type="date" id="firstMetDateInput" value="${escapeHtml(firstMetDate)}" aria-label="처음 만난 날"></label>
-                <button type="button" class="anniversary-primary-btn" onclick="hmSaveFirstMetDate()">저장</button>
-            </div>
-        </div>
-        <div class="anniversary-settings-section anniversary-feature-card anniversary-auto-card">
-            <div class="anniversary-section-label"><span>✨</span><strong>자동 계산 기념일</strong></div>
-            <div class="anniversary-settings-help">처음 만난 날 기준으로 자동 표시됩니다. 별도 저장 없이 날짜가 바뀌어도 안전하게 다시 계산됩니다.</div>
-            <div class="anniversary-auto-list">${autoListHtml}</div>
-        </div>
-        <div class="anniversary-settings-section anniversary-feature-card">
-            <div class="anniversary-section-label"><span>🎉</span><strong>둘만의 기념일 추가</strong></div>
-            <div class="anniversary-settings-help">생일, 여행, 약속한 날처럼 캘린더에 함께 기억할 날짜를 추가할 수 있습니다.</div>
+            <div class="anniversary-section-label"><span>🎉</span><strong>기념일 추가</strong></div>
+            <div class="anniversary-settings-help">생일, 여행, 데이트, 휴가, 약속한 날처럼 함께 기억할 날짜를 자유롭게 등록하세요.</div>
             <input type="hidden" id="customAnniversaryType" value="love">
             <div class="anniversary-type-grid">${typeChips}</div>
             <div class="anniversary-add-grid">
                 <label class="anniversary-field"><span>날짜</span><input type="date" id="customAnniversaryDate" aria-label="기념일 날짜"></label>
-                <label class="anniversary-field anniversary-field-title"><span>이름</span><input type="text" id="customAnniversaryTitle" placeholder="예: 200일 여행, 첫 생일, 약속한 날" aria-label="기념일 이름"></label>
+                <label class="anniversary-field anniversary-field-title"><span>이름</span><input type="text" id="customAnniversaryTitle" placeholder="예: 생일, 첫 여행, 데이트, 휴가" aria-label="기념일 이름"></label>
                 <button type="button" class="anniversary-primary-btn anniversary-add-btn" onclick="hmAddCustomAnniversary()">추가</button>
             </div>
         </div>
@@ -364,39 +330,27 @@ function hmRenderAnniversaryModal() {
             <div class="anniversary-custom-list">${listHtml}</div>
         </div>`;
 }
-
 function hmRenderAnniversaryPanel() {
     const box = document.getElementById('anniversaryPanel');
     if (!box) return;
-    const firstMetDate = hmAnniversaryState.firstMetDate || '';
-    const selectedDate = hmGetSelectedHistoryDateSafe();
-    const selectedDday = firstMetDate ? hmCalculateDday(firstMetDate, selectedDate) : null;
-    const todayDday = firstMetDate ? hmCalculateDday(firstMetDate, hmGetTodayYmd()) : null;
-    const customCount = hmGetAnniversaryList().length;
-    const autoMilestones = hmGetAutoMilestones(firstMetDate);
-    const nextMilestone = hmGetNextAutoMilestone(firstMetDate);
-    const selectedAutoMilestones = hmGetAutoMilestonesForDate(selectedDate);
-    const selectedAutoText = selectedAutoMilestones.length ? ` · 자동 기념일 <strong>${selectedAutoMilestones.map(item => item.title).join(', ')}</strong>` : '';
-    const selectedNote = firstMetDate && selectedDday ? `<div class="anniversary-selected-note">📅 선택한 날짜 <strong>${hmFormatKoreanDate(selectedDate)}</strong>는 만난 지 <strong>D+${selectedDday}</strong>입니다${selectedAutoText}.</div>` : '';
-    const summaryText = firstMetDate
-        ? `처음 만난 날: ${hmFormatKoreanDate(firstMetDate)}${nextMilestone ? ` · 다음 D+${nextMilestone.day}: ${hmFormatKoreanDate(nextMilestone.date)}` : ''}`
-        : '처음 만난 날을 설정하면 D+가 자동 계산됩니다.';
-    const autoPreview = firstMetDate ? `<div class="anniversary-auto-preview">${autoMilestones.map(item => `<span>${item.icon} ${item.title} <b>${hmFormatKoreanDate(item.date)}</b></span>`).join('')}</div>` : '';
-    const todayBox = firstMetDate
-        ? `<div class="anniversary-today compact"><span class="anniversary-icon">🎉</span><span><div class="anniversary-main">오늘은 만난 지 D+${todayDday}</div><div class="anniversary-caption">자동 기념일 5개 · 직접 등록한 기념일 ${customCount}개</div></span></div>`
-        : `<div class="anniversary-today compact"><span class="anniversary-icon">💕</span><span><div class="anniversary-main">처음 만난 날을 설정해 주세요</div><div class="anniversary-caption">설정 버튼에서 기념일 종류도 함께 관리할 수 있어요.</div></span></div>`;
+    const list = hmGetAnniversaryList();
+    const today = hmGetTodayYmd();
+    const upcoming = list.filter(item => item.date >= today).slice(0, 3);
+    const previewHtml = upcoming.length
+        ? `<div class="anniversary-auto-preview">${upcoming.map(item => { const meta = hmGetAnniversaryTypeMeta(item.type); return `<span>${meta.icon} ${escapeHtml(item.title)} <b>${hmFormatKoreanDate(item.date)}</b></span>`; }).join('')}</div>`
+        : '<div class="anniversary-selected-note">등록한 기념일이 캘린더에 아이콘으로 표시됩니다.</div>';
     box.innerHTML = `<div class="anniversary-card anniversary-card-compact">
         <div class="anniversary-head">
             <div>
                 <div class="anniversary-title">💕 우리의 기념일</div>
-                <div class="anniversary-sub">${escapeHtml(summaryText)}</div>
+                <div class="anniversary-sub">등록된 기념일 ${list.length}개 · 캘린더 아이콘 표시</div>
             </div>
-            <button type="button" class="anniversary-toggle-btn" onclick="hmOpenAnniversarySettings()">설정</button>
+            <button type="button" class="anniversary-toggle-btn" onclick="hmOpenAnniversarySettings()">등록/관리</button>
         </div>
-        ${selectedNote}${todayBox}${autoPreview}
+        <div class="anniversary-today compact"><span class="anniversary-icon">📌</span><span><div class="anniversary-main">기억하고 싶은 날짜를 직접 등록하세요</div><div class="anniversary-caption">첫날 계산과 자동 D+ 표시는 사용하지 않습니다.</div></span></div>
+        ${previewHtml}
     </div>`;
 }
-
 async function hmRefreshAnniversaryPanel() {
     await hmLoadAnniversarySettings();
     hmRenderAnniversaryPanel();
@@ -420,27 +374,18 @@ function hmRenderSelectedDateAnniversaryDetail() {
     if (oldDetail) oldDetail.remove();
 
     const items = hmGetAnniversariesForDate(selectedDate);
-    const firstMetDate = hmAnniversaryState.firstMetDate || '';
-    const dday = firstMetDate ? hmCalculateDday(firstMetDate, selectedDate) : null;
-    const hasDdayOnly = dday && !items.length;
-
-    if (!items.length && !hasDdayOnly) return;
+    if (!items.length) return;
 
     const card = document.createElement('div');
     card.className = 'anniversary-selected-detail-card';
 
-    const itemHtml = items.length ? items.map(item => {
-        const sourceLabel = item.source === 'auto' ? '자동 계산' : (item.source === 'firstMet' ? '처음 만난 날' : '직접 등록');
-        return `<div class="anniversary-selected-detail-item">
+    const itemHtml = items.map(item => `<div class="anniversary-selected-detail-item">
             <span class="anniversary-selected-detail-icon">${item.icon || '💕'}</span>
             <span>
                 <strong>${escapeHtml(item.title || '기념일')}</strong>
-                <small>${escapeHtml(sourceLabel)}</small>
+                <small>직접 등록</small>
             </span>
-        </div>`;
-    }).join('') : '<div class="anniversary-selected-detail-empty">이 날짜에는 별도 등록된 기념일은 없지만, 만난 날 기준 D-day를 확인할 수 있어요.</div>';
-
-    const ddayHtml = dday ? `<div class="anniversary-selected-dday-line">💕 처음 만난 날 기준 <strong>D+${dday}</strong></div>` : '';
+        </div>`).join('');
 
     card.innerHTML = `
         <div class="anniversary-selected-detail-head">
@@ -450,7 +395,6 @@ function hmRenderSelectedDateAnniversaryDetail() {
                 <small>선택한 날짜의 기록과 함께 표시됩니다.</small>
             </div>
         </div>
-        ${ddayHtml}
         <div class="anniversary-selected-detail-list">${itemHtml}</div>
     `;
 
