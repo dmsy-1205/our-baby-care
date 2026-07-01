@@ -310,14 +310,23 @@
         <small id="customRoutineCountText">0/5 · 관리(Dom)가 설계</small>
     </div>
 
-    <div class="custom-routine-toolbar" id="customRoutineToolbar">
-        <button type="button" class="custom-routine-manage-btn" id="customRoutineManageBtn" onclick="openCustomRoutineManager()">⚙ 맞춤 루틴 관리</button>
-        <span class="custom-routine-help">커플마다 다른 미션과 일과를 직접 카드로 만들 수 있어요.</span>
+    <div class="input-group custom-routine-home-wrap">
+        <button type="button" class="daily-card custom-routine-hub-card" id="customRoutineHubCard" onclick="openCustomRoutineHub()">
+            <span class="daily-card-icon">🧩</span>
+            <span>
+                <span class="daily-card-title">나만의 루틴</span>
+                <span class="daily-card-sub" id="customRoutineHubSub">공간을 연결하면 맞춤 루틴을 불러옵니다.</span>
+            </span>
+            <span class="daily-card-arrow">›</span>
+        </button>
     </div>
 
-    <div class="custom-routine-list" id="customRoutineList">
-        <div class="custom-routine-empty">방에 연결되면 맞춤 루틴을 불러옵니다.</div>
+    <div class="custom-routine-toolbar compact" id="customRoutineToolbar">
+        <button type="button" class="custom-routine-manage-btn" id="customRoutineManageBtn" onclick="openCustomRoutineManager()">⚙ 맞춤 루틴 관리</button>
+        <span class="custom-routine-help">홈은 한 장으로 유지하고, 루틴은 전용 페이지에서 작성해요.</span>
     </div>
+
+    <div class="custom-routine-list" id="customRoutineList" hidden aria-hidden="true"></div>
 
 
     <div id="chatSection" style="margin: 20px auto; max-width: 500px; padding: 15px; background: #fff; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); font-family: sans-serif;">
@@ -356,6 +365,23 @@
 </button>
 </div>
 
+
+<div class="daily-modal-overlay" id="customRoutineHubOverlay" onclick="if(event.target.id==='customRoutineHubOverlay') closeCustomRoutineHub()">
+    <div class="daily-modal custom-routine-modal custom-routine-hub-modal" role="dialog" aria-modal="true" aria-labelledby="customRoutineHubTitle">
+        <div class="daily-modal-head">
+            <h2 id="customRoutineHubTitle">🧩 맞춤 루틴</h2>
+            <button type="button" class="modal-close-btn" onclick="closeCustomRoutineHub()">닫기</button>
+        </div>
+        <p class="custom-routine-note" id="customRoutineHubNote">관리(Dom)가 만든 미션과 일과를 한 화면에서 확인하고 작성합니다.</p>
+        <div class="custom-routine-hub-actions" id="customRoutineHubActions">
+            <button type="button" class="custom-routine-manage-btn" onclick="openCustomRoutineManager()">⚙ 관리 화면 열기</button>
+        </div>
+        <div id="customRoutineHubList" class="custom-routine-hub-list">
+            <div class="custom-routine-empty">맞춤 루틴을 불러오는 중입니다.</div>
+        </div>
+    </div>
+</div>
+
 <div class="daily-modal-overlay" id="customRoutineManagerOverlay" onclick="if(event.target.id==='customRoutineManagerOverlay') closeCustomRoutineManager()">
     <div class="daily-modal custom-routine-modal" role="dialog" aria-modal="true" aria-labelledby="customRoutineManagerTitle">
         <div class="daily-modal-head">
@@ -371,6 +397,7 @@
                 <button type="button" onclick="fillCustomRoutineTemplate('mission')">미션 카드</button>
                 <button type="button" onclick="fillCustomRoutineTemplate('checklist')">체크리스트</button>
                 <button type="button" onclick="fillCustomRoutineTemplate('routine')">생활 루틴</button>
+                <button type="button" onclick="fillCustomRoutineTemplate('free')">자유형</button>
             </div>
             <label for="customCardTitleInput">카드 이름</label>
             <input type="text" id="customCardTitleInput" maxlength="20" placeholder="예: 오늘 보고">

@@ -508,14 +508,17 @@ function buildHistoryCustomRoutineText(record) {
     const blocks = [];
     Object.entries(values).forEach(([cardId, itemMap]) => {
         if (!itemMap || typeof itemMap !== 'object') return;
-        const cardTitle = (typeof hmCustomCards !== 'undefined' && hmCustomCards?.[cardId]?.title) ? hmCustomCards[cardId].title : '맞춤 루틴';
-        const lines = Object.values(itemMap).map(item => {
-            if (!item || typeof item !== 'object') return '';
-            let value = item.value;
-            if (item.type === 'checkbox') value = value === true ? '완료' : '미완료';
-            if (value === undefined || value === null || value === '') value = '기록 없음';
-            return `${item.label || '항목'}: ${value}`;
-        }).filter(Boolean);
+        const itemRows = Object.values(itemMap).filter(item => item && typeof item === 'object');
+        const savedTitle = itemRows.find(item => item.cardTitle)?.cardTitle || '';
+        const cardTitle = (typeof hmCustomCards !== 'undefined' && hmCustomCards?.[cardId]?.title) ? hmCustomCards[cardId].title : (savedTitle || '맞춤 루틴');
+        const lines = itemRows
+            .sort((a, b) => Number(a.order || 0) - Number(b.order || 0))
+            .map(item => {
+                let value = item.value;
+                if (item.type === 'checkbox') value = value === true ? '완료' : '미완료';
+                if (value === undefined || value === null || value === '') value = '기록 없음';
+                return `${item.label || '항목'}: ${value}`;
+            }).filter(Boolean);
         if (lines.length) blocks.push(`🧩 ${cardTitle}\n${lines.join('\n')}`);
     });
     return blocks.join('\n\n');

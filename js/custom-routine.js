@@ -1,6 +1,6 @@
 // =========================================================
-// HearMe2nite RC2.11 STEP16
-// custom-routine.js - Custom Routine Card MVP
+// HearMe2nite RC2.11.4 STEP17
+// custom-routine.js - Custom Routine Hub Data Safety Hotfix
 // - 기본 카드/기존 days 구조는 유지한다.
 // - 카드 정의: rooms/{roomCode}/customCards/{cardId}
 // - 날짜별 입력값: rooms/{roomCode}/days/{date}/customCardValues
@@ -20,11 +20,17 @@ let hmCustomEditingCardId = '';
 let hmCustomActiveInputCardId = '';
 let hmCustomDraftItems = [];
 
-function hmCustomCardRows(includeInactive = false) {
+function hmCustomCardRows(includeInactive = false, includeDeleted = false) {
     return Object.entries(hmCustomCards || {})
         .map(([id, card]) => ({ id, ...(card || {}) }))
+        .filter(card => includeDeleted || card.deleted !== true)
         .filter(card => includeInactive || card.active !== false)
         .sort((a, b) => Number(a.order || 0) - Number(b.order || 0) || String(a.title || '').localeCompare(String(b.title || '')));
+}
+
+function hmCustomCssEscape(value) {
+    if (window.CSS && typeof window.CSS.escape === 'function') return window.CSS.escape(String(value));
+    return String(value).replace(/[^a-zA-Z0-9_-]/g, '\\$&');
 }
 
 function hmCustomItemRows(card) {
@@ -71,6 +77,7 @@ function hmStopCustomRoutineCards() {
     hmCustomValues = {};
     renderCustomRoutineCards();
     renderCustomRoutineManager();
+    renderCustomRoutineHub();
 }
 
 function hmSetCustomRoutineValues(values = {}) {
@@ -108,29 +115,56 @@ function renderCustomRoutineCards() {
     const countText = document.getElementById('customRoutineCountText');
     const toolbar = document.getElementById('customRoutineToolbar');
     const manageBtn = document.getElementById('customRoutineManageBtn');
+    const hubSub = document.getElementById('customRoutineHubSub');
+    const hubCard = document.getElementById('customRoutineHubCard');
     const rows = hmCustomCardRows(false);
     const canManage = typeof canManageRelationshipCards === 'function' && canManageRelationshipCards();
 
+    const totalItems = rows.reduce((sum, card) => sum + hmCustomItemRows(card).length, 0);
+    const doneItems = rows.reduce((sum, card) => sum + hmCustomItemRows(card).filter(item => {
+        const saved = hmCustomValues?.[card.id]?.[item.id];
+        if (!saved) return false;
+        if (item.type === 'checkbox') return saved.value === true;
+        return saved.value !== undefined && saved.value !== null && String(saved.value).trim() !== '';
+    }).length, 0);
+
     if (countText) countText.innerText = `${rows.length}/${HM_CUSTOM_MAX_CARDS} · ${canManage ? '관리(Dom)가 설계' : '기록(Sub)은 입력만 가능'}`;
-    if (toolbar) toolbar.style.display = canManage ? 'flex' : (rows.length ? 'none' : 'flex');
+    if (toolbar) toolbar.style.display = canManage ? 'flex' : 'none';
     if (manageBtn) {
         manageBtn.style.display = canManage ? '' : 'none';
         manageBtn.disabled = !canManage;
     }
-    if (!list) return;
+    if (hubCard) hubCard.disabled = !getRoomCodeForData();
+    if (hubSub) {
+        if (!getRoomCodeForData()) hubSub.innerText = '공간을 만들거나 연결하면 맞춤 루틴을 사용할 수 있어요.';
+        else if (!rows.length) hubSub.innerText = canManage ? '관리 버튼으로 첫 루틴을 만들어 보세요.' : '관리(Dom)가 루틴을 만들면 표시됩니다.';
+        else hubSub.innerText = `${rows.length}개 루틴 · ${totalItems ? `${doneItems}/${totalItems} 입력 완료` : '항목 없음'}`;
+    }
 
+    // RC2.11.3: 홈 화면은 길어지지 않도록 단일 허브 카드만 표시한다.
+    // 기존 customRoutineList는 호환용으로만 남기고 실제 목록은 허브 모달에서 렌더링한다.
+    if (list) list.innerHTML = '';
+    renderCustomRoutineHub();
+}
+
+function renderCustomRoutineHub() {
+    const box = document.getElementById('customRoutineHubList');
+    const actions = document.getElementById('customRoutineHubActions');
+    const rows = hmCustomCardRows(false);
+    const canManage = typeof canManageRelationshipCards === 'function' && canManageRelationshipCards();
+    if (actions) actions.style.display = canManage ? 'flex' : 'none';
+    if (!box) return;
     if (!getRoomCodeForData()) {
-        list.innerHTML = '<div class="custom-routine-empty">공간을 만들거나 연결하면 맞춤 루틴을 사용할 수 있어요.</div>';
+        box.innerHTML = '<div class="custom-routine-empty">공간을 먼저 연결해 주세요.</div>';
         return;
     }
     if (!rows.length) {
-        list.innerHTML = canManage
-            ? '<div class="custom-routine-empty">아직 맞춤 루틴이 없습니다. 관리 버튼으로 첫 카드를 만들어 보세요.</div>'
+        box.innerHTML = canManage
+            ? '<div class="custom-routine-empty">아직 맞춤 루틴이 없습니다. 관리 화면에서 첫 루틴을 만들어 주세요.</div>'
             : '<div class="custom-routine-empty">관리(Dom)가 맞춤 루틴을 만들면 이곳에 표시됩니다.</div>';
         return;
     }
-
-    list.innerHTML = rows.map(card => {
+    box.innerHTML = rows.map(card => {
         const items = hmCustomItemRows(card);
         const doneCount = items.filter(item => {
             const saved = hmCustomValues?.[card.id]?.[item.id];
@@ -139,18 +173,25 @@ function renderCustomRoutineCards() {
             return saved.value !== undefined && saved.value !== null && String(saved.value).trim() !== '';
         }).length;
         const sub = items.length ? `${doneCount}/${items.length} 입력 완료` : '항목이 없습니다.';
-        return `
-            <div class="input-group custom-routine-card-wrap">
-                <button type="button" class="daily-card custom-routine-card" onclick="openCustomRoutineInput('${escapeHtml(card.id)}')">
-                    <span class="daily-card-icon">${escapeHtml(card.icon || '🧩')}</span>
-                    <span>
-                        <span class="daily-card-title">${escapeHtml(card.title || '맞춤 루틴')}</span>
-                        <span class="daily-card-sub">${escapeHtml(card.description || sub)} · ${escapeHtml(sub)}</span>
-                    </span>
-                    <span class="daily-card-arrow">›</span>
-                </button>
-            </div>`;
+        return `<button type="button" class="custom-routine-hub-row" onclick="openCustomRoutineInput('${escapeHtml(card.id)}')">
+            <span class="custom-routine-hub-icon">${escapeHtml(card.icon || '🧩')}</span>
+            <span class="custom-routine-hub-text"><strong>${escapeHtml(card.title || '맞춤 루틴')}</strong><small>${escapeHtml(card.description || sub)} · ${escapeHtml(sub)}</small></span>
+            <span class="custom-routine-hub-arrow">›</span>
+        </button>`;
     }).join('');
+}
+
+function openCustomRoutineHub() {
+    if (!getRoomCodeForData()) {
+        alert('공간을 먼저 만들거나 연결해 주세요.');
+        return;
+    }
+    renderCustomRoutineHub();
+    openModalOverlayById('customRoutineHubOverlay');
+}
+
+function closeCustomRoutineHub() {
+    closeModalOverlayById('customRoutineHubOverlay');
 }
 
 function openCustomRoutineManager() {
@@ -189,6 +230,9 @@ function fillCustomRoutineTemplate(type = 'blank') {
         ] },
         routine: { title: '생활 루틴', desc: '정해진 일과를 기록합니다', items: [
             ['시작 시간', 'time', ''], ['완료 여부', 'checkbox', ''], ['점수', 'number', '1~10'], ['메모', 'text', '']
+        ] },
+        free: { title: '자유형', desc: '자유롭게 적고 저장합니다', items: [
+            ['내용', 'text', '오늘의 기록을 적어 주세요']
         ] }
     };
     const tpl = templates[type] || templates.blank;
@@ -364,10 +408,18 @@ async function deleteCustomRoutineCard(cardId) {
     if (!canManageRelationshipCards()) return;
     const roomCode = getRoomCodeForData();
     if (!roomCode || !cardId) return;
-    if (!confirm('이 맞춤 루틴 카드를 삭제할까요? 기존 날짜 기록값은 보존되지만 홈에서는 사라집니다.')) return;
+    if (!confirm('이 맞춤 루틴 카드를 삭제할까요? 기존 날짜 기록과 카드 제목은 보존되고, 홈/관리 목록에서만 사라집니다.')) return;
     try {
-        await db.ref(`rooms/${roomCode}/customCards/${cardId}`).remove();
+        await db.ref(`rooms/${roomCode}/customCards/${cardId}`).update({
+            active: false,
+            deleted: true,
+            deletedBy: currentUser?.uid || '',
+            deletedAt: firebase.database.ServerValue.TIMESTAMP,
+            updatedBy: currentUser?.uid || '',
+            updatedAt: firebase.database.ServerValue.TIMESTAMP
+        });
         if (hmCustomEditingCardId === cardId) resetCustomRoutineEditor();
+        showSaveStatus('🧩 맞춤 루틴 삭제 완료');
     } catch (err) {
         hmReportError('deleteCustomRoutineCard', err, '❌ 맞춤 루틴 삭제 실패');
     }
@@ -420,7 +472,7 @@ function saveCustomRoutineInput() {
     next[cardId] = { ...(next[cardId] || {}) };
     const requiredMissing = [];
     hmCustomItemRows(card).forEach(item => {
-        const el = body.querySelector(`[data-custom-item="${CSS.escape(item.id)}"]`);
+        const el = body.querySelector(`[data-custom-item="${hmCustomCssEscape(item.id)}"]`);
         if (!el) return;
         const value = item.type === 'checkbox' ? el.checked : el.value;
         if (item.required && item.type !== 'checkbox' && !String(value || '').trim()) requiredMissing.push(item.label || '항목');
@@ -428,6 +480,9 @@ function saveCustomRoutineInput() {
             value,
             label: item.label || '',
             type: item.type || 'text',
+            order: Number(item.order || 0),
+            cardTitle: card.title || '맞춤 루틴',
+            cardDescription: card.description || '',
             updatedBy: currentUser?.uid || '',
             updatedAt: Date.now()
         };
