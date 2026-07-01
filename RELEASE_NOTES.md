@@ -25,3 +25,10 @@
 - RC2.14 홈 UX/오늘의 약속/오늘의 요약 모달 반영
 - RC2.13 Room Presence 계열 제외
 - 변경 파일: index.html, css/style.css, js/custom-routine.js, js/product.js
+
+
+## RC2.15.1 History UX STEP2
+- 사진 모아보기 카드형 갤러리 정리
+- 하루 기록 날짜별 카드 리스트 정리
+- 기록실 여백/카드 간격 정리
+- Firebase/Room/History 데이터 구조 변경 없음

@@ -478,64 +478,116 @@ function openHistoryPanelModal() {
         box.innerHTML = html;
     }
 
+    function hmHistoryPhotoCountText(record) {
+        return record && record.photo ? '사진 1장' : '사진 없음';
+    }
+
     function renderPhotoThumbs(daysData) {
         const box = document.getElementById('photoThumbs');
         if (!box) return;
-        const photos = Object.keys(daysData || {}).sort((a,b)=>new Date(b)-new Date(a)).filter(date => daysData[date]?.photo).slice(0, 12);
+        const photos = Object.keys(daysData || {})
+            .sort((a,b)=>new Date(b)-new Date(a))
+            .filter(date => daysData[date]?.photo)
+            .slice(0, 18);
         if (!photos.length) {
-            box.innerHTML = '<div class="history-photo-empty">📷 아직 사진 기록이 없습니다.</div>';
+            box.innerHTML = `
+                <section class="history-gallery-section history-gallery-empty-section">
+                    <div class="history-section-headline">
+                        <div><strong>📷 사진 모아보기</strong><span>저장된 사진 기록이 아직 없습니다.</span></div>
+                    </div>
+                    <div class="history-photo-empty">사진이 저장된 날이 생기면 이곳에 모아 보여요.</div>
+                </section>`;
             return;
         }
-        box.innerHTML = `<div class="history-photo-label"><strong>사진 모아보기</strong>최근 사진 ${photos.length}장</div>` + photos.map(date => `<img class="history-thumb" src="${daysData[date].photo}" title="${date}" alt="${date} 사진" onclick="openHistoryDetailModal('${date}')">`).join('');
+        const items = photos.map(date => {
+            const record = daysData[date] || {};
+            const missionText = getHistoryMissionText(record);
+            const chips = [record.moodLabel && record.moodLabel !== '기록 없음' ? record.moodLabel : '', missionText ? '🎯 미션' : '', record.diary ? '📝 기록' : ''].filter(Boolean).map(makeHistoryChip).join('');
+            return `<button type="button" class="history-photo-card" onclick="openHistoryDetailModal('${date}')" aria-label="${escapeHtml(formatHistoryDateLabel(date))} 사진 기록 열기">
+                <span class="history-photo-frame"><img src="${record.photo}" alt="${date} 사진"></span>
+                <span class="history-photo-meta"><strong>${formatHistoryDateLabel(date)}</strong><small>${chips || '사진 기록'}</small></span>
+            </button>`;
+        }).join('');
+        box.innerHTML = `
+            <section class="history-gallery-section">
+                <div class="history-section-headline">
+                    <div><strong>📷 사진 모아보기</strong><span>최근 사진 ${photos.length}장을 카드로 모았어요.</span></div>
+                </div>
+                <div class="history-photo-grid">${items}</div>
+            </section>`;
     }
 
     function displayHistory(daysData) {
-        const historyList = document.getElementById('historyList');
-        renderHistoryHero(daysData || {});
-        renderHistorySummary(daysData || {});
-        updateHistoryLaunchSub(daysData || {});
-        renderCalendar(daysData || {});
-        renderPhotoThumbs(daysData || {});
-        if (!historyList) return;
-        if (!daysData || Object.keys(daysData).length === 0) {
-            historyList.innerHTML = '<div class="empty-message">아직 저장된 서버 기록이 없습니다. ✨</div>';
-            return;
-        }
-        if (!selectedHistoryDate) {
-            historyList.innerHTML = '<div class="history-selected-hint"><strong>날짜를 선택해 주세요</strong>캘린더에서 기록이 있는 날짜를 누르면<br>그 날의 상세 카드가 이곳에 표시됩니다.</div>';
-            return;
-        }
-        const record = daysData[selectedHistoryDate];
-        if (!record) {
-            historyList.innerHTML = '<div class="history-selected-hint"><strong>기록이 없습니다</strong>선택한 날짜에는 저장된 기록이 없습니다. 📅</div>';
-            return;
-        }
-        const date = selectedHistoryDate;
-        const icon = getHistoryMoodIcon(record);
-        const missionText = getHistoryMissionText(record);
-        const diaryPreview = record.diary ? record.diary.substring(0, 62) : '오늘의 하루 기록을 열어 확인하세요.';
-        const chips = [
-            record.moodLabel && record.moodLabel !== '기록 없음' ? record.moodLabel : '',
-            record.water ? `💧 ${record.water}` : '',
-            record.weight ? `⚖️ ${record.weight}` : '',
-            missionText ? `🎯 ${missionText}` : '',
-            record.photo ? '📷 사진' : '',
-            record.dailyChoiceLabel && record.dailyChoiceLabel !== '기록 없음' ? record.dailyChoiceLabel : ''
-        ].map(makeHistoryChip).join('');
-        historyList.innerHTML = `
-            <button type="button" class="history-day-card history-premium-selected" onclick="openHistoryDetailModal('${date}')">
-                <span class="history-day-icon">${icon}</span>
-                <span>
-                    <span class="history-day-title">${formatHistoryDateLabel(date)}의 기록</span>
-                    <span class="history-day-sub">${escapeHtml(diaryPreview)}${record.diary && record.diary.length > 62 ? '...' : ''}</span>
-                    <span class="history-day-chips">${chips}</span>
-                </span>
-                <span class="history-day-actions">
-                    <span class="history-card-arrow">›</span>
-                    <span class="btn-delete" onclick="deleteRecord(event, '${date}')">삭제</span>
-                </span>
-            </button>`;
+    const historyList = document.getElementById('historyList');
+    renderHistoryHero(daysData || {});
+    renderHistorySummary(daysData || {});
+    updateHistoryLaunchSub(daysData || {});
+    renderCalendar(daysData || {});
+    renderHistoryTimeline(daysData || {});
+    renderPhotoThumbs(daysData || {});
+    if (!historyList) return;
+    if (!daysData || Object.keys(daysData).length === 0) {
+        historyList.innerHTML = '<div class="empty-message">아직 저장된 서버 기록이 없습니다. ✨</div>';
+        return;
     }
+    const filtered = hmHistoryFilteredDates(daysData || {});
+    if (!selectedHistoryDate) {
+        const recordDate = document.getElementById('recordDate')?.value || '';
+        selectedHistoryDate = filtered.includes(recordDate) ? recordDate : (filtered[0] || '');
+        if (selectedHistoryDate && !hmHistoryCalendarViewDate) hmHistorySetCalendarViewFromDate(selectedHistoryDate);
+    }
+    if (selectedHistoryDate && !filtered.includes(selectedHistoryDate) && filtered.length) selectedHistoryDate = filtered[0];
+    if (!filtered.length) {
+        historyList.innerHTML = '<div class="history-selected-hint"><strong>검색 결과가 없습니다</strong>검색어 또는 필터를 초기화해 주세요.</div>';
+        return;
+    }
+
+    const selectedRecord = selectedHistoryDate ? daysData[selectedHistoryDate] : null;
+    const selectedCard = selectedRecord ? (() => {
+        const missionText = getHistoryMissionText(selectedRecord);
+        const diaryPreview = hmHistoryTimelinePreview(selectedRecord);
+        const chips = hmHistorySummaryChips(selectedRecord);
+        return `<button type="button" class="history-day-card history-premium-selected history-selected-record-card" onclick="openHistoryDetailModal('${selectedHistoryDate}')">
+            <span class="history-day-icon">${getHistoryMoodIcon(selectedRecord)}</span>
+            <span class="history-day-main">
+                <span class="history-day-title">${formatHistoryDateLabel(selectedHistoryDate)}의 기록</span>
+                <span class="history-day-sub">${escapeHtml(diaryPreview)}${diaryPreview.length >= 78 ? '...' : ''}</span>
+                <span class="history-day-chips">${chips}</span>
+            </span>
+            <span class="history-day-actions">
+                <span class="history-card-arrow">›</span>
+                <span class="btn-delete" onclick="deleteRecord(event, '${selectedHistoryDate}')">삭제</span>
+            </span>
+        </button>`;
+    })() : '<div class="history-selected-hint"><strong>기록이 없습니다</strong>선택한 날짜에는 저장된 기록이 없습니다. 📅</div>';
+
+    const recentCards = filtered.slice(0, 10).map(date => {
+        const record = daysData[date] || {};
+        const isSelected = date === selectedHistoryDate;
+        const preview = hmHistoryTimelinePreview(record);
+        const chips = hmHistorySummaryChips(record);
+        return `<button type="button" class="history-story-row ${isSelected ? 'is-selected' : ''}" onclick="selectHistoryDate('${date}')">
+            <span class="history-story-date"><strong>${String(new Date(date + 'T00:00:00').getDate()).padStart(2,'0')}</strong><small>${formatHistoryDateLabel(date).replace(/^\d+년\s*/, '')}</small></span>
+            <span class="history-story-body"><strong>${getHistoryMoodIcon(record)} ${record.photo ? '사진과 함께한 기록' : '하루 기록'}</strong><small>${escapeHtml(preview)}${preview.length >= 78 ? '...' : ''}</small><em>${chips || '저장된 기록'}</em></span>
+            <span class="history-story-arrow">›</span>
+        </button>`;
+    }).join('');
+
+    historyList.innerHTML = `
+        <section class="history-selected-record-section">
+            <div class="history-section-headline">
+                <div><strong>📝 선택한 날짜의 기록</strong><span>날짜를 누르면 하루 기록 팝업이 열립니다.</span></div>
+                ${selectedHistoryDate ? `<button type="button" class="history-open-again" onclick="openHistoryDetailModal('${selectedHistoryDate}')">다시 열기</button>` : ''}
+            </div>
+            ${selectedCard}
+        </section>
+        <section class="history-story-section">
+            <div class="history-section-headline">
+                <div><strong>📖 하루 기록</strong><span>최근 기록을 날짜별 카드로 정리했어요.</span></div>
+            </div>
+            <div class="history-story-list">${recentCards}</div>
+        </section>`;
+}
 
 
 
