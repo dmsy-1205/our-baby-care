@@ -65,13 +65,13 @@
         const anchor = document.querySelector('.room-settings-card'); if (!anchor) return;
         const box = document.createElement('section');
         box.id='hmProductDashboard'; box.className='hm-beta-dashboard';
-        box.innerHTML=`<div class="hm-beta-dashboard-head"><div><span>Home</span><strong>오늘의 요약</strong></div></div>
-        <div class="hm-beta-dashboard-grid hm-home-summary-grid">
-        <div class="hm-beta-tile"><small>오늘 기록</small><strong id="hmProductTodayStatus">대기중</strong></div>
-        <div class="hm-beta-tile"><small>수분</small><strong id="hmProductWaterStatus">0ML</strong></div>
-        <div class="hm-beta-tile"><small>체중</small><strong id="hmProductWeightStatus">-</strong></div>
-        <div class="hm-beta-tile"><small>오늘의 약속</small><strong id="hmProductPromiseStatus">-</strong></div>
-        <div class="hm-beta-tile"><small>다음 기념일</small><strong id="hmProductNextAnniversary">-</strong></div></div>`;
+        box.innerHTML=`<div class="hm-summary-strip-head"><span>HOME</span><strong>오늘의 요약</strong></div>
+        <div class="hm-summary-strip" aria-label="오늘의 요약">
+        <div class="hm-summary-dot"><b>📝</b><span id="hmProductTodayStatus">대기</span></div>
+        <div class="hm-summary-dot"><b>💧</b><span id="hmProductWaterStatus">0ML</span></div>
+        <div class="hm-summary-dot"><b>⚖️</b><span id="hmProductWeightStatus">-</span></div>
+        <div class="hm-summary-dot"><b>💜</b><span id="hmProductPromiseStatus">-</span></div>
+        <div class="hm-summary-dot"><b>🎁</b><span id="hmProductNextAnniversary">없음</span></div></div>`;
         anchor.insertAdjacentElement('afterend', box);
         setTimeout(moveTodayPromiseSection, 0);
     }
@@ -79,11 +79,11 @@
         if (HM_STAGE < 2) return;
         buildDashboard();
         const rec=getCurrentRecord();
-        const todayStatus=$('hmProductTodayStatus'); if(todayStatus) todayStatus.textContent = rec ? '저장됨' : (($('recordDate')?.value||'') ? '작성 중' : '날짜 선택');
+        const todayStatus=$('hmProductTodayStatus'); if(todayStatus) todayStatus.textContent = rec ? '저장' : (($('recordDate')?.value||'') ? '작성' : '대기');
         const water=$('hmProductWaterStatus'); if(water) { let w = 0; try { w = Number(window.currentWater || currentWater || 0); } catch(e) { w = 0; } water.textContent = w ? `${w}ML` : '0ML'; }
         const weight=$('hmProductWeightStatus'); if(weight) { const value = (($('weight')?.value || rec?.weight || '') + '').trim(); weight.textContent = value || '-'; }
-        const promise=routineRatio(); const promiseStatus=$('hmProductPromiseStatus'); if(promiseStatus) promiseStatus.textContent = promise.total ? `${promise.done}/${promise.total}` : (promise.cards ? '항목 없음' : '등록 없음');
-        const next=getNextAnniversary(); const ann=$('hmProductNextAnniversary'); if(ann) ann.textContent = next ? `${next.icon || '💕'} ${next.title || '기념일'}` : '등록 없음';
+        const promise=routineRatio(); const promiseStatus=$('hmProductPromiseStatus'); if(promiseStatus) promiseStatus.textContent = promise.total ? `${promise.done}/${promise.total}` : (promise.cards ? '0/0' : '없음');
+        const next=getNextAnniversary(); const ann=$('hmProductNextAnniversary'); if(ann) ann.textContent = next ? (next.ddayText || next.dDay || next.title || '있음') : '없음';
         moveTodayPromiseSection();
     }
     function renderMonthlyStats(){
