@@ -189,6 +189,9 @@
         updateOwnerOnlySections();
         updateManagedFieldAccessControls();
         if (typeof hmRefreshRoomPresencePanel === 'function') hmRefreshRoomPresencePanel();
+        if (typeof hmStartRoomPresence === 'function' && currentUser && activeRoomCode) {
+            hmStartRoomPresence(activeRoomCode);
+        }
     }
 
     // =========================================================
@@ -218,47 +221,69 @@
         return name.length > 14 ? name.slice(0, 14) + '…' : name;
     }
 
-    function hmFindSubMember(members) {
-        const entries = Object.entries(members || {});
-        let target = entries.find(([uid, item]) => uid !== currentUser?.uid && item?.relationshipRole === 'sub');
-        if (!target && activeRelationshipRole === 'dom') target = entries.find(([uid]) => uid !== currentUser?.uid);
-        if (!target && activeRelationshipRole === 'sub') target = entries.find(([uid, item]) => uid !== currentUser?.uid && item?.relationshipRole === 'dom');
-        return target || null;
+    function hmFindRoomPartnerMember(members) {
+        const entries = Object.entries(members || {}).filter(([uid]) => uid !== currentUser?.uid);
+        if (!entries.length) return null;
+        const oppositeRole = activeRelationshipRole === 'dom' ? 'sub' : (activeRelationshipRole === 'sub' ? 'dom' : '');
+        if (oppositeRole) {
+            const preferred = entries.find(([uid, item]) => item?.relationshipRole === oppositeRole);
+            if (preferred) return preferred;
+        }
+        return entries[0] || null;
+    }
+
+    function hmGetPresenceRoleTitle(member) {
+        const role = member?.relationshipRole || '';
+        if (role === 'sub') return '기록(Sub)';
+        if (role === 'dom') return '관리(Dom)';
+        return '상대방';
     }
 
     function hmRefreshRoomPresencePanel(members) {
         const card = document.getElementById('roomPresenceCard');
         const body = document.getElementById('roomPresenceBody');
         if (!card || !body) return;
-        if (!activeRoomCode || activeRelationshipRole !== 'dom') {
+        if (!activeRoomCode) {
             card.style.display = 'none';
             return;
         }
-        if (!members) {
-            body.innerHTML = '<span class="presence-muted">상대 상태를 불러오는 중입니다.</span>';
-            card.style.display = '';
-            return;
-        }
-        const found = hmFindSubMember(members);
-        if (!found) {
-            body.innerHTML = '<span class="presence-muted">아직 연결된 기록(Sub) 사용자가 없습니다.</span>';
-            card.style.display = '';
-            return;
-        }
-        const member = found[1] || {};
-        const lastSeen = member.lastSeen || member.joinedAt || 0;
-        const online = member.online === true && lastSeen && (Date.now() - Number(lastSeen) < 150000);
-        const label = online ? '온라인' : '오프라인';
-        body.innerHTML = `
-            <div><span class="presence-dot ${online ? 'online' : 'offline'}"></span><strong>${label}</strong> · ${escapeHtml(hmShortEmail(member.email))}</div>
-            <div class="presence-muted">마지막 접속: ${escapeHtml(hmPresenceRelativeTime(lastSeen))}</div>
-        `;
+
         card.style.display = '';
+
+        if (!members) {
+            body.innerHTML = `
+                <div class="presence-main-line"><span class="presence-dot offline"></span><strong>상태 확인 중</strong></div>
+                <div class="presence-muted">상대 접속 정보를 불러오는 중입니다.</div>
+            `;
+            return;
+        }
+
+        const found = hmFindRoomPartnerMember(members);
+        if (!found) {
+            body.innerHTML = `
+                <div class="presence-main-line"><span class="presence-dot offline"></span><strong>상대 연결 대기</strong></div>
+                <div class="presence-muted">아직 같은 공간에 연결된 상대가 없습니다.</div>
+                <div class="presence-hint">상대가 초대코드로 들어오면 온라인 여부와 마지막 접속 시간이 여기에 표시됩니다.</div>
+            `;
+            return;
+        }
+
+        const member = found[1] || {};
+        const lastSeen = Number(member.lastSeen || member.lastActiveAt || member.joinedAt || 0);
+        const online = member.online === true && lastSeen && (Date.now() - lastSeen < 150000);
+        const label = online ? '온라인' : '오프라인';
+        const roleTitle = hmGetPresenceRoleTitle(member);
+        body.innerHTML = `
+            <div class="presence-main-line"><span class="presence-dot ${online ? 'online' : 'offline'}"></span><strong>${roleTitle}</strong> · ${label}</div>
+            <div class="presence-muted">${escapeHtml(hmShortEmail(member.email))}</div>
+            <div class="presence-lastseen">마지막 접속: <strong>${escapeHtml(hmPresenceRelativeTime(lastSeen))}</strong></div>
+        `;
     }
 
     function hmStopRoomPresence() {
         if (roomPresenceRef) roomPresenceRef.off();
         roomPresenceRef = null;
+        window.hmActivePresenceRoom = '';
         if (hmPresenceInterval) clearInterval(hmPresenceInterval);
         hmPresenceInterval = null;
         const card = document.getElementById('roomPresenceCard');
@@ -286,6 +311,11 @@
 
     async function hmStartRoomPresence(roomCode) {
         if (!currentUser || !hmIsSafeRoomCode(roomCode)) return;
+        if (window.hmActivePresenceRoom === roomCode && roomPresenceRef) {
+            await hmTouchRoomPresence(roomCode);
+            return;
+        }
+        window.hmActivePresenceRoom = roomCode;
         if (roomPresenceRef) roomPresenceRef.off();
         if (hmPresenceInterval) clearInterval(hmPresenceInterval);
         await hmTouchRoomPresence(roomCode);
@@ -712,7 +742,10 @@
             email: myEmail,
             role: role,
             relationshipRole: finalRelationshipRole,
-            joinedAt: firebase.database.ServerValue.TIMESTAMP
+            joinedAt: firebase.database.ServerValue.TIMESTAMP,
+            online: true,
+            lastSeen: firebase.database.ServerValue.TIMESTAMP,
+            lastActiveAt: firebase.database.ServerValue.TIMESTAMP
         };
         updates[`userRooms/${currentUser.uid}/${roomCode}`] = true;
         updates[`users/${currentUser.uid}/activeRoom`] = roomCode;

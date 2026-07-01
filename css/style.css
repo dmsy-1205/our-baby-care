@@ -6590,3 +6590,52 @@ body.hm-phone-viewport .daily-modal {
 .presence-dot.online { background: #00b894; box-shadow: 0 0 0 4px rgba(0,184,148,0.12); }
 .presence-dot.offline { background: #b2bec3; }
 .presence-muted { color: #9b93aa; font-size: 0.76rem; }
+
+
+/* RC2.13.1 Room Presence UI Visible Hotfix */
+.room-presence-card {
+    display: block;
+    margin: 12px 0 14px;
+    padding: 14px 16px;
+    border: 1px solid rgba(116, 79, 255, 0.18);
+    border-radius: 18px;
+    background: linear-gradient(135deg, rgba(116, 79, 255, 0.08), rgba(255, 255, 255, 0.92));
+}
+.room-presence-title {
+    font-size: 0.82rem;
+    font-weight: 900;
+    color: #6c5ce7;
+    margin-bottom: 8px;
+}
+.room-presence-body {
+    display: grid;
+    gap: 5px;
+    font-size: 0.86rem;
+    line-height: 1.45;
+    color: #4d4263;
+}
+.presence-main-line {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+.presence-dot {
+    display: inline-block;
+    width: 9px;
+    height: 9px;
+    border-radius: 999px;
+    background: #b2bec3;
+    flex: 0 0 auto;
+}
+.presence-dot.online { background: #00b894; box-shadow: 0 0 0 4px rgba(0,184,148,0.14); }
+.presence-dot.offline { background: #b2bec3; }
+.presence-muted { color: #9b93aa; font-size: 0.78rem; }
+.presence-lastseen { color: #5b526f; font-size: 0.82rem; }
+.presence-hint {
+    margin-top: 3px;
+    padding: 8px 10px;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.74);
+    color: #8f86a3;
+    font-size: 0.76rem;
+}
