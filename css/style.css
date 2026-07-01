@@ -7796,3 +7796,201 @@ button:active {
     .history-launch-icon,
     .history-day-icon { width: 46px; height: 46px; min-width: 46px; }
 }
+
+/* =========================================================
+   HearMe2nite RC2.16.1 PC Layout Optimization
+   - CSS-only desktop layout layer
+   - No Firebase / Room / Invite / Presence / History JS changes
+   - Mobile, Fold, Tablet layouts remain based on existing rules
+   ========================================================= */
+@media (min-width: 1024px) {
+    body {
+        padding: 28px 24px 40px !important;
+        align-items: flex-start !important;
+        background:
+            radial-gradient(circle at 18% 0%, rgba(255,122,138,.12), transparent 34%),
+            radial-gradient(circle at 85% 8%, rgba(196,164,255,.14), transparent 32%),
+            var(--background-color, #F8F7FB) !important;
+    }
+
+    #appContent {
+        max-width: 1180px !important;
+        margin: 0 auto !important;
+        align-items: stretch !important;
+        gap: 18px !important;
+    }
+
+    #appContent > .container {
+        width: min(100%, 1080px) !important;
+        max-width: 1080px !important;
+        padding: 32px 34px 34px !important;
+        border-radius: 36px !important;
+        display: grid !important;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+        column-gap: 22px !important;
+        row-gap: 16px !important;
+        align-items: start !important;
+    }
+
+    .container > .autosave-status,
+    .container > .app-title-row,
+    .container > .app-subtitle,
+    .container > .app-meta-row,
+    .container > .user-bar,
+    .container > .room-settings-card,
+    .container > .room-settings-overlay,
+    .container > .room-empty-state,
+    .container > .home-section-title,
+    .container > .custom-routine-toolbar,
+    .container > .custom-routine-list,
+    .container > #chatSection,
+    .container > .result-container,
+    .container > .btn-main {
+        grid-column: 1 / -1 !important;
+    }
+
+    .container > .input-group,
+    .container > .row {
+        margin: 0 !important;
+        width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    .container > .input-group:has(#recordDate),
+    .container > .input-group.hm-legacy-mission-hidden,
+    .container > .input-group.custom-routine-home-wrap {
+        grid-column: 1 / -1 !important;
+    }
+
+    .container > .row,
+    .container > .compact-metrics-row {
+        grid-column: 1 / -1 !important;
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 16px !important;
+    }
+
+    .container > .row .input-group,
+    .compact-metrics-row .input-group {
+        margin: 0 !important;
+        min-width: 0 !important;
+    }
+
+    .app-title-row {
+        margin-top: 4px !important;
+    }
+    .app-title-row h1 {
+        font-size: clamp(2rem, 3vw, 2.45rem) !important;
+        letter-spacing: -.06em !important;
+    }
+    .app-subtitle {
+        margin-top: -4px !important;
+        margin-bottom: 2px !important;
+    }
+    .app-meta-row {
+        margin: 4px 0 8px !important;
+    }
+
+    .user-bar,
+    .room-settings-card,
+    .daily-card,
+    #chatSection,
+    .result-container,
+    .history-launch-card {
+        box-shadow: 0 14px 38px rgba(44, 34, 82, .08) !important;
+    }
+
+    .daily-card {
+        min-height: 96px !important;
+        padding: 18px 20px !important;
+    }
+
+    .daily-card:hover,
+    .room-settings-card:hover,
+    .history-launch-card:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 18px 44px rgba(44, 34, 82, .11) !important;
+    }
+
+    .home-section-title {
+        margin: 10px 0 -2px !important;
+        padding-top: 4px !important;
+    }
+    .home-section-title span {
+        font-size: 1.04rem !important;
+    }
+    .home-section-title small {
+        font-size: .78rem !important;
+    }
+
+    .custom-routine-hub-card {
+        min-height: 104px !important;
+        background: linear-gradient(135deg, rgba(255,246,249,.98), rgba(244,255,250,.98)) !important;
+    }
+
+    #chatSection {
+        max-width: none !important;
+        width: auto !important;
+        margin: 8px 0 0 !important;
+        border-radius: 28px !important;
+        padding: 20px !important;
+        border: 1px solid rgba(232,224,255,.82) !important;
+    }
+    #chatMessages {
+        height: 220px !important;
+        border-radius: 20px !important;
+    }
+    #chatSender {
+        width: 86px !important;
+        border-radius: 16px !important;
+    }
+    #chatInput {
+        border-radius: 16px !important;
+    }
+
+    .container > .btn-main {
+        max-width: 560px !important;
+        justify-self: center !important;
+        margin-top: 8px !important;
+        border-radius: 22px !important;
+    }
+
+    #appContent > .history-launch-card {
+        width: min(100%, 1080px) !important;
+        max-width: 1080px !important;
+        margin: 0 auto 20px !important;
+        padding: 22px 26px !important;
+        border-radius: 30px !important;
+    }
+
+    .history-panel-modal {
+        max-width: min(1120px, calc(100vw - 64px)) !important;
+    }
+    .history-calendar-grid {
+        gap: 10px !important;
+    }
+    .calendar-day {
+        min-height: 58px !important;
+        border-radius: 18px !important;
+    }
+
+    .room-settings-modal,
+    .daily-modal,
+    .mission-modal,
+    .history-detail-modal {
+        max-width: min(720px, calc(100vw - 64px)) !important;
+    }
+}
+
+@media (min-width: 1280px) {
+    #appContent > .container,
+    #appContent > .history-launch-card {
+        width: min(100%, 1120px) !important;
+        max-width: 1120px !important;
+    }
+
+    #appContent > .container {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+        column-gap: 26px !important;
+    }
+}

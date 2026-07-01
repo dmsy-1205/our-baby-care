@@ -40,3 +40,8 @@
 - 하루 기록 날짜별 카드 리스트 정리
 - 기록실 여백/카드 간격 정리
 - Firebase/Room/History 데이터 구조 변경 없음
+
+## RC2.16.1 PC Layout Optimization
+- PC 전용 CSS 레이아웃 최적화 추가
+- 기능 JS 변경 없음
+- 모바일 기존 구조 유지
