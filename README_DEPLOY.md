@@ -1,4 +1,4 @@
 # Deploy
 
-GitHub/Netlify에 전체 파일을 업로드합니다.
-기준: v0.10.20 Safe Enforced Access Gate + v0.10.21 UI/Logout guard hotfix.
+GitHub/Netlify 업로드용 Lite 패키지입니다.
+기존 사용자 보호를 위해 READ_ERROR는 fail-open으로 처리됩니다.

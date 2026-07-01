@@ -65,11 +65,6 @@
     // - 오늘 날짜를 기본 기록일로 세팅한다.
     // - URL 초대코드를 먼저 감지한 뒤, 로그인 상태에 따라 방 연결을 시도한다.
     // - Firebase listener는 로그인 변경 시 반드시 해제 후 다시 연결한다.
-    // v0.10.21: Auth 상태 확정 전 로그인 화면 깜빡임을 방지하기 위해 body.hm-booting 유지
-    function hmFinishBooting() {
-        document.body.classList.remove('hm-booting');
-    }
-
     window.onload = function() {
         const today = new Date();
         const dateInput = document.getElementById('recordDate');
@@ -96,7 +91,6 @@
                 const gate = await enforceMasterAppAccess({ timeoutMs: 5000, label: 'Access Gate / Session' });
                 if (!gate.allowed) {
                     currentUser = null;
-                    hmFinishBooting();
                     return;
                 }
 
@@ -104,7 +98,6 @@
                 document.getElementById('authBox').classList.add('is-hidden');
                 document.getElementById('authBox').style.display = 'none';
                 document.getElementById('appContent').style.display = 'flex';
-                hmFinishBooting();
                 document.getElementById('userInfoText').innerText = `로그인됨: ${user.email}`;
                 await loadUserActiveRoom();
                 await acceptPendingInviteIfAny();
@@ -118,7 +111,6 @@
                 document.getElementById('authBox').classList.remove('is-hidden');
                 document.getElementById('authBox').style.display = 'grid';
                 document.getElementById('appContent').style.display = 'none';
-                hmFinishBooting();
                 showSaveStatus("🔒 로그인이 필요합니다.");
             }
         });

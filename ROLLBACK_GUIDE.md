@@ -1,3 +1,4 @@
 # Rollback
 
-문제 발생 시 v0.10.20 Safe Enforced Access Gate로 되돌립니다.
+기존 사용자가 차단되면 즉시 v0.10.13 Home Final Candidate로 롤백하세요.
+진단이 필요하면 v0.10.19 Email Fallback Diagnostic을 사용하세요.
