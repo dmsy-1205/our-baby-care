@@ -32,3 +32,15 @@
 
 ## RC2.15.1 History Cleanup Step 1
 - 기록실 중복/저가치 정보 제거.
+
+
+## RC2.15.2 Anniversary Upcoming Step 2
+- 기념일 패널을 다가오는 일정 중심으로 재구성.
+
+
+## RC2.15.3 Calendar Anniversary Markers Step 3
+- 캘린더 헤더 D+ 표시 및 일정 아이콘 보강.
+
+
+## RC2.15.4 History UX Final
+- 기록실 UX 최종 안내 문구 및 누적 안정화.
