@@ -8124,3 +8124,88 @@ button:active {
         gap: 6px;
     }
 }
+
+/* =========================================================
+   HearMe2nite RC2.18 - Help Center
+   Documentation & Help Center only / existing branding preserved
+   ========================================================= */
+.help-center-card {
+    max-width: 780px;
+}
+
+.help-center-header {
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.help-center-kicker {
+    margin: 0 0 4px;
+    color: var(--hm-premium-sub, #7D7694);
+    font-size: .72rem;
+    font-weight: 800;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+
+.help-center-intro {
+    margin-bottom: 12px;
+}
+
+.help-center-tabs {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 4px 2px 12px;
+    margin: 0 0 10px;
+    scrollbar-width: thin;
+}
+
+.help-tab {
+    flex: 0 0 auto;
+    border: 1px solid var(--hm-premium-border, #ECE6FF);
+    background: rgba(255, 255, 255, .78);
+    color: var(--hm-premium-sub, #7D7694);
+    border-radius: 999px;
+    padding: 9px 12px;
+    font-size: .78rem;
+    font-weight: 800;
+    cursor: pointer;
+    box-shadow: 0 6px 18px rgba(80, 72, 120, .06);
+}
+
+.help-tab.active {
+    background: linear-gradient(135deg, rgba(255, 235, 241, .95), rgba(244, 239, 255, .95));
+    color: var(--hm-premium-text, #2D2A35);
+    border-color: rgba(255, 174, 200, .8);
+}
+
+.help-center-panels {
+    min-height: 240px;
+}
+
+.help-panel {
+    display: none;
+}
+
+.help-panel.active {
+    display: block;
+}
+
+.help-center-footer {
+    margin-top: 14px;
+}
+
+@media (max-width: 640px) {
+    .help-center-card {
+        width: min(94vw, 520px);
+    }
+
+    .help-tab {
+        padding: 8px 11px;
+        font-size: .75rem;
+    }
+
+    .help-center-panels {
+        min-height: 220px;
+    }
+}

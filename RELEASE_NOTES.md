@@ -1,3 +1,58 @@
+# RELEASE_NOTES
+
+## RC2.18 Documentation & Help Center
+
+기준 Source: HearMe2nite_RC2.17.3_ExerciseCard_FULL
+
+### 추가
+
+- `/docs` 폴더 추가
+- 사용자 설명서 추가
+- FAQ 추가
+- CHANGELOG 추가
+- Release Notes 정리
+- Architecture 문서 추가
+- Project Rules 문서 추가
+- UI Guideline 추가
+- Deploy Checklist 추가
+- Roadmap 추가
+- GitHub README 개편
+- 앱 내부 Help Center 추가
+- `❓` 버튼을 도움말 센터로 확장
+
+### 개선
+
+- 기존 사용설명서 모달을 기능별 Help Center로 개편
+- 시작하기, 우리의 공간, 오늘의 기록, 오늘의 운동, 우리의 기념일, 기록실, FAQ, 업데이트 내역 섹션 추가
+- 운동 카드 추가 이후 누락되었던 설명 보완
+- v1.0 Stable Release 문서 체계 정리
+
+### 유지
+
+- Firebase 구조 변경 없음
+- Room 구조 변경 없음
+- Presence 구조 변경 없음
+- History 구조 변경 없음
+- MasterOS Access Gate 변경 없음
+- RC2.16 Branding 유지
+
+### 다음 버전
+
+RC2.19에서 전체 QA를 진행합니다.
+
+- PC
+- Tablet
+- Fold
+- Mobile
+- Firebase
+- GitHub
+- Netlify
+- Help Center
+- README
+- 사용설명서
+
+---
+
 # HearMe2nite RC2.17.3 Exercise Card
 
 ## 변경 사항

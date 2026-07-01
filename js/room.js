@@ -374,6 +374,7 @@
 
     function openGuideModal() {
         closeModalOverlayById('onboardingModal');
+        if (typeof resetHelpCenter === 'function') resetHelpCenter();
         openModalOverlayById('guideModal');
     }
 
