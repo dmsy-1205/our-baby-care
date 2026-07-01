@@ -6100,24 +6100,3 @@ body.is-authenticated #authBox,
     outline: 3px solid rgba(124, 82, 255, .28);
     outline-offset: 3px;
 }
-
-/* v0.10.21 Refresh Flicker Guard */
-body.hm-booting #authBox,
-body.hm-booting #appContent {
-    display: none !important;
-}
-
-body.hm-booting::before {
-    content: "💕 HearMe2nite";
-    position: fixed;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: radial-gradient(circle at top left, rgba(255, 199, 226, .45), transparent 36%),
-                linear-gradient(135deg, #fff7fb 0%, #f5efff 48%, #eef8ff 100%);
-    color: #6d4cc2;
-    font-weight: 900;
-    letter-spacing: -0.03em;
-    z-index: 99999;
-}

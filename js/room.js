@@ -30,7 +30,7 @@
     async function getCurrentUserRelationshipRole(roomCode) {
         if (!currentUser || !roomCode) return '';
         try {
-            const snap = await db.ref(`roomMembers/${roomCode}/${uid}/relationshipRole`).once('value');
+            const snap = await db.ref(`roomMembers/${roomCode}/${currentUser.uid}/relationshipRole`).once('value');
             return snap.val() || '';
         } catch (err) {
             console.error('관계 역할 확인 실패:', err);
@@ -167,7 +167,7 @@
                 if (invitePanel) { invitePanel.open = false; invitePanel.style.display = ''; }
                 if (joinInvitePanel) { joinInvitePanel.open = false; joinInvitePanel.style.display = ''; }
                 if (legacyRoomPanel) { legacyRoomPanel.open = false; legacyRoomPanel.style.display = ''; }
-                if (currentUser) loadMyRoomList();
+                loadMyRoomList();
             } else {
                 if (createBtn) { createBtn.style.display = 'none'; }
                 if (invitePanel) { invitePanel.open = false; invitePanel.style.display = 'none'; }
@@ -183,7 +183,7 @@
             if (invitePanel) { invitePanel.open = false; invitePanel.style.display = ''; }
             if (joinInvitePanel) { joinInvitePanel.open = false; joinInvitePanel.style.display = ''; }
             if (legacyRoomPanel) { legacyRoomPanel.open = false; legacyRoomPanel.style.display = ''; }
-            if (currentUser) loadMyRoomList();
+            loadMyRoomList();
         }
         updateRelationshipRoleUI();
         updateOwnerOnlySections();
@@ -365,11 +365,10 @@
 
     async function loadMyRoomList() {
         const box = document.getElementById('ownedRoomsList');
-        const uid = currentUser && currentUser.uid;
-        if (!box || !uid) return;
+        if (!box || !currentUser) return;
         box.innerHTML = '<div class="empty-message">이전 공간을 불러오는 중입니다...</div>';
         try {
-            const snap = await db.ref(`userRooms/${uid}`).once('value');
+            const snap = await db.ref(`userRooms/${currentUser.uid}`).once('value');
             const rooms = snap.val() || {};
             const roomCodes = Object.keys(rooms).filter(Boolean);
             if (roomCodes.length === 0) {
@@ -379,7 +378,7 @@
 
             const items = [];
             for (const roomCode of roomCodes) {
-                const memberSnap = await db.ref(`roomMembers/${roomCode}/${uid}`).once('value');
+                const memberSnap = await db.ref(`roomMembers/${roomCode}/${currentUser.uid}`).once('value');
                 if (!memberSnap.exists()) continue;
                 const member = memberSnap.val() || {};
                 const metaSnap = await db.ref(`rooms/${roomCode}/meta`).once('value');
@@ -432,7 +431,7 @@
         const ok = confirm('이전 공간으로 다시 연결할까요? 현재 기본 공간이 변경됩니다.');
         if (!ok) return;
         try {
-            const memberSnap = await db.ref(`roomMembers/${roomCode}/${uid}`).once('value');
+            const memberSnap = await db.ref(`roomMembers/${roomCode}/${currentUser.uid}`).once('value');
             if (!memberSnap.exists()) {
                 alert('이 계정은 해당 공간의 멤버가 아닙니다.');
                 return;
@@ -441,7 +440,7 @@
             pendingRelationshipRole = memberData.relationshipRole || pendingRelationshipRole || '';
             await saveActiveRoom(roomCode, memberData.role || 'member', memberData.relationshipRole || pendingRelationshipRole);
             connectAndListenFirebase();
-            if (currentUser) loadMyRoomList();
+            loadMyRoomList();
             showSaveStatus('☁️ 이전 공간 연결 완료');
         } catch (err) {
             console.error(err);
@@ -537,7 +536,7 @@
     async function canCurrentUserAccessRoom(roomCode) {
         if (!currentUser || !hmIsSafeRoomCode(roomCode)) return false;
         try {
-            const memberSnap = await db.ref(`roomMembers/${roomCode}/${uid}`).once('value');
+            const memberSnap = await db.ref(`roomMembers/${roomCode}/${currentUser.uid}`).once('value');
             return memberSnap.exists();
         } catch (err) {
             console.error('방 접근 확인 실패:', err);
@@ -556,7 +555,7 @@
     async function getCurrentUserRoomRole(roomCode) {
         if (!currentUser || !roomCode) return '';
         try {
-            const memberSnap = await db.ref(`roomMembers/${roomCode}/${uid}/role`).once('value');
+            const memberSnap = await db.ref(`roomMembers/${roomCode}/${currentUser.uid}/role`).once('value');
             return memberSnap.val() || '';
         } catch (err) {
             console.error('방 역할 확인 실패:', err);
@@ -585,7 +584,7 @@
         const myEmail = normalizeEmail(currentUser.email);
         let existingRelationshipRole = '';
         try {
-            const existingSnap = await db.ref(`roomMembers/${roomCode}/${uid}/relationshipRole`).once('value');
+            const existingSnap = await db.ref(`roomMembers/${roomCode}/${currentUser.uid}/relationshipRole`).once('value');
             existingRelationshipRole = existingSnap.val() || '';
         } catch (e) {
             console.warn(e);
@@ -596,7 +595,7 @@
         // STEP5: 방 권한은 roomMembers 하나만 기준으로 관리합니다.
         // rooms 내부에 members를 중복 저장하지 않습니다.
         const updates = {};
-        updates[`roomMembers/${roomCode}/${uid}`] = {
+        updates[`roomMembers/${roomCode}/${currentUser.uid}`] = {
             email: myEmail,
             role: role,
             relationshipRole: finalRelationshipRole,
@@ -803,7 +802,7 @@
 
             // STEP5: roomMembers에 등록된 사용자만 rooms 데이터를 읽고 쓸 수 있게 만듭니다.
             const firstUpdates = {};
-            firstUpdates[`roomMembers/${roomCode}/${uid}`] = {
+            firstUpdates[`roomMembers/${roomCode}/${currentUser.uid}`] = {
                 email: myEmail,
                 role: 'partner',
                 relationshipRole: pendingRelationshipRole || activeRelationshipRole || 'sub',
@@ -865,7 +864,7 @@
         }
         showSaveStatus('🔗 기존 방 확인 중...');
         try {
-            const memberSnap = await db.ref(`roomMembers/${roomCode}/${uid}`).once('value');
+            const memberSnap = await db.ref(`roomMembers/${roomCode}/${currentUser.uid}`).once('value');
             if (!memberSnap.exists()) {
                 alert('이 계정은 해당 기존 공유코드 방의 멤버가 아닙니다. 방 주인의 초대코드를 받아 참여해 주세요.');
                 showSaveStatus('🔒 기존 방 접근 차단');
