@@ -70,6 +70,7 @@
         updateOwnerOnlySections();
         updateDailyCards();
         updateManagedFieldAccessControls();
+        hmRefreshPresenceFromRoom();
 
         if (currentUser) {
             try {
@@ -188,6 +189,34 @@
         updateRelationshipRoleUI();
         updateOwnerOnlySections();
         updateManagedFieldAccessControls();
+        hmRefreshPresenceFromRoom();
+    }
+
+
+    // =========================================================
+
+    // MODULE: ROOM / PRESENCE BRIDGE
+
+    // RC2.14.4 Recovery STEP1
+    // room.js는 Presence 데이터를 직접 관리하지 않는다.
+    // 방 상태(activeRoomCode/currentUser)가 바뀐 뒤 presence.js에 새로고침만 요청한다.
+    // presence.js가 아직 로드되지 않은 시점도 안전하게 무시한다.
+    function hmRefreshPresenceFromRoom() {
+        try {
+            setTimeout(function(){
+                try {
+                    if (window.hmPresenceRefresh) {
+                        window.hmPresenceRefresh();
+                    } else if (!activeRoomCode && window.hmPresenceStop) {
+                        window.hmPresenceStop();
+                    }
+                } catch (e) {
+                    console.warn('[Presence Bridge] refresh skipped:', e);
+                }
+            }, 0);
+        } catch (e) {
+            console.warn('[Presence Bridge] schedule failed:', e);
+        }
     }
 
     // =========================================================
@@ -428,7 +457,10 @@
 
     async function openPreviousRoom(roomCode) {
         if (!currentUser || !roomCode) return;
-        if (roomCode === activeRoomCode) return;
+        if (roomCode === activeRoomCode) {
+            hmRefreshPresenceFromRoom();
+            return;
+        }
         const ok = confirm('이전 공간으로 다시 연결할까요? 현재 기본 공간이 변경됩니다.');
         if (!ok) return;
         try {
