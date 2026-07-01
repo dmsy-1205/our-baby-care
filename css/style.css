@@ -7079,3 +7079,45 @@ body.hm-phone-viewport .daily-modal {
     .app-meta-row { margin-bottom: 14px; }
     .home-presence-dot { width: 9px; height: 9px; }
 }
+
+/* =========================================================
+   RC2.14.9 Header Presence Layout Hotfix
+   - Keep version badge and home presence dots on one compact line.
+   - Reduce floating gap between header and login/session card.
+   ========================================================= */
+.container > .app-subtitle {
+    margin-bottom: 6px !important;
+}
+.app-meta-row {
+    width: 100% !important;
+    max-width: 420px !important;
+    margin: 4px auto 10px !important;
+    padding: 0 4px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 12px !important;
+    box-sizing: border-box !important;
+}
+.app-meta-row .app-version-badge {
+    display: inline-flex !important;
+    width: auto !important;
+    margin: 0 !important;
+    flex: 0 0 auto !important;
+    padding: 6px 12px !important;
+}
+.app-meta-row .home-presence-indicator {
+    margin-left: auto !important;
+    flex: 0 0 auto !important;
+    padding: 4px 2px !important;
+}
+.user-bar {
+    margin-top: 0 !important;
+}
+@media (max-width: 520px) {
+    .app-meta-row {
+        max-width: 100% !important;
+        margin: 4px auto 8px !important;
+        padding: 0 2px !important;
+    }
+}
