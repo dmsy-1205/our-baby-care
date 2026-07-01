@@ -391,6 +391,8 @@
                 }
             }
 
+            try { if (window.hmRefreshPresenceFromRoom) window.hmRefreshPresenceFromRoom('login-complete'); } catch(e) { console.warn(e); }
+            try { if (window.hmPresenceRefresh) setTimeout(window.hmPresenceRefresh, 600); } catch(e) { console.warn(e); }
             showSaveStatus('☁️ 로그인 완료');
         } catch (err) {
             console.error(err);
@@ -474,6 +476,8 @@
 
         updateCurrentRoomInfo();
         connectAndListenFirebase();
+        try { if (window.hmRefreshPresenceFromRoom) window.hmRefreshPresenceFromRoom('recovered-room'); } catch(e) { console.warn(e); }
+        try { if (window.hmPresenceRefresh) setTimeout(window.hmPresenceRefresh, 250); } catch(e) { console.warn(e); }
         return true;
     }
 

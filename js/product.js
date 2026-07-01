@@ -56,14 +56,23 @@
             const title = $('customRoutineHomeTitle');
             const wrap = document.querySelector('.custom-routine-home-wrap');
             const toolbar = $('customRoutineToolbar');
-            if (!dash || !title || !wrap || title.dataset.hmMoved === '1') return;
-            const holder = document.createElement('section');
-            holder.id = 'hmTodayPromiseSection';
-            holder.className = 'hm-today-promise-section';
-            dash.insertAdjacentElement('afterend', holder);
-            holder.appendChild(title);
-            holder.appendChild(wrap);
-            if (toolbar) holder.appendChild(toolbar);
+            if (!dash || !title || !wrap) return;
+            let holder = $('hmTodayPromiseSection');
+            if (!holder) {
+                holder = document.createElement('section');
+                holder.id = 'hmTodayPromiseSection';
+                holder.className = 'hm-today-promise-section';
+                dash.insertAdjacentElement('afterend', holder);
+            }
+            // RC2.14.4: title만 이동되고 본문 카드가 남거나 숨는 상태를 방지한다.
+            if (title.parentNode !== holder) holder.appendChild(title);
+            if (wrap.parentNode !== holder) holder.appendChild(wrap);
+            wrap.hidden = false;
+            wrap.removeAttribute('aria-hidden');
+            wrap.style.display = '';
+            const hub = $('customRoutineHubCard');
+            if (hub) { hub.style.display = ''; hub.hidden = false; hub.removeAttribute('aria-hidden'); }
+            if (toolbar && toolbar.parentNode !== holder) holder.appendChild(toolbar);
             title.dataset.hmMoved = '1';
         } catch(e) {}
     }

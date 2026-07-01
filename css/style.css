@@ -6982,3 +6982,45 @@ body.hm-phone-viewport .daily-modal {
     .hm-summary-dot span{ font-size:.64rem !important; }
     .hm-summary-dot b{ font-size:.9rem !important; }
 }
+
+
+/* =========================================================
+   RC2.14.4 Recovery: Today Promise + Room Presence
+   - 오늘의 약속 제목만 보이고 카드가 사라지는 상태를 방지합니다.
+   - Presence는 별도 js/presence.js에서 안전하게 연결됩니다.
+   ========================================================= */
+#hmTodayPromiseSection .custom-routine-home-wrap,
+.custom-routine-home-wrap{
+    display:block !important;
+    visibility:visible !important;
+}
+#customRoutineHubCard.custom-routine-hub-card,
+.custom-routine-hub-card{
+    display:flex !important;
+    visibility:visible !important;
+    opacity:1 !important;
+}
+#customRoutineToolbar.compact{
+    display:none !important;
+}
+.room-presence-box {
+    margin: 10px 0 12px;
+    padding: 12px;
+    border: 1px solid #dcd2ff;
+    border-radius: 16px;
+    background: linear-gradient(135deg, #ffffff, #f8f4ff);
+    box-shadow: 0 8px 20px rgba(142, 92, 244, 0.08);
+}
+.room-presence-title { font-size: 0.84rem; font-weight: 900; color: #5f3dc4; margin-bottom: 9px; }
+.room-presence-content { display: grid; gap: 8px; }
+.presence-empty { color: #636e72; font-size: 0.78rem; line-height: 1.45; background: #fff; border: 1px dashed #dcd2ff; border-radius: 13px; padding: 10px; }
+.presence-user-card { display: grid; gap: 8px; background: #fff; border: 1px solid #eadcff; border-radius: 14px; padding: 10px; }
+.presence-user-main { display: flex; align-items: center; gap: 9px; }
+.presence-dot { width: 10px; height: 10px; border-radius: 999px; flex: 0 0 auto; background: #b2bec3; box-shadow: 0 0 0 4px rgba(178,190,195,.18); }
+.presence-dot.online { background: #00b894; box-shadow: 0 0 0 4px rgba(0,184,148,.16); }
+.presence-dot.offline { background: #b2bec3; }
+.presence-user-title { font-size: 0.84rem; font-weight: 900; color: #2d3436; }
+.presence-user-email { font-size: 0.72rem; color: #8b86a3; word-break: break-all; }
+.presence-user-status { display: flex; justify-content: space-between; gap: 8px; align-items: center; font-size: 0.75rem; color: #636e72; border-top: 1px solid #f1ecff; padding-top: 8px; }
+.presence-user-status strong { color: #5f3dc4; }
+@media (max-width: 420px) { .presence-user-status { align-items: flex-start; flex-direction: column; gap: 3px; } }

@@ -70,7 +70,6 @@
         updateOwnerOnlySections();
         updateDailyCards();
         updateManagedFieldAccessControls();
-        hmRefreshPresenceFromRoom();
 
         if (currentUser) {
             try {
@@ -189,45 +188,7 @@
         updateRelationshipRoleUI();
         updateOwnerOnlySections();
         updateManagedFieldAccessControls();
-        hmRefreshPresenceFromRoom();
     }
-
-
-    // =========================================================
-
-    // MODULE: ROOM / PRESENCE BRIDGE
-
-    // RC2.14.4 Recovery STEP1
-    // room.js는 Presence 데이터를 직접 관리하지 않는다.
-    // 방 상태(activeRoomCode/currentUser)가 바뀐 뒤 presence.js에 새로고침만 요청한다.
-    // presence.js가 아직 로드되지 않은 시점도 안전하게 무시한다.
-    function hmRefreshPresenceFromRoom(reason = 'room-state') {
-        try {
-            const run = function(delay){
-                setTimeout(function(){
-                    try {
-                        if (!activeRoomCode && window.hmPresenceStop) {
-                            window.hmPresenceStop();
-                            return;
-                        }
-                        if (window.hmPresenceRefresh) {
-                            window.hmPresenceRefresh();
-                        }
-                    } catch (e) {
-                        console.warn('[Presence Bridge] refresh skipped:', reason, e);
-                    }
-                }, delay);
-            };
-            // Auth/room 복구는 비동기로 완료되므로 한 번만 호출하면 타이밍이 어긋날 수 있다.
-            // 0ms + 짧은 지연 재시도로 currentUser/activeRoomCode 확정 후 Presence를 다시 연결한다.
-            run(0);
-            run(300);
-            run(1000);
-        } catch (e) {
-            console.warn('[Presence Bridge] schedule failed:', reason, e);
-        }
-    }
-    window.hmRefreshPresenceFromRoom = hmRefreshPresenceFromRoom;
 
     // =========================================================
 
@@ -467,10 +428,7 @@
 
     async function openPreviousRoom(roomCode) {
         if (!currentUser || !roomCode) return;
-        if (roomCode === activeRoomCode) {
-            hmRefreshPresenceFromRoom();
-            return;
-        }
+        if (roomCode === activeRoomCode) return;
         const ok = confirm('이전 공간으로 다시 연결할까요? 현재 기본 공간이 변경됩니다.');
         if (!ok) return;
         try {
@@ -483,7 +441,6 @@
             pendingRelationshipRole = memberData.relationshipRole || pendingRelationshipRole || '';
             await saveActiveRoom(roomCode, memberData.role || 'member', memberData.relationshipRole || pendingRelationshipRole);
             connectAndListenFirebase();
-            hmRefreshPresenceFromRoom('open-previous-room');
             if (currentUser) loadMyRoomList();
             showSaveStatus('☁️ 이전 공간 연결 완료');
         } catch (err) {
@@ -659,7 +616,6 @@
         const roomInput = document.getElementById('roomCode');
         if (roomInput) roomInput.value = roomCode;
         updateCurrentRoomInfo();
-        hmRefreshPresenceFromRoom('save-active-room');
     }
 
     // =========================================================
@@ -696,7 +652,6 @@
                 app: 'hearme2nite'
             });
             connectAndListenFirebase();
-            hmRefreshPresenceFromRoom('create-room');
             showSaveStatus('☁️ 내 방 생성 완료');
         } catch (err) {
             console.error(err);
@@ -880,7 +835,6 @@
             if (roomInput) roomInput.value = roomCode;
             updateCurrentRoomInfo();
             connectAndListenFirebase();
-            hmRefreshPresenceFromRoom('accept-invite');
             showSaveStatus('☁️ 초대 참여 완료');
         } catch (err) {
             console.error(err);
@@ -921,7 +875,6 @@
             pendingRelationshipRole = memberData.relationshipRole || pendingRelationshipRole || '';
             await saveActiveRoom(roomCode, memberData.role || 'member', memberData.relationshipRole || pendingRelationshipRole);
             connectAndListenFirebase();
-            hmRefreshPresenceFromRoom('join-existing-room');
             showSaveStatus('☁️ 기존 공유코드 연결 완료');
         } catch (err) {
             console.error(err);
