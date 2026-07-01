@@ -8016,3 +8016,111 @@ button:active {
         font-size: .76rem;
     }
 }
+
+/* =========================================================
+   RC2.17.2 SAFE: Anniversary Upcoming Preview + Together Day
+   - 기념일 카드는 최대 3개 미리보기로 고정
+   - 전체 목록/대표 날짜 지정은 관리 모달에서 처리
+   - 캘린더 헤더에 대표 날짜 기준 함께한 날 표시
+   ========================================================= */
+.history-calendar-month-line {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+.history-together-day-badge {
+    display: inline-flex;
+    align-items: center;
+    min-height: 24px;
+    padding: 5px 10px;
+    border-radius: 999px;
+    background: rgba(255, 122, 138, .12);
+    color: var(--hm-premium-primary, #ff6b81);
+    font-size: .74rem;
+    font-weight: 900;
+    letter-spacing: -0.01em;
+    box-shadow: inset 0 0 0 1px rgba(255, 122, 138, .14);
+}
+.anniversary-panel-preview-list {
+    gap: 7px;
+}
+.anniversary-more-btn {
+    width: 100%;
+    border: 0;
+    border-radius: 16px;
+    padding: 10px 12px;
+    margin-top: 2px;
+    background: rgba(109, 76, 255, .075);
+    color: var(--hm-premium-primary, #6D4CFF);
+    font-weight: 900;
+    cursor: pointer;
+    text-align: center;
+}
+.anniversary-more-btn:active {
+    transform: scale(.985);
+}
+.anniversary-custom-main {
+    flex: 1;
+    min-width: 0;
+}
+.anniversary-custom-actions {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+.anniversary-main-btn {
+    border: 0;
+    border-radius: 999px;
+    padding: 7px 10px;
+    background: rgba(255, 122, 138, .12);
+    color: var(--hm-premium-primary, #ff6b81);
+    font-weight: 900;
+    font-size: .74rem;
+    cursor: pointer;
+}
+.anniversary-main-badge {
+    display: inline-flex;
+    align-items: center;
+    margin-left: 5px;
+    padding: 2px 7px;
+    border-radius: 999px;
+    background: rgba(52, 199, 89, .12);
+    color: #21a95b;
+    font-size: .68rem;
+    font-weight: 900;
+    vertical-align: middle;
+}
+.anniversary-main-date-check {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+    padding: 10px 12px;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, .72);
+    color: var(--hm-premium-sub, #7D7694);
+    font-size: .82rem;
+    font-weight: 800;
+    cursor: pointer;
+}
+.anniversary-main-date-check input {
+    accent-color: var(--hm-premium-primary, #ff6b81);
+}
+@media (max-width: 520px) {
+    .history-calendar-month-line {
+        gap: 7px;
+    }
+    .history-together-day-badge {
+        font-size: .68rem;
+        padding: 4px 8px;
+    }
+    .anniversary-custom-item {
+        align-items: flex-start;
+    }
+    .anniversary-custom-actions {
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 6px;
+    }
+}

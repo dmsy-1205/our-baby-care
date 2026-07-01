@@ -69,6 +69,61 @@ function hmGetRelativeDayLabel(ymd) {
     return `D+${Math.abs(diff)}`;
 }
 
+// RC2.17.2: 기념일은 "다가오는 순서"로 보여준다.
+// 생일/기념일처럼 과거 날짜도 올해 또는 다음 해의 같은 월/일 기준으로 D-day를 계산한다.
+function hmGetUpcomingOccurrence(ymd) {
+    const original = hmDateFromYmd(ymd);
+    const today = hmDateFromYmd(hmGetTodayYmd());
+    if (!original || !today) return null;
+
+    // 미래의 1회성 일정은 원래 날짜를 그대로 사용한다.
+    if (original.getTime() >= today.getTime()) return original;
+
+    // 과거에 등록된 생일/기념일은 매년 돌아오는 날짜로 계산한다.
+    let next = new Date(today.getFullYear(), original.getMonth(), original.getDate());
+    if (next.getTime() < today.getTime()) {
+        next = new Date(today.getFullYear() + 1, original.getMonth(), original.getDate());
+    }
+    return next;
+}
+
+function hmGetUpcomingDayInfo(ymd) {
+    const next = hmGetUpcomingOccurrence(ymd);
+    const today = hmDateFromYmd(hmGetTodayYmd());
+    if (!next || !today) return { diff: 999999, label: '', date: null };
+    const diff = Math.round((next.getTime() - today.getTime()) / 86400000);
+    return {
+        diff,
+        label: diff === 0 ? '오늘' : `D-${diff}`,
+        date: next
+    };
+}
+
+function hmSortAnniversariesByUpcoming(list) {
+    return [...(list || [])].sort((a, b) => {
+        const ad = hmGetUpcomingDayInfo(a.date).diff;
+        const bd = hmGetUpcomingDayInfo(b.date).diff;
+        if (ad !== bd) return ad - bd;
+        return String(a.title || '').localeCompare(String(b.title || ''));
+    });
+}
+
+function hmGetTogetherDayCount() {
+    if (!hmAnniversaryState.firstMetDate) return null;
+    const start = hmDateFromYmd(hmAnniversaryState.firstMetDate);
+    const today = hmDateFromYmd(hmGetTodayYmd());
+    if (!start || !today) return null;
+    const diff = Math.floor((today.getTime() - start.getTime()) / 86400000) + 1;
+    return diff > 0 ? diff : null;
+}
+
+function hmGetTogetherDayBadgeHtml() {
+    const day = hmGetTogetherDayCount();
+    if (!day) return '';
+    return `<span class="history-together-day-badge" title="대표 기념일 기준">💕 함께한 지 ${day}일</span>`;
+}
+window.hmGetTogetherDayBadgeHtml = hmGetTogetherDayBadgeHtml;
+
 
 function hmGetSelectedHistoryDateSafe() {
     try { if (typeof selectedHistoryDate !== 'undefined' && selectedHistoryDate) return selectedHistoryDate; } catch (err) {}
@@ -136,6 +191,21 @@ function hmGetCalendarBaseYearMonth() {
     const current = window.hmHistoryCalendarViewDate || hmGetSelectedHistoryDateSafe();
     const base = hmDateFromYmd(current) || new Date();
     return { year: base.getFullYear(), month: base.getMonth() };
+}
+
+
+function hmRenderTogetherDayBadgeInCalendar() {
+    const monthLine = document.querySelector('#calendarBox .history-calendar-month-line');
+    const currentMonth = document.querySelector('#calendarBox .history-calendar-current-month');
+    const target = monthLine || currentMonth;
+    if (!target) return;
+    const old = target.querySelector('.history-together-day-badge');
+    if (old) old.remove();
+    const html = hmGetTogetherDayBadgeHtml();
+    if (!html) return;
+    const wrap = document.createElement('span');
+    wrap.innerHTML = html;
+    target.appendChild(wrap.firstElementChild);
 }
 
 function hmRenderAnniversaryCalendarMarkers() {
@@ -219,9 +289,11 @@ async function hmAddCustomAnniversary() {
     const dateInput = document.getElementById('customAnniversaryDate');
     const titleInput = document.getElementById('customAnniversaryTitle');
     const typeInput = document.getElementById('customAnniversaryType');
+    const mainInput = document.getElementById('customAnniversaryMainDate');
     const date = dateInput ? dateInput.value : '';
     const title = titleInput ? titleInput.value.trim() : '';
     const type = typeInput ? typeInput.value : 'love';
+    const useAsMainDate = !!(mainInput && mainInput.checked);
     if (!date) { alert('기념일 날짜를 선택해 주세요.'); return; }
     if (!title) { alert('기념일 이름을 입력해 주세요.'); return; }
     const roomCode = typeof getRoomCodeForData === 'function' ? getRoomCodeForData() : '';
@@ -232,11 +304,16 @@ async function hmAddCustomAnniversary() {
             if (!ok) return;
         }
         const id = hmCreateAnniversaryId();
-        const item = { date, title, type, createdAt: Date.now(), createdBy: currentUser?.uid || '' };
-        await db.ref(`rooms/${roomCode}/meta/anniversaries/${id}`).set(item);
+        const item = { date, title, type, createdAt: Date.now(), createdBy: currentUser?.uid || '', isMainDate: useAsMainDate };
+        const updates = {};
+        updates[`rooms/${roomCode}/meta/anniversaries/${id}`] = item;
+        if (useAsMainDate) updates[`rooms/${roomCode}/meta/firstMetDate`] = date;
+        await db.ref().update(updates);
         hmAnniversaryState.anniversaries = { ...(hmAnniversaryState.anniversaries || {}), [id]: item };
+        if (useAsMainDate) hmAnniversaryState.firstMetDate = date;
         if (dateInput) dateInput.value = '';
         if (titleInput) titleInput.value = '';
+        if (mainInput) mainInput.checked = false;
         if (typeof showToast === 'function') showToast('기념일이 추가되었습니다. 🎉');
         hmRenderAnniversaryPanel();
         hmRenderAnniversaryModal();
@@ -244,6 +321,32 @@ async function hmAddCustomAnniversary() {
     } catch (err) {
         if (typeof hmReportError === 'function') hmReportError('hmAddCustomAnniversary', err, '기념일 추가 실패');
         else alert('기념일 추가 중 오류가 발생했습니다.');
+    }
+}
+
+
+async function hmSetFirstMetFromAnniversary(id) {
+    const item = (hmAnniversaryState.anniversaries || {})[id];
+    if (!item || !item.date) return;
+    const okConfirm = confirm('이 날짜를 함께한 날 계산 기준으로 지정할까요?');
+    if (!okConfirm) return;
+    const roomCode = typeof getRoomCodeForData === 'function' ? getRoomCodeForData() : '';
+    if (!roomCode) { alert('공간을 먼저 연결해 주세요.'); return; }
+    try {
+        if (typeof hmRequireRoomAccess === 'function') {
+            const ok = await hmRequireRoomAccess('대표 기념일 지정', roomCode);
+            if (!ok) return;
+        }
+        await db.ref(`rooms/${roomCode}/meta/firstMetDate`).set(item.date);
+        hmAnniversaryState.firstMetDate = item.date;
+        if (typeof showToast === 'function') showToast('함께한 날짜 기준으로 지정되었습니다. 💕');
+        hmRenderAnniversaryPanel();
+        hmRenderAnniversaryModal();
+        try { if (typeof renderCalendar === 'function') renderCalendar(window.cachedDaysData || {}); } catch (e) {}
+        hmRenderAnniversaryCalendarMarkers();
+    } catch (err) {
+        if (typeof hmReportError === 'function') hmReportError('hmSetFirstMetFromAnniversary', err, '대표 기념일 지정 실패');
+        else alert('대표 기념일 지정 중 오류가 발생했습니다.');
     }
 }
 
@@ -302,17 +405,22 @@ function hmRenderAnniversaryModal() {
     hmEnsureAnniversaryModal();
     const modal = document.getElementById('anniversarySettingsModal');
     if (!modal) return;
-    const list = hmGetAnniversaryList();
+    const list = hmSortAnniversariesByUpcoming(hmGetAnniversaryList());
     const typeChips = HM_ANNIVERSARY_TYPES.map((item, index) => `<button type="button" class="anniversary-type-chip${index === 0 ? ' is-selected' : ''}" data-type="${escapeHtml(item.value)}" onclick="hmSetCustomAnniversaryType('${escapeHtml(item.value)}')" aria-label="${escapeHtml(item.label)} 선택"><span>${item.icon}</span><small>${escapeHtml(item.label)}</small></button>`).join('');
     const listHtml = list.length ? list.map(item => {
         const meta = hmGetAnniversaryTypeMeta(item.type);
+        const upcoming = hmGetUpcomingDayInfo(item.date);
+        const isMain = hmAnniversaryState.firstMetDate === item.date;
         return `<div class="anniversary-custom-item">
             <div class="anniversary-custom-icon">${meta.icon}</div>
-            <div>
-                <div class="anniversary-custom-title">${escapeHtml(item.title)}</div>
-                <div class="anniversary-custom-date">${hmFormatKoreanDate(item.date)} · ${escapeHtml(meta.label)}</div>
+            <div class="anniversary-custom-main">
+                <div class="anniversary-custom-title">${escapeHtml(item.title)}${isMain ? ' <span class="anniversary-main-badge">대표</span>' : ''}</div>
+                <div class="anniversary-custom-date">${hmFormatKoreanDate(item.date)} · ${escapeHtml(meta.label)} · ${escapeHtml(upcoming.label)}</div>
             </div>
-            <button type="button" class="anniversary-delete-btn" onclick="hmDeleteCustomAnniversary('${escapeHtml(item.id)}')">삭제</button>
+            <div class="anniversary-custom-actions">
+                <button type="button" class="anniversary-main-btn" onclick="hmSetFirstMetFromAnniversary('${escapeHtml(item.id)}')">대표</button>
+                <button type="button" class="anniversary-delete-btn" onclick="hmDeleteCustomAnniversary('${escapeHtml(item.id)}')">삭제</button>
+            </div>
         </div>`;
     }).join('') : '<div class="anniversary-empty-note">아직 등록한 기념일이 없습니다. 생일, 여행, 데이트, 휴가처럼 캘린더에 표시할 날짜를 추가해 보세요.</div>';
 
@@ -335,6 +443,7 @@ function hmRenderAnniversaryModal() {
                 <label class="anniversary-field anniversary-field-title"><span>이름</span><input type="text" id="customAnniversaryTitle" placeholder="예: 생일, 첫 여행, 데이트, 휴가" aria-label="기념일 이름"></label>
                 <button type="button" class="anniversary-primary-btn anniversary-add-btn" onclick="hmAddCustomAnniversary()">추가</button>
             </div>
+            <label class="anniversary-main-date-check"><input type="checkbox" id="customAnniversaryMainDate"> 이 날짜를 함께한 날 계산 기준으로 사용</label>
         </div>
         <div class="anniversary-settings-section anniversary-list-card">
             <div class="anniversary-section-label"><span>📌</span><strong>등록된 기념일</strong></div>
@@ -344,18 +453,13 @@ function hmRenderAnniversaryModal() {
 function hmRenderAnniversaryPanel() {
     const box = document.getElementById('anniversaryPanel');
     if (!box) return;
-    const list = hmGetAnniversaryList();
-    const today = hmGetTodayYmd();
-    const ordered = [...list].sort((a, b) => {
-        const aFuture = String(a.date) >= today ? 0 : 1;
-        const bFuture = String(b.date) >= today ? 0 : 1;
-        if (aFuture !== bFuture) return aFuture - bFuture;
-        return aFuture === 0 ? String(a.date).localeCompare(String(b.date)) : String(b.date).localeCompare(String(a.date));
-    });
+    const ordered = hmSortAnniversariesByUpcoming(hmGetAnniversaryList());
+    const preview = ordered.slice(0, 3);
+    const hiddenCount = Math.max(ordered.length - preview.length, 0);
     const listHtml = ordered.length
-        ? `<div class="anniversary-panel-list">${ordered.map(item => {
+        ? `<div class="anniversary-panel-list anniversary-panel-preview-list">${preview.map(item => {
             const meta = hmGetAnniversaryTypeMeta(item.type);
-            const relative = hmGetRelativeDayLabel(item.date);
+            const relative = hmGetUpcomingDayInfo(item.date).label;
             return `<div class="anniversary-panel-item">
                 <div class="anniversary-panel-icon">${meta.icon}</div>
                 <div class="anniversary-panel-body">
@@ -364,7 +468,7 @@ function hmRenderAnniversaryPanel() {
                 </div>
                 <div class="anniversary-panel-dday">${escapeHtml(relative)}</div>
             </div>`;
-        }).join('')}</div>`
+        }).join('')}${hiddenCount ? `<button type="button" class="anniversary-more-btn" onclick="hmOpenAnniversarySettings()">+ ${hiddenCount}개의 기념일 더 보기</button>` : ''}</div>`
         : `<div class="anniversary-empty-panel">
             <div class="anniversary-panel-icon">📌</div>
             <div>
@@ -376,9 +480,9 @@ function hmRenderAnniversaryPanel() {
         <div class="anniversary-head">
             <div>
                 <div class="anniversary-title">💕 우리의 기념일</div>
-                <div class="anniversary-sub">등록한 기념일은 캘린더에도 함께 표시됩니다.</div>
+                <div class="anniversary-sub">다가오는 순서로 최대 3개만 보여주고, 캘린더에도 함께 표시됩니다.</div>
             </div>
-            <button type="button" class="anniversary-toggle-btn" onclick="hmOpenAnniversarySettings()">등록/관리</button>
+            <button type="button" class="anniversary-toggle-btn" onclick="hmOpenAnniversarySettings()">관리</button>
         </div>
         ${listHtml}
     </div>`;
@@ -463,6 +567,7 @@ function hmEnableAnniversaryCalendarDateClicks() {
 // =========================================================
 function hmAfterHistoryRenderSafe() {
     try { hmRenderAnniversaryPanel(); } catch (err) { console.warn('[Anniversary] panel render skipped', err); }
+    try { hmRenderTogetherDayBadgeInCalendar(); } catch (err) { console.warn('[Anniversary] together day skipped', err); }
     try { hmRenderAnniversaryCalendarMarkers(); } catch (err) { console.warn('[Anniversary] calendar markers skipped', err); }
     try { hmEnableAnniversaryCalendarDateClicks(); } catch (err) { console.warn('[Anniversary] date clicks skipped', err); }
     try { hmRenderSelectedDateAnniversaryDetail(); } catch (err) { console.warn('[Anniversary] detail render skipped', err); }

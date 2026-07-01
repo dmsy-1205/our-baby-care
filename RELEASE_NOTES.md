@@ -1,3 +1,9 @@
+
+## RC2.17.2 Anniversary Upcoming Day
+- Anniversary preview limited to upcoming 3 items.
+- Full anniversary list moved to management modal.
+- Representative date can be used for together-day badge in calendar header.
+
 # Latest: RC2.16 Branding STEP1
 
 - Quiet Love v1.0 branding polish applied.

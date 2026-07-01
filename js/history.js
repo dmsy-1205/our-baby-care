@@ -767,7 +767,10 @@ function renderCalendar(daysData) {
     let html = `<div class="history-calendar-title-row history-calendar-nav-row">
         <button type="button" class="history-month-nav-btn" onclick="hmHistoryChangeMonth(-1)" aria-label="이전 달">‹</button>
         <div class="history-calendar-current-month">
-            <strong>📅 ${year}년 ${String(month+1).padStart(2,'0')}월</strong>
+            <div class="history-calendar-month-line">
+                <strong>📅 ${year}년 ${String(month+1).padStart(2,'0')}월</strong>
+                ${typeof window.hmGetTogetherDayBadgeHtml === 'function' ? window.hmGetTogetherDayBadgeHtml() : ''}
+            </div>
             <span>달을 넘기며 기록과 기념일을 확인하세요.</span>
         </div>
         <button type="button" class="history-month-nav-btn" onclick="hmHistoryChangeMonth(1)" aria-label="다음 달">›</button>
