@@ -25,7 +25,7 @@
         if (typeof hmStopCustomRoutineCards === 'function') hmStopCustomRoutineCards();
         if (chatRef) chatRef.off();
         if (ownerNoteRef) ownerNoteRef.off();
-        if (typeof hmStopRoomPresence === 'function') hmStopRoomPresence();
+        if (typeof hmStopPresence === 'function') hmStopPresence();
         currentRoomRef = null;
         entireRoomRef = null;
         chatRef = null;
@@ -77,7 +77,6 @@
         activeRelationshipRole = await getCurrentUserRelationshipRole(roomCode) || activeRelationshipRole || (activeRoomRole === 'owner' ? 'dom' : 'sub');
         pendingRelationshipRole = activeRelationshipRole;
         updateCurrentRoomInfo();
-        if (typeof hmStartRoomPresence === 'function') hmStartRoomPresence(roomCode);
         setDataSectionsVisible(true);
         showSaveStatus('📡 연결 중...');
         updateOwnerOnlySections();

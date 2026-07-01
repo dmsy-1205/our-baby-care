@@ -6558,84 +6558,89 @@ body.hm-phone-viewport .daily-modal {
 }
 
 
-/* RC2.13 Room Presence */
-.room-presence-card {
+/* RC2.13.2 Room Presence - 실제 표시 카드 */
+.room-presence-box {
     margin: 10px 0 12px;
-    padding: 12px 13px;
-    border: 1px solid rgba(162, 155, 254, 0.22);
+    padding: 12px;
+    border: 1px solid #dcd2ff;
     border-radius: 16px;
-    background: linear-gradient(135deg, rgba(255,255,255,0.96), rgba(248,246,255,0.96));
-    box-shadow: 0 8px 22px rgba(108, 92, 231, 0.08);
+    background: linear-gradient(135deg, #ffffff, #f8f4ff);
+    box-shadow: 0 8px 20px rgba(142, 92, 244, 0.08);
 }
 .room-presence-title {
     font-size: 0.84rem;
     font-weight: 900;
-    color: #5f4bd6;
-    margin-bottom: 6px;
+    color: #5f3dc4;
+    margin-bottom: 9px;
 }
-.room-presence-body {
-    font-size: 0.82rem;
-    color: #5d536c;
-    line-height: 1.55;
-}
-.presence-dot {
-    display: inline-block;
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    margin-right: 5px;
-    vertical-align: middle;
-    background: #b2bec3;
-}
-.presence-dot.online { background: #00b894; box-shadow: 0 0 0 4px rgba(0,184,148,0.12); }
-.presence-dot.offline { background: #b2bec3; }
-.presence-muted { color: #9b93aa; font-size: 0.76rem; }
-
-
-/* RC2.13.1 Room Presence UI Visible Hotfix */
-.room-presence-card {
-    display: block;
-    margin: 12px 0 14px;
-    padding: 14px 16px;
-    border: 1px solid rgba(116, 79, 255, 0.18);
-    border-radius: 18px;
-    background: linear-gradient(135deg, rgba(116, 79, 255, 0.08), rgba(255, 255, 255, 0.92));
-}
-.room-presence-title {
-    font-size: 0.82rem;
-    font-weight: 900;
-    color: #6c5ce7;
-    margin-bottom: 8px;
-}
-.room-presence-body {
+.room-presence-content {
     display: grid;
-    gap: 5px;
-    font-size: 0.86rem;
-    line-height: 1.45;
-    color: #4d4263;
+    gap: 8px;
 }
-.presence-main-line {
+.presence-empty {
+    color: #636e72;
+    font-size: 0.78rem;
+    line-height: 1.45;
+    background: #fff;
+    border: 1px dashed #dcd2ff;
+    border-radius: 13px;
+    padding: 10px;
+}
+.presence-user-card {
+    display: grid;
+    gap: 8px;
+    background: #fff;
+    border: 1px solid #eadcff;
+    border-radius: 14px;
+    padding: 10px;
+}
+.presence-user-main {
     display: flex;
     align-items: center;
-    gap: 7px;
+    gap: 9px;
 }
 .presence-dot {
-    display: inline-block;
-    width: 9px;
-    height: 9px;
+    width: 10px;
+    height: 10px;
     border-radius: 999px;
-    background: #b2bec3;
     flex: 0 0 auto;
+    background: #b2bec3;
+    box-shadow: 0 0 0 4px rgba(178, 190, 195, 0.18);
 }
-.presence-dot.online { background: #00b894; box-shadow: 0 0 0 4px rgba(0,184,148,0.14); }
-.presence-dot.offline { background: #b2bec3; }
-.presence-muted { color: #9b93aa; font-size: 0.78rem; }
-.presence-lastseen { color: #5b526f; font-size: 0.82rem; }
-.presence-hint {
-    margin-top: 3px;
-    padding: 8px 10px;
-    border-radius: 12px;
-    background: rgba(255,255,255,0.74);
-    color: #8f86a3;
-    font-size: 0.76rem;
+.presence-dot.online {
+    background: #00b894;
+    box-shadow: 0 0 0 4px rgba(0, 184, 148, 0.16);
+}
+.presence-dot.offline {
+    background: #b2bec3;
+}
+.presence-user-title {
+    font-size: 0.84rem;
+    font-weight: 900;
+    color: #2d3436;
+}
+.presence-user-email {
+    font-size: 0.72rem;
+    color: #8b86a3;
+    word-break: break-all;
+}
+.presence-user-status {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    align-items: center;
+    font-size: 0.75rem;
+    color: #636e72;
+    border-top: 1px solid #f1ecff;
+    padding-top: 8px;
+}
+.presence-user-status strong {
+    color: #5f3dc4;
+}
+@media (max-width: 420px) {
+    .presence-user-status {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 3px;
+    }
 }

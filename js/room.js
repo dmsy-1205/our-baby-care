@@ -188,148 +188,119 @@
         updateRelationshipRoleUI();
         updateOwnerOnlySections();
         updateManagedFieldAccessControls();
-        if (typeof hmRefreshRoomPresencePanel === 'function') hmRefreshRoomPresencePanel();
-        if (typeof hmStartRoomPresence === 'function' && currentUser && activeRoomCode) {
-            hmStartRoomPresence(activeRoomCode);
-        }
+        if (activeRoomCode && currentUser) hmStartPresence(activeRoomCode);
+        else hmRenderPresenceBox(null);
     }
 
     // =========================================================
-    // MODULE 06-1. ROOM PRESENCE / LAST SEEN
-    // 관리(Dom)가 기록(Sub)의 접속 상태를 확인할 수 있도록 roomMembers 하위에 안전하게 부가 정보만 추가한다.
-    // 기존 Room/History 저장 구조는 변경하지 않는다.
+    // RC2.13.2 ROOM PRESENCE - 실제 화면 표시용
+    // roomMembers/{roomCode}/{uid}/presence 하위 노드만 추가한다.
+    // 기존 Room / History / Daily 구조는 변경하지 않는다.
     // =========================================================
-    function hmPresenceRelativeTime(ts) {
-        if (!ts) return '아직 기록 없음';
-        const d = new Date(ts);
-        if (Number.isNaN(d.getTime())) return '아직 기록 없음';
-        const diff = Date.now() - d.getTime();
-        const min = Math.max(0, Math.floor(diff / 60000));
-        if (min < 1) return '방금 전';
-        if (min < 60) return `${min}분 전`;
-        const hours = Math.floor(min / 60);
-        if (hours < 24) return `${hours}시간 전`;
-        const days = Math.floor(hours / 24);
-        if (days === 1) return `어제 ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
-        return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
-    }
-
-    function hmShortEmail(email) {
-        const value = String(email || '').trim();
-        if (!value) return '상대';
-        const name = value.split('@')[0] || value;
-        return name.length > 14 ? name.slice(0, 14) + '…' : name;
-    }
-
-    function hmFindRoomPartnerMember(members) {
-        const entries = Object.entries(members || {}).filter(([uid]) => uid !== currentUser?.uid);
-        if (!entries.length) return null;
-        const oppositeRole = activeRelationshipRole === 'dom' ? 'sub' : (activeRelationshipRole === 'sub' ? 'dom' : '');
-        if (oppositeRole) {
-            const preferred = entries.find(([uid, item]) => item?.relationshipRole === oppositeRole);
-            if (preferred) return preferred;
-        }
-        return entries[0] || null;
-    }
-
-    function hmGetPresenceRoleTitle(member) {
-        const role = member?.relationshipRole || '';
-        if (role === 'sub') return '기록(Sub)';
-        if (role === 'dom') return '관리(Dom)';
-        return '상대방';
-    }
-
-    function hmRefreshRoomPresencePanel(members) {
-        const card = document.getElementById('roomPresenceCard');
-        const body = document.getElementById('roomPresenceBody');
-        if (!card || !body) return;
-        if (!activeRoomCode) {
-            card.style.display = 'none';
-            return;
-        }
-
-        card.style.display = '';
-
-        if (!members) {
-            body.innerHTML = `
-                <div class="presence-main-line"><span class="presence-dot offline"></span><strong>상태 확인 중</strong></div>
-                <div class="presence-muted">상대 접속 정보를 불러오는 중입니다.</div>
-            `;
-            return;
-        }
-
-        const found = hmFindRoomPartnerMember(members);
-        if (!found) {
-            body.innerHTML = `
-                <div class="presence-main-line"><span class="presence-dot offline"></span><strong>상대 연결 대기</strong></div>
-                <div class="presence-muted">아직 같은 공간에 연결된 상대가 없습니다.</div>
-                <div class="presence-hint">상대가 초대코드로 들어오면 온라인 여부와 마지막 접속 시간이 여기에 표시됩니다.</div>
-            `;
-            return;
-        }
-
-        const member = found[1] || {};
-        const lastSeen = Number(member.lastSeen || member.lastActiveAt || member.joinedAt || 0);
-        const online = member.online === true && lastSeen && (Date.now() - lastSeen < 150000);
-        const label = online ? '온라인' : '오프라인';
-        const roleTitle = hmGetPresenceRoleTitle(member);
-        body.innerHTML = `
-            <div class="presence-main-line"><span class="presence-dot ${online ? 'online' : 'offline'}"></span><strong>${roleTitle}</strong> · ${label}</div>
-            <div class="presence-muted">${escapeHtml(hmShortEmail(member.email))}</div>
-            <div class="presence-lastseen">마지막 접속: <strong>${escapeHtml(hmPresenceRelativeTime(lastSeen))}</strong></div>
-        `;
-    }
-
-    function hmStopRoomPresence() {
-        if (roomPresenceRef) roomPresenceRef.off();
-        roomPresenceRef = null;
-        window.hmActivePresenceRoom = '';
-        if (hmPresenceInterval) clearInterval(hmPresenceInterval);
-        hmPresenceInterval = null;
-        const card = document.getElementById('roomPresenceCard');
-        if (card) card.style.display = 'none';
-    }
-
-    async function hmTouchRoomPresence(roomCode) {
-        if (!currentUser || !hmIsSafeRoomCode(roomCode)) return;
+    function hmStopPresence() {
         try {
-            const ref = db.ref(`roomMembers/${roomCode}/${currentUser.uid}`);
-            await ref.update({
-                email: currentUser.email || myEmail || '',
+            if (hmPresenceSelfRef) hmPresenceSelfRef.update({ online: false, lastSeen: firebase.database.ServerValue.TIMESTAMP });
+            if (hmPresenceRoomMembersRef) hmPresenceRoomMembersRef.off();
+        } catch(e) { console.warn(e); }
+        hmPresenceRoomMembersRef = null;
+        hmPresenceSelfRef = null;
+        hmRenderPresenceBox(null);
+    }
+
+    function hmStartPresence(roomCode) {
+        if (!currentUser || !roomCode) return;
+        try {
+            const targetPath = `roomMembers/${roomCode}/${currentUser.uid}/presence`;
+            const selfRef = db.ref(targetPath);
+            hmPresenceSelfRef = selfRef;
+            selfRef.update({
                 online: true,
                 lastSeen: firebase.database.ServerValue.TIMESTAMP,
-                lastActiveAt: firebase.database.ServerValue.TIMESTAMP
+                email: normalizeEmail(currentUser.email),
+                relationshipRole: activeRelationshipRole || pendingRelationshipRole || '',
+                updatedAt: firebase.database.ServerValue.TIMESTAMP
             });
-            ref.onDisconnect().update({
+            selfRef.onDisconnect().update({
                 online: false,
                 lastSeen: firebase.database.ServerValue.TIMESTAMP
             });
+
+            if (hmPresenceRoomMembersRef) hmPresenceRoomMembersRef.off();
+            hmPresenceRoomMembersRef = db.ref(`roomMembers/${roomCode}`);
+            hmPresenceRoomMembersRef.on('value', (snapshot) => {
+                hmRenderPresenceBox(snapshot.val() || {});
+            }, (err) => {
+                console.warn('Presence 읽기 실패:', err);
+                hmRenderPresenceBox({});
+            });
         } catch (err) {
-            console.warn('[Room Presence] 상태 저장 실패:', err);
+            console.warn('Presence 시작 실패:', err);
         }
     }
 
-    async function hmStartRoomPresence(roomCode) {
-        if (!currentUser || !hmIsSafeRoomCode(roomCode)) return;
-        if (window.hmActivePresenceRoom === roomCode && roomPresenceRef) {
-            await hmTouchRoomPresence(roomCode);
+    function hmFormatPresenceTime(ts) {
+        if (!ts) return '아직 기록 없음';
+        const date = new Date(ts);
+        if (Number.isNaN(date.getTime())) return '시간 확인 불가';
+        const diff = Date.now() - date.getTime();
+        const min = Math.floor(diff / 60000);
+        if (min < 1) return '방금 전';
+        if (min < 60) return `${min}분 전`;
+        const hour = Math.floor(min / 60);
+        if (hour < 24) return `${hour}시간 전`;
+        const y = date.getFullYear();
+        const m = String(date.getMonth() + 1).padStart(2, '0');
+        const d = String(date.getDate()).padStart(2, '0');
+        const hh = String(date.getHours()).padStart(2, '0');
+        const mm = String(date.getMinutes()).padStart(2, '0');
+        return `${y}.${m}.${d} ${hh}:${mm}`;
+    }
+
+    function hmRenderPresenceBox(members) {
+        const box = document.getElementById('roomPresenceBox');
+        const content = document.getElementById('roomPresenceContent');
+        if (!box || !content) return;
+        if (!activeRoomCode || !currentUser) {
+            box.style.display = 'none';
+            content.innerHTML = '';
             return;
         }
-        window.hmActivePresenceRoom = roomCode;
-        if (roomPresenceRef) roomPresenceRef.off();
-        if (hmPresenceInterval) clearInterval(hmPresenceInterval);
-        await hmTouchRoomPresence(roomCode);
-        hmPresenceInterval = setInterval(() => {
-            if (currentUser && activeRoomCode === roomCode) hmTouchRoomPresence(roomCode);
-        }, 60000);
-        roomPresenceRef = db.ref(`roomMembers/${roomCode}`);
-        roomPresenceRef.on('value', (snap) => {
-            if (roomCode !== activeRoomCode) return;
-            hmRefreshRoomPresencePanel(snap.val() || {});
-        }, (err) => {
-            console.warn('[Room Presence] 상태 읽기 실패:', err);
-            hmRefreshRoomPresencePanel(null);
-        });
+        box.style.display = 'block';
+        const all = members && typeof members === 'object' ? Object.entries(members) : [];
+        const others = all.filter(([uid]) => uid !== currentUser.uid);
+        if (!others.length) {
+            content.innerHTML = `
+                <div class="presence-empty">
+                    <strong>아직 연결된 상대가 없습니다.</strong><br>
+                    상대방이 초대코드로 들어오면 이곳에 온라인 상태와 마지막 접속 시간이 표시됩니다.
+                </div>
+            `;
+            return;
+        }
+        const rows = others.map(([uid, member]) => {
+            const role = member.relationshipRole || (member.role === 'owner' ? 'dom' : 'sub');
+            const presence = member.presence || {};
+            const isOnline = presence.online === true;
+            const label = getRelationshipRoleLabel(role);
+            const email = member.email || presence.email || '상대 사용자';
+            const lastSeen = presence.lastSeen || member.lastSeen || member.joinedAt || 0;
+            return `
+                <div class="presence-user-card">
+                    <div class="presence-user-main">
+                        <span class="presence-dot ${isOnline ? 'online' : 'offline'}"></span>
+                        <div>
+                            <div class="presence-user-title">${escapeHtml(label)}</div>
+                            <div class="presence-user-email">${escapeHtml(email)}</div>
+                        </div>
+                    </div>
+                    <div class="presence-user-status">
+                        <strong>${isOnline ? '온라인' : '오프라인'}</strong>
+                        <span>마지막 접속: ${escapeHtml(hmFormatPresenceTime(lastSeen))}</span>
+                    </div>
+                </div>
+            `;
+        }).join('');
+        content.innerHTML = rows;
     }
 
     // =========================================================
@@ -742,10 +713,7 @@
             email: myEmail,
             role: role,
             relationshipRole: finalRelationshipRole,
-            joinedAt: firebase.database.ServerValue.TIMESTAMP,
-            online: true,
-            lastSeen: firebase.database.ServerValue.TIMESTAMP,
-            lastActiveAt: firebase.database.ServerValue.TIMESTAMP
+            joinedAt: firebase.database.ServerValue.TIMESTAMP
         };
         updates[`userRooms/${currentUser.uid}/${roomCode}`] = true;
         updates[`users/${currentUser.uid}/activeRoom`] = roomCode;
