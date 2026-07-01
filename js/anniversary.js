@@ -59,6 +59,17 @@ function hmMilestoneDate(firstMetDate, milestone) {
 
 function hmGetTodayYmd() { return hmYmdFromDate(new Date()); }
 
+function hmGetRelativeDayLabel(ymd) {
+    const target = hmDateFromYmd(ymd);
+    const today = hmDateFromYmd(hmGetTodayYmd());
+    if (!target || !today) return '';
+    const diff = Math.round((target.getTime() - today.getTime()) / 86400000);
+    if (diff === 0) return '오늘';
+    if (diff > 0) return `D-${diff}`;
+    return `D+${Math.abs(diff)}`;
+}
+
+
 function hmGetSelectedHistoryDateSafe() {
     try { if (typeof selectedHistoryDate !== 'undefined' && selectedHistoryDate) return selectedHistoryDate; } catch (err) {}
     const recordDate = document.getElementById('recordDate')?.value;
@@ -335,20 +346,41 @@ function hmRenderAnniversaryPanel() {
     if (!box) return;
     const list = hmGetAnniversaryList();
     const today = hmGetTodayYmd();
-    const upcoming = list.filter(item => item.date >= today).slice(0, 3);
-    const previewHtml = upcoming.length
-        ? `<div class="anniversary-auto-preview">${upcoming.map(item => { const meta = hmGetAnniversaryTypeMeta(item.type); return `<span>${meta.icon} ${escapeHtml(item.title)} <b>${hmFormatKoreanDate(item.date)}</b></span>`; }).join('')}</div>`
-        : '<div class="anniversary-selected-note">등록한 기념일이 캘린더에 아이콘으로 표시됩니다.</div>';
+    const ordered = [...list].sort((a, b) => {
+        const aFuture = String(a.date) >= today ? 0 : 1;
+        const bFuture = String(b.date) >= today ? 0 : 1;
+        if (aFuture !== bFuture) return aFuture - bFuture;
+        return aFuture === 0 ? String(a.date).localeCompare(String(b.date)) : String(b.date).localeCompare(String(a.date));
+    });
+    const listHtml = ordered.length
+        ? `<div class="anniversary-panel-list">${ordered.map(item => {
+            const meta = hmGetAnniversaryTypeMeta(item.type);
+            const relative = hmGetRelativeDayLabel(item.date);
+            return `<div class="anniversary-panel-item">
+                <div class="anniversary-panel-icon">${meta.icon}</div>
+                <div class="anniversary-panel-body">
+                    <div class="anniversary-panel-title">${escapeHtml(item.title)}</div>
+                    <div class="anniversary-panel-date">${hmFormatKoreanDate(item.date)} · ${escapeHtml(meta.label)}</div>
+                </div>
+                <div class="anniversary-panel-dday">${escapeHtml(relative)}</div>
+            </div>`;
+        }).join('')}</div>`
+        : `<div class="anniversary-empty-panel">
+            <div class="anniversary-panel-icon">📌</div>
+            <div>
+                <div class="anniversary-panel-title">아직 등록된 기념일이 없습니다</div>
+                <div class="anniversary-panel-date">생일, 여행, 데이트, 휴가처럼 기억하고 싶은 날짜를 추가해 보세요.</div>
+            </div>
+        </div>`;
     box.innerHTML = `<div class="anniversary-card anniversary-card-compact">
         <div class="anniversary-head">
             <div>
                 <div class="anniversary-title">💕 우리의 기념일</div>
-                <div class="anniversary-sub">등록된 기념일 ${list.length}개 · 캘린더 아이콘 표시</div>
+                <div class="anniversary-sub">등록한 기념일은 캘린더에도 함께 표시됩니다.</div>
             </div>
             <button type="button" class="anniversary-toggle-btn" onclick="hmOpenAnniversarySettings()">등록/관리</button>
         </div>
-        <div class="anniversary-today compact"><span class="anniversary-icon">📌</span><span><div class="anniversary-main">기억하고 싶은 날짜를 직접 등록하세요</div><div class="anniversary-caption">첫날 계산과 자동 D+ 표시는 사용하지 않습니다.</div></span></div>
-        ${previewHtml}
+        ${listHtml}
     </div>`;
 }
 async function hmRefreshAnniversaryPanel() {

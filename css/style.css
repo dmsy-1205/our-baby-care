@@ -7931,3 +7931,88 @@ button:active {
         max-height: var(--hm-rc217-chat-height) !important;
     }
 }
+
+/* =========================================================
+   RC2.17.1 SAFE: Anniversary Panel List Polish
+   - 안내용 박스를 제거하고 등록된 기념일 목록을 카드 안에 직접 표시
+   - Firebase / History / Calendar 데이터 구조 변경 없음
+   ========================================================= */
+.anniversary-card-compact .anniversary-head {
+    margin-bottom: 12px;
+}
+.anniversary-card-compact .anniversary-sub {
+    color: var(--hm-premium-sub, #7D7694);
+}
+.anniversary-panel-list {
+    display: grid;
+    gap: 8px;
+}
+.anniversary-panel-item,
+.anniversary-empty-panel {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border: 1px solid var(--hm-premium-border, #ECE6FF);
+    border-radius: 18px;
+    padding: 12px 14px;
+    background: linear-gradient(135deg, rgba(255,255,255,.92), rgba(250,247,255,.92));
+    box-shadow: 0 8px 22px rgba(109, 76, 255, 0.055);
+}
+.anniversary-panel-icon {
+    width: 42px;
+    height: 42px;
+    min-width: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 15px;
+    background: #fff;
+    font-size: 1.18rem;
+    box-shadow: inset 0 0 0 1px rgba(236,230,255,.75);
+}
+.anniversary-panel-body {
+    flex: 1;
+    min-width: 0;
+}
+.anniversary-panel-title {
+    font-weight: 850;
+    color: var(--hm-premium-text, #2D2A35);
+    font-size: .92rem;
+    line-height: 1.3;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.anniversary-panel-date {
+    margin-top: 3px;
+    color: var(--hm-premium-sub, #7D7694);
+    font-size: .76rem;
+    line-height: 1.35;
+}
+.anniversary-panel-dday {
+    min-width: 54px;
+    text-align: right;
+    font-size: .8rem;
+    font-weight: 900;
+    color: var(--hm-premium-primary, #6D4CFF);
+}
+.anniversary-empty-panel {
+    align-items: flex-start;
+}
+.anniversary-empty-panel .anniversary-panel-title {
+    white-space: normal;
+    color: var(--hm-premium-primary, #6D4CFF);
+}
+@media (max-width: 430px) {
+    .anniversary-panel-item,
+    .anniversary-empty-panel {
+        padding: 11px 12px;
+    }
+    .anniversary-panel-title {
+        white-space: normal;
+    }
+    .anniversary-panel-dday {
+        min-width: 46px;
+        font-size: .76rem;
+    }
+}

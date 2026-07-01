@@ -46,3 +46,9 @@
 - CSS-only polish based on RC2.16 Branding STEP1.
 - Reduced chat height and tightened header/login spacing.
 - Kept room, Firebase, Presence, History, Invite logic unchanged.
+
+
+## RC2.17.1 Anniversary Panel List
+- 우리의 기념일 카드 안에 등록된 기념일 목록을 직접 표시합니다.
+- 설명 박스를 제거하고 제목 아래 회색 설명 한 줄만 유지합니다.
+- 생일/여행/기념일 등 모든 타입의 기념일이 동일 목록에 표시되도록 정리했습니다.
