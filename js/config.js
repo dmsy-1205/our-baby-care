@@ -59,8 +59,6 @@
     let ownerNoteRef = null;
     let ownerNoteSaveTimeout = null;
     let cachedDaysData = null;
-    let hmPresenceRoomMembersRef = null;
-    let hmPresenceSelfRef = null;
 
     // RC2.7 안정화: Firebase 연결 상태와 과도한 경고 반복을 제어한다.
     let hmIsOnline = navigator.onLine;
