@@ -1,5 +1,7 @@
-# HearMe2nite v0.10.13 Home Final Candidate
+# HearMe2nite v0.10.20 Safe Enforced Access Gate
 
-- 로그인/홈 표시 전환 안정화 라인을 기준으로 홈 화면을 정리했습니다.
-- Firebase, Room, History, AutoSave 저장 구조는 변경하지 않았습니다.
-- GitHub 업로드 100개 미만 구조를 유지합니다.
+- MasterOS 승인 판정 PASS 계정만 앱 실행 허용
+- NO_ACCESS_RECORD / BLOCKED 계정은 권한 없음 화면 표시
+- READ_ERROR / MASTER_AUTH_NOT_READY는 기존 사용자 보호를 위해 임시 통과
+- 승인 확인 기준: MasterOS Realtime DB `userAppAccess` + `appAccessRequests` + email fallback
+- Room / History / AutoSave / Chat 저장 구조 변경 없음

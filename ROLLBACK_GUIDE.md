@@ -1,4 +1,4 @@
-# Rollback Guide v0.10.13
+# Rollback
 
-문제가 발생하면 직전 버전으로 되돌립니다.
-데이터 구조 변경 없음.
+기존 사용자가 차단되면 즉시 v0.10.13 Home Final Candidate로 롤백하세요.
+진단이 필요하면 v0.10.19 Email Fallback Diagnostic을 사용하세요.

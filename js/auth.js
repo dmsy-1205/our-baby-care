@@ -43,6 +43,300 @@
         updateCurrentRoomInfo();
     }
 
+
+    // =========================================================
+    // MODULE: MASTEROS APP ACCESS DIAGNOSTIC
+    // v0.10.20 Safe Enforced Access Gate
+    // 목적: MasterOS 승인 사용자만 HearMe2nite 앱 실행을 허용한다. 기존 사용자 보호를 위해 READ_ERROR는 임시 통과한다.
+    // MasterOS DB 기준 경로:
+    // - userAppAccess/{masterUid}/baby-care-secure
+    // - appAccessRequests/baby-care-secure/{masterUid}
+    // - appAccessRequests/baby-care-secure/* 중 email 일치 항목
+    // - users/* 중 email 일치 UID → userAppAccess/{matchedUid}/baby-care-secure
+    // =========================================================
+
+    function waitForMasterUser(timeoutMs = 5000) {
+        if (masterAuth.currentUser) return Promise.resolve(masterAuth.currentUser);
+        return new Promise((resolve) => {
+            let resolved = false;
+            const timer = setTimeout(() => {
+                if (resolved) return;
+                resolved = true;
+                unsubscribe();
+                resolve(masterAuth.currentUser || null);
+            }, timeoutMs);
+            const unsubscribe = masterAuth.onAuthStateChanged((user) => {
+                if (resolved) return;
+                resolved = true;
+                clearTimeout(timer);
+                unsubscribe();
+                resolve(user || null);
+            });
+        });
+    }
+
+    function normalizeAccessEmail(email) {
+        return (email || '').trim().toLowerCase();
+    }
+
+    function isMasterAccessApproved(accessData) {
+        // userAppAccess는 active:true가 기본이지만, 과거 데이터 호환을 위해 active가 없으면 차단하지 않는다.
+        return !!accessData && accessData.status === 'approved' && accessData.active !== false;
+    }
+
+    function isMasterAccessExplicitlyBlocked(accessData) {
+        return !!accessData && (accessData.status === 'rejected' || accessData.status === 'blocked' || accessData.active === false);
+    }
+
+    function isRequestApproved(requestData) {
+        return !!requestData && requestData.status === 'approved';
+    }
+
+    function objectEntriesSafe(value) {
+        if (!value || typeof value !== 'object') return [];
+        return Object.entries(value);
+    }
+
+    async function readPathSafe(path) {
+        try {
+            const snap = await masterDb.ref(path).once('value');
+            return { ok: true, path, exists: snap.exists(), value: snap.val(), error: null };
+        } catch (err) {
+            return { ok: false, path, exists: false, value: null, error: err && (err.message || err.code || String(err)) };
+        }
+    }
+
+    async function queryByEmailSafe(path, email) {
+        try {
+            const snap = await masterDb.ref(path).orderByChild('email').equalTo(email).once('value');
+            return { ok: true, path, email, exists: snap.exists(), value: snap.val(), error: null };
+        } catch (err) {
+            return { ok: false, path, email, exists: false, value: null, error: err && (err.message || err.code || String(err)) };
+        }
+    }
+
+    async function readMasterAccessDiagnostic(masterUid, masterEmail) {
+        const appId = HM_MASTER_APP_ID || 'baby-care-secure';
+        const normalizedEmail = normalizeAccessEmail(masterEmail);
+        const primaryPath = masterUid ? `userAppAccess/${masterUid}/${appId}` : '';
+        const requestPath = masterUid ? `appAccessRequests/${appId}/${masterUid}` : '';
+
+        const result = {
+            approved: false,
+            blocked: false,
+            reason: 'NO_APPROVED_ACCESS_RECORD',
+            result: 'NO_ACCESS_RECORD',
+            source: 'none',
+            appId,
+            masterUid: masterUid || '',
+            masterEmail: normalizedEmail,
+            primaryPath,
+            requestPath,
+            primary: null,
+            request: null,
+            usersByEmail: null,
+            requestsByEmail: null,
+            matchedUserUids: [],
+            matchedApprovedUserAccess: [],
+            matchedApprovedRequests: [],
+            diagnostics: []
+        };
+
+        if (!masterUid) {
+            result.reason = 'NO_MASTER_UID';
+            result.diagnostics.push('MasterOS UID가 없어 직접 경로를 확인하지 못했습니다.');
+            return result;
+        }
+
+        // 1) 현재 MasterOS UID 직접 승인 확인
+        result.primary = await readPathSafe(primaryPath);
+        const primaryData = result.primary.value;
+        if (isMasterAccessApproved(primaryData)) {
+            result.approved = true;
+            result.result = 'PASS';
+            result.reason = 'APPROVED_CURRENT_UID_USER_ACCESS';
+            result.source = 'userAppAccess/currentMasterUid';
+            return result;
+        }
+        if (isMasterAccessExplicitlyBlocked(primaryData)) {
+            result.blocked = true;
+            result.result = 'BLOCKED';
+            result.reason = 'EXPLICITLY_BLOCKED_CURRENT_UID_USER_ACCESS';
+            result.source = 'userAppAccess/currentMasterUid';
+            return result;
+        }
+
+        // 2) 현재 MasterOS UID의 승인 요청 확인
+        result.request = await readPathSafe(requestPath);
+        const requestData = result.request.value;
+        if (isRequestApproved(requestData)) {
+            result.approved = true;
+            result.result = 'PASS';
+            result.reason = 'APPROVED_CURRENT_UID_ACCESS_REQUEST';
+            result.source = 'appAccessRequests/currentMasterUid';
+            return result;
+        }
+        if (isMasterAccessExplicitlyBlocked(requestData)) {
+            result.blocked = true;
+            result.result = 'BLOCKED';
+            result.reason = 'EXPLICITLY_BLOCKED_CURRENT_UID_ACCESS_REQUEST';
+            result.source = 'appAccessRequests/currentMasterUid';
+            return result;
+        }
+
+        // 3) email 기준 users 검색 → 같은 email의 다른 MasterOS UID 찾기
+        if (normalizedEmail) {
+            result.usersByEmail = await queryByEmailSafe('users', normalizedEmail);
+            const userMatches = objectEntriesSafe(result.usersByEmail.value);
+            result.matchedUserUids = userMatches.map(([uid, data]) => ({ uid, email: normalizeAccessEmail(data && data.email), userStatus: data && data.userStatus, role: data && data.role }));
+
+            for (const [uid, userData] of userMatches) {
+                const accessPath = `userAppAccess/${uid}/${appId}`;
+                const accessRead = await readPathSafe(accessPath);
+                const accessData = accessRead.value;
+                const match = { uid, user: userData, accessPath, accessRead, accessData };
+                if (isMasterAccessApproved(accessData)) {
+                    result.matchedApprovedUserAccess.push(match);
+                }
+            }
+
+            if (result.matchedApprovedUserAccess.length > 0) {
+                result.approved = true;
+                result.result = 'PASS_BY_EMAIL_USER_ACCESS';
+                result.reason = 'APPROVED_EMAIL_MATCHED_USER_ACCESS';
+                result.source = 'userAppAccess/emailMatchedUid';
+                return result;
+            }
+
+            // 4) email 기준 appAccessRequests 검색
+            result.requestsByEmail = await queryByEmailSafe(`appAccessRequests/${appId}`, normalizedEmail);
+            const requestMatches = objectEntriesSafe(result.requestsByEmail.value);
+            result.matchedApprovedRequests = requestMatches
+                .map(([uid, data]) => ({ uid, data }))
+                .filter(item => isRequestApproved(item.data));
+
+            if (result.matchedApprovedRequests.length > 0) {
+                result.approved = true;
+                result.result = 'PASS_BY_EMAIL_REQUEST';
+                result.reason = 'APPROVED_EMAIL_MATCHED_ACCESS_REQUEST';
+                result.source = 'appAccessRequests/emailMatchedUid';
+                return result;
+            }
+        }
+
+        result.diagnostics.push('현재 MasterOS UID로 승인 기록이 없습니다.');
+        result.diagnostics.push('email fallback에서도 승인된 userAppAccess 또는 appAccessRequests를 찾지 못했습니다.');
+        result.result = result.blocked ? 'BLOCKED' : 'NO_ACCESS_RECORD';
+        return result;
+    }
+
+    async function verifyMasterAppAccess(options = {}) {
+        const masterUser = await waitForMasterUser(options.timeoutMs || 5000);
+        const label = options.label || 'Access Diagnostic';
+        if (!masterUser) {
+            const result = { approved: false, blocked: false, reason: 'MASTER_AUTH_NOT_READY', source: 'auth', masterUid: '', masterEmail: '', result: 'MASTER_AUTH_NOT_READY' };
+            console.warn(`[${label}] MasterOS auth not ready`, result);
+            return result;
+        }
+
+        try {
+            const result = await readMasterAccessDiagnostic(masterUser.uid, masterUser.email || '');
+            console.groupCollapsed(`[${label}] HearMe2nite approval diagnostic: ${result.result}`);
+            console.log('Master UID:', result.masterUid);
+            console.log('Master Email:', result.masterEmail);
+            console.log('App ID:', result.appId);
+            console.log('Primary current UID path:', result.primaryPath);
+            console.log('Primary current UID read:', result.primary);
+            console.log('Request current UID path:', result.requestPath);
+            console.log('Request current UID read:', result.request);
+            console.log('Users by email:', result.usersByEmail);
+            console.log('Matched user UIDs by email:', result.matchedUserUids);
+            console.log('Approved userAppAccess matches by email:', result.matchedApprovedUserAccess);
+            console.log('Requests by email:', result.requestsByEmail);
+            console.log('Approved request matches by email:', result.matchedApprovedRequests);
+            console.log('Final Result:', result.result, result.reason, 'source:', result.source);
+            console.log('Full diagnostic object:', result);
+            console.groupEnd();
+            return result;
+        } catch (err) {
+            const result = { approved: false, blocked: false, reason: 'MASTER_ACCESS_DIAGNOSTIC_FAILED', source: 'error', error: err, masterUid: masterUser.uid, masterEmail: masterUser.email || '', result: 'READ_ERROR' };
+            console.groupCollapsed(`[${label}] HearMe2nite approval diagnostic: READ_ERROR`);
+            console.error(err);
+            console.log(result);
+            console.groupEnd();
+            return result;
+        }
+    }
+
+
+    // =========================================================
+    // MODULE: MASTEROS APP ACCESS ENFORCEMENT
+    // v0.10.20 Safe Enforced Access Gate
+    // 정책:
+    // - PASS / PASS_BY_EMAIL_* : 앱 실행 허용
+    // - NO_ACCESS_RECORD / BLOCKED : 앱 실행 차단
+    // - READ_ERROR / MASTER_AUTH_NOT_READY : 기존 사용자 보호를 위해 임시 통과 + 콘솔 경고
+    // =========================================================
+
+    function isAccessGateAllowed(result) {
+        if (!result) return true; // 예외적 상황은 기존 사용자 보호를 위해 통과
+        if (result.approved === true) return true;
+        if (result.result === 'PASS' || result.result === 'PASS_BY_EMAIL_USER_ACCESS' || result.result === 'PASS_BY_EMAIL_REQUEST') return true;
+        if (result.result === 'READ_ERROR' || result.result === 'MASTER_AUTH_NOT_READY') {
+            console.warn('[Access Gate] approval check unavailable, fail-open for existing-user safety', result);
+            return true;
+        }
+        return false;
+    }
+
+    function showAccessDeniedScreen(result) {
+        try {
+            disconnectAllListeners();
+            clearRoomInputs();
+            clearFormFieldsExceptSync();
+            setDataSectionsVisible(false);
+            resetProtectedDataUI();
+        } catch (err) {
+            console.warn('[Access Gate] cleanup warning', err);
+        }
+
+        const authBox = document.getElementById('authBox');
+        const appContent = document.getElementById('appContent');
+        if (appContent) appContent.style.display = 'none';
+        if (authBox) {
+            authBox.classList.remove('is-hidden');
+            authBox.style.display = 'grid';
+            let denied = document.getElementById('accessDeniedNotice');
+            if (!denied) {
+                denied = document.createElement('div');
+                denied.id = 'accessDeniedNotice';
+                denied.setAttribute('role', 'alert');
+                denied.style.cssText = 'grid-column:1/-1;max-width:620px;margin:0 auto 16px;padding:18px 20px;border-radius:22px;background:rgba(255,255,255,.94);box-shadow:0 18px 45px rgba(88,60,120,.18);border:1px solid rgba(166,121,214,.28);text-align:center;color:#3c3150;line-height:1.55;';
+                authBox.insertBefore(denied, authBox.firstChild);
+            }
+            denied.innerHTML = `
+                <strong style="display:block;font-size:1.08rem;margin-bottom:6px;">앱 사용 권한이 없습니다</strong>
+                <span style="display:block;font-size:.92rem;color:#6f6380;">MasterOS Platform에서 HearMe2nite 앱 승인을 받은 후 사용할 수 있습니다.</span>
+                <button type="button" onclick="location.href='https://hearu2nite.netlify.app/'" style="margin-top:12px;border:0;border-radius:999px;padding:10px 16px;background:linear-gradient(135deg,#ff7ab6,#8b5cf6);color:white;font-weight:800;cursor:pointer;">플랫폼으로 이동</button>
+            `;
+        }
+        showSaveStatus('🔒 앱 승인이 필요합니다.');
+        console.warn('[Access Gate] blocked user access', result);
+    }
+
+    async function enforceMasterAppAccess(options = {}) {
+        const result = await verifyMasterAppAccess(options);
+        const allowed = isAccessGateAllowed(result);
+        if (!allowed) {
+            showAccessDeniedScreen(result);
+            try { await babyAuth.signOut(); } catch(e) { console.warn(e); }
+            return { allowed: false, result };
+        }
+        const oldNotice = document.getElementById('accessDeniedNotice');
+        if (oldNotice) oldNotice.remove();
+        return { allowed: true, result };
+    }
+
     // =========================================================
 
     // MODULE: AUTH / LOGIN / SIGNUP
@@ -68,12 +362,20 @@
         if (password.length < 6) { alert('비밀번호는 6자리 이상이어야 합니다.'); return; }
 
         try {
-            showSaveStatus('🔐 로그인 확인 중...');
+            showSaveStatus('🔐 MasterOS 로그인 확인 중...');
 
-            // 1단계: 2번 사이트(master-app-platform)에 가입된 계정인지 확인
+            // 1단계: MasterOS 계정 로그인
             await masterAuth.signInWithEmailAndPassword(email, password);
 
-            // 2단계: 기존 rooms 데이터가 있는 our-baby-care에도 로그인
+            // 2단계: MasterOS 승인 상태 확인. 승인된 사용자만 HearMe2nite 로그인 진행.
+            showSaveStatus('🔐 앱 승인 상태 확인 중...');
+            const gate = await enforceMasterAppAccess({ timeoutMs: 5000, label: 'Access Gate / Login' });
+            if (!gate.allowed) {
+                try { await masterAuth.signOut(); } catch(e) { console.warn(e); }
+                return;
+            }
+
+            // 3단계: 기존 rooms 데이터가 있는 our-baby-care에도 로그인
             try {
                 await babyAuth.signInWithEmailAndPassword(email, password);
             } catch (babyErr) {
@@ -81,7 +383,7 @@
                     // master에는 가입되어 있지만 baby 쪽 계정이 없는 경우만 생성
                     await babyAuth.createUserWithEmailAndPassword(email, password);
                 } else if (babyErr.code === 'auth/wrong-password') {
-                    alert('2번 사이트 로그인은 성공했지만, 기존 생활관리앱 계정의 비밀번호가 달라서 our-baby-care에 로그인하지 못했습니다. 두 프로젝트의 비밀번호를 맞춰 주세요.');
+                    alert('MasterOS 로그인과 앱 승인은 확인됐지만, 기존 HearMe2nite 계정의 비밀번호가 달라 로그인하지 못했습니다. 두 프로젝트의 비밀번호를 맞춰 주세요.');
                     return;
                 } else {
                     throw babyErr;
