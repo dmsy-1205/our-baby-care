@@ -1,6 +1,7 @@
 // =========================================================
 // HearMe2nite RC2 v2.8.0 STEP7
 // history.js - History
+// RC2.12.1: Calendar-first hotfix. Recent timeline list disabled.
 // Extracted from stable RC2.7 final file without DB/Firebase key changes.
 // =========================================================
 
@@ -649,27 +650,10 @@ function hmHistoryTimelinePreview(record) {
 }
 
 function renderHistoryTimeline(daysData) {
+    // RC2.12.1: 기록 목록이 캘린더 위로 길게 나열되지 않도록 비활성화.
+    // History Center의 기준 UX는 “캘린더 먼저 → 선택 날짜 1건 표시”이다.
     const box = document.getElementById('historyTimeline');
-    if (!box) return;
-    const dates = hmHistoryFilteredDates(daysData || {}).slice(0, 8);
-    if (!Object.keys(daysData || {}).length) {
-        box.innerHTML = '';
-        return;
-    }
-    if (!dates.length) {
-        box.innerHTML = '<div class="history-v2-empty">조건에 맞는 기록이 없습니다.</div>';
-        return;
-    }
-    box.innerHTML = `
-        <div class="history-v2-title"><strong>날짜별 통합 기록</strong><span>${dates.length}개 표시</span></div>
-        ${dates.map(date => {
-            const record = daysData[date] || {};
-            return `<button type="button" class="history-v2-row ${date === selectedHistoryDate ? 'is-selected' : ''}" onclick="selectHistoryDate('${date}')">
-                <span class="history-v2-date">${formatHistoryDateLabel(date)}</span>
-                <span class="history-v2-main"><strong>${getHistoryMoodIcon(record)} 오늘 기록</strong><small>${escapeHtml(hmHistoryTimelinePreview(record))}${hmHistoryTimelinePreview(record).length >= 78 ? '...' : ''}</small><em>${hmHistorySummaryChips(record)}</em></span>
-                <span class="history-v2-arrow">›</span>
-            </button>`;
-        }).join('')}`;
+    if (box) box.innerHTML = '';
 }
 
 function renderCalendar(daysData) {
@@ -707,8 +691,8 @@ function displayHistory(daysData) {
     renderHistoryHero(daysData || {});
     renderHistorySummary(daysData || {});
     updateHistoryLaunchSub(daysData || {});
-    renderHistoryTimeline(daysData || {});
     renderCalendar(daysData || {});
+    renderHistoryTimeline(daysData || {});
     renderPhotoThumbs(daysData || {});
     if (!historyList) return;
     if (!daysData || Object.keys(daysData).length === 0) {
@@ -716,7 +700,10 @@ function displayHistory(daysData) {
         return;
     }
     const filtered = hmHistoryFilteredDates(daysData || {});
-    if (!selectedHistoryDate && filtered.length) selectedHistoryDate = filtered[0];
+    if (!selectedHistoryDate) {
+        const recordDate = document.getElementById('recordDate')?.value || '';
+        selectedHistoryDate = filtered.includes(recordDate) ? recordDate : (filtered[0] || '');
+    }
     if (selectedHistoryDate && !filtered.includes(selectedHistoryDate) && filtered.length) selectedHistoryDate = filtered[0];
     if (!filtered.length) {
         historyList.innerHTML = '<div class="history-selected-hint"><strong>검색 결과가 없습니다</strong>검색어 또는 필터를 초기화해 주세요.</div>';

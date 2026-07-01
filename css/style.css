@@ -6507,3 +6507,16 @@ body.hm-phone-viewport .daily-modal {
         padding: 10px;
     }
 }
+
+
+/* RC2.12.1 History Calendar First Hotfix */
+.history-v2-timeline{display:none !important;}
+.history-v2-toolbar-below{margin-top:14px;}
+.history-selected-section-title{
+    margin:14px 4px 8px;
+    font-size:13px;
+    font-weight:900;
+    color:#7d6f9c;
+    letter-spacing:-0.01em;
+}
+.history-panel-modal #calendarBox{margin-top:10px;}
