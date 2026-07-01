@@ -70,11 +70,61 @@
         if (hour < 24) return hour + '시간 전';
         return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
     }
+
+    function setDotState(dot, isOnline){
+        if (!dot) return;
+        const wasOnline = dot.classList.contains('online');
+        dot.classList.toggle('online', !!isOnline);
+        dot.classList.toggle('offline', !isOnline);
+        if (isOnline && !wasOnline) {
+            dot.classList.remove('pulse');
+            void dot.offsetWidth;
+            dot.classList.add('pulse');
+        }
+    }
+    function updateHomePresence(members){
+        const indicator = $('homePresenceIndicator');
+        const selfDot = $('homePresenceSelfDot');
+        const partnerDot = $('homePresencePartnerDot');
+        if (!indicator || !selfDot || !partnerDot) return;
+
+        const roomCode = getRoomCode();
+        const user = getUser();
+        if (!roomCode || !user) {
+            setDotState(selfDot, false);
+            setDotState(partnerDot, false);
+            indicator.title = '공간 연결 전';
+            selfDot.setAttribute('aria-label', '나 오프라인');
+            partnerDot.setAttribute('aria-label', '상대 오프라인');
+            return;
+        }
+
+        const allRows = members && typeof members === 'object' ? Object.entries(members) : [];
+        const myMember = members && members[user.uid] ? members[user.uid] : null;
+        const myPresence = (myMember && myMember.presence) || {};
+        const selfOnline = myPresence.online === true || !!selfRef;
+        const partnerRows = allRows.filter(([uid]) => uid !== user.uid);
+        const partnerOnline = partnerRows.some(([, member]) => member && member.presence && member.presence.online === true);
+        const partnerLastSeen = partnerRows.reduce((latest, [, member]) => {
+            const presence = (member && member.presence) || {};
+            const value = Number(presence.lastSeen || presence.updatedAt || member && member.joinedAt || 0);
+            return value > latest ? value : latest;
+        }, 0);
+
+        setDotState(selfDot, selfOnline);
+        setDotState(partnerDot, partnerOnline);
+        selfDot.setAttribute('aria-label', selfOnline ? '나 온라인' : '나 오프라인');
+        partnerDot.setAttribute('aria-label', partnerOnline ? '상대 온라인' : '상대 오프라인');
+        indicator.title = partnerRows.length
+            ? `나: ${selfOnline ? '온라인' : '오프라인'} · 상대: ${partnerOnline ? '온라인' : '오프라인'} · 마지막 접속 ${formatTime(partnerLastSeen)}`
+            : `나: ${selfOnline ? '온라인' : '오프라인'} · 상대: 아직 연결 전`;
+    }
     function render(members){
         const box = ensureBox();
         const content = $('roomPresenceContent');
         const roomCode = getRoomCode();
         const user = getUser();
+        updateHomePresence(members || {});
         if (!box || !content) return;
         if (!roomCode || !user) {
             box.style.display = 'none';
@@ -131,6 +181,7 @@
         try { if (selfRef) selfRef.update({ online:false, lastSeen: firebase.database.ServerValue.TIMESTAMP, updatedAt: firebase.database.ServerValue.TIMESTAMP }); } catch(e) {}
         try { if (membersRef) membersRef.off(); } catch(e) {}
         membersRef = null; selfRef = null; activePresenceRoom = null; activePresenceUid = null;
+        updateHomePresence({});
     }
     function start(){
         const roomCode = getRoomCode();

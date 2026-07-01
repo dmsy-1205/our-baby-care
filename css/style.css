@@ -7024,3 +7024,58 @@ body.hm-phone-viewport .daily-modal {
 .presence-user-status { display: flex; justify-content: space-between; gap: 8px; align-items: center; font-size: 0.75rem; color: #636e72; border-top: 1px solid #f1ecff; padding-top: 8px; }
 .presence-user-status strong { color: #5f3dc4; }
 @media (max-width: 420px) { .presence-user-status { align-items: flex-start; flex-direction: column; gap: 3px; } }
+
+/* =========================================================
+   RC2.14.8 Home Presence Indicator
+   - Two simple dots on the home version row.
+   - First dot: me / second dot: partner.
+   ========================================================= */
+.app-meta-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin: 8px 0 16px;
+}
+.app-meta-row .app-version-badge {
+    margin: 0;
+}
+.home-presence-indicator {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 7px;
+    min-width: 34px;
+    padding: 4px 2px;
+    user-select: none;
+}
+.home-presence-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 999px;
+    display: inline-block;
+    background: #cfcfd5;
+    box-shadow: 0 0 0 4px rgba(207,207,213,.18);
+    transition: background .2s ease, box-shadow .2s ease, transform .2s ease, opacity .2s ease;
+    opacity: .95;
+}
+.home-presence-dot.online {
+    background: #35D07F;
+    box-shadow: 0 0 0 4px rgba(53,208,127,.18);
+}
+.home-presence-dot.offline {
+    background: #cfcfd5;
+    box-shadow: 0 0 0 4px rgba(207,207,213,.18);
+}
+.home-presence-dot.pulse {
+    animation: hmPresenceDotPulse .42s ease-out;
+}
+@keyframes hmPresenceDotPulse {
+    0% { transform: scale(1); }
+    45% { transform: scale(1.35); }
+    100% { transform: scale(1); }
+}
+@media (max-width: 420px) {
+    .app-meta-row { margin-bottom: 14px; }
+    .home-presence-dot { width: 9px; height: 9px; }
+}

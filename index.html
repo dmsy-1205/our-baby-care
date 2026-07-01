@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>HearMe2nite v0.10.21 Beta</title>
+    <title>HearMe2nite v1.0 RC</title>
     <!-- RC2 v2.9.0 STEP7 FINAL: onboarding-ux-qa / 기존 기능 유지 -->
     <!-- RC2 v2.6.0 STEP5 FINAL QA: component-ready module map / UI and data logic preserved -->
     
@@ -65,7 +65,13 @@
         <div></div>
     </div>
     <div class="app-subtitle">합의된 하루를 신뢰로 기록하고, 따뜻하게 지켜보세요.</div>
-    <div class="app-version-badge">v0.10.21 Beta</div>
+    <div class="app-meta-row">
+        <div class="app-version-badge">v1.0 RC</div>
+        <div class="home-presence-indicator" id="homePresenceIndicator" title="접속 상태 확인 중">
+            <span class="home-presence-dot self offline" id="homePresenceSelfDot" aria-label="나 오프라인"></span>
+            <span class="home-presence-dot partner offline" id="homePresencePartnerDot" aria-label="상대 오프라인"></span>
+        </div>
+    </div>
 
     <div class="user-bar">
         <span id="userInfoText">로그인 확인 중...</span>
