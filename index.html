@@ -94,13 +94,6 @@
                     아직 연결된 공간이 없습니다. 혼자 사용할 공간을 만들거나 초대코드를 입력해 주세요.
                 </div>
 
-                <div class="room-presence-box" id="roomPresenceBox" style="display:none;">
-                    <div class="room-presence-title">👀 상대 접속 상태</div>
-                    <div id="roomPresenceContent" class="room-presence-content">
-                        상대 정보를 불러오는 중입니다.
-                    </div>
-                </div>
-
                 <div class="relationship-role-box" id="relationshipRoleBox">
                     <div class="relationship-role-title">👥 내 관계 역할 선택 <span id="relationshipRoleLockedBadge"></span></div>
                     <div class="relationship-role-note" id="relationshipRoleNote">
@@ -162,7 +155,7 @@
         <input type="date" id="recordDate" onchange="connectAndListenFirebase()">
     </div>
 
-    <div class="input-group hm-legacy-mission-hidden" aria-hidden="true">
+    <div class="input-group">
         <label>🎯 오늘의 미션</label>
         <div class="mission-compact-card">
             <div>
@@ -313,24 +306,24 @@
 
 
     <div class="home-section-title custom-routine-title" id="customRoutineHomeTitle">
-        <span>오늘의 약속</span>
+        <span>맞춤 루틴</span>
         <small id="customRoutineCountText">0/5 · 관리(Dom)가 설계</small>
     </div>
 
     <div class="input-group custom-routine-home-wrap">
         <button type="button" class="daily-card custom-routine-hub-card" id="customRoutineHubCard" onclick="openCustomRoutineHub()">
-            <span class="daily-card-icon">💜</span>
+            <span class="daily-card-icon">🧩</span>
             <span>
-                <span class="daily-card-title">오늘의 약속</span>
-                <span class="daily-card-sub" id="customRoutineHubSub">공간을 연결하면 오늘의 약속을 불러옵니다.</span>
+                <span class="daily-card-title">나만의 루틴</span>
+                <span class="daily-card-sub" id="customRoutineHubSub">공간을 연결하면 맞춤 루틴을 불러옵니다.</span>
             </span>
             <span class="daily-card-arrow">›</span>
         </button>
     </div>
 
     <div class="custom-routine-toolbar compact" id="customRoutineToolbar">
-        <button type="button" class="custom-routine-manage-btn" id="customRoutineManageBtn" onclick="openCustomRoutineManager()">⚙ 오늘의 약속 관리</button>
-        <span class="custom-routine-help">홈은 한 장으로 유지하고, 약속은 전용 팝업에서 작성해요.</span>
+        <button type="button" class="custom-routine-manage-btn" id="customRoutineManageBtn" onclick="openCustomRoutineManager()">⚙ 맞춤 루틴 관리</button>
+        <span class="custom-routine-help">홈은 한 장으로 유지하고, 루틴은 전용 페이지에서 작성해요.</span>
     </div>
 
     <div class="custom-routine-list" id="customRoutineList" hidden aria-hidden="true"></div>
@@ -376,15 +369,15 @@
 <div class="daily-modal-overlay" id="customRoutineHubOverlay" onclick="if(event.target.id==='customRoutineHubOverlay') closeCustomRoutineHub()">
     <div class="daily-modal custom-routine-modal custom-routine-hub-modal" role="dialog" aria-modal="true" aria-labelledby="customRoutineHubTitle">
         <div class="daily-modal-head">
-            <h2 id="customRoutineHubTitle">💜 오늘의 약속</h2>
+            <h2 id="customRoutineHubTitle">🧩 맞춤 루틴</h2>
             <button type="button" class="modal-close-btn" onclick="closeCustomRoutineHub()">닫기</button>
         </div>
-        <p class="custom-routine-note" id="customRoutineHubNote">관리(Dom)가 만든 오늘의 약속을 한 화면에서 확인하고 작성합니다.</p>
+        <p class="custom-routine-note" id="customRoutineHubNote">관리(Dom)가 만든 미션과 일과를 한 화면에서 확인하고 작성합니다.</p>
         <div class="custom-routine-hub-actions" id="customRoutineHubActions">
             <button type="button" class="custom-routine-manage-btn" onclick="openCustomRoutineManager()">⚙ 관리 화면 열기</button>
         </div>
         <div id="customRoutineHubList" class="custom-routine-hub-list">
-            <div class="custom-routine-empty">오늘의 약속을 불러오는 중입니다.</div>
+            <div class="custom-routine-empty">맞춤 루틴을 불러오는 중입니다.</div>
         </div>
     </div>
 </div>
@@ -392,10 +385,10 @@
 <div class="daily-modal-overlay" id="customRoutineManagerOverlay" onclick="if(event.target.id==='customRoutineManagerOverlay') closeCustomRoutineManager()">
     <div class="daily-modal custom-routine-modal" role="dialog" aria-modal="true" aria-labelledby="customRoutineManagerTitle">
         <div class="daily-modal-head">
-            <h2 id="customRoutineManagerTitle">💜 오늘의 약속 관리</h2>
+            <h2 id="customRoutineManagerTitle">🧩 맞춤 루틴 관리</h2>
             <button type="button" class="modal-close-btn" onclick="closeCustomRoutineManager()">닫기</button>
         </div>
-        <p class="custom-routine-note">관리(Dom)가 오늘 지킬 약속과 일과를 카드로 만들 수 있어요. 최대 카드 5개, 카드당 항목 7개까지 가능합니다.</p>
+        <p class="custom-routine-note">관리(Dom)가 원하는 미션과 일과를 카드로 만들 수 있어요. 최대 카드 5개, 카드당 항목 7개까지 가능합니다.</p>
         <div class="custom-routine-limit-line" id="customRoutineManagerLimit">카드 0/5</div>
 
         <div class="custom-routine-editor-box">
@@ -428,7 +421,7 @@
 <div class="daily-modal-overlay" id="customRoutineInputOverlay" onclick="if(event.target.id==='customRoutineInputOverlay') closeCustomRoutineInput()">
     <div class="daily-modal custom-routine-modal" role="dialog" aria-modal="true" aria-labelledby="customRoutineInputTitle">
         <div class="daily-modal-head">
-            <h2 id="customRoutineInputTitle">💜 오늘의 약속</h2>
+            <h2 id="customRoutineInputTitle">🧩 맞춤 루틴</h2>
             <button type="button" class="modal-close-btn" onclick="closeCustomRoutineInput()">닫기</button>
         </div>
         <p class="custom-routine-note" id="customRoutineInputDesc"></p>
@@ -443,24 +436,25 @@
         <div class="history-panel-head">
             <div>
                 <div class="history-detail-kicker">History Center</div>
-                <h2 id="historyPanelTitle">📜 우리들의 지난 기록실 <span>RC2.15.4</span></h2>
+                <h2 id="historyPanelTitle">📜 우리들의 지난 기록실 <span>RC2.12</span></h2>
             </div>
             <button type="button" class="modal-close-btn" onclick="closeHistoryPanelModal()">닫기</button>
         </div>
-        <div class="history-intro-note">사진과 다가오는 일정을 확인하고, 캘린더에서 날짜를 누르면 하루 기록이 바로 열립니다.</div>
-        <div id="calendarBox"></div>
-        <div class="history-v2-toolbar history-v2-toolbar-below" aria-label="History 2.0 controls">
+        <div class="history-intro-note">함께한 하루하루가 차곡차곡 쌓이는 공간입니다. 원하는 날짜를 누르면 그날의 기록을 볼 수 있어요.</div>
+        <div class="history-v2-toolbar" aria-label="History 2.0 controls">
             <input type="search" id="historySearchInput" placeholder="기록 검색: 미션, 메모, 루틴, 식사" oninput="hmHistoryApplySearch()">
             <select id="historyTypeFilter" onchange="hmHistoryApplySearch()" aria-label="기록 필터">
                 <option value="all">전체 기록</option>
-                <option value="routine">오늘의 약속</option>
+                <option value="routine">맞춤 루틴</option>
                 <option value="mission">미션</option>
                 <option value="photo">사진</option>
                 <option value="mood">기분</option>
             </select>
             <button type="button" onclick="hmHistoryClearSearch()">초기화</button>
         </div>
-        <div class="history-selected-section-title">선택한 날짜의 기록</div>
+        <div id="historyTimeline" class="history-v2-timeline"></div>
+        <div id="calendarBox"></div>
+
         <div class="history-list" id="historyList"></div>
         <div id="photoThumbs" class="history-thumb-row"></div>
         <div id="anniversaryPanel" class="anniversary-panel"></div>
