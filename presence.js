@@ -157,11 +157,12 @@
     window.hmPresenceRefresh = refresh;
     window.hmPresenceStop = stop;
     window.addEventListener('beforeunload', stop);
+    // RC2.14.6: Do not mark offline on tab/window blur or hidden state.
+    // Chrome normal/incognito testing and mobile app-switching can trigger
+    // visibilityState='hidden' while the session is still connected.
+    // Offline state is now handled only by logout, beforeunload, and Firebase onDisconnect().
     document.addEventListener('visibilitychange', () => {
         if (document.visibilityState === 'visible') refresh();
-        else {
-            try { if (selfRef) selfRef.update({ online:false, lastSeen: firebase.database.ServerValue.TIMESTAMP }); } catch(e) {}
-        }
     });
     document.addEventListener('DOMContentLoaded', () => setTimeout(refresh, 700));
 })();
