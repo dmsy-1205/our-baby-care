@@ -563,3 +563,185 @@ function openHistoryDetailModal(date) {
         <button type="button" class="history-detail-copy" onclick="copyDirectText(event, '${date}')">📋 이 기록 복사하기</button>`;
     openModalOverlayById('historyDetailOverlay');
 }
+
+/* =========================================================
+   HearMe2nite RC2.12 History 2.0 Stable Sprint
+   - Firebase 저장 구조 변경 없음
+   - 기존 days/{date} 기록을 날짜별 통합 타임라인으로 보강
+   - 검색/필터는 클라이언트 렌더링만 수행
+   ========================================================= */
+let hmHistorySearchText = '';
+let hmHistoryTypeFilter = 'all';
+
+function hmHistoryRecordHasRoutine(record) {
+    return !!(record && record.customCardValues && Object.keys(record.customCardValues || {}).length);
+}
+
+function hmHistoryRecordText(record) {
+    if (!record) return '';
+    const customText = typeof buildHistoryCustomRoutineText === 'function' ? buildHistoryCustomRoutineText(record) : '';
+    const parts = [
+        record.date, record.wakeTime, record.water, record.weight,
+        record.mealBreakfast, record.mealLunch, record.mealDinner,
+        record.goingOut, record.sleepTime, record.diary, record.replyMessage,
+        record.moodLabel, record.moodNote, record.missionSummary,
+        record.dailyChoiceLabel, record.rewardNote, customText
+    ];
+    if (Array.isArray(record.missions)) {
+        record.missions.forEach(m => parts.push(m && (m.title || m.text || m.label || m.memo)));
+    }
+    return parts.filter(Boolean).join(' ').toLowerCase();
+}
+
+function hmHistoryMatchesFilter(date, record) {
+    const query = (hmHistorySearchText || '').trim().toLowerCase();
+    if (query && !hmHistoryRecordText(record).includes(query) && !String(date || '').includes(query)) return false;
+    if (hmHistoryTypeFilter === 'routine') return hmHistoryRecordHasRoutine(record);
+    if (hmHistoryTypeFilter === 'mission') return !!getHistoryMissionText(record);
+    if (hmHistoryTypeFilter === 'photo') return !!record?.photo;
+    if (hmHistoryTypeFilter === 'mood') return !!(record?.moodLabel && record.moodLabel !== '기록 없음');
+    return true;
+}
+
+function hmHistoryFilteredDates(daysData) {
+    return Object.keys(daysData || {})
+        .filter(date => hmHistoryMatchesFilter(date, daysData[date]))
+        .sort((a, b) => new Date(b) - new Date(a));
+}
+
+function hmHistoryApplySearch() {
+    const input = document.getElementById('historySearchInput');
+    const select = document.getElementById('historyTypeFilter');
+    hmHistorySearchText = input ? input.value : '';
+    hmHistoryTypeFilter = select ? select.value : 'all';
+    if (cachedDaysData) displayHistory(cachedDaysData);
+}
+
+function hmHistoryClearSearch() {
+    hmHistorySearchText = '';
+    hmHistoryTypeFilter = 'all';
+    const input = document.getElementById('historySearchInput');
+    const select = document.getElementById('historyTypeFilter');
+    if (input) input.value = '';
+    if (select) select.value = 'all';
+    if (cachedDaysData) displayHistory(cachedDaysData);
+}
+
+function hmHistorySummaryChips(record) {
+    const missionText = getHistoryMissionText(record);
+    return [
+        record?.moodLabel && record.moodLabel !== '기록 없음' ? record.moodLabel : '',
+        record?.water ? `💧 ${record.water}` : '',
+        record?.weight ? `⚖️ ${record.weight}` : '',
+        missionText ? `🎯 ${missionText}` : '',
+        hmHistoryRecordHasRoutine(record) ? '🧩 맞춤 루틴' : '',
+        record?.photo ? '📷 사진' : '',
+        record?.dailyChoiceLabel && record.dailyChoiceLabel !== '기록 없음' ? record.dailyChoiceLabel : ''
+    ].filter(Boolean).map(makeHistoryChip).join('');
+}
+
+function hmHistoryTimelinePreview(record) {
+    if (!record) return '저장된 기록을 열어 확인하세요.';
+    const diary = record.diary && record.diary !== '기록 없음' ? String(record.diary) : '';
+    const routine = hmHistoryRecordHasRoutine(record) ? '맞춤 루틴 포함' : '';
+    const meal = [record.mealBreakfast, record.mealLunch, record.mealDinner].filter(v => v && v !== '기록 없음').length ? '식사 기록 포함' : '';
+    return (diary || [routine, meal, getHistoryMissionText(record)].filter(Boolean).join(' · ') || '저장된 기록을 열어 확인하세요.').slice(0, 78);
+}
+
+function renderHistoryTimeline(daysData) {
+    const box = document.getElementById('historyTimeline');
+    if (!box) return;
+    const dates = hmHistoryFilteredDates(daysData || {}).slice(0, 8);
+    if (!Object.keys(daysData || {}).length) {
+        box.innerHTML = '';
+        return;
+    }
+    if (!dates.length) {
+        box.innerHTML = '<div class="history-v2-empty">조건에 맞는 기록이 없습니다.</div>';
+        return;
+    }
+    box.innerHTML = `
+        <div class="history-v2-title"><strong>날짜별 통합 기록</strong><span>${dates.length}개 표시</span></div>
+        ${dates.map(date => {
+            const record = daysData[date] || {};
+            return `<button type="button" class="history-v2-row ${date === selectedHistoryDate ? 'is-selected' : ''}" onclick="selectHistoryDate('${date}')">
+                <span class="history-v2-date">${formatHistoryDateLabel(date)}</span>
+                <span class="history-v2-main"><strong>${getHistoryMoodIcon(record)} 오늘 기록</strong><small>${escapeHtml(hmHistoryTimelinePreview(record))}${hmHistoryTimelinePreview(record).length >= 78 ? '...' : ''}</small><em>${hmHistorySummaryChips(record)}</em></span>
+                <span class="history-v2-arrow">›</span>
+            </button>`;
+        }).join('')}`;
+}
+
+function renderCalendar(daysData) {
+    const box = document.getElementById('calendarBox');
+    if (!box) return;
+    box.classList.add('history-calendar-premium');
+    const filtered = hmHistoryFilteredDates(daysData || {});
+    const visibleSet = new Set(filtered);
+    const current = selectedHistoryDate || filtered[0] || document.getElementById('recordDate')?.value || '';
+    const base = current ? new Date(current + 'T00:00:00') : new Date();
+    const year = base.getFullYear();
+    const month = base.getMonth();
+    const first = new Date(year, month, 1);
+    const last = new Date(year, month + 1, 0);
+    const today = new Date();
+    const todayYmd = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+    const week = ['일','월','화','수','목','금','토'];
+    const monthRecords = filtered.filter(date => date.startsWith(`${year}-${String(month+1).padStart(2,'0')}-`)).length;
+    let html = `<div class="history-calendar-title-row"><div><strong>📅 ${year}.${String(month+1).padStart(2,'0')} 기록 캘린더</strong><br><span>검색/필터 조건에 맞는 날짜만 활성화됩니다.</span></div><span>${monthRecords}일 기록</span></div><div class="calendar-grid history-calendar-grid">`;
+    html += week.map(w => `<div class="calendar-head">${w}</div>`).join('');
+    for (let i = 0; i < first.getDay(); i++) html += '<div class="calendar-day"></div>';
+    for (let day = 1; day <= last.getDate(); day++) {
+        const ymd = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+        const rec = (daysData || {})[ymd];
+        const visible = rec && visibleSet.has(ymd);
+        const icons = visible ? `${rec.photo ? '📷' : ''}${getHistoryMissionText(rec) ? '🎯' : ''}${hmHistoryRecordHasRoutine(rec) ? '🧩' : ''}${rec.mood === 'hard' || rec.mood === 'veryHard' ? '☁️' : ''}` : '';
+        html += `<div class="calendar-day ${visible ? 'has-record' : ''} ${ymd === todayYmd ? 'today' : ''} ${ymd === selectedHistoryDate ? 'selected-record' : ''}" ${visible ? `onclick="selectHistoryDate('${ymd}')"` : ''}>${day}<span class="calendar-icons">${icons}</span></div>`;
+    }
+    html += '</div>';
+    box.innerHTML = html;
+}
+
+function displayHistory(daysData) {
+    const historyList = document.getElementById('historyList');
+    renderHistoryHero(daysData || {});
+    renderHistorySummary(daysData || {});
+    updateHistoryLaunchSub(daysData || {});
+    renderHistoryTimeline(daysData || {});
+    renderCalendar(daysData || {});
+    renderPhotoThumbs(daysData || {});
+    if (!historyList) return;
+    if (!daysData || Object.keys(daysData).length === 0) {
+        historyList.innerHTML = '<div class="empty-message">아직 저장된 서버 기록이 없습니다. ✨</div>';
+        return;
+    }
+    const filtered = hmHistoryFilteredDates(daysData || {});
+    if (!selectedHistoryDate && filtered.length) selectedHistoryDate = filtered[0];
+    if (selectedHistoryDate && !filtered.includes(selectedHistoryDate) && filtered.length) selectedHistoryDate = filtered[0];
+    if (!filtered.length) {
+        historyList.innerHTML = '<div class="history-selected-hint"><strong>검색 결과가 없습니다</strong>검색어 또는 필터를 초기화해 주세요.</div>';
+        return;
+    }
+    const record = daysData[selectedHistoryDate];
+    if (!record) {
+        historyList.innerHTML = '<div class="history-selected-hint"><strong>기록이 없습니다</strong>선택한 날짜에는 저장된 기록이 없습니다. 📅</div>';
+        return;
+    }
+    const date = selectedHistoryDate;
+    const icon = getHistoryMoodIcon(record);
+    const preview = hmHistoryTimelinePreview(record);
+    const chips = hmHistorySummaryChips(record);
+    historyList.innerHTML = `
+        <button type="button" class="history-day-card history-premium-selected" onclick="openHistoryDetailModal('${date}')">
+            <span class="history-day-icon">${icon}</span>
+            <span>
+                <span class="history-day-title">${formatHistoryDateLabel(date)}의 기록</span>
+                <span class="history-day-sub">${escapeHtml(preview)}${preview.length >= 78 ? '...' : ''}</span>
+                <span class="history-day-chips">${chips}</span>
+            </span>
+            <span class="history-day-actions">
+                <span class="history-card-arrow">›</span>
+                <span class="btn-delete" onclick="deleteRecord(event, '${date}')">삭제</span>
+            </span>
+        </button>`;
+}

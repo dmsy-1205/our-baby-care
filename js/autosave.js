@@ -101,17 +101,15 @@
                 safeUpdateField('rewardNote', record.rewardNote);
                 renderMissions(record.missions);
                 if (typeof hmSetCustomRoutineValues === 'function') hmSetCustomRoutineValues(record.customCardValues || {});
+
+                currentWater = parseInt(record.water) || 0;
+                const waterDisplay = document.getElementById('waterDisplay');
+                if (waterDisplay) waterDisplay.innerText = currentWater;
+
                 selectedDailyChoice = record.dailyChoice || '';
                 updateDailyChoiceButtons();
                 selectedMood = record.mood || '';
                 updateMoodUI();
-
-                // RC2.11.2 Hotfix: 수분 카드 요약이 0ML로 남는 문제 수정
-                // 기존에는 updateDailyCards()가 currentWater 갱신보다 먼저 실행되어
-                // 팝업에는 1000ML이 보여도 카드에는 이전 값(0ML)이 표시될 수 있었다.
-                currentWater = parseInt(record.water, 10) || 0;
-                const waterDisplay = document.getElementById('waterDisplay');
-                if (waterDisplay) waterDisplay.innerText = currentWater;
                 updateDailyCards();
 
                 if (record.photo) {

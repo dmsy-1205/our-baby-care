@@ -436,11 +436,23 @@
         <div class="history-panel-head">
             <div>
                 <div class="history-detail-kicker">History Center</div>
-                <h2 id="historyPanelTitle">📜 우리들의 지난 기록실 <span>v0.10.17</span></h2>
+                <h2 id="historyPanelTitle">📜 우리들의 지난 기록실 <span>RC2.12</span></h2>
             </div>
             <button type="button" class="modal-close-btn" onclick="closeHistoryPanelModal()">닫기</button>
         </div>
         <div class="history-intro-note">함께한 하루하루가 차곡차곡 쌓이는 공간입니다. 원하는 날짜를 누르면 그날의 기록을 볼 수 있어요.</div>
+        <div class="history-v2-toolbar" aria-label="History 2.0 controls">
+            <input type="search" id="historySearchInput" placeholder="기록 검색: 미션, 메모, 루틴, 식사" oninput="hmHistoryApplySearch()">
+            <select id="historyTypeFilter" onchange="hmHistoryApplySearch()" aria-label="기록 필터">
+                <option value="all">전체 기록</option>
+                <option value="routine">맞춤 루틴</option>
+                <option value="mission">미션</option>
+                <option value="photo">사진</option>
+                <option value="mood">기분</option>
+            </select>
+            <button type="button" onclick="hmHistoryClearSearch()">초기화</button>
+        </div>
+        <div id="historyTimeline" class="history-v2-timeline"></div>
         <div id="calendarBox"></div>
 
         <div class="history-list" id="historyList"></div>
