@@ -356,6 +356,8 @@ function openHistoryPanelModal() {
         const filterInput = document.getElementById('historyFilterDate');
         if (filterInput) filterInput.value = date;
         if (cachedDaysData) displayHistory(cachedDaysData);
+        // RC2.12.2: 캘린더 날짜를 누르면 하단 카드 경유 없이 바로 하루 기록 팝업을 연다.
+        setTimeout(() => openHistoryDetailModal(date), 0);
     }
 
     function applyHistoryFilter() {
@@ -561,7 +563,10 @@ function openHistoryDetailModal(date) {
         ${historyDetailBlock('💌 주인의 피드백', record.replyMessage)}
         ${historyDetailBlock('✨ 보상 / 휴식', [record.dailyChoiceLabel, record.rewardNote].filter(Boolean).join('\n'))}
         ${historyDetailBlock('🧩 맞춤 루틴', customRoutineText)}
-        <button type="button" class="history-detail-copy" onclick="copyDirectText(event, '${date}')">📋 이 기록 복사하기</button>`;
+        <div class="history-detail-actions">
+            <button type="button" class="history-detail-copy" onclick="copyDirectText(event, '${date}')">📋 이 기록 복사하기</button>
+            <button type="button" class="history-detail-delete" onclick="deleteRecord(event, '${date}')">삭제</button>
+        </div>`;
     openModalOverlayById('historyDetailOverlay');
 }
 
@@ -715,20 +720,10 @@ function displayHistory(daysData) {
         return;
     }
     const date = selectedHistoryDate;
-    const icon = getHistoryMoodIcon(record);
-    const preview = hmHistoryTimelinePreview(record);
-    const chips = hmHistorySummaryChips(record);
     historyList.innerHTML = `
-        <button type="button" class="history-day-card history-premium-selected" onclick="openHistoryDetailModal('${date}')">
-            <span class="history-day-icon">${icon}</span>
-            <span>
-                <span class="history-day-title">${formatHistoryDateLabel(date)}의 기록</span>
-                <span class="history-day-sub">${escapeHtml(preview)}${preview.length >= 78 ? '...' : ''}</span>
-                <span class="history-day-chips">${chips}</span>
-            </span>
-            <span class="history-day-actions">
-                <span class="history-card-arrow">›</span>
-                <span class="btn-delete" onclick="deleteRecord(event, '${date}')">삭제</span>
-            </span>
-        </button>`;
+        <div class="history-selected-hint history-popup-hint">
+            <strong>${formatHistoryDateLabel(date)} 기록</strong>
+            캘린더 날짜를 누르면 하루 기록이 바로 팝업으로 열립니다.
+            <button type="button" class="history-open-again" onclick="openHistoryDetailModal('${date}')">다시 열기</button>
+        </div>`;
 }

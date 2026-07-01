@@ -6520,3 +6520,39 @@ body.hm-phone-viewport .daily-modal {
     letter-spacing:-0.01em;
 }
 .history-panel-modal #calendarBox{margin-top:10px;}
+
+
+/* RC2.12.2 History Popup First Hotfix */
+.history-detail-actions {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 10px;
+    align-items: center;
+    margin-top: 8px;
+}
+.history-detail-delete,
+.history-open-again {
+    border: 0;
+    border-radius: 14px;
+    padding: 12px 14px;
+    font-weight: 800;
+    cursor: pointer;
+}
+.history-detail-delete {
+    background: #FFE7EC;
+    color: #C85B6B;
+}
+.history-open-again {
+    margin-top: 10px;
+    background: linear-gradient(135deg, #F2ECFF, #FFF7FB);
+    color: #6D4CFF;
+    border: 1px solid rgba(109, 76, 255, 0.16);
+}
+.history-popup-hint {
+    text-align: center;
+}
+@media (max-width: 430px) {
+    .history-detail-actions {
+        grid-template-columns: 1fr;
+    }
+}
