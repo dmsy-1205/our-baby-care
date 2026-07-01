@@ -4,6 +4,17 @@
 // Extracted from stable RC2.7 final file without DB/Firebase key changes.
 // =========================================================
 
+
+// =========================================================
+// RC2.13.3 ROOM PRESENCE GLOBAL STATE
+// Presence listener state must be declared before use.
+// Without these declarations, older browsers throw ReferenceError
+// and the presence UI remains hidden.
+// =========================================================
+let hmPresenceRoomMembersRef = null;
+let hmPresenceSelfRef = null;
+let hmPresenceActiveRoomCode = null;
+
     // MODULE: ROLE / RELATIONSHIP ROLE
 
     // Split-ready target: getRelationshipRoleLabel
@@ -204,28 +215,44 @@
         } catch(e) { console.warn(e); }
         hmPresenceRoomMembersRef = null;
         hmPresenceSelfRef = null;
+        hmPresenceActiveRoomCode = null;
         hmRenderPresenceBox(null);
     }
 
     function hmStartPresence(roomCode) {
-        if (!currentUser || !roomCode) return;
+        if (!currentUser || !roomCode) {
+            hmRenderPresenceBox(null);
+            return;
+        }
+
+        // 같은 방에서 이미 listener가 연결되어 있으면 중복 연결하지 않는다.
+        if (hmPresenceActiveRoomCode === roomCode && hmPresenceRoomMembersRef) {
+            hmRenderPresenceBox({});
+            return;
+        }
+
         try {
+            if (hmPresenceRoomMembersRef) hmPresenceRoomMembersRef.off();
+            hmPresenceRoomMembersRef = null;
+            hmPresenceActiveRoomCode = roomCode;
+
             const targetPath = `roomMembers/${roomCode}/${currentUser.uid}/presence`;
             const selfRef = db.ref(targetPath);
             hmPresenceSelfRef = selfRef;
+
             selfRef.update({
                 online: true,
                 lastSeen: firebase.database.ServerValue.TIMESTAMP,
                 email: normalizeEmail(currentUser.email),
                 relationshipRole: activeRelationshipRole || pendingRelationshipRole || '',
                 updatedAt: firebase.database.ServerValue.TIMESTAMP
-            });
+            }).catch((err) => console.warn('Presence 쓰기 실패:', err));
+
             selfRef.onDisconnect().update({
                 online: false,
                 lastSeen: firebase.database.ServerValue.TIMESTAMP
             });
 
-            if (hmPresenceRoomMembersRef) hmPresenceRoomMembersRef.off();
             hmPresenceRoomMembersRef = db.ref(`roomMembers/${roomCode}`);
             hmPresenceRoomMembersRef.on('value', (snapshot) => {
                 hmRenderPresenceBox(snapshot.val() || {});
@@ -235,6 +262,7 @@
             });
         } catch (err) {
             console.warn('Presence 시작 실패:', err);
+            hmRenderPresenceBox({});
         }
     }
 
