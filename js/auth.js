@@ -290,6 +290,7 @@
     }
 
     function showAccessDeniedScreen(result) {
+        document.body.classList.remove('hm-booting');
         try {
             disconnectAllListeners();
             clearRoomInputs();
