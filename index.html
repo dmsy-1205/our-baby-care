@@ -305,6 +305,21 @@
     </div>
 
 
+    <div class="home-section-title custom-routine-title" id="customRoutineHomeTitle">
+        <span>맞춤 루틴</span>
+        <small id="customRoutineCountText">0/5 · 관리(Dom)가 설계</small>
+    </div>
+
+    <div class="custom-routine-toolbar" id="customRoutineToolbar">
+        <button type="button" class="custom-routine-manage-btn" id="customRoutineManageBtn" onclick="openCustomRoutineManager()">⚙ 맞춤 루틴 관리</button>
+        <span class="custom-routine-help">커플마다 다른 미션과 일과를 직접 카드로 만들 수 있어요.</span>
+    </div>
+
+    <div class="custom-routine-list" id="customRoutineList">
+        <div class="custom-routine-empty">방에 연결되면 맞춤 루틴을 불러옵니다.</div>
+    </div>
+
+
     <div id="chatSection" style="margin: 20px auto; max-width: 500px; padding: 15px; background: #fff; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); font-family: sans-serif;">
         <h3 style="margin-top:0; color: #ff6b6b; display: flex; align-items: center; gap: 8px; font-size: 1.1rem;">
             💖 우리들의 실시간 한줄 톡
@@ -340,6 +355,54 @@
     <span class="history-launch-arrow">›</span>
 </button>
 </div>
+
+<div class="daily-modal-overlay" id="customRoutineManagerOverlay" onclick="if(event.target.id==='customRoutineManagerOverlay') closeCustomRoutineManager()">
+    <div class="daily-modal custom-routine-modal" role="dialog" aria-modal="true" aria-labelledby="customRoutineManagerTitle">
+        <div class="daily-modal-head">
+            <h2 id="customRoutineManagerTitle">🧩 맞춤 루틴 관리</h2>
+            <button type="button" class="modal-close-btn" onclick="closeCustomRoutineManager()">닫기</button>
+        </div>
+        <p class="custom-routine-note">관리(Dom)가 원하는 미션과 일과를 카드로 만들 수 있어요. 최대 카드 5개, 카드당 항목 7개까지 가능합니다.</p>
+        <div class="custom-routine-limit-line" id="customRoutineManagerLimit">카드 0/5</div>
+
+        <div class="custom-routine-editor-box">
+            <div class="custom-routine-template-row">
+                <button type="button" onclick="fillCustomRoutineTemplate('blank')">빈 카드</button>
+                <button type="button" onclick="fillCustomRoutineTemplate('mission')">미션 카드</button>
+                <button type="button" onclick="fillCustomRoutineTemplate('checklist')">체크리스트</button>
+                <button type="button" onclick="fillCustomRoutineTemplate('routine')">생활 루틴</button>
+            </div>
+            <label for="customCardTitleInput">카드 이름</label>
+            <input type="text" id="customCardTitleInput" maxlength="20" placeholder="예: 오늘 보고">
+            <label for="customCardDescInput">카드 설명</label>
+            <input type="text" id="customCardDescInput" maxlength="60" placeholder="예: 주인님께 오늘 상태를 보고하기">
+            <div class="custom-routine-item-editor-head">
+                <strong>카드 안 항목</strong>
+                <button type="button" onclick="addCustomRoutineDraftItem()">+ 항목 추가</button>
+            </div>
+            <div id="customRoutineDraftItems" class="custom-routine-draft-items"></div>
+            <div class="custom-routine-editor-actions">
+                <button type="button" class="btn-secondary" onclick="resetCustomRoutineEditor()">초기화</button>
+                <button type="button" class="daily-modal-save" onclick="saveCustomRoutineCard()">저장</button>
+            </div>
+        </div>
+
+        <div class="custom-routine-manager-list" id="customRoutineManagerList"></div>
+    </div>
+</div>
+
+<div class="daily-modal-overlay" id="customRoutineInputOverlay" onclick="if(event.target.id==='customRoutineInputOverlay') closeCustomRoutineInput()">
+    <div class="daily-modal custom-routine-modal" role="dialog" aria-modal="true" aria-labelledby="customRoutineInputTitle">
+        <div class="daily-modal-head">
+            <h2 id="customRoutineInputTitle">🧩 맞춤 루틴</h2>
+            <button type="button" class="modal-close-btn" onclick="closeCustomRoutineInput()">닫기</button>
+        </div>
+        <p class="custom-routine-note" id="customRoutineInputDesc"></p>
+        <div id="customRoutineInputBody" class="custom-routine-input-body"></div>
+        <button type="button" class="daily-modal-save" onclick="saveCustomRoutineInput()">저장</button>
+    </div>
+</div>
+
 
 <div class="history-panel-overlay" id="historyPanelOverlay" onclick="if(event.target.id==='historyPanelOverlay') closeHistoryPanelModal()">
     <div class="history-panel-modal" role="dialog" aria-modal="true" aria-labelledby="historyPanelTitle">
@@ -633,6 +696,7 @@
     <script src="js/room.js"></script>
     <script src="js/daily.js"></script>
     <script src="js/mission.js"></script>
+    <script src="js/custom-routine.js"></script>
     <script src="js/history.js"></script>
     <script src="js/anniversary.js"></script>
     <script src="js/chat.js"></script>

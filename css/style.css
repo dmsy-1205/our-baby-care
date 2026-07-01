@@ -6121,3 +6121,175 @@ body.hm-booting::before {
     letter-spacing: -0.03em;
     z-index: 99999;
 }
+
+
+/* =========================================================
+   HearMe2nite RC2.11 STEP16 - Custom Routine Card MVP
+   ========================================================= */
+.custom-routine-title { margin-top: 18px; }
+.custom-routine-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin: 8px 0 10px;
+    padding: 10px 12px;
+    border-radius: 16px;
+    background: rgba(255,255,255,0.72);
+    border: 1px solid rgba(255, 171, 145, 0.25);
+}
+.custom-routine-manage-btn {
+    border: 0;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #ff8f8f, #ffb199);
+    color: white;
+    padding: 9px 13px;
+    font-weight: 800;
+    box-shadow: 0 8px 18px rgba(255, 118, 117, 0.18);
+}
+.custom-routine-help { font-size: 0.78rem; color: #8b6f6f; line-height: 1.35; }
+.custom-routine-list { width: 100%; }
+.custom-routine-empty {
+    padding: 14px;
+    border-radius: 16px;
+    background: rgba(255,255,255,0.7);
+    color: #8b6f6f;
+    font-size: 0.88rem;
+    text-align: center;
+    border: 1px dashed rgba(255, 171, 145, 0.55);
+}
+.custom-routine-empty.small { font-size: 0.78rem; padding: 10px; }
+.custom-routine-card-wrap { margin-bottom: 10px; }
+.custom-routine-card .daily-card-icon { background: linear-gradient(135deg, #ffeaa7, #fab1a0); }
+.custom-routine-modal { max-width: 560px; }
+.custom-routine-note {
+    margin: 6px 0 12px;
+    color: #7a6868;
+    font-size: 0.86rem;
+    line-height: 1.45;
+}
+.custom-routine-limit-line {
+    display: inline-flex;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: #fff3ef;
+    color: #d46a6a;
+    font-size: 0.8rem;
+    font-weight: 800;
+    margin-bottom: 12px;
+}
+.custom-routine-editor-box {
+    padding: 12px;
+    border-radius: 18px;
+    background: rgba(255,255,255,0.78);
+    border: 1px solid rgba(255, 171, 145, 0.28);
+    margin-bottom: 14px;
+}
+.custom-routine-template-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+    margin-bottom: 10px;
+}
+.custom-routine-template-row button,
+.custom-routine-item-editor-head button,
+.custom-routine-manager-actions button {
+    border: 0;
+    border-radius: 10px;
+    background: #ffe8e1;
+    color: #b65d5d;
+    padding: 8px 9px;
+    font-size: 0.78rem;
+    font-weight: 800;
+}
+.custom-routine-editor-box label,
+.custom-routine-input-line span {
+    display: block;
+    margin: 8px 0 5px;
+    font-size: 0.82rem;
+    font-weight: 800;
+    color: #7a4f4f;
+}
+.custom-routine-editor-box input[type="text"],
+.custom-routine-editor-box select,
+.custom-routine-input-line input {
+    width: 100%;
+    border: 1px solid #ffd7ca;
+    border-radius: 12px;
+    padding: 10px;
+    font-size: 0.9rem;
+    background: #fff;
+}
+.custom-routine-item-editor-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 12px 0 8px;
+}
+.custom-routine-draft-items { display: flex; flex-direction: column; gap: 8px; }
+.custom-routine-draft-row {
+    display: grid;
+    grid-template-columns: 24px 1.2fr 0.8fr 1fr auto auto;
+    gap: 6px;
+    align-items: center;
+    padding: 8px;
+    border-radius: 14px;
+    background: #fffaf8;
+}
+.custom-routine-drag-no { color: #d46a6a; font-weight: 900; text-align: center; }
+.custom-routine-required {
+    display: inline-flex !important;
+    align-items: center;
+    gap: 4px;
+    margin: 0 !important;
+    white-space: nowrap;
+    color: #8b6f6f !important;
+    font-size: 0.76rem !important;
+}
+.custom-routine-mini-danger {
+    background: #ffe1e1 !important;
+    color: #c0392b !important;
+}
+.custom-routine-editor-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 12px;
+}
+.custom-routine-manager-list { display: flex; flex-direction: column; gap: 8px; }
+.custom-routine-manager-item {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 12px;
+    border-radius: 16px;
+    background: rgba(255,255,255,0.75);
+    border: 1px solid rgba(255, 171, 145, 0.25);
+}
+.custom-routine-manager-item strong { display: block; color: #4d3d3d; }
+.custom-routine-manager-item small { display: block; color: #8b6f6f; margin-top: 4px; }
+.custom-routine-manager-item.is-inactive { opacity: 0.55; }
+.custom-routine-manager-actions { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+.custom-routine-input-body { display: flex; flex-direction: column; gap: 10px; }
+.custom-routine-check-line {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px;
+    border-radius: 14px;
+    background: #fff8f4;
+    color: #5b4545;
+    font-weight: 800;
+}
+.custom-routine-check-line input { width: 20px; height: 20px; accent-color: #ff7675; }
+.custom-routine-input-line { display: block; }
+@media (max-width: 640px) {
+    .custom-routine-toolbar { align-items: stretch; flex-direction: column; }
+    .custom-routine-template-row { grid-template-columns: repeat(2, 1fr); }
+    .custom-routine-draft-row { grid-template-columns: 22px 1fr; }
+    .custom-routine-draft-row select,
+    .custom-routine-draft-row input[data-draft-field="placeholder"],
+    .custom-routine-draft-row .custom-routine-required,
+    .custom-routine-draft-row button { grid-column: 2; }
+    .custom-routine-manager-item { flex-direction: column; }
+}

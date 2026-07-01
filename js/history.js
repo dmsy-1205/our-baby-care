@@ -501,6 +501,26 @@ function openHistoryPanelModal() {
 
 
 
+
+function buildHistoryCustomRoutineText(record) {
+    const values = record && record.customCardValues ? record.customCardValues : null;
+    if (!values || typeof values !== 'object') return '';
+    const blocks = [];
+    Object.entries(values).forEach(([cardId, itemMap]) => {
+        if (!itemMap || typeof itemMap !== 'object') return;
+        const cardTitle = (typeof hmCustomCards !== 'undefined' && hmCustomCards?.[cardId]?.title) ? hmCustomCards[cardId].title : '맞춤 루틴';
+        const lines = Object.values(itemMap).map(item => {
+            if (!item || typeof item !== 'object') return '';
+            let value = item.value;
+            if (item.type === 'checkbox') value = value === true ? '완료' : '미완료';
+            if (value === undefined || value === null || value === '') value = '기록 없음';
+            return `${item.label || '항목'}: ${value}`;
+        }).filter(Boolean);
+        if (lines.length) blocks.push(`🧩 ${cardTitle}\n${lines.join('\n')}`);
+    });
+    return blocks.join('\n\n');
+}
+
 /* v0.9.23 History Detail Polish - UI only override, data structure preserved */
 function hmHistoryValueText(value) {
     if (!value || value === '기록 없음') return '';
@@ -520,7 +540,8 @@ function openHistoryDetailModal(date) {
     const missionText = getHistoryMissionText(record);
     const meals = [record.mealBreakfast ? `아침: ${record.mealBreakfast}` : '', record.mealLunch ? `점심: ${record.mealLunch}` : '', record.mealDinner ? `저녁: ${record.mealDinner}` : ''].filter(Boolean).join('\n');
     const dailyBase = [record.wakeTime ? `☀️ 기상: ${record.wakeTime}` : '', record.sleepTime ? `🌙 취침 예정: ${record.sleepTime}` : '', record.water ? `💧 수분: ${record.water}` : '', record.weight ? `⚖️ 체중: ${record.weight}` : ''].filter(Boolean).join('\n');
-    const summaryChips = [record.moodLabel && record.moodLabel !== '기록 없음' ? record.moodLabel : '', missionText ? `🎯 ${missionText}` : '', record.photo ? '📷 사진 있음' : '', record.dailyChoiceLabel && record.dailyChoiceLabel !== '기록 없음' ? record.dailyChoiceLabel : ''].filter(Boolean).map(makeHistoryChip).join('');
+    const customRoutineText = buildHistoryCustomRoutineText(record);
+    const summaryChips = [record.moodLabel && record.moodLabel !== '기록 없음' ? record.moodLabel : '', missionText ? `🎯 ${missionText}` : '', customRoutineText ? '🧩 맞춤 루틴' : '', record.photo ? '📷 사진 있음' : '', record.dailyChoiceLabel && record.dailyChoiceLabel !== '기록 없음' ? record.dailyChoiceLabel : ''].filter(Boolean).map(makeHistoryChip).join('');
     content.innerHTML = `
         <div class="history-detail-summary-card">
             <div class="history-detail-summary-icon">${getHistoryMoodIcon(record)}</div>
@@ -535,6 +556,7 @@ function openHistoryDetailModal(date) {
         ${historyDetailBlock('📝 오늘의 하루', record.diary)}
         ${historyDetailBlock('💌 주인의 피드백', record.replyMessage)}
         ${historyDetailBlock('✨ 보상 / 휴식', [record.dailyChoiceLabel, record.rewardNote].filter(Boolean).join('\n'))}
+        ${historyDetailBlock('🧩 맞춤 루틴', customRoutineText)}
         <button type="button" class="history-detail-copy" onclick="copyDirectText(event, '${date}')">📋 이 기록 복사하기</button>`;
     openModalOverlayById('historyDetailOverlay');
 }

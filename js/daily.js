@@ -177,6 +177,7 @@
         const sections = document.querySelectorAll('.owner-only-section');
         sections.forEach((el) => { el.style.display = canManageRelationshipCards() ? '' : 'none'; });
         updateManagedFieldAccessControls();
+        if (typeof renderCustomRoutineCards === 'function') renderCustomRoutineCards();
     }
 
     // 관리 전용 카드 접근 제어

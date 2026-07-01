@@ -22,6 +22,7 @@
     function disconnectAllListeners() {
         if (currentRoomRef) currentRoomRef.off();
         if (entireRoomRef) entireRoomRef.off();
+        if (typeof hmStopCustomRoutineCards === 'function') hmStopCustomRoutineCards();
         if (chatRef) chatRef.off();
         if (ownerNoteRef) ownerNoteRef.off();
         currentRoomRef = null;
@@ -80,6 +81,7 @@
         updateOwnerOnlySections();
         listenChat();
         listenOwnerPrivateNote();
+        if (typeof hmStartCustomRoutineCards === 'function') hmStartCustomRoutineCards(roomCode);
 
         currentRoomRef = db.ref('rooms/' + roomCode + '/days/' + date);
         currentRoomRef.on('value', (snapshot) => {
@@ -98,6 +100,7 @@
                 safeUpdateField('moodNote', record.moodNote);
                 safeUpdateField('rewardNote', record.rewardNote);
                 renderMissions(record.missions);
+                if (typeof hmSetCustomRoutineValues === 'function') hmSetCustomRoutineValues(record.customCardValues || {});
                 selectedDailyChoice = record.dailyChoice || '';
                 updateDailyChoiceButtons();
                 selectedMood = record.mood || '';
@@ -116,6 +119,7 @@
                 }
             } else {
                 clearFormFieldsExceptSync();
+                if (typeof hmSetCustomRoutineValues === 'function') hmSetCustomRoutineValues({});
             }
             showSaveStatus('☁️ 서버 실시간 동기화 완료');
         }, (err) => {
@@ -223,7 +227,8 @@
                 moodNote: record.moodNote,
                 dailyChoice: record.dailyChoice,
                 rewardNote: record.rewardNote,
-                photo: record.photo ? record.photo.slice(0, 80) + ':' + record.photo.length : ''
+                photo: record.photo ? record.photo.slice(0, 80) + ':' + record.photo.length : '',
+                customCardValues: (typeof hmCollectCustomRoutineValues === 'function') ? hmCollectCustomRoutineValues() : {}
             });
         } catch (err) {
             console.warn('autosave.signature', err);
@@ -270,6 +275,8 @@
         const dailyChoiceLabel = getDailyChoiceLabel(dailyChoice);
         const rewardNote = document.getElementById('rewardNote').value || '';
         const hasPhotoText = uploadedPhotoBase64 ? '📷 사진 첨부 완료' : '사진 없음';
+        const customRoutineReport = (typeof hmBuildCustomRoutineReportText === 'function') ? hmBuildCustomRoutineReportText() : '';
+        const customCardValues = (typeof hmCollectCustomRoutineValues === 'function') ? hmCollectCustomRoutineValues() : {};
 
         const reportText = `📅 [${date}] 아가의 하루 기록 💕\n\n` +
                            `☀️ 기상 시간: ${wakeTime}\n` +
@@ -282,7 +289,8 @@
                            `🚶‍♀️ 외출 여부: ${goingOut} (${hasPhotoText})\n` +
                            `🌙 취침 예정: ${sleepTime}\n\n` +
                            `📝 오늘의 한 줄:\n"${diary}"\n\n` +
-                           `💌 오늘의 답장:\n"${replyMessage}"\n\n` +
+                           `💌 오늘의 답장:\n"${replyMessage}"` +
+                           customRoutineReport + `\n\n` +
                            `오늘도 건강하게 보내줘서 고마워요 단 한 사람 최고 알라뷰❤️`;
 
         updateDailyCards();
@@ -292,6 +300,7 @@
             mealBreakfast, mealLunch, mealDinner,
             goingOut, sleepTime, diary, replyMessage,
             missions, mood, moodLabel, moodNote, missionSummary,
+            customCardValues,
             dailyChoice, dailyChoiceLabel, rewardNote,
             photo: uploadedPhotoBase64, fullText: reportText,
             updatedBy: currentUser.uid,
