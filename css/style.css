@@ -6293,3 +6293,40 @@ body.hm-booting::before {
     .custom-routine-draft-row button { grid-column: 2; }
     .custom-routine-manager-item { flex-direction: column; }
 }
+
+
+/* =========================================================
+   RC2.11.1 Mobile Viewport Guard
+   - 일부 모바일 브라우저/데스크톱 사이트 모드에서 450px 컨테이너가
+     지나치게 작게 중앙 정렬되는 현상을 방지합니다.
+   - JS가 body.hm-phone-viewport와 --hm-mobile-safe-width를 설정합니다.
+   ========================================================= */
+body.hm-phone-viewport {
+    padding-left: 0;
+    padding-right: 0;
+    overflow-x: hidden;
+}
+
+body.hm-phone-viewport .container,
+body.hm-phone-viewport .auth-box,
+body.hm-phone-viewport .history-card,
+body.hm-phone-viewport .room-settings-panel,
+body.hm-phone-viewport .history-panel,
+body.hm-phone-viewport .custom-routine-panel {
+    width: min(calc(var(--hm-mobile-safe-width, 100vw) - 20px), 450px);
+    max-width: none;
+}
+
+body.hm-phone-viewport .daily-modal {
+    width: min(calc(var(--hm-mobile-safe-width, 100vw) - 20px), 460px);
+    max-width: none;
+}
+
+@media (max-width: 420px) {
+    body.hm-phone-viewport .container,
+    body.hm-phone-viewport .auth-box,
+    body.hm-phone-viewport .history-card {
+        padding-left: 18px;
+        padding-right: 18px;
+    }
+}

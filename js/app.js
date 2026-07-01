@@ -61,6 +61,27 @@
 
     // RC2 v2.8.0 STEP1: Config / Global State moved to js/config.js
 
+
+// RC2.11.1 Mobile Viewport Guard
+// 일부 안드로이드/크롬 모바일에서 데스크톱 레이아웃 폭으로 해석되어
+// 450px 앱 컨테이너가 작게 중앙 정렬되는 현상을 보정한다.
+(function applyHmMobileViewportGuard() {
+    const ua = navigator.userAgent || '';
+    const isTouchPhone = /Android|iPhone|iPod|Mobile/i.test(ua) || Math.min(screen.width || 9999, screen.height || 9999) <= 600;
+
+    function updateMobileViewportWidth() {
+        if (!isTouchPhone || !document.body) return;
+        const screenShortSide = Math.min(screen.width || window.innerWidth || 390, screen.height || window.innerHeight || 390);
+        const safeWidth = Math.max(320, Math.min(screenShortSide, 480));
+        document.documentElement.style.setProperty('--hm-mobile-safe-width', `${safeWidth}px`);
+        document.body.classList.add('hm-phone-viewport');
+    }
+
+    updateMobileViewportWidth();
+    window.addEventListener('resize', updateMobileViewportWidth);
+    window.addEventListener('orientationchange', () => setTimeout(updateMobileViewportWidth, 120));
+})();
+
     // App bootstrap
     // - 오늘 날짜를 기본 기록일로 세팅한다.
     // - URL 초대코드를 먼저 감지한 뒤, 로그인 상태에 따라 방 연결을 시도한다.
