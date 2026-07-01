@@ -1,7 +1,7 @@
-# v0.10.19 QA Checklist
+# v0.10.21 QA
 
-- 기존 승인 사용자 로그인 가능
-- Console에 `[Access Diagnostic / Login]` 출력
-- 결과가 PASS / PASS_BY_EMAIL_USER_ACCESS / PASS_BY_EMAIL_REQUEST 중 하나인지 확인
-- NO_ACCESS_RECORD이면 Full diagnostic object에서 masterEmail, matchedUserUids, requestsByEmail 확인
-- Room / History / AutoSave / Chat 정상 확인
+- [ ] 승인 사용자 새로고침 시 로그인 화면 깜빡임 없음
+- [ ] 승인 사용자 로그인 PASS
+- [ ] 미승인 사용자 권한 없음 화면
+- [ ] 로그아웃 시 room.js uid 오류 없음
+- [ ] 재로그인 정상

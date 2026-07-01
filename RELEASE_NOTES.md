@@ -1,15 +1,6 @@
-# HearMe2nite v0.10.19 Email Fallback Diagnostic
+# v0.10.21 Logout + Refresh Flicker Hotfix
 
-## 목적
-기존 사용자를 절대 차단하지 않고 MasterOS 승인 연결 문제를 진단한다.
-
-## 변경
-- 현재 MasterOS UID 직접 확인
-- `userAppAccess/{masterUid}/baby-care-secure` 확인
-- `appAccessRequests/baby-care-secure/{masterUid}` 확인
-- 현재 로그인 email로 `users` 검색 후 다른 UID의 승인 기록 확인
-- 현재 로그인 email로 `appAccessRequests` 검색 후 승인 요청 확인
-- PASS_BY_EMAIL_USER_ACCESS / PASS_BY_EMAIL_REQUEST 결과 출력
-
-## 중요
-이 버전은 차단하지 않는다. 기존 사용자는 로그인 가능해야 한다.
+- 로그아웃 중 room.js currentUser null 오류 방지
+- 새로고침 시 로그인 화면이 잠깐 보이는 flicker 제거
+- Auth/Access Gate 판정 완료 후 로그인/홈 화면 표시
+- Firebase/Auth/Room/History 저장 구조 변경 없음

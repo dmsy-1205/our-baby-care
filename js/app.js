@@ -65,6 +65,11 @@
     // - 오늘 날짜를 기본 기록일로 세팅한다.
     // - URL 초대코드를 먼저 감지한 뒤, 로그인 상태에 따라 방 연결을 시도한다.
     // - Firebase listener는 로그인 변경 시 반드시 해제 후 다시 연결한다.
+    // v0.10.21: Auth 상태 확정 전 로그인 화면 깜빡임을 방지하기 위해 body.hm-booting 유지
+    function hmFinishBooting() {
+        document.body.classList.remove('hm-booting');
+    }
+
     window.onload = function() {
         const today = new Date();
         const dateInput = document.getElementById('recordDate');
@@ -85,15 +90,21 @@
             currentUser = user;
 
             if (user) {
-                // v0.10.18 Access Diagnostic Only
-                // 승인 상태는 Console에 상세 출력하지만, 기존 사용자가 막히지 않도록 앱은 계속 실행한다.
-                showSaveStatus('🔐 앱 승인 상태 진단 중...');
-                await verifyMasterAppAccess({ timeoutMs: 5000, label: 'Access Diagnostic / Session' });
+                // v0.10.20 Safe Enforced Access Gate
+                // 승인된 사용자만 앱 화면을 표시한다. READ_ERROR는 기존 사용자 보호를 위해 임시 통과한다.
+                showSaveStatus('🔐 앱 승인 상태 확인 중...');
+                const gate = await enforceMasterAppAccess({ timeoutMs: 5000, label: 'Access Gate / Session' });
+                if (!gate.allowed) {
+                    currentUser = null;
+                    hmFinishBooting();
+                    return;
+                }
 
                 document.body.classList.add('hm-authenticated');
                 document.getElementById('authBox').classList.add('is-hidden');
                 document.getElementById('authBox').style.display = 'none';
                 document.getElementById('appContent').style.display = 'flex';
+                hmFinishBooting();
                 document.getElementById('userInfoText').innerText = `로그인됨: ${user.email}`;
                 await loadUserActiveRoom();
                 await acceptPendingInviteIfAny();
@@ -107,6 +118,7 @@
                 document.getElementById('authBox').classList.remove('is-hidden');
                 document.getElementById('authBox').style.display = 'grid';
                 document.getElementById('appContent').style.display = 'none';
+                hmFinishBooting();
                 showSaveStatus("🔒 로그인이 필요합니다.");
             }
         });

@@ -1,3 +1,3 @@
-# Rollback Guide v0.10.19
+# Rollback
 
-이 버전은 차단하지 않으므로 위험도는 낮습니다. 문제가 있으면 v0.10.13으로 롤백하세요.
+문제 발생 시 v0.10.20 Safe Enforced Access Gate로 되돌립니다.
