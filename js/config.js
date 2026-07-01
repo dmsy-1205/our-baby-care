@@ -57,6 +57,8 @@
     let entireRoomRef = null;
     let chatRef = null;
     let ownerNoteRef = null;
+    let roomPresenceRef = null;
+    let hmPresenceInterval = null;
     let ownerNoteSaveTimeout = null;
     let cachedDaysData = null;
 
@@ -73,7 +75,7 @@
     let hmLastAutoSaveSignature = '';
     let hmPendingAutoSaveReason = '';
     // RC2.7 STEP5: 최종 안정화 QA 상태
-    const HM_APP_VERSION = 'RC2 v2.8.0 STEP7 release-candidate-qa';
+    const HM_APP_VERSION = 'RC2.13 Room Presence Stable';
     const hmQaState = {
         bootedAt: new Date().toISOString(),
         checks: [],

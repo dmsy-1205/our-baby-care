@@ -6556,3 +6556,37 @@ body.hm-phone-viewport .daily-modal {
         grid-template-columns: 1fr;
     }
 }
+
+
+/* RC2.13 Room Presence */
+.room-presence-card {
+    margin: 10px 0 12px;
+    padding: 12px 13px;
+    border: 1px solid rgba(162, 155, 254, 0.22);
+    border-radius: 16px;
+    background: linear-gradient(135deg, rgba(255,255,255,0.96), rgba(248,246,255,0.96));
+    box-shadow: 0 8px 22px rgba(108, 92, 231, 0.08);
+}
+.room-presence-title {
+    font-size: 0.84rem;
+    font-weight: 900;
+    color: #5f4bd6;
+    margin-bottom: 6px;
+}
+.room-presence-body {
+    font-size: 0.82rem;
+    color: #5d536c;
+    line-height: 1.55;
+}
+.presence-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 5px;
+    vertical-align: middle;
+    background: #b2bec3;
+}
+.presence-dot.online { background: #00b894; box-shadow: 0 0 0 4px rgba(0,184,148,0.12); }
+.presence-dot.offline { background: #b2bec3; }
+.presence-muted { color: #9b93aa; font-size: 0.76rem; }

@@ -188,6 +188,118 @@
         updateRelationshipRoleUI();
         updateOwnerOnlySections();
         updateManagedFieldAccessControls();
+        if (typeof hmRefreshRoomPresencePanel === 'function') hmRefreshRoomPresencePanel();
+    }
+
+    // =========================================================
+    // MODULE 06-1. ROOM PRESENCE / LAST SEEN
+    // 관리(Dom)가 기록(Sub)의 접속 상태를 확인할 수 있도록 roomMembers 하위에 안전하게 부가 정보만 추가한다.
+    // 기존 Room/History 저장 구조는 변경하지 않는다.
+    // =========================================================
+    function hmPresenceRelativeTime(ts) {
+        if (!ts) return '아직 기록 없음';
+        const d = new Date(ts);
+        if (Number.isNaN(d.getTime())) return '아직 기록 없음';
+        const diff = Date.now() - d.getTime();
+        const min = Math.max(0, Math.floor(diff / 60000));
+        if (min < 1) return '방금 전';
+        if (min < 60) return `${min}분 전`;
+        const hours = Math.floor(min / 60);
+        if (hours < 24) return `${hours}시간 전`;
+        const days = Math.floor(hours / 24);
+        if (days === 1) return `어제 ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+        return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+    }
+
+    function hmShortEmail(email) {
+        const value = String(email || '').trim();
+        if (!value) return '상대';
+        const name = value.split('@')[0] || value;
+        return name.length > 14 ? name.slice(0, 14) + '…' : name;
+    }
+
+    function hmFindSubMember(members) {
+        const entries = Object.entries(members || {});
+        let target = entries.find(([uid, item]) => uid !== currentUser?.uid && item?.relationshipRole === 'sub');
+        if (!target && activeRelationshipRole === 'dom') target = entries.find(([uid]) => uid !== currentUser?.uid);
+        if (!target && activeRelationshipRole === 'sub') target = entries.find(([uid, item]) => uid !== currentUser?.uid && item?.relationshipRole === 'dom');
+        return target || null;
+    }
+
+    function hmRefreshRoomPresencePanel(members) {
+        const card = document.getElementById('roomPresenceCard');
+        const body = document.getElementById('roomPresenceBody');
+        if (!card || !body) return;
+        if (!activeRoomCode || activeRelationshipRole !== 'dom') {
+            card.style.display = 'none';
+            return;
+        }
+        if (!members) {
+            body.innerHTML = '<span class="presence-muted">상대 상태를 불러오는 중입니다.</span>';
+            card.style.display = '';
+            return;
+        }
+        const found = hmFindSubMember(members);
+        if (!found) {
+            body.innerHTML = '<span class="presence-muted">아직 연결된 기록(Sub) 사용자가 없습니다.</span>';
+            card.style.display = '';
+            return;
+        }
+        const member = found[1] || {};
+        const lastSeen = member.lastSeen || member.joinedAt || 0;
+        const online = member.online === true && lastSeen && (Date.now() - Number(lastSeen) < 150000);
+        const label = online ? '온라인' : '오프라인';
+        body.innerHTML = `
+            <div><span class="presence-dot ${online ? 'online' : 'offline'}"></span><strong>${label}</strong> · ${escapeHtml(hmShortEmail(member.email))}</div>
+            <div class="presence-muted">마지막 접속: ${escapeHtml(hmPresenceRelativeTime(lastSeen))}</div>
+        `;
+        card.style.display = '';
+    }
+
+    function hmStopRoomPresence() {
+        if (roomPresenceRef) roomPresenceRef.off();
+        roomPresenceRef = null;
+        if (hmPresenceInterval) clearInterval(hmPresenceInterval);
+        hmPresenceInterval = null;
+        const card = document.getElementById('roomPresenceCard');
+        if (card) card.style.display = 'none';
+    }
+
+    async function hmTouchRoomPresence(roomCode) {
+        if (!currentUser || !hmIsSafeRoomCode(roomCode)) return;
+        try {
+            const ref = db.ref(`roomMembers/${roomCode}/${currentUser.uid}`);
+            await ref.update({
+                email: currentUser.email || myEmail || '',
+                online: true,
+                lastSeen: firebase.database.ServerValue.TIMESTAMP,
+                lastActiveAt: firebase.database.ServerValue.TIMESTAMP
+            });
+            ref.onDisconnect().update({
+                online: false,
+                lastSeen: firebase.database.ServerValue.TIMESTAMP
+            });
+        } catch (err) {
+            console.warn('[Room Presence] 상태 저장 실패:', err);
+        }
+    }
+
+    async function hmStartRoomPresence(roomCode) {
+        if (!currentUser || !hmIsSafeRoomCode(roomCode)) return;
+        if (roomPresenceRef) roomPresenceRef.off();
+        if (hmPresenceInterval) clearInterval(hmPresenceInterval);
+        await hmTouchRoomPresence(roomCode);
+        hmPresenceInterval = setInterval(() => {
+            if (currentUser && activeRoomCode === roomCode) hmTouchRoomPresence(roomCode);
+        }, 60000);
+        roomPresenceRef = db.ref(`roomMembers/${roomCode}`);
+        roomPresenceRef.on('value', (snap) => {
+            if (roomCode !== activeRoomCode) return;
+            hmRefreshRoomPresencePanel(snap.val() || {});
+        }, (err) => {
+            console.warn('[Room Presence] 상태 읽기 실패:', err);
+            hmRefreshRoomPresencePanel(null);
+        });
     }
 
     // =========================================================
