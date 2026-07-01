@@ -40,7 +40,3 @@
 
 ## RC2.15.3 Calendar Anniversary Markers Step 3
 - 캘린더 헤더 D+ 표시 및 일정 아이콘 보강.
-
-
-## RC2.15.4 History UX Final
-- 기록실 UX 최종 안내 문구 및 누적 안정화.
