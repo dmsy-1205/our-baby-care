@@ -13,6 +13,8 @@
     let selfRef = null;
     let activePresenceRoom = null;
     let activePresenceUid = null;
+    let heartbeatTimer = null;
+    const HEARTBEAT_MS = 15000;
 
     const $ = (id) => document.getElementById(id);
     const safe = (value) => String(value == null ? '' : value).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
@@ -101,8 +103,32 @@
             </div>`;
         }).join('');
     }
+    function writeSelfOnline(){
+        try {
+            const user = getUser();
+            if (!selfRef || !user) return;
+            selfRef.update({
+                online: true,
+                lastSeen: firebase.database.ServerValue.TIMESTAMP,
+                updatedAt: firebase.database.ServerValue.TIMESTAMP,
+                email: emailOf(user),
+                relationshipRole: getRole()
+            }).catch(err => console.warn('[Presence] heartbeat skipped:', err && err.message ? err.message : err));
+        } catch(e) {}
+    }
+    function startHeartbeat(){
+        stopHeartbeat();
+        heartbeatTimer = setInterval(writeSelfOnline, HEARTBEAT_MS);
+    }
+    function stopHeartbeat(){
+        if (heartbeatTimer) {
+            clearInterval(heartbeatTimer);
+            heartbeatTimer = null;
+        }
+    }
     function stop(){
-        try { if (selfRef) selfRef.update({ online:false, lastSeen: firebase.database.ServerValue.TIMESTAMP }); } catch(e) {}
+        stopHeartbeat();
+        try { if (selfRef) selfRef.update({ online:false, lastSeen: firebase.database.ServerValue.TIMESTAMP, updatedAt: firebase.database.ServerValue.TIMESTAMP }); } catch(e) {}
         try { if (membersRef) membersRef.off(); } catch(e) {}
         membersRef = null; selfRef = null; activePresenceRoom = null; activePresenceUid = null;
     }
@@ -111,15 +137,8 @@
         const user = getUser();
         if (!roomCode || !user || typeof db === 'undefined' || !db) { render(null); return; }
         if (activePresenceRoom === roomCode && activePresenceUid === user.uid && membersRef) {
-            try {
-                if (selfRef) selfRef.update({
-                    online: true,
-                    lastSeen: firebase.database.ServerValue.TIMESTAMP,
-                    updatedAt: firebase.database.ServerValue.TIMESTAMP,
-                    email: emailOf(user),
-                    relationshipRole: getRole()
-                });
-            } catch(e) {}
+            writeSelfOnline();
+            startHeartbeat();
             return;
         }
         stop();
@@ -127,14 +146,9 @@
         activePresenceUid = user.uid;
         try {
             selfRef = db.ref(`roomMembers/${roomCode}/${user.uid}/presence`);
-            selfRef.update({
-                online: true,
-                lastSeen: firebase.database.ServerValue.TIMESTAMP,
-                updatedAt: firebase.database.ServerValue.TIMESTAMP,
-                email: emailOf(user),
-                relationshipRole: getRole()
-            }).catch(err => console.warn('[Presence] write skipped:', err && err.message ? err.message : err));
-            try { selfRef.onDisconnect().update({ online:false, lastSeen: firebase.database.ServerValue.TIMESTAMP }); } catch(e) {}
+            writeSelfOnline();
+            try { selfRef.onDisconnect().update({ online:false, lastSeen: firebase.database.ServerValue.TIMESTAMP, updatedAt: firebase.database.ServerValue.TIMESTAMP }); } catch(e) {}
+            startHeartbeat();
             membersRef = db.ref(`roomMembers/${roomCode}`);
             membersRef.on('value', snap => render(snap.val() || {}), err => { console.warn('[Presence] read skipped:', err && err.message ? err.message : err); render({}); });
         } catch(err) {
@@ -164,5 +178,8 @@
     document.addEventListener('visibilitychange', () => {
         if (document.visibilityState === 'visible') refresh();
     });
+    // RC2.14.7: keep active sessions online with a lightweight heartbeat.
+    // This stabilizes normal/incognito dual-login tests and prevents one side
+    // from staying offline after the first room restore timing.
     document.addEventListener('DOMContentLoaded', () => setTimeout(refresh, 700));
 })();
