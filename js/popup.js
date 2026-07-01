@@ -109,6 +109,7 @@
     }
 
     function closeRoomSettingsModal() {
+        try { if (document.activeElement && typeof document.activeElement.blur === 'function') document.activeElement.blur(); } catch(e) {}
         closeModalOverlayById('roomSettingsOverlay');
     }
 

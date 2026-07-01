@@ -7426,3 +7426,373 @@ body.hm-phone-viewport .daily-modal {
         -webkit-box-orient: vertical;
     }
 }
+
+/* =========================================================
+   RC2.16.0 Branding STEP1 - Quiet Love UI Polish
+   - 기능/DB/Firebase 구조 변경 없음
+   - Header, Brand tone, card rhythm, modal focus polish
+   ========================================================= */
+:root {
+    --hm-brand-bg: #F8F7FB;
+    --hm-brand-bg-warm: #FFF8FB;
+    --hm-brand-card: rgba(255,255,255,.92);
+    --hm-brand-text: #1E1E2F;
+    --hm-brand-subtext: #747189;
+    --hm-brand-primary: #FF6F86;
+    --hm-brand-primary-2: #FF9EB0;
+    --hm-brand-lavender: #A98BFF;
+    --hm-brand-mint: #39D98A;
+    --hm-brand-border: rgba(232,224,255,.86);
+    --hm-brand-shadow: 0 18px 48px rgba(67, 53, 105, .10);
+    --hm-brand-shadow-soft: 0 10px 28px rgba(67, 53, 105, .075);
+    --hm-brand-radius-xl: 30px;
+    --hm-brand-radius-card: 24px;
+    --hm-brand-radius-btn: 18px;
+
+    --primary-color: var(--hm-brand-primary);
+    --accent-purple: var(--hm-brand-lavender);
+    --bg-color: var(--hm-brand-bg);
+    --card-color: #fff;
+    --text-color: var(--hm-brand-text);
+    --border-color: var(--hm-brand-border);
+}
+
+body {
+    background:
+        radial-gradient(circle at 16% 2%, rgba(255,111,134,.15), transparent 28%),
+        radial-gradient(circle at 88% 8%, rgba(169,139,255,.20), transparent 25%),
+        linear-gradient(150deg, var(--hm-brand-bg-warm) 0%, var(--hm-brand-bg) 58%, #F4F0FF 100%);
+    color: var(--hm-brand-text);
+}
+
+.container {
+    border-radius: var(--hm-brand-radius-xl);
+    border: 1px solid var(--hm-brand-border);
+    background: var(--hm-brand-card);
+    box-shadow: var(--hm-brand-shadow);
+    padding: 24px 22px 22px;
+    overflow: hidden;
+}
+
+.container::before {
+    content: '';
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    width: 40px;
+    height: 4px;
+    transform: translateX(-50%);
+    border-radius: 999px;
+    background: rgba(169,139,255,.26);
+}
+
+.autosave-status {
+    top: 22px;
+    right: 22px;
+    color: var(--hm-brand-mint);
+    font-weight: 800;
+    letter-spacing: -.02em;
+}
+
+.app-title-row {
+    margin-top: 10px;
+    grid-template-columns: 44px 1fr 44px;
+    align-items: center;
+}
+
+.guide-btn {
+    width: 42px;
+    height: 42px;
+    border-radius: 18px !important;
+    background: linear-gradient(145deg, #FFF7FA, #FFFFFF) !important;
+    border: 1px solid rgba(255,111,134,.25) !important;
+    box-shadow: 0 10px 24px rgba(255,111,134,.10);
+}
+
+.app-title-row h1 {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    font-size: 1.72rem;
+    line-height: 1.05;
+    margin: 0;
+    color: var(--hm-brand-text);
+    font-weight: 850;
+    letter-spacing: -.055em;
+}
+
+.hm-title-mark {
+    display: inline-grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 13px;
+    background: linear-gradient(135deg, var(--hm-brand-primary), var(--hm-brand-lavender));
+    color: #fff;
+    font-size: .82rem;
+    letter-spacing: -.08em;
+    box-shadow: 0 10px 22px rgba(255,111,134,.18);
+}
+
+.app-subtitle {
+    margin-top: 10px;
+    margin-bottom: 12px;
+    color: var(--hm-brand-subtext);
+    font-weight: 650;
+    letter-spacing: -.025em;
+}
+
+.app-meta-row {
+    margin: 4px 0 14px;
+    padding: 0 2px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.app-version-badge,
+.history-launch-version {
+    background: linear-gradient(135deg, #FFF1F5, #F3EDFF) !important;
+    color: var(--hm-brand-primary) !important;
+    border: 1px solid rgba(255,111,134,.16) !important;
+    border-radius: 999px !important;
+    padding: 7px 12px !important;
+    font-size: .74rem !important;
+    letter-spacing: -.01em !important;
+    font-weight: 850 !important;
+}
+
+.home-presence-indicator {
+    min-height: 28px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: rgba(255,255,255,.72);
+    border: 1px solid rgba(232,224,255,.86);
+    box-shadow: 0 8px 20px rgba(67,53,105,.055);
+}
+
+.home-presence-dot.online {
+    background: var(--hm-brand-mint) !important;
+    box-shadow: 0 0 0 4px rgba(57,217,138,.13), 0 6px 14px rgba(57,217,138,.26) !important;
+}
+
+.home-presence-dot.offline {
+    background: #DAD8E4 !important;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,.85) !important;
+}
+
+.user-bar,
+.room-settings-card,
+.daily-card,
+.mission-compact-card,
+.history-launch-card,
+.history-day-card,
+.history-section-card,
+.relationship-role-box,
+.sync-box,
+#calendarBox,
+#photoThumbs.history-thumb-row,
+.history-filter-card {
+    border-radius: var(--hm-brand-radius-card) !important;
+    border: 1px solid var(--hm-brand-border) !important;
+    background: linear-gradient(145deg, rgba(255,255,255,.96), rgba(255,250,253,.88)) !important;
+    box-shadow: var(--hm-brand-shadow-soft) !important;
+}
+
+.user-bar {
+    margin: 10px 0 14px;
+    padding: 12px 14px;
+}
+
+.room-settings-card,
+.daily-card,
+.history-launch-card {
+    min-height: 88px;
+    padding: 17px 18px;
+}
+
+.room-settings-card { background: linear-gradient(145deg, #F7F2FF, #FFFFFF) !important; }
+.input-group:nth-of-type(3n) .daily-card { background: linear-gradient(145deg, #FFF4F7, #FFFFFF) !important; }
+.input-group:nth-of-type(3n+1) .daily-card { background: linear-gradient(145deg, #F6F1FF, #FFFFFF) !important; }
+.input-group:nth-of-type(3n+2) .daily-card { background: linear-gradient(145deg, #F1FFF8, #FFFFFF) !important; }
+
+.daily-card-icon,
+.room-settings-icon,
+.history-launch-icon,
+.history-day-icon {
+    width: 50px;
+    height: 50px;
+    min-width: 50px;
+    border-radius: 19px !important;
+    background: linear-gradient(145deg, #FFFFFF, #FFF0F5) !important;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,.98), 0 10px 22px rgba(255,111,134,.12) !important;
+}
+
+.daily-card-title,
+.room-settings-title,
+.history-launch-title,
+.history-day-title,
+.history-section-title,
+.mission-compact-title {
+    color: var(--hm-brand-text) !important;
+    font-weight: 820 !important;
+    letter-spacing: -.035em;
+}
+
+.daily-card-sub,
+.room-settings-sub,
+.history-launch-sub,
+.history-day-sub,
+.history-section-title small,
+.mission-compact-sub {
+    color: var(--hm-brand-subtext) !important;
+}
+
+.daily-card,
+.room-settings-card,
+.mission-compact-card,
+.history-launch-card,
+.history-day-card,
+.guide-btn,
+button {
+    transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease, opacity .16s ease;
+}
+
+.daily-card:hover,
+.room-settings-card:hover,
+.history-launch-card:hover,
+.history-day-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 18px 40px rgba(67,53,105,.12) !important;
+}
+
+.daily-card:active,
+.room-settings-card:active,
+.mission-compact-card:active,
+.history-launch-card:active,
+.history-day-card:active,
+button:active {
+    transform: scale(.975);
+}
+
+.btn-main,
+.btn-connect,
+.mission-open-btn,
+.daily-modal-save,
+.room-open-btn,
+.guide-primary,
+.history-filter-card button {
+    border-radius: var(--hm-brand-radius-btn) !important;
+    background: linear-gradient(135deg, var(--hm-brand-primary), var(--hm-brand-primary-2)) !important;
+    box-shadow: 0 14px 28px rgba(255,111,134,.23) !important;
+}
+
+.btn-secondary,
+.modal-close-btn,
+.guide-close,
+.mission-mini-btn {
+    border-radius: var(--hm-brand-radius-btn) !important;
+    background: #FFF3F7 !important;
+    color: var(--hm-brand-primary) !important;
+    border: 1px solid rgba(255,111,134,.18) !important;
+}
+
+.history-panel-head h2,
+.history-detail-head h2,
+.room-settings-head h2,
+.daily-modal-head h2,
+.mission-modal-head h2 {
+    color: var(--hm-brand-text) !important;
+    font-weight: 850 !important;
+    letter-spacing: -.045em;
+}
+
+.history-panel-head h2 span,
+.history-detail-kicker {
+    background: #FFF2F6 !important;
+    color: var(--hm-brand-primary) !important;
+}
+
+.calendar-day.selected-record,
+.calendar-day.today,
+.relationship-role-btn.active,
+.mood-btn.active,
+.choice-btn.active {
+    background: linear-gradient(135deg, var(--hm-brand-primary), var(--hm-brand-primary-2)) !important;
+    color: #fff !important;
+    border-color: transparent !important;
+    box-shadow: 0 12px 26px rgba(255,111,134,.22) !important;
+}
+
+.calendar-day.has-record {
+    border-color: rgba(255,111,134,.20) !important;
+    background: linear-gradient(145deg, #FFFFFF, #FFF7FA) !important;
+}
+
+.daily-modal,
+.mission-modal,
+.room-settings-modal,
+.guide-card,
+.history-panel-modal,
+.history-detail-modal {
+    border-radius: 32px !important;
+    background: rgba(255,255,255,.97) !important;
+    border: 1px solid rgba(232,224,255,.92) !important;
+    box-shadow: 0 30px 80px rgba(39,31,72,.22) !important;
+}
+
+.hm-login-mark.hm-brand-mark {
+    position: relative;
+    width: 92px;
+    height: 92px;
+    margin: 0 auto 16px;
+    border-radius: 28px;
+    background: linear-gradient(145deg, #FFFFFF, #FFF3F8);
+    box-shadow: 0 22px 50px rgba(67,53,105,.10);
+    display: grid;
+    place-items: center;
+    font-size: 0;
+}
+.hm-login-mark.hm-brand-mark span:first-child {
+    position: absolute;
+    font-size: 3rem;
+    color: var(--hm-brand-primary);
+    transform: translate(-8px,-4px);
+}
+.hm-login-mark.hm-brand-mark span:last-child {
+    position: absolute;
+    font-size: 2.7rem;
+    color: var(--hm-brand-lavender);
+    transform: translate(18px,14px) rotate(-18deg);
+    opacity: .9;
+}
+.hm-login-title {
+    color: var(--hm-brand-text) !important;
+    letter-spacing: -.055em;
+}
+.hm-login-title::first-letter,
+.app-title-row h1 { text-shadow: none; }
+.hm-login-copy {
+    color: var(--hm-brand-subtext) !important;
+    font-weight: 650;
+}
+.hm-login-pill {
+    background: linear-gradient(135deg, #FF6F86, #FF9EB0) !important;
+    color: #fff !important;
+    box-shadow: 0 12px 24px rgba(255,111,134,.22);
+}
+
+@media (max-width: 430px) {
+    body { padding: 8px 6px; }
+    .container { padding: 24px 18px 20px; border-radius: 28px; }
+    .app-title-row h1 { font-size: 1.52rem; }
+    .hm-title-mark { width: 28px; height: 28px; }
+    .room-settings-card,
+    .daily-card,
+    .history-launch-card { min-height: 84px; padding: 15px; }
+    .daily-card-icon,
+    .room-settings-icon,
+    .history-launch-icon,
+    .history-day-icon { width: 46px; height: 46px; min-width: 46px; }
+}

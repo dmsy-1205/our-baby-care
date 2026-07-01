@@ -1,3 +1,11 @@
+# Latest: RC2.16 Branding STEP1
+
+- Quiet Love v1.0 branding polish applied.
+- Header, cards, buttons, presence dots visual style refined.
+- No Firebase/Room/History data path changes.
+
+---
+
 # HearMe2nite v0.10.22 Room Boot Recovery Hotfix
 
 ## 목적
