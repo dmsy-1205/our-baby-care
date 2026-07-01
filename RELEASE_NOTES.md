@@ -17,3 +17,11 @@
 4. 새로고침 후 dmsy 방 유지 확인
 5. 로그아웃 후 재로그인 확인
 6. 미승인 계정 차단 확인
+
+
+## RC2.14.3 SAFE Integrated
+
+- RC2.12.2 정상본 기준 안전 통합
+- RC2.14 홈 UX/오늘의 약속/오늘의 요약 모달 반영
+- RC2.13 Room Presence 계열 제외
+- 변경 파일: index.html, css/style.css, js/custom-routine.js, js/product.js
