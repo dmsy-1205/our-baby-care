@@ -11,6 +11,21 @@
     function days(){ try { return window.cachedDaysData || cachedDaysData || {}; } catch(e) { return {}; } }
     function dayKeys(){ return Object.keys(days()).filter(k => /^\d{4}-\d{2}-\d{2}$/.test(k)).sort(); }
     function getCurrentRecord(){ const d = $('recordDate')?.value || ''; return d ? days()[d] : null; }
+    function cleanNumberText(value, fallback='-'){
+        const raw = String(value == null ? '' : value).trim();
+        if (!raw || raw === '기록 없음') return fallback;
+        const match = raw.match(/[0-9]+(?:\.[0-9]+)?/);
+        return match ? match[0] : raw.replace(/ml|ML|kg|KG|㎏/g,'').trim() || fallback;
+    }
+    function formatRecentUpdate(rec){
+        const ts = rec && (rec.updatedAt || rec.createdAt || rec.timestamp);
+        if (!ts) return '-';
+        const d = new Date(Number(ts));
+        if (Number.isNaN(d.getTime())) return '-';
+        const hh = String(d.getHours()).padStart(2,'0');
+        const mm = String(d.getMinutes()).padStart(2,'0');
+        return `${hh}:${mm}`;
+    }
     function dateLabel(k){ try { const [y,m,d]=k.split('-'); return `${Number(m)}월 ${Number(d)}일`; } catch(e){ return k; } }
     function missionRatio(rec){
         const arr = rec && Array.isArray(rec.missions) ? rec.missions : [];
@@ -65,13 +80,18 @@
         const anchor = document.querySelector('.room-settings-card'); if (!anchor) return;
         const box = document.createElement('section');
         box.id='hmProductDashboard'; box.className='hm-beta-dashboard';
-        box.innerHTML=`<div class="hm-summary-strip-head"><span>HOME</span><strong>오늘의 요약</strong></div>
+        box.setAttribute('role','button');
+        box.setAttribute('tabindex','0');
+        box.setAttribute('aria-label','오늘의 요약 자세히 보기');
+        box.innerHTML=`<div class="hm-summary-strip-head"><strong>오늘의 요약</strong><small>눌러서 자세히 보기</small></div>
         <div class="hm-summary-strip" aria-label="오늘의 요약">
-        <div class="hm-summary-dot"><b>📝</b><span id="hmProductTodayStatus">대기</span></div>
-        <div class="hm-summary-dot"><b>💧</b><span id="hmProductWaterStatus">0ML</span></div>
+        <div class="hm-summary-dot"><b>📝</b><span id="hmProductTodayStatus">작성</span></div>
+        <div class="hm-summary-dot"><b>💧</b><span id="hmProductWaterStatus">0</span></div>
         <div class="hm-summary-dot"><b>⚖️</b><span id="hmProductWeightStatus">-</span></div>
         <div class="hm-summary-dot"><b>💜</b><span id="hmProductPromiseStatus">-</span></div>
-        <div class="hm-summary-dot"><b>🎁</b><span id="hmProductNextAnniversary">없음</span></div></div>`;
+        <div class="hm-summary-dot"><b>🎁</b><span id="hmProductNextAnniversary">-</span></div></div>`;
+        box.addEventListener('click', openHomeSummaryModal);
+        box.addEventListener('keydown', (event)=>{ if(event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openHomeSummaryModal(); } });
         anchor.insertAdjacentElement('afterend', box);
         setTimeout(moveTodayPromiseSection, 0);
     }
@@ -79,13 +99,59 @@
         if (HM_STAGE < 2) return;
         buildDashboard();
         const rec=getCurrentRecord();
-        const todayStatus=$('hmProductTodayStatus'); if(todayStatus) todayStatus.textContent = rec ? '저장' : (($('recordDate')?.value||'') ? '작성' : '대기');
-        const water=$('hmProductWaterStatus'); if(water) { let w = 0; try { w = Number(window.currentWater || currentWater || 0); } catch(e) { w = 0; } water.textContent = w ? `${w}ML` : '0ML'; }
-        const weight=$('hmProductWeightStatus'); if(weight) { const value = (($('weight')?.value || rec?.weight || '') + '').trim(); weight.textContent = value || '-'; }
-        const promise=routineRatio(); const promiseStatus=$('hmProductPromiseStatus'); if(promiseStatus) promiseStatus.textContent = promise.total ? `${promise.done}/${promise.total}` : (promise.cards ? '0/0' : '없음');
-        const next=getNextAnniversary(); const ann=$('hmProductNextAnniversary'); if(ann) ann.textContent = next ? (next.ddayText || next.dDay || next.title || '있음') : '없음';
+        const todayStatus=$('hmProductTodayStatus'); if(todayStatus) todayStatus.textContent = rec ? '✔' : (($('recordDate')?.value||'') ? '작성' : '-');
+        const water=$('hmProductWaterStatus'); if(water) { let w = 0; try { w = Number(window.currentWater || currentWater || 0); } catch(e) { w = 0; } water.textContent = w ? String(w) : '0'; }
+        const weight=$('hmProductWeightStatus'); if(weight) { const value = cleanNumberText($('weight')?.value || rec?.weight || '', '-'); weight.textContent = value; }
+        const promise=routineRatio(); const promiseStatus=$('hmProductPromiseStatus'); if(promiseStatus) promiseStatus.textContent = promise.total ? `${promise.done}/${promise.total}` : '-';
+        const next=getNextAnniversary(); const ann=$('hmProductNextAnniversary'); if(ann) ann.textContent = next ? (next.ddayText || next.dDay || 'D-Day') : '-';
         moveTodayPromiseSection();
     }
+
+    function ensureHomeSummaryModal(){
+        let overlay = $('hmHomeSummaryOverlay');
+        if (overlay) return overlay;
+        overlay = document.createElement('div');
+        overlay.id = 'hmHomeSummaryOverlay';
+        overlay.className = 'daily-modal-overlay hm-home-summary-overlay';
+        overlay.style.display = 'none';
+        overlay.setAttribute('aria-hidden','true');
+        overlay.innerHTML = `<div class="daily-modal hm-home-summary-modal" role="dialog" aria-modal="true" aria-labelledby="hmHomeSummaryTitle">
+            <div class="daily-modal-head">
+                <h2 id="hmHomeSummaryTitle">오늘의 요약</h2>
+                <button type="button" class="modal-close-btn" onclick="hmCloseHomeSummaryModal()">닫기</button>
+            </div>
+            <div id="hmHomeSummaryModalBody" class="hm-home-summary-modal-body"></div>
+        </div>`;
+        document.body.appendChild(overlay);
+        overlay.addEventListener('click', (event)=>{ if(event.target === overlay) hmCloseHomeSummaryModal(); });
+        return overlay;
+    }
+    function summaryRow(icon, label, value, sub){
+        return `<div class="hm-summary-modal-row"><div class="hm-summary-modal-icon">${icon}</div><div><strong>${safe(label)}</strong>${sub ? `<small>${safe(sub)}</small>` : ''}</div><b>${safe(value)}</b></div>`;
+    }
+    function openHomeSummaryModal(){
+        const rec = getCurrentRecord();
+        let w = 0; try { w = Number(window.currentWater || currentWater || 0); } catch(e) { w = 0; }
+        const weightValue = cleanNumberText($('weight')?.value || rec?.weight || '', '-');
+        const promise = routineRatio();
+        const next = getNextAnniversary();
+        const body = $('hmHomeSummaryModalBody') || ensureHomeSummaryModal().querySelector('#hmHomeSummaryModalBody');
+        if (body) {
+            body.innerHTML = [
+                summaryRow('📝','오늘 기록', rec ? '작성 완료' : '작성 전', $('recordDate')?.value || ''),
+                summaryRow('💧','수분', w ? `${w} ml` : '0 ml', '오늘 누적'),
+                summaryRow('⚖️','체중', weightValue === '-' ? '-' : `${weightValue} kg`, '오늘 기록'),
+                summaryRow('💜','오늘의 약속', promise.total ? `${promise.done} / ${promise.total} 완료` : '등록 없음', promise.cards ? `${promise.cards}개 약속` : '관리 버튼으로 약속을 만들 수 있어요'),
+                summaryRow('🎁','다음 기념일', next ? (next.ddayText || next.dDay || 'D-Day') : '등록 없음', next ? (next.title || next.date || '') : ''),
+                `<div class="hm-summary-modal-updated">최근 업데이트 <strong>${safe(formatRecentUpdate(rec))}</strong></div>`
+            ].join('');
+        }
+        if (typeof openModalOverlayById === 'function') openModalOverlayById('hmHomeSummaryOverlay');
+        else { const overlay = ensureHomeSummaryModal(); overlay.style.display = 'flex'; overlay.setAttribute('aria-hidden','false'); }
+    }
+    window.hmOpenHomeSummaryModal = openHomeSummaryModal;
+    window.hmCloseHomeSummaryModal = function(){ if (typeof closeModalOverlayById === 'function') closeModalOverlayById('hmHomeSummaryOverlay'); else { const overlay=$('hmHomeSummaryOverlay'); if(overlay) overlay.style.display='none'; } };
+
     function renderMonthlyStats(){
         if (!HM_HISTORY_TOOLS_ENABLED || HM_STAGE < 3) return;
         const target=$('hmProductHistoryStats'); if(!target) return;
