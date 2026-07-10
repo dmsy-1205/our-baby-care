@@ -8,7 +8,7 @@
 - Room 구조를 임의로 변경하지 않는다.
 - History 구조를 임의로 변경하지 않는다.
 - Presence 구조를 임의로 변경하지 않는다.
-- MasterOS Access Gate를 변경하지 않는다.
+- HearMe2nite 독립 인증 구조를 유지한다.
 - Popup 구조와 Responsive 구조를 유지한다.
 
 ## 개발 순서
@@ -45,7 +45,7 @@ Deploy
 - 기존 함수명 변경 금지
 - Firebase path 변경 금지
 - Room Membership 검증 우회 금지
-- 승인 사용자 제한 우회 금지
+- Firebase Authentication 및 Room 권한 우회 금지
 - 모바일 팝업 중앙 정렬 구조 훼손 금지
 - Desktop Dashboard 부활 금지
 

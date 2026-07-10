@@ -9,7 +9,7 @@ RC2.18은 `HearMe2nite_RC2.17.3_ExerciseCard_FULL`을 기준으로 합니다.
 ```text
 Authentication
   ↓
-MasterOS Access Gate
+HearMe2nite 독립 인증
   ↓
 Room
   ↓
@@ -30,7 +30,7 @@ UI / Popup / Responsive
 
 ## Authentication
 
-Firebase Auth와 MasterOS Access Gate를 통해 승인된 사용자만 앱에 접근합니다.
+Firebase Authentication을 통해 HearMe2nite 계정으로 직접 로그인합니다.
 
 ## Room
 

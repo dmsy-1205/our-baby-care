@@ -769,7 +769,7 @@
     // =========================================================
 
     function copyInviteText(code, link) {
-        const text = `HearMe2nite 초대코드: ${code}\n초대링크: ${link}\n\nHearU2nite 계정으로 로그인한 뒤 초대코드를 입력하면 같은 방을 사용할 수 있어요.\n이미 다른 방에 연결되어 있어도 이 초대코드로 새 방으로 이동할 수 있어요.`;
+        const text = `HearMe2nite 초대코드: ${code}\n초대링크: ${link}\n\nHearMe2nite 계정으로 로그인한 뒤 초대코드를 입력하면 같은 공간을 사용할 수 있어요.\n이미 다른 방에 연결되어 있어도 이 초대코드로 새 방으로 이동할 수 있어요.`;
         executeCopy(text);
     }
 
@@ -799,7 +799,7 @@
     async function acceptInviteCodeValue(code, fromPending) {
         if (!currentUser) {
             sessionStorage.setItem('pendingInviteCode', code);
-            alert('먼저 HearU2nite 계정으로 로그인해 주세요. 로그인 후 초대 참여가 진행됩니다.');
+            alert('먼저 HearMe2nite 계정으로 로그인하거나 회원가입해 주세요. 로그인 후 초대 참여가 진행됩니다.');
             return;
         }
         if (!pendingRelationshipRole && !activeRelationshipRole) {
