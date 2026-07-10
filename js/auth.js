@@ -45,11 +45,8 @@
 
 
     // =========================================================
-    // STEP3 HOTFIX: MASTEROS ACCESS GATE REMOVED
-    // HearMe2nite는 our-baby-care Firebase Authentication만 사용한다.
-    // =========================================================
-
-    // =========================================================
+    // STEP3: MasterOS/HearU2nite Access Gate 제거 완료.
+    // 기존 our-baby-care Firebase Authentication 계정으로만 로그인한다.
 
     // MODULE: AUTH / LOGIN / SIGNUP
 
@@ -58,7 +55,7 @@
     // =========================================================
 
     // 기존 HearMe2nite 계정 직접 로그인 처리
-    // STEP3: MasterOS 승인 확인과 자동 계정 생성을 사용하지 않는다.
+    // 신규 계정 생성은 STEP4에서 별도로 구현한다.
     // 주의: 로그인 성공 이후 방 복구는 onAuthStateChanged 흐름에서 처리한다.
 
     // =========================================================
@@ -76,8 +73,8 @@
         try {
             showSaveStatus('🔐 HearMe2nite 로그인 확인 중...');
 
-            // STEP3: our-baby-care Firebase Authentication의 기존 계정으로 직접 로그인한다.
-            // 로그인 실패 시 새 계정을 자동 생성하지 않아 기존 UID와 Room 연결을 보호한다.
+            // STEP3: 기존 our-baby-care Authentication 계정으로만 직접 로그인한다.
+            // 실패 시 계정을 자동 생성하지 않아 기존 UID와 Room 연결을 보호한다.
             await babyAuth.signInWithEmailAndPassword(email, password);
 
             try { if (window.hmRefreshPresenceFromRoom) window.hmRefreshPresenceFromRoom('login-complete'); } catch(e) { console.warn(e); }
@@ -247,7 +244,7 @@
             sessionStorage.setItem('pendingInviteCode', invite);
             const help = document.querySelector('#authBox .auth-help');
             if (help) {
-                help.innerHTML = `초대코드 <strong>${escapeHtml(invite)}</strong>가 확인되었습니다.<br>HearU2nite 계정으로 로그인하면 자동으로 방 참여를 진행합니다.`;
+                help.innerHTML = `초대코드 <strong>${escapeHtml(invite)}</strong>가 확인되었습니다.<br>HearMe2nite 계정으로 로그인하면 자동으로 방 참여를 진행합니다.`;
             }
         }
     }

@@ -55,7 +55,7 @@
     // - 로그인 계정별 users/{uid}/activeRoom 에서만 자동 연결
     // - 기존 rooms/{공유코드}/days 데이터 그대로 사용
     // - roomAccess/{공유코드} ownerEmail / partnerEmail 로 접근 제한
-    // - 로그인 확인은 master-app-platform, 생활관리 데이터는 our-baby-care 사용
+    // - 로그인과 생활관리 데이터 모두 our-baby-care Firebase 사용
     // =========================================================
 
 
@@ -112,8 +112,9 @@
             currentUser = user;
 
             if (user) {
-                // STEP3: our-baby-care Firebase 로그인 세션만 확인한다.
-                // MasterOS 승인 상태를 다시 조회하지 않아 기존 사용자의 직접 로그인을 보장한다.
+                // STEP3: our-baby-care Firebase 로그인 세션만 사용한다.
+                // MasterOS 승인 조회 없이 기존 UID와 Room 연결을 그대로 유지한다.
+
                 document.body.classList.add('hm-authenticated');
                 document.getElementById('authBox').classList.add('is-hidden');
                 document.getElementById('authBox').style.display = 'none';

@@ -8,19 +8,9 @@
 // =========================================================
     // MODULE 01. CONFIG / GLOBAL STATE
     // 분리 후보: config.js
-    // Firebase 앱 2개(master/baby), Auth/DB 참조, 전역 상태값을 관리한다.
+    // HearMe2nite 단일 Firebase 앱, Auth/DB 참조, 전역 상태값을 관리한다.
     // DB 구조와 key 이름은 절대 변경하지 않는다.
     // =========================================================
-    const masterFirebaseConfig = {
-        apiKey: "AIzaSyBvTPf5UCzgaB4USvKZ8EyvVJMvO5dqp4A",
-        authDomain: "master-app-platform.firebaseapp.com",
-        databaseURL: "https://master-app-platform-default-rtdb.firebaseio.com",
-        projectId: "master-app-platform",
-        storageBucket: "master-app-platform.firebasestorage.app",
-        messagingSenderId: "1037858420971",
-        appId: "1:1037858420971:web:2782c5e9164e5d98a626ae",
-        measurementId: "G-CWK0X4PNZY"
-    };
 
     const babyFirebaseConfig = {
         apiKey: "AIzaSyDMVl65SWhqPcxrMY7h_ir7OgPbk7P1LAs",
@@ -32,18 +22,11 @@
         appId: "1:564751165:web:12012e95e1240e87e27354"
     };
 
-    const masterApp = firebase.apps.find(app => app.name === 'masterApp') || firebase.initializeApp(masterFirebaseConfig, 'masterApp');
     const babyApp = firebase.apps.find(app => app.name === 'babyApp') || firebase.initializeApp(babyFirebaseConfig, 'babyApp');
 
-    const masterAuth = firebase.auth(masterApp);
     const babyAuth = firebase.auth(babyApp);
-    const masterDb = firebase.database(masterApp);
     const db = firebase.database(babyApp);
     const auth = babyAuth;
-
-    // MasterOS App Access Gate
-    // 승인 확인은 MasterOS UID 기준으로 userAppAccess/{masterUid}/baby-care-secure를 읽는다.
-    const HM_MASTER_APP_ID = 'baby-care-secure';
 
     let currentUser = null;
     let activeRoomCode = "";
