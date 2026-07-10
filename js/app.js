@@ -112,9 +112,30 @@
             currentUser = user;
 
             if (user) {
-                // STEP3: our-baby-care Firebase 로그인 세션만 사용한다.
-                // MasterOS 승인 조회 없이 기존 UID와 Room 연결을 그대로 유지한다.
+                // STEP5.2: 기존 사용자는 그대로 보호하고, 신규 가입 표시가 있는 계정만 이메일 인증을 요구한다.
+                const verificationPolicy = await hmGetEmailVerificationPolicy(user);
+                if (verificationPolicy.required && !user.emailVerified) {
+                    document.body.classList.remove('hm-authenticated');
+                    document.getElementById('authBox').classList.remove('is-hidden');
+                    document.getElementById('authBox').style.display = 'grid';
+                    document.getElementById('appContent').style.display = 'none';
+                    showEmailVerificationPanel(user);
+                    hmFinishBooting();
+                    showSaveStatus('✉️ 이메일 인증이 필요합니다.');
+                    return;
+                }
 
+                if (verificationPolicy.required && user.emailVerified) {
+                    try {
+                        await db.ref(`users/${user.uid}`).update({
+                            emailVerified: true,
+                            emailVerifiedAt: firebase.database.ServerValue.TIMESTAMP
+                        });
+                    } catch (err) { console.warn('[STEP5.2] 인증 완료 기록 실패:', err); }
+                    hmSignupFlowActive = false;
+                }
+
+                hideEmailVerificationPanel();
                 document.body.classList.add('hm-authenticated');
                 document.getElementById('authBox').classList.add('is-hidden');
                 document.getElementById('authBox').style.display = 'none';
@@ -129,6 +150,7 @@
                 activeRoomRole = "";
                 activeRelationshipRole = "";
                 pendingRelationshipRole = "";
+                hideEmailVerificationPanel();
                 document.body.classList.remove('hm-authenticated');
                 document.getElementById('authBox').classList.remove('is-hidden');
                 document.getElementById('authBox').style.display = 'grid';

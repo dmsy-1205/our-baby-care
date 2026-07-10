@@ -65,6 +65,8 @@
     // 로그인 구조와 기존 계정 데이터는 변경하지 않는다.
     // =========================================================
     let hmAuthMode = 'login';
+    let hmSignupFlowActive = false;
+    let hmVerificationEmailSentAt = 0;
 
     function setAuthMode(mode) {
         hmAuthMode = mode === 'signup' ? 'signup' : 'login';
@@ -105,7 +107,74 @@
         if (submitBtn) submitBtn.textContent = values.submit;
     }
 
+    function showEmailVerificationPanel(user) {
+        const entryPanel = document.getElementById('authEntryPanel');
+        const verifyPanel = document.getElementById('emailVerificationPanel');
+        const tabs = document.querySelector('.hm-auth-mode-tabs');
+        const trust = document.querySelector('.hm-login-trust');
+        const fields = document.querySelectorAll('.hm-login-field');
+        const emailText = document.getElementById('verificationEmailText');
+
+        if (entryPanel) entryPanel.hidden = true;
+        if (verifyPanel) verifyPanel.hidden = false;
+        if (tabs) tabs.hidden = true;
+        if (trust) trust.hidden = true;
+        fields.forEach(el => { el.hidden = true; });
+        if (emailText) emailText.textContent = normalizeEmail((user && user.email) || '가입한 이메일');
+
+        const icon = document.getElementById('authModeIcon');
+        const kicker = document.getElementById('authModeKicker');
+        const title = document.getElementById('authModeTitle');
+        if (icon) icon.textContent = '✉️';
+        if (kicker) kicker.textContent = 'VERIFY EMAIL';
+        if (title) title.textContent = '이메일 인증';
+    }
+
+    function hideEmailVerificationPanel() {
+        const entryPanel = document.getElementById('authEntryPanel');
+        const verifyPanel = document.getElementById('emailVerificationPanel');
+        const tabs = document.querySelector('.hm-auth-mode-tabs');
+        const trust = document.querySelector('.hm-login-trust');
+        const fields = document.querySelectorAll('.hm-login-field');
+
+        if (entryPanel) entryPanel.hidden = false;
+        if (verifyPanel) verifyPanel.hidden = true;
+        if (tabs) tabs.hidden = false;
+        if (trust) trust.hidden = false;
+        fields.forEach(el => {
+            if (el.id === 'authPasswordConfirmGroup') el.hidden = hmAuthMode !== 'signup';
+            else el.hidden = false;
+        });
+        setAuthMode(hmAuthMode);
+    }
+
+    async function hmGetEmailVerificationPolicy(user) {
+        if (!user) return { required: false, existingUser: false };
+        let profile = null;
+        try {
+            const snap = await db.ref(`users/${user.uid}`).once('value');
+            profile = snap.val() || null;
+        } catch (err) {
+            console.warn('[STEP5.2] 이메일 인증 정책 조회 실패:', err);
+        }
+
+        const explicitlyRequired = !!(profile && profile.emailVerificationRequired === true);
+        // 기존 계정 보호: 가입일을 추정해 차단하지 않는다.
+        // STEP5.2 회원가입 흐름 또는 신규 가입 시 저장된 명시적 표시만 인증 대상으로 본다.
+        const required = explicitlyRequired || hmSignupFlowActive;
+        return { required, existingUser: !required, profile };
+    }
+
+    async function hmSendVerificationEmail(user, force = false) {
+        if (!user || user.emailVerified) return;
+        const now = Date.now();
+        if (!force && now - hmVerificationEmailSentAt < 10000) return;
+        await user.sendEmailVerification();
+        hmVerificationEmailSentAt = now;
+    }
+
     async function createHearMe2niteAccount(email, password) {
+        hmSignupFlowActive = true;
         const credential = await babyAuth.createUserWithEmailAndPassword(email, password);
         const user = credential.user;
         if (!user) throw new Error('auth/user-not-created');
@@ -114,9 +183,62 @@
             email: normalizeEmail(user.email || email),
             createdAt: firebase.database.ServerValue.TIMESTAMP,
             lastLogin: firebase.database.ServerValue.TIMESTAMP,
-            hasSeenGuide: false
+            hasSeenGuide: false,
+            emailVerificationRequired: true,
+            emailVerified: false,
+            registrationVersion: 'STEP5.2'
         });
+
+        await hmSendVerificationEmail(user, true);
         return user;
+    }
+
+    async function checkEmailVerificationStatus() {
+        const user = babyAuth.currentUser;
+        if (!user) { alert('로그인 정보가 없습니다. 다시 로그인해 주세요.'); return; }
+        const btn = document.getElementById('checkVerificationBtn');
+        if (btn) btn.disabled = true;
+        try {
+            await user.reload();
+            const refreshedUser = babyAuth.currentUser;
+            if (!refreshedUser || !refreshedUser.emailVerified) {
+                alert('아직 이메일 인증이 확인되지 않았습니다.\n인증 메일의 링크를 누른 뒤 다시 확인해 주세요.');
+                return;
+            }
+            await db.ref(`users/${refreshedUser.uid}`).update({
+                emailVerified: true,
+                emailVerifiedAt: firebase.database.ServerValue.TIMESTAMP
+            });
+            hmSignupFlowActive = false;
+            alert('이메일 인증이 확인되었습니다. HearMe2nite를 시작합니다.');
+            window.location.reload();
+        } catch (err) {
+            console.error(err);
+            alert('인증 상태를 확인하지 못했습니다. 인터넷 연결을 확인한 뒤 다시 시도해 주세요.');
+        } finally {
+            if (btn) btn.disabled = false;
+        }
+    }
+
+    async function resendEmailVerification() {
+        const user = babyAuth.currentUser;
+        if (!user) { alert('로그인 정보가 없습니다. 다시 로그인해 주세요.'); return; }
+        const btn = document.getElementById('resendVerificationBtn');
+        if (btn) btn.disabled = true;
+        try {
+            await user.reload();
+            if (babyAuth.currentUser && babyAuth.currentUser.emailVerified) {
+                await checkEmailVerificationStatus();
+                return;
+            }
+            await hmSendVerificationEmail(babyAuth.currentUser, true);
+            alert('인증 메일을 다시 보냈습니다. 스팸함도 함께 확인해 주세요.');
+        } catch (err) {
+            console.error(err);
+            alert(firebaseAuthErrorToKorean(err.code || err.message));
+        } finally {
+            if (btn) btn.disabled = false;
+        }
     }
 
     async function handleAuthSubmit() {
@@ -137,9 +259,10 @@
         try {
             if (signup) {
                 showSaveStatus('✨ HearMe2nite 계정을 만드는 중...');
-                await createHearMe2niteAccount(email, password);
-                showSaveStatus('☁️ 회원가입 완료');
-                alert('회원가입이 완료되었습니다.\n새로운 공간을 만들거나 초대코드로 참여해 주세요.');
+                const newUser = await createHearMe2niteAccount(email, password);
+                showEmailVerificationPanel(newUser);
+                showSaveStatus('✉️ 이메일 인증 대기 중');
+                alert('회원가입이 완료되었습니다.\n가입한 이메일로 인증 메일을 보냈습니다.\n인증을 완료해야 Room을 만들거나 초대에 참여할 수 있습니다.');
             } else {
                 showSaveStatus('🔐 HearMe2nite 로그인 확인 중...');
                 await babyAuth.signInWithEmailAndPassword(email, password);
@@ -196,6 +319,8 @@
         activeRelationshipRole = "";
         clearRoomInputs();
         clearFormFieldsExceptSync();
+        hmSignupFlowActive = false;
+        hideEmailVerificationPanel();
         try { await babyAuth.signOut(); } catch(e) { console.warn(e); }
     }
 
