@@ -112,16 +112,8 @@
             currentUser = user;
 
             if (user) {
-                // v0.10.20 Safe Enforced Access Gate
-                // 승인된 사용자만 앱 화면을 표시한다. READ_ERROR는 기존 사용자 보호를 위해 임시 통과한다.
-                showSaveStatus('🔐 앱 승인 상태 확인 중...');
-                const gate = await enforceMasterAppAccess({ timeoutMs: 5000, label: 'Access Gate / Session' });
-                if (!gate.allowed) {
-                    currentUser = null;
-                    hmFinishBooting();
-                    return;
-                }
-
+                // STEP3: our-baby-care Firebase 로그인 세션만 확인한다.
+                // MasterOS 승인 상태를 다시 조회하지 않아 기존 사용자의 직접 로그인을 보장한다.
                 document.body.classList.add('hm-authenticated');
                 document.getElementById('authBox').classList.add('is-hidden');
                 document.getElementById('authBox').style.display = 'none';

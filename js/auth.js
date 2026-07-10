@@ -346,8 +346,8 @@
 
     // =========================================================
 
-    // 로그인/회원가입 공통 처리
-    // Auth 탭 상태에 따라 Firebase Auth signIn 또는 createUser를 실행한다.
+    // 기존 HearMe2nite 계정 직접 로그인 처리
+    // STEP3: MasterOS 승인 확인과 자동 계정 생성을 사용하지 않는다.
     // 주의: 로그인 성공 이후 방 복구는 onAuthStateChanged 흐름에서 처리한다.
 
     // =========================================================
@@ -363,33 +363,11 @@
         if (password.length < 6) { alert('비밀번호는 6자리 이상이어야 합니다.'); return; }
 
         try {
-            showSaveStatus('🔐 MasterOS 로그인 확인 중...');
+            showSaveStatus('🔐 HearMe2nite 로그인 확인 중...');
 
-            // 1단계: MasterOS 계정 로그인
-            await masterAuth.signInWithEmailAndPassword(email, password);
-
-            // 2단계: MasterOS 승인 상태 확인. 승인된 사용자만 HearMe2nite 로그인 진행.
-            showSaveStatus('🔐 앱 승인 상태 확인 중...');
-            const gate = await enforceMasterAppAccess({ timeoutMs: 5000, label: 'Access Gate / Login' });
-            if (!gate.allowed) {
-                try { await masterAuth.signOut(); } catch(e) { console.warn(e); }
-                return;
-            }
-
-            // 3단계: 기존 rooms 데이터가 있는 our-baby-care에도 로그인
-            try {
-                await babyAuth.signInWithEmailAndPassword(email, password);
-            } catch (babyErr) {
-                if (babyErr.code === 'auth/user-not-found' || babyErr.code === 'auth/invalid-credential') {
-                    // master에는 가입되어 있지만 baby 쪽 계정이 없는 경우만 생성
-                    await babyAuth.createUserWithEmailAndPassword(email, password);
-                } else if (babyErr.code === 'auth/wrong-password') {
-                    alert('MasterOS 로그인과 앱 승인은 확인됐지만, 기존 HearMe2nite 계정의 비밀번호가 달라 로그인하지 못했습니다. 두 프로젝트의 비밀번호를 맞춰 주세요.');
-                    return;
-                } else {
-                    throw babyErr;
-                }
-            }
+            // STEP3: our-baby-care Firebase Authentication의 기존 계정으로 직접 로그인한다.
+            // 로그인 실패 시 새 계정을 자동 생성하지 않아 기존 UID와 Room 연결을 보호한다.
+            await babyAuth.signInWithEmailAndPassword(email, password);
 
             try { if (window.hmRefreshPresenceFromRoom) window.hmRefreshPresenceFromRoom('login-complete'); } catch(e) { console.warn(e); }
             try { if (window.hmPresenceRefresh) setTimeout(window.hmPresenceRefresh, 600); } catch(e) { console.warn(e); }
@@ -413,7 +391,7 @@
         const map = {
             'auth/email-already-in-use': '이미 가입된 이메일입니다.',
             'auth/invalid-email': '이메일 형식이 올바르지 않습니다.',
-            'auth/user-not-found': '2번 사이트(hearu2nite)에서 먼저 회원가입해 주세요.',
+            'auth/user-not-found': '등록된 HearMe2nite 계정을 찾을 수 없습니다. 이메일을 확인해 주세요.',
             'auth/wrong-password': '비밀번호가 맞지 않습니다.',
             'auth/invalid-credential': '이메일 또는 비밀번호가 맞지 않습니다.',
             'auth/network-request-failed': '인터넷 연결을 확인해 주세요.',
@@ -438,7 +416,6 @@
         activeRelationshipRole = "";
         clearRoomInputs();
         clearFormFieldsExceptSync();
-        try { await masterAuth.signOut(); } catch(e) { console.warn(e); }
         try { await babyAuth.signOut(); } catch(e) { console.warn(e); }
     }
 
