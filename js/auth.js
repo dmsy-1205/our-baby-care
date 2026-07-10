@@ -64,26 +64,95 @@
     // Firebase Auth 로그인/회원가입/로그아웃, 로그인 후 기본 방 복원을 담당한다.
     // 로그인 구조와 기존 계정 데이터는 변경하지 않는다.
     // =========================================================
+    let hmAuthMode = 'login';
+
+    function setAuthMode(mode) {
+        hmAuthMode = mode === 'signup' ? 'signup' : 'login';
+        const signup = hmAuthMode === 'signup';
+        const confirmGroup = document.getElementById('authPasswordConfirmGroup');
+        const confirmInput = document.getElementById('authPasswordConfirm');
+        const passwordInput = document.getElementById('authPassword');
+        const loginTab = document.getElementById('authLoginTab');
+        const signupTab = document.getElementById('authSignupTab');
+        const submitBtn = document.getElementById('authSubmitBtn');
+
+        if (confirmGroup) confirmGroup.hidden = !signup;
+        if (!signup && confirmInput) confirmInput.value = '';
+        if (passwordInput) passwordInput.autocomplete = signup ? 'new-password' : 'current-password';
+        if (loginTab) { loginTab.classList.toggle('active', !signup); loginTab.setAttribute('aria-selected', String(!signup)); }
+        if (signupTab) { signupTab.classList.toggle('active', signup); signupTab.setAttribute('aria-selected', String(signup)); }
+
+        const values = signup ? {
+            icon: '✨', kicker: 'SIGN UP', title: '회원가입',
+            trustTitle: 'HearMe2nite 시작하기',
+            trustText: '이메일과 비밀번호로 계정을 만든 뒤 새로운 공간을 만들거나 초대코드로 참여할 수 있습니다.',
+            submit: '회원가입하기',
+            help: '회원가입만으로 다른 Room에 접근할 수 없습니다. 공간을 만들거나 유효한 초대코드로 참여해야 합니다.'
+        } : {
+            icon: '🔐', kicker: 'LOGIN', title: '로그인',
+            trustTitle: '안전한 공간으로 들어가기',
+            trustText: '기존 HearMe2nite 계정으로 로그인하세요.',
+            submit: '로그인하기',
+            help: '방을 만들거나 초대코드로 참여하면 연결된 사용자에게만 기록이 표시됩니다.'
+        };
+
+        const bindings = {
+            authModeIcon: values.icon, authModeKicker: values.kicker, authModeTitle: values.title,
+            authModeTrustTitle: values.trustTitle, authModeTrustText: values.trustText,
+            authModeHelp: values.help
+        };
+        Object.entries(bindings).forEach(([id, value]) => { const el = document.getElementById(id); if (el) el.textContent = value; });
+        if (submitBtn) submitBtn.textContent = values.submit;
+    }
+
+    async function createHearMe2niteAccount(email, password) {
+        const credential = await babyAuth.createUserWithEmailAndPassword(email, password);
+        const user = credential.user;
+        if (!user) throw new Error('auth/user-not-created');
+
+        await db.ref(`users/${user.uid}`).update({
+            email: normalizeEmail(user.email || email),
+            createdAt: firebase.database.ServerValue.TIMESTAMP,
+            lastLogin: firebase.database.ServerValue.TIMESTAMP,
+            hasSeenGuide: false
+        });
+        return user;
+    }
+
     async function handleAuthSubmit() {
-        const email = normalizeEmail(document.getElementById('authEmail').value);
-        const password = document.getElementById('authPassword').value;
+        const emailInput = document.getElementById('authEmail');
+        const passwordInput = document.getElementById('authPassword');
+        const confirmInput = document.getElementById('authPasswordConfirm');
+        const submitBtn = document.getElementById('authSubmitBtn');
+        const email = normalizeEmail(emailInput ? emailInput.value : '');
+        const password = passwordInput ? passwordInput.value : '';
+        const passwordConfirm = confirmInput ? confirmInput.value : '';
+        const signup = hmAuthMode === 'signup';
+
         if (!email || !password) { alert('이메일과 비밀번호를 입력해 주세요.'); return; }
         if (password.length < 6) { alert('비밀번호는 6자리 이상이어야 합니다.'); return; }
+        if (signup && password !== passwordConfirm) { alert('비밀번호 확인이 일치하지 않습니다.'); return; }
 
+        if (submitBtn) submitBtn.disabled = true;
         try {
-            showSaveStatus('🔐 HearMe2nite 로그인 확인 중...');
-
-            // STEP3: 기존 our-baby-care Authentication 계정으로만 직접 로그인한다.
-            // 실패 시 계정을 자동 생성하지 않아 기존 UID와 Room 연결을 보호한다.
-            await babyAuth.signInWithEmailAndPassword(email, password);
-
-            try { if (window.hmRefreshPresenceFromRoom) window.hmRefreshPresenceFromRoom('login-complete'); } catch(e) { console.warn(e); }
-            try { if (window.hmPresenceRefresh) setTimeout(window.hmPresenceRefresh, 600); } catch(e) { console.warn(e); }
-            showSaveStatus('☁️ 로그인 완료');
+            if (signup) {
+                showSaveStatus('✨ HearMe2nite 계정을 만드는 중...');
+                await createHearMe2niteAccount(email, password);
+                showSaveStatus('☁️ 회원가입 완료');
+                alert('회원가입이 완료되었습니다.\n새로운 공간을 만들거나 초대코드로 참여해 주세요.');
+            } else {
+                showSaveStatus('🔐 HearMe2nite 로그인 확인 중...');
+                await babyAuth.signInWithEmailAndPassword(email, password);
+                try { if (window.hmRefreshPresenceFromRoom) window.hmRefreshPresenceFromRoom('login-complete'); } catch(e) { console.warn(e); }
+                try { if (window.hmPresenceRefresh) setTimeout(window.hmPresenceRefresh, 600); } catch(e) { console.warn(e); }
+                showSaveStatus('☁️ 로그인 완료');
+            }
         } catch (err) {
             console.error(err);
-            alert(firebaseAuthErrorToKorean(err.code));
-            showSaveStatus('❌ 로그인 실패');
+            alert(firebaseAuthErrorToKorean(err.code || err.message));
+            showSaveStatus(signup ? '❌ 회원가입 실패' : '❌ 로그인 실패');
+        } finally {
+            if (submitBtn) submitBtn.disabled = false;
         }
     }
 
@@ -103,7 +172,10 @@
             'auth/wrong-password': '비밀번호가 맞지 않습니다.',
             'auth/invalid-credential': '이메일 또는 비밀번호가 맞지 않습니다.',
             'auth/network-request-failed': '인터넷 연결을 확인해 주세요.',
-            'auth/too-many-requests': '로그인 시도가 너무 많습니다. 잠시 후 다시 시도해 주세요.'
+            'auth/too-many-requests': '시도가 너무 많습니다. 잠시 후 다시 시도해 주세요.',
+            'auth/weak-password': '비밀번호는 6자리 이상으로 설정해 주세요.',
+            'auth/operation-not-allowed': '현재 이메일 회원가입을 사용할 수 없습니다. 관리자에게 문의해 주세요.',
+            'auth/user-not-created': '회원가입 계정을 생성하지 못했습니다. 잠시 후 다시 시도해 주세요.'
         };
         return map[code] || `로그인 처리 중 오류가 생겼습니다. (${code})`;
     }

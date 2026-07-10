@@ -8658,3 +8658,44 @@ button:active {
         grid-template-columns: 1fr;
     }
 }
+
+
+/* =========================================================
+   Standalone STEP4 — Direct signup UI
+   Login layout and existing app UI remain unchanged.
+   ========================================================= */
+#authBox .hm-auth-mode-tabs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin: -4px 0 18px;
+    padding: 6px;
+    border-radius: 18px;
+    background: rgba(244,239,255,.92);
+    border: 1px solid rgba(221,210,255,.92);
+}
+#authBox .hm-auth-mode-tab {
+    min-height: 44px;
+    border: 0;
+    border-radius: 13px;
+    background: transparent;
+    color: #81758f;
+    font-weight: 900;
+    font-size: .94rem;
+    cursor: pointer;
+}
+#authBox .hm-auth-mode-tab.active {
+    background: #fff;
+    color: #6547dc;
+    box-shadow: 0 8px 20px rgba(109,76,255,.13);
+}
+#authBox .hm-signup-only[hidden] { display: none !important; }
+#authBox .hm-login-button:disabled {
+    cursor: wait;
+    opacity: .68;
+    transform: none !important;
+}
+@media (max-width: 760px) {
+    #authBox .hm-auth-mode-tabs { margin-bottom: 16px; }
+    #authBox .hm-auth-mode-tab { min-height: 46px; font-size: .96rem; }
+}
