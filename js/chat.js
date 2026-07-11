@@ -71,21 +71,23 @@
         }
         const myName = typeof hmGetChatDisplayName === 'function' ? hmGetChatDisplayName() : document.getElementById('chatSender').value.trim();
         Object.keys(messages).forEach((key) => {
-            const msg = messages[key];
-            const msgLine = document.createElement('div');
+            const msg = messages[key] || {};
             const isMe = msg.senderUid === currentUser.uid || (msg.sender === myName && myName !== '');
-            msgLine.className = 'chat-message-line ' + (isMe ? 'is-me' : 'is-other');
+            const row = document.createElement('div');
+            row.className = 'chat-message-row ' + (isMe ? 'is-me' : 'is-other');
+            const profile = typeof hmGetRoomProfile === 'function' ? hmGetRoomProfile(msg.senderUid) : null;
+            const displayName = msg.sender || (profile && profile.nickname) || (isMe ? myName : '상대방');
+            if (typeof hmCreateAvatarElement === 'function') row.appendChild(hmCreateAvatarElement('chat-avatar', profile, displayName));
 
+            const msgLine = document.createElement('div');
+            msgLine.className = 'chat-message-line ' + (isMe ? 'is-me' : 'is-other');
+            const senderName = document.createElement('span');
+            senderName.className = 'chat-sender-name';
+            senderName.innerText = displayName;
+            msgLine.appendChild(senderName);
             const bubble = document.createElement('div');
             bubble.className = 'chat-bubble';
-            bubble.innerText = msg.text;
-
-            if (!isMe) {
-                const senderName = document.createElement('span');
-                senderName.className = 'chat-sender-name';
-                senderName.innerText = msg.sender || '상대방';
-                msgLine.appendChild(senderName);
-            }
+            bubble.innerText = msg.text || '';
             msgLine.appendChild(bubble);
             const timeText = hmFormatChatTimestamp(msg.timestamp || msg.createdAt || msg.sentAt);
             if (timeText) {
@@ -94,7 +96,8 @@
                 timeEl.innerText = timeText;
                 msgLine.appendChild(timeEl);
             }
-            chatMessages.appendChild(msgLine);
+            row.appendChild(msgLine);
+            chatMessages.appendChild(row);
         });
         chatMessages.scrollTop = chatMessages.scrollHeight;
     }

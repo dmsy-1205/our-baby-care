@@ -8895,3 +8895,25 @@ button:active {
 .hm-profile-reset{border:1px solid #eadde8;background:#fff;color:#8b7484;border-radius:12px;font-weight:800;cursor:pointer;}
 .hm-profile-photo-help{margin:0 2px 16px;color:#8b7c87;font-size:.76rem;line-height:1.45;}
 .hm-profile-modal .daily-modal-save{margin-top:8px;}
+
+
+/* =========================================================
+   HearMe2nite STEP5.6.2R - shared profile integration
+   ========================================================= */
+.hm-room-profile-pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:12px 0 14px;}
+.hm-room-person{display:flex;align-items:center;gap:10px;min-width:0;padding:11px 12px;border:1px solid #eadff4;border-radius:16px;background:linear-gradient(145deg,#fff,#faf6ff);}
+.hm-room-person-avatar,.chat-avatar{overflow:hidden;border-radius:50%;display:grid;place-items:center;flex:0 0 auto;background:linear-gradient(145deg,#fff,#f4eaff);border:1px solid #e8d6f5;color:#a955c6;font-weight:900;}
+.hm-room-person-avatar{width:42px;height:42px;font-size:.95rem;}
+.hm-room-person-avatar img,.chat-avatar img{width:100%;height:100%;object-fit:cover;display:block;}
+.hm-room-person-copy{min-width:0;display:grid;gap:2px;}
+.hm-room-person-copy strong{font-size:.88rem;color:#493b4b;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.hm-room-person-copy small{font-size:.73rem;color:#8b7d8b;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.hm-room-person-status{display:inline-flex;align-items:center;gap:5px;font-size:.69rem;color:#8d7f8c;}
+.hm-room-person-status::before{content:"";width:7px;height:7px;border-radius:50%;background:#c9c2ca;}
+.hm-room-person-status.online::before{background:#55c987;box-shadow:0 0 0 3px rgba(85,201,135,.12);}
+.chat-message-row{display:flex;align-items:flex-end;gap:7px;max-width:90%;}
+.chat-message-row.is-me{align-self:flex-end;flex-direction:row-reverse;}
+.chat-message-row.is-other{align-self:flex-start;}
+.chat-avatar{width:28px;height:28px;font-size:.68rem;margin-bottom:17px;}
+.chat-message-row .chat-message-line{max-width:100%;}
+@media (max-width:560px){.hm-room-profile-pair{grid-template-columns:1fr;}.chat-message-row{max-width:94%;}}

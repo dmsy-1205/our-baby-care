@@ -190,6 +190,7 @@
         updateOwnerOnlySections();
         updateManagedFieldAccessControls();
         hmRefreshPresenceFromRoom();
+        if (window.hmStartRoomProfilesListener) window.hmStartRoomProfilesListener();
     }
 
 

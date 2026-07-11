@@ -1,5 +1,5 @@
 // =========================================================
-// HearMe2nite v1.0 STEP5.6.2
+// HearMe2nite v1.0 STEP5.6.2R
 // profile.js - 닉네임 / 프로필 사진 / 채팅 이름 고정
 // 기존 UID, Room, 메시지 경로를 변경하지 않는다.
 // =========================================================
@@ -8,6 +8,8 @@ let hmCurrentNickname = '';
 let hmCurrentProfilePhotoURL = '';
 let hmPendingProfilePhotoBlob = null;
 let hmPendingProfilePhotoPreviewURL = '';
+let hmRoomProfiles = {};
+let hmRoomProfilesRef = null;
 
 function hmNicknameFallback(user) {
     const email = user && user.email ? String(user.email) : '';
@@ -38,6 +40,92 @@ function hmRenderAvatar(element, sizeClass) {
         element.textContent = hmAvatarLetter();
     }
 }
+
+function hmProfileLetter(name) {
+    return (String(name || '').trim().slice(0, 1).toUpperCase() || '♡');
+}
+function hmCreateAvatarElement(className, profile, fallbackName) {
+    const el = document.createElement('div');
+    el.className = className;
+    const name = (profile && profile.nickname) || fallbackName || '상대방';
+    const photoURL = profile && typeof profile.photoURL === 'string' ? profile.photoURL : '';
+    if (photoURL) {
+        const img = document.createElement('img');
+        img.src = photoURL;
+        img.alt = `${name} 프로필 사진`;
+        img.referrerPolicy = 'no-referrer';
+        img.onerror = () => { el.innerHTML = ''; el.textContent = hmProfileLetter(name); };
+        el.appendChild(img);
+    } else {
+        el.textContent = hmProfileLetter(name);
+    }
+    return el;
+}
+function hmProfileStorageErrorMessage(err) {
+    const code = err && err.code ? String(err.code) : '';
+    if (code === 'storage/unauthorized') return '사진 저장 권한이 없습니다. Storage Rules가 배포되었는지 확인해 주세요.';
+    if (code === 'storage/bucket-not-found') return 'Firebase Storage 버킷을 찾지 못했습니다. Firebase Console에서 Storage를 먼저 활성화해 주세요.';
+    if (code === 'storage/retry-limit-exceeded') return '사진 업로드 시간이 초과되었습니다. 인터넷 연결을 확인한 뒤 다시 시도해 주세요.';
+    if (code === 'storage/quota-exceeded') return 'Firebase Storage 사용 한도를 초과했습니다.';
+    if (code === 'storage/unauthenticated') return '로그인 상태가 만료되었습니다. 다시 로그인해 주세요.';
+    return '프로필 사진 저장에 실패했습니다. Storage 설정과 배포 상태를 확인해 주세요.';
+}
+function hmStopRoomProfilesListener() {
+    if (hmRoomProfilesRef) hmRoomProfilesRef.off();
+    hmRoomProfilesRef = null;
+    hmRoomProfiles = {};
+}
+function hmStartRoomProfilesListener() {
+    hmStopRoomProfilesListener();
+    if (!currentUser || !activeRoomCode) { hmRenderRoomProfilePair(); return; }
+    hmRoomProfilesRef = db.ref(`roomMembers/${activeRoomCode}`);
+    hmRoomProfilesRef.on('value', snap => {
+        hmRoomProfiles = snap.val() || {};
+        hmRenderRoomProfilePair();
+        if (typeof updateChatAlignment === 'function') updateChatAlignment();
+    }, err => hmReportError('hmStartRoomProfilesListener', err, '공간 프로필을 불러오지 못했습니다.'));
+}
+function hmRenderRoomProfilePair() {
+    const wrap = document.getElementById('roomProfilePair');
+    if (!wrap) return;
+    wrap.innerHTML = '';
+    if (!currentUser || !activeRoomCode) { wrap.hidden = true; return; }
+    const entries = Object.entries(hmRoomProfiles || {});
+    if (!entries.length) { wrap.hidden = true; return; }
+    entries.sort((a,b) => (a[1].role === 'owner' ? -1 : 1) - (b[1].role === 'owner' ? -1 : 1));
+    entries.slice(0,2).forEach(([uid, member]) => {
+        const profile = member.profile || {};
+        const fallback = uid === currentUser.uid ? hmGetChatDisplayName() : (member.email ? String(member.email).split('@')[0] : '상대방');
+        const name = profile.nickname || fallback;
+        const card = document.createElement('div');
+        card.className = 'hm-room-person';
+        card.appendChild(hmCreateAvatarElement('hm-room-person-avatar', profile, name));
+        const copy = document.createElement('div');
+        copy.className = 'hm-room-person-copy';
+        const strong = document.createElement('strong');
+        strong.textContent = uid === currentUser.uid ? `${name} · 나` : name;
+        const role = member.relationshipRole === 'dom' ? '관리(Dom)' : member.relationshipRole === 'sub' ? '기록(Sub)' : (member.role === 'owner' ? '방주인' : '참여자');
+        const small = document.createElement('small');
+        small.textContent = role;
+        const status = document.createElement('span');
+        const online = !!(member.presence && member.presence.online);
+        status.className = `hm-room-person-status${online ? ' online' : ''}`;
+        status.textContent = online ? '온라인' : '오프라인';
+        copy.append(strong, small, status);
+        card.appendChild(copy);
+        wrap.appendChild(card);
+    });
+    wrap.hidden = false;
+}
+function hmGetRoomProfile(uid) {
+    if (!uid) return null;
+    const member = hmRoomProfiles && hmRoomProfiles[uid];
+    return member && member.profile ? member.profile : null;
+}
+window.hmStartRoomProfilesListener = hmStartRoomProfilesListener;
+window.hmStopRoomProfilesListener = hmStopRoomProfilesListener;
+window.hmGetRoomProfile = hmGetRoomProfile;
+window.hmCreateAvatarElement = hmCreateAvatarElement;
 
 function hmApplyNicknameToUI() {
     const displayName = hmGetChatDisplayName();
@@ -160,10 +248,15 @@ async function handleProfilePhotoSelected(event) {
     }
 }
 async function hmUploadPendingProfilePhoto() {
-    if (!hmPendingProfilePhotoBlob || !currentUser) return hmCurrentProfilePhotoURL;
+    if (!hmPendingProfilePhotoBlob || !currentUser) return { photoURL: hmCurrentProfilePhotoURL, uploaded: false, ref: null };
+    if (!storage || typeof storage.ref !== 'function') throw Object.assign(new Error('Firebase Storage가 초기화되지 않았습니다.'), { code: 'storage/not-initialized' });
     const ref = storage.ref().child(`profiles/${currentUser.uid}/avatar.webp`);
-    const snapshot = await ref.put(hmPendingProfilePhotoBlob, { contentType: 'image/webp', cacheControl: 'public,max-age=3600' });
-    return snapshot.ref.getDownloadURL();
+    const snapshot = await ref.put(hmPendingProfilePhotoBlob, {
+        contentType: 'image/webp',
+        cacheControl: 'public,max-age=3600',
+        customMetadata: { ownerUid: currentUser.uid, app: 'HearMe2nite' }
+    });
+    return { photoURL: await snapshot.ref.getDownloadURL(), uploaded: true, ref: snapshot.ref };
 }
 
 async function saveProfileNickname() {
@@ -171,22 +264,43 @@ async function saveProfileNickname() {
     const input = document.getElementById('profileNicknameInput');
     const button = document.getElementById('profileSaveBtn');
     const nickname = hmNormalizeNickname(input ? input.value : '');
-    if (!hmIsValidNickname(nickname)) { hmSetProfileStatus('닉네임은 2~20자로 입력하고 / . # $ [ ] 문자는 사용하지 마세요.', 'error'); if(input) input.focus(); return; }
+    if (!hmIsValidNickname(nickname)) {
+        hmSetProfileStatus('닉네임은 2~20자로 입력하고 / . # $ [ ] 문자는 사용하지 마세요.', 'error');
+        if (input) input.focus();
+        return;
+    }
+    let uploadResult = { photoURL: hmCurrentProfilePhotoURL, uploaded: false, ref: null };
     try {
-        if (button) { button.disabled = true; button.textContent = hmPendingProfilePhotoBlob ? '사진과 프로필 저장 중…' : '프로필 저장 중…'; }
-        const photoURL = await hmUploadPendingProfilePhoto();
-        const updates = { nickname, updatedAt: firebase.database.ServerValue.TIMESTAMP };
-        if (photoURL) updates.photoURL = photoURL;
-        await db.ref(`users/${currentUser.uid}/profile`).update(updates);
+        if (button) { button.disabled = true; button.textContent = hmPendingProfilePhotoBlob ? '사진 업로드 중…' : '프로필 저장 중…'; }
+        uploadResult = await hmUploadPendingProfilePhoto();
+        if (button) button.textContent = '프로필 정보 저장 중…';
+        const profileData = {
+            nickname,
+            photoURL: uploadResult.photoURL || '',
+            updatedAt: firebase.database.ServerValue.TIMESTAMP
+        };
+        const updates = {};
+        updates[`users/${currentUser.uid}/profile`] = profileData;
+        if (activeRoomCode) updates[`roomMembers/${activeRoomCode}/${currentUser.uid}/profile`] = profileData;
+        await db.ref().update(updates);
         hmCurrentNickname = nickname;
-        hmCurrentProfilePhotoURL = photoURL || hmCurrentProfilePhotoURL;
-        hmDiscardPendingPhoto(); hmApplyNicknameToUI(); updateChatAlignment();
-        hmSetProfileStatus('프로필이 저장되었습니다. 새 채팅부터 이 닉네임으로 표시됩니다.', 'success');
+        hmCurrentProfilePhotoURL = uploadResult.photoURL || '';
+        hmDiscardPendingPhoto();
+        hmApplyNicknameToUI();
+        hmStartRoomProfilesListener();
+        updateChatAlignment();
+        hmSetProfileStatus('프로필이 저장되었습니다. 우리의 공간과 새 채팅에 반영됩니다.', 'success');
         showSaveStatus('✅ 프로필 저장 완료');
     } catch (err) {
+        if (uploadResult.uploaded && uploadResult.ref) {
+            try { await uploadResult.ref.delete(); } catch (_) {}
+        }
         hmReportError('saveUserProfile', err, hmIsFirebasePermissionError(err) ? '프로필 저장 권한을 확인해 주세요.' : '프로필 저장에 실패했습니다.');
-        hmSetProfileStatus('프로필을 저장하지 못했습니다. Firebase Storage 설정과 권한을 확인해 주세요.', 'error');
-    } finally { if (button) { button.disabled = false; button.textContent = '프로필 저장'; } }
+        const message = String(err && err.code || '').startsWith('storage/') ? hmProfileStorageErrorMessage(err) : (hmIsFirebasePermissionError(err) ? 'Realtime Database 프로필 저장 권한을 확인해 주세요.' : '프로필을 저장하지 못했습니다. 잠시 후 다시 시도해 주세요.');
+        hmSetProfileStatus(message, 'error');
+    } finally {
+        if (button) { button.disabled = false; button.textContent = '프로필 저장'; }
+    }
 }
 
 async function resetProfilePhoto() {
@@ -196,8 +310,11 @@ async function resetProfilePhoto() {
     try {
         if (button) button.disabled = true;
         try { await storage.ref().child(`profiles/${currentUser.uid}/avatar.webp`).delete(); } catch (e) { if (!e || e.code !== 'storage/object-not-found') throw e; }
-        await db.ref(`users/${currentUser.uid}/profile/photoURL`).remove();
-        hmCurrentProfilePhotoURL = ''; hmDiscardPendingPhoto(); hmApplyNicknameToUI();
+        const updates = {};
+        updates[`users/${currentUser.uid}/profile/photoURL`] = null;
+        if (activeRoomCode) updates[`roomMembers/${activeRoomCode}/${currentUser.uid}/profile/photoURL`] = null;
+        await db.ref().update(updates);
+        hmCurrentProfilePhotoURL = ''; hmDiscardPendingPhoto(); hmApplyNicknameToUI(); hmStartRoomProfilesListener();
         hmSetProfileStatus('기본 이미지로 변경했습니다.', 'success');
     } catch (err) {
         hmReportError('resetProfilePhoto', err, '프로필 사진을 초기화하지 못했습니다.');
