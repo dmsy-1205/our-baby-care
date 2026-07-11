@@ -12,7 +12,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
 
-    <link rel="stylesheet" href="css/style.css?v=step5-6-1-2-mobile-login-position-20260711">
+    <link rel="stylesheet" href="css/style.css?v=step5-6-1-3-account-bar-20260711">
 </head>
 <body class="hm-booting">
 
@@ -100,11 +100,20 @@
         </div>
     </div>
 
-    <div class="user-bar">
-        <span id="userInfoText">로그인 확인 중...</span>
-        <div class="user-bar-actions">
-            <button type="button" class="btn-small btn-secondary" onclick="openProfileModal()">내 프로필</button>
-            <button type="button" class="btn-small btn-secondary" onclick="openDataManagementModal()">데이터 관리</button>
+    <div class="user-bar hm-account-panel">
+        <div class="hm-account-summary" id="userInfoText" aria-live="polite">
+            <div class="hm-account-item">
+                <span class="hm-account-label">닉네임</span>
+                <strong class="hm-account-value" id="userBarNickname">확인 중...</strong>
+            </div>
+            <div class="hm-account-item">
+                <span class="hm-account-label">계정</span>
+                <strong class="hm-account-value hm-account-email" id="userBarEmail">확인 중...</strong>
+            </div>
+        </div>
+        <div class="user-bar-actions hm-account-actions">
+            <button type="button" class="btn-small btn-secondary" onclick="openProfileModal()">프로필</button>
+            <button type="button" class="btn-small btn-secondary" onclick="openDataManagementModal()">데이터</button>
             <button type="button" class="btn-small btn-secondary" onclick="logoutUser()">로그아웃</button>
         </div>
     </div>
@@ -985,7 +994,7 @@
     <script src="js/custom-routine.js"></script>
     <script src="js/history.js"></script>
     <script src="js/anniversary.js"></script>
-    <script src="js/profile.js?v=step5-6-1-profile-nickname-20260711"></script>
+    <script src="js/profile.js?v=step5-6-1-3-account-bar-20260711"></script>
     <script src="js/chat.js?v=step5-6-1-profile-nickname-20260711"></script>
     <script src="js/autosave.js"></script>
     <script src="js/qa.js?v=step5-6-1-profile-nickname-20260711"></script>
@@ -993,6 +1002,6 @@
     <script src="js/product.js"></script>
     <script src="js/help-center.js"></script>
     <script src="js/data-management.js"></script>
-    <script src="js/app.js?v=step5-6-1-profile-nickname-20260711"></script>
+    <script src="js/app.js?v=step5-6-1-3-account-bar-20260711"></script>
 </body>
 </html>

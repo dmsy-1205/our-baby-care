@@ -9068,3 +9068,84 @@ button:active {
         min-height: calc(100dvh - 14px) !important;
     }
 }
+
+
+/* =========================================================
+   STEP5.6.1.3 — Compact two-row account panel
+   1행: 닉네임 / 계정, 2행: 프로필 / 데이터 / 로그아웃
+   ========================================================= */
+.user-bar.hm-account-panel {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 10px !important;
+    padding: 12px 14px !important;
+    align-items: stretch !important;
+}
+.hm-account-summary {
+    display: grid;
+    grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr);
+    gap: 12px;
+    min-width: 0;
+}
+.hm-account-item {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: baseline;
+    gap: 8px;
+    min-width: 0;
+}
+.hm-account-label {
+    color: #8b7f98;
+    font-size: .76rem;
+    font-weight: 800;
+    white-space: nowrap;
+}
+.hm-account-value {
+    min-width: 0;
+    color: #2f2938;
+    font-size: .9rem;
+    font-weight: 850;
+    line-height: 1.3;
+    overflow-wrap: anywhere;
+}
+.hm-account-email {
+    font-weight: 700;
+}
+.user-bar-actions.hm-account-actions {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px !important;
+    width: 100%;
+}
+.user-bar-actions.hm-account-actions .btn-small {
+    width: 100% !important;
+    min-width: 0 !important;
+    padding: 8px 10px !important;
+    border-radius: 14px !important;
+    font-size: .8rem !important;
+    line-height: 1.2;
+}
+@media (max-width: 520px) {
+    .user-bar.hm-account-panel {
+        padding: 11px 12px !important;
+        gap: 9px !important;
+    }
+    .hm-account-summary {
+        grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr);
+        gap: 9px;
+    }
+    .hm-account-item {
+        grid-template-columns: 1fr;
+        gap: 2px;
+    }
+    .hm-account-label {
+        font-size: .68rem;
+    }
+    .hm-account-value {
+        font-size: .82rem;
+    }
+    .user-bar-actions.hm-account-actions .btn-small {
+        padding: 8px 5px !important;
+        font-size: .76rem !important;
+    }
+}

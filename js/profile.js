@@ -34,13 +34,15 @@ function hmApplyNicknameToUI() {
     const preview = document.getElementById('profileNicknamePreview');
     const avatar = document.getElementById('profileAvatar');
     const userInfo = document.getElementById('userInfoText');
+    const userBarNickname = document.getElementById('userBarNickname');
+    const userBarEmail = document.getElementById('userBarEmail');
     if (chatSender) chatSender.value = displayName;
     if (currentName) currentName.textContent = hmCurrentNickname || '닉네임 미설정';
     if (preview) preview.textContent = displayName;
     if (avatar) avatar.textContent = displayName.slice(0, 1).toUpperCase() || '♡';
-    if (userInfo && currentUser) {
-        userInfo.innerText = hmCurrentNickname ? `${hmCurrentNickname} · ${currentUser.email}` : `로그인됨: ${currentUser.email}`;
-    }
+    if (userBarNickname) userBarNickname.textContent = currentUser ? displayName : '로그인 필요';
+    if (userBarEmail) userBarEmail.textContent = currentUser?.email || '-';
+    if (userInfo) userInfo.setAttribute('data-ready', currentUser ? 'true' : 'false');
 }
 
 async function loadUserProfile() {
