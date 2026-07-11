@@ -82,3 +82,20 @@ hmPrintQaSummary()
 - `errors: 0`이 정상 기준이다.
 - warning은 실제 누락인지 확인한 뒤 배포 승인한다.
 - `favicon.ico 404`, 확장 프로그램의 `runtime.lastError`는 앱 기능 오류와 분리해서 판단한다.
+
+---
+
+## STEP5.5.1 Firebase Rules 회귀 테스트
+
+- [ ] 기존 사용자 `users/{uid}/activeRoom` 읽기 정상
+- [ ] 기존 사용자 `userRooms/{uid}` 읽기 정상
+- [ ] 현재 Room의 `rooms/{roomCode}` 읽기/쓰기 정상
+- [ ] 현재 Room의 `roomMembers/{roomCode}` 읽기 정상
+- [ ] 다른 Room의 `rooms`, `roomMembers`, `ownerNotes` 접근 거부
+- [ ] 신규 미인증 계정 Room 접근 거부
+- [ ] 신규 인증 계정 Room 생성 정상
+- [ ] Owner Invite 생성 정상
+- [ ] Partner Invite 참여 정상
+- [ ] 사용 완료 Invite 재사용 차단
+- [ ] 만료 Invite 참여 차단
+- [ ] Presence online/lastSeen 갱신 정상

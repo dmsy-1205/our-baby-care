@@ -421,17 +421,8 @@
                 }
             }
 
-            // Legacy fallback: userRooms가 비어 있거나 손상된 경우 roomMembers에서 내 UID를 역검색한다.
-            const membersSnap = await db.ref('roomMembers').once('value');
-            const allMembers = membersSnap.val() || {};
-            for (const roomCode of Object.keys(allMembers)) {
-                if (allMembers[roomCode] && allMembers[roomCode][currentUser.uid]) {
-                    if (await hmActivateRecoveredRoom(roomCode, defaultRelationshipRole)) {
-                        showSaveStatus('☁️ 기존 공간 자동 복구 완료');
-                        return true;
-                    }
-                }
-            }
+            // 보안 원칙: roomMembers 전체 목록은 사용자에게 공개하지 않는다.
+            // 기존 공간 복구는 users/{uid}/activeRoom 및 userRooms/{uid}만 사용한다.
         } catch (err) {
             console.warn('[Room Recovery] 기존 공간 자동 복구 실패:', err);
         }
