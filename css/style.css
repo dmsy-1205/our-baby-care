@@ -8866,3 +8866,205 @@ button:active {
 .hm-profile-status.success { color:#2e7d59; }
 .hm-profile-status.error { color:#bd3f50; }
 #chatSender[readonly] { user-select:none; }
+
+/* =========================================================
+   STEP5.6.1.1 모바일 로그인 화면 축소 핫픽스
+   범위: 로그인/회원가입 화면의 모바일 레이아웃만 조정
+   ========================================================= */
+@media (max-width: 760px) {
+    body:has(#authBox.hm-login-shell:not([style*="display: none"])) {
+        display: block !important;
+        min-height: 100dvh !important;
+        padding: 0 !important;
+        overflow-x: hidden !important;
+    }
+
+    #authBox.hm-login-shell {
+        display: block !important;
+        width: 100% !important;
+        max-width: none !important;
+        min-height: 100dvh !important;
+        margin: 0 !important;
+        border: 0 !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        transform: none !important;
+        overflow: visible !important;
+        background: #fff !important;
+    }
+
+    #authBox .hm-login-hero {
+        min-height: 0 !important;
+        padding: 15px 18px 13px !important;
+        border: 0 !important;
+        border-bottom: 1px solid rgba(229, 219, 247, .9) !important;
+        text-align: left !important;
+        display: grid !important;
+        grid-template-columns: 42px minmax(0, 1fr) !important;
+        grid-template-rows: auto auto !important;
+        column-gap: 11px !important;
+        align-items: center !important;
+        background: linear-gradient(135deg, #fff8fb 0%, #f7f3ff 100%) !important;
+    }
+
+    #authBox .hm-login-hero::after,
+    #authBox .hm-login-pill,
+    #authBox .hm-login-points {
+        display: none !important;
+    }
+
+    #authBox .hm-login-mark {
+        display: grid !important;
+        grid-column: 1 !important;
+        grid-row: 1 / 3 !important;
+        width: 42px !important;
+        height: 42px !important;
+        min-width: 42px !important;
+        margin: 0 !important;
+        border-radius: 14px !important;
+        font-size: 1rem !important;
+        transform: none !important;
+        box-shadow: 0 7px 18px rgba(111, 82, 160, .12) !important;
+    }
+
+    #authBox .hm-login-title {
+        grid-column: 2 !important;
+        grid-row: 1 !important;
+        margin: 0 !important;
+        font-size: 1.45rem !important;
+        line-height: 1.08 !important;
+        letter-spacing: -.045em !important;
+        text-align: left !important;
+    }
+
+    #authBox .hm-login-copy {
+        grid-column: 2 !important;
+        grid-row: 2 !important;
+        margin: 3px 0 0 !important;
+        max-width: none !important;
+        font-size: .78rem !important;
+        line-height: 1.3 !important;
+        text-align: left !important;
+        color: #7e7488 !important;
+    }
+
+    #authBox .hm-login-copy br { display: none !important; }
+
+    #authBox .hm-login-panel {
+        padding: 18px 18px calc(22px + env(safe-area-inset-bottom)) !important;
+        min-height: 0 !important;
+    }
+
+    #authBox .hm-login-panel-head {
+        gap: 10px !important;
+        margin: 0 0 13px !important;
+    }
+
+    #authBox .hm-login-lock {
+        width: 42px !important;
+        height: 42px !important;
+        flex: 0 0 42px !important;
+        border-radius: 13px !important;
+        font-size: 1.05rem !important;
+    }
+
+    #authBox .hm-login-kicker {
+        margin-bottom: 1px !important;
+        font-size: .64rem !important;
+        letter-spacing: .16em !important;
+    }
+
+    #authBox .hm-login-panel h2 {
+        font-size: 1.55rem !important;
+        line-height: 1.08 !important;
+    }
+
+    #authBox .hm-auth-mode-tabs {
+        margin-bottom: 13px !important;
+    }
+
+    #authBox .hm-auth-mode-tab {
+        min-height: 43px !important;
+        padding: 9px 12px !important;
+        font-size: .91rem !important;
+        border-radius: 13px !important;
+    }
+
+    #authBox .hm-login-trust {
+        display: none !important;
+    }
+
+    #authBox .hm-login-field {
+        margin-bottom: 12px !important;
+    }
+
+    #authBox .hm-login-field label {
+        margin-bottom: 6px !important;
+        font-size: .82rem !important;
+    }
+
+    #authBox .hm-login-field input {
+        height: 49px !important;
+        min-height: 49px !important;
+        padding: 0 14px !important;
+        border-radius: 14px !important;
+        font-size: 16px !important;
+    }
+
+    #authBox .hm-login-button.btn-main,
+    #authBox .hm-login-button {
+        height: 51px !important;
+        min-height: 51px !important;
+        border-radius: 15px !important;
+        font-size: .98rem !important;
+    }
+
+    #authBox .hm-login-small {
+        margin: 10px 2px 0 !important;
+        padding-bottom: 0 !important;
+        font-size: .72rem !important;
+        line-height: 1.4 !important;
+    }
+
+    #authBox .hm-email-verification-panel {
+        margin-top: 4px !important;
+    }
+}
+
+@media (max-width: 380px) {
+    #authBox .hm-login-hero { padding: 12px 15px 11px !important; }
+    #authBox .hm-login-panel { padding: 15px 15px calc(18px + env(safe-area-inset-bottom)) !important; }
+    #authBox .hm-login-panel-head { margin-bottom: 10px !important; }
+    #authBox .hm-login-small { display: none !important; }
+}
+
+/* =========================================================
+   STEP5.6.1.2 모바일 로그인 세로 정렬 보정
+   - 휴대폰 세로 화면에서만 상단 여백 추가
+   - 태블릿/가로 화면/PC에는 영향 없음
+   ========================================================= */
+@media (max-width: 600px) and (orientation: portrait) {
+    body:has(#authBox.hm-login-shell:not([style*="display: none"])) {
+        padding-top: clamp(22px, 4.5vh, 42px) !important;
+        background: linear-gradient(180deg, #fff8fb 0%, #ffffff 30%) !important;
+    }
+
+    #authBox.hm-login-shell {
+        min-height: calc(100dvh - clamp(22px, 4.5vh, 42px)) !important;
+    }
+
+    #authBox .hm-login-hero {
+        border-top-left-radius: 22px !important;
+        border-top-right-radius: 22px !important;
+    }
+}
+
+@media (max-width: 600px) and (orientation: portrait) and (max-height: 700px) {
+    body:has(#authBox.hm-login-shell:not([style*="display: none"])) {
+        padding-top: 14px !important;
+    }
+
+    #authBox.hm-login-shell {
+        min-height: calc(100dvh - 14px) !important;
+    }
+}
