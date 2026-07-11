@@ -12,7 +12,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
 
-    <link rel="stylesheet" href="css/style.css?v=step5-2-email-verification-20260711">
+    <link rel="stylesheet" href="css/style.css?v=step5-3-verification-ux-20260711">
 </head>
 <body class="hm-booting">
 
@@ -71,6 +71,11 @@
             <strong>이메일 인증이 필요합니다</strong>
             <p><span id="verificationEmailText"></span> 주소로 보낸 인증 메일을 확인해 주세요.</p>
             <p class="hm-email-verification-note">인증 링크를 누른 뒤 이 화면으로 돌아와 아래 버튼을 눌러 주세요.</p>
+            <div class="hm-email-spam-guide" role="note">
+                <strong>메일이 보이지 않나요?</strong>
+                <span>받은편지함에 없으면 스팸함 또는 정크메일함을 확인해 주세요.</span>
+            </div>
+            <p class="hm-verification-status" id="verificationStatus" aria-live="polite"></p>
             <button type="button" class="btn-main hm-login-button" id="checkVerificationBtn" onclick="checkEmailVerificationStatus()">인증 완료 확인</button>
             <button type="button" class="btn-secondary hm-verification-secondary" id="resendVerificationBtn" onclick="resendEmailVerification()">인증 메일 다시 보내기</button>
             <button type="button" class="hm-verification-logout" onclick="logoutUser()">다른 계정으로 로그인</button>
@@ -934,7 +939,7 @@
     <script src="js/config.js?v=standalone-step3-rebuild-20260710"></script>
     <script src="js/utils.js"></script>
     <script src="js/popup.js"></script>
-    <script src="js/auth.js?v=step5-2-email-verification-20260711"></script>
+    <script src="js/auth.js?v=step5-3-verification-ux-20260711"></script>
     <script src="js/room.js"></script>
     <script src="js/presence.js"></script>
     <script src="js/daily.js"></script>
@@ -949,6 +954,6 @@
     <script src="js/product.js"></script>
     <script src="js/help-center.js"></script>
     <script src="js/data-management.js"></script>
-    <script src="js/app.js?v=step5-2-email-verification-20260711"></script>
+    <script src="js/app.js?v=step5-3-verification-ux-20260711"></script>
 </body>
 </html>

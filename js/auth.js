@@ -67,6 +67,8 @@
     let hmAuthMode = 'login';
     let hmSignupFlowActive = false;
     let hmVerificationEmailSentAt = 0;
+    let hmVerificationCooldownTimer = null;
+    const HM_VERIFICATION_RESEND_COOLDOWN_MS = 60000;
 
     function setAuthMode(mode) {
         hmAuthMode = mode === 'signup' ? 'signup' : 'login';
@@ -107,6 +109,36 @@
         if (submitBtn) submitBtn.textContent = values.submit;
     }
 
+
+    function setVerificationStatus(message, type = '') {
+        const status = document.getElementById('verificationStatus');
+        if (!status) return;
+        status.textContent = message || '';
+        status.className = `hm-verification-status${type ? ` is-${type}` : ''}`;
+    }
+
+    function startVerificationResendCooldown(durationMs = HM_VERIFICATION_RESEND_COOLDOWN_MS) {
+        const btn = document.getElementById('resendVerificationBtn');
+        if (!btn) return;
+        if (hmVerificationCooldownTimer) clearInterval(hmVerificationCooldownTimer);
+        const endAt = Date.now() + durationMs;
+        const render = () => {
+            const seconds = Math.max(0, Math.ceil((endAt - Date.now()) / 1000));
+            if (seconds <= 0) {
+                clearInterval(hmVerificationCooldownTimer);
+                hmVerificationCooldownTimer = null;
+                btn.disabled = false;
+                btn.textContent = '인증 메일 다시 보내기';
+                setVerificationStatus('인증 메일을 다시 보낼 수 있습니다.', 'ready');
+                return;
+            }
+            btn.disabled = true;
+            btn.textContent = `다시 보내기 (${seconds}초)`;
+        };
+        render();
+        hmVerificationCooldownTimer = setInterval(render, 1000);
+    }
+
     function showEmailVerificationPanel(user) {
         const entryPanel = document.getElementById('authEntryPanel');
         const verifyPanel = document.getElementById('emailVerificationPanel');
@@ -128,6 +160,7 @@
         if (icon) icon.textContent = '✉️';
         if (kicker) kicker.textContent = 'VERIFY EMAIL';
         if (title) title.textContent = '이메일 인증';
+        setVerificationStatus('인증 메일을 보냈습니다. 받은편지함과 스팸함을 확인해 주세요.', 'info');
     }
 
     function hideEmailVerificationPanel() {
@@ -146,6 +179,8 @@
             else el.hidden = false;
         });
         setAuthMode(hmAuthMode);
+        setVerificationStatus('');
+        if (hmVerificationCooldownTimer) { clearInterval(hmVerificationCooldownTimer); hmVerificationCooldownTimer = null; }
     }
 
     async function hmGetEmailVerificationPolicy(user) {
@@ -171,6 +206,7 @@
         if (!force && now - hmVerificationEmailSentAt < 10000) return;
         await user.sendEmailVerification();
         hmVerificationEmailSentAt = now;
+        startVerificationResendCooldown();
     }
 
     async function createHearMe2niteAccount(email, password) {
@@ -202,7 +238,8 @@
             await user.reload();
             const refreshedUser = babyAuth.currentUser;
             if (!refreshedUser || !refreshedUser.emailVerified) {
-                alert('아직 이메일 인증이 확인되지 않았습니다.\n인증 메일의 링크를 누른 뒤 다시 확인해 주세요.');
+                setVerificationStatus('아직 인증이 확인되지 않았습니다. 메일의 인증 링크를 누른 뒤 다시 확인해 주세요.', 'warning');
+                alert('아직 이메일 인증이 확인되지 않았습니다.\n받은편지함 또는 스팸함에서 인증 메일의 링크를 누른 뒤 다시 확인해 주세요.');
                 return;
             }
             await db.ref(`users/${refreshedUser.uid}`).update({
@@ -210,10 +247,12 @@
                 emailVerifiedAt: firebase.database.ServerValue.TIMESTAMP
             });
             hmSignupFlowActive = false;
+            setVerificationStatus('이메일 인증이 확인되었습니다.', 'success');
             alert('이메일 인증이 확인되었습니다. HearMe2nite를 시작합니다.');
             window.location.reload();
         } catch (err) {
             console.error(err);
+            setVerificationStatus('인증 상태를 확인하지 못했습니다. 잠시 후 다시 시도해 주세요.', 'error');
             alert('인증 상태를 확인하지 못했습니다. 인터넷 연결을 확인한 뒤 다시 시도해 주세요.');
         } finally {
             if (btn) btn.disabled = false;
@@ -224,7 +263,9 @@
         const user = babyAuth.currentUser;
         if (!user) { alert('로그인 정보가 없습니다. 다시 로그인해 주세요.'); return; }
         const btn = document.getElementById('resendVerificationBtn');
+        if (btn && btn.disabled) return;
         if (btn) btn.disabled = true;
+        setVerificationStatus('인증 메일을 보내는 중입니다...', 'info');
         try {
             await user.reload();
             if (babyAuth.currentUser && babyAuth.currentUser.emailVerified) {
@@ -232,12 +273,13 @@
                 return;
             }
             await hmSendVerificationEmail(babyAuth.currentUser, true);
-            alert('인증 메일을 다시 보냈습니다. 스팸함도 함께 확인해 주세요.');
+            setVerificationStatus('인증 메일을 다시 보냈습니다. 받은편지함과 스팸함을 확인해 주세요.', 'success');
+            alert('인증 메일을 다시 보냈습니다.\n받은편지함에 없으면 스팸함 또는 정크메일함도 확인해 주세요.');
         } catch (err) {
             console.error(err);
             alert(firebaseAuthErrorToKorean(err.code || err.message));
         } finally {
-            if (btn) btn.disabled = false;
+            if (btn && !hmVerificationCooldownTimer) btn.disabled = false;
         }
     }
 
@@ -262,7 +304,7 @@
                 const newUser = await createHearMe2niteAccount(email, password);
                 showEmailVerificationPanel(newUser);
                 showSaveStatus('✉️ 이메일 인증 대기 중');
-                alert('회원가입이 완료되었습니다.\n가입한 이메일로 인증 메일을 보냈습니다.\n인증을 완료해야 Room을 만들거나 초대에 참여할 수 있습니다.');
+                alert('회원가입이 완료되었습니다.\n가입한 이메일로 인증 메일을 보냈습니다.\n받은편지함에 없으면 스팸함 또는 정크메일함을 확인해 주세요.\n인증을 완료해야 Room을 만들거나 초대에 참여할 수 있습니다.');
             } else {
                 showSaveStatus('🔐 HearMe2nite 로그인 확인 중...');
                 await babyAuth.signInWithEmailAndPassword(email, password);
@@ -295,7 +337,11 @@
             'auth/wrong-password': '비밀번호가 맞지 않습니다.',
             'auth/invalid-credential': '이메일 또는 비밀번호가 맞지 않습니다.',
             'auth/network-request-failed': '인터넷 연결을 확인해 주세요.',
-            'auth/too-many-requests': '시도가 너무 많습니다. 잠시 후 다시 시도해 주세요.',
+            'auth/too-many-requests': '요청이 너무 많습니다. 잠시 기다린 뒤 다시 시도해 주세요.',
+            'auth/requires-recent-login': '보안을 위해 다시 로그인한 뒤 시도해 주세요.',
+            'auth/user-disabled': '사용이 중지된 계정입니다. 관리자에게 문의해 주세요.',
+            'auth/quota-exceeded': '인증 메일 발송 한도를 초과했습니다. 잠시 후 다시 시도해 주세요.',
+            'auth/internal-error': '인증 서버에서 일시적인 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.',
             'auth/weak-password': '비밀번호는 6자리 이상으로 설정해 주세요.',
             'auth/operation-not-allowed': '현재 이메일 회원가입을 사용할 수 없습니다. 관리자에게 문의해 주세요.',
             'auth/user-not-created': '회원가입 계정을 생성하지 못했습니다. 잠시 후 다시 시도해 주세요.'

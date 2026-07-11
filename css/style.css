@@ -8719,3 +8719,19 @@ button:active {
 #authBox .hm-email-verification-note { font-size: .88rem; }
 #authBox .hm-verification-secondary { width: 100%; min-height: 48px; border-radius: 14px; }
 #authBox .hm-verification-logout { border: 0; background: transparent; color: #716a82; text-decoration: underline; cursor: pointer; padding: 8px; }
+
+
+/* STEP5.3: Email verification guidance and resend status */
+#authBox .hm-email-spam-guide {
+    width: 100%; box-sizing: border-box; padding: 12px 14px; border-radius: 13px;
+    background: rgba(255,255,255,.72); border: 1px solid rgba(113,106,130,.18);
+    display: flex; flex-direction: column; gap: 4px; text-align: left;
+}
+#authBox .hm-email-spam-guide strong { font-size: .9rem; color: #443b5c; }
+#authBox .hm-email-spam-guide span { font-size: .84rem; line-height: 1.5; color: #6d657d; }
+#authBox .hm-verification-status { min-height: 1.35em; margin: 0; font-size: .84rem; line-height: 1.45; text-align: center; }
+#authBox .hm-verification-status.is-info, #authBox .hm-verification-status.is-ready { color: #5f5871; }
+#authBox .hm-verification-status.is-success { color: #28734b; }
+#authBox .hm-verification-status.is-warning { color: #8a5a13; }
+#authBox .hm-verification-status.is-error { color: #a33b42; }
+#authBox #resendVerificationBtn:disabled { opacity: .68; cursor: not-allowed; }
