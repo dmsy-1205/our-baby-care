@@ -32,7 +32,8 @@
         const requiredElementIds = [
             'recordDate', 'authEmail', 'authPassword', 'roomCode', 'currentRoomInfo',
             'saveStatus', 'historyList', 'historyPanelOverlay', 'historyDetailOverlay',
-            'chatMessages', 'chatInput', 'missionModalOverlay'
+            'chatMessages', 'chatInput', 'missionModalOverlay',
+            'verificationEmailText', 'verificationStatus', 'guideModal'
         ];
         requiredElementIds.forEach((id) => {
             const found = !!document.getElementById(id);
@@ -43,7 +44,8 @@
             'handleAuthSubmit', 'logoutUser', 'createMyRoom', 'acceptInviteFromInput',
             'createInviteCode', 'connectAndListenFirebase', 'triggerAutoSave', 'executeAutoSave',
             'displayHistory', 'renderCalendar', 'openDailyModal', 'closeDailyModal',
-            'openMissionModal', 'closeMissionModal', 'listenChat', 'sendChatMessage'
+            'openMissionModal', 'closeMissionModal', 'listenChat', 'sendChatMessage',
+            'checkEmailVerificationStatus', 'resendEmailVerification', 'showEmailVerificationPanel'
         ];
         requiredFunctions.forEach((name) => {
             // eval 결과가 function인지 확인한다. 일부 함수는 전역 프로퍼티가 아닌 스크립트 스코프에 존재한다.
@@ -63,6 +65,32 @@
         }
         if (duplicateFunctions.length) hmQaLog('warn', 'DUPLICATE_SCAN', '중복 함수 확인 필요', duplicateFunctions);
         else hmQaLog('info', 'DUPLICATE_SCAN', '중복 함수 없음');
+
+        // STEP5.5: 중복 DOM id, Firebase 초기화, 핵심 설정값을 읽기 전용으로 점검한다.
+        const allIds = Array.from(document.querySelectorAll('[id]')).map((el) => el.id).filter(Boolean);
+        const duplicateIds = Object.entries(allIds.reduce((acc, id) => {
+            acc[id] = (acc[id] || 0) + 1;
+            return acc;
+        }, {})).filter(([, count]) => count > 1).map(([id, count]) => `${id} x${count}`);
+        if (duplicateIds.length) hmQaLog('warn', 'DOM_ID_SCAN', '중복 id 확인 필요', duplicateIds);
+        else hmQaLog('info', 'DOM_ID_SCAN', '중복 id 없음');
+
+        const firebaseChecks = {
+            sdkLoaded: typeof firebase !== 'undefined',
+            authReady: typeof babyAuth !== 'undefined' && !!babyAuth,
+            databaseReady: typeof db !== 'undefined' && !!db,
+            projectId: typeof babyFirebaseConfig !== 'undefined' ? babyFirebaseConfig.projectId : '',
+            databaseURL: typeof babyFirebaseConfig !== 'undefined' ? babyFirebaseConfig.databaseURL : ''
+        };
+        const firebaseHealthy = firebaseChecks.sdkLoaded && firebaseChecks.authReady && firebaseChecks.databaseReady
+            && firebaseChecks.projectId === 'our-baby-care'
+            && /our-baby-care-default-rtdb/.test(firebaseChecks.databaseURL || '');
+        hmQaLog(firebaseHealthy ? 'info' : 'error', 'FIREBASE', firebaseHealthy ? 'Firebase 기본 연결 설정 OK' : 'Firebase 기본 연결 설정 확인 필요', firebaseChecks);
+
+        const authPolicyHealthy = typeof hmGetEmailVerificationPolicy === 'function'
+            && typeof checkEmailVerificationStatus === 'function'
+            && typeof resendEmailVerification === 'function';
+        hmQaLog(authPolicyHealthy ? 'info' : 'error', 'AUTH_POLICY', authPolicyHealthy ? '신규 회원 이메일 인증 함수 OK' : '이메일 인증 함수 확인 필요');
 
         hmQaLog('info', 'BOOT', `${HM_APP_VERSION} 로드 완료`, {
             online: navigator.onLine,
@@ -127,4 +155,23 @@
     }
 
     hmSetupUsabilityQA();
+
+    // STEP5.5: 배포 후 콘솔에서 읽기 전용 QA 결과를 다시 확인할 수 있다.
+    window.hmGetQaReport = function hmGetQaReport() {
+        return JSON.parse(JSON.stringify(window.hmQaState || hmQaState));
+    };
+    window.hmPrintQaSummary = function hmPrintQaSummary() {
+        const report = window.hmGetQaReport();
+        const summary = {
+            version: window.hmQaVersion || HM_APP_VERSION,
+            checks: report.checks.length,
+            warnings: report.warnings.length,
+            errors: report.errors.length,
+            bootedAt: report.bootedAt
+        };
+        console.table(summary);
+        if (report.warnings.length) console.warn('[HearMe2nite QA] warnings', report.warnings);
+        if (report.errors.length) console.error('[HearMe2nite QA] errors', report.errors);
+        return summary;
+    };
 
