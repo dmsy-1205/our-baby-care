@@ -9000,3 +9000,160 @@ button:active {
     .hm-account-copy strong,.hm-account-copy small{white-space:normal;overflow-wrap:anywhere;}
     .hm-account-bar .user-bar-actions{flex-wrap:wrap;justify-content:flex-end;}
 }
+
+
+/* =========================================================
+   STEP5.6.2R.2 Storage bucket + profile identity display fix
+   ========================================================= */
+.hm-account-bar{
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) auto!important;
+    align-items:center!important;
+    gap:14px!important;
+    padding:12px 14px!important;
+}
+.hm-account-identity{
+    display:grid!important;
+    grid-template-columns:44px minmax(0,1fr)!important;
+    align-items:center!important;
+    gap:11px!important;
+    min-width:0!important;
+    width:100%!important;
+}
+.hm-account-avatar{
+    width:42px!important;
+    height:42px!important;
+    flex:0 0 42px!important;
+}
+.hm-account-copy{
+    display:grid!important;
+    grid-template-columns:1fr!important;
+    gap:4px!important;
+    min-width:0!important;
+    width:100%!important;
+}
+.hm-account-copy>div{
+    display:grid!important;
+    grid-template-columns:66px minmax(0,1fr)!important;
+    align-items:baseline!important;
+    gap:6px!important;
+    min-width:0!important;
+}
+.hm-account-copy span{
+    width:auto!important;
+    color:#8f7e8b!important;
+    font-size:.74rem!important;
+    line-height:1.3!important;
+    font-weight:850!important;
+    white-space:nowrap!important;
+}
+.hm-account-copy strong,
+.hm-account-copy small{
+    display:block!important;
+    min-width:0!important;
+    max-width:none!important;
+    overflow:visible!important;
+    text-overflow:clip!important;
+    white-space:normal!important;
+    overflow-wrap:anywhere!important;
+    word-break:break-word!important;
+    line-height:1.35!important;
+}
+.hm-account-copy strong{
+    color:#403442!important;
+    font-size:.94rem!important;
+    font-weight:850!important;
+}
+.hm-account-copy small{
+    color:#70636e!important;
+    font-size:.78rem!important;
+}
+.hm-account-bar .user-bar-actions{
+    display:flex!important;
+    flex-wrap:nowrap!important;
+    justify-content:flex-end!important;
+    align-items:center!important;
+    gap:7px!important;
+    width:auto!important;
+    min-width:max-content!important;
+}
+.hm-account-bar .user-bar-actions .btn-small{
+    width:auto!important;
+    min-width:0!important;
+    padding:9px 12px!important;
+    white-space:nowrap!important;
+}
+.hm-profile-summary-copy{
+    display:grid!important;
+    grid-template-columns:1fr!important;
+    gap:10px!important;
+    min-width:0!important;
+    width:100%!important;
+}
+.hm-profile-info-row{
+    display:grid!important;
+    grid-template-columns:70px minmax(0,1fr)!important;
+    align-items:baseline!important;
+    gap:8px!important;
+    min-width:0!important;
+}
+.hm-profile-info-label{
+    color:#a888ba!important;
+    font-size:.75rem!important;
+    font-weight:900!important;
+    white-space:nowrap!important;
+}
+.hm-profile-info-row strong,
+.hm-profile-info-row #profileEmailText{
+    display:block!important;
+    min-width:0!important;
+    max-width:none!important;
+    overflow:visible!important;
+    text-overflow:clip!important;
+    white-space:normal!important;
+    overflow-wrap:anywhere!important;
+    word-break:break-word!important;
+}
+.hm-profile-info-row strong{
+    color:#423647!important;
+    font-size:1.16rem!important;
+    line-height:1.3!important;
+}
+.hm-profile-info-row #profileEmailText{
+    color:#756976!important;
+    font-size:.84rem!important;
+    line-height:1.4!important;
+}
+@media (max-width:760px){
+    .hm-account-bar{
+        grid-template-columns:1fr!important;
+        align-items:stretch!important;
+    }
+    .hm-account-bar .user-bar-actions{
+        justify-content:flex-start!important;
+        flex-wrap:wrap!important;
+        min-width:0!important;
+    }
+}
+
+
+/* STEP5.6.3 — nickname/account only profile cleanup */
+.hm-account-bar{display:grid!important;grid-template-columns:minmax(250px,1fr) auto!important;align-items:center!important;gap:14px!important;padding:12px 14px!important;}
+.hm-account-identity{display:grid!important;grid-template-columns:42px minmax(0,1fr)!important;align-items:center!important;gap:11px!important;min-width:0!important;}
+.hm-account-avatar{width:42px!important;height:42px!important;min-width:42px!important;display:grid!important;place-items:center!important;border-radius:50%!important;background:#fff!important;color:#bd68d9!important;font-weight:900!important;border:1px solid #eadcff!important;}
+.hm-account-copy{display:grid!important;gap:4px!important;min-width:0!important;}
+.hm-account-copy>div{display:grid!important;grid-template-columns:64px minmax(0,1fr)!important;align-items:start!important;gap:8px!important;line-height:1.35!important;min-width:0!important;}
+.hm-account-copy span{font-size:.78rem!important;color:#8a7b91!important;font-weight:800!important;white-space:nowrap!important;}
+.hm-account-copy strong,.hm-account-copy small{display:block!important;min-width:0!important;max-width:none!important;overflow:visible!important;text-overflow:clip!important;white-space:normal!important;word-break:break-word!important;color:#473b4e!important;}
+.hm-account-copy strong{font-size:.94rem!important;font-weight:900!important;}
+.hm-account-copy small{font-size:.8rem!important;}
+.hm-account-bar .user-bar-actions{display:flex!important;flex-wrap:nowrap!important;gap:7px!important;justify-content:flex-end!important;}
+.hm-account-bar .user-bar-actions .btn-small{width:auto!important;min-width:0!important;padding:10px 13px!important;white-space:nowrap!important;}
+.hm-profile-hero-simple{display:grid!important;grid-template-columns:78px minmax(0,1fr)!important;align-items:center!important;gap:18px!important;}
+.hm-profile-summary-copy{display:grid!important;gap:10px!important;min-width:0!important;}
+.hm-profile-info-row{display:grid!important;grid-template-columns:76px minmax(0,1fr)!important;gap:10px!important;align-items:start!important;min-width:0!important;}
+.hm-profile-info-label{font-size:.8rem!important;color:#9a7fa8!important;font-weight:900!important;white-space:nowrap!important;}
+.hm-profile-info-row strong,.hm-profile-info-row #profileEmailText{display:block!important;max-width:none!important;overflow:visible!important;text-overflow:clip!important;white-space:normal!important;word-break:break-word!important;}
+.hm-profile-info-row strong{font-size:1.12rem!important;color:#423647!important;}
+.hm-profile-info-row #profileEmailText{font-size:.88rem!important;color:#746779!important;}
+@media(max-width:760px){.hm-account-bar{grid-template-columns:1fr!important}.hm-account-bar .user-bar-actions{justify-content:flex-start!important;flex-wrap:wrap!important}.hm-account-copy>div{grid-template-columns:58px minmax(0,1fr)!important}}

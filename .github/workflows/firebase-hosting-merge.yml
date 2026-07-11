@@ -27,10 +27,10 @@ jobs:
         run: |
           printf '%s' '${{ secrets.FIREBASE_SERVICE_ACCOUNT_OUR_BABY_CARE }}' > "$RUNNER_TEMP/firebase-service-account.json"
 
-      - name: Deploy Realtime Database and Storage rules
+      - name: Deploy Realtime Database rules
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/firebase-service-account.json
-        run: npx --yes firebase-tools@latest deploy --only database,storage --project our-baby-care --non-interactive
+        run: npx --yes firebase-tools@latest deploy --only database --project our-baby-care --non-interactive
 
       - name: Deploy to Firebase Hosting live channel
         uses: FirebaseExtended/action-hosting-deploy@v0

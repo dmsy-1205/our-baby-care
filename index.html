@@ -11,9 +11,8 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
 
-    <link rel="stylesheet" href="css/style.css?v=step5-6-2-profile-photo-20260711">
+    <link rel="stylesheet" href="css/style.css?v=step5-6-3-nickname-profile-cleanup-20260711">
 </head>
 <body class="hm-booting">
 
@@ -105,8 +104,8 @@
         <div class="hm-account-identity">
             <div class="hm-account-avatar" id="userBarAvatar" aria-hidden="true">♡</div>
             <div class="hm-account-copy" id="userInfoText">
-                <div><span>닉네임</span><strong id="userBarNickname">설정 전</strong></div>
-                <div><span>계정</span><small id="userBarEmail">로그인 확인 중...</small></div>
+                <div><span>닉네임 :</span><strong id="userBarNickname" title="닉네임">설정 전</strong></div>
+                <div><span>계정 :</span><small id="userBarEmail" title="계정 이메일">로그인 확인 중...</small></div>
             </div>
         </div>
         <div class="user-bar-actions">
@@ -905,34 +904,25 @@
             <h2 id="profileModalTitle">👤 내 프로필</h2>
             <button type="button" class="modal-close-btn" onclick="closeProfileModal()">닫기</button>
         </div>
-        <div class="hm-profile-hero">
-            <button type="button" class="hm-profile-avatar-button" onclick="document.getElementById('profilePhotoInput').click()" aria-label="프로필 사진 선택">
-                <div class="hm-profile-avatar" id="profileAvatar" aria-hidden="true">♡</div>
-                <span>사진 변경</span>
-            </button>
+        <div class="hm-profile-hero hm-profile-hero-simple">
+            <div class="hm-profile-avatar" id="profileAvatar" aria-hidden="true">♡</div>
             <div class="hm-profile-summary-copy">
                 <div class="hm-profile-info-row">
-                    <span class="hm-profile-info-label">닉네임</span>
+                    <span class="hm-profile-info-label">닉네임 :</span>
                     <strong id="profileCurrentName">닉네임 미설정</strong>
                 </div>
                 <div class="hm-profile-info-row">
-                    <span class="hm-profile-info-label">계정</span>
+                    <span class="hm-profile-info-label">계정 :</span>
                     <span id="profileEmailText">로그인 이메일</span>
                 </div>
             </div>
         </div>
-        <input type="file" id="profilePhotoInput" accept="image/jpeg,image/png,image/webp" hidden onchange="handleProfilePhotoSelected(event)">
-        <div class="hm-profile-photo-actions">
-            <button type="button" class="btn-small btn-secondary" onclick="document.getElementById('profilePhotoInput').click()">사진 또는 그림 선택</button>
-            <button type="button" class="btn-small hm-profile-reset" id="profilePhotoResetBtn" onclick="resetProfilePhoto()">기본 이미지</button>
-        </div>
-        <p class="hm-profile-photo-help">JPG, PNG, WEBP 이미지를 선택하면 정사각형으로 자동 조정해 안전하게 저장합니다.</p>
         <label class="hm-profile-label" for="profileNicknameInput">채팅 닉네임</label>
         <input type="text" id="profileNicknameInput" class="hm-profile-input" maxlength="20" autocomplete="nickname" placeholder="2~20자로 입력해 주세요" oninput="updateProfileNicknamePreview()">
         <p class="hm-profile-help">채팅에서는 이 이름이 자동으로 사용되며 직접 바꿀 수 없습니다. 변경한 이름은 새 메시지부터 적용되고 기존 대화 이름은 유지됩니다.</p>
         <div class="hm-profile-preview"><span>채팅 표시</span><strong id="profileNicknamePreview">이메일 이름</strong></div>
         <p class="hm-profile-status" id="profileStatus" aria-live="polite"></p>
-        <button type="button" class="daily-modal-save" id="profileSaveBtn" onclick="saveProfileNickname()">프로필 저장</button>
+        <button type="button" class="daily-modal-save" id="profileSaveBtn" onclick="saveProfileNickname()">닉네임 저장</button>
     </div>
 </div>
 
@@ -997,7 +987,7 @@
 </div>
 
 <div class="toast" id="toast">기록이 복사되었습니다! 💕</div>
-    <script src="js/config.js?v=step5-5-stability-qa-20260711"></script>
+    <script src="js/config.js?v=step5-6-3-nickname-profile-cleanup-20260711"></script>
     <script src="js/utils.js"></script>
     <script src="js/popup.js"></script>
     <script src="js/auth.js?v=step5-3-verification-ux-20260711"></script>
@@ -1008,14 +998,14 @@
     <script src="js/custom-routine.js"></script>
     <script src="js/history.js"></script>
     <script src="js/anniversary.js"></script>
-    <script src="js/profile.js?v=step5-6-2-profile-photo-20260711"></script>
-    <script src="js/chat.js?v=step5-6-2-profile-photo-20260711"></script>
+    <script src="js/profile.js?v=step5-6-3-nickname-profile-cleanup-20260711"></script>
+    <script src="js/chat.js?v=step5-6-3-nickname-profile-cleanup-20260711"></script>
     <script src="js/autosave.js"></script>
-    <script src="js/qa.js?v=step5-6-2-profile-photo-20260711"></script>
+    <script src="js/qa.js?v=step5-6-3-nickname-profile-cleanup-20260711"></script>
     <script src="js/motion.js"></script>
     <script src="js/product.js"></script>
     <script src="js/help-center.js"></script>
     <script src="js/data-management.js"></script>
-    <script src="js/app.js?v=step5-6-2-profile-photo-20260711"></script>
+    <script src="js/app.js?v=step5-6-3-nickname-profile-cleanup-20260711"></script>
 </body>
 </html>
