@@ -33,7 +33,7 @@
             'recordDate', 'authEmail', 'authPassword', 'roomCode', 'currentRoomInfo',
             'saveStatus', 'historyList', 'historyPanelOverlay', 'historyDetailOverlay',
             'chatMessages', 'chatInput', 'chatSender', 'missionModalOverlay',
-            'verificationEmailText', 'verificationStatus', 'guideModal', 'profileOverlay', 'profileNicknameInput'
+            'verificationEmailText', 'verificationStatus', 'guideModal', 'profileOverlay', 'profileNicknameInput', 'profilePhotoInput', 'userBarAvatar', 'userBarNickname', 'userBarEmail'
         ];
         requiredElementIds.forEach((id) => {
             const found = !!document.getElementById(id);
@@ -45,7 +45,7 @@
             'createInviteCode', 'connectAndListenFirebase', 'triggerAutoSave', 'executeAutoSave',
             'displayHistory', 'renderCalendar', 'openDailyModal', 'closeDailyModal',
             'openMissionModal', 'closeMissionModal', 'listenChat', 'sendChatMessage',
-            'checkEmailVerificationStatus', 'resendEmailVerification', 'showEmailVerificationPanel',
+            'checkEmailVerificationStatus', 'resendEmailVerification', 'showEmailVerificationPanel', 'handleProfilePhotoSelected', 'resetProfilePhoto',
             'loadUserProfile', 'openProfileModal', 'saveProfileNickname', 'hmGetChatDisplayName'
         ];
         requiredFunctions.forEach((name) => {

@@ -141,7 +141,8 @@
                 document.getElementById('authBox').style.display = 'none';
                 document.getElementById('appContent').style.display = 'flex';
                 hmFinishBooting();
-                document.getElementById('userInfoText').innerText = `로그인됨: ${user.email}`;
+                const emailEl = document.getElementById('userBarEmail');
+                if (emailEl) emailEl.textContent = user.email || ''; 
                 if (typeof loadUserProfile === 'function') await loadUserProfile();
                 await loadUserActiveRoom();
                 await acceptPendingInviteIfAny();
