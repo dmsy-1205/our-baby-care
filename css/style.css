@@ -8735,3 +8735,112 @@ button:active {
 #authBox .hm-verification-status.is-warning { color: #8a5a13; }
 #authBox .hm-verification-status.is-error { color: #a33b42; }
 #authBox #resendVerificationBtn:disabled { opacity: .68; cursor: not-allowed; }
+
+/* =========================================================
+   v1.0 STEP5.4 - User Guide clarity & visual hierarchy
+   Guide-only update. No Firebase / Room / data logic changes.
+   ========================================================= */
+.help-quick-flow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin: 0 0 12px;
+    padding: 10px 12px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, rgba(255,246,250,.96), rgba(246,242,255,.96));
+    border: 1px solid rgba(228,216,255,.92);
+    color: #5f5674;
+    font-size: .76rem;
+    font-weight: 850;
+    flex-wrap: wrap;
+}
+.help-quick-flow span { display:flex; align-items:center; gap:5px; }
+.help-quick-flow b,
+.help-steps b {
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    width:22px;
+    height:22px;
+    border-radius:50%;
+    background: linear-gradient(135deg,#ff8eae,#8a5cff);
+    color:#fff;
+    font-size:.72rem;
+    flex:0 0 auto;
+}
+.help-quick-flow i { color:#b5a8ca; font-style:normal; }
+.help-menu-card { position:relative; transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease; }
+.help-menu-card:hover { transform:translateY(-2px); box-shadow:0 14px 30px rgba(80,72,120,.11); }
+.help-menu-card-featured {
+    grid-column: 1 / -1;
+    background: linear-gradient(135deg, rgba(255,243,249,.98), rgba(244,238,255,.98));
+    border: 1px solid rgba(179,137,255,.58);
+    box-shadow: 0 14px 34px rgba(132,83,220,.13);
+}
+.help-menu-card-featured em {
+    position:absolute;
+    top:12px;
+    right:12px;
+    padding:5px 8px;
+    border-radius:999px;
+    background:linear-gradient(135deg,#ff7da3,#8558ff);
+    color:#fff;
+    font-size:.66rem;
+    font-style:normal;
+    font-weight:900;
+}
+.help-tab-promise { font-weight:900; }
+.help-tab-promise:not(.active) { color:#7248c8; background:rgba(246,240,255,.86); }
+.help-promise-hero {
+    background: linear-gradient(145deg, rgba(255,247,251,.98), rgba(246,241,255,.98));
+    border-color: rgba(179,137,255,.5);
+}
+.help-feature-badge {
+    display:inline-flex;
+    margin:0 0 10px;
+    padding:5px 9px;
+    border-radius:999px;
+    background:rgba(137,86,255,.1);
+    color:#7445ce;
+    font-size:.7rem;
+    font-weight:900;
+}
+.help-steps { display:grid; gap:8px; margin-top:12px; }
+.help-steps > span {
+    display:flex;
+    align-items:center;
+    gap:9px;
+    padding:9px 10px;
+    border-radius:14px;
+    background:rgba(255,255,255,.8);
+    border:1px solid rgba(230,222,247,.95);
+    color:#51495f;
+    font-size:.8rem;
+    font-weight:800;
+}
+.help-steps-vertical > span { display:grid; grid-template-columns:22px 1fr; column-gap:9px; }
+.help-steps-vertical > span b { grid-row:1 / 3; }
+.help-steps-vertical strong { font-size:.82rem; color:#352f42; }
+.help-steps-vertical small { font-size:.74rem; line-height:1.4; color:#7b738d; font-weight:700; }
+.help-example-chips { display:flex; flex-wrap:wrap; gap:8px; }
+.help-example-chips span {
+    padding:8px 10px;
+    border-radius:999px;
+    background:#fff;
+    border:1px solid rgba(228,218,248,.95);
+    color:#625970;
+    font-size:.76rem;
+    font-weight:850;
+}
+@media (max-width: 640px) {
+    .help-center-card .help-card-grid { grid-template-columns: repeat(2,minmax(0,1fr)); gap:9px; }
+    .help-center-card .help-menu-card { padding:13px 12px; min-height:104px; }
+    .help-center-card .help-menu-card-featured { min-height:auto; }
+}
+@media (max-width: 430px) {
+    .help-center-card .help-card-grid { grid-template-columns:1fr; }
+    .help-menu-card-featured { grid-column:auto; }
+    .help-quick-flow i { display:none; }
+    .help-quick-flow { justify-content:flex-start; }
+}
