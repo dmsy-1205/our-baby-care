@@ -911,9 +911,14 @@
                 <span>사진 변경</span>
             </button>
             <div class="hm-profile-summary-copy">
-                <p class="hm-profile-eyebrow">MY PROFILE</p>
-                <strong id="profileCurrentName">닉네임 미설정</strong>
-                <span id="profileEmailText">로그인 이메일</span>
+                <div class="hm-profile-info-row">
+                    <span class="hm-profile-info-label">닉네임</span>
+                    <strong id="profileCurrentName">닉네임 미설정</strong>
+                </div>
+                <div class="hm-profile-info-row">
+                    <span class="hm-profile-info-label">계정</span>
+                    <span id="profileEmailText">로그인 이메일</span>
+                </div>
             </div>
         </div>
         <input type="file" id="profilePhotoInput" accept="image/jpeg,image/png,image/webp" hidden onchange="handleProfilePhotoSelected(event)">

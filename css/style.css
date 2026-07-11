@@ -8917,3 +8917,86 @@ button:active {
 .chat-avatar{width:28px;height:28px;font-size:.68rem;margin-bottom:17px;}
 .chat-message-row .chat-message-line{max-width:100%;}
 @media (max-width:560px){.hm-room-profile-pair{grid-template-columns:1fr;}.chat-message-row{max-width:94%;}}
+
+
+/* =========================================================
+   STEP5.6.2R.1 - Storage bucket hotfix / profile identity clarity
+   ========================================================= */
+.hm-account-bar{
+    gap:12px;
+}
+.hm-account-identity{
+    min-width:240px;
+}
+.hm-account-copy{
+    grid-template-columns:1fr;
+    flex:1;
+}
+.hm-account-copy>div{
+    display:grid;
+    grid-template-columns:48px minmax(0,1fr);
+    align-items:center;
+    gap:7px;
+}
+.hm-account-copy span{
+    width:auto;
+    color:#8f7e8b;
+    font-size:.72rem;
+    font-weight:800;
+}
+.hm-account-copy strong,
+.hm-account-copy small{
+    min-width:0;
+    overflow:visible;
+    text-overflow:clip;
+    white-space:nowrap;
+}
+.hm-account-copy strong{
+    font-size:.92rem;
+    color:#403442;
+    font-weight:850;
+}
+.hm-account-copy small{
+    font-size:.76rem;
+    color:#70636e;
+}
+.hm-profile-summary-copy{
+    flex:1;
+    gap:9px;
+}
+.hm-profile-info-row{
+    display:grid;
+    grid-template-columns:54px minmax(0,1fr);
+    align-items:baseline;
+    gap:8px;
+    min-width:0;
+}
+.hm-profile-info-label{
+    color:#a888ba!important;
+    font-size:.72rem!important;
+    font-weight:900;
+    letter-spacing:0!important;
+    white-space:nowrap;
+}
+.hm-profile-info-row strong,
+.hm-profile-info-row #profileEmailText{
+    overflow:visible;
+    text-overflow:clip;
+    white-space:normal;
+    overflow-wrap:anywhere;
+}
+.hm-profile-info-row strong{
+    font-size:1.18rem;
+    line-height:1.25;
+}
+.hm-profile-info-row #profileEmailText{
+    font-size:.82rem;
+    line-height:1.35;
+    color:#756976;
+}
+@media (max-width:760px){
+    .hm-account-bar{align-items:flex-start!important;}
+    .hm-account-identity{min-width:0;}
+    .hm-account-copy strong,.hm-account-copy small{white-space:normal;overflow-wrap:anywhere;}
+    .hm-account-bar .user-bar-actions{flex-wrap:wrap;justify-content:flex-end;}
+}

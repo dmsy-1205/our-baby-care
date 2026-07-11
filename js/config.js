@@ -17,7 +17,7 @@
         authDomain: "our-baby-care.firebaseapp.com",
         databaseURL: "https://our-baby-care-default-rtdb.firebaseio.com",
         projectId: "our-baby-care",
-        storageBucket: "our-baby-care.appspot.com",
+        storageBucket: "our-baby-care.firebasestorage.app",
         messagingSenderId: "564751165",
         appId: "1:564751165:web:12012e95e1240e87e27354"
     };
