@@ -1,11 +1,19 @@
-# HearMe2nite v1.0 STEP5.5 QA 체크리스트
+# HearMe2nite v1.0 STEP5.6.1.3 QA 체크리스트
 
 ## 검수 기준
 
-- 기준 소스: `HearMe2nite_v1.0_STEP5.4_USER_GUIDE_FULL.zip`
+- 기준 소스: GitHub `main` 커밋 `c19c825` / `HearMe2nite_v1.0_STEP5.6.1.3_COMPACT_ACCOUNT_BAR_FULL`
 - 검수 화면: PC 우선
 - 기존 사용자 4명과 실제 운영 Room 2개 보호가 최우선
 - Firebase UID, Room, 데이터 경로에 대한 마이그레이션 금지
+
+## 0. Compact Account Bar
+
+- [ ] 1행 왼쪽에 닉네임이 표시된다.
+- [ ] 1행 오른쪽에 계정 이메일이 표시된다.
+- [ ] 2행의 프로필, 데이터, 로그아웃 버튼이 모두 동작한다.
+- [ ] 모바일, Fold, 태블릿, PC에서 계정 영역이 2줄 구조를 유지한다.
+- [ ] 계정 영역 변경이 Auth, Room, Profile 저장 구조에 영향을 주지 않는다.
 
 ## 1. 기존 사용자 회귀 테스트
 
