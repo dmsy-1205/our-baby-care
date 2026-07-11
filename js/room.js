@@ -190,7 +190,6 @@
         updateOwnerOnlySections();
         updateManagedFieldAccessControls();
         hmRefreshPresenceFromRoom();
-        if (window.hmStartRoomProfilesListener) window.hmStartRoomProfilesListener();
     }
 
 
@@ -410,7 +409,7 @@
         if (!box || !uid) return;
         box.innerHTML = '<div class="empty-message">이전 공간을 불러오는 중입니다...</div>';
         try {
-            const snap = await db.ref(`userRooms/${uid}`).once('value');
+            const snap = await db.ref(`userRooms/${currentUser.uid}`).once('value');
             const rooms = snap.val() || {};
             const roomCodes = Object.keys(rooms).filter(Boolean);
             if (roomCodes.length === 0) {
@@ -420,7 +419,7 @@
 
             const items = [];
             for (const roomCode of roomCodes) {
-                const memberSnap = await db.ref(`roomMembers/${roomCode}/${uid}`).once('value');
+                const memberSnap = await db.ref(`roomMembers/${roomCode}/${currentUser.uid}`).once('value');
                 if (!memberSnap.exists()) continue;
                 const member = memberSnap.val() || {};
                 const metaSnap = await db.ref(`rooms/${roomCode}/meta`).once('value');
@@ -476,7 +475,7 @@
         const ok = confirm('이전 공간으로 다시 연결할까요? 현재 기본 공간이 변경됩니다.');
         if (!ok) return;
         try {
-            const memberSnap = await db.ref(`roomMembers/${roomCode}/${uid}`).once('value');
+            const memberSnap = await db.ref(`roomMembers/${roomCode}/${currentUser.uid}`).once('value');
             if (!memberSnap.exists()) {
                 alert('이 계정은 해당 공간의 멤버가 아닙니다.');
                 return;
@@ -582,7 +581,7 @@
     async function canCurrentUserAccessRoom(roomCode) {
         if (!currentUser || !hmIsSafeRoomCode(roomCode)) return false;
         try {
-            const memberSnap = await db.ref(`roomMembers/${roomCode}/${uid}`).once('value');
+            const memberSnap = await db.ref(`roomMembers/${roomCode}/${currentUser.uid}`).once('value');
             return memberSnap.exists();
         } catch (err) {
             console.error('방 접근 확인 실패:', err);
@@ -913,7 +912,7 @@
         }
         showSaveStatus('🔗 기존 방 확인 중...');
         try {
-            const memberSnap = await db.ref(`roomMembers/${roomCode}/${uid}`).once('value');
+            const memberSnap = await db.ref(`roomMembers/${roomCode}/${currentUser.uid}`).once('value');
             if (!memberSnap.exists()) {
                 alert('이 계정은 해당 기존 공유코드 방의 멤버가 아닙니다. 방 주인의 초대코드를 받아 참여해 주세요.');
                 showSaveStatus('🔒 기존 방 접근 차단');

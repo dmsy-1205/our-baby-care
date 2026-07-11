@@ -17,7 +17,7 @@
         authDomain: "our-baby-care.firebaseapp.com",
         databaseURL: "https://our-baby-care-default-rtdb.firebaseio.com",
         projectId: "our-baby-care",
-        storageBucket: "our-baby-care.firebasestorage.app",
+        storageBucket: "our-baby-care.appspot.com",
         messagingSenderId: "564751165",
         appId: "1:564751165:web:12012e95e1240e87e27354"
     };
@@ -56,7 +56,7 @@
     let hmLastAutoSaveSignature = '';
     let hmPendingAutoSaveReason = '';
     // RC2.7 STEP5: 최종 안정화 QA 상태
-    const HM_APP_VERSION = 'HearMe2nite v1.0 STEP5.6.3 nickname-profile-cleanup';
+    const HM_APP_VERSION = 'HearMe2nite v1.0 STEP5.6.1 profile-nickname';
     const hmQaState = {
         bootedAt: new Date().toISOString(),
         checks: [],

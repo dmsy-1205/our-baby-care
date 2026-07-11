@@ -33,7 +33,7 @@
             'recordDate', 'authEmail', 'authPassword', 'roomCode', 'currentRoomInfo',
             'saveStatus', 'historyList', 'historyPanelOverlay', 'historyDetailOverlay',
             'chatMessages', 'chatInput', 'chatSender', 'missionModalOverlay',
-            'verificationEmailText', 'verificationStatus', 'guideModal', 'profileOverlay', 'profileNicknameInput', 'userBarAvatar', 'userBarNickname', 'userBarEmail'
+            'verificationEmailText', 'verificationStatus', 'guideModal', 'profileOverlay', 'profileNicknameInput'
         ];
         requiredElementIds.forEach((id) => {
             const found = !!document.getElementById(id);
@@ -176,19 +176,3 @@
         return summary;
     };
 
-
-
-(function hmQaCheckStorageBucket(){
-    try {
-        const expected = 'our-baby-care.firebasestorage.app';
-        const actual = (window.firebaseConfig && window.firebaseConfig.storageBucket) ||
-            (typeof firebaseConfig !== 'undefined' && firebaseConfig.storageBucket) || '';
-        if (actual === expected) {
-            console.log('[HearMe2nite QA][STORAGE] Storage Bucket OK', { storageBucket: actual });
-        } else {
-            console.error('[HearMe2nite QA][STORAGE] Storage Bucket 불일치', { expected, actual });
-        }
-    } catch (error) {
-        console.warn('[HearMe2nite QA][STORAGE] Storage Bucket 검사 보류', error);
-    }
-})();
