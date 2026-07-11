@@ -4,7 +4,7 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💗</text></svg>">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>HearMe2nite RC2.18 Help Center</title>
+    <title>HearMe2nite v1.0 STEP5.6.1</title>
     <!-- RC2.16.0 Branding STEP1: Quiet Love UI polish / 기능 구조 유지 -->
     <!-- RC2 v2.6.0 STEP5 FINAL QA: component-ready module map / UI and data logic preserved -->
     
@@ -12,7 +12,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
 
-    <link rel="stylesheet" href="css/style.css?v=step5-3-verification-ux-20260711">
+    <link rel="stylesheet" href="css/style.css?v=step5-6-1-profile-nickname-20260711">
 </head>
 <body class="hm-booting">
 
@@ -103,6 +103,7 @@
     <div class="user-bar">
         <span id="userInfoText">로그인 확인 중...</span>
         <div class="user-bar-actions">
+            <button type="button" class="btn-small btn-secondary" onclick="openProfileModal()">내 프로필</button>
             <button type="button" class="btn-small btn-secondary" onclick="openDataManagementModal()">데이터 관리</button>
             <button type="button" class="btn-small btn-secondary" onclick="logoutUser()">로그아웃</button>
         </div>
@@ -387,7 +388,7 @@
         </div>
         
         <div style="display: flex; gap: 6px;">
-            <input type="text" id="chatSender" placeholder="이름" style="width: 65px; padding: 10px; border: 1px solid #ddd; border-radius: 8px; text-align: center; font-size: 0.9rem;" oninput="updateChatAlignment()">
+            <input type="text" id="chatSender" placeholder="닉네임" readonly aria-label="채팅 닉네임" title="내 프로필에서 변경할 수 있습니다." style="width: 92px; padding: 10px; border: 1px solid #eadfe8; border-radius: 8px; text-align: center; font-size: 0.9rem; background:#f8f4f7; color:#6f5968; cursor:default;">
             <input type="text" id="chatInput" placeholder="메시지를 입력하세요..." style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 0.9rem;" onkeypress="if(event.key === 'Enter') sendChatMessage()">
             <button type="button" class="chat-send-btn" onclick="sendChatMessage()">전송</button>
         </div>
@@ -890,6 +891,28 @@
 </div>
 
 
+<div class="daily-modal-overlay hm-profile-overlay" id="profileOverlay" onclick="if(event.target.id==='profileOverlay') closeProfileModal()" aria-hidden="true">
+    <div class="daily-modal hm-profile-modal" role="dialog" aria-modal="true" aria-labelledby="profileModalTitle">
+        <div class="daily-modal-head">
+            <h2 id="profileModalTitle">👤 내 프로필</h2>
+            <button type="button" class="modal-close-btn" onclick="closeProfileModal()">닫기</button>
+        </div>
+        <div class="hm-profile-summary">
+            <div class="hm-profile-avatar" id="profileAvatar" aria-hidden="true">♡</div>
+            <div>
+                <strong id="profileCurrentName">닉네임 미설정</strong>
+                <span id="profileEmailText">로그인 이메일</span>
+            </div>
+        </div>
+        <label class="hm-profile-label" for="profileNicknameInput">채팅 닉네임</label>
+        <input type="text" id="profileNicknameInput" class="hm-profile-input" maxlength="20" autocomplete="nickname" placeholder="2~20자로 입력해 주세요" oninput="updateProfileNicknamePreview()">
+        <p class="hm-profile-help">채팅에서는 이 이름이 자동으로 사용되며 직접 바꿀 수 없습니다. 변경한 이름은 새 메시지부터 적용되고 기존 대화 이름은 유지됩니다.</p>
+        <div class="hm-profile-preview"><span>채팅 표시</span><strong id="profileNicknamePreview">이메일 이름</strong></div>
+        <p class="hm-profile-status" id="profileStatus" aria-live="polite"></p>
+        <button type="button" class="daily-modal-save" id="profileSaveBtn" onclick="saveProfileNickname()">닉네임 저장</button>
+    </div>
+</div>
+
 <div class="daily-modal-overlay data-management-overlay" id="dataManagementOverlay" onclick="if(event.target.id==='dataManagementOverlay') closeDataManagementModal()">
     <div class="daily-modal data-management-modal" role="dialog" aria-modal="true" aria-labelledby="dataManagementTitle">
         <div class="daily-modal-head">
@@ -962,13 +985,14 @@
     <script src="js/custom-routine.js"></script>
     <script src="js/history.js"></script>
     <script src="js/anniversary.js"></script>
-    <script src="js/chat.js"></script>
+    <script src="js/profile.js?v=step5-6-1-profile-nickname-20260711"></script>
+    <script src="js/chat.js?v=step5-6-1-profile-nickname-20260711"></script>
     <script src="js/autosave.js"></script>
-    <script src="js/qa.js?v=step5-5-stability-qa-20260711"></script>
+    <script src="js/qa.js?v=step5-6-1-profile-nickname-20260711"></script>
     <script src="js/motion.js"></script>
     <script src="js/product.js"></script>
     <script src="js/help-center.js"></script>
     <script src="js/data-management.js"></script>
-    <script src="js/app.js?v=step5-3-verification-ux-20260711"></script>
+    <script src="js/app.js?v=step5-6-1-profile-nickname-20260711"></script>
 </body>
 </html>

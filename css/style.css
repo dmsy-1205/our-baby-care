@@ -8844,3 +8844,25 @@ button:active {
     .help-quick-flow i { display:none; }
     .help-quick-flow { justify-content:flex-start; }
 }
+
+
+/* =========================================================
+   STEP5.6.1 사용자 프로필 / 채팅 닉네임
+   ========================================================= */
+.hm-profile-overlay { display:none; z-index:10050; }
+.hm-profile-modal { max-width:460px; }
+.hm-profile-summary { display:flex; align-items:center; gap:14px; padding:16px; margin-bottom:18px; border:1px solid #f0e4eb; border-radius:16px; background:linear-gradient(135deg,#fff8fb,#f8f3ff); }
+.hm-profile-summary > div:last-child { display:flex; flex-direction:column; gap:4px; min-width:0; }
+.hm-profile-summary strong { color:#59424f; font-size:1.05rem; }
+.hm-profile-summary span { color:#8c7b85; font-size:.82rem; overflow:hidden; text-overflow:ellipsis; }
+.hm-profile-avatar { width:52px; height:52px; flex:0 0 52px; border-radius:50%; display:grid; place-items:center; background:#fff; color:#d66f9b; border:1px solid #efd8e4; font-weight:800; font-size:1.25rem; box-shadow:0 5px 14px rgba(133,82,108,.1); }
+.hm-profile-label { display:block; color:#59424f; font-weight:700; margin:0 0 7px; }
+.hm-profile-input { width:100%; box-sizing:border-box; padding:13px 14px; border:1px solid #dfd1d9; border-radius:12px; font-size:1rem; outline:none; }
+.hm-profile-input:focus { border-color:#d985ab; box-shadow:0 0 0 3px rgba(217,133,171,.13); }
+.hm-profile-help { margin:9px 2px 14px; color:#7f7078; font-size:.82rem; line-height:1.55; }
+.hm-profile-preview { display:flex; justify-content:space-between; align-items:center; padding:12px 14px; margin-bottom:10px; border-radius:12px; background:#f8f5f7; color:#796973; font-size:.85rem; }
+.hm-profile-preview strong { color:#bd5f8a; }
+.hm-profile-status { min-height:20px; margin:8px 0; font-size:.83rem; line-height:1.4; }
+.hm-profile-status.success { color:#2e7d59; }
+.hm-profile-status.error { color:#bd3f50; }
+#chatSender[readonly] { user-select:none; }

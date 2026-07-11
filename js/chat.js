@@ -69,7 +69,7 @@
             chatMessages.innerHTML = '<div style="text-align: center; color: #ccc; font-size: 0.85rem; margin-top: 50px;">첫 메시지를 보내 대화를 시작해보세요! 💬</div>';
             return;
         }
-        const myName = document.getElementById('chatSender').value.trim();
+        const myName = typeof hmGetChatDisplayName === 'function' ? hmGetChatDisplayName() : document.getElementById('chatSender').value.trim();
         Object.keys(messages).forEach((key) => {
             const msg = messages[key];
             const msgLine = document.createElement('div');
@@ -112,7 +112,7 @@
     async function sendChatMessage() {
         try {
             const roomCode = getRoomCodeForData();
-            const sender = document.getElementById('chatSender').value.trim();
+            const sender = typeof hmGetChatDisplayName === 'function' ? hmGetChatDisplayName() : document.getElementById('chatSender').value.trim();
             const text = document.getElementById('chatInput').value.trim();
             if (!currentUser) { alert('로그인이 필요합니다.'); return; }
             if (!sender || !text) return;

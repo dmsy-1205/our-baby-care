@@ -32,8 +32,8 @@
         const requiredElementIds = [
             'recordDate', 'authEmail', 'authPassword', 'roomCode', 'currentRoomInfo',
             'saveStatus', 'historyList', 'historyPanelOverlay', 'historyDetailOverlay',
-            'chatMessages', 'chatInput', 'missionModalOverlay',
-            'verificationEmailText', 'verificationStatus', 'guideModal'
+            'chatMessages', 'chatInput', 'chatSender', 'missionModalOverlay',
+            'verificationEmailText', 'verificationStatus', 'guideModal', 'profileOverlay', 'profileNicknameInput'
         ];
         requiredElementIds.forEach((id) => {
             const found = !!document.getElementById(id);
@@ -45,7 +45,8 @@
             'createInviteCode', 'connectAndListenFirebase', 'triggerAutoSave', 'executeAutoSave',
             'displayHistory', 'renderCalendar', 'openDailyModal', 'closeDailyModal',
             'openMissionModal', 'closeMissionModal', 'listenChat', 'sendChatMessage',
-            'checkEmailVerificationStatus', 'resendEmailVerification', 'showEmailVerificationPanel'
+            'checkEmailVerificationStatus', 'resendEmailVerification', 'showEmailVerificationPanel',
+            'loadUserProfile', 'openProfileModal', 'saveProfileNickname', 'hmGetChatDisplayName'
         ];
         requiredFunctions.forEach((name) => {
             // eval 결과가 function인지 확인한다. 일부 함수는 전역 프로퍼티가 아닌 스크립트 스코프에 존재한다.

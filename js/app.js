@@ -142,6 +142,7 @@
                 document.getElementById('appContent').style.display = 'flex';
                 hmFinishBooting();
                 document.getElementById('userInfoText').innerText = `로그인됨: ${user.email}`;
+                if (typeof loadUserProfile === 'function') await loadUserProfile();
                 await loadUserActiveRoom();
                 await acceptPendingInviteIfAny();
                 await showGuideForFirstLogin();
@@ -150,6 +151,8 @@
                 activeRoomRole = "";
                 activeRelationshipRole = "";
                 pendingRelationshipRole = "";
+                if (typeof hmCurrentNickname !== 'undefined') hmCurrentNickname = '';
+                if (typeof hmApplyNicknameToUI === 'function') hmApplyNicknameToUI();
                 hideEmailVerificationPanel();
                 document.body.classList.remove('hm-authenticated');
                 document.getElementById('authBox').classList.remove('is-hidden');
