@@ -1,21 +1,21 @@
 // =========================================================
-// HearMe2nite v1.0 STEP5.6.1.8.1 - Admin Modal Accessibility Hotfix
+// HearMe2nite v1.0 STEP5.6.1.9 - Approved Room Disconnect Engine
 // - Users can submit/cancel and view only their own requests.
 // - Firebase admins can review, hold, approve, or reject.
-// - This module NEVER deletes Auth, Database, or Storage data.
+// - Approved leave_room requests can be executed only through one callable Cloud Function.
 // =========================================================
 (function () {
     const STATUS_LABELS = {
         pending: '🟡 접수됨', reviewing: '🔎 검토 중', approved: '🟢 승인',
         hold: '🟠 보류', rejected: '🔴 거절', canceled: '⚪ 사용자 취소',
-        scheduled: '🔵 삭제 예정', completed: '✅ 처리 완료', failed: '🔴 처리 실패'
+        scheduled: '🔵 삭제 예정', processing: '⏳ 처리 중', completed: '✅ 처리 완료', failed: '🔴 처리 실패'
     };
     const REQUEST_TYPES = {
         account: { label: '내 계정 및 개인 정보 삭제', notice: '계정과 개인 프로필 삭제를 요청합니다. 공동 Room 기록은 상대방의 권리를 위해 별도로 검토됩니다.', placeholder: '예: 더 이상 서비스를 사용하지 않아 계정과 개인 정보 삭제를 요청합니다.' },
         leave_room: { label: '현재 Room 연결 해제', notice: '내 계정과 현재 Room의 연결 해제를 요청합니다. Room 기록 자체는 보존됩니다.', placeholder: '예: 현재 상대방과의 Room 연결을 종료하고 싶습니다.' },
         delete_room: { label: 'Room 전체 데이터 삭제', notice: '공동 기록 전체 삭제 요청입니다. 상대방 확인과 추가 검토가 필요하며 즉시 삭제되지 않습니다.', placeholder: '예: 두 사용자가 합의하여 Room의 모든 공동 기록 삭제를 요청합니다.' }
     };
-    const OPEN_STATUSES = ['pending', 'reviewing', 'approved', 'hold', 'scheduled'];
+    const OPEN_STATUSES = ['pending', 'reviewing', 'approved', 'hold', 'scheduled', 'processing', 'failed'];
     let hmDataAdmin = false;
     let hmAdminRequests = [];
     let hmAdminNotes = {};
@@ -214,12 +214,21 @@
         const items = hmAdminFilter === 'all' ? hmAdminRequests : open;
         list.innerHTML = items.length ? items.map(renderDataAdminCard).join('') : '<div class="data-empty-state">표시할 요청이 없습니다.</div>';
     }
+    function renderDisconnectExecution(item) {
+        if ((item.status || '') !== 'approved' || item.requestType !== 'leave_room') return '';
+        return `<section class="data-admin-execution" aria-label="승인된 Room 연결 해제 실행">
+            <strong>최종 Room 연결 해제</strong>
+            <p>공동 Room 기록은 보존하고, 요청자의 Room 연결 정보만 제거합니다.</p>
+            <button type="button" class="data-admin-execute" onclick="executeApprovedRoomDisconnect('${escapeJs(item.ownerUid)}','${escapeJs(item.id)}')">최종 연결 해제 실행</button>
+        </section>`;
+    }
+
     function renderDataAdminCard(item) {
         const type = REQUEST_TYPES[item.requestType] || { label: item.requestTypeLabel || '데이터 요청' };
         const status = item.status || 'pending';
         const note = hmAdminNotes?.[item.ownerUid]?.[item.id]?.memo || '';
         const actionButton = (value, label) => `<button class="${status === value ? `is-selected status-${value}` : ''}" onclick="processDataAdminRequest('${escapeJs(item.ownerUid)}','${escapeJs(item.id)}','${value}')" aria-pressed="${status === value ? 'true' : 'false'}">${label}</button>`;
-        return `<article class="data-admin-card"><div class="data-request-head"><strong>${escapeHtml(STATUS_LABELS[status] || status)}</strong><small>${escapeHtml(formatDate(item.requestedAt))}</small></div><h3>${escapeHtml(type.label)}</h3><dl><div><dt>사용자</dt><dd>${escapeHtml(item.requestedByEmail || item.requestedByUid || '-')}</dd></div><div><dt>Room</dt><dd>${escapeHtml(item.roomCode || '-')}</dd></div></dl><div class="data-admin-reason"><strong>요청 사유</strong><p>${escapeHtml(item.reason || '-')}</p></div><label>사용자에게 전달할 답변<textarea id="adminMessage_${escapeHtml(item.id)}" rows="3">${escapeHtml(item.adminMessage || '')}</textarea></label><label>관리자 내부 메모<textarea id="adminMemo_${escapeHtml(item.id)}" rows="2" placeholder="사용자에게 보이지 않습니다.">${escapeHtml(note)}</textarea></label><button type="button" class="data-admin-memo-save" onclick="saveDataAdminMemo('${escapeJs(item.ownerUid)}','${escapeJs(item.id)}')">관리자 메모 저장</button><div class="data-admin-actions">${actionButton('reviewing','검토 중')}${actionButton('hold','보류')}${actionButton('approved','승인')}${actionButton('rejected','거절')}</div></article>`;
+        return `<article class="data-admin-card"><div class="data-request-head"><strong>${escapeHtml(STATUS_LABELS[status] || status)}</strong><small>${escapeHtml(formatDate(item.requestedAt))}</small></div><h3>${escapeHtml(type.label)}</h3><dl><div><dt>사용자</dt><dd>${escapeHtml(item.requestedByEmail || item.requestedByUid || '-')}</dd></div><div><dt>Room</dt><dd>${escapeHtml(item.roomCode || '-')}</dd></div></dl><div class="data-admin-reason"><strong>요청 사유</strong><p>${escapeHtml(item.reason || '-')}</p></div><label>사용자에게 전달할 답변<textarea id="adminMessage_${escapeHtml(item.id)}" rows="3">${escapeHtml(item.adminMessage || '')}</textarea></label><label>관리자 내부 메모<textarea id="adminMemo_${escapeHtml(item.id)}" rows="2" placeholder="사용자에게 보이지 않습니다.">${escapeHtml(note)}</textarea></label><button type="button" class="data-admin-memo-save" onclick="saveDataAdminMemo('${escapeJs(item.ownerUid)}','${escapeJs(item.id)}')">관리자 메모 저장</button><div class="data-admin-actions">${actionButton('reviewing','검토 중')}${actionButton('hold','보류')}${actionButton('approved','승인')}${actionButton('rejected','거절')}</div>${renderDisconnectExecution(item)}</article>`;
     }
 
     async function saveDataAdminMemo(uid, requestId) {
@@ -262,6 +271,35 @@
         } catch (error) { console.warn('[DataAdmin] update failed', error); alert('관리자 처리 저장에 실패했습니다. Firebase Rules를 확인해 주세요.'); }
     }
 
+    async function executeApprovedRoomDisconnect(uid, requestId) {
+        if (!hmDataAdmin || !uid || !requestId) return;
+        const item = hmAdminRequests.find((request) => request.ownerUid === uid && request.id === requestId);
+        if (!item || item.status !== 'approved' || item.requestType !== 'leave_room') {
+            return alert('승인된 Room 연결 해제 요청만 실행할 수 있습니다.');
+        }
+        const typed = window.prompt(`Room ${item.roomCode || '-'} 연결을 최종 해제합니다.\n공동 기록은 보존됩니다.\n계속하려면 DISCONNECT를 입력하세요.`);
+        if (typed !== 'DISCONNECT') {
+            if (typed !== null) alert('확인 문구가 일치하지 않아 실행하지 않았습니다.');
+            return;
+        }
+        const button = document.activeElement;
+        if (button && button.tagName === 'BUTTON') button.disabled = true;
+        try {
+            if (!firebase.functions) throw new Error('Firebase Functions SDK가 로드되지 않았습니다.');
+            const callable = firebase.app().functions('us-central1').httpsCallable('executeApprovedRoomDisconnect');
+            const result = await callable({ targetUid: uid, requestId });
+            if (!result?.data?.ok) throw new Error('서버에서 완료 결과를 받지 못했습니다.');
+            showToastSafe('Room 연결 해제가 완료되었습니다.');
+            await loadDataAdminRequests();
+        } catch (error) {
+            console.warn('[DataAdmin] room disconnect failed', error);
+            const message = error?.message || '알 수 없는 오류';
+            alert(`Room 연결 해제에 실패했습니다.\n${message}`);
+        } finally {
+            if (button && button.tagName === 'BUTTON') button.disabled = false;
+        }
+    }
+
     window.openDataManagementModal = openDataManagementModal;
     window.closeDataManagementModal = closeDataManagementModal;
     window.selectDataManagementTab = selectDataManagementTab;
@@ -275,4 +313,5 @@
     window.setDataAdminFilter = setDataAdminFilter;
     window.saveDataAdminMemo = saveDataAdminMemo;
     window.processDataAdminRequest = processDataAdminRequest;
+    window.executeApprovedRoomDisconnect = executeApprovedRoomDisconnect;
 })();

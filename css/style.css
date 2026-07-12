@@ -9299,3 +9299,20 @@ button:active {
         font-size: .72rem !important;
     }
 }
+
+
+/* STEP5.6.1.9 - approved Room disconnect execution */
+.data-admin-execution {
+    margin-top: 14px;
+    padding: 12px;
+    border: 1px solid rgba(201, 71, 91, .28);
+    border-radius: 14px;
+    background: #fff7f8;
+}
+.data-admin-execution strong { display:block; color:#9f3e50; font-size:.88rem; }
+.data-admin-execution p { margin:6px 0 10px; color:#7d6269; font-size:.78rem; line-height:1.45; }
+.data-admin-execute {
+    width:100%; border:0; border-radius:12px; padding:11px 12px;
+    background:#bd4058; color:#fff; font-weight:900; font-size:.82rem;
+}
+.data-admin-execute:disabled { opacity:.5; cursor:wait; }
