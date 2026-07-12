@@ -275,7 +275,8 @@
 
 
     async function hmRequireRoomAccess(actionLabel = '작업', roomCode = getRoomCodeForData()) {
-        if (!currentUser) {
+        const sessionUid = currentUser && currentUser.uid;
+        if (!sessionUid) {
             showSaveStatus(`🔒 로그인 후 ${actionLabel}할 수 있습니다.`);
             return false;
         }
@@ -284,6 +285,7 @@
             return false;
         }
         const allowed = await canCurrentUserAccessRoom(roomCode);
+        if (!currentUser || currentUser.uid !== sessionUid) return false;
         if (!allowed) {
             if (hmLastPermissionRoomCode !== roomCode) {
                 hmLastPermissionRoomCode = roomCode;
@@ -409,7 +411,8 @@
         if (!box || !uid) return;
         box.innerHTML = '<div class="empty-message">이전 공간을 불러오는 중입니다...</div>';
         try {
-            const snap = await db.ref(`userRooms/${currentUser.uid}`).once('value');
+            const snap = await db.ref(`userRooms/${uid}`).once('value');
+            if (!currentUser || currentUser.uid !== uid) return;
             const rooms = snap.val() || {};
             const roomCodes = Object.keys(rooms).filter(Boolean);
             if (roomCodes.length === 0) {
@@ -419,10 +422,12 @@
 
             const items = [];
             for (const roomCode of roomCodes) {
-                const memberSnap = await db.ref(`roomMembers/${roomCode}/${currentUser.uid}`).once('value');
+                const memberSnap = await db.ref(`roomMembers/${roomCode}/${uid}`).once('value');
+                if (!currentUser || currentUser.uid !== uid) return;
                 if (!memberSnap.exists()) continue;
                 const member = memberSnap.val() || {};
                 const metaSnap = await db.ref(`rooms/${roomCode}/meta`).once('value');
+                if (!currentUser || currentUser.uid !== uid) return;
                 const meta = metaSnap.val() || {};
                 items.push({
                     roomCode,
@@ -579,9 +584,11 @@
     // 현재 사용자의 Room 접근 권한 확인
     // roomMembers/{roomCode}/{uid} 기준으로 접근 가능 여부를 판단한다.
     async function canCurrentUserAccessRoom(roomCode) {
-        if (!currentUser || !hmIsSafeRoomCode(roomCode)) return false;
+        const uid = currentUser && currentUser.uid;
+        if (!uid || !hmIsSafeRoomCode(roomCode)) return false;
         try {
-            const memberSnap = await db.ref(`roomMembers/${roomCode}/${currentUser.uid}`).once('value');
+            const memberSnap = await db.ref(`roomMembers/${roomCode}/${uid}`).once('value');
+            if (!currentUser || currentUser.uid !== uid) return false;
             return memberSnap.exists();
         } catch (err) {
             console.error('방 접근 확인 실패:', err);

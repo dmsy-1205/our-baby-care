@@ -47,7 +47,8 @@
     // 주의: 저장 구조는 기존 rooms/{roomCode}/days/{date} 형태를 유지한다.
     async function connectAndListenFirebase() {
         try {
-        if (!currentUser) { showSaveStatus('🔒 로그인이 필요합니다.'); return; }
+        const sessionUid = currentUser && currentUser.uid;
+        if (!sessionUid) { showSaveStatus('🔒 로그인이 필요합니다.'); return; }
         const roomCode = getRoomCodeForData();
         const date = document.getElementById('recordDate').value;
 
@@ -62,6 +63,10 @@
         }
 
         const allowed = await hmRequireRoomAccess('방 연결', roomCode);
+        if (!currentUser || currentUser.uid !== sessionUid) {
+            disconnectAllListeners();
+            return;
+        }
         if (!allowed) {
             activeRoomCode = '';
             clearRoomInputs();
@@ -73,7 +78,9 @@
 
         activeRoomCode = roomCode;
         activeRoomRole = await getCurrentUserRoomRole(roomCode) || activeRoomRole || 'member';
+        if (!currentUser || currentUser.uid !== sessionUid) { disconnectAllListeners(); return; }
         activeRelationshipRole = await getCurrentUserRelationshipRole(roomCode) || activeRelationshipRole || (activeRoomRole === 'owner' ? 'dom' : 'sub');
+        if (!currentUser || currentUser.uid !== sessionUid) { disconnectAllListeners(); return; }
         pendingRelationshipRole = activeRelationshipRole;
         updateCurrentRoomInfo();
         setDataSectionsVisible(true);

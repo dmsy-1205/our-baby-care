@@ -26,7 +26,6 @@
 
     const babyAuth = firebase.auth(babyApp);
     const db = firebase.database(babyApp);
-    const functions = firebase.functions(babyApp, 'us-central1');
     const auth = babyAuth;
 
     let currentUser = null;
@@ -57,7 +56,7 @@
     let hmLastAutoSaveSignature = '';
     let hmPendingAutoSaveReason = '';
     // RC2.7 STEP5: 최종 안정화 QA 상태
-    const HM_APP_VERSION = 'HearMe2nite v1.0 STEP5.6.1.8 deletion-preview';
+    const HM_APP_VERSION = 'HearMe2nite v1.0 STEP5.6.1.8.1 stability-recovery';
     const hmQaState = {
         bootedAt: new Date().toISOString(),
         checks: [],

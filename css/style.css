@@ -9299,21 +9299,3 @@ button:active {
         font-size: .72rem !important;
     }
 }
-
-
-/* STEP5.6.1.8 - Safe deletion preview */
-.data-deletion-preview { margin-top:14px; padding:12px; border:1px dashed #cfc4f7; border-radius:14px; background:#fbfaff; }
-.data-deletion-preview > div:first-child { display:flex; flex-direction:column; gap:4px; }
-.data-deletion-preview p { margin:0; color:#766c7d; font-size:.78rem; line-height:1.45; }
-.data-preview-button { width:100%; margin-top:10px; border:1px solid #bcaef1; border-radius:12px; padding:10px 12px; background:#7463d9; color:#fff; font-size:.82rem; font-weight:800; }
-.data-preview-button:disabled { background:#eee9f1; color:#9d919f; border-color:#e2dae5; cursor:not-allowed; }
-.data-preview-result { margin-top:10px; padding:12px; border-radius:12px; background:#fff; border:1px solid #e6defa; color:#514858; font-size:.78rem; }
-.data-preview-result h4 { margin:12px 0 6px; color:#62558b; }
-.data-preview-result ul { margin:5px 0 0; padding-left:18px; }
-.data-preview-result li { margin:4px 0; word-break:break-all; }
-.data-preview-result code { font-size:.75rem; color:#5f4fa3; }
-.preview-status { display:flex; justify-content:space-between; gap:8px; align-items:center; padding-bottom:8px; border-bottom:1px solid #eee8f8; }
-.preview-status span { color:#958a9b; font-size:.72rem; }
-.preview-missing { color:#aa7b45; font-size:.7rem; }
-.preview-warnings { margin-top:10px; padding:10px; border-radius:10px; background:#fff7e8; color:#7b6036; }
-.preview-execution-state { margin-top:10px !important; padding-top:8px; border-top:1px solid #eee8f8; }

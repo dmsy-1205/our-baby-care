@@ -130,3 +130,9 @@ hmPrintQaSummary()
 - [ ] 관리자 내부 메모는 일반 사용자에게 노출되지 않는다.
 - [ ] 실제 계정/Room/Storage 데이터는 삭제되지 않는다.
 - [ ] Realtime Database Rules 배포 후 일반 사용자는 타 사용자 요청을 읽을 수 없다.
+
+## STEP5.6.1.8.1 추가 QA
+- [ ] 로그아웃 직후 `loadMyRoomList` null UID 오류가 발생하지 않는다.
+- [ ] 관리자/일반 사용자 계정 전환 시 이전 Room 리스너의 permission_denied가 발생하지 않는다.
+- [ ] 기존 Room 자동 복구, 채팅, 기록실이 정상 작동한다.
+- [ ] 삭제 요청/관리자 검토 기능은 STEP5.6.1.7.1과 동일하게 작동한다.
