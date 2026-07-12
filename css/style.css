@@ -9275,8 +9275,13 @@ button:active {
 .data-admin-card textarea { width:100%; margin-top:6px; border:1px solid #eadde1; border-radius:12px; padding:10px; resize:vertical; font:inherit; box-sizing:border-box; background:#fff; color:#3f3437; }
 .data-admin-actions { display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:6px; margin-top:12px; }
 .data-admin-actions button { border:0; border-radius:11px; padding:9px 5px; background:#f2ecee; color:#6b555b; font-size:.76rem; font-weight:800; }
-.data-admin-actions .approve { background:#dff6e8; color:#267145; }
-.data-admin-actions .reject { background:#ffe3e8; color:#b83852; }
+.data-admin-actions button.is-selected { color:#fff; box-shadow:0 8px 18px rgba(112,72,84,.16); transform:translateY(-1px); }
+.data-admin-actions button.status-reviewing { background:#7b6df2; }
+.data-admin-actions button.status-hold { background:#e2a63b; }
+.data-admin-actions button.status-approved { background:#43b77a; }
+.data-admin-actions button.status-rejected { background:#eb6c86; }
+.data-admin-memo-save { width:100%; margin-top:8px; border:1px solid #d8cef9; border-radius:12px; padding:10px 12px; background:#f7f4ff; color:#6f5ac8; font-size:.8rem; font-weight:800; }
+.data-admin-memo-save:active { transform:translateY(1px); }
 @media (max-width: 480px) {
   .data-admin-actions { grid-template-columns:1fr 1fr; }
   .data-admin-card dl div { grid-template-columns:58px 1fr; }

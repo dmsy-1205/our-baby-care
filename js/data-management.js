@@ -1,5 +1,5 @@
 // =========================================================
-// HearMe2nite v1.0 STEP5.6.1.6 - Data Request + Admin Review
+// HearMe2nite v1.0 STEP5.6.1.7 - Admin Memo + Status Button UX
 // - Users can submit/cancel and view only their own requests.
 // - Firebase admins can review, hold, approve, or reject.
 // - This module NEVER deletes Auth, Database, or Storage data.
@@ -18,6 +18,7 @@
     const OPEN_STATUSES = ['pending', 'reviewing', 'approved', 'hold', 'scheduled'];
     let hmDataAdmin = false;
     let hmAdminRequests = [];
+    let hmAdminNotes = {};
     let hmAdminFilter = 'open';
 
     function getRoomCode() {
@@ -180,7 +181,12 @@
         const list = document.getElementById('dataAdminRequestList'); if (!list || !hmDataAdmin) return;
         list.innerHTML = '<div class="data-empty-state">삭제 요청을 불러오는 중입니다.</div>';
         try {
-            const snap = await db.ref('dataDeleteRequests').once('value'); const root = snap.val() || {};
+            const [requestSnap, noteSnap] = await Promise.all([
+                db.ref('dataDeleteRequests').once('value'),
+                db.ref('dataDeleteRequestAdminNotes').once('value')
+            ]);
+            const root = requestSnap.val() || {};
+            hmAdminNotes = noteSnap.val() || {};
             hmAdminRequests = [];
             Object.entries(root).forEach(([uid, requests]) => Object.entries(requests || {}).forEach(([id, item]) => hmAdminRequests.push({ id, ownerUid: uid, ...(item || {}) })));
             hmAdminRequests.sort((a, b) => (b.requestedAt || 0) - (a.requestedAt || 0)); renderDataAdminRequests();
@@ -196,8 +202,31 @@
     function renderDataAdminCard(item) {
         const type = REQUEST_TYPES[item.requestType] || { label: item.requestTypeLabel || '데이터 요청' };
         const status = item.status || 'pending';
-        return `<article class="data-admin-card"><div class="data-request-head"><strong>${escapeHtml(STATUS_LABELS[status] || status)}</strong><small>${escapeHtml(formatDate(item.requestedAt))}</small></div><h3>${escapeHtml(type.label)}</h3><dl><div><dt>사용자</dt><dd>${escapeHtml(item.requestedByEmail || item.requestedByUid || '-')}</dd></div><div><dt>Room</dt><dd>${escapeHtml(item.roomCode || '-')}</dd></div></dl><div class="data-admin-reason"><strong>요청 사유</strong><p>${escapeHtml(item.reason || '-')}</p></div><label>사용자에게 전달할 답변<textarea id="adminMessage_${escapeHtml(item.id)}" rows="3">${escapeHtml(item.adminMessage || '')}</textarea></label><label>관리자 내부 메모<textarea id="adminMemo_${escapeHtml(item.id)}" rows="2" placeholder="사용자에게 보이지 않습니다."></textarea></label><div class="data-admin-actions"><button onclick="processDataAdminRequest('${escapeJs(item.ownerUid)}','${escapeJs(item.id)}','reviewing')">검토 중</button><button onclick="processDataAdminRequest('${escapeJs(item.ownerUid)}','${escapeJs(item.id)}','hold')">보류</button><button class="approve" onclick="processDataAdminRequest('${escapeJs(item.ownerUid)}','${escapeJs(item.id)}','approved')">승인</button><button class="reject" onclick="processDataAdminRequest('${escapeJs(item.ownerUid)}','${escapeJs(item.id)}','rejected')">거절</button></div></article>`;
+        const note = hmAdminNotes?.[item.ownerUid]?.[item.id]?.memo || '';
+        const actionButton = (value, label) => `<button class="${status === value ? `is-selected status-${value}` : ''}" onclick="processDataAdminRequest('${escapeJs(item.ownerUid)}','${escapeJs(item.id)}','${value}')" aria-pressed="${status === value ? 'true' : 'false'}">${label}</button>`;
+        return `<article class="data-admin-card"><div class="data-request-head"><strong>${escapeHtml(STATUS_LABELS[status] || status)}</strong><small>${escapeHtml(formatDate(item.requestedAt))}</small></div><h3>${escapeHtml(type.label)}</h3><dl><div><dt>사용자</dt><dd>${escapeHtml(item.requestedByEmail || item.requestedByUid || '-')}</dd></div><div><dt>Room</dt><dd>${escapeHtml(item.roomCode || '-')}</dd></div></dl><div class="data-admin-reason"><strong>요청 사유</strong><p>${escapeHtml(item.reason || '-')}</p></div><label>사용자에게 전달할 답변<textarea id="adminMessage_${escapeHtml(item.id)}" rows="3">${escapeHtml(item.adminMessage || '')}</textarea></label><label>관리자 내부 메모<textarea id="adminMemo_${escapeHtml(item.id)}" rows="2" placeholder="사용자에게 보이지 않습니다.">${escapeHtml(note)}</textarea></label><button type="button" class="data-admin-memo-save" onclick="saveDataAdminMemo('${escapeJs(item.ownerUid)}','${escapeJs(item.id)}')">관리자 메모 저장</button><div class="data-admin-actions">${actionButton('reviewing','검토 중')}${actionButton('hold','보류')}${actionButton('approved','승인')}${actionButton('rejected','거절')}</div></article>`;
     }
+
+    async function saveDataAdminMemo(uid, requestId) {
+        if (!hmDataAdmin || !uid || !requestId) return;
+        const memo = (document.getElementById(`adminMemo_${requestId}`)?.value || '').trim();
+        try {
+            const noteRef = db.ref(adminNotePath(uid, requestId));
+            if (memo) {
+                await noteRef.set({ memo, updatedByUid: getUser().uid, updatedAt: firebase.database.ServerValue.TIMESTAMP });
+            } else {
+                await noteRef.remove();
+            }
+            showToastSafe(memo ? '관리자 메모가 저장되었습니다.' : '관리자 메모가 삭제되었습니다.');
+            hmAdminNotes[uid] = hmAdminNotes[uid] || {};
+            if (memo) hmAdminNotes[uid][requestId] = { memo };
+            else delete hmAdminNotes[uid][requestId];
+        } catch (error) {
+            console.warn('[DataAdmin] memo save failed', error);
+            alert('관리자 메모 저장에 실패했습니다. Firebase Rules를 확인해 주세요.');
+        }
+    }
+
     async function processDataAdminRequest(uid, requestId, status) {
         if (!hmDataAdmin || !uid || !requestId) return;
         const message = (document.getElementById(`adminMessage_${requestId}`)?.value || '').trim();
@@ -213,6 +242,7 @@
             updates[`${requestItemPath(uid, requestId)}/reviewedAt`] = firebase.database.ServerValue.TIMESTAMP;
             updates[`${requestItemPath(uid, requestId)}/updatedAt`] = firebase.database.ServerValue.TIMESTAMP;
             if (memo) updates[adminNotePath(uid, requestId)] = { memo, updatedByUid: getUser().uid, updatedAt: firebase.database.ServerValue.TIMESTAMP };
+            else updates[adminNotePath(uid, requestId)] = null;
             await db.ref().update(updates); showToastSafe(`요청이 ${labels[status]} 상태로 변경되었습니다.`); await loadDataAdminRequests();
         } catch (error) { console.warn('[DataAdmin] update failed', error); alert('관리자 처리 저장에 실패했습니다. Firebase Rules를 확인해 주세요.'); }
     }
@@ -228,5 +258,6 @@
     window.openDataAdminModal = openDataAdminModal;
     window.closeDataAdminModal = closeDataAdminModal;
     window.setDataAdminFilter = setDataAdminFilter;
+    window.saveDataAdminMemo = saveDataAdminMemo;
     window.processDataAdminRequest = processDataAdminRequest;
 })();
