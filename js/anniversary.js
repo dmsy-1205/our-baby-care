@@ -125,6 +125,18 @@ function hmGetTogetherDayBadgeHtml() {
 window.hmGetTogetherDayBadgeHtml = hmGetTogetherDayBadgeHtml;
 window.hmGetTogetherDayCount = hmGetTogetherDayCount;
 
+function hmSyncHomeSummary() {
+    try {
+        if (typeof window.hmUpdateHomeSummary === 'function') {
+            window.hmUpdateHomeSummary();
+            return;
+        }
+        setTimeout(() => {
+            try { if (typeof window.hmUpdateHomeSummary === 'function') window.hmUpdateHomeSummary(); } catch (err) {}
+        }, 0);
+    } catch (err) {}
+}
+
 
 function hmGetSelectedHistoryDateSafe() {
     try { if (typeof selectedHistoryDate !== 'undefined' && selectedHistoryDate) return selectedHistoryDate; } catch (err) {}
@@ -257,6 +269,7 @@ async function hmLoadAnniversarySettings() {
         hmAnniversaryState.firstMetDate = meta.firstMetDate || '';
         hmAnniversaryState.anniversaries = meta.anniversaries || {};
         hmAnniversaryState.isLoaded = true;
+        hmSyncHomeSummary();
     } catch (err) {
         hmAnniversaryState.isLoaded = true;
         if (typeof hmReportError === 'function') hmReportError('hmLoadAnniversarySettings', err, '기념일 정보를 불러오지 못했습니다.');
@@ -280,6 +293,7 @@ async function hmSaveFirstMetDate() {
         hmRenderAnniversaryPanel();
         hmRenderAnniversaryModal();
         hmRenderAnniversaryCalendarMarkers();
+        hmSyncHomeSummary();
     } catch (err) {
         if (typeof hmReportError === 'function') hmReportError('hmSaveFirstMetDate', err, '처음 만난 날 저장 실패');
         else alert('저장 중 오류가 발생했습니다.');
@@ -319,6 +333,7 @@ async function hmAddCustomAnniversary() {
         hmRenderAnniversaryPanel();
         hmRenderAnniversaryModal();
         hmRenderAnniversaryCalendarMarkers();
+        hmSyncHomeSummary();
     } catch (err) {
         if (typeof hmReportError === 'function') hmReportError('hmAddCustomAnniversary', err, '기념일 추가 실패');
         else alert('기념일 추가 중 오류가 발생했습니다.');
@@ -345,6 +360,7 @@ async function hmSetFirstMetFromAnniversary(id) {
         hmRenderAnniversaryModal();
         try { if (typeof renderCalendar === 'function') renderCalendar(window.cachedDaysData || {}); } catch (e) {}
         hmRenderAnniversaryCalendarMarkers();
+        hmSyncHomeSummary();
     } catch (err) {
         if (typeof hmReportError === 'function') hmReportError('hmSetFirstMetFromAnniversary', err, '대표 기념일 지정 실패');
         else alert('대표 기념일 지정 중 오류가 발생했습니다.');

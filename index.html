@@ -4,7 +4,7 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💗</text></svg>">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>HearMe2nite v1.0 STEP5.6.2.1</title>
+    <title>HearMe2nite v1.0 STEP5.6.2.2</title>
     <!-- RC2.16.0 Branding STEP1: Quiet Love UI polish / 기능 구조 유지 -->
     <!-- RC2 v2.6.0 STEP5 FINAL QA: component-ready module map / UI and data logic preserved -->
     
@@ -13,7 +13,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-functions-compat.js"></script>
 
-    <link rel="stylesheet" href="css/style.css?v=step5-6-2-1-together-photo-gallery-20260712">
+    <link rel="stylesheet" href="css/style.css?v=step5-6-2-2-wake-summary-sync-20260712">
 </head>
 <body class="hm-booting">
 
@@ -94,7 +94,7 @@
     </div>
     <div class="app-subtitle">우리의 하루를, 함께 기록합니다.</div>
     <div class="app-meta-row">
-        <div class="app-version-badge">Version v1.0 STEP5.6.2.1</div>
+        <div class="app-version-badge">Version v1.0 STEP5.6.2.2</div>
         <div class="home-presence-indicator" id="homePresenceIndicator" title="접속 상태 확인 중">
             <span class="home-presence-dot self offline" id="homePresenceSelfDot" aria-label="나 오프라인"></span>
             <span class="home-presence-dot partner offline" id="homePresencePartnerDot" aria-label="상대 오프라인"></span>
@@ -218,7 +218,7 @@
 
     <div class="home-section-title condition-title">
         <span>오늘의 컨디션</span>
-        <small>기분 · 기상 · 운동 · 체중 · 수분</small>
+        <small>기분 · 운동 · 체중 · 수분</small>
     </div>
 
     <div class="input-group">
@@ -232,27 +232,15 @@
         </button>
     </div>
 
-    <div class="row compact-metrics-row">
-        <div class="input-group">
-            <button type="button" class="daily-card metric-daily-card" onclick="openDailyModal('wake')">
-                <span class="daily-card-icon">☀️</span>
-                <span>
-                    <span class="daily-card-title">기상 시간</span>
-                    <span class="daily-card-sub" id="wakeCardSub">아직 입력하지 않았어요.</span>
-                </span>
-                <span class="daily-card-arrow">›</span>
-            </button>
-        </div>
-        <div class="input-group">
-            <button type="button" class="daily-card metric-daily-card" onclick="openDailyModal('weight')">
-                <span class="daily-card-icon">⚖️</span>
-                <span>
-                    <span class="daily-card-title">체중</span>
-                    <span class="daily-card-sub" id="weightCardSub">아직 입력하지 않았어요.</span>
-                </span>
-                <span class="daily-card-arrow">›</span>
-            </button>
-        </div>
+    <div class="input-group">
+        <button type="button" class="daily-card" onclick="openDailyModal('weight')">
+            <span class="daily-card-icon">⚖️</span>
+            <span>
+                <span class="daily-card-title">체중</span>
+                <span class="daily-card-sub" id="weightCardSub">아직 입력하지 않았어요.</span>
+            </span>
+            <span class="daily-card-arrow">›</span>
+        </button>
     </div>
 
     <div class="input-group">
@@ -279,7 +267,18 @@
 
     <div class="home-section-title record-title">
         <span>오늘의 기록</span>
-        <small>식사 · 외출 · 하루</small>
+        <small>기상 · 식사 · 외출 · 하루</small>
+    </div>
+
+    <div class="input-group">
+        <button type="button" class="daily-card" onclick="openDailyModal('wake')">
+            <span class="daily-card-icon">☀️</span>
+            <span>
+                <span class="daily-card-title">기상 시간</span>
+                <span class="daily-card-sub" id="wakeCardSub">아직 입력하지 않았어요.</span>
+            </span>
+            <span class="daily-card-arrow">›</span>
+        </button>
     </div>
 
     <div class="input-group">
@@ -639,8 +638,8 @@
             </section>
 
             <section class="help-panel" data-help-panel="daily">
-                <article class="help-mini-card" data-help-keywords="컨디션 기분 기상시간 체중 수분 물"><h3>😊 오늘의 컨디션</h3><p>기분, 기상시간, 체중, 수분을 간단히 남기는 공간입니다. 하루의 흐름을 서로 이해하는 데 도움이 됩니다.</p><div class="help-tip">💡 매일 같은 시간에 입력하면 변화를 보기 쉬워요.</div></article>
-                <article class="help-mini-card" data-help-keywords="오늘의 기록 사진 메모 하루 정리"><h3>📝 오늘의 기록</h3><p>오늘 있었던 일을 메모와 사진으로 남길 수 있습니다. 작성한 내용은 기록실에서 다시 볼 수 있어요.</p><div class="help-tip">💡 특별한 일이 없어도 한 줄만 남겨보세요.</div></article>
+                <article class="help-mini-card" data-help-keywords="컨디션 기분 운동 체중 수분 물"><h3>😊 오늘의 컨디션</h3><p>기분, 운동, 체중, 수분을 간단히 남기는 공간입니다. 하루의 흐름을 서로 이해하는 데 도움이 됩니다.</p><div class="help-tip">💡 매일 같은 시간에 입력하면 변화를 보기 쉬워요.</div></article>
+                <article class="help-mini-card" data-help-keywords="오늘의 기록 기상시간 식사 외출 사진 메모 하루 정리"><h3>📝 오늘의 기록</h3><p>기상 시간, 식사, 외출과 오늘 있었던 일을 메모와 사진으로 남길 수 있습니다. 작성한 내용은 기록실에서 다시 볼 수 있어요.</p><div class="help-tip">💡 특별한 일이 없어도 한 줄만 남겨보세요.</div></article>
                 <article class="help-mini-card" data-help-keywords="관리 피드백 칭찬 응원"><h3>💬 관리 및 피드백</h3><p>서로에게 전하고 싶은 응원, 칭찬, 조정이 필요한 내용을 남기는 공간입니다.</p><div class="help-tip">💡 지적보다 칭찬을 먼저 적으면 더 따뜻하게 전달돼요.</div></article>
             </section>
 
@@ -1023,25 +1022,25 @@
 </div>
 
 <div class="toast" id="toast">기록이 복사되었습니다! 💕</div>
-    <script src="js/config.js?v=step5-6-2-1-together-photo-gallery-20260712"></script>
-    <script src="js/utils.js?v=step5-6-2-1-together-photo-gallery-20260712"></script>
-    <script src="js/popup.js?v=step5-6-2-1-together-photo-gallery-20260712"></script>
-    <script src="js/auth.js?v=step5-6-2-1-together-photo-gallery-20260712"></script>
-    <script src="js/room.js?v=step5-6-2-1-together-photo-gallery-20260712"></script>
-    <script src="js/presence.js?v=step5-6-2-1-together-photo-gallery-20260712"></script>
-    <script src="js/daily.js?v=step5-6-2-1-together-photo-gallery-20260712"></script>
-    <script src="js/mission.js?v=step5-6-2-1-together-photo-gallery-20260712"></script>
-    <script src="js/custom-routine.js?v=step5-6-2-1-together-photo-gallery-20260712"></script>
-    <script src="js/history.js?v=step5-6-2-1-together-photo-gallery-20260712"></script>
-    <script src="js/anniversary.js?v=step5-6-2-1-together-photo-gallery-20260712"></script>
-    <script src="js/profile.js?v=step5-6-2-1-together-photo-gallery-20260712"></script>
-    <script src="js/chat.js?v=step5-6-2-1-together-photo-gallery-20260712"></script>
-    <script src="js/autosave.js?v=step5-6-2-1-together-photo-gallery-20260712"></script>
-    <script src="js/qa.js?v=step5-6-2-1-together-photo-gallery-20260712"></script>
-    <script src="js/motion.js?v=step5-6-2-1-together-photo-gallery-20260712"></script>
-    <script src="js/product.js?v=step5-6-2-1-together-photo-gallery-20260712"></script>
-    <script src="js/help-center.js?v=step5-6-2-1-together-photo-gallery-20260712"></script>
-    <script src="js/data-management.js?v=step5-6-2-1-together-photo-gallery-20260712"></script>
-    <script src="js/app.js?v=step5-6-2-1-together-photo-gallery-20260712"></script>
+    <script src="js/config.js?v=step5-6-2-2-wake-summary-sync-20260712"></script>
+    <script src="js/utils.js?v=step5-6-2-2-wake-summary-sync-20260712"></script>
+    <script src="js/popup.js?v=step5-6-2-2-wake-summary-sync-20260712"></script>
+    <script src="js/auth.js?v=step5-6-2-2-wake-summary-sync-20260712"></script>
+    <script src="js/room.js?v=step5-6-2-2-wake-summary-sync-20260712"></script>
+    <script src="js/presence.js?v=step5-6-2-2-wake-summary-sync-20260712"></script>
+    <script src="js/daily.js?v=step5-6-2-2-wake-summary-sync-20260712"></script>
+    <script src="js/mission.js?v=step5-6-2-2-wake-summary-sync-20260712"></script>
+    <script src="js/custom-routine.js?v=step5-6-2-2-wake-summary-sync-20260712"></script>
+    <script src="js/history.js?v=step5-6-2-2-wake-summary-sync-20260712"></script>
+    <script src="js/anniversary.js?v=step5-6-2-2-wake-summary-sync-20260712"></script>
+    <script src="js/profile.js?v=step5-6-2-2-wake-summary-sync-20260712"></script>
+    <script src="js/chat.js?v=step5-6-2-2-wake-summary-sync-20260712"></script>
+    <script src="js/autosave.js?v=step5-6-2-2-wake-summary-sync-20260712"></script>
+    <script src="js/qa.js?v=step5-6-2-2-wake-summary-sync-20260712"></script>
+    <script src="js/motion.js?v=step5-6-2-2-wake-summary-sync-20260712"></script>
+    <script src="js/product.js?v=step5-6-2-2-wake-summary-sync-20260712"></script>
+    <script src="js/help-center.js?v=step5-6-2-2-wake-summary-sync-20260712"></script>
+    <script src="js/data-management.js?v=step5-6-2-2-wake-summary-sync-20260712"></script>
+    <script src="js/app.js?v=step5-6-2-2-wake-summary-sync-20260712"></script>
 </body>
 </html>
