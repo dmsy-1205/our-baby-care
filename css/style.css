@@ -9149,3 +9149,103 @@ button:active {
         font-size: .76rem !important;
     }
 }
+
+/* =========================================================
+   STEP5.6.1.5 — Data management request scope and status
+   ========================================================= */
+.data-current-request {
+    border: 1px solid rgba(109, 76, 255, 0.2);
+    background: linear-gradient(135deg, rgba(246, 243, 255, 0.98), rgba(255, 248, 251, 0.98));
+    border-radius: 18px;
+    padding: 14px;
+    margin-bottom: 12px;
+}
+.data-current-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: center;
+}
+.data-current-head strong { color: #574969; }
+.data-current-head span { font-size: .82rem; font-weight: 800; color: #d94f68; }
+.data-current-request p { margin: 8px 0 2px; font-weight: 800; color: #4b3b42; }
+.data-current-request small { color: #887681; }
+.data-current-link {
+    display: block;
+    margin-top: 10px;
+    border: 0;
+    background: transparent;
+    color: #7657d5;
+    font-weight: 800;
+    padding: 0;
+    cursor: pointer;
+}
+.data-request-scope {
+    border: 0;
+    padding: 0;
+    margin: 14px 0 0;
+}
+.data-request-scope legend {
+    width: 100%;
+    font-weight: 900;
+    color: #4b3b42;
+    font-size: .92rem;
+    margin-bottom: 8px;
+}
+.data-scope-option {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    border: 1px solid rgba(255, 118, 136, .18);
+    background: #fff;
+    border-radius: 16px;
+    padding: 12px;
+    margin-bottom: 8px;
+    cursor: pointer;
+}
+.data-scope-option:has(input:checked) {
+    border-color: rgba(255, 96, 124, .62);
+    box-shadow: 0 8px 20px rgba(255, 117, 140, .12);
+    background: #fff9fb;
+}
+.data-scope-option input { margin-top: 3px; accent-color: #ff7189; }
+.data-scope-option span { min-width: 0; }
+.data-scope-option strong { display: block; color: #5b454d; font-size: .9rem; }
+.data-scope-option small { display: block; margin-top: 4px; color: #87737a; line-height: 1.45; font-size: .78rem; }
+.data-scope-danger:has(input:checked) { background: #fff4f5; border-color: rgba(221, 67, 86, .55); }
+.data-scope-notice {
+    border-radius: 14px;
+    background: rgba(109, 76, 255, .07);
+    color: #66547a;
+    padding: 10px 12px;
+    font-size: .8rem;
+    line-height: 1.45;
+    margin-bottom: 4px;
+}
+.data-scope-notice.danger { background: rgba(217, 79, 104, .09); color: #a63f53; }
+.data-request-type {
+    display: inline-block;
+    border-radius: 999px;
+    background: rgba(109, 76, 255, .09);
+    color: #6950b3;
+    font-size: .78rem;
+    font-weight: 800;
+    padding: 6px 10px;
+    margin-bottom: 4px;
+}
+.data-shared-notice {
+    margin: 8px 0;
+    padding: 9px 10px;
+    border-radius: 12px;
+    background: rgba(217, 79, 104, .08);
+    color: #a84356;
+    font-size: .78rem;
+    line-height: 1.4;
+    font-weight: 700;
+}
+#deleteRequestSubmitBtn:disabled { opacity: .45; cursor: not-allowed; transform: none; }
+@media (max-width: 520px) {
+    .data-management-tabs { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+    .data-tab { padding: 9px 5px; font-size: .78rem; }
+    .data-scope-option { padding: 11px; }
+}

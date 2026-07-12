@@ -1,4 +1,4 @@
-# HearMe2nite v1.0 STEP5.6.1.3 QA 체크리스트
+# HearMe2nite v1.0 STEP5.6.1.5 QA 체크리스트
 
 ## 검수 기준
 
@@ -107,3 +107,15 @@ hmPrintQaSummary()
 - [ ] 사용 완료 Invite 재사용 차단
 - [ ] 만료 Invite 참여 차단
 - [ ] Presence online/lastSeen 갱신 정상
+
+
+## STEP5.6.1.5 데이터 관리 추가 QA
+- [ ] 데이터 관리 모달이 정상적으로 열린다.
+- [ ] 계정 삭제 / Room 연결 해제 / Room 전체 삭제 중 하나를 선택할 수 있다.
+- [ ] Room 전체 삭제 선택 시 공동 데이터 경고가 표시된다.
+- [ ] 사유 10자 미만 또는 확인 미체크 시 요청이 차단된다.
+- [ ] 요청 저장 후 요청 종류와 상태가 요청 내역에 표시된다.
+- [ ] 진행 중인 요청이 있으면 중복 요청 버튼이 비활성화된다.
+- [ ] pending/reviewing/hold 요청은 취소할 수 있다.
+- [ ] 기존 요청에 requestType이 없어도 “기존 삭제 요청”으로 표시된다.
+- [ ] 실제 Room/Auth/Storage 데이터는 삭제되지 않는다.
