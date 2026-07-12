@@ -9438,3 +9438,117 @@ button:active {
         grid-template-columns: minmax(0, 1fr) 64px !important;
     }
 }
+
+/* =========================================================
+   STEP5.6.3.1 - Today's Gift UI
+   Existing reward/rest data model is preserved.
+   ========================================================= */
+#rewardDailyCard .daily-card-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 15px;
+    background: linear-gradient(145deg, #fff1dc, #fff8ef);
+    box-shadow: inset 0 0 0 1px rgba(224, 160, 91, 0.16);
+}
+
+#rewardModalOverlay .trust-card {
+    background: linear-gradient(160deg, #fffaf4 0%, #fff7f7 100%);
+    border-color: rgba(230, 171, 133, 0.34);
+    padding: 14px;
+}
+
+.todays-gift-intro {
+    display: grid;
+    gap: 4px;
+    margin-bottom: 13px;
+}
+
+.todays-gift-intro strong {
+    color: #4d3c3c;
+    font-size: 0.94rem;
+}
+
+.todays-gift-intro span {
+    color: #7b6a6a;
+    font-size: 0.79rem;
+    line-height: 1.45;
+}
+
+.todays-gift-grid {
+    gap: 10px;
+    margin-bottom: 13px;
+}
+
+.gift-choice-btn {
+    min-height: 104px;
+    padding: 13px 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+    gap: 8px;
+    text-align: left;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.88);
+    border: 1px solid rgba(222, 178, 151, 0.34);
+    box-shadow: 0 7px 18px rgba(122, 85, 70, 0.06);
+    transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+
+.gift-choice-btn:not(:disabled):active {
+    transform: scale(0.985);
+}
+
+.gift-choice-icon {
+    font-size: 1.34rem;
+    line-height: 1;
+}
+
+.gift-choice-copy {
+    display: grid;
+    gap: 4px;
+}
+
+.gift-choice-copy strong {
+    color: #574545;
+    font-size: 0.9rem;
+}
+
+.gift-choice-copy small {
+    color: #8a7777;
+    font-size: 0.72rem;
+    line-height: 1.35;
+    font-weight: 600;
+}
+
+.gift-choice-btn.active {
+    background: linear-gradient(145deg, #ff8d86, #ff716f);
+    border-color: transparent;
+    box-shadow: 0 10px 22px rgba(255, 113, 111, 0.22);
+}
+
+.gift-choice-btn.active .gift-choice-copy strong,
+.gift-choice-btn.active .gift-choice-copy small {
+    color: #fff;
+}
+
+.todays-gift-label {
+    display: block;
+    margin: 2px 0 7px;
+    color: #625151;
+    font-size: 0.8rem;
+    font-weight: 800;
+}
+
+@media (max-width: 420px) {
+    .gift-choice-btn {
+        min-height: 98px;
+        padding: 12px 9px;
+    }
+    .gift-choice-copy small {
+        font-size: 0.68rem;
+    }
+}

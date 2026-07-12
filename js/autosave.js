@@ -306,7 +306,7 @@
 "${replyMessage}"
 
 ` +
-                           `✨ 보상 / 휴식:
+                           `🎁 오늘의 선물:
 ` +
                            `  - 선택: ${dailyChoiceLabel}
 ` +

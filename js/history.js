@@ -312,7 +312,7 @@ function openHistoryPanelModal() {
             ${historyDetailBlock('🚶 외출 기록', record.goingOut)}
             ${historyDetailBlock('📝 오늘의 하루', record.diary)}
             ${historyDetailBlock('💌 주인의 피드백', record.replyMessage)}
-            ${historyDetailBlock('✨ 보상 / 휴식', [record.dailyChoiceLabel, record.rewardNote].filter(Boolean).join('\n'))}
+            ${historyDetailBlock('🎁 오늘의 선물', [record.dailyChoiceLabel, record.rewardNote].filter(Boolean).join('\n'))}
             <button type="button" class="history-detail-copy" onclick="copyDirectText(event, '${date}')">📋 이 기록 복사하기</button>
         `;
         openModalOverlayById('historyDetailOverlay');
@@ -725,7 +725,7 @@ function openHistoryDetailModal(date) {
         ${historyDetailBlock('🚶 외출 기록', record.goingOut)}
         ${historyDetailBlock('📝 오늘의 하루', record.diary)}
         ${historyDetailBlock('💌 주인의 피드백', record.replyMessage)}
-        ${historyDetailBlock('✨ 보상 / 휴식', [record.dailyChoiceLabel, record.rewardNote].filter(Boolean).join('\n'))}
+        ${historyDetailBlock('🎁 오늘의 선물', [record.dailyChoiceLabel, record.rewardNote].filter(Boolean).join('\n'))}
         <div class="history-detail-actions">
             <button type="button" class="history-detail-copy" onclick="copyDirectText(event, '${date}')">📋 이 기록 복사하기</button>
             <button type="button" class="history-detail-delete" onclick="deleteRecord(event, '${date}')">삭제</button>

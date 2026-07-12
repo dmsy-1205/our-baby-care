@@ -137,7 +137,7 @@
         if (rewardSub) {
             const label = selectedDailyChoice ? getDailyChoiceLabel(selectedDailyChoice) : '';
             const note = getTrimmedValue('rewardNote');
-            rewardSub.innerText = label ? `${label}${note ? ' · 메모 있음' : ''}` : (note ? (note.length > 28 ? `${note.slice(0, 28)}...` : note) : '오늘의 보상이나 휴식을 남겨주세요.');
+            rewardSub.innerText = label ? `${label}${note ? ' · 메모 있음' : ''}` : (note ? (note.length > 28 ? `${note.slice(0, 28)}...` : note) : '작은 보상이나 편안한 휴식을 전해보세요.');
         }
 
         const feedbackCard = document.getElementById('feedbackDailyCard');
@@ -213,7 +213,7 @@
 
     function toggleDailyChoice(choice) {
         if (!canManageRelationshipCards()) {
-            alert('보상 / 휴식은 관리(Dom)만 작성할 수 있습니다.');
+            alert('오늘의 선물은 관리(Dom)만 작성할 수 있습니다.');
             return;
         }
         selectedDailyChoice = selectedDailyChoice === choice ? '' : choice;
@@ -230,8 +230,8 @@
     }
 
     function getDailyChoiceLabel(choice) {
-        if (choice === 'reward') return '✨ 보상';
-        if (choice === 'rest') return '🌙 휴식';
+        if (choice === 'reward') return '🎁 작은 보상';
+        if (choice === 'rest') return '🌙 편안한 휴식';
         return '기록 없음';
     }
 
@@ -434,10 +434,10 @@
             const record = snapshot.val();
             if (record) {
                 let finalText = record.fullText || '';
-                if (!finalText.includes('✨ 보상 / 휴식:')) {
+                if (!finalText.includes('🎁 오늘의 선물:')) {
                     const choiceLabel = record.dailyChoiceLabel || getDailyChoiceLabel(record.dailyChoice || '');
                     const rewardNote = record.rewardNote || '기록 없음';
-                    finalText += `\n\n✨ 보상 / 휴식:\n  - 선택: ${choiceLabel || '기록 없음'}\n  - 내용: ${rewardNote}`;
+                    finalText += `\n\n🎁 오늘의 선물:\n  - 선택: ${choiceLabel || '기록 없음'}\n  - 내용: ${rewardNote}`;
                 }
                 document.getElementById('resultBox').value = finalText;
                 const resultContainer = document.getElementById('resultContainer');

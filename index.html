@@ -4,7 +4,7 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💗</text></svg>">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>HearMe2nite v1.0 STEP5.6.3.0</title>
+    <title>HearMe2nite v1.0 STEP5.6.3.1</title>
     <!-- RC2.16.0 Branding STEP1: Quiet Love UI polish / 기능 구조 유지 -->
     <!-- RC2 v2.6.0 STEP5 FINAL QA: component-ready module map / UI and data logic preserved -->
     
@@ -13,7 +13,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-functions-compat.js"></script>
 
-    <link rel="stylesheet" href="css/style.css?v=step5-6-3-0-chat-card-unread-20260713">
+    <link rel="stylesheet" href="css/style.css?v=step5-6-3-1-todays-gift-20260713">
 </head>
 <body class="hm-booting">
 
@@ -94,7 +94,7 @@
     </div>
     <div class="app-subtitle">우리의 하루를, 함께 기록합니다.</div>
     <div class="app-meta-row">
-        <div class="app-version-badge">Version v1.0 STEP5.6.3.0</div>
+        <div class="app-version-badge">Version v1.0 STEP5.6.3.1</div>
         <div class="home-presence-indicator" id="homePresenceIndicator" title="접속 상태 확인 중">
             <span class="home-presence-dot self offline" id="homePresenceSelfDot" aria-label="나 오프라인"></span>
             <span class="home-presence-dot partner offline" id="homePresencePartnerDot" aria-label="상대 오프라인"></span>
@@ -149,7 +149,7 @@
                         이 설정은 앱 설치 순서나 방 생성 순서가 아니라, 두 사람의 관계 역할을 의미합니다. 최초 1회 선택 후 일반 화면에서는 변경할 수 없습니다.
                     </div>
                     <div class="relationship-role-grid">
-                        <button type="button" class="relationship-role-btn" id="relationshipDomBtn" onclick="setRelationshipRole('dom')">👑 관리(Dom)<br><small>피드백 / 보상 / 휴식 작성</small></button>
+                        <button type="button" class="relationship-role-btn" id="relationshipDomBtn" onclick="setRelationshipRole('dom')">👑 관리(Dom)<br><small>피드백 / 오늘의 선물 작성</small></button>
                         <button type="button" class="relationship-role-btn" id="relationshipSubBtn" onclick="setRelationshipRole('sub')">📝 기록(Sub)<br><small>하루 기록 작성 / 피드백 확인</small></button>
                     </div>
                     <div class="relationship-role-help" id="relationshipRoleHelp">처음 공간을 만들거나 초대코드로 참여하기 전에 역할을 선택해 주세요.</div>
@@ -340,7 +340,7 @@
 
     <div class="home-section-title manage-title">
         <span>관리와 피드백</span>
-        <small>피드백 · 보상 · 메모</small>
+        <small>피드백 · 오늘의 선물 · 메모</small>
     </div>
 
     <div class="input-group">
@@ -356,10 +356,10 @@
 
     <div class="input-group">
         <button type="button" class="daily-card managed-card" id="rewardDailyCard" onclick="openDailyModal('reward')">
-            <span class="daily-card-icon">✨</span>
+            <span class="daily-card-icon">🎁</span>
             <span>
-                <span class="daily-card-title">보상 / 휴식</span>
-                <span class="daily-card-sub" id="rewardCardSub">오늘의 보상이나 휴식을 남겨주세요.</span>
+                <span class="daily-card-title">오늘의 선물</span>
+                <span class="daily-card-sub" id="rewardCardSub">작은 보상이나 편안한 휴식을 전해보세요.</span>
             </span>
             <span class="daily-card-arrow">›</span>
         </button>
@@ -895,15 +895,25 @@
 
 <div class="daily-modal-overlay" id="rewardModalOverlay" onclick="if(event.target.id==='rewardModalOverlay') closeDailyModal('reward')">
     <div class="daily-modal" role="dialog" aria-modal="true" aria-labelledby="rewardModalTitle">
-        <div class="daily-modal-head"><h2 id="rewardModalTitle">✨ 보상 / 휴식</h2><button type="button" class="modal-close-btn" onclick="closeDailyModal('reward')">닫기</button></div>
-        <div class="manager-lock-note" id="rewardLockNote"><strong>관리(Dom)가 작성하는 영역입니다.</strong><br>기록(Sub)은 보상과 휴식 내용을 확인만 할 수 있어요.</div>
+        <div class="daily-modal-head"><h2 id="rewardModalTitle">🎁 오늘의 선물</h2><button type="button" class="modal-close-btn" onclick="closeDailyModal('reward')">닫기</button></div>
+        <div class="manager-lock-note" id="rewardLockNote"><strong>관리(Dom)가 전하는 오늘의 선물입니다.</strong><br>기록(Sub)은 작은 보상과 편안한 휴식 내용을 확인할 수 있어요.</div>
         <div class="trust-card">
-            <div class="trust-card-help">오늘의 흐름에 맞게 보상이나 휴식을 남겨주세요. 관계가 통제보다 회복과 신뢰로 이어지도록 돕습니다.</div>
-            <div class="reward-grid">
-                <button type="button" class="choice-btn" id="rewardBtn" onclick="toggleDailyChoice('reward')">✨ 보상</button>
-                <button type="button" class="choice-btn" id="restBtn" onclick="toggleDailyChoice('rest')">🌙 휴식</button>
+            <div class="todays-gift-intro">
+                <strong>오늘은 어떤 마음을 전할까요?</strong>
+                <span>수고한 하루에는 작은 기쁨을, 지친 하루에는 편안한 쉼을 선물해요.</span>
             </div>
-            <textarea id="rewardNote" rows="3" placeholder="예: 오늘은 충분히 잘했으니 좋아하는 디저트 / 오늘은 쉬는 날" oninput="handleDailyFieldChanged()"></textarea>
+            <div class="reward-grid todays-gift-grid">
+                <button type="button" class="choice-btn gift-choice-btn" id="rewardBtn" onclick="toggleDailyChoice('reward')">
+                    <span class="gift-choice-icon">🎁</span>
+                    <span class="gift-choice-copy"><strong>작은 보상</strong><small>오늘의 수고를 다정하게 칭찬해요</small></span>
+                </button>
+                <button type="button" class="choice-btn gift-choice-btn" id="restBtn" onclick="toggleDailyChoice('rest')">
+                    <span class="gift-choice-icon">🌙</span>
+                    <span class="gift-choice-copy"><strong>편안한 휴식</strong><small>잠시 멈추고 충분히 쉬어가요</small></span>
+                </button>
+            </div>
+            <label class="todays-gift-label" for="rewardNote">오늘의 메시지</label>
+            <textarea id="rewardNote" rows="3" placeholder="예: 오늘 정말 잘했어요. 좋아하는 디저트 먹어요 😊" oninput="handleDailyFieldChanged()"></textarea>
         </div>
         <button type="button" class="daily-modal-save" onclick="closeDailyModal('reward')">저장하고 닫기</button>
     </div>
@@ -1042,25 +1052,25 @@
 </div>
 
 <div class="toast" id="toast">기록이 복사되었습니다! 💕</div>
-    <script src="js/config.js?v=step5-6-3-0-chat-card-unread-20260713"></script>
-    <script src="js/utils.js?v=step5-6-3-0-chat-card-unread-20260713"></script>
-    <script src="js/popup.js?v=step5-6-3-0-chat-card-unread-20260713"></script>
-    <script src="js/auth.js?v=step5-6-3-0-chat-card-unread-20260713"></script>
-    <script src="js/room.js?v=step5-6-3-0-chat-card-unread-20260713"></script>
-    <script src="js/presence.js?v=step5-6-3-0-chat-card-unread-20260713"></script>
-    <script src="js/daily.js?v=step5-6-3-0-chat-card-unread-20260713"></script>
-    <script src="js/mission.js?v=step5-6-3-0-chat-card-unread-20260713"></script>
-    <script src="js/custom-routine.js?v=step5-6-3-0-chat-card-unread-20260713"></script>
-    <script src="js/history.js?v=step5-6-3-0-chat-card-unread-20260713"></script>
-    <script src="js/anniversary.js?v=step5-6-3-0-chat-card-unread-20260713"></script>
-    <script src="js/profile.js?v=step5-6-3-0-chat-card-unread-20260713"></script>
-    <script src="js/chat.js?v=step5-6-3-0-chat-card-unread-20260713"></script>
-    <script src="js/autosave.js?v=step5-6-3-0-chat-card-unread-20260713"></script>
-    <script src="js/qa.js?v=step5-6-3-0-chat-card-unread-20260713"></script>
-    <script src="js/motion.js?v=step5-6-3-0-chat-card-unread-20260713"></script>
-    <script src="js/product.js?v=step5-6-3-0-chat-card-unread-20260713"></script>
-    <script src="js/help-center.js?v=step5-6-3-0-chat-card-unread-20260713"></script>
-    <script src="js/data-management.js?v=step5-6-3-0-chat-card-unread-20260713"></script>
-    <script src="js/app.js?v=step5-6-3-0-chat-card-unread-20260713"></script>
+    <script src="js/config.js?v=step5-6-3-1-todays-gift-20260713"></script>
+    <script src="js/utils.js?v=step5-6-3-1-todays-gift-20260713"></script>
+    <script src="js/popup.js?v=step5-6-3-1-todays-gift-20260713"></script>
+    <script src="js/auth.js?v=step5-6-3-1-todays-gift-20260713"></script>
+    <script src="js/room.js?v=step5-6-3-1-todays-gift-20260713"></script>
+    <script src="js/presence.js?v=step5-6-3-1-todays-gift-20260713"></script>
+    <script src="js/daily.js?v=step5-6-3-1-todays-gift-20260713"></script>
+    <script src="js/mission.js?v=step5-6-3-1-todays-gift-20260713"></script>
+    <script src="js/custom-routine.js?v=step5-6-3-1-todays-gift-20260713"></script>
+    <script src="js/history.js?v=step5-6-3-1-todays-gift-20260713"></script>
+    <script src="js/anniversary.js?v=step5-6-3-1-todays-gift-20260713"></script>
+    <script src="js/profile.js?v=step5-6-3-1-todays-gift-20260713"></script>
+    <script src="js/chat.js?v=step5-6-3-1-todays-gift-20260713"></script>
+    <script src="js/autosave.js?v=step5-6-3-1-todays-gift-20260713"></script>
+    <script src="js/qa.js?v=step5-6-3-1-todays-gift-20260713"></script>
+    <script src="js/motion.js?v=step5-6-3-1-todays-gift-20260713"></script>
+    <script src="js/product.js?v=step5-6-3-1-todays-gift-20260713"></script>
+    <script src="js/help-center.js?v=step5-6-3-1-todays-gift-20260713"></script>
+    <script src="js/data-management.js?v=step5-6-3-1-todays-gift-20260713"></script>
+    <script src="js/app.js?v=step5-6-3-1-todays-gift-20260713"></script>
 </body>
 </html>
