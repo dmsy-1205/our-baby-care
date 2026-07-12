@@ -1,5 +1,5 @@
 // =========================================================
-// HearMe2nite v1.0 STEP5.6.1.7 - Admin Memo + Status Button UX
+// HearMe2nite v1.0 STEP5.6.1.7.1 - Admin Modal Accessibility Hotfix
 // - Users can submit/cancel and view only their own requests.
 // - Firebase admins can review, hold, approve, or reject.
 // - This module NEVER deletes Auth, Database, or Storage data.
@@ -169,9 +169,24 @@
     async function openDataAdminModal() {
         if (!await hmRefreshDataAdminAccess()) return alert('관리자 권한이 없습니다.');
         const modal = document.getElementById('dataAdminOverlay'); if (!modal) return;
-        modal.classList.add('show'); modal.setAttribute('aria-hidden', 'false'); await loadDataAdminRequests();
+        modal.removeAttribute('inert');
+        modal.classList.add('show');
+        modal.setAttribute('aria-hidden', 'false');
+        await loadDataAdminRequests();
+        const closeButton = modal.querySelector('.modal-close-btn');
+        if (closeButton) closeButton.focus({ preventScroll: true });
     }
-    function closeDataAdminModal() { const modal = document.getElementById('dataAdminOverlay'); if (modal) { modal.classList.remove('show'); modal.setAttribute('aria-hidden', 'true'); } }
+    function closeDataAdminModal() {
+        const modal = document.getElementById('dataAdminOverlay');
+        if (!modal) return;
+        const focused = document.activeElement;
+        if (focused && modal.contains(focused) && typeof focused.blur === 'function') focused.blur();
+        modal.classList.remove('show');
+        modal.setAttribute('aria-hidden', 'true');
+        modal.setAttribute('inert', '');
+        const trigger = document.getElementById('dataAdminButton');
+        if (trigger && !trigger.hidden) window.setTimeout(() => trigger.focus({ preventScroll: true }), 0);
+    }
     function setDataAdminFilter(filter) {
         hmAdminFilter = filter === 'all' ? 'all' : 'open';
         document.querySelectorAll('[data-admin-filter]').forEach((b) => b.classList.toggle('active', b.dataset.adminFilter === hmAdminFilter));
