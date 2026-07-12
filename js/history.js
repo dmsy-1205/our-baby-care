@@ -483,39 +483,111 @@ function openHistoryPanelModal() {
         return record && record.photo ? '사진 1장' : '사진 없음';
     }
 
+    let hmHistoryGalleryDates = [];
+    let hmHistoryGalleryVisibleCount = 9;
+
+    function hmGetHistoryPhotoDates(daysData) {
+        return Object.keys(daysData || {})
+            .sort((a, b) => new Date(b) - new Date(a))
+            .filter(date => daysData[date]?.photo);
+    }
+
+    function ensureHistoryPhotoGalleryModal() {
+        let overlay = document.getElementById('historyPhotoGalleryOverlay');
+        if (overlay) return overlay;
+        overlay = document.createElement('div');
+        overlay.id = 'historyPhotoGalleryOverlay';
+        overlay.className = 'daily-modal-overlay history-photo-gallery-overlay';
+        overlay.style.display = 'none';
+        overlay.setAttribute('aria-hidden', 'true');
+        overlay.innerHTML = `
+            <div class="daily-modal history-photo-gallery-modal" role="dialog" aria-modal="true" aria-labelledby="historyPhotoGalleryTitle">
+                <div class="daily-modal-head">
+                    <div><h2 id="historyPhotoGalleryTitle">📷 사진 모아보기</h2><small id="historyPhotoGalleryCount"></small></div>
+                    <button type="button" class="modal-close-btn" onclick="closeHistoryPhotoGallery()">닫기</button>
+                </div>
+                <div id="historyPhotoGalleryGrid" class="history-photo-modal-grid"></div>
+                <button type="button" id="historyPhotoGalleryMore" class="history-photo-more-btn" onclick="loadMoreHistoryPhotos()">사진 9장 더 보기</button>
+            </div>`;
+        document.body.appendChild(overlay);
+        overlay.addEventListener('click', event => {
+            if (event.target === overlay) closeHistoryPhotoGallery();
+        });
+        return overlay;
+    }
+
+    function renderHistoryPhotoGalleryModal() {
+        const overlay = ensureHistoryPhotoGalleryModal();
+        const grid = overlay.querySelector('#historyPhotoGalleryGrid');
+        const count = overlay.querySelector('#historyPhotoGalleryCount');
+        const more = overlay.querySelector('#historyPhotoGalleryMore');
+        const visibleDates = hmHistoryGalleryDates.slice(0, hmHistoryGalleryVisibleCount);
+        if (count) count.textContent = `전체 ${hmHistoryGalleryDates.length}장 · 최신순`;
+        if (grid) {
+            grid.innerHTML = visibleDates.map(date => {
+                const record = (window.cachedDaysData || cachedDaysData || {})[date] || {};
+                return `<button type="button" class="history-photo-modal-item" onclick="closeHistoryPhotoGallery(); openHistoryDetailModal('${date}')" aria-label="${escapeHtml(formatHistoryDateLabel(date))} 사진 기록 열기">
+                    <img src="${record.photo}" alt="${escapeHtml(formatHistoryDateLabel(date))} 사진" loading="lazy">
+                    <span>${escapeHtml(formatHistoryDateLabel(date))}</span>
+                </button>`;
+            }).join('');
+        }
+        if (more) {
+            const remaining = hmHistoryGalleryDates.length - visibleDates.length;
+            more.hidden = remaining <= 0;
+            more.textContent = remaining > 0 ? `사진 ${Math.min(9, remaining)}장 더 보기` : '';
+        }
+    }
+
+    function openHistoryPhotoGallery() {
+        hmHistoryGalleryDates = hmGetHistoryPhotoDates(window.cachedDaysData || cachedDaysData || {});
+        hmHistoryGalleryVisibleCount = 9;
+        renderHistoryPhotoGalleryModal();
+        if (typeof openModalOverlayById === 'function') openModalOverlayById('historyPhotoGalleryOverlay');
+        else {
+            const overlay = ensureHistoryPhotoGalleryModal();
+            overlay.style.display = 'flex';
+            overlay.setAttribute('aria-hidden', 'false');
+        }
+    }
+
+    function closeHistoryPhotoGallery() {
+        if (typeof closeModalOverlayById === 'function') closeModalOverlayById('historyPhotoGalleryOverlay');
+        else {
+            const overlay = document.getElementById('historyPhotoGalleryOverlay');
+            if (overlay) { overlay.style.display = 'none'; overlay.setAttribute('aria-hidden', 'true'); }
+        }
+    }
+
+    function loadMoreHistoryPhotos() {
+        hmHistoryGalleryVisibleCount += 9;
+        renderHistoryPhotoGalleryModal();
+    }
+
+    window.openHistoryPhotoGallery = openHistoryPhotoGallery;
+    window.closeHistoryPhotoGallery = closeHistoryPhotoGallery;
+    window.loadMoreHistoryPhotos = loadMoreHistoryPhotos;
+
     function renderPhotoThumbs(daysData) {
         const box = document.getElementById('photoThumbs');
         if (!box) return;
-        const photos = Object.keys(daysData || {})
-            .sort((a,b)=>new Date(b)-new Date(a))
-            .filter(date => daysData[date]?.photo)
-            .slice(0, 18);
+        const photos = hmGetHistoryPhotoDates(daysData);
         if (!photos.length) {
             box.innerHTML = `
-                <section class="history-gallery-section history-gallery-empty-section">
-                    <div class="history-section-headline">
-                        <div><strong>📷 사진 모아보기</strong><span>저장된 사진 기록이 아직 없습니다.</span></div>
-                    </div>
-                    <div class="history-photo-empty">사진이 저장된 날이 생기면 이곳에 모아 보여요.</div>
+                <section class="history-gallery-card history-gallery-card-empty" aria-label="사진 모아보기">
+                    <span class="history-gallery-card-icon">📷</span>
+                    <span class="history-gallery-card-copy"><strong>사진 모아보기</strong><small>저장된 사진 기록이 아직 없습니다.</small></span>
+                    <span class="history-gallery-card-count">0장</span>
                 </section>`;
             return;
         }
-        const items = photos.map(date => {
-            const record = daysData[date] || {};
-            const missionText = getHistoryMissionText(record);
-            const chips = [record.moodLabel && record.moodLabel !== '기록 없음' ? record.moodLabel : '', missionText ? '🎯 미션' : '', record.diary ? '📝 기록' : ''].filter(Boolean).map(makeHistoryChip).join('');
-            return `<button type="button" class="history-photo-card" onclick="openHistoryDetailModal('${date}')" aria-label="${escapeHtml(formatHistoryDateLabel(date))} 사진 기록 열기">
-                <span class="history-photo-frame"><img src="${record.photo}" alt="${date} 사진"></span>
-                <span class="history-photo-meta"><strong>${formatHistoryDateLabel(date)}</strong><small>${chips || '사진 기록'}</small></span>
-            </button>`;
-        }).join('');
+        const latestPhoto = daysData[photos[0]]?.photo || '';
         box.innerHTML = `
-            <section class="history-gallery-section">
-                <div class="history-section-headline">
-                    <div><strong>📷 사진 모아보기</strong><span>최근 사진 ${photos.length}장을 카드로 모았어요.</span></div>
-                </div>
-                <div class="history-photo-grid">${items}</div>
-            </section>`;
+            <button type="button" class="history-gallery-card" onclick="openHistoryPhotoGallery()" aria-label="사진 ${photos.length}장 모아보기 열기">
+                <span class="history-gallery-card-preview">${latestPhoto ? `<img src="${latestPhoto}" alt="최근 사진 미리보기">` : '📷'}</span>
+                <span class="history-gallery-card-copy"><strong>📷 사진 모아보기</strong><small>우리의 추억을 한곳에서 확인해요.</small></span>
+                <span class="history-gallery-card-count">${photos.length}장 <b>›</b></span>
+            </button>`;
     }
 
     function displayHistory(daysData) {

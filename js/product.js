@@ -76,12 +76,10 @@
             title.dataset.hmMoved = '1';
         } catch(e) {}
     }
-    function getNextAnniversary(){
+    function getTogetherDay(){
         try {
-            const items = typeof hmGetAllAnniversaryItems === 'function' ? hmGetAllAnniversaryItems() : [];
-            const today = new Date(); today.setHours(0,0,0,0);
-            return (items || []).filter(i => i && i.date).map(i => ({...i, time: new Date(i.date+'T00:00:00').getTime()}))
-                .filter(i => i.time >= today.getTime()).sort((a,b)=>a.time-b.time)[0] || null;
+            if (typeof window.hmGetTogetherDayCount === 'function') return window.hmGetTogetherDayCount();
+            return null;
         } catch(e) { return null; }
     }
     function buildDashboard(){
@@ -98,7 +96,7 @@
         <div class="hm-summary-dot"><b>💧</b><span id="hmProductWaterStatus">0</span></div>
         <div class="hm-summary-dot"><b>⚖️</b><span id="hmProductWeightStatus">-</span></div>
         <div class="hm-summary-dot"><b>💜</b><span id="hmProductPromiseStatus">-</span></div>
-        <div class="hm-summary-dot"><b>🎁</b><span id="hmProductNextAnniversary">-</span></div></div>`;
+        <div class="hm-summary-dot" id="hmProductTogetherItem" hidden><b>💕</b><span id="hmProductTogetherDay">-</span></div></div>`;
         box.addEventListener('click', openHomeSummaryModal);
         box.addEventListener('keydown', (event)=>{ if(event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openHomeSummaryModal(); } });
         // STEP5.6.2.0: 기록 날짜를 '우리의 공간'과 '오늘의 요약' 사이에 고정합니다.
@@ -120,7 +118,11 @@
         const water=$('hmProductWaterStatus'); if(water) { let w = 0; try { w = Number(window.currentWater || currentWater || 0); } catch(e) { w = 0; } water.textContent = w ? String(w) : '0'; }
         const weight=$('hmProductWeightStatus'); if(weight) { const value = cleanNumberText($('weight')?.value || rec?.weight || '', '-'); weight.textContent = value; }
         const promise=routineRatio(); const promiseStatus=$('hmProductPromiseStatus'); if(promiseStatus) promiseStatus.textContent = promise.total ? `${promise.done}/${promise.total}` : '-';
-        const next=getNextAnniversary(); const ann=$('hmProductNextAnniversary'); if(ann) ann.textContent = next ? (next.ddayText || next.dDay || 'D-Day') : '-';
+        const togetherDay = getTogetherDay();
+        const togetherItem = $('hmProductTogetherItem');
+        const togetherValue = $('hmProductTogetherDay');
+        if (togetherItem) togetherItem.hidden = !togetherDay;
+        if (togetherValue) togetherValue.textContent = togetherDay ? `${togetherDay}일` : '-';
         moveTodayPromiseSection();
     }
 
@@ -151,7 +153,7 @@
         let w = 0; try { w = Number(window.currentWater || currentWater || 0); } catch(e) { w = 0; }
         const weightValue = cleanNumberText($('weight')?.value || rec?.weight || '', '-');
         const promise = routineRatio();
-        const next = getNextAnniversary();
+        const togetherDay = getTogetherDay();
         const body = $('hmHomeSummaryModalBody') || ensureHomeSummaryModal().querySelector('#hmHomeSummaryModalBody');
         if (body) {
             body.innerHTML = [
@@ -159,7 +161,7 @@
                 summaryRow('💧','수분', w ? `${w} ml` : '0 ml', '오늘 누적'),
                 summaryRow('⚖️','체중', weightValue === '-' ? '-' : `${weightValue} kg`, '오늘 기록'),
                 summaryRow('💜','오늘의 약속', promise.total ? `${promise.done} / ${promise.total} 완료` : '등록 없음', promise.cards ? `${promise.cards}개 약속` : '관리 버튼으로 약속을 만들 수 있어요'),
-                summaryRow('🎁','다음 기념일', next ? (next.ddayText || next.dDay || 'D-Day') : '등록 없음', next ? (next.title || next.date || '') : ''),
+                togetherDay ? summaryRow('💕','함께한 지', `${togetherDay}일`, '대표 기념일 기준') : '',
                 `<div class="hm-summary-modal-updated">최근 업데이트 <strong>${safe(formatRecentUpdate(rec))}</strong></div>`
             ].join('');
         }

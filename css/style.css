@@ -9316,3 +9316,41 @@ button:active {
     background:#bd4058; color:#fff; font-weight:900; font-size:.82rem;
 }
 .data-admin-execute:disabled { opacity:.5; cursor:wait; }
+
+/* =========================================================
+   STEP5.6.2.1 Together Day + Compact Photo Gallery
+   ========================================================= */
+#hmProductTogetherItem[hidden] { display: none !important; }
+.history-gallery-card {
+    width: 100%; display: flex; align-items: center; gap: 13px; padding: 13px 14px;
+    border: 1px solid rgba(124,92,255,.14); border-radius: 19px;
+    background: linear-gradient(135deg,#fff,#faf7ff); color: #352e43;
+    text-align: left; cursor: pointer; box-shadow: 0 8px 22px rgba(68,48,92,.06);
+}
+.history-gallery-card:hover { transform: translateY(-1px); box-shadow: 0 11px 26px rgba(68,48,92,.1); }
+.history-gallery-card-preview, .history-gallery-card-icon {
+    width: 52px; height: 52px; flex: 0 0 52px; border-radius: 16px; overflow: hidden;
+    display: flex; align-items: center; justify-content: center; background: #f4edff; font-size: 23px;
+}
+.history-gallery-card-preview img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.history-gallery-card-copy { min-width: 0; flex: 1; display: flex; flex-direction: column; gap: 4px; }
+.history-gallery-card-copy strong { font-size: .96rem; color: #352e43; }
+.history-gallery-card-copy small { color: #8c83a8; font-size: .78rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.history-gallery-card-count { flex: 0 0 auto; color: #7c5cff; font-size: .8rem; font-weight: 800; }
+.history-gallery-card-count b { font-size: 1.15rem; margin-left: 3px; }
+.history-gallery-card-empty { cursor: default; box-shadow: none; }
+.history-photo-gallery-modal { width: min(680px, calc(100vw - 24px)); max-height: min(82vh, 760px); overflow: auto; }
+.history-photo-gallery-modal .daily-modal-head > div small { display: block; color: #8c83a8; margin-top: 3px; font-size: .75rem; }
+.history-photo-modal-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 9px; padding: 2px 1px 12px; }
+.history-photo-modal-item { position: relative; aspect-ratio: 1 / 1; border: 0; border-radius: 14px; overflow: hidden; padding: 0; cursor: pointer; background: #f2edf6; }
+.history-photo-modal-item img { width: 100%; height: 100%; display: block; object-fit: cover; transition: transform .18s ease; }
+.history-photo-modal-item:hover img { transform: scale(1.035); }
+.history-photo-modal-item span { position: absolute; left: 0; right: 0; bottom: 0; padding: 19px 6px 6px; background: linear-gradient(transparent,rgba(25,18,31,.66)); color: #fff; font-size: .68rem; font-weight: 700; text-align: left; }
+.history-photo-more-btn { width: 100%; min-height: 44px; border: 1px solid rgba(124,92,255,.22); border-radius: 14px; background: #f8f4ff; color: #6e4de0; font-weight: 800; cursor: pointer; }
+.history-photo-more-btn[hidden] { display: none !important; }
+@media (max-width: 420px) {
+    .history-gallery-card { padding: 11px 12px; gap: 10px; }
+    .history-gallery-card-preview, .history-gallery-card-icon { width: 46px; height: 46px; flex-basis: 46px; border-radius: 14px; }
+    .history-photo-modal-grid { gap: 6px; }
+    .history-photo-modal-item { border-radius: 11px; }
+}

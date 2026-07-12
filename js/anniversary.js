@@ -123,6 +123,7 @@ function hmGetTogetherDayBadgeHtml() {
     return `<span class="history-together-day-badge" title="대표 기념일 기준">💕 함께한 지 ${day}일</span>`;
 }
 window.hmGetTogetherDayBadgeHtml = hmGetTogetherDayBadgeHtml;
+window.hmGetTogetherDayCount = hmGetTogetherDayCount;
 
 
 function hmGetSelectedHistoryDateSafe() {
