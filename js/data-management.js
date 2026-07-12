@@ -1,5 +1,5 @@
 // =========================================================
-// HearMe2nite v1.0 STEP5.6.1.9 - Approved Room Disconnect Engine
+// HearMe2nite v1.0 STEP5.6.1.9.1 - User Request Cancellation
 // - Users can submit/cancel and view only their own requests.
 // - Firebase admins can review, hold, approve, or reject.
 // - Approved leave_room requests can be executed only through one callable Cloud Function.
@@ -143,17 +143,40 @@
         const status = item.status || 'pending';
         const type = REQUEST_TYPES[item.requestType] || { label: item.requestTypeLabel || '기존 삭제 요청' };
         const partnerNotice = item.requestType === 'delete_room' || item.partnerConsentRequired ? '<div class="data-shared-notice">공동 Room 전체 삭제 요청 · 상대방 확인이 필요할 수 있습니다.</div>' : '';
-        const cancelButton = ['pending', 'reviewing', 'hold'].includes(status) ? `<button type="button" class="data-small-action" onclick="cancelDataDeleteRequest('${escapeJs(item.id)}')">요청 취소</button>` : '';
+        const cancelButton = ['pending', 'reviewing', 'hold'].includes(status) ? `<button type="button" class="data-small-action" onclick="cancelDataDeleteRequest('${escapeJs(item.id)}')" aria-label="${escapeHtml(type.label)} 삭제 요청 취소">삭제 요청 취소</button>` : '';
         return `<article class="data-request-card"><div class="data-request-head"><strong>${escapeHtml(STATUS_LABELS[status] || status)}</strong><small>${escapeHtml(formatDate(item.requestedAt))}</small></div><div class="data-request-type">${escapeHtml(type.label)}</div>${partnerNotice}<div class="data-request-body"><div><strong>요청 사유</strong><p>${escapeHtml(item.reason || '-')}</p></div><div><strong>운영자 답변</strong><p>${escapeHtml(item.adminMessage || '운영자 답변을 기다리는 중입니다.')}</p></div></div>${cancelButton}</article>`;
     }
     async function cancelDataDeleteRequest(requestId) {
-        const user = getUser(); if (!user || !requestId || !confirm('진행 중인 요청을 취소할까요?')) return;
+        const user = getUser();
+        if (!user || !requestId) return;
+        const confirmed = confirm('이 데이터 삭제 요청을 취소할까요?\n\n접수됨 · 검토 중 · 보류 상태에서만 취소할 수 있습니다.');
+        if (!confirmed) return;
         try {
-            const ref = db.ref(requestItemPath(user.uid, requestId)); const snap = await ref.once('value'); const item = snap.val();
-            if (!item || item.requestedByUid !== user.uid || !['pending', 'reviewing', 'hold'].includes(item.status)) return alert('현재 상태에서는 취소할 수 없는 요청입니다.');
-            await ref.update({ status: 'canceled', adminMessage: '사용자가 요청을 취소했습니다.', canceledAt: firebase.database.ServerValue.TIMESTAMP, updatedAt: firebase.database.ServerValue.TIMESTAMP });
-            showToastSafe('요청이 취소되었습니다.'); await loadDataDeleteRequests();
-        } catch (error) { console.warn('[DataManagement] cancel failed', error); alert('요청 취소 중 오류가 발생했습니다.'); }
+            const ref = db.ref(requestItemPath(user.uid, requestId));
+            let cancelAllowed = false;
+            const result = await ref.transaction((item) => {
+                if (!item || item.requestedByUid !== user.uid || !['pending', 'reviewing', 'hold'].includes(item.status || 'pending')) return;
+                cancelAllowed = true;
+                const now = Date.now();
+                return {
+                    ...item,
+                    status: 'canceled',
+                    adminMessage: '사용자가 요청을 취소했습니다.',
+                    canceledAt: now,
+                    updatedAt: now
+                };
+            }, undefined, false);
+            if (!cancelAllowed || !result.committed) {
+                alert('관리자가 이미 승인했거나 처리 상태가 변경되어 취소할 수 없습니다.');
+                await loadDataDeleteRequests();
+                return;
+            }
+            showToastSafe('삭제 요청이 취소되었습니다.');
+            await loadDataDeleteRequests();
+        } catch (error) {
+            console.warn('[DataManagement] cancel failed', error);
+            alert('요청 취소 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.');
+        }
     }
 
     async function hmRefreshDataAdminAccess() {
