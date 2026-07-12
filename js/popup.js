@@ -6,6 +6,7 @@
 
     let hmRoomModalScrollY = 0;
     let hmOpenModalCount = 0;
+    const hmModalReturnFocus = new WeakMap();
 
     // =========================================================
 
@@ -57,7 +58,12 @@
             return;
         }
         hmEnsureOverlayAttachedToBody(overlay);
+        const active = document.activeElement;
+        if (active && active !== document.body && !overlay.contains(active)) {
+            hmModalReturnFocus.set(overlay, active);
+        }
         if (overlay.style.display !== 'flex') lockBodyForModal();
+        overlay.removeAttribute('inert');
         overlay.style.display = 'flex';
         overlay.setAttribute('aria-hidden', 'false');
         overlay.dataset.hmOpenedAt = String(Date.now());
@@ -67,9 +73,24 @@
     function closeModalOverlayById(id) {
         const overlay = document.getElementById(id);
         if (!overlay) return;
+
+        // 포커스가 모달 내부에 남은 상태에서 aria-hidden을 적용하면
+        // Chrome이 접근성 경고를 발생시키므로 먼저 외부로 이동한다.
+        const active = document.activeElement;
+        const returnTarget = hmModalReturnFocus.get(overlay);
+        if (active && overlay.contains(active)) {
+            if (returnTarget && returnTarget.isConnected && typeof returnTarget.focus === 'function') {
+                try { returnTarget.focus({ preventScroll: true }); } catch (err) { returnTarget.focus(); }
+            } else if (typeof active.blur === 'function') {
+                active.blur();
+            }
+        }
+
         if (overlay.style.display === 'flex') unlockBodyForModal();
         overlay.style.display = 'none';
+        overlay.setAttribute('inert', '');
         overlay.setAttribute('aria-hidden', 'true');
+        hmModalReturnFocus.delete(overlay);
         delete overlay.dataset.hmOpenedAt;
     }
 

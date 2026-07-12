@@ -134,6 +134,7 @@
         overlay.className = 'daily-modal-overlay hm-home-summary-overlay';
         overlay.style.display = 'none';
         overlay.setAttribute('aria-hidden','true');
+        overlay.setAttribute('inert', '');
         overlay.innerHTML = `<div class="daily-modal hm-home-summary-modal" role="dialog" aria-modal="true" aria-labelledby="hmHomeSummaryTitle">
             <div class="daily-modal-head">
                 <h2 id="hmHomeSummaryTitle">오늘의 요약</h2>
@@ -166,7 +167,7 @@
             ].join('');
         }
         if (typeof openModalOverlayById === 'function') openModalOverlayById('hmHomeSummaryOverlay');
-        else { const overlay = ensureHomeSummaryModal(); overlay.style.display = 'flex'; overlay.setAttribute('aria-hidden','false'); }
+        else { const overlay = ensureHomeSummaryModal(); overlay.removeAttribute('inert'); overlay.style.display = 'flex'; overlay.setAttribute('aria-hidden','false'); }
     }
     window.hmOpenHomeSummaryModal = openHomeSummaryModal;
     window.hmCloseHomeSummaryModal = function(){ if (typeof closeModalOverlayById === 'function') closeModalOverlayById('hmHomeSummaryOverlay'); else { const overlay=$('hmHomeSummaryOverlay'); if(overlay) overlay.style.display='none'; } };

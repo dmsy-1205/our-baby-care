@@ -500,6 +500,7 @@ function openHistoryPanelModal() {
         overlay.className = 'daily-modal-overlay history-photo-gallery-overlay';
         overlay.style.display = 'none';
         overlay.setAttribute('aria-hidden', 'true');
+        overlay.setAttribute('inert', '');
         overlay.innerHTML = `
             <div class="daily-modal history-photo-gallery-modal" role="dialog" aria-modal="true" aria-labelledby="historyPhotoGalleryTitle">
                 <div class="daily-modal-head">
@@ -546,6 +547,7 @@ function openHistoryPanelModal() {
         if (typeof openModalOverlayById === 'function') openModalOverlayById('historyPhotoGalleryOverlay');
         else {
             const overlay = ensureHistoryPhotoGalleryModal();
+            overlay.removeAttribute('inert');
             overlay.style.display = 'flex';
             overlay.setAttribute('aria-hidden', 'false');
         }
@@ -555,7 +557,8 @@ function openHistoryPanelModal() {
         if (typeof closeModalOverlayById === 'function') closeModalOverlayById('historyPhotoGalleryOverlay');
         else {
             const overlay = document.getElementById('historyPhotoGalleryOverlay');
-            if (overlay) { overlay.style.display = 'none'; overlay.setAttribute('aria-hidden', 'true'); }
+            if (overlay) { if (overlay.contains(document.activeElement) && document.activeElement.blur) document.activeElement.blur(); overlay.style.display = 'none'; overlay.setAttribute('inert', ''); overlay.setAttribute('aria-hidden', 'true');
+        overlay.setAttribute('inert', ''); }
         }
     }
 

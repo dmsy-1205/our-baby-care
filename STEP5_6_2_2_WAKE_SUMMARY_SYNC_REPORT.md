@@ -1,4 +1,4 @@
-# HearMe2nite v1.0 STEP5.6.2.2 변경 보고서
+# HearMe2nite v1.0 STEP5.6.2.3 변경 보고서
 
 ## 적용 내용
 
@@ -12,4 +12,4 @@
 ## 기준 버전
 
 - 이전: HearMe2nite v1.0 STEP5.6.2.1
-- 현재: HearMe2nite v1.0 STEP5.6.2.2
+- 현재: HearMe2nite v1.0 STEP5.6.2.3

@@ -72,17 +72,25 @@ function openProfileModal() {
     if (email) email.textContent = currentUser.email || '';
     if (status) { status.textContent = ''; status.className = 'hm-profile-status'; }
     hmApplyNicknameToUI();
-    overlay.style.display = 'flex';
-    overlay.setAttribute('aria-hidden', 'false');
+    if (typeof openModalOverlayById === 'function') openModalOverlayById('profileOverlay');
+    else {
+        overlay.removeAttribute('inert');
+        overlay.style.display = 'flex';
+        overlay.setAttribute('aria-hidden', 'false');
+    }
     setTimeout(() => input.focus(), 30);
 }
 
 function closeProfileModal() {
     const overlay = document.getElementById('profileOverlay');
     if (!overlay) return;
-    if (overlay.contains(document.activeElement)) document.activeElement.blur();
-    overlay.style.display = 'none';
-    overlay.setAttribute('aria-hidden', 'true');
+    if (typeof closeModalOverlayById === 'function') closeModalOverlayById('profileOverlay');
+    else {
+        if (overlay.contains(document.activeElement)) document.activeElement.blur();
+        overlay.style.display = 'none';
+        overlay.setAttribute('inert', '');
+        overlay.setAttribute('aria-hidden', 'true');
+    }
 }
 
 function updateProfileNicknamePreview() {
