@@ -4,7 +4,7 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💗</text></svg>">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>HearMe2nite v1.0 STEP5.6.2.3</title>
+    <title>HearMe2nite v1.0 STEP5.6.3.0</title>
     <!-- RC2.16.0 Branding STEP1: Quiet Love UI polish / 기능 구조 유지 -->
     <!-- RC2 v2.6.0 STEP5 FINAL QA: component-ready module map / UI and data logic preserved -->
     
@@ -13,7 +13,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-functions-compat.js"></script>
 
-    <link rel="stylesheet" href="css/style.css?v=step5-6-2-3-modal-focus-accessibility-20260713">
+    <link rel="stylesheet" href="css/style.css?v=step5-6-3-0-chat-card-unread-20260713">
 </head>
 <body class="hm-booting">
 
@@ -94,7 +94,7 @@
     </div>
     <div class="app-subtitle">우리의 하루를, 함께 기록합니다.</div>
     <div class="app-meta-row">
-        <div class="app-version-badge">Version v1.0 STEP5.6.2.3</div>
+        <div class="app-version-badge">Version v1.0 STEP5.6.3.0</div>
         <div class="home-presence-indicator" id="homePresenceIndicator" title="접속 상태 확인 중">
             <span class="home-presence-dot self offline" id="homePresenceSelfDot" aria-label="나 오프라인"></span>
             <span class="home-presence-dot partner offline" id="homePresencePartnerDot" aria-label="상대 오프라인"></span>
@@ -203,6 +203,19 @@
         <label>📅 기록 날짜</label>
         <input type="date" id="recordDate" onchange="connectAndListenFirebase()">
     </div>
+
+    <button type="button" class="hm-chat-card" id="chatLaunchCard" onclick="openChatModal()" aria-label="우리의 대화 열기">
+        <span class="hm-chat-card-icon">💬</span>
+        <span class="hm-chat-card-content">
+            <span class="hm-chat-card-title-row">
+                <strong>우리의 대화</strong>
+                <span class="hm-chat-unread-badge" id="chatUnreadBadge" hidden>0</span>
+            </span>
+            <span class="hm-chat-card-preview" id="chatCardPreview">공간을 연결하면 대화를 시작할 수 있어요.</span>
+            <span class="hm-chat-card-meta"><span class="hm-chat-presence-dot" id="chatCardPresenceDot"></span><span id="chatCardPresenceText">상대방 상태 확인 중</span><span id="chatCardTime"></span></span>
+        </span>
+        <span class="hm-chat-card-arrow">›</span>
+    </button>
 
     <div class="input-group hm-legacy-mission-hidden" aria-hidden="true">
         <label>🎯 오늘의 미션</label>
@@ -388,19 +401,26 @@
     <div class="custom-routine-list" id="customRoutineList" hidden aria-hidden="true"></div>
 
 
-    <div id="chatSection" style="margin: 20px auto; max-width: 500px; padding: 15px; background: #fff; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); font-family: sans-serif;">
-        <h3 style="margin-top:0; color: #ff6b6b; display: flex; align-items: center; gap: 8px; font-size: 1.1rem;">
-            💖 우리들의 실시간 한줄 톡
-        </h3>
-        
-        <div id="chatMessages" style="height: 250px; overflow-y: auto; border: 1px solid #f0f0f0; padding: 12px; border-radius: 12px; margin-bottom: 10px; background: #fafafa; display: flex; flex-direction: column; gap: 8px;">
-            <div style="text-align: center; color: #aaa; font-size: 0.85rem; margin-top: 50px;">방에 연결되면 채팅방이 연결됩니다. ✨</div>
-        </div>
-        
-        <div style="display: flex; gap: 6px;">
-            <input type="text" id="chatSender" placeholder="닉네임" readonly aria-label="채팅 닉네임" title="내 프로필에서 변경할 수 있습니다." style="width: 92px; padding: 10px; border: 1px solid #eadfe8; border-radius: 8px; text-align: center; font-size: 0.9rem; background:#f8f4f7; color:#6f5968; cursor:default;">
-            <input type="text" id="chatInput" placeholder="메시지를 입력하세요..." style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 0.9rem;" onkeypress="if(event.key === 'Enter') sendChatMessage()">
-            <button type="button" class="chat-send-btn" onclick="sendChatMessage()">전송</button>
+    <div class="daily-modal-overlay hm-chat-overlay" id="chatModalOverlay" onclick="if(event.target.id==='chatModalOverlay') closeChatModal()" aria-hidden="true" inert>
+        <div class="daily-modal hm-chat-modal" role="dialog" aria-modal="true" aria-labelledby="chatModalTitle">
+            <div class="daily-modal-head hm-chat-modal-head">
+                <div>
+                    <h2 id="chatModalTitle">💬 우리의 대화</h2>
+                    <div class="hm-chat-modal-presence" id="chatModalPresence">상대방 상태 확인 중</div>
+                </div>
+                <button type="button" class="modal-close-btn" onclick="closeChatModal()">닫기</button>
+            </div>
+            <div id="chatSection" class="hm-chat-section">
+                <div id="chatMessages" class="hm-chat-messages">
+                    <div class="hm-chat-empty">방에 연결되면 채팅방이 연결됩니다. ✨</div>
+                </div>
+                <div class="hm-chat-offline-note" id="chatOfflineNote" hidden>상대방이 오프라인입니다. 메시지는 저장되며 다음 접속 때 확인할 수 있어요.</div>
+                <div class="hm-chat-input-row">
+                    <input type="text" id="chatSender" placeholder="닉네임" readonly aria-label="채팅 닉네임" title="내 프로필에서 변경할 수 있습니다.">
+                    <input type="text" id="chatInput" placeholder="메시지를 입력하세요..." aria-label="채팅 메시지" onkeypress="if(event.key === 'Enter') sendChatMessage()">
+                    <button type="button" class="chat-send-btn" onclick="sendChatMessage()">전송</button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -1022,25 +1042,25 @@
 </div>
 
 <div class="toast" id="toast">기록이 복사되었습니다! 💕</div>
-    <script src="js/config.js?v=step5-6-2-3-modal-focus-accessibility-20260713"></script>
-    <script src="js/utils.js?v=step5-6-2-3-modal-focus-accessibility-20260713"></script>
-    <script src="js/popup.js?v=step5-6-2-3-modal-focus-accessibility-20260713"></script>
-    <script src="js/auth.js?v=step5-6-2-3-modal-focus-accessibility-20260713"></script>
-    <script src="js/room.js?v=step5-6-2-3-modal-focus-accessibility-20260713"></script>
-    <script src="js/presence.js?v=step5-6-2-3-modal-focus-accessibility-20260713"></script>
-    <script src="js/daily.js?v=step5-6-2-3-modal-focus-accessibility-20260713"></script>
-    <script src="js/mission.js?v=step5-6-2-3-modal-focus-accessibility-20260713"></script>
-    <script src="js/custom-routine.js?v=step5-6-2-3-modal-focus-accessibility-20260713"></script>
-    <script src="js/history.js?v=step5-6-2-3-modal-focus-accessibility-20260713"></script>
-    <script src="js/anniversary.js?v=step5-6-2-3-modal-focus-accessibility-20260713"></script>
-    <script src="js/profile.js?v=step5-6-2-3-modal-focus-accessibility-20260713"></script>
-    <script src="js/chat.js?v=step5-6-2-3-modal-focus-accessibility-20260713"></script>
-    <script src="js/autosave.js?v=step5-6-2-3-modal-focus-accessibility-20260713"></script>
-    <script src="js/qa.js?v=step5-6-2-3-modal-focus-accessibility-20260713"></script>
-    <script src="js/motion.js?v=step5-6-2-3-modal-focus-accessibility-20260713"></script>
-    <script src="js/product.js?v=step5-6-2-3-modal-focus-accessibility-20260713"></script>
-    <script src="js/help-center.js?v=step5-6-2-3-modal-focus-accessibility-20260713"></script>
-    <script src="js/data-management.js?v=step5-6-2-3-modal-focus-accessibility-20260713"></script>
-    <script src="js/app.js?v=step5-6-2-3-modal-focus-accessibility-20260713"></script>
+    <script src="js/config.js?v=step5-6-3-0-chat-card-unread-20260713"></script>
+    <script src="js/utils.js?v=step5-6-3-0-chat-card-unread-20260713"></script>
+    <script src="js/popup.js?v=step5-6-3-0-chat-card-unread-20260713"></script>
+    <script src="js/auth.js?v=step5-6-3-0-chat-card-unread-20260713"></script>
+    <script src="js/room.js?v=step5-6-3-0-chat-card-unread-20260713"></script>
+    <script src="js/presence.js?v=step5-6-3-0-chat-card-unread-20260713"></script>
+    <script src="js/daily.js?v=step5-6-3-0-chat-card-unread-20260713"></script>
+    <script src="js/mission.js?v=step5-6-3-0-chat-card-unread-20260713"></script>
+    <script src="js/custom-routine.js?v=step5-6-3-0-chat-card-unread-20260713"></script>
+    <script src="js/history.js?v=step5-6-3-0-chat-card-unread-20260713"></script>
+    <script src="js/anniversary.js?v=step5-6-3-0-chat-card-unread-20260713"></script>
+    <script src="js/profile.js?v=step5-6-3-0-chat-card-unread-20260713"></script>
+    <script src="js/chat.js?v=step5-6-3-0-chat-card-unread-20260713"></script>
+    <script src="js/autosave.js?v=step5-6-3-0-chat-card-unread-20260713"></script>
+    <script src="js/qa.js?v=step5-6-3-0-chat-card-unread-20260713"></script>
+    <script src="js/motion.js?v=step5-6-3-0-chat-card-unread-20260713"></script>
+    <script src="js/product.js?v=step5-6-3-0-chat-card-unread-20260713"></script>
+    <script src="js/help-center.js?v=step5-6-3-0-chat-card-unread-20260713"></script>
+    <script src="js/data-management.js?v=step5-6-3-0-chat-card-unread-20260713"></script>
+    <script src="js/app.js?v=step5-6-3-0-chat-card-unread-20260713"></script>
 </body>
 </html>
