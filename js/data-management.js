@@ -1,8 +1,9 @@
 // =========================================================
-// HearMe2nite v1.0 STEP5.6.1.7.1 - Admin Modal Accessibility Hotfix
+// HearMe2nite v1.0 STEP5.6.1.8 - Safe Deletion Preview Foundation
 // - Users can submit/cancel and view only their own requests.
 // - Firebase admins can review, hold, approve, or reject.
-// - This module NEVER deletes Auth, Database, or Storage data.
+// - This module can request a server-side deletion preview.
+// - This version NEVER deletes Auth, Database, or Storage data.
 // =========================================================
 (function () {
     const STATUS_LABELS = {
@@ -219,7 +220,9 @@
         const status = item.status || 'pending';
         const note = hmAdminNotes?.[item.ownerUid]?.[item.id]?.memo || '';
         const actionButton = (value, label) => `<button class="${status === value ? `is-selected status-${value}` : ''}" onclick="processDataAdminRequest('${escapeJs(item.ownerUid)}','${escapeJs(item.id)}','${value}')" aria-pressed="${status === value ? 'true' : 'false'}">${label}</button>`;
-        return `<article class="data-admin-card"><div class="data-request-head"><strong>${escapeHtml(STATUS_LABELS[status] || status)}</strong><small>${escapeHtml(formatDate(item.requestedAt))}</small></div><h3>${escapeHtml(type.label)}</h3><dl><div><dt>사용자</dt><dd>${escapeHtml(item.requestedByEmail || item.requestedByUid || '-')}</dd></div><div><dt>Room</dt><dd>${escapeHtml(item.roomCode || '-')}</dd></div></dl><div class="data-admin-reason"><strong>요청 사유</strong><p>${escapeHtml(item.reason || '-')}</p></div><label>사용자에게 전달할 답변<textarea id="adminMessage_${escapeHtml(item.id)}" rows="3">${escapeHtml(item.adminMessage || '')}</textarea></label><label>관리자 내부 메모<textarea id="adminMemo_${escapeHtml(item.id)}" rows="2" placeholder="사용자에게 보이지 않습니다.">${escapeHtml(note)}</textarea></label><button type="button" class="data-admin-memo-save" onclick="saveDataAdminMemo('${escapeJs(item.ownerUid)}','${escapeJs(item.id)}')">관리자 메모 저장</button><div class="data-admin-actions">${actionButton('reviewing','검토 중')}${actionButton('hold','보류')}${actionButton('approved','승인')}${actionButton('rejected','거절')}</div></article>`;
+        const previewDisabled = status !== 'approved' ? 'disabled' : '';
+        const previewHint = status === 'approved' ? '승인된 요청의 삭제 대상만 안전하게 계산합니다. 실제 삭제는 실행하지 않습니다.' : '승인 상태에서만 삭제 대상 미리보기를 실행할 수 있습니다.';
+        return `<article class="data-admin-card"><div class="data-request-head"><strong>${escapeHtml(STATUS_LABELS[status] || status)}</strong><small>${escapeHtml(formatDate(item.requestedAt))}</small></div><h3>${escapeHtml(type.label)}</h3><dl><div><dt>사용자</dt><dd>${escapeHtml(item.requestedByEmail || item.requestedByUid || '-')}</dd></div><div><dt>Room</dt><dd>${escapeHtml(item.roomCode || '-')}</dd></div></dl><div class="data-admin-reason"><strong>요청 사유</strong><p>${escapeHtml(item.reason || '-')}</p></div><label>사용자에게 전달할 답변<textarea id="adminMessage_${escapeHtml(item.id)}" rows="3">${escapeHtml(item.adminMessage || '')}</textarea></label><label>관리자 내부 메모<textarea id="adminMemo_${escapeHtml(item.id)}" rows="2" placeholder="사용자에게 보이지 않습니다.">${escapeHtml(note)}</textarea></label><button type="button" class="data-admin-memo-save" onclick="saveDataAdminMemo('${escapeJs(item.ownerUid)}','${escapeJs(item.id)}')">관리자 메모 저장</button><div class="data-admin-actions">${actionButton('reviewing','검토 중')}${actionButton('hold','보류')}${actionButton('approved','승인')}${actionButton('rejected','거절')}</div><section class="data-deletion-preview"><div><strong>실제 처리 전 안전 점검</strong><p>${previewHint}</p></div><button type="button" class="data-preview-button" ${previewDisabled} onclick="previewDataDeletion('${escapeJs(item.ownerUid)}','${escapeJs(item.id)}')">삭제 대상 미리보기</button><div class="data-preview-result" id="deletionPreview_${escapeHtml(item.id)}" hidden></div></section></article>`;
     }
 
     async function saveDataAdminMemo(uid, requestId) {
@@ -262,6 +265,33 @@
         } catch (error) { console.warn('[DataAdmin] update failed', error); alert('관리자 처리 저장에 실패했습니다. Firebase Rules를 확인해 주세요.'); }
     }
 
+    function renderDeletionPreview(result) {
+        const databaseItems = Array.isArray(result.databaseTargets) ? result.databaseTargets : [];
+        const storageItems = Array.isArray(result.storageTargets) ? result.storageTargets : [];
+        const warnings = Array.isArray(result.warnings) ? result.warnings : [];
+        const list = (items) => items.length ? `<ul>${items.map((item) => `<li><code>${escapeHtml(item.path || item)}</code>${item.exists === false ? ' <span class="preview-missing">현재 없음</span>' : ''}</li>`).join('')}</ul>` : '<p>해당 항목이 없습니다.</p>';
+        return `<div class="preview-status"><strong>미리보기 완료 · 실제 삭제되지 않음</strong><span>${escapeHtml(formatDate(result.previewedAt))}</span></div><h4>Realtime Database 대상</h4>${list(databaseItems)}<h4>Storage 대상</h4>${list(storageItems)}<h4>Authentication</h4><p>${result.authTarget ? `사용자 UID <code>${escapeHtml(result.authTarget.uid)}</code> 계정이 대상입니다.` : 'Authentication 계정 삭제 대상이 아닙니다.'}</p>${warnings.length ? `<div class="preview-warnings"><strong>확인 필요</strong><ul>${warnings.map((w) => `<li>${escapeHtml(w)}</li>`).join('')}</ul></div>` : ''}<p class="preview-execution-state">실제 실행 가능 상태: <strong>${result.canExecute ? '예' : '아니오'}</strong></p>`;
+    }
+
+    async function previewDataDeletion(uid, requestId) {
+        if (!hmDataAdmin || !uid || !requestId) return;
+        const box = document.getElementById(`deletionPreview_${requestId}`);
+        if (!box) return;
+        box.hidden = false;
+        box.innerHTML = '<div class="data-empty-state">서버에서 삭제 대상을 안전하게 계산하는 중입니다.</div>';
+        try {
+            if (typeof functions === 'undefined') throw new Error('Firebase Functions SDK가 준비되지 않았습니다.');
+            const callable = functions.httpsCallable('previewDataDeletion');
+            const response = await callable({ uid, requestId });
+            box.innerHTML = renderDeletionPreview(response.data || {});
+            showToastSafe('삭제 대상 미리보기가 완료되었습니다. 실제 데이터는 삭제되지 않았습니다.');
+        } catch (error) {
+            console.warn('[DataAdmin] deletion preview failed', error);
+            const message = error?.message || 'Cloud Function 호출에 실패했습니다.';
+            box.innerHTML = `<div class="data-empty-state error">${escapeHtml(message)}</div>`;
+        }
+    }
+
     window.openDataManagementModal = openDataManagementModal;
     window.closeDataManagementModal = closeDataManagementModal;
     window.selectDataManagementTab = selectDataManagementTab;
@@ -275,4 +305,5 @@
     window.setDataAdminFilter = setDataAdminFilter;
     window.saveDataAdminMemo = saveDataAdminMemo;
     window.processDataAdminRequest = processDataAdminRequest;
+    window.previewDataDeletion = previewDataDeletion;
 })();

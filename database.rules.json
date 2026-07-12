@@ -127,6 +127,10 @@
     "dataDeleteRequestAdminNotes": {
       ".read": "auth != null && root.child('admins').child(auth.uid).exists()",
       ".write": "auth != null && root.child('admins').child(auth.uid).exists()"
+    },
+    "dataDeletionPreviews": {
+      ".read": "auth != null && root.child('admins').child(auth.uid).exists()",
+      ".write": false
     }
   }
 }
