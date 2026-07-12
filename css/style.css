@@ -9249,3 +9249,48 @@ button:active {
     .data-tab { padding: 9px 5px; font-size: .78rem; }
     .data-scope-option { padding: 11px; }
 }
+
+/* =========================================================
+   STEP5.6.1.6 - HearMe2nite Data Admin Review UI
+   ========================================================= */
+.hm-admin-only[hidden] { display: none !important; }
+.data-admin-overlay { display: none; }
+.data-admin-overlay.show { display: flex; }
+.data-admin-modal { max-height: min(92vh, 900px); overflow-y: auto; }
+.data-admin-summary { display:flex; justify-content:space-between; gap:10px; align-items:center; margin:0 0 12px; padding:12px 14px; border:1px solid #ffd1da; border-radius:16px; background:#fff7f9; color:#6f4e57; }
+.data-admin-summary span { font-size:.82rem; color:#e45572; font-weight:700; }
+.data-admin-filters { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:12px; }
+.data-admin-filter { border:1px solid #ffd1da; background:#fff; color:#7d5a63; border-radius:14px; padding:10px; font-weight:700; }
+.data-admin-filter.active { background:#ff7f96; color:#fff; border-color:#ff7f96; }
+.data-admin-list { display:grid; gap:12px; }
+.data-admin-card { border:1px solid #ffd1da; border-radius:18px; padding:14px; background:#fff; box-shadow:0 8px 24px rgba(120,76,88,.06); }
+.data-admin-card h3 { margin:8px 0 10px; color:#3d3034; font-size:1rem; }
+.data-admin-card dl { display:grid; gap:6px; margin:0 0 10px; }
+.data-admin-card dl div { display:grid; grid-template-columns:72px 1fr; gap:8px; font-size:.83rem; }
+.data-admin-card dt { color:#8d747b; font-weight:700; }
+.data-admin-card dd { margin:0; color:#4f4246; word-break:break-all; }
+.data-admin-reason { margin:10px 0; padding:10px 12px; border-radius:12px; background:#fff8fa; }
+.data-admin-reason p { margin:5px 0 0; white-space:pre-wrap; line-height:1.5; }
+.data-admin-card label { display:block; margin-top:10px; color:#6b535a; font-size:.82rem; font-weight:700; }
+.data-admin-card textarea { width:100%; margin-top:6px; border:1px solid #eadde1; border-radius:12px; padding:10px; resize:vertical; font:inherit; box-sizing:border-box; background:#fff; color:#3f3437; }
+.data-admin-actions { display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:6px; margin-top:12px; }
+.data-admin-actions button { border:0; border-radius:11px; padding:9px 5px; background:#f2ecee; color:#6b555b; font-size:.76rem; font-weight:800; }
+.data-admin-actions .approve { background:#dff6e8; color:#267145; }
+.data-admin-actions .reject { background:#ffe3e8; color:#b83852; }
+@media (max-width: 480px) {
+  .data-admin-actions { grid-template-columns:1fr 1fr; }
+  .data-admin-card dl div { grid-template-columns:58px 1fr; }
+}
+.user-bar-actions.hm-account-actions:has(#dataAdminButton:not([hidden])) {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+@media (max-width: 420px) {
+    .user-bar-actions.hm-account-actions:has(#dataAdminButton:not([hidden])) {
+        gap: 5px !important;
+    }
+    .user-bar-actions.hm-account-actions:has(#dataAdminButton:not([hidden])) .btn-small {
+        padding-left: 3px !important;
+        padding-right: 3px !important;
+        font-size: .72rem !important;
+    }
+}

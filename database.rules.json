@@ -2,21 +2,18 @@
   "rules": {
     ".read": false,
     ".write": false,
-
     "admins": {
       "$uid": {
         ".read": "auth != null && (auth.uid === $uid || root.child('admins').child(auth.uid).exists())",
         ".write": "auth != null && root.child('admins').child(auth.uid).exists()"
       }
     },
-
     "users": {
       "$uid": {
         ".read": "auth != null && (auth.uid === $uid || root.child('admins').child(auth.uid).exists())",
         ".write": "auth != null && (root.child('admins').child(auth.uid).exists() || (auth.uid === $uid && ((!data.exists() && (auth.token.email_verified === true || newData.child('emailVerificationRequired').val() === true)) || (data.exists() && (!data.child('emailVerificationRequired').exists() || (newData.child('emailVerificationRequired').exists() && newData.child('emailVerificationRequired').val() === data.child('emailVerificationRequired').val()))))))"
       }
     },
-
     "userRooms": {
       "$uid": {
         ".read": "auth != null && (auth.uid === $uid || root.child('admins').child(auth.uid).exists())",
@@ -26,7 +23,6 @@
         }
       }
     },
-
     "roomMembers": {
       "$roomCode": {
         ".read": "auth != null && (root.child('admins').child(auth.uid).exists() || root.child('roomMembers').child($roomCode).child(auth.uid).exists())",
@@ -37,21 +33,18 @@
         }
       }
     },
-
     "rooms": {
       "$roomCode": {
         ".read": "auth != null && (root.child('admins').child(auth.uid).exists() || root.child('roomMembers').child($roomCode).child(auth.uid).exists())",
         ".write": "auth != null && (root.child('admins').child(auth.uid).exists() || (root.child('roomMembers').child($roomCode).child(auth.uid).exists() && (!root.child('users').child(auth.uid).child('emailVerificationRequired').exists() || auth.token.email_verified === true)))"
       }
     },
-
     "ownerNotes": {
       "$roomCode": {
         ".read": "auth != null && (root.child('admins').child(auth.uid).exists() || root.child('roomMembers').child($roomCode).child(auth.uid).exists())",
         ".write": "auth != null && (root.child('admins').child(auth.uid).exists() || (root.child('roomMembers').child($roomCode).child(auth.uid).exists() && (root.child('roomMembers').child($roomCode).child(auth.uid).child('role').val() === 'owner' || root.child('roomMembers').child($roomCode).child(auth.uid).child('relationshipRole').val() === 'dom') && (!root.child('users').child(auth.uid).child('emailVerificationRequired').exists() || auth.token.email_verified === true)))"
       }
     },
-
     "invites": {
       "$code": {
         ".read": "auth != null && (!root.child('users').child(auth.uid).child('emailVerificationRequired').exists() || auth.token.email_verified === true)",
@@ -59,7 +52,6 @@
         ".validate": "!newData.exists() || (newData.child('roomCode').isString() && newData.child('ownerUid').isString() && newData.child('ownerEmail').isString() && newData.child('createdAt').exists() && newData.child('used').isBoolean())"
       }
     },
-
     "userAppAccess": {
       "$uid": {
         ".read": "auth != null && (auth.uid === $uid || root.child('admins').child(auth.uid).exists())",
@@ -121,6 +113,20 @@
         ".read": "auth != null && (auth.uid === $uid || root.child('admins').child(auth.uid).exists())",
         ".write": "auth != null && auth.uid === $uid"
       }
+    },
+    "dataDeleteRequests": {
+      ".read": "auth != null && root.child('admins').child(auth.uid).exists()",
+      "$uid": {
+        ".read": "auth != null && (auth.uid === $uid || root.child('admins').child(auth.uid).exists())",
+        "$requestId": {
+          ".write": "auth != null && (root.child('admins').child(auth.uid).exists() || (auth.uid === $uid && ((!data.exists() && newData.child('requestedByUid').val() === auth.uid && newData.child('status').val() === 'pending') || (data.exists() && data.child('requestedByUid').val() === auth.uid && newData.child('requestedByUid').val() === data.child('requestedByUid').val() && newData.child('requestId').val() === data.child('requestId').val() && newData.child('roomCode').val() === data.child('roomCode').val() && newData.child('requestType').val() === data.child('requestType').val() && newData.child('reason').val() === data.child('reason').val() && newData.child('requestedAt').val() === data.child('requestedAt').val() && newData.child('status').val() === 'canceled' && (data.child('status').val() === 'pending' || data.child('status').val() === 'reviewing' || data.child('status').val() === 'hold') && newData.child('adminMessage').val() === '사용자가 요청을 취소했습니다.'))))",
+          ".validate": "!newData.exists() || (newData.child('requestId').isString() && newData.child('requestedByUid').val() === $uid && newData.child('requestedByEmail').isString() && newData.child('roomCode').isString() && (newData.child('requestType').val() === 'account' || newData.child('requestType').val() === 'leave_room' || newData.child('requestType').val() === 'delete_room') && newData.child('reason').isString() && newData.child('reason').val().length >= 10 && (newData.child('status').val() === 'pending' || newData.child('status').val() === 'reviewing' || newData.child('status').val() === 'approved' || newData.child('status').val() === 'hold' || newData.child('status').val() === 'rejected' || newData.child('status').val() === 'canceled' || newData.child('status').val() === 'scheduled' || newData.child('status').val() === 'completed' || newData.child('status').val() === 'failed') && newData.child('requestedAt').exists() && newData.child('updatedAt').exists())"
+        }
+      }
+    },
+    "dataDeleteRequestAdminNotes": {
+      ".read": "auth != null && root.child('admins').child(auth.uid).exists()",
+      ".write": "auth != null && root.child('admins').child(auth.uid).exists()"
     }
   }
 }

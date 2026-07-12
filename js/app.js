@@ -142,6 +142,7 @@
                 document.getElementById('appContent').style.display = 'flex';
                 hmFinishBooting();
                 if (typeof loadUserProfile === 'function') await loadUserProfile();
+                if (typeof hmRefreshDataAdminAccess === 'function') await hmRefreshDataAdminAccess();
                 await loadUserActiveRoom();
                 await acceptPendingInviteIfAny();
                 await showGuideForFirstLogin();
@@ -152,6 +153,7 @@
                 pendingRelationshipRole = "";
                 if (typeof hmCurrentNickname !== 'undefined') hmCurrentNickname = '';
                 if (typeof hmApplyNicknameToUI === 'function') hmApplyNicknameToUI();
+                if (typeof hmRefreshDataAdminAccess === 'function') hmRefreshDataAdminAccess();
                 hideEmailVerificationPanel();
                 document.body.classList.remove('hm-authenticated');
                 document.getElementById('authBox').classList.remove('is-hidden');
