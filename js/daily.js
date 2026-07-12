@@ -433,7 +433,13 @@
         db.ref('rooms/' + roomCode + '/days/' + date).once('value').then((snapshot) => {
             const record = snapshot.val();
             if (record) {
-                document.getElementById('resultBox').value = record.fullText;
+                let finalText = record.fullText || '';
+                if (!finalText.includes('✨ 보상 / 휴식:')) {
+                    const choiceLabel = record.dailyChoiceLabel || getDailyChoiceLabel(record.dailyChoice || '');
+                    const rewardNote = record.rewardNote || '기록 없음';
+                    finalText += `\n\n✨ 보상 / 휴식:\n  - 선택: ${choiceLabel || '기록 없음'}\n  - 내용: ${rewardNote}`;
+                }
+                document.getElementById('resultBox').value = finalText;
                 const resultContainer = document.getElementById('resultContainer');
                 resultContainer.style.display = 'block';
                 resultContainer.scrollIntoView({ behavior: 'smooth' });

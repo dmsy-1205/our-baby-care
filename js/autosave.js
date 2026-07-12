@@ -302,8 +302,18 @@
                            `🚶‍♀️ 외출 여부: ${goingOut} (${hasPhotoText})\n` +
                            `🌙 취침 예정: ${sleepTime}\n\n` +
                            `📝 오늘의 한 줄:\n"${diary}"\n\n` +
-                           `💌 오늘의 답장:\n"${replyMessage}"` +
-                           customRoutineReport + `\n\n` +
+                           `💌 오늘의 답장:
+"${replyMessage}"
+
+` +
+                           `✨ 보상 / 휴식:
+` +
+                           `  - 선택: ${dailyChoiceLabel}
+` +
+                           `  - 내용: ${rewardNote || '기록 없음'}` +
+                           customRoutineReport + `
+
+` +
                            `오늘도 건강하게 보내줘서 고마워요 단 한 사람 최고 알라뷰❤️`;
 
         updateDailyCards();

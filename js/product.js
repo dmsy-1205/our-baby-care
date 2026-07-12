@@ -101,7 +101,15 @@
         <div class="hm-summary-dot"><b>🎁</b><span id="hmProductNextAnniversary">-</span></div></div>`;
         box.addEventListener('click', openHomeSummaryModal);
         box.addEventListener('keydown', (event)=>{ if(event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openHomeSummaryModal(); } });
-        anchor.insertAdjacentElement('afterend', box);
+        // STEP5.6.2.0: 기록 날짜를 '우리의 공간'과 '오늘의 요약' 사이에 고정합니다.
+        const recordDateInput = $('recordDate');
+        const recordDateGroup = recordDateInput ? recordDateInput.closest('.input-group') : null;
+        if (recordDateGroup) {
+            anchor.insertAdjacentElement('afterend', recordDateGroup);
+            recordDateGroup.insertAdjacentElement('afterend', box);
+        } else {
+            anchor.insertAdjacentElement('afterend', box);
+        }
         setTimeout(moveTodayPromiseSection, 0);
     }
     function updateDashboard(){

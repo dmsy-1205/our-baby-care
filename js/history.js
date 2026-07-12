@@ -601,7 +601,7 @@ function buildHistoryCustomRoutineText(record) {
         if (!itemMap || typeof itemMap !== 'object') return;
         const itemRows = Object.values(itemMap).filter(item => item && typeof item === 'object');
         const savedTitle = itemRows.find(item => item.cardTitle)?.cardTitle || '';
-        const cardTitle = (typeof hmCustomCards !== 'undefined' && hmCustomCards?.[cardId]?.title) ? hmCustomCards[cardId].title : (savedTitle || '맞춤 루틴');
+        const cardTitle = (typeof hmCustomCards !== 'undefined' && hmCustomCards?.[cardId]?.title) ? hmCustomCards[cardId].title : (savedTitle || '오늘의 약속');
         const lines = itemRows
             .sort((a, b) => Number(a.order || 0) - Number(b.order || 0))
             .map(item => {
@@ -635,7 +635,7 @@ function openHistoryDetailModal(date) {
     const meals = [record.mealBreakfast ? `아침: ${record.mealBreakfast}` : '', record.mealLunch ? `점심: ${record.mealLunch}` : '', record.mealDinner ? `저녁: ${record.mealDinner}` : ''].filter(Boolean).join('\n');
     const dailyBase = [record.wakeTime ? `☀️ 기상: ${record.wakeTime}` : '', record.sleepTime ? `🌙 취침 예정: ${record.sleepTime}` : '', record.water ? `💧 수분: ${record.water}` : '', record.exercise ? `🏃 운동: ${record.exercise}` : '', record.weight ? `⚖️ 체중: ${record.weight}` : ''].filter(Boolean).join('\n');
     const customRoutineText = buildHistoryCustomRoutineText(record);
-    const summaryChips = [record.moodLabel && record.moodLabel !== '기록 없음' ? record.moodLabel : '', missionText ? `🎯 ${missionText}` : '', customRoutineText ? '🧩 맞춤 루틴' : '', record.photo ? '📷 사진 있음' : '', record.dailyChoiceLabel && record.dailyChoiceLabel !== '기록 없음' ? record.dailyChoiceLabel : ''].filter(Boolean).map(makeHistoryChip).join('');
+    const summaryChips = [record.moodLabel && record.moodLabel !== '기록 없음' ? record.moodLabel : '', missionText ? `🎯 ${missionText}` : '', customRoutineText ? '💜 오늘의 약속' : '', record.photo ? '📷 사진 있음' : '', record.dailyChoiceLabel && record.dailyChoiceLabel !== '기록 없음' ? record.dailyChoiceLabel : ''].filter(Boolean).map(makeHistoryChip).join('');
     content.innerHTML = `
         <div class="history-detail-summary-card">
             <div class="history-detail-summary-icon">${getHistoryMoodIcon(record)}</div>
@@ -644,13 +644,13 @@ function openHistoryDetailModal(date) {
         ${record.photo ? `<img src="${record.photo}" class="history-detail-photo" alt="${date} 사진">` : ''}
         ${historyDetailBlock('😊 오늘의 기분', [record.moodLabel, record.moodNote].filter(Boolean).join('\n'))}
         ${historyDetailBlock('🎯 오늘의 미션', missionText)}
+        ${historyDetailBlock('💜 오늘의 약속', customRoutineText)}
         ${historyDetailBlock('☀️ 기본 기록', dailyBase)}
         ${historyDetailBlock('🥗 식사 기록', meals)}
         ${historyDetailBlock('🚶 외출 기록', record.goingOut)}
         ${historyDetailBlock('📝 오늘의 하루', record.diary)}
         ${historyDetailBlock('💌 주인의 피드백', record.replyMessage)}
         ${historyDetailBlock('✨ 보상 / 휴식', [record.dailyChoiceLabel, record.rewardNote].filter(Boolean).join('\n'))}
-        ${historyDetailBlock('🧩 맞춤 루틴', customRoutineText)}
         <div class="history-detail-actions">
             <button type="button" class="history-detail-copy" onclick="copyDirectText(event, '${date}')">📋 이 기록 복사하기</button>
             <button type="button" class="history-detail-delete" onclick="deleteRecord(event, '${date}')">삭제</button>
@@ -729,7 +729,7 @@ function hmHistorySummaryChips(record) {
         record?.exercise ? `🏃 ${record.exercise}` : '',
         record?.weight ? `⚖️ ${record.weight}` : '',
         missionText ? `🎯 ${missionText}` : '',
-        hmHistoryRecordHasRoutine(record) ? '🧩 맞춤 루틴' : '',
+        hmHistoryRecordHasRoutine(record) ? '💜 오늘의 약속' : '',
         record?.photo ? '📷 사진' : '',
         record?.dailyChoiceLabel && record.dailyChoiceLabel !== '기록 없음' ? record.dailyChoiceLabel : ''
     ].filter(Boolean).map(makeHistoryChip).join('');
@@ -738,7 +738,7 @@ function hmHistorySummaryChips(record) {
 function hmHistoryTimelinePreview(record) {
     if (!record) return '저장된 기록을 열어 확인하세요.';
     const diary = record.diary && record.diary !== '기록 없음' ? String(record.diary) : '';
-    const routine = hmHistoryRecordHasRoutine(record) ? '맞춤 루틴 포함' : '';
+    const routine = hmHistoryRecordHasRoutine(record) ? '오늘의 약속 포함' : '';
     const meal = [record.mealBreakfast, record.mealLunch, record.mealDinner].filter(v => v && v !== '기록 없음').length ? '식사 기록 포함' : '';
     return (diary || [routine, meal, getHistoryMissionText(record)].filter(Boolean).join(' · ') || '저장된 기록을 열어 확인하세요.').slice(0, 78);
 }
