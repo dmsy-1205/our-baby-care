@@ -176,3 +176,108 @@
         return summary;
     };
 
+
+
+    // =========================================================
+    // STEP5.6.4.1: SECURITY COMPATIBILITY QA
+    // 기능을 변경하지 않고 현재 로그인 계정의 보안 적용 상태를 읽기 전용으로 확인한다.
+    // 콘솔 실행: await hmRunSecurityCompatibilityQA()
+    // =========================================================
+    window.hmRunSecurityCompatibilityQA = async function hmRunSecurityCompatibilityQA() {
+        const result = {
+            version: HM_APP_VERSION,
+            checkedAt: new Date().toISOString(),
+            signedIn: !!currentUser,
+            uid: currentUser ? currentUser.uid : '',
+            email: currentUser ? (currentUser.email || '') : '',
+            emailVerified: !!(currentUser && currentUser.emailVerified),
+            activeRoomCode: activeRoomCode || '',
+            activeRoomRole: activeRoomRole || '',
+            activeRelationshipRole: activeRelationshipRole || '',
+            adminValueIsTrue: false,
+            membershipExists: false,
+            membershipRole: '',
+            membershipRelationshipRole: '',
+            canManagePrivateNote: false,
+            ownerNoteListenerExpected: false,
+            ownerNoteListenerConnected: !!ownerNoteRef,
+            checks: [],
+            warnings: [],
+            errors: []
+        };
+
+        const add = (level, name, ok, detail) => {
+            const item = { name, ok: !!ok, detail: detail || '' };
+            result[level].push(item);
+            const method = level === 'errors' ? 'error' : level === 'warnings' ? 'warn' : 'info';
+            console[method](`[HearMe2nite Security QA] ${ok ? 'OK' : 'CHECK'} ${name}`, detail || '');
+        };
+
+        if (!currentUser) {
+            add('errors', '로그인 상태', false, '로그인 후 다시 실행하세요.');
+            console.table(result);
+            window.hmLastSecurityCompatibilityReport = result;
+            return result;
+        }
+        add('checks', '로그인 상태', true, currentUser.email || currentUser.uid);
+        add(result.emailVerified ? 'checks' : 'warnings', '이메일 인증', result.emailVerified, result.emailVerified ? '인증됨' : '미인증 계정');
+
+        try {
+            const adminSnap = await db.ref(`admins/${currentUser.uid}`).once('value');
+            result.adminValueIsTrue = adminSnap.val() === true;
+            add('checks', '관리자 판정 true 기준', true, result.adminValueIsTrue ? '관리자' : '일반 사용자');
+        } catch (err) {
+            add('errors', '관리자 판정 읽기', false, err && err.code ? err.code : String(err));
+        }
+
+        if (!activeRoomCode) {
+            add('warnings', '활성 Room', false, 'Room 연결 후 다시 실행하세요.');
+        } else {
+            try {
+                const memberSnap = await db.ref(`roomMembers/${activeRoomCode}/${currentUser.uid}`).once('value');
+                const member = memberSnap.val() || {};
+                result.membershipExists = memberSnap.exists();
+                result.membershipRole = member.role || '';
+                result.membershipRelationshipRole = member.relationshipRole || '';
+                add(result.membershipExists ? 'checks' : 'errors', '현재 Room 멤버십', result.membershipExists, result.membershipExists ? `${result.membershipRole}/${result.membershipRelationshipRole}` : '멤버십 없음');
+            } catch (err) {
+                add('errors', '현재 Room 멤버십 읽기', false, err && err.code ? err.code : String(err));
+            }
+        }
+
+        result.canManagePrivateNote = typeof canManageRelationshipCards === 'function' && canManageRelationshipCards();
+        result.ownerNoteListenerExpected = result.canManagePrivateNote && !!activeRoomCode;
+        const listenerCorrect = result.ownerNoteListenerExpected ? !!ownerNoteRef : !ownerNoteRef;
+        add(listenerCorrect ? 'checks' : 'warnings', '비공개 메모 리스너', listenerCorrect,
+            result.ownerNoteListenerExpected
+                ? (ownerNoteRef ? 'Dom/Owner 리스너 연결됨' : 'Dom/Owner지만 리스너 미연결')
+                : (ownerNoteRef ? 'Sub/비관리 계정에 리스너가 연결됨' : 'Sub/비관리 계정 리스너 차단됨'));
+
+        const roleConsistent = !result.membershipExists || !result.membershipRelationshipRole || !activeRelationshipRole || result.membershipRelationshipRole === activeRelationshipRole;
+        add(roleConsistent ? 'checks' : 'warnings', '관계 역할 일치', roleConsistent,
+            `active=${activeRelationshipRole || '-'}, member=${result.membershipRelationshipRole || '-'}`);
+
+        console.group('[HearMe2nite Security QA] 결과');
+        console.table({
+            version: result.version,
+            signedIn: result.signedIn,
+            emailVerified: result.emailVerified,
+            activeRoomCode: result.activeRoomCode,
+            adminValueIsTrue: result.adminValueIsTrue,
+            membershipExists: result.membershipExists,
+            role: `${result.membershipRole || '-'}/${result.membershipRelationshipRole || '-'}`,
+            ownerNoteListenerExpected: result.ownerNoteListenerExpected,
+            ownerNoteListenerConnected: result.ownerNoteListenerConnected,
+            warnings: result.warnings.length,
+            errors: result.errors.length
+        });
+        console.groupEnd();
+        window.hmLastSecurityCompatibilityReport = result;
+        return result;
+    };
+
+    window.hmGetLastSecurityCompatibilityReport = function hmGetLastSecurityCompatibilityReport() {
+        return window.hmLastSecurityCompatibilityReport
+            ? JSON.parse(JSON.stringify(window.hmLastSecurityCompatibilityReport))
+            : null;
+    };

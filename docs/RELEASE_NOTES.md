@@ -1,3 +1,11 @@
+## v1.0 STEP5.6.4.1
+
+- STEP5.6.4.0 보안 Rules 적용 후 기존 사용자 호환성 확인용 읽기 전용 QA 추가
+- 콘솔 명령 `await hmRunSecurityCompatibilityQA()` 추가
+- 관리자 값 true 판정, 현재 Room 멤버십, 관계 역할, ownerNotes 리스너 연결 상태 진단
+- 실제 데이터 쓰기 및 Firebase 구조 변경 없음
+- 기존 채팅·기록·루틴 기능과 Rules 범위 유지
+
 ## v1.0 STEP5.6.4.0
 
 - 1차 보안 강화 완료(기존 사용자 호환 우선).
