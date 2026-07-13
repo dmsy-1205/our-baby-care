@@ -185,7 +185,7 @@
         if (!user) return false;
         try {
             const snap = await db.ref(`admins/${user.uid}`).once('value');
-            hmDataAdmin = snap.exists(); if (button) button.hidden = !hmDataAdmin;
+            hmDataAdmin = snap.val() === true; if (button) button.hidden = !hmDataAdmin;
             return hmDataAdmin;
         } catch (error) { console.warn('[DataAdmin] access check failed', error); return false; }
     }

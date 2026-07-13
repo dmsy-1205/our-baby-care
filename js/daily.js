@@ -330,7 +330,7 @@
         if (ownerNoteRef) ownerNoteRef.off();
         ownerNoteRef = null;
         const noteEl = document.getElementById('ownerPrivateNote');
-        if (!currentUser || !activeRoomCode || activeRoomRole !== 'owner' || !noteEl) return;
+        if (!currentUser || !activeRoomCode || !noteEl || !canManageRelationshipCards()) return;
         const date = document.getElementById('recordDate').value;
         ownerNoteRef = db.ref(`ownerNotes/${activeRoomCode}/${date}`);
         ownerNoteRef.on('value', (snapshot) => {

@@ -1,3 +1,14 @@
+## v1.0 STEP5.6.4.0
+
+- 1차 보안 강화 완료(기존 사용자 호환 우선).
+- 관리자 판정을 `admins/{uid} === true`로 통일.
+- 기존 Room에 제3자가 owner로 자가 등록하는 경로 차단.
+- `ownerNotes` 읽기/쓰기를 관리자, Room owner, 관계 역할 Dom으로 제한.
+- Sub 계정은 ownerNotes 리스너를 연결하지 않도록 앱 조건 유지·강화.
+- 초대코드는 생성 후 임의 재작성할 수 없고 `used: false → true` 사용 처리만 허용.
+- 삭제 요청 상태에 `processing` 호환 추가.
+- rooms 하위 세부 쓰기 분리, 채팅 senderUid 검증, chatReadStatus 본인 쓰기 제한은 호환성 QA 후 다음 단계에서 진행.
+
 ## v1.0 STEP5.6.3.8
 
 - 오늘의 약속 관리 화면에 기존 루틴을 개별 항목으로 표시
