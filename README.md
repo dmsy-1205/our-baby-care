@@ -1,6 +1,6 @@
 # HearMe2nite
 
-현재 공식 기준: **HearMe2nite v1.0 STEP5.6.3.3**
+현재 공식 기준: **HearMe2nite v1.0 STEP5.6.3.5**
 
 - Repository: `our-baby-care`
 - Branch: `main`

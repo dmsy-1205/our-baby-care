@@ -594,6 +594,20 @@ function hmAfterHistoryRenderSafe() {
     if (window.__hmAnniversaryUnifiedHooksInstalled) return;
     window.__hmAnniversaryUnifiedHooksInstalled = true;
 
+    // STEP5.6.3.5: Room 연결 시 대표 기념일을 즉시 불러와 홈 요약에 함께한 지 N일을 표시한다.
+    const originalConnectAndListenFirebase = window.connectAndListenFirebase;
+    if (typeof originalConnectAndListenFirebase === 'function') {
+        window.connectAndListenFirebase = function() {
+            const result = originalConnectAndListenFirebase.apply(this, arguments);
+            setTimeout(function() {
+                hmLoadAnniversarySettings().then(function() {
+                    hmSyncHomeSummary();
+                }).catch(function() {});
+            }, 0);
+            return result;
+        };
+    }
+
     const originalOpenHistoryPanelModal = window.openHistoryPanelModal;
     if (typeof originalOpenHistoryPanelModal === 'function') {
         window.openHistoryPanelModal = function() {
