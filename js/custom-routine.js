@@ -74,7 +74,7 @@ function hmCustomCardRows(includeInactive = false, includeDeleted = false) {
     return Object.entries(hmCustomCards || {})
         .map(([id, card]) => ({ id, ...(card || {}) }))
         .filter(card => includeDeleted || card.deleted !== true)
-        // STEP5.6.3.5: 과거에 자동 생성된 의미 없는 '약속 체크' 카드는 화면에서 제외한다.
+        // STEP5.6.3.6: 과거에 자동 생성된 의미 없는 '약속 체크' 카드는 화면에서 제외한다.
         // Firebase 원본은 삭제하지 않아 기존 사용자 데이터 호환성을 유지한다.
         .filter(card => String(card.title || '').trim() !== '약속 체크')
         .filter(card => includeInactive || card.active !== false)

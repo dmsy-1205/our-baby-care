@@ -77,7 +77,7 @@
             wrap.style.display = '';
             const hub = $('customRoutineHubCard');
             if (hub) { hub.style.display = ''; hub.hidden = false; hub.removeAttribute('aria-hidden'); }
-            // STEP5.6.3.5: 생성된 미션/주간 루틴은 메인 카드 바로 아래의 독립 카드 목록으로 표시한다.
+            // STEP5.6.3.6: 생성된 미션/주간 루틴은 메인 카드 바로 아래의 독립 카드 목록으로 표시한다.
             if (routineList && routineList.parentNode !== holder) holder.appendChild(routineList);
             if (toolbar && toolbar.parentNode !== holder) holder.appendChild(toolbar);
             title.dataset.hmMoved = '1';

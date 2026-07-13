@@ -90,6 +90,17 @@
         listenOwnerPrivateNote();
         if (typeof hmStartCustomRoutineCards === 'function') hmStartCustomRoutineCards(roomCode);
 
+        // STEP5.6.3.6: 기록실을 열지 않아도 Room 연결 직후 대표 기념일을 불러온다.
+        // anniversary.js가 autosave.js보다 먼저 로드되지만 connectAndListenFirebase 호출 시점에는
+        // 전체 스크립트 로딩이 완료되어 있으므로 여기서 직접 호출하는 것이 가장 안정적이다.
+        if (typeof hmLoadAnniversarySettings === 'function') {
+            await hmLoadAnniversarySettings();
+            if (!currentUser || currentUser.uid !== sessionUid || roomCode !== activeRoomCode) {
+                disconnectAllListeners();
+                return;
+            }
+        }
+
         currentRoomRef = db.ref('rooms/' + roomCode + '/days/' + date);
         currentRoomRef.on('value', (snapshot) => {
             if (roomCode !== activeRoomCode) return;

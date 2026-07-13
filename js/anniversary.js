@@ -594,19 +594,10 @@ function hmAfterHistoryRenderSafe() {
     if (window.__hmAnniversaryUnifiedHooksInstalled) return;
     window.__hmAnniversaryUnifiedHooksInstalled = true;
 
-    // STEP5.6.3.5: Room 연결 시 대표 기념일을 즉시 불러와 홈 요약에 함께한 지 N일을 표시한다.
-    const originalConnectAndListenFirebase = window.connectAndListenFirebase;
-    if (typeof originalConnectAndListenFirebase === 'function') {
-        window.connectAndListenFirebase = function() {
-            const result = originalConnectAndListenFirebase.apply(this, arguments);
-            setTimeout(function() {
-                hmLoadAnniversarySettings().then(function() {
-                    hmSyncHomeSummary();
-                }).catch(function() {});
-            }, 0);
-            return result;
-        };
-    }
+    // STEP5.6.3.6: 초기 대표 기념일 로딩은 autosave.js의
+    // connectAndListenFirebase 내부에서 직접 수행한다.
+    // 이 파일 로드 시점에는 connectAndListenFirebase가 아직 선언되지 않아
+    // 함수 래핑 방식이 적용되지 않는 문제를 제거했다.
 
     const originalOpenHistoryPanelModal = window.openHistoryPanelModal;
     if (typeof originalOpenHistoryPanelModal === 'function') {
