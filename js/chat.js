@@ -1,5 +1,5 @@
 // =========================================================
-// HearMe2nite v1.0 STEP5.6.3.2
+// HearMe2nite v1.0 STEP5.6.3.3
 // chat.js - card launcher, unread badge, realtime chat modal
 // Existing message path remains rooms/{roomCode}/messages.
 // =========================================================

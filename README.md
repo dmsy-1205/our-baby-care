@@ -1,44 +1,10 @@
 # HearMe2nite
 
-두 사람이 하루를 함께 기록하고, 약속과 미션, 기념일, 운동, 추억을 한 공간에 남기는 커플 라이프 앱입니다.
+현재 공식 기준: **HearMe2nite v1.0 STEP5.6.3.3**
 
-## 주요 기능
-- HearMe2nite 자체 회원가입 및 로그인
-- 우리의 공간 생성 / 초대코드 입장 / 기존 공간 복구
-- 상대방 온라인 상태 표시
-- 오늘의 약속과 커스텀 미션
-- 오늘의 컨디션과 하루 기록
-- 오늘의 운동 기록
-- 우리의 기념일
-- 기록실 캘린더와 하루 기록 팝업
-- 채팅
-- 앱 내부 사용 가이드
+- Repository: `our-baby-care`
+- Branch: `main`
+- 개발 원칙: Stability First / Full Source Only
+- 배포: GitHub Push → GitHub Actions → Run Workflow → Firebase Hosting
 
-## RC2.18 핵심
-RC2.18은 문서를 길게 늘리는 버전이 아니라, 사용자가 앱 안에서 바로 이해할 수 있는 짧은 도움말 경험을 만드는 버전입니다.
-
-추가된 내용:
-- ✨ 사용 가이드 리모델링
-- 🔍 도움말 검색
-- ❓ Q&A 아코디언
-- 💡 활용 팁
-- `/docs` 문서 정리
-
-## 개발 원칙
-- 최신 Full Source 기준으로만 개발
-- modified_files_only 누적 개발 금지
-- Firebase / Room / History / Presence 구조 변경 금지
-- 기능 추가보다 안정성과 사용자 경험 우선
-
-자세한 내용은 `/docs` 폴더를 확인하세요.
-
-
-## v1.1 STEP1 - Data Management Center
-
-사용자가 서버 데이터를 직접 삭제하지 않고 관리자에게 삭제를 요청할 수 있는 데이터 관리 기능을 추가했습니다.
-
-- 사용자 삭제 요청
-- 요청 내역 확인
-- 관리자 답변 표시 구조
-- 실제 삭제 기능 미포함
-- Firebase Rules 변경 없음
+상세 문서는 `docs/` 폴더를 확인합니다.

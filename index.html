@@ -4,7 +4,7 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💗</text></svg>">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>HearMe2nite v1.0 STEP5.6.3.2</title>
+    <title>HearMe2nite v1.0 STEP5.6.3.3</title>
     <!-- RC2.16.0 Branding STEP1: Quiet Love UI polish / 기능 구조 유지 -->
     <!-- RC2 v2.6.0 STEP5 FINAL QA: component-ready module map / UI and data logic preserved -->
     
@@ -13,7 +13,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-functions-compat.js"></script>
 
-    <link rel="stylesheet" href="css/style.css?v=step5-6-3-2-weekly-routine-chat-position-20260713">
+    <link rel="stylesheet" href="css/style.css?v=step5-6-3-3-feedback-cleanup-20260713">
 </head>
 <body class="hm-booting">
 
@@ -94,7 +94,7 @@
     </div>
     <div class="app-subtitle">우리의 하루를, 함께 기록합니다.</div>
     <div class="app-meta-row">
-        <div class="app-version-badge">Version v1.0 STEP5.6.3.2</div>
+        <div class="app-version-badge">Version v1.0 STEP5.6.3.3</div>
         <div class="home-presence-indicator" id="homePresenceIndicator" title="접속 상태 확인 중">
             <span class="home-presence-dot self offline" id="homePresenceSelfDot" aria-label="나 오프라인"></span>
             <span class="home-presence-dot partner offline" id="homePresencePartnerDot" aria-label="상대 오프라인"></span>
@@ -474,7 +474,6 @@
             <div class="custom-routine-template-row">
                 <button type="button" onclick="fillCustomRoutineTemplate('blank')">빈 카드</button>
                 <button type="button" onclick="fillCustomRoutineTemplate('mission')">미션 카드</button>
-                <button type="button" onclick="fillCustomRoutineTemplate('checklist')">체크리스트</button>
                 <button type="button" onclick="fillCustomRoutineTemplate('routine')">생활 루틴</button>
                 <button type="button" onclick="fillCustomRoutineTemplate('free')">자유형</button>
             </div>
@@ -905,9 +904,21 @@
             <h2 id="feedbackModalTitle">💌 주인의 피드백</h2>
             <button type="button" class="modal-close-btn" onclick="closeDailyModal('feedback')">닫기</button>
         </div>
-        <div class="manager-lock-note" id="feedbackLockNote"><strong>관리(Dom)가 작성하는 영역입니다.</strong><br>기록(Sub)은 피드백 내용을 확인만 할 수 있어요.</div>
-        <div class="feedback-hint">칭찬, 격려, 내일의 미션, 주의할 점을 따뜻하게 남겨주세요.</div>
-        <textarea id="replyMessage" rows="5" placeholder="오늘의 기록을 읽고 주인의 피드백을 남겨주세요." oninput="handleDailyFieldChanged()"></textarea>
+        <div class="manager-lock-note" id="feedbackLockNote"><strong>관리(Dom)가 작성하는 영역입니다.</strong><br>기록(Sub)은 확인 상태와 피드백을 읽을 수 있어요.</div>
+        <section class="feedback-review-card" aria-labelledby="feedbackReviewTitle">
+            <div class="feedback-review-head"><strong id="feedbackReviewTitle">오늘의 확인</strong><span id="feedbackReviewSummary">기록을 확인하는 중입니다.</span></div>
+            <div class="feedback-review-list" id="feedbackReviewList"></div>
+        </section>
+        <div class="feedback-hint">마음을 먼저 고르고, 오늘의 기록에 대한 한마디를 남겨주세요.</div>
+        <div class="feedback-type-grid" role="group" aria-label="피드백 유형">
+            <button type="button" class="feedback-type-btn" data-feedback-type="praise" onclick="selectFeedbackType('praise')">💜<span>칭찬해요</span></button>
+            <button type="button" class="feedback-type-btn" data-feedback-type="support" onclick="selectFeedbackType('support')">🌱<span>응원해요</span></button>
+            <button type="button" class="feedback-type-btn" data-feedback-type="talk" onclick="selectFeedbackType('talk')">💬<span>이야기해요</span></button>
+            <button type="button" class="feedback-type-btn" data-feedback-type="together" onclick="selectFeedbackType('together')">🤍<span>함께할게요</span></button>
+        </div>
+        <label class="todays-gift-label" for="replyMessage">한마디</label>
+        <textarea id="replyMessage" rows="5" placeholder="오늘의 기록을 읽고 따뜻한 한마디를 남겨주세요." oninput="handleDailyFieldChanged()"></textarea>
+        <label class="feedback-confirm-row"><input type="checkbox" id="feedbackConfirmed" onchange="handleFeedbackConfirmedChanged()"><span>오늘의 기록을 확인했어요</span></label>
         <button type="button" class="daily-modal-save" onclick="closeDailyModal('feedback')">저장하고 닫기</button>
     </div>
 </div>
@@ -1071,25 +1082,25 @@
 </div>
 
 <div class="toast" id="toast">기록이 복사되었습니다! 💕</div>
-    <script src="js/config.js?v=step5-6-3-2-weekly-routine-chat-position-20260713"></script>
-    <script src="js/utils.js?v=step5-6-3-2-weekly-routine-chat-position-20260713"></script>
-    <script src="js/popup.js?v=step5-6-3-2-weekly-routine-chat-position-20260713"></script>
-    <script src="js/auth.js?v=step5-6-3-2-weekly-routine-chat-position-20260713"></script>
-    <script src="js/room.js?v=step5-6-3-2-weekly-routine-chat-position-20260713"></script>
-    <script src="js/presence.js?v=step5-6-3-2-weekly-routine-chat-position-20260713"></script>
-    <script src="js/daily.js?v=step5-6-3-2-weekly-routine-chat-position-20260713"></script>
-    <script src="js/mission.js?v=step5-6-3-2-weekly-routine-chat-position-20260713"></script>
-    <script src="js/custom-routine.js?v=step5-6-3-2-weekly-routine-chat-position-20260713"></script>
-    <script src="js/history.js?v=step5-6-3-2-weekly-routine-chat-position-20260713"></script>
-    <script src="js/anniversary.js?v=step5-6-3-2-weekly-routine-chat-position-20260713"></script>
-    <script src="js/profile.js?v=step5-6-3-2-weekly-routine-chat-position-20260713"></script>
-    <script src="js/chat.js?v=step5-6-3-2-weekly-routine-chat-position-20260713"></script>
-    <script src="js/autosave.js?v=step5-6-3-2-weekly-routine-chat-position-20260713"></script>
-    <script src="js/qa.js?v=step5-6-3-2-weekly-routine-chat-position-20260713"></script>
-    <script src="js/motion.js?v=step5-6-3-2-weekly-routine-chat-position-20260713"></script>
-    <script src="js/product.js?v=step5-6-3-2-weekly-routine-chat-position-20260713"></script>
-    <script src="js/help-center.js?v=step5-6-3-2-weekly-routine-chat-position-20260713"></script>
-    <script src="js/data-management.js?v=step5-6-3-2-weekly-routine-chat-position-20260713"></script>
-    <script src="js/app.js?v=step5-6-3-2-weekly-routine-chat-position-20260713"></script>
+    <script src="js/config.js?v=step5-6-3-3-feedback-cleanup-20260713"></script>
+    <script src="js/utils.js?v=step5-6-3-3-feedback-cleanup-20260713"></script>
+    <script src="js/popup.js?v=step5-6-3-3-feedback-cleanup-20260713"></script>
+    <script src="js/auth.js?v=step5-6-3-3-feedback-cleanup-20260713"></script>
+    <script src="js/room.js?v=step5-6-3-3-feedback-cleanup-20260713"></script>
+    <script src="js/presence.js?v=step5-6-3-3-feedback-cleanup-20260713"></script>
+    <script src="js/daily.js?v=step5-6-3-3-feedback-cleanup-20260713"></script>
+    <script src="js/mission.js?v=step5-6-3-3-feedback-cleanup-20260713"></script>
+    <script src="js/custom-routine.js?v=step5-6-3-3-feedback-cleanup-20260713"></script>
+    <script src="js/history.js?v=step5-6-3-3-feedback-cleanup-20260713"></script>
+    <script src="js/anniversary.js?v=step5-6-3-3-feedback-cleanup-20260713"></script>
+    <script src="js/profile.js?v=step5-6-3-3-feedback-cleanup-20260713"></script>
+    <script src="js/chat.js?v=step5-6-3-3-feedback-cleanup-20260713"></script>
+    <script src="js/autosave.js?v=step5-6-3-3-feedback-cleanup-20260713"></script>
+    <script src="js/qa.js?v=step5-6-3-3-feedback-cleanup-20260713"></script>
+    <script src="js/motion.js?v=step5-6-3-3-feedback-cleanup-20260713"></script>
+    <script src="js/product.js?v=step5-6-3-3-feedback-cleanup-20260713"></script>
+    <script src="js/help-center.js?v=step5-6-3-3-feedback-cleanup-20260713"></script>
+    <script src="js/data-management.js?v=step5-6-3-3-feedback-cleanup-20260713"></script>
+    <script src="js/app.js?v=step5-6-3-3-feedback-cleanup-20260713"></script>
 </body>
 </html>

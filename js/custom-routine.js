@@ -297,9 +297,6 @@ function fillCustomRoutineTemplate(type = 'blank') {
         mission: { title: '오늘의 약속', desc: '주인님이 바라는 오늘의 약속', items: [
             ['미션 완료', 'checkbox', ''], ['인증 메모', 'text', '어떻게 했는지 적기'], ['주인님께 한마디', 'text', '']
         ] },
-        checklist: { title: '약속 체크', desc: '하루 약속을 체크합니다', items: [
-            ['물 마시기', 'checkbox', ''], ['운동하기', 'checkbox', ''], ['정리하기', 'checkbox', ''], ['보고하기', 'checkbox', '']
-        ] },
         routine: { title: '생활 루틴', desc: '정해진 일과를 기록합니다', items: [
             ['시작 시간', 'time', ''], ['완료 여부', 'checkbox', ''], ['점수', 'number', '1~10'], ['메모', 'text', '']
         ] },
@@ -310,7 +307,7 @@ function fillCustomRoutineTemplate(type = 'blank') {
     const tpl = templates[type] || templates.blank;
     if (title) title.value = tpl.title;
     if (desc) desc.value = tpl.desc;
-    const kindValue = type === 'routine' || type === 'checklist' ? 'weekly' : 'mission';
+    const kindValue = type === 'routine' ? 'weekly' : 'mission';
     const kindInput = document.querySelector(`input[name="customRoutineKind"][value="${kindValue}"]`);
     if (kindInput) kindInput.checked = true;
     document.querySelectorAll('[data-custom-weekday]').forEach(input => { input.checked = kindValue === 'weekly'; });

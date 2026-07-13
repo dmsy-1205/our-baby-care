@@ -9590,3 +9590,12 @@ button:active {
     .custom-routine-weekday-row { gap:4px; }
     .custom-routine-weekday-row label { font-size:11px; padding:6px 1px; }
 }
+
+
+/* STEP5.6.3.3 관리와 피드백 정리 */
+.feedback-review-card{margin:12px 0;padding:14px;border:1px solid #eee3f3;border-radius:18px;background:linear-gradient(180deg,#fff,#fcf9fd)}
+.feedback-review-head{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:10px}.feedback-review-head span{font-size:12px;color:#8b7d91}
+.feedback-review-list{display:grid;gap:7px}.feedback-review-item{display:grid;grid-template-columns:22px 1fr auto;align-items:center;gap:8px;padding:9px 10px;border-radius:12px;background:#f8f5fa;color:#8b7d91}.feedback-review-item.is-done{background:#f1fbf6;color:#426e59}.feedback-review-item small{font-size:11px}
+.feedback-type-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:12px 0}.feedback-type-btn{min-height:58px;border:1px solid #eadcf0;border-radius:15px;background:#fff;display:flex;align-items:center;justify-content:center;gap:7px;font-weight:700;color:#4d4053}.feedback-type-btn.active{border-color:#a96ad6;background:#f7effd;box-shadow:0 0 0 2px rgba(169,106,214,.12)}.feedback-type-btn:disabled{opacity:.6}
+.feedback-confirm-row{display:flex;align-items:center;gap:9px;margin:12px 0;padding:11px 12px;border-radius:13px;background:#faf7fb;font-weight:700}.feedback-confirm-row input{width:18px;height:18px}
+@media(max-width:420px){.feedback-type-grid{grid-template-columns:1fr 1fr}.feedback-review-item{grid-template-columns:20px 1fr auto}}

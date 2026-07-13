@@ -130,7 +130,11 @@
         const feedbackSub = document.getElementById('feedbackCardSub');
         if (feedbackSub) {
             const text = getTrimmedValue('replyMessage');
-            feedbackSub.innerText = text ? (text.length > 28 ? `${text.slice(0, 28)}...` : text) : '아직 피드백이 없습니다.';
+            const typeLabel = getFeedbackTypeLabel(selectedFeedbackType);
+            if (feedbackConfirmed && typeLabel) feedbackSub.innerText = `확인 완료 · ${typeLabel}`;
+            else if (feedbackConfirmed) feedbackSub.innerText = '오늘의 기록을 확인했어요.';
+            else if (typeLabel) feedbackSub.innerText = `${typeLabel}${text ? ' · 한마디 있음' : ''}`;
+            else feedbackSub.innerText = text ? (text.length > 28 ? `${text.slice(0, 28)}...` : text) : '아직 피드백이 없습니다.';
         }
 
         const rewardSub = document.getElementById('rewardCardSub');
@@ -142,7 +146,7 @@
 
         const feedbackCard = document.getElementById('feedbackDailyCard');
         const rewardCard = document.getElementById('rewardDailyCard');
-        const hasFeedbackContent = !!getTrimmedValue('replyMessage');
+        const hasFeedbackContent = !!(getTrimmedValue('replyMessage') || selectedFeedbackType || feedbackConfirmed);
         const hasRewardContent = !!(selectedDailyChoice || getTrimmedValue('rewardNote'));
         if (feedbackCard) {
             feedbackCard.classList.toggle('is-filled', hasFeedbackContent);
@@ -196,8 +200,11 @@
         const rewardBtn = document.getElementById('rewardBtn');
         const restBtn = document.getElementById('restBtn');
         const feedbackLock = document.getElementById('feedbackLockNote');
+        const feedbackConfirmedEl = document.getElementById('feedbackConfirmed');
+        const feedbackTypeButtons = document.querySelectorAll('[data-feedback-type]');
         const rewardLock = document.getElementById('rewardLockNote');
-        [replyEl, rewardEl, ownerNoteEl, rewardBtn, restBtn].forEach((el) => { if (el) el.disabled = !canManage; });
+        [replyEl, rewardEl, ownerNoteEl, rewardBtn, restBtn, feedbackConfirmedEl].forEach((el) => { if (el) el.disabled = !canManage; });
+        feedbackTypeButtons.forEach((el) => { el.disabled = !canManage; });
         if (feedbackLock) feedbackLock.style.display = canManage ? 'none' : 'block';
         if (rewardLock) rewardLock.style.display = canManage ? 'none' : 'block';
         updateMissionAccessControls();
@@ -205,7 +212,52 @@
 
     // =========================================================
 
-    // MODULE: DAILY CHOICE / REWARD CHECK
+
+    function getFeedbackTypeLabel(type) {
+        const labels = { praise: '💜 칭찬해요', support: '🌱 응원해요', talk: '💬 이야기해요', together: '🤍 함께할게요' };
+        return labels[type] || '';
+    }
+
+    function selectFeedbackType(type) {
+        if (!canManageRelationshipCards()) { alert('피드백은 관리(Dom)만 작성할 수 있습니다.'); return; }
+        selectedFeedbackType = selectedFeedbackType === type ? '' : type;
+        updateFeedbackTypeButtons();
+        updateDailyCards();
+        triggerAutoSave('feedback-type');
+    }
+
+    function updateFeedbackTypeButtons() {
+        document.querySelectorAll('[data-feedback-type]').forEach((btn) => {
+            btn.classList.toggle('active', btn.dataset.feedbackType === selectedFeedbackType);
+        });
+        const confirmedEl = document.getElementById('feedbackConfirmed');
+        if (confirmedEl && document.activeElement !== confirmedEl) confirmedEl.checked = !!feedbackConfirmed;
+    }
+
+    function handleFeedbackConfirmedChanged() {
+        if (!canManageRelationshipCards()) return;
+        feedbackConfirmed = !!document.getElementById('feedbackConfirmed')?.checked;
+        updateDailyCards();
+        triggerAutoSave('feedback-confirmed');
+    }
+
+    function renderFeedbackReviewStatus() {
+        const list = document.getElementById('feedbackReviewList');
+        const summary = document.getElementById('feedbackReviewSummary');
+        if (!list) return;
+        const checks = [
+            ['기상 시간', !!getTrimmedValue('wakeTime')],
+            ['오늘의 컨디션', !!(selectedMood || getTrimmedValue('moodNote') || getTrimmedValue('exercise') || getTrimmedValue('weight') || currentWater > 0)],
+            ['식사 기록', ['mealBreakfast','mealLunch','mealDinner'].some(id => !!getTrimmedValue(id))],
+            ['외출 기록', !!(getTrimmedValue('goingOut') || uploadedPhotoBase64)],
+            ['오늘의 하루', !!getTrimmedValue('diary')]
+        ];
+        const completed = checks.filter(([,done]) => done).length;
+        list.innerHTML = checks.map(([label, done]) => `<div class="feedback-review-item ${done ? 'is-done' : ''}"><span>${done ? '✓' : '–'}</span><strong>${label}</strong><small>${done ? '작성됨' : '기록 없음'}</small></div>`).join('');
+        if (summary) summary.textContent = `${completed}/${checks.length} 항목 작성`;
+    }
+
+        // MODULE: DAILY CHOICE / REWARD CHECK
 
     // Split-ready target: toggleDailyChoice
 
@@ -322,6 +374,9 @@
         const waterDisplay = document.getElementById('waterDisplay');
         if (waterDisplay) waterDisplay.innerText = 0;
         clearMissionAndMoodUI();
+        selectedFeedbackType = '';
+        feedbackConfirmed = false;
+        updateFeedbackTypeButtons();
         updateDailyCards();
         removePhotoUI();
     }

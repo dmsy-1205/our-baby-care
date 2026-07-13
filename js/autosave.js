@@ -105,6 +105,9 @@
                 safeUpdateField('sleepTime', record.sleepTime);
                 safeUpdateField('diary', record.diary);
                 safeUpdateField('replyMessage', record.replyMessage);
+                selectedFeedbackType = record.feedbackType || '';
+                feedbackConfirmed = record.feedbackConfirmed === true;
+                if (typeof updateFeedbackTypeButtons === 'function') updateFeedbackTypeButtons();
                 safeUpdateField('moodNote', record.moodNote);
                 safeUpdateField('rewardNote', record.rewardNote);
                 renderMissions(record.missions);
@@ -233,6 +236,8 @@
                 sleepTime: record.sleepTime,
                 diary: record.diary,
                 replyMessage: record.replyMessage,
+                feedbackType: record.feedbackType,
+                feedbackConfirmed: record.feedbackConfirmed,
                 missions: record.missions,
                 mood: record.mood,
                 moodNote: record.moodNote,
@@ -277,6 +282,8 @@
         const sleepTime = document.getElementById('sleepTime').value || '기록 없음';
         const diary = document.getElementById('diary').value || '기록 없음';
         const replyMessage = document.getElementById('replyMessage').value || '기록 없음';
+        const feedbackType = selectedFeedbackType || '';
+        const feedbackTypeLabel = (typeof getFeedbackTypeLabel === 'function' ? getFeedbackTypeLabel(feedbackType) : '') || '선택 없음';
         const missions = collectMissions();
         const missionSummary = getMissionSummary(missions);
         const missionReport = getMissionReportText(missions);
@@ -302,8 +309,10 @@
                            `🚶‍♀️ 외출 여부: ${goingOut} (${hasPhotoText})\n` +
                            `🌙 취침 예정: ${sleepTime}\n\n` +
                            `📝 오늘의 한 줄:\n"${diary}"\n\n` +
-                           `💌 오늘의 답장:
-"${replyMessage}"
+                           `💌 주인의 피드백:
+  - 유형: ${feedbackTypeLabel}
+  - 확인: ${feedbackConfirmed ? '확인 완료' : '미확인'}
+  - 한마디: "${replyMessage}"
 
 ` +
                            `🎁 오늘의 선물:
@@ -321,7 +330,7 @@
         const newRecord = {
             date, wakeTime, water: `${currentWater}ML`, weight, exercise,
             mealBreakfast, mealLunch, mealDinner,
-            goingOut, sleepTime, diary, replyMessage,
+            goingOut, sleepTime, diary, replyMessage, feedbackType, feedbackConfirmed,
             missions, mood, moodLabel, moodNote, missionSummary,
             customCardValues,
             dailyChoice, dailyChoiceLabel, rewardNote,
