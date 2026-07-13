@@ -24,10 +24,14 @@
         if (entireRoomRef) entireRoomRef.off();
         if (typeof hmStopCustomRoutineCards === 'function') hmStopCustomRoutineCards();
         if (chatRef) chatRef.off();
+        if (typeof hmChatReadRef !== 'undefined' && hmChatReadRef) hmChatReadRef.off();
+        if (typeof hmChatPresenceRef !== 'undefined' && hmChatPresenceRef) hmChatPresenceRef.off();
         if (ownerNoteRef) ownerNoteRef.off();
         currentRoomRef = null;
         entireRoomRef = null;
         chatRef = null;
+        if (typeof hmChatReadRef !== 'undefined') hmChatReadRef = null;
+        if (typeof hmChatPresenceRef !== 'undefined') hmChatPresenceRef = null;
         ownerNoteRef = null;
         cachedDaysData = null;
         hmLastAutoSaveSignature = '';

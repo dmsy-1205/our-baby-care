@@ -19,7 +19,7 @@
 - `Unchecked runtime.lastError`는 확장 프로그램 메시지인지 구분
 
 
-## STEP5.6.4.1 보안 호환성 QA
+## STEP5.6.4.1.1 보안 호환성 QA
 
 배포 후 브라우저 개발자 도구 Console에서 다음을 실행한다.
 

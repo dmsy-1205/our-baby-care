@@ -1,4 +1,4 @@
-## v1.0 STEP5.6.4.1
+## v1.0 STEP5.6.4.1.1
 
 - STEP5.6.4.0 보안 Rules 적용 후 기존 사용자 호환성 확인용 읽기 전용 QA 추가
 - 콘솔 명령 `await hmRunSecurityCompatibilityQA()` 추가
@@ -63,3 +63,11 @@
 ## v1.0 STEP5.6.3.2
 - 오늘의 미션과 요일별 주간 루틴 관리
 - 우리의 대화를 오늘의 요약 아래로 이동
+
+
+## HearMe2nite v1.0 STEP5.6.4.1.1
+
+- Room 또는 계정 전환 시 남아 있던 `hmChatReadRef` 리스너를 공통 정리 함수에서 해제합니다.
+- 채팅 Presence 리스너 `hmChatPresenceRef`도 함께 해제하고 참조를 초기화합니다.
+- 이전 Room의 `chatReadStatus/{uid}` 접근으로 발생하던 `permission_denied` 콘솔 오류를 방지합니다.
+- Firebase 데이터 구조와 Rules는 변경하지 않았습니다.
