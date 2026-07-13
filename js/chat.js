@@ -207,8 +207,14 @@ async function sendChatMessage() {
         const sender = typeof hmGetChatDisplayName === 'function' ? hmGetChatDisplayName() : document.getElementById('chatSender').value.trim();
         const input = document.getElementById('chatInput');
         const text = input.value.trim();
+        const maxChatLength = 2000;
         if (!currentUser) { alert('로그인이 필요합니다.'); return; }
         if (!sender || !text) return;
+        if (text.length > maxChatLength) {
+            alert(`메시지는 ${maxChatLength.toLocaleString()}자 이하로 입력해 주세요.`);
+            input.focus({ preventScroll: true });
+            return;
+        }
         if (!(await hmRequireRoomAccess('채팅 전송', roomCode))) { alert('채팅 권한이 없습니다.'); return; }
         await db.ref('rooms/' + roomCode + '/messages').push({
             sender,

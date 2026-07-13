@@ -26,3 +26,12 @@
 - 실제 데이터 삭제 엔진
 - 계정·Room·Storage 실제 삭제
 - 푸시 알림
+
+
+# STEP5.6.4.2 추가 사항
+
+- 채팅 신규 저장 데이터에 senderUid/auth.uid 일치 검증 적용
+- 채팅 발신 이메일/auth.token.email 일치 검증 적용
+- chatReadStatus는 본인 UID 또는 관리자만 갱신 가능
+- 기존 rooms 상위 쓰기 구조는 호환성을 위해 유지하고 하위 `.validate`로 보강
+- GitHub Actions는 Hosting 전용이며 database.rules.json은 자동 배포되지 않음

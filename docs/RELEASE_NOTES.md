@@ -1,3 +1,15 @@
+## HearMe2nite v1.0 STEP5.6.4.2
+
+### 채팅 및 읽음 상태 세부 보안 강화
+
+- 신규 채팅 `senderUid === auth.uid` 검증 추가
+- 신규 채팅 `senderEmail === auth.token.email` 검증 추가
+- 채팅 본문 1~2,000자, 발신자 이름 최대 80자 제한
+- `chatReadStatus/{uid}` 쓰기를 본인 UID 또는 관리자에게만 허용
+- 읽음 상태 객체 필드를 `lastReadAt`, `updatedAt`으로 제한
+- 기존 채팅 및 Room 데이터는 마이그레이션 없이 유지
+- Hosting Workflow가 Realtime Database Rules를 배포하지 않음을 문서화
+
 ## v1.0 STEP5.6.4.1.1
 
 - STEP5.6.4.0 보안 Rules 적용 후 기존 사용자 호환성 확인용 읽기 전용 QA 추가
