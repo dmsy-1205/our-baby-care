@@ -20,6 +20,56 @@ let hmCustomEditingCardId = '';
 let hmCustomActiveInputCardId = '';
 let hmCustomDraftItems = [];
 
+const HM_CUSTOM_DAY_LABELS = ['일', '월', '화', '수', '목', '금', '토'];
+
+function hmCustomSelectedDate() {
+    const raw = document.getElementById('recordDate')?.value || '';
+    if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) {
+        const [y, m, d] = raw.split('-').map(Number);
+        return new Date(y, m - 1, d);
+    }
+    return new Date();
+}
+
+function hmCustomCardKind(card) {
+    return card?.kind === 'weekly' ? 'weekly' : 'mission';
+}
+
+function hmCustomCardWeekdays(card) {
+    const days = Array.isArray(card?.weekdays) ? card.weekdays : [];
+    return days.map(Number).filter(day => day >= 0 && day <= 6);
+}
+
+function hmCustomAppliesToday(card) {
+    if (hmCustomCardKind(card) !== 'weekly') return true;
+    const weekdays = hmCustomCardWeekdays(card);
+    return weekdays.includes(hmCustomSelectedDate().getDay());
+}
+
+function hmCustomScheduleLabel(card) {
+    if (hmCustomCardKind(card) !== 'weekly') return '오늘의 미션';
+    const weekdays = hmCustomCardWeekdays(card);
+    if (weekdays.length === 7) return '매일';
+    return weekdays.length ? weekdays.map(day => HM_CUSTOM_DAY_LABELS[day]).join('·') : '요일 미지정';
+}
+
+function updateCustomRoutineScheduleUi() {
+    const kind = document.querySelector('input[name="customRoutineKind"]:checked')?.value || 'mission';
+    const box = document.getElementById('customRoutineWeekdayBox');
+    if (box) box.hidden = kind !== 'weekly';
+}
+
+function selectAllCustomRoutineDays() {
+    document.querySelectorAll('[data-custom-weekday]').forEach(input => { input.checked = true; });
+}
+
+function hmResetCustomRoutineSchedule() {
+    const mission = document.querySelector('input[name="customRoutineKind"][value="mission"]');
+    if (mission) mission.checked = true;
+    document.querySelectorAll('[data-custom-weekday]').forEach(input => { input.checked = false; });
+    updateCustomRoutineScheduleUi();
+}
+
 function hmCustomCardRows(includeInactive = false, includeDeleted = false) {
     return Object.entries(hmCustomCards || {})
         .map(([id, card]) => ({ id, ...(card || {}) }))
@@ -119,7 +169,8 @@ function renderCustomRoutineCards() {
     const manageBtn = document.getElementById('customRoutineManageBtn');
     const hubSub = document.getElementById('customRoutineHubSub');
     const hubCard = document.getElementById('customRoutineHubCard');
-    const rows = hmCustomCardRows(false);
+    const allRows = hmCustomCardRows(false);
+    const rows = allRows.filter(hmCustomAppliesToday);
     const canManage = typeof canManageRelationshipCards === 'function' && canManageRelationshipCards();
 
     const totalItems = rows.reduce((sum, card) => sum + hmCustomItemRows(card).length, 0);
@@ -130,7 +181,7 @@ function renderCustomRoutineCards() {
         return saved.value !== undefined && saved.value !== null && String(saved.value).trim() !== '';
     }).length, 0);
 
-    if (countText) countText.innerText = `${rows.length}/${HM_CUSTOM_MAX_CARDS} · ${canManage ? '관리(Dom)가 설계' : '기록(Sub)은 입력만 가능'}`;
+    if (countText) countText.innerText = `${rows.length}개 오늘 · 전체 ${allRows.length}/${HM_CUSTOM_MAX_CARDS} · ${canManage ? '관리(Dom)가 설계' : '기록(Sub)은 입력만 가능'}`;
     if (toolbar) toolbar.style.display = canManage ? 'flex' : 'none';
     if (manageBtn) {
         manageBtn.style.display = canManage ? '' : 'none';
@@ -143,9 +194,27 @@ function renderCustomRoutineCards() {
         else hubSub.innerText = `${rows.length}개 약속 · ${totalItems ? `${doneItems}/${totalItems} 입력 완료` : '항목 없음'}`;
     }
 
-    // RC2.11.3: 홈 화면은 길어지지 않도록 단일 허브 카드만 표시한다.
-    // 기존 customRoutineList는 호환용으로만 남기고 실제 목록은 허브 모달에서 렌더링한다.
-    if (list) list.innerHTML = '';
+    // STEP5.6.3.2: 메인 카드 아래에는 선택 날짜에 해당하는 미션과 주간 루틴을 카드형으로 표시한다.
+    if (list) {
+        const todayRows = rows.filter(hmCustomAppliesToday);
+        list.hidden = false;
+        list.setAttribute('aria-hidden', 'false');
+        list.innerHTML = todayRows.length ? todayRows.map(card => {
+            const items = hmCustomItemRows(card);
+            const doneCount = items.filter(item => {
+                const saved = hmCustomValues?.[card.id]?.[item.id];
+                if (!saved) return false;
+                if (item.type === 'checkbox') return saved.value === true;
+                return saved.value !== undefined && saved.value !== null && String(saved.value).trim() !== '';
+            }).length;
+            const complete = items.length > 0 && doneCount === items.length;
+            return `<button type="button" class="custom-routine-home-item ${complete ? 'is-complete' : ''}" onclick="openCustomRoutineInput('${escapeHtml(card.id)}')">
+                <span class="custom-routine-home-icon">${escapeHtml(card.icon || (hmCustomCardKind(card) === 'weekly' ? '🔁' : '📌'))}</span>
+                <span class="custom-routine-home-text"><strong>${escapeHtml(card.title || '오늘의 약속')}</strong><small>${escapeHtml(hmCustomScheduleLabel(card))} · ${items.length ? `${doneCount}/${items.length} 완료` : '항목 없음'}</small></span>
+                <span class="custom-routine-home-check">${complete ? '✓' : '○'}</span>
+            </button>`;
+        }).join('') : '<div class="custom-routine-home-empty">선택한 날짜에 해당하는 약속이 없습니다.</div>';
+    }
     renderCustomRoutineHub();
 }
 
@@ -177,7 +246,7 @@ function renderCustomRoutineHub() {
         const sub = items.length ? `${doneCount}/${items.length} 입력 완료` : '항목이 없습니다.';
         return `<button type="button" class="custom-routine-hub-row" onclick="openCustomRoutineInput('${escapeHtml(card.id)}')">
             <span class="custom-routine-hub-icon">${escapeHtml(card.icon || '💜')}</span>
-            <span class="custom-routine-hub-text"><strong>${escapeHtml(card.title || '오늘의 약속')}</strong><small>${escapeHtml(card.description || sub)} · ${escapeHtml(sub)}</small></span>
+            <span class="custom-routine-hub-text"><strong>${escapeHtml(card.title || '오늘의 약속')}</strong><small>${escapeHtml(hmCustomScheduleLabel(card))} · ${escapeHtml(card.description || sub)} · ${escapeHtml(sub)}</small></span>
             <span class="custom-routine-hub-arrow">›</span>
         </button>`;
     }).join('');
@@ -216,6 +285,7 @@ function resetCustomRoutineEditor() {
     const desc = document.getElementById('customCardDescInput');
     if (title) title.value = '';
     if (desc) desc.value = '';
+    hmResetCustomRoutineSchedule();
     renderCustomRoutineDraftItems();
 }
 
@@ -240,6 +310,11 @@ function fillCustomRoutineTemplate(type = 'blank') {
     const tpl = templates[type] || templates.blank;
     if (title) title.value = tpl.title;
     if (desc) desc.value = tpl.desc;
+    const kindValue = type === 'routine' || type === 'checklist' ? 'weekly' : 'mission';
+    const kindInput = document.querySelector(`input[name="customRoutineKind"][value="${kindValue}"]`);
+    if (kindInput) kindInput.checked = true;
+    document.querySelectorAll('[data-custom-weekday]').forEach(input => { input.checked = kindValue === 'weekly'; });
+    updateCustomRoutineScheduleUi();
     hmCustomDraftItems = tpl.items.map((row, idx) => ({ id: hmCustomId('draft'), label: row[0], type: row[1], placeholder: row[2], required: false, order: idx + 1, active: true }));
     renderCustomRoutineDraftItems();
 }
@@ -315,7 +390,7 @@ function renderCustomRoutineManager() {
             <article class="custom-routine-manager-item ${card.active === false ? 'is-inactive' : ''}">
                 <div>
                     <strong>${escapeHtml(card.title || '오늘의 약속')}</strong>
-                    <small>${escapeHtml(card.description || '설명 없음')} · 항목 ${items.length}/${HM_CUSTOM_MAX_ITEMS}</small>
+                    <small>${escapeHtml(card.description || '설명 없음')} · ${escapeHtml(hmCustomScheduleLabel(card))} · 항목 ${items.length}/${HM_CUSTOM_MAX_ITEMS}</small>
                 </div>
                 <div class="custom-routine-manager-actions">
                     <button type="button" onclick="editCustomRoutineCard('${escapeHtml(card.id)}')">수정</button>
@@ -334,6 +409,12 @@ function editCustomRoutineCard(cardId) {
     const desc = document.getElementById('customCardDescInput');
     if (title) title.value = card.title || '';
     if (desc) desc.value = card.description || '';
+    const kind = hmCustomCardKind(card);
+    const kindInput = document.querySelector(`input[name="customRoutineKind"][value="${kind}"]`);
+    if (kindInput) kindInput.checked = true;
+    const weekdays = hmCustomCardWeekdays(card);
+    document.querySelectorAll('[data-custom-weekday]').forEach(input => { input.checked = weekdays.includes(Number(input.value)); });
+    updateCustomRoutineScheduleUi();
     hmCustomDraftItems = hmCustomItemRows(card).map(item => ({ ...item }));
     renderCustomRoutineDraftItems();
 }
@@ -351,7 +432,10 @@ async function saveCustomRoutineCard() {
 
     const title = hmCustomSafeText(document.getElementById('customCardTitleInput')?.value, HM_CUSTOM_CARD_TITLE_MAX);
     const description = hmCustomSafeText(document.getElementById('customCardDescInput')?.value, HM_CUSTOM_CARD_DESC_MAX);
+    const kind = document.querySelector('input[name="customRoutineKind"]:checked')?.value === 'weekly' ? 'weekly' : 'mission';
+    const weekdays = Array.from(document.querySelectorAll('[data-custom-weekday]:checked')).map(input => Number(input.value)).sort((a, b) => a - b);
     if (!title) return alert('카드 이름을 입력해 주세요.');
+    if (kind === 'weekly' && !weekdays.length) return alert('주간 루틴의 반복 요일을 1개 이상 선택해 주세요.');
     const cleanItems = hmCustomDraftItems
         .filter(item => item.label)
         .slice(0, HM_CUSTOM_MAX_ITEMS)
@@ -376,7 +460,9 @@ async function saveCustomRoutineCard() {
     const payload = {
         title,
         description,
-        icon: prev.icon || '💜',
+        icon: prev.icon || (kind === 'weekly' ? '🔁' : '📌'),
+        kind,
+        weekdays: kind === 'weekly' ? weekdays : [],
         order: prev.order || (activeCount + 1),
         active: true,
         items,
@@ -499,3 +585,6 @@ function saveCustomRoutineInput() {
     closeCustomRoutineInput();
     showSaveStatus('💜 오늘의 약속 입력 저장 중...');
 }
+
+window.updateCustomRoutineScheduleUi = updateCustomRoutineScheduleUi;
+window.selectAllCustomRoutineDays = selectAllCustomRoutineDays;

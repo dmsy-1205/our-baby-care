@@ -9440,7 +9440,7 @@ button:active {
 }
 
 /* =========================================================
-   STEP5.6.3.1 - Today's Gift UI
+   STEP5.6.3.2 - Today's Gift UI
    Existing reward/rest data model is preserved.
    ========================================================= */
 #rewardDailyCard .daily-card-icon {
@@ -9551,4 +9551,42 @@ button:active {
     .gift-choice-copy small {
         font-size: 0.68rem;
     }
+}
+
+/* STEP5.6.3.2 Weekly routine management + home promise cards */
+.custom-routine-schedule-box {
+    margin: 12px 0;
+    padding: 12px;
+    border: 1px solid rgba(255, 118, 117, .18);
+    border-radius: 14px;
+    background: rgba(255, 248, 248, .78);
+}
+.custom-routine-kind-row { display:flex; gap:10px; flex-wrap:wrap; margin-top:8px; }
+.custom-routine-kind-row label {
+    display:flex; align-items:center; gap:6px; padding:8px 11px;
+    border:1px solid rgba(255,118,117,.22); border-radius:999px; background:#fff;
+}
+.custom-routine-kind-row input { width:18px; height:18px; accent-color:#ff7675; }
+.custom-routine-weekday-box { margin-top:12px; }
+.custom-routine-weekday-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+.custom-routine-weekday-head button { border:0; border-radius:999px; padding:6px 10px; background:#ffe8e8; color:#9b4b4b; font-weight:700; }
+.custom-routine-weekday-row { display:grid; grid-template-columns:repeat(7, minmax(0,1fr)); gap:6px; }
+.custom-routine-weekday-row label { display:flex; flex-direction:column; align-items:center; gap:4px; padding:7px 2px; border-radius:10px; background:#fff; font-size:12px; }
+.custom-routine-weekday-row input { width:18px; height:18px; accent-color:#ff7675; }
+.custom-routine-list { display:flex; flex-direction:column; gap:8px; margin:8px 0 12px; }
+.custom-routine-home-item {
+    width:100%; display:grid; grid-template-columns:42px minmax(0,1fr) 28px; align-items:center; gap:10px;
+    padding:11px 12px; border:1px solid rgba(159, 103, 171, .16); border-radius:14px;
+    background:rgba(255,255,255,.92); text-align:left; cursor:pointer;
+}
+.custom-routine-home-item.is-complete { background:rgba(244, 255, 248, .95); }
+.custom-routine-home-icon { width:42px; height:42px; display:grid; place-items:center; border-radius:13px; background:#f7effa; font-size:20px; }
+.custom-routine-home-text { min-width:0; display:flex; flex-direction:column; gap:3px; }
+.custom-routine-home-text strong { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.custom-routine-home-text small { color:#8a7a8d; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.custom-routine-home-check { justify-self:end; font-size:20px; font-weight:800; color:#a66ab2; }
+.custom-routine-home-empty { padding:10px 12px; border-radius:12px; background:rgba(250,247,251,.9); color:#8d8290; font-size:13px; text-align:center; }
+@media (max-width:480px) {
+    .custom-routine-weekday-row { gap:4px; }
+    .custom-routine-weekday-row label { font-size:11px; padding:6px 1px; }
 }

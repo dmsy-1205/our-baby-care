@@ -4,7 +4,7 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💗</text></svg>">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>HearMe2nite v1.0 STEP5.6.3.1</title>
+    <title>HearMe2nite v1.0 STEP5.6.3.2</title>
     <!-- RC2.16.0 Branding STEP1: Quiet Love UI polish / 기능 구조 유지 -->
     <!-- RC2 v2.6.0 STEP5 FINAL QA: component-ready module map / UI and data logic preserved -->
     
@@ -13,7 +13,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-functions-compat.js"></script>
 
-    <link rel="stylesheet" href="css/style.css?v=step5-6-3-1-todays-gift-20260713">
+    <link rel="stylesheet" href="css/style.css?v=step5-6-3-2-weekly-routine-chat-position-20260713">
 </head>
 <body class="hm-booting">
 
@@ -94,7 +94,7 @@
     </div>
     <div class="app-subtitle">우리의 하루를, 함께 기록합니다.</div>
     <div class="app-meta-row">
-        <div class="app-version-badge">Version v1.0 STEP5.6.3.1</div>
+        <div class="app-version-badge">Version v1.0 STEP5.6.3.2</div>
         <div class="home-presence-indicator" id="homePresenceIndicator" title="접속 상태 확인 중">
             <span class="home-presence-dot self offline" id="homePresenceSelfDot" aria-label="나 오프라인"></span>
             <span class="home-presence-dot partner offline" id="homePresencePartnerDot" aria-label="상대 오프라인"></span>
@@ -482,6 +482,25 @@
             <input type="text" id="customCardTitleInput" maxlength="20" placeholder="예: 오늘 보고">
             <label for="customCardDescInput">카드 설명</label>
             <input type="text" id="customCardDescInput" maxlength="60" placeholder="예: 주인님께 오늘 상태를 보고하기">
+            <div class="custom-routine-schedule-box">
+                <strong>약속 유형</strong>
+                <div class="custom-routine-kind-row">
+                    <label><input type="radio" name="customRoutineKind" value="mission" checked onchange="updateCustomRoutineScheduleUi()"> 오늘의 미션</label>
+                    <label><input type="radio" name="customRoutineKind" value="weekly" onchange="updateCustomRoutineScheduleUi()"> 주간 루틴</label>
+                </div>
+                <div id="customRoutineWeekdayBox" class="custom-routine-weekday-box" hidden>
+                    <div class="custom-routine-weekday-head"><span>반복 요일</span><button type="button" onclick="selectAllCustomRoutineDays()">매일</button></div>
+                    <div class="custom-routine-weekday-row">
+                        <label><input type="checkbox" value="0" data-custom-weekday>일</label>
+                        <label><input type="checkbox" value="1" data-custom-weekday>월</label>
+                        <label><input type="checkbox" value="2" data-custom-weekday>화</label>
+                        <label><input type="checkbox" value="3" data-custom-weekday>수</label>
+                        <label><input type="checkbox" value="4" data-custom-weekday>목</label>
+                        <label><input type="checkbox" value="5" data-custom-weekday>금</label>
+                        <label><input type="checkbox" value="6" data-custom-weekday>토</label>
+                    </div>
+                </div>
+            </div>
             <div class="custom-routine-item-editor-head">
                 <strong>카드 안 항목</strong>
                 <button type="button" onclick="addCustomRoutineDraftItem()">+ 항목 추가</button>
@@ -1052,25 +1071,25 @@
 </div>
 
 <div class="toast" id="toast">기록이 복사되었습니다! 💕</div>
-    <script src="js/config.js?v=step5-6-3-1-todays-gift-20260713"></script>
-    <script src="js/utils.js?v=step5-6-3-1-todays-gift-20260713"></script>
-    <script src="js/popup.js?v=step5-6-3-1-todays-gift-20260713"></script>
-    <script src="js/auth.js?v=step5-6-3-1-todays-gift-20260713"></script>
-    <script src="js/room.js?v=step5-6-3-1-todays-gift-20260713"></script>
-    <script src="js/presence.js?v=step5-6-3-1-todays-gift-20260713"></script>
-    <script src="js/daily.js?v=step5-6-3-1-todays-gift-20260713"></script>
-    <script src="js/mission.js?v=step5-6-3-1-todays-gift-20260713"></script>
-    <script src="js/custom-routine.js?v=step5-6-3-1-todays-gift-20260713"></script>
-    <script src="js/history.js?v=step5-6-3-1-todays-gift-20260713"></script>
-    <script src="js/anniversary.js?v=step5-6-3-1-todays-gift-20260713"></script>
-    <script src="js/profile.js?v=step5-6-3-1-todays-gift-20260713"></script>
-    <script src="js/chat.js?v=step5-6-3-1-todays-gift-20260713"></script>
-    <script src="js/autosave.js?v=step5-6-3-1-todays-gift-20260713"></script>
-    <script src="js/qa.js?v=step5-6-3-1-todays-gift-20260713"></script>
-    <script src="js/motion.js?v=step5-6-3-1-todays-gift-20260713"></script>
-    <script src="js/product.js?v=step5-6-3-1-todays-gift-20260713"></script>
-    <script src="js/help-center.js?v=step5-6-3-1-todays-gift-20260713"></script>
-    <script src="js/data-management.js?v=step5-6-3-1-todays-gift-20260713"></script>
-    <script src="js/app.js?v=step5-6-3-1-todays-gift-20260713"></script>
+    <script src="js/config.js?v=step5-6-3-2-weekly-routine-chat-position-20260713"></script>
+    <script src="js/utils.js?v=step5-6-3-2-weekly-routine-chat-position-20260713"></script>
+    <script src="js/popup.js?v=step5-6-3-2-weekly-routine-chat-position-20260713"></script>
+    <script src="js/auth.js?v=step5-6-3-2-weekly-routine-chat-position-20260713"></script>
+    <script src="js/room.js?v=step5-6-3-2-weekly-routine-chat-position-20260713"></script>
+    <script src="js/presence.js?v=step5-6-3-2-weekly-routine-chat-position-20260713"></script>
+    <script src="js/daily.js?v=step5-6-3-2-weekly-routine-chat-position-20260713"></script>
+    <script src="js/mission.js?v=step5-6-3-2-weekly-routine-chat-position-20260713"></script>
+    <script src="js/custom-routine.js?v=step5-6-3-2-weekly-routine-chat-position-20260713"></script>
+    <script src="js/history.js?v=step5-6-3-2-weekly-routine-chat-position-20260713"></script>
+    <script src="js/anniversary.js?v=step5-6-3-2-weekly-routine-chat-position-20260713"></script>
+    <script src="js/profile.js?v=step5-6-3-2-weekly-routine-chat-position-20260713"></script>
+    <script src="js/chat.js?v=step5-6-3-2-weekly-routine-chat-position-20260713"></script>
+    <script src="js/autosave.js?v=step5-6-3-2-weekly-routine-chat-position-20260713"></script>
+    <script src="js/qa.js?v=step5-6-3-2-weekly-routine-chat-position-20260713"></script>
+    <script src="js/motion.js?v=step5-6-3-2-weekly-routine-chat-position-20260713"></script>
+    <script src="js/product.js?v=step5-6-3-2-weekly-routine-chat-position-20260713"></script>
+    <script src="js/help-center.js?v=step5-6-3-2-weekly-routine-chat-position-20260713"></script>
+    <script src="js/data-management.js?v=step5-6-3-2-weekly-routine-chat-position-20260713"></script>
+    <script src="js/app.js?v=step5-6-3-2-weekly-routine-chat-position-20260713"></script>
 </body>
 </html>
