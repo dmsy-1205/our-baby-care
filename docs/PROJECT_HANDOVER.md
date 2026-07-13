@@ -1,7 +1,7 @@
 # HearMe2nite 프로젝트 인수인계
 
 ## 현재 기준
-- 버전: HearMe2nite v1.0 STEP5.6.3.6
+- 버전: HearMe2nite v1.0 STEP5.6.3.7
 - 단일 앱 구조: 사용자 앱 + 관리자 모드 + 데이터 관리
 - HearU2nite 의존성 없음
 - GitHub Full Source만 공식 기준으로 사용

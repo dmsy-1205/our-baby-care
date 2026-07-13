@@ -70,15 +70,36 @@ function hmResetCustomRoutineSchedule() {
     updateCustomRoutineScheduleUi();
 }
 
+function hmIsLegacyPromiseCheckCard(card) {
+    return String(card?.title || '').trim() === '약속 체크';
+}
+
 function hmCustomCardRows(includeInactive = false, includeDeleted = false) {
     return Object.entries(hmCustomCards || {})
         .map(([id, card]) => ({ id, ...(card || {}) }))
         .filter(card => includeDeleted || card.deleted !== true)
-        // STEP5.6.3.6: 과거에 자동 생성된 의미 없는 '약속 체크' 카드는 화면에서 제외한다.
-        // Firebase 원본은 삭제하지 않아 기존 사용자 데이터 호환성을 유지한다.
-        .filter(card => String(card.title || '').trim() !== '약속 체크')
         .filter(card => includeInactive || card.active !== false)
         .sort((a, b) => Number(a.order || 0) - Number(b.order || 0) || String(a.title || '').localeCompare(String(b.title || '')));
+}
+
+// STEP5.6.3.7: 구버전의 '약속 체크' 카드는 삭제된 데이터가 아니다.
+// 컨테이너 제목은 숨기되 내부 항목을 각각 기존 루틴 카드처럼 복구 표시한다.
+function hmCustomPrimaryCardRows(includeInactive = false) {
+    return hmCustomCardRows(includeInactive).filter(card => !hmIsLegacyPromiseCheckCard(card));
+}
+
+function hmCustomLegacyRoutineEntries() {
+    const entries = [];
+    hmCustomCardRows(false).filter(hmIsLegacyPromiseCheckCard).forEach(card => {
+        hmCustomItemRows(card).forEach(item => {
+            const saved = hmCustomValues?.[card.id]?.[item.id] || {};
+            const complete = item.type === 'checkbox'
+                ? saved.value === true
+                : saved.value !== undefined && saved.value !== null && String(saved.value).trim() !== '';
+            entries.push({ card, item, complete });
+        });
+    });
+    return entries;
 }
 
 function hmCustomCssEscape(value) {
@@ -160,7 +181,7 @@ function hmBuildCustomRoutineReportText() {
             if (value === undefined || value === null || value === '') value = '기록 없음';
             lines.push(`  - ${item.label || '항목'}: ${value}`);
         });
-        if (lines.length) blocks.push(`💜 ${card.title || '오늘의 약속'}\n${lines.join('\n')}`);
+        if (lines.length) blocks.push(`💜 ${hmIsLegacyPromiseCheckCard(card) ? '기존 루틴' : (card.title || '오늘의 약속')}\n${lines.join('\n')}`);
     });
     return blocks.length ? `\n\n${blocks.join('\n\n')}` : '';
 }
@@ -172,19 +193,21 @@ function renderCustomRoutineCards() {
     const manageBtn = document.getElementById('customRoutineManageBtn');
     const hubSub = document.getElementById('customRoutineHubSub');
     const hubCard = document.getElementById('customRoutineHubCard');
-    const allRows = hmCustomCardRows(false);
+    const allRows = hmCustomPrimaryCardRows(false);
     const rows = allRows.filter(hmCustomAppliesToday);
+    const legacyEntries = hmCustomLegacyRoutineEntries();
     const canManage = typeof canManageRelationshipCards === 'function' && canManageRelationshipCards();
 
-    const totalItems = rows.reduce((sum, card) => sum + hmCustomItemRows(card).length, 0);
+    const totalItems = rows.reduce((sum, card) => sum + hmCustomItemRows(card).length, 0) + legacyEntries.length;
     const doneItems = rows.reduce((sum, card) => sum + hmCustomItemRows(card).filter(item => {
         const saved = hmCustomValues?.[card.id]?.[item.id];
         if (!saved) return false;
         if (item.type === 'checkbox') return saved.value === true;
         return saved.value !== undefined && saved.value !== null && String(saved.value).trim() !== '';
-    }).length, 0);
+    }).length, 0) + legacyEntries.filter(entry => entry.complete).length;
+    const visibleCount = rows.length + legacyEntries.length;
 
-    if (countText) countText.innerText = `${rows.length}개 오늘 · 전체 ${allRows.length}/${HM_CUSTOM_MAX_CARDS} · ${canManage ? '관리(Dom)가 설계' : '기록(Sub)은 입력만 가능'}`;
+    if (countText) countText.innerText = `${visibleCount}개 오늘 · 전체 ${allRows.length + legacyEntries.length}/${HM_CUSTOM_MAX_CARDS + legacyEntries.length} · ${canManage ? '관리(Dom)가 설계' : '기록(Sub)은 입력만 가능'}`;
     if (toolbar) toolbar.style.display = canManage ? 'flex' : 'none';
     if (manageBtn) {
         manageBtn.style.display = canManage ? '' : 'none';
@@ -193,16 +216,16 @@ function renderCustomRoutineCards() {
     if (hubCard) hubCard.disabled = !getRoomCodeForData();
     if (hubSub) {
         if (!getRoomCodeForData()) hubSub.innerText = '공간을 만들거나 연결하면 오늘의 약속을 사용할 수 있어요.';
-        else if (!rows.length) hubSub.innerText = canManage ? '관리 버튼으로 첫 약속을 만들어 보세요.' : '관리(Dom)가 오늘의 약속을 만들면 표시됩니다.';
-        else hubSub.innerText = `${rows.length}개 약속 · ${totalItems ? `${doneItems}/${totalItems} 입력 완료` : '항목 없음'}`;
+        else if (!visibleCount) hubSub.innerText = canManage ? '관리 버튼으로 첫 약속을 만들어 보세요.' : '관리(Dom)가 오늘의 약속을 만들면 표시됩니다.';
+        else hubSub.innerText = `${visibleCount}개 약속 · ${totalItems ? `${doneItems}/${totalItems} 입력 완료` : '항목 없음'}`;
     }
 
-    // STEP5.6.3.2: 메인 카드 아래에는 선택 날짜에 해당하는 미션과 주간 루틴을 카드형으로 표시한다.
     if (list) {
-        const todayRows = rows.filter(hmCustomAppliesToday);
         list.hidden = false;
         list.setAttribute('aria-hidden', 'false');
-        list.innerHTML = todayRows.length ? todayRows.map(card => {
+        const cards = [];
+
+        rows.forEach(card => {
             const items = hmCustomItemRows(card);
             const doneCount = items.filter(item => {
                 const saved = hmCustomValues?.[card.id]?.[item.id];
@@ -211,12 +234,22 @@ function renderCustomRoutineCards() {
                 return saved.value !== undefined && saved.value !== null && String(saved.value).trim() !== '';
             }).length;
             const complete = items.length > 0 && doneCount === items.length;
-            return `<button type="button" class="custom-routine-home-item ${complete ? 'is-complete' : ''}" onclick="openCustomRoutineInput('${escapeHtml(card.id)}')">
+            cards.push(`<button type="button" class="custom-routine-home-item ${complete ? 'is-complete' : ''}" onclick="openCustomRoutineInput('${escapeHtml(card.id)}')">
                 <span class="custom-routine-home-icon">${escapeHtml(card.icon || (hmCustomCardKind(card) === 'weekly' ? '🔁' : '📌'))}</span>
                 <span class="custom-routine-home-text"><strong>${escapeHtml(card.title || '오늘의 약속')}</strong><small>${escapeHtml(hmCustomScheduleLabel(card))} · ${items.length ? `${doneCount}/${items.length} 완료` : '항목 없음'}</small></span>
                 <span class="custom-routine-home-check">${complete ? '✓' : '○'}</span>
-            </button>`;
-        }).join('') : '<div class="custom-routine-home-empty">선택한 날짜에 해당하는 약속이 없습니다.</div>';
+            </button>`);
+        });
+
+        legacyEntries.forEach(({ card, item, complete }) => {
+            cards.push(`<button type="button" class="custom-routine-home-item ${complete ? 'is-complete' : ''}" onclick="openCustomRoutineInput('${escapeHtml(card.id)}')">
+                <span class="custom-routine-home-icon">🔁</span>
+                <span class="custom-routine-home-text"><strong>${escapeHtml(item.label || '기존 루틴')}</strong><small>기존 루틴 · ${complete ? '완료' : '미완료'}</small></span>
+                <span class="custom-routine-home-check">${complete ? '✓' : '○'}</span>
+            </button>`);
+        });
+
+        list.innerHTML = cards.length ? cards.join('') : '<div class="custom-routine-home-empty">선택한 날짜에 해당하는 약속이 없습니다.</div>';
     }
     renderCustomRoutineHub();
 }
@@ -224,7 +257,8 @@ function renderCustomRoutineCards() {
 function renderCustomRoutineHub() {
     const box = document.getElementById('customRoutineHubList');
     const actions = document.getElementById('customRoutineHubActions');
-    const rows = hmCustomCardRows(false);
+    const rows = hmCustomPrimaryCardRows(false);
+    const legacyEntries = hmCustomLegacyRoutineEntries();
     const canManage = typeof canManageRelationshipCards === 'function' && canManageRelationshipCards();
     if (actions) actions.style.display = canManage ? 'flex' : 'none';
     if (!box) return;
@@ -232,13 +266,13 @@ function renderCustomRoutineHub() {
         box.innerHTML = '<div class="custom-routine-empty">공간을 먼저 연결해 주세요.</div>';
         return;
     }
-    if (!rows.length) {
+    if (!rows.length && !legacyEntries.length) {
         box.innerHTML = canManage
             ? '<div class="custom-routine-empty">아직 오늘의 약속이 없습니다. 관리 화면에서 첫 약속을 만들어 주세요.</div>'
             : '<div class="custom-routine-empty">관리(Dom)가 오늘의 약속을 만들면 이곳에 표시됩니다.</div>';
         return;
     }
-    box.innerHTML = rows.map(card => {
+    const hubRows = rows.map(card => {
         const items = hmCustomItemRows(card);
         const doneCount = items.filter(item => {
             const saved = hmCustomValues?.[card.id]?.[item.id];
@@ -246,13 +280,21 @@ function renderCustomRoutineHub() {
             if (item.type === 'checkbox') return saved.value === true;
             return saved.value !== undefined && saved.value !== null && String(saved.value).trim() !== '';
         }).length;
-        const sub = items.length ? `${doneCount}/${items.length} 입력 완료` : '항목이 없습니다.';
+        const sub = items.length ? `${doneCount}/${items.length} 입력` : '항목 없음';
         return `<button type="button" class="custom-routine-hub-row" onclick="openCustomRoutineInput('${escapeHtml(card.id)}')">
             <span class="custom-routine-hub-icon">${escapeHtml(card.icon || '💜')}</span>
             <span class="custom-routine-hub-text"><strong>${escapeHtml(card.title || '오늘의 약속')}</strong><small>${escapeHtml(hmCustomScheduleLabel(card))} · ${escapeHtml(card.description || sub)} · ${escapeHtml(sub)}</small></span>
             <span class="custom-routine-hub-arrow">›</span>
         </button>`;
-    }).join('');
+    });
+    legacyEntries.forEach(({ card, item, complete }) => {
+        hubRows.push(`<button type="button" class="custom-routine-hub-row" onclick="openCustomRoutineInput('${escapeHtml(card.id)}')">
+            <span class="custom-routine-hub-icon">🔁</span>
+            <span class="custom-routine-hub-text"><strong>${escapeHtml(item.label || '기존 루틴')}</strong><small>기존 루틴 · ${complete ? '완료' : '미완료'}</small></span>
+            <span class="custom-routine-hub-arrow">›</span>
+        </button>`);
+    });
+    box.innerHTML = hubRows.join('');
 }
 
 function openCustomRoutineHub() {
@@ -375,7 +417,7 @@ function renderCustomRoutineDraftItems() {
 function renderCustomRoutineManager() {
     const limit = document.getElementById('customRoutineManagerLimit');
     const managerList = document.getElementById('customRoutineManagerList');
-    const rows = hmCustomCardRows(true);
+    const rows = hmCustomPrimaryCardRows(true);
     const activeRows = rows.filter(card => card.active !== false);
     if (limit) limit.innerText = `카드 ${activeRows.length}/${HM_CUSTOM_MAX_CARDS} · 카드당 항목 ${HM_CUSTOM_MAX_ITEMS}개까지`;
     renderCustomRoutineDraftItems();
@@ -426,7 +468,7 @@ async function saveCustomRoutineCard() {
     if (!(await hmRequireRoomAccess('오늘의 약속 저장', roomCode))) return;
 
     syncCustomRoutineDraftFromDom();
-    const activeCount = hmCustomCardRows(false).length;
+    const activeCount = hmCustomPrimaryCardRows(false).length;
     const isNew = !hmCustomEditingCardId;
     if (isNew && activeCount >= HM_CUSTOM_MAX_CARDS) return alert(`오늘의 약속 카드는 최대 ${HM_CUSTOM_MAX_CARDS}개까지 가능합니다.`);
 
