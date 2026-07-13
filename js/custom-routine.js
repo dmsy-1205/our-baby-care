@@ -82,7 +82,7 @@ function hmCustomCardRows(includeInactive = false, includeDeleted = false) {
         .sort((a, b) => Number(a.order || 0) - Number(b.order || 0) || String(a.title || '').localeCompare(String(b.title || '')));
 }
 
-// STEP5.6.3.7: 구버전의 '약속 체크' 카드는 삭제된 데이터가 아니다.
+// STEP5.6.3.8: 구버전의 '약속 체크' 카드는 삭제된 데이터가 아니다.
 // 컨테이너 제목은 숨기되 내부 항목을 각각 기존 루틴 카드처럼 복구 표시한다.
 function hmCustomPrimaryCardRows(includeInactive = false) {
     return hmCustomCardRows(includeInactive).filter(card => !hmIsLegacyPromiseCheckCard(card));
@@ -418,15 +418,19 @@ function renderCustomRoutineManager() {
     const limit = document.getElementById('customRoutineManagerLimit');
     const managerList = document.getElementById('customRoutineManagerList');
     const rows = hmCustomPrimaryCardRows(true);
+    const legacyEntries = hmCustomLegacyRoutineEntries();
     const activeRows = rows.filter(card => card.active !== false);
-    if (limit) limit.innerText = `카드 ${activeRows.length}/${HM_CUSTOM_MAX_CARDS} · 카드당 항목 ${HM_CUSTOM_MAX_ITEMS}개까지`;
+    if (limit) {
+        limit.innerText = `신규 카드 ${activeRows.length}/${HM_CUSTOM_MAX_CARDS} · 기존 루틴 ${legacyEntries.length}개 · 카드당 항목 ${HM_CUSTOM_MAX_ITEMS}개까지`;
+    }
     renderCustomRoutineDraftItems();
     if (!managerList) return;
-    if (!rows.length) {
+    if (!rows.length && !legacyEntries.length) {
         managerList.innerHTML = '<div class="custom-routine-empty">등록된 오늘의 약속 카드가 없습니다.</div>';
         return;
     }
-    managerList.innerHTML = rows.map(card => {
+
+    const managerRows = rows.map(card => {
         const items = hmCustomItemRows(card);
         return `
             <article class="custom-routine-manager-item ${card.active === false ? 'is-inactive' : ''}">
@@ -440,7 +444,22 @@ function renderCustomRoutineManager() {
                     <button type="button" class="custom-routine-mini-danger" onclick="deleteCustomRoutineCard('${escapeHtml(card.id)}')">삭제</button>
                 </div>
             </article>`;
-    }).join('');
+    });
+
+    legacyEntries.forEach(({ card, item }) => {
+        managerRows.push(`
+            <article class="custom-routine-manager-item custom-routine-manager-legacy">
+                <div>
+                    <strong>${escapeHtml(item.label || '기존 루틴')}</strong>
+                    <small>기존 루틴 · 과거 날짜의 완료 기록은 보존됩니다.</small>
+                </div>
+                <div class="custom-routine-manager-actions">
+                    <button type="button" class="custom-routine-mini-danger" onclick="deleteLegacyRoutineItem('${escapeHtml(card.id)}', '${escapeHtml(item.id)}')">삭제</button>
+                </div>
+            </article>`);
+    });
+
+    managerList.innerHTML = managerRows.join('');
 }
 
 function editCustomRoutineCard(cardId) {
@@ -552,6 +571,31 @@ async function deleteCustomRoutineCard(cardId) {
         showSaveStatus('💜 오늘의 약속 삭제 완료');
     } catch (err) {
         hmReportError('deleteCustomRoutineCard', err, '❌ 오늘의 약속 삭제 실패');
+    }
+}
+
+
+async function deleteLegacyRoutineItem(cardId, itemId) {
+    if (!canManageRelationshipCards()) return alert('기존 루틴 삭제는 관리(Dom)만 사용할 수 있습니다.');
+    const roomCode = getRoomCodeForData();
+    const card = hmCustomCards?.[cardId];
+    const item = card?.items?.[itemId];
+    if (!roomCode || !card || !item || !hmIsLegacyPromiseCheckCard(card)) return;
+    if (!(await hmRequireRoomAccess('기존 루틴 삭제', roomCode))) return;
+    const label = hmCustomSafeText(item.label || '기존 루틴', HM_CUSTOM_ITEM_LABEL_MAX);
+    if (!confirm(`'${label}' 기존 루틴을 삭제할까요?\n\n홈과 관리 목록에서는 사라지지만, 과거 날짜에 저장된 완료 기록은 그대로 보존됩니다.`)) return;
+
+    try {
+        await db.ref(`rooms/${roomCode}/customCards/${cardId}/items/${itemId}`).update({
+            active: false,
+            deleted: true,
+            deletedBy: currentUser?.uid || '',
+            deletedAt: firebase.database.ServerValue.TIMESTAMP,
+            updatedAt: firebase.database.ServerValue.TIMESTAMP
+        });
+        showSaveStatus('💜 기존 루틴 삭제 완료');
+    } catch (err) {
+        hmReportError('deleteLegacyRoutineItem', err, hmIsFirebasePermissionError(err) ? '❌ 기존 루틴 삭제 권한 없음' : '❌ 기존 루틴 삭제 실패');
     }
 }
 
