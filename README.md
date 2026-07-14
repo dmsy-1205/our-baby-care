@@ -1,4 +1,4 @@
-# HearMe2nite v1.0 STEP5.7.0
+# HearMe2nite v1.0 STEP5.7.2
 
 초대코드와 Room 가입 보안을 강화한 Full Source입니다.
 
@@ -28,7 +28,7 @@ Realtime Database invite child fields are explicitly declared so normal invite c
 초대 코드 수락 시 RTDB transaction 초기 null 스냅샷으로 인해 정상 코드가 사용 불가로 오판되던 문제를 수정했습니다. 서버 Rules가 보장하는 false→true update 방식으로 귀속하고, 같은 계정의 부분 완료 재시도를 복구합니다.
 
 
-## STEP5.7.0 — 오늘의 약속 관리 목록형 UI
+## STEP5.7.1 — 오늘의 약속 관리 목록형 UI
 
 - 오늘의 약속 팝업에서 홈과 중복되던 대형 입력 카드를 제거
 - 관리(Dom)에게만 간결한 한 줄 관리 목록 표시

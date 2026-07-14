@@ -66,24 +66,89 @@
         return merged;
     }
 
+    function hmBuildRecordCustomRoutineReportText(record) {
+        const values = record && record.customCardValues;
+        if (!values || typeof values !== 'object') return '';
+        const blocks = [];
+        Object.entries(values).forEach(([cardId, itemMap]) => {
+            if (!itemMap || typeof itemMap !== 'object') return;
+            const itemRows = Object.values(itemMap).filter(item => item && typeof item === 'object');
+            const savedTitle = itemRows.find(item => item.cardTitle)?.cardTitle || '';
+            const cardTitle = (typeof hmCustomCards !== 'undefined' && hmCustomCards?.[cardId]?.title)
+                ? hmCustomCards[cardId].title
+                : (savedTitle || '오늘의 약속');
+            const lines = itemRows
+                .sort((a, b) => Number(a.order || 0) - Number(b.order || 0))
+                .map(item => {
+                    let value = item.value;
+                    if (item.type === 'checkbox') value = value === true ? '완료' : '미완료';
+                    if (value === undefined || value === null || value === '') value = '기록 없음';
+                    return `  - ${item.label || '항목'}: ${value}`;
+                });
+            if (lines.length) blocks.push(`💜 ${cardTitle}:\n${lines.join('\n')}`);
+        });
+        return blocks.join('\n\n');
+    }
+
     function hmBuildMergedDayReportText(record) {
-        const baseText = String(record?.fullTextPublic || record?.fullText || '').trim();
+        const valueOrEmpty = (value) => {
+            if (value === undefined || value === null) return '기록 없음';
+            const text = String(value).trim();
+            return text || '기록 없음';
+        };
+        const date = valueOrEmpty(record?.date);
+        const moodLabel = valueOrEmpty(record?.moodLabel);
+        const moodNote = String(record?.moodNote || '').trim();
+        const weight = valueOrEmpty(record?.weight);
+        const exercise = valueOrEmpty(record?.exercise);
+        const water = valueOrEmpty(record?.water);
+        const wakeTime = valueOrEmpty(record?.wakeTime);
+        const mealBreakfast = valueOrEmpty(record?.mealBreakfast);
+        const mealLunch = valueOrEmpty(record?.mealLunch);
+        const mealDinner = valueOrEmpty(record?.mealDinner);
+        const goingOut = valueOrEmpty(record?.goingOut);
+        const hasPhotoText = record?.photo ? '📷 사진 첨부 완료' : '사진 없음';
+        const sleepTime = valueOrEmpty(record?.sleepTime);
+        const diary = valueOrEmpty(record?.diary);
         const feedbackTypeLabel = (typeof getFeedbackTypeLabel === 'function' ? getFeedbackTypeLabel(record?.feedbackType || '') : '') || '선택 없음';
-        const replyMessage = record?.replyMessage || '기록 없음';
+        const replyMessage = valueOrEmpty(record?.replyMessage);
         const choiceLabel = record?.dailyChoiceLabel || (typeof getDailyChoiceLabel === 'function' ? getDailyChoiceLabel(record?.dailyChoice || '') : '') || '기록 없음';
-        const rewardNote = record?.rewardNote || '기록 없음';
-        const adminText = `💌 주인의 피드백:
+        const rewardNote = valueOrEmpty(record?.rewardNote);
+        const promiseText = hmBuildRecordCustomRoutineReportText(record);
+
+        const sections = [
+            `📅 [${date}] 아가의 하루 기록 💕`
+        ];
+
+        // STEP5.7.2: 홈 화면의 큰 구역 순서와 동일하게 정렬합니다.
+        // 오늘의 약속 → 오늘의 컨디션 → 오늘의 기록 → 관리와 피드백
+        if (promiseText) sections.push(promiseText);
+        sections.push(
+            `😊 오늘의 기분:
+  - 기분: ${moodLabel}${moodNote ? `
+  - 한마디: ${moodNote}` : ''}`,
+            `⚖️ 체중: ${weight}`,
+            `🏃 오늘의 운동: ${exercise}`,
+            `💧 오늘의 수분: ${water}`,
+            `☀️ 기상 시간: ${wakeTime}`,
+            `🥗 식사 기록:
+  - 아침: ${mealBreakfast}
+  - 점심: ${mealLunch}
+  - 저녁: ${mealDinner}`,
+            `🚶‍♀️ 외출 기록: ${goingOut} (${hasPhotoText})`,
+            `🌙 취침 예정: ${sleepTime}`,
+            `📝 오늘의 하루:
+"${diary}"`,
+            `💌 주인의 피드백:
   - 유형: ${feedbackTypeLabel}
   - 확인: ${record?.feedbackConfirmed === true ? '확인 완료' : '미확인'}
-  - 한마디: "${replyMessage}"
-
-🎁 오늘의 선물:
+  - 한마디: "${replyMessage}"`,
+            `🎁 오늘의 선물:
   - 선택: ${choiceLabel}
-  - 내용: ${rewardNote}`;
-        // 신규 public report에는 관리 섹션이 없으므로 뒤에 붙인다. 기존 report는 중복 방지를 위해 해당 섹션 앞까지만 사용한다.
-        const marker = baseText.indexOf('💌 주인의 피드백:');
-        const cleanBase = marker >= 0 ? baseText.slice(0, marker).trim() : baseText;
-        return `${cleanBase}${cleanBase ? '\n\n' : ''}${adminText}`.trim();
+  - 내용: ${rewardNote}`,
+            '오늘도 건강하게 보내줘서 고마워요 단 한 사람 최고 알라뷰❤️'
+        );
+        return sections.join('\n\n').trim();
     }
 
     async function hmLoadMergedDayRecord(roomCode, date) {
@@ -409,18 +474,20 @@
         const customCardValues = (typeof hmCollectCustomRoutineValues === 'function') ? hmCollectCustomRoutineValues() : {};
 
         const publicReportText = `📅 [${date}] 아가의 하루 기록 💕\n\n` +
-                           `☀️ 기상 시간: ${wakeTime}\n` +
-                           `💧 물 마시기: ${water}\n` +
-                           `🏃 운동: ${exercise}\n` +
-                           `⚖️ 몸무게: ${weight}\n\n` +
+                           (customRoutineReport ? `${customRoutineReport}\n\n` : '') +
+                           `😊 오늘의 기분:\n` +
+                           `  - 기분: ${moodLabel}${moodNote ? `\n  - 한마디: ${moodNote}` : ''}\n\n` +
+                           `⚖️ 체중: ${weight}\n\n` +
+                           `🏃 오늘의 운동: ${exercise}\n\n` +
+                           `💧 오늘의 수분: ${water}\n\n` +
+                           `☀️ 기상 시간: ${wakeTime}\n\n` +
                            `🥗 식사 기록:\n` +
                            `  - 아침: ${mealBreakfast}\n` +
                            `  - 점심: ${mealLunch}\n` +
                            `  - 저녁: ${mealDinner}\n\n` +
-                           `🚶‍♀️ 외출 여부: ${goingOut} (${hasPhotoText})\n` +
+                           `🚶‍♀️ 외출 기록: ${goingOut} (${hasPhotoText})\n\n` +
                            `🌙 취침 예정: ${sleepTime}\n\n` +
-                           `📝 오늘의 한 줄:\n"${diary}"` +
-                           customRoutineReport + `\n\n오늘도 건강하게 보내줘서 고마워요 단 한 사람 최고 알라뷰❤️`;
+                           `📝 오늘의 하루:\n"${diary}"`;
 
         updateDailyCards();
 

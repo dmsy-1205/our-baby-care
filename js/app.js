@@ -218,7 +218,7 @@
 })();
 
 
-// STEP5.7.0: 오늘의 약속 중복 카드 제거 및 관리 목록형 UI 적용.
+// STEP5.7.1: 오늘의 약속 중복 카드 제거 및 관리 목록형 UI 적용.
 (function hmSyncVisibleAppVersion() {
   function syncVersion() {
     var badge = document.getElementById('appVersionBadge');

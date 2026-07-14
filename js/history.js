@@ -709,23 +709,24 @@ function openHistoryDetailModal(date) {
     const content = document.getElementById('historyDetailContent');
     if (!title || !content) return;
     title.innerText = `${getHistoryMoodIcon(record)} ${formatHistoryDateLabel(date)}`;
-    const missionText = getHistoryMissionText(record);
     const meals = [record.mealBreakfast ? `아침: ${record.mealBreakfast}` : '', record.mealLunch ? `점심: ${record.mealLunch}` : '', record.mealDinner ? `저녁: ${record.mealDinner}` : ''].filter(Boolean).join('\n');
-    const dailyBase = [record.wakeTime ? `☀️ 기상: ${record.wakeTime}` : '', record.sleepTime ? `🌙 취침 예정: ${record.sleepTime}` : '', record.water ? `💧 수분: ${record.water}` : '', record.exercise ? `🏃 운동: ${record.exercise}` : '', record.weight ? `⚖️ 체중: ${record.weight}` : ''].filter(Boolean).join('\n');
     const customRoutineText = buildHistoryCustomRoutineText(record);
-    const summaryChips = [record.moodLabel && record.moodLabel !== '기록 없음' ? record.moodLabel : '', missionText ? `🎯 ${missionText}` : '', customRoutineText ? '💜 오늘의 약속' : '', record.photo ? '📷 사진 있음' : '', record.dailyChoiceLabel && record.dailyChoiceLabel !== '기록 없음' ? record.dailyChoiceLabel : ''].filter(Boolean).map(makeHistoryChip).join('');
+    const summaryChips = [record.moodLabel && record.moodLabel !== '기록 없음' ? record.moodLabel : '', customRoutineText ? '💜 오늘의 약속' : '', record.photo ? '📷 사진 있음' : '', record.dailyChoiceLabel && record.dailyChoiceLabel !== '기록 없음' ? record.dailyChoiceLabel : ''].filter(Boolean).map(makeHistoryChip).join('');
     content.innerHTML = `
         <div class="history-detail-summary-card">
             <div class="history-detail-summary-icon">${getHistoryMoodIcon(record)}</div>
             <div><strong>${formatHistoryDateLabel(date)}의 기록</strong><span>${summaryChips || '저장된 세부 내용을 확인해 주세요.'}</span></div>
         </div>
         ${record.photo ? `<img src="${record.photo}" class="history-detail-photo" alt="${date} 사진">` : ''}
-        ${historyDetailBlock('😊 오늘의 기분', [record.moodLabel, record.moodNote].filter(Boolean).join('\n'))}
-        ${historyDetailBlock('🎯 오늘의 미션', missionText)}
         ${historyDetailBlock('💜 오늘의 약속', customRoutineText)}
-        ${historyDetailBlock('☀️ 기본 기록', dailyBase)}
+        ${historyDetailBlock('😊 오늘의 기분', [record.moodLabel, record.moodNote].filter(Boolean).join('\n'))}
+        ${historyDetailBlock('⚖️ 체중', record.weight)}
+        ${historyDetailBlock('🏃 오늘의 운동', record.exercise)}
+        ${historyDetailBlock('💧 오늘의 수분', record.water)}
+        ${historyDetailBlock('☀️ 기상 시간', record.wakeTime)}
         ${historyDetailBlock('🥗 식사 기록', meals)}
         ${historyDetailBlock('🚶 외출 기록', record.goingOut)}
+        ${historyDetailBlock('🌙 취침 예정', record.sleepTime)}
         ${historyDetailBlock('📝 오늘의 하루', record.diary)}
         ${historyDetailBlock('💌 주인의 피드백', record.replyMessage)}
         ${historyDetailBlock('🎁 오늘의 선물', [record.dailyChoiceLabel, record.rewardNote].filter(Boolean).join('\n'))}
