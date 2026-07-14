@@ -773,15 +773,20 @@
                 ownerUid: currentUser.uid,
                 ownerEmail: normalizeEmail(currentUser.email),
                 createdAt: firebase.database.ServerValue.TIMESTAMP,
-                expiresAt: serverNow + (1000 * 60 * 60 * 24),
+                expiresAt: serverNow + HM_INVITE_TTL_MS,
                 used: false
             });
+            const expiresAt = serverNow + HM_INVITE_TTL_MS;
+            const expiresLabel = hmFormatInviteExpiry(expiresAt);
             const box = document.getElementById('inviteResult');
             box.style.display = 'block';
             box.innerHTML = `
                 <strong>초대코드:</strong> <span style="font-size:1.1rem; color:#ff7675; font-weight:bold;">${code}</span><br>
+                <strong>유효기간:</strong> 생성 후 ${HM_INVITE_TTL_LABEL}<br>
+                <strong>만료 예정:</strong> ${escapeHtml(expiresLabel)}<br>
                 <strong>초대링크:</strong><br>${escapeHtml(inviteLink)}<br>
-                <button type="button" class="btn-copy" style="padding:8px; font-size:0.85rem; margin-top:8px;" onclick="copyInviteText('${code}', '${inviteLink}')">📋 초대문구 복사하기</button>
+                <div style="margin-top:7px; color:#636e72; font-size:0.8rem;">※ 코드가 만료되면 새 초대코드를 만들어 주세요.</div>
+                <button type="button" class="btn-copy" style="padding:8px; font-size:0.85rem; margin-top:8px;" onclick="copyInviteText('${code}', '${inviteLink}', ${expiresAt})">📋 초대문구 복사하기</button>
             `;
             showSaveStatus('🎟️ 초대코드 생성 완료');
         } catch (err) {
@@ -798,9 +803,29 @@
     // Split-ready target: copyInviteText
 
     // =========================================================
+    function hmFormatInviteExpiry(expiresAt) {
+        const date = new Date(Number(expiresAt));
+        if (Number.isNaN(date.getTime())) return '생성 후 24시간';
+        try {
+            return new Intl.DateTimeFormat('ko-KR', {
+                year: 'numeric', month: 'long', day: 'numeric',
+                hour: 'numeric', minute: '2-digit', hour12: true
+            }).format(date);
+        } catch (error) {
+            return date.toLocaleString('ko-KR');
+        }
+    }
 
-    function copyInviteText(code, link) {
-        const text = `HearMe2nite 초대코드: ${code}\n초대링크: ${link}\n\nHearMe2nite 계정으로 로그인한 뒤 초대코드를 입력하면 같은 공간을 사용할 수 있어요.\n이미 다른 방에 연결되어 있어도 이 초대코드로 새 방으로 이동할 수 있어요.`;
+    function copyInviteText(code, link, expiresAt) {
+        const expiryText = hmFormatInviteExpiry(expiresAt);
+        const text = `HearMe2nite 초대코드: ${code}
+초대링크: ${link}
+유효기간: 생성 후 ${HM_INVITE_TTL_LABEL}
+만료 예정: ${expiryText}
+
+HearMe2nite 계정으로 로그인한 뒤 초대코드를 입력하면 같은 공간을 사용할 수 있어요.
+이미 다른 방에 연결되어 있어도 이 초대코드로 새 방으로 이동할 수 있어요.
+코드가 만료되면 방 주인에게 새 코드를 요청해 주세요.`;
         executeCopy(text);
     }
 
@@ -873,7 +898,7 @@
             const serverNow = await hmGetFirebaseServerNow();
             if (!initialInvite.used && initialInvite.expiresAt && serverNow > initialInvite.expiresAt) {
                 if (fromPending) sessionStorage.removeItem('pendingInviteCode');
-                alert('만료된 초대코드입니다. 방 주인에게 새 초대코드를 요청해 주세요.');
+                alert('초대코드의 24시간 유효기간이 만료되었습니다. 방 주인에게 새 초대코드를 요청해 주세요.');
                 showSaveStatus('🔒 만료된 초대코드');
                 return;
             }

@@ -220,7 +220,7 @@
         navigator.clipboard?.writeText(text).then(()=>{ if(typeof showToast==='function') showToast('기록실 텍스트가 복사되었습니다.'); }).catch(()=>{ const box=$('resultBox'); if(box) box.value=text; if(typeof showToast==='function') showToast('결과창에 내보내기 내용을 넣었습니다.'); });
     };
     function applyPolish(){
-        document.documentElement.setAttribute('data-hm-version','0.9.9');
+        document.documentElement.setAttribute('data-hm-version', typeof HM_APP_VERSION === 'string' ? HM_APP_VERSION : 'unknown');
         if (HM_STAGE >= 7) document.body.classList.add('hm-accessibility-polish');
         updateDashboard();
         moveTodayPromiseSection();

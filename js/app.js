@@ -216,3 +216,18 @@
   window.addEventListener('load', syncAuthVisibility);
   setTimeout(syncAuthVisibility, 500);
 })();
+
+
+// STEP5.6.4.6.10: 내부 버전과 화면 표시를 항상 동기화한다.
+(function hmSyncVisibleAppVersion() {
+  function syncVersion() {
+    var badge = document.getElementById('appVersionBadge');
+    if (badge && typeof HM_APP_VERSION === 'string') {
+      badge.textContent = HM_APP_VERSION.replace('HearMe2nite ', 'Version ');
+      badge.setAttribute('data-version', HM_APP_VERSION);
+    }
+    if (typeof HM_APP_VERSION === 'string') document.title = HM_APP_VERSION;
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', syncVersion);
+  else syncVersion();
+})();

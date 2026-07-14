@@ -1,4 +1,4 @@
-# HearMe2nite v1.0 STEP5.6.4.6.9
+# HearMe2nite v1.0 STEP5.6.4.6.10
 
 초대코드와 Room 가입 보안을 강화한 Full Source입니다.
 
@@ -26,3 +26,13 @@ Realtime Database invite child fields are explicitly declared so normal invite c
 ## STEP5.6.4.6.9
 
 초대 코드 수락 시 RTDB transaction 초기 null 스냅샷으로 인해 정상 코드가 사용 불가로 오판되던 문제를 수정했습니다. 서버 Rules가 보장하는 false→true update 방식으로 귀속하고, 같은 계정의 부분 완료 재시도를 복구합니다.
+
+
+## STEP5.6.4.6.10 — Invite 24H + Version Sync
+
+- 초대코드 유효기간을 Firebase 서버 시간 기준 정확히 24시간으로 고정
+- 초대 결과에 유효기간과 만료 예정 시각 표시
+- 복사되는 초대문구에도 24시간 및 만료 예정 시각 포함
+- 만료 안내 문구를 24시간 기준으로 명확화
+- 화면 상단 버전 배지를 `HM_APP_VERSION`과 자동 동기화
+- HTML title, QA BOOT, 캐시 버전을 STEP5.6.4.6.10으로 통일

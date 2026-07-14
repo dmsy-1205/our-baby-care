@@ -1,3 +1,10 @@
+# STEP5.6.4.6.10 — Invite 24H + Version Sync
+
+- Invite TTL fixed to exactly 24 hours using Firebase server-adjusted time.
+- Invite UI and copied text show expiry information.
+- Visible version badge now auto-syncs from HM_APP_VERSION.
+- Cache keys and title updated consistently.
+
 # STEP5.6.4.6.9 — Partner Meta Child Write Hotfix
 
 - 초대 참여 시 `rooms/{roomCode}/meta` 부모 update 제거
@@ -61,7 +68,7 @@
 - 관리 기록 쓰기는 관리자/Room Owner/Dom만 허용
 - 기록 삭제는 관리자/Room Owner/Dom만 허용하며 두 경로를 함께 삭제
 - 기록실/복사/결과 생성 시 두 경로를 병합해 기존 화면 호환 유지
-## HearMe2nite v1.0 STEP5.6.4.6.9
+## HearMe2nite v1.0 STEP5.6.4.6.10
 
 - 주요 사용자 입력값의 앱/RTDB 이중 검증 추가
 - 닉네임, 피드백, 선물 메모, 비공개 메모 길이 제한
