@@ -1,4 +1,4 @@
-# HearMe2nite v1.0 STEP5.8.1
+# HearMe2nite v1.0 STEP5.8.2
 
 초대코드와 Room 가입 보안을 강화한 Full Source입니다.
 
@@ -50,3 +50,7 @@ Realtime Database invite child fields are explicitly declared so normal invite c
 - Firebase Hosting no longer deploys internal Rules, Functions, documentation, backup, archive, or source-map files.
 - Removed `js/room.js.bak`.
 - No feature or Firebase data-path migration was added in this release.
+
+
+## STEP5.8.2
+앱 전체 구성요소를 의미 기반 테마 토큰으로 연결한 테마 엔진 기반 버전입니다.

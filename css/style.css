@@ -9696,7 +9696,7 @@ button:active {
 }
 
 /* =========================================================
-   STEP5.8.1 개인 테마
+   STEP5.8.2 개인 테마
    기존 레이아웃과 기능은 유지하고 핵심 색상만 CSS 변수로 전환한다.
    ========================================================= */
 :root,
@@ -9832,12 +9832,12 @@ button:active {
 .hm-theme-status.success { color:#2e9a68; }
 .hm-theme-status.error { color:#d34f61; }
 @media (max-width:360px){.hm-theme-grid{grid-template-columns:1fr}.hm-theme-option{padding:12px}.hm-theme-option.is-selected{padding:11px}}
-/* STEP5.8.1: 일반 사용자는 프로필/테마/데이터/로그아웃을 2×2로 간결하게 표시 */
+/* STEP5.8.2: 일반 사용자는 프로필/테마/데이터/로그아웃을 2×2로 간결하게 표시 */
 .user-bar-actions.hm-account-actions { grid-template-columns:repeat(2,minmax(0,1fr)); }
 .user-bar-actions.hm-account-actions:has(#dataAdminButton:not([hidden])) { grid-template-columns:repeat(3,minmax(0,1fr)); }
 
 
-/* STEP5.8.1 개인/공용 테마 적용 방식 */
+/* STEP5.8.2 개인/공용 테마 적용 방식 */
 .hm-theme-mode-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:0 0 8px}
 .hm-theme-mode-option{padding:12px;border:1px solid var(--hm-border);border-radius:15px;background:var(--hm-card);color:var(--hm-text);text-align:left;cursor:pointer}
 .hm-theme-mode-option strong,.hm-theme-mode-option small{display:block}.hm-theme-mode-option small{margin-top:4px;color:var(--hm-muted);font-size:.75rem}
@@ -9846,3 +9846,187 @@ button:active {
 .hm-theme-mode-notice{min-height:38px;margin:7px 2px 13px;padding:9px 11px;border-radius:12px;background:var(--hm-soft-2);color:var(--hm-muted);font-size:.76rem;line-height:1.4}
 .hm-theme-option:disabled{opacity:.55;cursor:not-allowed}
 @media(max-width:360px){.hm-theme-mode-grid{grid-template-columns:1fr}}
+
+
+/* =========================================================
+   STEP5.8.2 테마 엔진 기반 재설계
+   - 개별 색상 변경이 아니라 앱 전체 구성요소가 같은 디자인 토큰을 사용한다.
+   - 레이아웃/기능/데이터 구조는 변경하지 않는다.
+   - STEP5.8.3에서 각 분위기별 팔레트를 본격 조정할 수 있는 기반이다.
+   ========================================================= */
+:root[data-hm-theme] {
+    /* Surface hierarchy */
+    --hm-surface-page: var(--hm-bg-2);
+    --hm-surface-shell: color-mix(in srgb, var(--hm-card) 94%, var(--hm-soft) 6%);
+    --hm-surface-card: var(--hm-card);
+    --hm-surface-card-soft: color-mix(in srgb, var(--hm-card) 70%, var(--hm-soft) 30%);
+    --hm-surface-card-tint: color-mix(in srgb, var(--hm-card) 58%, var(--hm-soft-2) 42%);
+    --hm-surface-input: var(--hm-input);
+    --hm-surface-overlay: color-mix(in srgb, var(--hm-text) 30%, transparent);
+
+    /* Typography */
+    --hm-color-title: var(--hm-text);
+    --hm-color-body: color-mix(in srgb, var(--hm-text) 88%, var(--hm-muted) 12%);
+    --hm-color-muted: var(--hm-muted);
+    --hm-color-on-accent: #fff;
+
+    /* Interactive */
+    --hm-action-primary: var(--hm-primary);
+    --hm-action-primary-strong: var(--hm-primary-strong);
+    --hm-action-accent: var(--hm-accent);
+    --hm-action-soft: color-mix(in srgb, var(--hm-soft) 78%, var(--hm-card) 22%);
+    --hm-focus-ring: color-mix(in srgb, var(--hm-accent) 26%, transparent);
+
+    /* Lines, shadows and glow */
+    --hm-line-soft: color-mix(in srgb, var(--hm-border) 74%, transparent);
+    --hm-line-strong: var(--hm-border);
+    --hm-shadow-card: 0 12px 30px var(--hm-shadow);
+    --hm-shadow-modal: 0 22px 58px color-mix(in srgb, var(--hm-shadow) 88%, rgba(0,0,0,.12) 12%);
+    --hm-brand-glow: 0 0 34px color-mix(in srgb, var(--hm-accent) 23%, transparent);
+
+    /* Compatibility mapping for legacy components */
+    --hm-brand-bg: var(--hm-surface-page);
+    --hm-brand-bg-warm: var(--hm-bg-1);
+    --hm-brand-card: var(--hm-surface-shell);
+    --hm-brand-text: var(--hm-color-title);
+    --hm-brand-subtext: var(--hm-color-muted);
+    --hm-brand-primary: var(--hm-action-primary);
+    --hm-brand-primary-2: color-mix(in srgb, var(--hm-action-primary) 62%, white 38%);
+    --hm-brand-lavender: var(--hm-action-accent);
+    --hm-brand-border: var(--hm-line-strong);
+    --hm-brand-shadow: var(--hm-shadow-modal);
+    --hm-brand-shadow-soft: var(--hm-shadow-card);
+}
+
+/* App shell and brand */
+:root[data-hm-theme] body {
+    background:
+        radial-gradient(circle at 12% 1%, color-mix(in srgb,var(--hm-primary) 16%,transparent), transparent 30%),
+        radial-gradient(circle at 92% 8%, color-mix(in srgb,var(--hm-accent) 18%,transparent), transparent 28%),
+        linear-gradient(145deg,var(--hm-bg-1) 0%,var(--hm-bg-2) 55%,var(--hm-bg-3) 100%);
+    color: var(--hm-color-body);
+}
+:root[data-hm-theme] .container {
+    background: var(--hm-surface-shell);
+    border-color: var(--hm-line-strong);
+    box-shadow: var(--hm-shadow-modal);
+}
+:root[data-hm-theme] .container::before { background: color-mix(in srgb,var(--hm-accent) 32%,transparent); }
+:root[data-hm-theme] .hm-title-mark {
+    background: linear-gradient(135deg,var(--hm-action-primary),var(--hm-action-accent));
+    box-shadow: var(--hm-brand-glow);
+}
+:root[data-hm-theme] .app-title-row h1 { text-shadow: 0 0 22px color-mix(in srgb,var(--hm-accent) 10%,transparent); }
+:root[data-hm-theme] .app-version-badge,
+:root[data-hm-theme] .history-launch-version {
+    background: linear-gradient(135deg,var(--hm-surface-card-tint),var(--hm-action-soft)) !important;
+    color: var(--hm-action-primary-strong) !important;
+    border-color: var(--hm-line-strong) !important;
+}
+
+/* Shared card system */
+:root[data-hm-theme] :is(
+    .user-bar,.room-settings-card,.summary-card,.dashboard-card,.history-card,.trust-card,
+    .daily-card,.managed-card,.mission-compact-card,.custom-routine-hub-card,
+    .hm-chat-card,.history-launch-card,.help-menu-card,.help-mini-card,.help-center-card,
+    .data-policy-card,.feedback-review-card,.onboarding-card,.onboarding-choice-card,
+    .hm-profile-summary,.hm-profile-preview,.data-admin-summary,.hm-account-panel
+) {
+    background: var(--hm-surface-card);
+    color: var(--hm-color-body);
+    border-color: var(--hm-line-soft);
+    box-shadow: var(--hm-shadow-card);
+}
+:root[data-hm-theme] :is(.summary-card,.hm-chat-card,.history-launch-card,.mission-compact-card,.custom-routine-hub-card) {
+    background: linear-gradient(135deg,var(--hm-surface-card),var(--hm-surface-card-tint));
+}
+:root[data-hm-theme] :is(.daily-card-icon,.hm-chat-card-icon,.custom-routine-hub-list-icon,.mission-compact-icon) {
+    background: linear-gradient(145deg,var(--hm-surface-card-tint),var(--hm-action-soft));
+    border-color: var(--hm-line-soft);
+}
+
+/* Modal system */
+:root[data-hm-theme] :is(
+    .daily-modal,.room-settings-modal,.guide-modal,.mission-modal,.custom-routine-modal,
+    .custom-routine-hub-modal,.hm-profile-modal,.hm-theme-modal,.hm-chat-modal,
+    .history-detail-modal,.history-panel-modal,.data-management-modal,.data-admin-modal,
+    .onboarding-modal
+) {
+    background: var(--hm-surface-shell);
+    color: var(--hm-color-body);
+    border-color: var(--hm-line-strong);
+    box-shadow: var(--hm-shadow-modal);
+}
+:root[data-hm-theme] :is(
+    .daily-modal-overlay,.room-settings-overlay,.mission-modal-overlay,.hm-profile-overlay,
+    .hm-theme-overlay,.hm-chat-overlay,.history-detail-overlay,.history-panel-overlay,
+    .data-management-overlay,.data-admin-overlay
+) { background: var(--hm-surface-overlay); }
+
+/* Inputs and controls */
+:root[data-hm-theme] :is(input,textarea,select,.hm-profile-input,.help-search-input) {
+    background: var(--hm-surface-input);
+    color: var(--hm-color-body);
+    border-color: var(--hm-line-strong);
+    box-shadow: inset 0 1px 0 color-mix(in srgb,var(--hm-card) 60%,transparent);
+}
+:root[data-hm-theme] :is(input,textarea,select,.hm-profile-input,.help-search-input):focus {
+    border-color: var(--hm-action-accent);
+    box-shadow: 0 0 0 4px var(--hm-focus-ring);
+    outline: none;
+}
+:root[data-hm-theme] :is(
+    .btn-main,.btn-primary,.daily-modal-save,.btn-connect,.chat-send-btn,
+    .custom-routine-manage-btn
+) {
+    background: linear-gradient(135deg,var(--hm-action-primary),var(--hm-action-primary-strong));
+    color: var(--hm-color-on-accent);
+    border-color: transparent;
+    box-shadow: 0 9px 22px color-mix(in srgb,var(--hm-primary) 23%,transparent);
+}
+:root[data-hm-theme] :is(
+    .btn-secondary,.btn-small,.btn-copy,.modal-close-btn,.guide-btn,
+    .choice-btn,.mood-btn,.feedback-type-btn,.gift-choice-btn,.relationship-role-btn
+) {
+    background: var(--hm-action-soft);
+    color: var(--hm-color-body);
+    border-color: var(--hm-line-strong);
+}
+:root[data-hm-theme] :is(
+    .btn-secondary,.btn-small,.btn-copy,.modal-close-btn,.guide-btn,
+    .choice-btn,.mood-btn,.feedback-type-btn,.gift-choice-btn,.relationship-role-btn
+):is(:hover,:focus-visible,.active,.selected) {
+    border-color: var(--hm-action-accent);
+    box-shadow: 0 0 0 3px var(--hm-focus-ring);
+}
+
+/* Text hierarchy and decorative details */
+:root[data-hm-theme] :is(
+    h1,h2,h3,.home-section-title,.condition-title,.record-title,
+    .daily-card-title,.hm-chat-card-title-row,.room-settings-title,.daily-modal-head h2,
+    .hm-account-value,.custom-routine-hub-list-title
+) { color: var(--hm-color-title); }
+:root[data-hm-theme] :is(
+    .app-subtitle,.daily-card-sub,.hm-chat-card-meta,.hm-chat-card-preview,
+    .hm-account-label,.room-settings-sub,.hm-profile-help,.custom-routine-hub-list-meta,
+    .feedback-hint,.trust-card-help
+) { color: var(--hm-color-muted); }
+:root[data-hm-theme] :is(.daily-card-arrow,.hm-chat-card-arrow,.mission-open-btn) { color: var(--hm-action-accent); }
+:root[data-hm-theme] :is(.hm-theme-option,.hm-theme-mode-option) {
+    background: var(--hm-surface-card);
+    color: var(--hm-color-body);
+    border-color: var(--hm-line-strong);
+}
+:root[data-hm-theme] :is(.hm-theme-option,.hm-theme-mode-option).is-selected {
+    background: var(--hm-surface-card-tint);
+    border-color: var(--hm-action-accent);
+    box-shadow: 0 0 0 3px var(--hm-focus-ring);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    :root[data-hm-theme] body,
+    :root[data-hm-theme] .container,
+    :root[data-hm-theme] :is(.daily-card,.summary-card,.hm-chat-card,.history-launch-card,.btn-main,.btn-primary) {
+        transition: background-color .22s ease,border-color .22s ease,color .22s ease,box-shadow .22s ease;
+    }
+}
