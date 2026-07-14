@@ -734,7 +734,13 @@
             return;
         }
 
-        let code = randomCode(6);
+        const partnerSnap = await db.ref(`rooms/${activeRoomCode}/meta/partnerUid`).once('value');
+        if (partnerSnap.exists()) {
+            alert('이미 상대방이 연결된 방입니다. 새 초대코드를 만들 수 없습니다.');
+            return;
+        }
+
+        let code = randomCode(8);
         let tries = 0;
         while ((await db.ref(`invites/${code}`).once('value')).exists() && tries < 5) {
             code = randomCode(6);
@@ -826,64 +832,115 @@
         showSaveStatus('🤝 초대코드 확인 중...');
         try {
             const inviteRef = db.ref(`invites/${code}`);
-            const inviteSnap = await inviteRef.once('value');
-            if (!inviteSnap.exists()) {
+            const initialSnap = await inviteRef.once('value');
+            if (!initialSnap.exists()) {
                 if (fromPending) sessionStorage.removeItem('pendingInviteCode');
                 alert('존재하지 않는 초대코드입니다.');
                 showSaveStatus('❌ 초대코드 없음');
                 return;
             }
-            const invite = inviteSnap.val() || {};
-            if (invite.used && invite.usedByUid !== currentUser.uid) {
+
+            const initialInvite = initialSnap.val() || {};
+            if (!initialInvite.roomCode || !initialInvite.ownerUid) {
+                alert('초대코드 정보가 올바르지 않습니다.');
+                showSaveStatus('❌ 초대코드 오류');
+                return;
+            }
+            if (initialInvite.used && initialInvite.usedByUid !== currentUser.uid) {
                 if (fromPending) sessionStorage.removeItem('pendingInviteCode');
-                alert('이미 사용된 초대코드입니다. 방 주인에게 새 초대코드를 요청해 주세요.');
+                alert('이미 다른 사용자가 사용한 초대코드입니다. 방 주인에게 새 초대코드를 요청해 주세요.');
                 showSaveStatus('🔒 이미 사용된 초대코드');
                 return;
             }
-            if (invite.expiresAt && Date.now() > invite.expiresAt) {
+            if (!initialInvite.used && initialInvite.expiresAt && Date.now() > initialInvite.expiresAt) {
                 if (fromPending) sessionStorage.removeItem('pendingInviteCode');
                 alert('만료된 초대코드입니다. 방 주인에게 새 초대코드를 요청해 주세요.');
                 showSaveStatus('🔒 만료된 초대코드');
                 return;
             }
-            const roomCode = invite.roomCode;
-            if (!roomCode) {
-                alert('초대코드에 방 정보가 없습니다.');
-                showSaveStatus('❌ 초대코드 오류');
-                return;
-            }
+
+            const roomCode = initialInvite.roomCode;
             const myEmail = normalizeEmail(currentUser.email);
 
-            // STEP5: roomMembers에 등록된 사용자만 rooms 데이터를 읽고 쓸 수 있게 만듭니다.
-            const firstUpdates = {};
-            firstUpdates[`roomMembers/${roomCode}/${currentUser.uid}`] = {
-                email: myEmail,
-                role: 'partner',
-                relationshipRole: pendingRelationshipRole || activeRelationshipRole || 'sub',
-                joinedAt: firebase.database.ServerValue.TIMESTAMP,
-                inviteCode: code
-            };
-            firstUpdates[`userRooms/${currentUser.uid}/${roomCode}`] = true;
-            firstUpdates[`users/${currentUser.uid}/activeRoom`] = roomCode;
-            firstUpdates[`users/${currentUser.uid}/email`] = myEmail;
-            firstUpdates[`users/${currentUser.uid}/lastLogin`] = firebase.database.ServerValue.TIMESTAMP;
-            firstUpdates[`users/${currentUser.uid}/relationshipRole`] = pendingRelationshipRole || activeRelationshipRole || 'sub';
-            await db.ref().update(firstUpdates);
+            // STEP5.6.4.6: 초대 코드를 트랜잭션으로 먼저 현재 계정에 귀속한다.
+            // 동시에 여러 계정이 같은 코드를 사용해도 한 계정만 used=false → true 전환에 성공한다.
+            let claimedInvite = initialInvite;
+            if (!initialInvite.used) {
+                const claimResult = await inviteRef.transaction((currentInvite) => {
+                    if (!currentInvite) return;
+                    if (currentInvite.roomCode !== roomCode || currentInvite.ownerUid !== initialInvite.ownerUid) return;
+                    if (currentInvite.used === true) return;
+                    if (currentInvite.expiresAt && Date.now() > currentInvite.expiresAt) return;
 
-            const secondUpdates = {};
-            secondUpdates[`rooms/${roomCode}/meta/partnerEmail`] = myEmail;
-            secondUpdates[`rooms/${roomCode}/meta/partnerUid`] = currentUser.uid;
-            secondUpdates[`invites/${code}/used`] = true;
-            secondUpdates[`invites/${code}/usedByUid`] = currentUser.uid;
-            secondUpdates[`invites/${code}/usedByEmail`] = myEmail;
-            secondUpdates[`invites/${code}/usedAt`] = firebase.database.ServerValue.TIMESTAMP;
-            await db.ref().update(secondUpdates);
+                    return Object.assign({}, currentInvite, {
+                        used: true,
+                        usedByUid: currentUser.uid,
+                        usedByEmail: myEmail,
+                        usedAt: Date.now()
+                    });
+                }, undefined, false);
+
+                claimedInvite = claimResult && claimResult.snapshot ? (claimResult.snapshot.val() || {}) : {};
+                if (!claimResult || !claimResult.committed) {
+                    if (fromPending) sessionStorage.removeItem('pendingInviteCode');
+                    alert('이 초대코드는 이미 사용되었거나 만료되었습니다. 방 주인에게 새 초대코드를 요청해 주세요.');
+                    showSaveStatus('🔒 초대코드 사용 불가');
+                    return;
+                }
+            }
+
+            if (claimedInvite.usedByUid !== currentUser.uid || claimedInvite.usedByEmail !== myEmail || claimedInvite.roomCode !== roomCode || claimedInvite.ownerUid !== initialInvite.ownerUid) {
+                if (fromPending) sessionStorage.removeItem('pendingInviteCode');
+                alert('이 초대코드는 현재 계정에 사용할 수 없습니다.');
+                showSaveStatus('🔒 초대코드 계정 불일치');
+                return;
+            }
+
+            // 귀속된 초대 코드의 사용자만 Partner 멤버십을 만든다.
+            // 재시도 시 기존 멤버십의 joinedAt을 덮어쓰지 않는다.
+            const finalRelationshipRole = pendingRelationshipRole || activeRelationshipRole || 'sub';
+            const memberRef = db.ref(`roomMembers/${roomCode}/${currentUser.uid}`);
+            const existingMemberSnap = await memberRef.once('value');
+            if (!existingMemberSnap.exists()) {
+                const membershipUpdates = {};
+                membershipUpdates[`roomMembers/${roomCode}/${currentUser.uid}`] = {
+                    email: myEmail,
+                    role: 'partner',
+                    relationshipRole: finalRelationshipRole,
+                    joinedAt: firebase.database.ServerValue.TIMESTAMP,
+                    inviteCode: code
+                };
+                membershipUpdates[`userRooms/${currentUser.uid}/${roomCode}`] = true;
+                membershipUpdates[`users/${currentUser.uid}/activeRoom`] = roomCode;
+                membershipUpdates[`users/${currentUser.uid}/email`] = myEmail;
+                membershipUpdates[`users/${currentUser.uid}/lastLogin`] = firebase.database.ServerValue.TIMESTAMP;
+                membershipUpdates[`users/${currentUser.uid}/relationshipRole`] = finalRelationshipRole;
+                await db.ref().update(membershipUpdates);
+            } else {
+                const existingMember = existingMemberSnap.val() || {};
+                if (existingMember.role !== 'partner' || existingMember.inviteCode !== code || normalizeEmail(existingMember.email) !== myEmail) {
+                    throw new Error('Existing Room membership does not match the claimed invite.');
+                }
+                const userUpdates = {};
+                userUpdates[`userRooms/${currentUser.uid}/${roomCode}`] = true;
+                userUpdates[`users/${currentUser.uid}/activeRoom`] = roomCode;
+                userUpdates[`users/${currentUser.uid}/lastLogin`] = firebase.database.ServerValue.TIMESTAMP;
+                await db.ref().update(userUpdates);
+            }
+
+            // 멤버십이 서버에 확인된 뒤 Partner 메타데이터를 기록한다.
+            await db.ref(`rooms/${roomCode}/meta`).update({
+                partnerEmail: myEmail,
+                partnerUid: currentUser.uid
+            });
+
             sessionStorage.removeItem('pendingInviteCode');
-            document.getElementById('inviteCodeInput').value = '';
+            const inviteInput = document.getElementById('inviteCodeInput');
+            if (inviteInput) inviteInput.value = '';
             activeRoomCode = roomCode;
             activeRoomRole = 'partner';
-            activeRelationshipRole = pendingRelationshipRole || activeRelationshipRole || 'sub';
-            pendingRelationshipRole = activeRelationshipRole;
+            activeRelationshipRole = finalRelationshipRole;
+            pendingRelationshipRole = finalRelationshipRole;
             const roomInput = document.getElementById('roomCode');
             if (roomInput) roomInput.value = roomCode;
             updateCurrentRoomInfo();
@@ -891,8 +948,8 @@
             hmRefreshPresenceFromRoom('accept-invite');
             showSaveStatus('☁️ 초대 참여 완료');
         } catch (err) {
-            console.error(err);
-            alert('초대 참여에 실패했습니다. Firebase Rules 또는 네트워크 상태를 확인해 주세요.');
+            console.error('[HearMe2nite Invite]', err);
+            alert('초대 참여에 실패했습니다. 초대코드가 만료되지 않았는지 확인한 뒤 다시 시도해 주세요.');
             showSaveStatus('❌ 초대 참여 실패');
         }
     }

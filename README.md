@@ -1,12 +1,11 @@
-# HearMe2nite v1.0 STEP5.6.4.5B-2
+# HearMe2nite v1.0 STEP5.6.4.6
 
-## 주요 입력값 보안 강화
+초대코드와 Room 가입 보안을 강화한 Full Source입니다.
 
-- 닉네임 2~20자 서버 검증
-- 피드백 및 오늘의 선물 메모 최대 1,000자
-- 비공개 메모 최대 1,000자 및 허용 필드 제한
-- 오늘의 하루 최대 5,000자, 기분 메모 최대 1,000자
-- 예상 가능한 로그인 실패는 간결한 경고로 기록
-- 기존 Firebase 경로와 기존 데이터 읽기 호환 유지
+- 초대코드 transaction 선점
+- 재사용 및 동시 사용 차단
+- usedByUid / 이메일 검증
+- 귀속된 사용자만 Partner 멤버십 생성
+- partnerUid 위조 및 추가 Partner 차단
 
-Realtime Database Rules는 GitHub Hosting 배포와 별도로 Firebase Console에서 게시해야 합니다.
+GitHub Actions는 Hosting만 배포합니다. `database.rules.json`은 Firebase Realtime Database Rules에 별도로 게시해야 합니다.

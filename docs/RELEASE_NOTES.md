@@ -1,4 +1,17 @@
-# STEP5.6.4.5B-2 — Day Role Security
+# STEP5.6.4.6 — Invite & Room Join Security
+
+- 초대코드 사용을 Firebase transaction으로 원자적 귀속 처리
+- 동일 초대코드 동시 사용 시 단일 UID만 성공
+- usedByUid / usedByEmail / usedAt 서버 규칙 검증
+- 초대코드에 귀속된 UID만 Partner roomMembers 생성 가능
+- Room ownerUid와 invite ownerUid 일치 검증
+- 이미 Partner가 연결된 Room의 추가 초대 생성 및 추가 Partner 차단
+- partnerUid / partnerEmail 위조 및 덮어쓰기 차단
+- 기존 Room과 기존 멤버십 구조 유지
+
+---
+
+# STEP5.6.4.6 — Day Role Security
 
 - 일반 날짜 기록과 Dom/Owner 관리 기록 저장 경로 분리
 - 신규 관리 기록: rooms/{roomCode}/dayAdmin/{date}
@@ -7,7 +20,7 @@
 - 관리 기록 쓰기는 관리자/Room Owner/Dom만 허용
 - 기록 삭제는 관리자/Room Owner/Dom만 허용하며 두 경로를 함께 삭제
 - 기록실/복사/결과 생성 시 두 경로를 병합해 기존 화면 호환 유지
-## HearMe2nite v1.0 STEP5.6.4.5B-2
+## HearMe2nite v1.0 STEP5.6.4.6
 
 - 주요 사용자 입력값의 앱/RTDB 이중 검증 추가
 - 닉네임, 피드백, 선물 메모, 비공개 메모 길이 제한
@@ -107,7 +120,7 @@
 - Allowed only `lastReadAt` and `updatedAt` under `chatReadStatus/{uid}`; all other fields are rejected through `$other`.
 
 
-## STEP5.6.4.5B-2 — Room Path Rules Hardening
+## STEP5.6.4.6 — Room Path Rules Hardening
 
 - Removed the broad `rooms/{roomCode}` member write grant.
 - Added explicit write permissions for `days`, `messages`, `chatReadStatus`, `meta`, `customCards`, and `missionLibrary`.
