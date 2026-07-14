@@ -881,7 +881,7 @@
             const roomCode = initialInvite.roomCode;
             const myEmail = normalizeEmail(currentUser.email);
 
-            // STEP5.6.4.6.8: 초대 코드 귀속을 트랜잭션 콜백이 아닌 서버 검증 update로 처리한다.
+            // STEP5.6.4.6.9: 초대 코드 귀속을 트랜잭션 콜백이 아닌 서버 검증 update로 처리한다.
             // RTDB Rules가 used=false → true 전환을 단 한 번만 허용하므로 동시에 여러 계정이 시도해도 한 계정만 성공한다.
             // 같은 계정이 앞선 시도에서 코드 귀속만 완료하고 멤버십 생성에 실패한 경우에는 재시도를 계속 허용한다.
             let claimedInvite = initialInvite;
@@ -948,11 +948,18 @@
                 await db.ref().update(userUpdates);
             }
 
-            // 멤버십이 서버에 확인된 뒤 Partner 메타데이터를 기록한다.
-            await db.ref(`rooms/${roomCode}/meta`).update({
-                partnerEmail: myEmail,
-                partnerUid: currentUser.uid
-            });
+            // STEP5.6.4.6.9: 기존 Room의 meta 부모 경로는 잠겨 있으므로
+            // 허용된 자식 경로를 순서대로 개별 저장한다.
+            // partnerEmail Rules가 partnerUid의 서버 저장을 확인하므로 UID를 먼저 기록한다.
+            const partnerUidRef = db.ref(`rooms/${roomCode}/meta/partnerUid`);
+            await partnerUidRef.set(currentUser.uid);
+
+            const savedPartnerUidSnap = await partnerUidRef.once('value');
+            if (savedPartnerUidSnap.val() !== currentUser.uid) {
+                throw new Error('Partner UID server verification failed.');
+            }
+
+            await db.ref(`rooms/${roomCode}/meta/partnerEmail`).set(myEmail);
 
             sessionStorage.removeItem('pendingInviteCode');
             const inviteInput = document.getElementById('inviteCodeInput');
