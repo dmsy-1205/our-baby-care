@@ -9599,3 +9599,98 @@ button:active {
 .feedback-type-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:12px 0}.feedback-type-btn{min-height:58px;border:1px solid #eadcf0;border-radius:15px;background:#fff;display:flex;align-items:center;justify-content:center;gap:7px;font-weight:700;color:#4d4053}.feedback-type-btn.active{border-color:#a96ad6;background:#f7effd;box-shadow:0 0 0 2px rgba(169,106,214,.12)}.feedback-type-btn:disabled{opacity:.6}
 .feedback-confirm-row{display:flex;align-items:center;gap:9px;margin:12px 0;padding:11px 12px;border-radius:13px;background:#faf7fb;font-weight:700}.feedback-confirm-row input{width:18px;height:18px}
 @media(max-width:420px){.feedback-type-grid{grid-template-columns:1fr 1fr}.feedback-review-item{grid-template-columns:20px 1fr auto}}
+
+
+/* =========================================================
+   STEP5.7.0 오늘의 약속 관리 목록형 UI
+   - 홈에 이미 표시되는 입력 카드를 팝업에서 반복하지 않습니다.
+   - 관리(Dom)는 등록 항목을 간결한 한 줄 목록으로만 확인합니다.
+   - 기록(Sub)은 홈 카드에서 바로 입력하도록 안내합니다.
+   ========================================================= */
+.custom-routine-hub-list {
+    gap: 0;
+    border-top: 1px solid rgba(126, 120, 146, 0.14);
+}
+.custom-routine-hub-list-row {
+    width: 100%;
+    border: 0;
+    border-bottom: 1px solid rgba(126, 120, 146, 0.14);
+    background: transparent;
+    padding: 13px 4px;
+    display: grid;
+    grid-template-columns: 34px minmax(0, 1fr) auto;
+    gap: 10px;
+    align-items: center;
+    text-align: left;
+    box-shadow: none;
+    border-radius: 0;
+}
+.custom-routine-hub-list-row:hover,
+.custom-routine-hub-list-row:focus-visible {
+    background: rgba(181, 135, 255, 0.06);
+}
+.custom-routine-hub-list-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 11px;
+    display: grid;
+    place-items: center;
+    background: #fff6ff;
+    font-size: 1rem;
+}
+.custom-routine-hub-list-text {
+    min-width: 0;
+}
+.custom-routine-hub-list-text strong {
+    display: block;
+    color: #2d2740;
+    font-size: 0.92rem;
+    line-height: 1.3;
+}
+.custom-routine-hub-list-text small {
+    display: block;
+    margin-top: 3px;
+    color: #7e7892;
+    font-size: 0.76rem;
+    line-height: 1.4;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.custom-routine-hub-list-action {
+    color: #a48acb;
+    font-size: 0.76rem;
+    font-weight: 800;
+    white-space: nowrap;
+}
+.custom-routine-hub-guide {
+    padding: 18px 14px;
+    border-radius: 14px;
+    background: rgba(181, 135, 255, 0.07);
+    text-align: center;
+}
+.custom-routine-hub-guide strong,
+.custom-routine-hub-guide span {
+    display: block;
+}
+.custom-routine-hub-guide strong {
+    color: #403653;
+    font-size: 0.94rem;
+}
+.custom-routine-hub-guide span {
+    margin-top: 6px;
+    color: #7e7892;
+    font-size: 0.8rem;
+    line-height: 1.5;
+}
+@media (max-width: 640px) {
+    .custom-routine-hub-list-row {
+        grid-template-columns: 32px minmax(0, 1fr) auto;
+        padding: 12px 2px;
+        gap: 9px;
+    }
+    .custom-routine-hub-list-icon {
+        width: 32px;
+        height: 32px;
+    }
+}

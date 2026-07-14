@@ -257,43 +257,56 @@ function renderCustomRoutineCards() {
 function renderCustomRoutineHub() {
     const box = document.getElementById('customRoutineHubList');
     const actions = document.getElementById('customRoutineHubActions');
+    const note = document.getElementById('customRoutineHubNote');
     const rows = hmCustomPrimaryCardRows(false);
     const legacyEntries = hmCustomLegacyRoutineEntries();
     const canManage = typeof canManageRelationshipCards === 'function' && canManageRelationshipCards();
+
     if (actions) actions.style.display = canManage ? 'flex' : 'none';
+    if (note) {
+        note.innerText = canManage
+            ? '등록된 약속은 간단한 관리 목록으로만 확인합니다. 실제 입력 카드는 홈 화면에서 사용하세요.'
+            : '오늘의 약속은 홈 화면에 표시된 각 항목을 눌러 확인하고 입력하세요.';
+    }
     if (!box) return;
+
     if (!getRoomCodeForData()) {
         box.innerHTML = '<div class="custom-routine-empty">공간을 먼저 연결해 주세요.</div>';
         return;
     }
-    if (!rows.length && !legacyEntries.length) {
-        box.innerHTML = canManage
-            ? '<div class="custom-routine-empty">아직 오늘의 약속이 없습니다. 관리 화면에서 첫 약속을 만들어 주세요.</div>'
-            : '<div class="custom-routine-empty">관리(Dom)가 오늘의 약속을 만들면 이곳에 표시됩니다.</div>';
+
+    // 기록(Sub)에게는 홈 화면과 동일한 카드 목록을 다시 보여주지 않습니다.
+    if (!canManage) {
+        box.innerHTML = rows.length || legacyEntries.length
+            ? '<div class="custom-routine-hub-guide"><strong>홈 화면에서 바로 입력하세요.</strong><span>오늘의 약속 아래에 표시된 항목을 누르면 해당 입력 화면이 열립니다.</span></div>'
+            : '<div class="custom-routine-empty">관리(Dom)가 오늘의 약속을 만들면 홈 화면에 표시됩니다.</div>';
         return;
     }
+
+    if (!rows.length && !legacyEntries.length) {
+        box.innerHTML = '<div class="custom-routine-empty">아직 오늘의 약속이 없습니다. 관리 화면에서 첫 약속을 만들어 주세요.</div>';
+        return;
+    }
+
     const hubRows = rows.map(card => {
         const items = hmCustomItemRows(card);
-        const doneCount = items.filter(item => {
-            const saved = hmCustomValues?.[card.id]?.[item.id];
-            if (!saved) return false;
-            if (item.type === 'checkbox') return saved.value === true;
-            return saved.value !== undefined && saved.value !== null && String(saved.value).trim() !== '';
-        }).length;
-        const sub = items.length ? `${doneCount}/${items.length} 입력` : '항목 없음';
-        return `<button type="button" class="custom-routine-hub-row" onclick="openCustomRoutineInput('${escapeHtml(card.id)}')">
-            <span class="custom-routine-hub-icon">${escapeHtml(card.icon || '💜')}</span>
-            <span class="custom-routine-hub-text"><strong>${escapeHtml(card.title || '오늘의 약속')}</strong><small>${escapeHtml(hmCustomScheduleLabel(card))} · ${escapeHtml(card.description || sub)} · ${escapeHtml(sub)}</small></span>
-            <span class="custom-routine-hub-arrow">›</span>
+        const schedule = hmCustomScheduleLabel(card);
+        const description = card.description || '설명 없음';
+        return `<button type="button" class="custom-routine-hub-list-row" onclick="openCustomRoutineManager(); editCustomRoutineCard('${escapeHtml(card.id)}')">
+            <span class="custom-routine-hub-list-icon">${escapeHtml(card.icon || '💜')}</span>
+            <span class="custom-routine-hub-list-text"><strong>${escapeHtml(card.title || '오늘의 약속')}</strong><small>${escapeHtml(schedule)} · ${escapeHtml(description)} · 항목 ${items.length}개</small></span>
+            <span class="custom-routine-hub-list-action">관리 ›</span>
         </button>`;
     });
-    legacyEntries.forEach(({ card, item, complete }) => {
-        hubRows.push(`<button type="button" class="custom-routine-hub-row" onclick="openCustomRoutineInput('${escapeHtml(card.id)}')">
-            <span class="custom-routine-hub-icon">🔁</span>
-            <span class="custom-routine-hub-text"><strong>${escapeHtml(item.label || '기존 루틴')}</strong><small>기존 루틴 · ${complete ? '완료' : '미완료'}</small></span>
-            <span class="custom-routine-hub-arrow">›</span>
+
+    legacyEntries.forEach(({ card, item }) => {
+        hubRows.push(`<button type="button" class="custom-routine-hub-list-row is-legacy" onclick="openCustomRoutineManager()">
+            <span class="custom-routine-hub-list-icon">🔁</span>
+            <span class="custom-routine-hub-list-text"><strong>${escapeHtml(item.label || '기존 루틴')}</strong><small>기존 루틴 · 관리 화면에서 삭제할 수 있습니다.</small></span>
+            <span class="custom-routine-hub-list-action">관리 ›</span>
         </button>`);
     });
+
     box.innerHTML = hubRows.join('');
 }
 
@@ -439,7 +452,7 @@ function renderCustomRoutineManager() {
                     <small>${escapeHtml(card.description || '설명 없음')} · ${escapeHtml(hmCustomScheduleLabel(card))} · 항목 ${items.length}/${HM_CUSTOM_MAX_ITEMS}</small>
                 </div>
                 <div class="custom-routine-manager-actions">
-                    <button type="button" onclick="editCustomRoutineCard('${escapeHtml(card.id)}')">수정</button>
+                    <button type="button" onclick="openCustomRoutineManager(); editCustomRoutineCard('${escapeHtml(card.id)}')">수정</button>
                     <button type="button" onclick="toggleCustomRoutineCard('${escapeHtml(card.id)}')">${card.active === false ? '복구' : '숨김'}</button>
                     <button type="button" class="custom-routine-mini-danger" onclick="deleteCustomRoutineCard('${escapeHtml(card.id)}')">삭제</button>
                 </div>

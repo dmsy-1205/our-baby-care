@@ -1,3 +1,10 @@
+# STEP5.7.0 — 오늘의 약속 관리 목록형 UI
+
+- 오늘의 약속 팝업에 반복 표시되던 대형 카드 목록을 제거했습니다.
+- 관리(Dom)는 등록된 약속을 간결한 한 줄 목록으로 확인하고 바로 수정할 수 있습니다.
+- 기록(Sub)은 중복 목록 대신 홈 화면의 약속 카드를 사용하도록 안내됩니다.
+- Room, 초대, Firebase 데이터 구조, 권한 및 저장 로직은 변경하지 않았습니다.
+
 # STEP5.6.4.7 — Final Security Stable
 
 - Completed final security audit without adding new app features.

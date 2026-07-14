@@ -218,7 +218,7 @@
 })();
 
 
-// STEP5.6.4.7: 내부 버전과 화면 표시를 항상 동기화한다.
+// STEP5.7.0: 오늘의 약속 중복 카드 제거 및 관리 목록형 UI 적용.
 (function hmSyncVisibleAppVersion() {
   function syncVersion() {
     var badge = document.getElementById('appVersionBadge');
