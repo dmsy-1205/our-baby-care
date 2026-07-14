@@ -1,5 +1,5 @@
 // =========================================================
-// HearMe2nite v1.0 STEP5.8.5
+// HearMe2nite v1.0 STEP5.8.6
 // theme.js - 개인/공용 색상 테마 + 개인 화면 표시 방식
 // =========================================================
 
@@ -374,6 +374,10 @@ async function savePersonalTheme() {
         hmThemeBeforePreview = hmEffectiveTheme();
         hmDisplayBeforePreview = selectedDisplay;
         hmThemeSavedInModal = true;
+
+        // 모바일에서는 설정 창이 화면을 가려 변경 결과를 확인하기 어렵다.
+        // 저장이 끝나면 짧은 안내 후 자동으로 닫아 즉시 적용된 화면을 보여준다.
+        window.setTimeout(() => closeThemeModal(), 180);
     } catch (err) {
         hmReportError('savePersonalTheme', err, hmIsFirebasePermissionError(err) ? '테마 저장 권한이 없습니다. Database Rules 배포 상태를 확인해 주세요.' : (err.message || '테마 저장에 실패했습니다.'));
         if (status) { status.textContent = err.message || '테마를 저장하지 못했습니다. 잠시 후 다시 시도해 주세요.'; status.className = 'hm-theme-status error'; }

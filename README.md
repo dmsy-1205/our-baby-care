@@ -1,4 +1,4 @@
-# HearMe2nite v1.0 STEP5.8.5
+# HearMe2nite v1.0 STEP5.8.6
 
 초대코드와 Room 가입 보안을 강화한 Full Source입니다.
 
@@ -52,11 +52,11 @@ Realtime Database invite child fields are explicitly declared so normal invite c
 - No feature or Firebase data-path migration was added in this release.
 
 
-## STEP5.8.5
+## STEP5.8.6
 
 - 여섯 가지 테마의 배경·카드·버튼·입력·아이콘·그림자를 서로 다른 분위기로 완성했습니다.
 - 모바일 화면에서도 테마 차이를 즉시 확인할 수 있도록 색상 면적과 대비를 강화했습니다.
 앱 전체 구성요소를 의미 기반 테마 토큰으로 연결한 테마 엔진 기반 버전입니다.
 
 
-STEP5.8.5: 개인/공용 테마 동기화와 전환 UX 최종 마무리.
+STEP5.8.6: 개인/공용 테마 동기화와 전환 UX 최종 마무리.

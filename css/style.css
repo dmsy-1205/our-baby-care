@@ -10242,3 +10242,134 @@ button:active {
 :root.hm-theme-changing body,:root.hm-theme-changing .container,:root.hm-theme-changing :is(.user-bar,.summary-card,.daily-card,.hm-chat-card,.history-launch-card,.daily-modal,.room-settings-modal,input,textarea,select,button){transition:background-color .32s ease,background .32s ease,color .24s ease,border-color .24s ease,box-shadow .32s ease}
 @media(prefers-reduced-motion:reduce){:root.hm-theme-changing *{transition:none!important;animation:none!important}}
 :root[data-hm-display="dark"] .hm-theme-live-state{background:#283149;border-color:#46516c}
+
+
+/* =========================================================
+   STEP5.8.6 다크 화면 대비 및 테마 반응 보정
+   - 다크 화면에서도 선택한 색상 테마의 포인트가 즉시 반영된다.
+   - 흰 카드 잔존과 저대비 글자를 제거한다.
+   ========================================================= */
+:root[data-hm-theme][data-hm-display="dark"] {
+    --hm-dark-shell:color-mix(in srgb,#151a28 91%,var(--hm-primary) 9%);
+    --hm-dark-card:color-mix(in srgb,#22293b 90%,var(--hm-primary) 10%);
+    --hm-dark-card-soft:color-mix(in srgb,#293248 86%,var(--hm-accent) 14%);
+    --hm-dark-card-tint:color-mix(in srgb,#2d3145 84%,var(--hm-primary) 16%);
+    --hm-dark-input:color-mix(in srgb,#2b344a 90%,var(--hm-primary) 10%);
+    --hm-dark-line:color-mix(in srgb,#56617d 78%,var(--hm-primary) 22%);
+    --hm-card:var(--hm-dark-card);
+    --hm-soft:var(--hm-dark-card-soft);
+    --hm-soft-2:var(--hm-dark-card-tint);
+    --hm-input:var(--hm-dark-input);
+    --hm-surface-shell:var(--hm-dark-shell);
+    --hm-surface-card:var(--hm-dark-card);
+    --hm-surface-card-soft:var(--hm-dark-card-soft);
+    --hm-surface-card-tint:var(--hm-dark-card-tint);
+    --hm-theme-card-feature:var(--hm-dark-card-soft);
+    --hm-theme-card-alt:var(--hm-dark-card-tint);
+    --hm-text:#f7f4fb;
+    --hm-muted:#c1bbcb;
+    --hm-border:var(--hm-dark-line);
+    --hm-color-title:#ffffff;
+    --hm-color-body:#f1edf7;
+    --hm-color-muted:#c1bbcb;
+    --hm-line-soft:color-mix(in srgb,var(--hm-dark-line) 58%,transparent);
+    --hm-line-strong:var(--hm-dark-line);
+}
+
+:root[data-hm-theme][data-hm-display="dark"] body {
+    background:
+      radial-gradient(circle at 7% 2%,color-mix(in srgb,var(--hm-primary) 26%,transparent),transparent 34%),
+      radial-gradient(circle at 96% 14%,color-mix(in srgb,var(--hm-accent) 22%,transparent),transparent 31%),
+      linear-gradient(145deg,#0f131e,var(--hm-dark-shell) 54%,#101521) !important;
+}
+:root[data-hm-theme][data-hm-display="dark"] .container {
+    background:linear-gradient(180deg,color-mix(in srgb,var(--hm-dark-shell) 94%,var(--hm-primary) 6%),#171d2b) !important;
+    border-color:var(--hm-dark-line) !important;
+}
+
+:root[data-hm-theme][data-hm-display="dark"] :is(
+ .user-bar,.hm-account-panel,.room-settings-card,.summary-card,.dashboard-card,.history-card,.trust-card,
+ .daily-card,.managed-card,.mission-compact-card,.custom-routine-hub-card,.hm-chat-card,
+ .history-launch-card,.help-menu-card,.help-mini-card,.help-center-card,.data-policy-card,
+ .feedback-review-card,.onboarding-card,.onboarding-choice-card,.hm-profile-summary,
+ .hm-profile-preview,.data-admin-summary,.input-group input,.input-group select
+) {
+    background:linear-gradient(145deg,var(--hm-dark-card),color-mix(in srgb,var(--hm-dark-card-soft) 78%,var(--hm-dark-card) 22%)) !important;
+    color:var(--hm-color-body) !important;
+    border-color:var(--hm-line-soft) !important;
+    box-shadow:0 10px 24px rgba(0,0,0,.24) !important;
+}
+
+:root[data-hm-theme][data-hm-display="dark"] :is(
+ .hm-chat-card,.summary-card,.history-launch-card
+) {
+    background:linear-gradient(135deg,var(--hm-dark-card-soft),var(--hm-dark-card)) !important;
+}
+
+:root[data-hm-theme][data-hm-display="dark"] :is(
+ .daily-modal,.room-settings-modal,.guide-modal,.mission-modal,.custom-routine-modal,
+ .custom-routine-hub-modal,.hm-profile-modal,.hm-theme-modal,.hm-chat-modal,
+ .history-detail-modal,.history-panel-modal,.data-management-modal,.data-admin-modal,.onboarding-modal
+) {
+    background:linear-gradient(180deg,var(--hm-dark-shell),#171d2b) !important;
+    color:var(--hm-color-body) !important;
+    border-color:var(--hm-dark-line) !important;
+}
+
+:root[data-hm-theme][data-hm-display="dark"] :is(
+ input,textarea,select,.hm-profile-input,.help-search-input,#recordDate
+) {
+    background:var(--hm-dark-input) !important;
+    color:#f8f5fb !important;
+    border-color:var(--hm-dark-line) !important;
+    color-scheme:dark;
+}
+
+:root[data-hm-theme][data-hm-display="dark"] :is(
+ .hm-account-label,.hm-account-value,.hm-account-email,.room-settings-title,.room-settings-sub,
+ .daily-card-title,.daily-card-sub,.hm-chat-card-title-row,.hm-chat-card-preview,.hm-chat-card-meta,
+ .home-section-title,.home-section-title span,.home-section-title small,.input-group>label,
+ .custom-routine-title,.condition-title,.record-title,.manage-title
+) { text-shadow:none !important; }
+
+:root[data-hm-theme][data-hm-display="dark"] :is(
+ .hm-account-value,.room-settings-title,.daily-card-title,.hm-chat-card-title-row strong,
+ .home-section-title,.home-section-title span,.input-group>label
+) { color:#ffffff !important; }
+
+:root[data-hm-theme][data-hm-display="dark"] :is(
+ .hm-account-label,.room-settings-sub,.daily-card-sub,.hm-chat-card-preview,.hm-chat-card-meta,
+ .home-section-title small
+) { color:#c1bbcb !important; }
+
+:root[data-hm-theme][data-hm-display="dark"] :is(
+ .user-bar-actions button,.hm-account-action-btn,.btn-secondary,.btn-small,.modal-close-btn
+) {
+    background:color-mix(in srgb,var(--hm-dark-card-soft) 84%,var(--hm-primary) 16%) !important;
+    color:#f7f2fb !important;
+    border-color:var(--hm-dark-line) !important;
+}
+
+:root[data-hm-theme][data-hm-display="dark"] :is(
+ .daily-card-icon,.hm-chat-card-icon,.room-settings-icon,.mission-compact-icon,.custom-routine-hub-list-icon
+) {
+    background:linear-gradient(145deg,color-mix(in srgb,var(--hm-primary) 22%,var(--hm-dark-card-soft)),color-mix(in srgb,var(--hm-accent) 18%,var(--hm-dark-card))) !important;
+    border-color:color-mix(in srgb,var(--hm-primary) 34%,var(--hm-dark-line)) !important;
+}
+
+:root[data-hm-theme][data-hm-display="dark"] :is(
+ .daily-card-arrow,.hm-chat-card-arrow,.room-settings-arrow,.mission-open-btn
+) { color:color-mix(in srgb,var(--hm-primary) 72%,#ffffff 28%) !important; }
+
+:root[data-hm-theme][data-hm-display="dark"] .summary-card :is(.summary-item,.summary-tile) {
+    background:color-mix(in srgb,var(--hm-dark-card) 88%,var(--hm-primary) 12%) !important;
+    color:#f7f4fb !important;
+    border-color:var(--hm-line-soft) !important;
+}
+
+:root[data-hm-theme][data-hm-display="dark"] .hm-theme-option,
+:root[data-hm-theme][data-hm-display="dark"] .hm-theme-mode-option,
+:root[data-hm-theme][data-hm-display="dark"] .hm-display-mode-option {
+    color:#f7f4fb !important;
+    border-color:var(--hm-dark-line) !important;
+}
