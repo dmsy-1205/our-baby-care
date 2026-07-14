@@ -36,12 +36,20 @@ function hmApplyNicknameToUI() {
     const userInfo = document.getElementById('userInfoText');
     const userBarNickname = document.getElementById('userBarNickname');
     const userBarEmail = document.getElementById('userBarEmail');
+    const userBarAvatar = document.getElementById('userBarAvatar');
+    const accountMenuNickname = document.getElementById('accountMenuNickname');
+    const accountMenuEmail = document.getElementById('accountMenuEmail');
+    const accountMenuAvatar = document.getElementById('accountMenuAvatar');
     if (chatSender) chatSender.value = displayName;
     if (currentName) currentName.textContent = hmCurrentNickname || '닉네임 미설정';
     if (preview) preview.textContent = displayName;
     if (avatar) avatar.textContent = displayName.slice(0, 1).toUpperCase() || '♡';
     if (userBarNickname) userBarNickname.textContent = currentUser ? displayName : '로그인 필요';
     if (userBarEmail) userBarEmail.textContent = currentUser?.email || '-';
+    if (userBarAvatar) userBarAvatar.textContent = displayName.slice(0, 1).toUpperCase() || '♡';
+    if (accountMenuNickname) accountMenuNickname.textContent = currentUser ? displayName : '로그인 필요';
+    if (accountMenuEmail) accountMenuEmail.textContent = currentUser?.email || '-';
+    if (accountMenuAvatar) accountMenuAvatar.textContent = displayName.slice(0, 1).toUpperCase() || '♡';
     if (userInfo) userInfo.setAttribute('data-ready', currentUser ? 'true' : 'false');
 }
 
@@ -129,3 +137,47 @@ async function saveProfileNickname() {
         if (button) button.disabled = false;
     }
 }
+
+
+// STEP5.9.0 홈 상단 계정 메뉴를 중앙 팝업으로 정리한다.
+function openAccountMenuModal() {
+    if (!currentUser) return;
+    hmApplyNicknameToUI();
+    const roomText = document.getElementById('roomSettingsCardSub')?.textContent?.trim() || '연결된 공간이 없습니다.';
+    const roomTarget = document.getElementById('accountMenuRoom');
+    if (roomTarget) roomTarget.textContent = roomText;
+    if (typeof openModalOverlayById === 'function') openModalOverlayById('accountMenuOverlay');
+    else {
+        const overlay = document.getElementById('accountMenuOverlay');
+        if (!overlay) return;
+        overlay.removeAttribute('inert');
+        overlay.style.display = 'flex';
+        overlay.setAttribute('aria-hidden', 'false');
+    }
+}
+
+function closeAccountMenuModal() {
+    const overlay = document.getElementById('accountMenuOverlay');
+    if (!overlay) return;
+    if (typeof closeModalOverlayById === 'function') closeModalOverlayById('accountMenuOverlay');
+    else {
+        if (overlay.contains(document.activeElement)) document.activeElement.blur();
+        overlay.style.display = 'none';
+        overlay.setAttribute('aria-hidden', 'true');
+        overlay.setAttribute('inert', '');
+    }
+}
+
+function openAccountChildModal(type) {
+    closeAccountMenuModal();
+    window.setTimeout(() => {
+        if (type === 'profile' && typeof openProfileModal === 'function') openProfileModal();
+        else if (type === 'theme' && typeof openThemeModal === 'function') openThemeModal();
+        else if (type === 'data' && typeof openDataManagementModal === 'function') openDataManagementModal();
+        else if (type === 'admin' && typeof openDataAdminModal === 'function') openDataAdminModal();
+    }, 80);
+}
+
+window.openAccountMenuModal = openAccountMenuModal;
+window.closeAccountMenuModal = closeAccountMenuModal;
+window.openAccountChildModal = openAccountChildModal;

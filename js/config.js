@@ -59,7 +59,7 @@
     let hmLastAutoSaveSignature = '';
     let hmPendingAutoSaveReason = '';
     // RC2.7 STEP5: 최종 안정화 QA 상태
-    const HM_APP_VERSION = 'HearMe2nite v1.0 STEP5.8.6';
+    const HM_APP_VERSION = 'HearMe2nite v1.0 STEP5.9.0';
     const HM_INVITE_TTL_MS = 24 * 60 * 60 * 1000;
     const HM_INVITE_TTL_LABEL = '24시간';
     const hmQaState = {
