@@ -1,4 +1,13 @@
-## HearMe2nite v1.0 STEP5.6.4.5B-1
+# STEP5.6.4.5B-2 — Day Role Security
+
+- 일반 날짜 기록과 Dom/Owner 관리 기록 저장 경로 분리
+- 신규 관리 기록: rooms/{roomCode}/dayAdmin/{date}
+- 기존 days/{date} 관리 필드는 읽기 fallback으로 유지
+- Sub 자동저장은 일반 필드만 update하여 관리 필드를 덮어쓰지 않음
+- 관리 기록 쓰기는 관리자/Room Owner/Dom만 허용
+- 기록 삭제는 관리자/Room Owner/Dom만 허용하며 두 경로를 함께 삭제
+- 기록실/복사/결과 생성 시 두 경로를 병합해 기존 화면 호환 유지
+## HearMe2nite v1.0 STEP5.6.4.5B-2
 
 - 주요 사용자 입력값의 앱/RTDB 이중 검증 추가
 - 닉네임, 피드백, 선물 메모, 비공개 메모 길이 제한
@@ -98,7 +107,7 @@
 - Allowed only `lastReadAt` and `updatedAt` under `chatReadStatus/{uid}`; all other fields are rejected through `$other`.
 
 
-## STEP5.6.4.5B-1 — Room Path Rules Hardening
+## STEP5.6.4.5B-2 — Room Path Rules Hardening
 
 - Removed the broad `rooms/{roomCode}` member write grant.
 - Added explicit write permissions for `days`, `messages`, `chatReadStatus`, `meta`, `customCards`, and `missionLibrary`.

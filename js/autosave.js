@@ -22,6 +22,8 @@
     function disconnectAllListeners() {
         if (currentRoomRef) currentRoomRef.off();
         if (entireRoomRef) entireRoomRef.off();
+        if (currentDayAdminRef) currentDayAdminRef.off();
+        if (entireDayAdminRef) entireDayAdminRef.off();
         if (typeof hmStopCustomRoutineCards === 'function') hmStopCustomRoutineCards();
         if (chatRef) chatRef.off();
         if (typeof hmChatReadRef !== 'undefined' && hmChatReadRef) hmChatReadRef.off();
@@ -29,6 +31,9 @@
         if (ownerNoteRef) ownerNoteRef.off();
         currentRoomRef = null;
         entireRoomRef = null;
+        currentDayAdminRef = null;
+        entireDayAdminRef = null;
+        cachedDayAdminData = null;
         chatRef = null;
         if (typeof hmChatReadRef !== 'undefined') hmChatReadRef = null;
         if (typeof hmChatPresenceRef !== 'undefined') hmChatPresenceRef = null;
@@ -36,6 +41,67 @@
         cachedDaysData = null;
         hmLastAutoSaveSignature = '';
         hmAutoSaveQueued = false;
+    }
+
+
+    // STEP5.6.4.5B-2: 날짜 일반 기록과 Dom/Owner 전용 관리 기록을 논리적으로 분리한다.
+    // 기존 days/{date} 안의 관리 필드는 읽기 fallback으로만 유지한다.
+    const HM_DAY_ADMIN_FIELDS = ['replyMessage', 'feedbackType', 'feedbackConfirmed', 'dailyChoice', 'dailyChoiceLabel', 'rewardNote'];
+
+    function hmExtractLegacyDayAdmin(record) {
+        const source = record || {};
+        const result = {};
+        HM_DAY_ADMIN_FIELDS.forEach((key) => {
+            if (Object.prototype.hasOwnProperty.call(source, key)) result[key] = source[key];
+        });
+        return result;
+    }
+
+    function hmMergeDaySecurityRecord(publicRecord, adminRecord) {
+        const base = publicRecord && typeof publicRecord === 'object' ? publicRecord : {};
+        const legacy = hmExtractLegacyDayAdmin(base);
+        const secure = adminRecord && typeof adminRecord === 'object' ? adminRecord : {};
+        const merged = Object.assign({}, base, legacy, secure);
+        merged.fullText = hmBuildMergedDayReportText(merged);
+        return merged;
+    }
+
+    function hmBuildMergedDayReportText(record) {
+        const baseText = String(record?.fullTextPublic || record?.fullText || '').trim();
+        const feedbackTypeLabel = (typeof getFeedbackTypeLabel === 'function' ? getFeedbackTypeLabel(record?.feedbackType || '') : '') || '선택 없음';
+        const replyMessage = record?.replyMessage || '기록 없음';
+        const choiceLabel = record?.dailyChoiceLabel || (typeof getDailyChoiceLabel === 'function' ? getDailyChoiceLabel(record?.dailyChoice || '') : '') || '기록 없음';
+        const rewardNote = record?.rewardNote || '기록 없음';
+        const adminText = `💌 주인의 피드백:
+  - 유형: ${feedbackTypeLabel}
+  - 확인: ${record?.feedbackConfirmed === true ? '확인 완료' : '미확인'}
+  - 한마디: "${replyMessage}"
+
+🎁 오늘의 선물:
+  - 선택: ${choiceLabel}
+  - 내용: ${rewardNote}`;
+        // 신규 public report에는 관리 섹션이 없으므로 뒤에 붙인다. 기존 report는 중복 방지를 위해 해당 섹션 앞까지만 사용한다.
+        const marker = baseText.indexOf('💌 주인의 피드백:');
+        const cleanBase = marker >= 0 ? baseText.slice(0, marker).trim() : baseText;
+        return `${cleanBase}${cleanBase ? '\n\n' : ''}${adminText}`.trim();
+    }
+
+    async function hmLoadMergedDayRecord(roomCode, date) {
+        const [publicSnap, adminSnap] = await Promise.all([
+            db.ref(`rooms/${roomCode}/days/${date}`).once('value'),
+            db.ref(`rooms/${roomCode}/dayAdmin/${date}`).once('value')
+        ]);
+        if (!publicSnap.exists() && !adminSnap.exists()) return null;
+        return hmMergeDaySecurityRecord(publicSnap.val() || {}, adminSnap.val() || {});
+    }
+
+    function hmMergeAllDaySecurityRecords(days, dayAdmin) {
+        const publicDays = days || {};
+        const secureDays = dayAdmin || {};
+        const keys = new Set([...Object.keys(publicDays), ...Object.keys(secureDays)]);
+        const merged = {};
+        keys.forEach((date) => { merged[date] = hmMergeDaySecurityRecord(publicDays[date] || {}, secureDays[date] || {}); });
+        return merged;
     }
 
     // =========================================================
@@ -108,7 +174,8 @@
         currentRoomRef = db.ref('rooms/' + roomCode + '/days/' + date);
         currentRoomRef.on('value', (snapshot) => {
             if (roomCode !== activeRoomCode) return;
-            const record = snapshot.val();
+            const publicRecord = snapshot.val();
+            const record = publicRecord ? hmMergeDaySecurityRecord(publicRecord, cachedDayAdminData?.[date] || {}) : null;
             if (record) {
                 safeUpdateField('wakeTime', record.wakeTime);
                 safeUpdateField('weight', record.weight);
@@ -154,13 +221,41 @@
             hmReportError('currentRoomRef.on', err, hmIsFirebasePermissionError(err) ? '❌ 읽기 권한 없음' : '❌ 기록 읽기 실패');
         });
 
-        entireRoomRef = db.ref('rooms/' + roomCode + '/days');
+        currentDayAdminRef = db.ref('rooms/' + roomCode + '/dayAdmin/' + date);
+        currentDayAdminRef.on('value', (snapshot) => {
+            if (roomCode !== activeRoomCode) return;
+            cachedDayAdminData = cachedDayAdminData || {};
+            cachedDayAdminData[date] = snapshot.val() || {};
+            // 일반 기록 listener의 최신 값과 병합하기 위해 한 번 읽어 화면만 갱신한다.
+            db.ref('rooms/' + roomCode + '/days/' + date).once('value').then((publicSnap) => {
+                const record = hmMergeDaySecurityRecord(publicSnap.val() || {}, snapshot.val() || {});
+                safeUpdateField('replyMessage', record.replyMessage);
+                selectedFeedbackType = record.feedbackType || '';
+                feedbackConfirmed = record.feedbackConfirmed === true;
+                safeUpdateField('rewardNote', record.rewardNote);
+                selectedDailyChoice = record.dailyChoice || '';
+                if (typeof updateFeedbackTypeButtons === 'function') updateFeedbackTypeButtons();
+                updateDailyChoiceButtons();
+                updateDailyCards();
+            }).catch((err) => hmReportError('currentDayAdminRef.merge', err));
+        }, (err) => hmReportError('currentDayAdminRef.on', err, hmIsFirebasePermissionError(err) ? '❌ 관리 기록 읽기 권한 없음' : '❌ 관리 기록 읽기 실패'));
+
+                entireRoomRef = db.ref('rooms/' + roomCode + '/days');
         entireRoomRef.on('value', (snapshot) => {
             if (roomCode !== activeRoomCode) return;
-            cachedDaysData = snapshot.val();
-            displayHistory(cachedDaysData);
+            cachedDaysData = snapshot.val() || {};
+            displayHistory(hmMergeAllDaySecurityRecords(cachedDaysData, cachedDayAdminData));
         }, (err) => {
             hmReportError('entireRoomRef.on', err, hmIsFirebasePermissionError(err) ? '❌ 기록실 읽기 권한 없음' : '❌ 기록실 불러오기 실패');
+        });
+
+        entireDayAdminRef = db.ref('rooms/' + roomCode + '/dayAdmin');
+        entireDayAdminRef.on('value', (snapshot) => {
+            if (roomCode !== activeRoomCode) return;
+            cachedDayAdminData = snapshot.val() || {};
+            displayHistory(hmMergeAllDaySecurityRecords(cachedDaysData, cachedDayAdminData));
+        }, (err) => {
+            hmReportError('entireDayAdminRef.on', err, hmIsFirebasePermissionError(err) ? '❌ 관리 기록 읽기 권한 없음' : '❌ 관리 기록실 불러오기 실패');
         });
         } catch (err) {
             hmReportError('connectAndListenFirebase', err, '❌ 방 연결 실패');
@@ -313,7 +408,7 @@
         const customRoutineReport = (typeof hmBuildCustomRoutineReportText === 'function') ? hmBuildCustomRoutineReportText() : '';
         const customCardValues = (typeof hmCollectCustomRoutineValues === 'function') ? hmCollectCustomRoutineValues() : {};
 
-        const reportText = `📅 [${date}] 아가의 하루 기록 💕\n\n` +
+        const publicReportText = `📅 [${date}] 아가의 하루 기록 💕\n\n` +
                            `☀️ 기상 시간: ${wakeTime}\n` +
                            `💧 물 마시기: ${water}\n` +
                            `🏃 운동: ${exercise}\n` +
@@ -324,37 +419,32 @@
                            `  - 저녁: ${mealDinner}\n\n` +
                            `🚶‍♀️ 외출 여부: ${goingOut} (${hasPhotoText})\n` +
                            `🌙 취침 예정: ${sleepTime}\n\n` +
-                           `📝 오늘의 한 줄:\n"${diary}"\n\n` +
-                           `💌 주인의 피드백:
-  - 유형: ${feedbackTypeLabel}
-  - 확인: ${feedbackConfirmed ? '확인 완료' : '미확인'}
-  - 한마디: "${replyMessage}"
-
-` +
-                           `🎁 오늘의 선물:
-` +
-                           `  - 선택: ${dailyChoiceLabel}
-` +
-                           `  - 내용: ${rewardNote || '기록 없음'}` +
-                           customRoutineReport + `
-
-` +
-                           `오늘도 건강하게 보내줘서 고마워요 단 한 사람 최고 알라뷰❤️`;
+                           `📝 오늘의 한 줄:\n"${diary}"` +
+                           customRoutineReport + `\n\n오늘도 건강하게 보내줘서 고마워요 단 한 사람 최고 알라뷰❤️`;
 
         updateDailyCards();
 
-        const newRecord = {
+        const publicRecord = {
             date, wakeTime, water: `${currentWater}ML`, weight, exercise,
             mealBreakfast, mealLunch, mealDinner,
-            goingOut, sleepTime, diary, replyMessage, feedbackType, feedbackConfirmed,
+            goingOut, sleepTime, diary,
             missions, mood, moodLabel, moodNote, missionSummary,
             customCardValues,
-            dailyChoice, dailyChoiceLabel, rewardNote,
-            photo: uploadedPhotoBase64, fullText: reportText,
+            photo: uploadedPhotoBase64,
+            fullText: publicReportText,
+            fullTextPublic: publicReportText,
             updatedBy: currentUser.uid,
             updatedByEmail: currentUser.email,
             updatedAt: firebase.database.ServerValue.TIMESTAMP
         };
+        const adminRecord = {
+            replyMessage, feedbackType, feedbackConfirmed,
+            dailyChoice, dailyChoiceLabel, rewardNote,
+            updatedBy: currentUser.uid,
+            updatedByEmail: currentUser.email,
+            updatedAt: firebase.database.ServerValue.TIMESTAMP
+        };
+        const newRecord = hmMergeDaySecurityRecord(publicRecord, canManageRelationshipCards() ? adminRecord : (cachedDayAdminData?.[date] || {}));
 
         const signature = hmBuildAutoSaveSignature(newRecord);
         if (signature === hmLastAutoSaveSignature && !hmAutoSaveQueued) {
@@ -362,7 +452,10 @@
             return;
         }
 
-        await db.ref('rooms/' + roomCode + '/days/' + date).set(newRecord);
+        await db.ref('rooms/' + roomCode + '/days/' + date).update(publicRecord);
+        if (canManageRelationshipCards()) {
+            await db.ref('rooms/' + roomCode + '/dayAdmin/' + date).set(adminRecord);
+        }
         hmLastAutoSaveSignature = signature;
         hmAutoSaveQueued = false;
         showSaveStatus('☁️ 서버 자동저장 완료');

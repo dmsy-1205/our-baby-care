@@ -138,10 +138,13 @@
         event.stopPropagation();
         const roomCode = getRoomCodeForData();
         if (!date) return;
-        if (!(await hmRequireRoomAccess('기록 삭제', roomCode))) { alert('삭제 권한이 없습니다.'); return; }
+        if (!(await hmRequireRoomAccess('기록 삭제', roomCode)) || !canManageRelationshipCards()) { alert('기록 삭제는 관리(Dom) 또는 Room Owner만 가능합니다.'); return; }
         if (confirm(`${date} 기록을 서버에서 완전히 삭제할까요?`)) {
             try {
-                await db.ref('rooms/' + roomCode + '/days/' + date).remove();
+                const updates = {};
+                updates['rooms/' + roomCode + '/days/' + date] = null;
+                updates['rooms/' + roomCode + '/dayAdmin/' + date] = null;
+                await db.ref().update(updates);
                 showSaveStatus('🗑️ 기록 삭제 완료');
             } catch (err) {
                 hmReportError('deleteRecord', err, hmIsFirebasePermissionError(err) ? '❌ 삭제 권한 없음' : '❌ 기록 삭제 실패');
@@ -154,8 +157,8 @@
         const roomCode = getRoomCodeForData();
         if (!(await hmRequireRoomAccess('기록 복사', roomCode))) { alert('복사 권한이 없습니다.'); return; }
         try {
-            const snapshot = await db.ref('rooms/' + roomCode + '/days/' + date).once('value');
-            if (snapshot.val()) executeCopy(snapshot.val().fullText);
+            const record = await hmLoadMergedDayRecord(roomCode, date);
+            if (record) executeCopy(record.fullText);
         } catch (err) {
             hmReportError('copyDirectText', err, hmIsFirebasePermissionError(err) ? '❌ 복사 권한 없음' : '❌ 기록 복사 실패');
         }

@@ -485,8 +485,7 @@
         if(!currentUser) { alert('로그인이 필요합니다.'); return; }
         if(!roomCode) { alert('방에 연결되어야 전송용 결과가 추출됩니다.'); return; }
         if (!(await canCurrentUserAccessRoom(roomCode))) { alert('이 방에 접근할 수 없습니다.'); return; }
-        db.ref('rooms/' + roomCode + '/days/' + date).once('value').then((snapshot) => {
-            const record = snapshot.val();
+        hmLoadMergedDayRecord(roomCode, date).then((record) => {
             if (record) {
                 let finalText = record.fullText || '';
                 if (!finalText.includes('🎁 오늘의 선물:')) {

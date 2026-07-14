@@ -37,9 +37,9 @@
 - GitHub Actions는 Hosting 전용이며 database.rules.json은 자동 배포되지 않음
 
 
-# STEP5.6.4.5B-1
+# STEP5.6.4.5B-2
 주요 입력값 앱/Realtime Database 이중 검증 완료. Rules는 별도 게시 필요.
 
 
-## STEP5.6.4.5B-1 Security Note
+## STEP5.6.4.5B-2 Security Note
 The broad parent write permission under `rooms/{roomCode}` was removed. Rules now grant writes per known child path. Daily record field-level role separation remains deferred because the app saves the whole day with `.set()`.
