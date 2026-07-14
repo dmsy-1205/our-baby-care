@@ -1,6 +1,6 @@
-# HearMe2nite v1.0 STEP5.8.4
+# HearMe2nite v1.0 STEP5.8.5
 
-## STEP5.8.4 — 화면 표시 방식 분리
+## STEP5.8.5 — 화면 표시 방식 분리
 
 - 미드나이트를 색상 테마에서 제거했습니다.
 - 라이트, 다크, 시스템 설정 따라가기를 별도 표시 방식으로 추가했습니다.
@@ -23,7 +23,7 @@
 - 기존 기능과 Firebase 데이터 구조는 변경하지 않았습니다.
 - 기존 6개 테마 선택 및 개인/공용 테마 동기화 기능을 유지했습니다.
 - STEP5.8.3에서 각 테마를 서로 확실히 구분되는 분위기로 조정할 수 있는 기반을 마련했습니다.
-- 다크 표시 방식 분리는 STEP5.8.4에서 진행합니다.
+- 다크 표시 방식 분리는 STEP5.8.5에서 진행합니다.
 
 ---
 
@@ -263,3 +263,10 @@
 - Normal Room Owner can create a new invite when no partner is connected.
 - Removed email equality from authorization decisions; email remains validated metadata.
 - Preserved atomic false-to-true invite claim and reuse protection.
+
+## STEP5.8.5 — 테마 동기화 최종 마무리
+- 개인/공용 테마의 현재 적용 상태 표시 추가
+- 상대 사용자의 공용 테마 변경을 실시간으로 반영하고 안내 표시
+- 동일 계정의 다른 브라우저 탭에서 개인 테마·표시 방식 변경 동기화
+- 테마 변경 시 짧은 전환 효과 추가, 기기의 동작 줄이기 설정 지원
+- Room 전환 및 공용 테마 해제 시 개인 테마 복귀 안정화

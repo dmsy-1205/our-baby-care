@@ -1,5 +1,5 @@
 // =========================================================
-// HearMe2nite v1.0 STEP5.8.4
+// HearMe2nite v1.0 STEP5.8.5
 // theme.js - 개인/공용 색상 테마 + 개인 화면 표시 방식
 // =========================================================
 
@@ -25,6 +25,9 @@ let hmDisplayMode = HM_DISPLAY_DEFAULT;
 let hmDisplayBeforePreview = HM_DISPLAY_DEFAULT;
 let hmDisplayPreview = HM_DISPLAY_DEFAULT;
 let hmSystemDisplayQuery = null;
+let hmSharedThemeSignature = '';
+let hmThemeTransitionTimer = null;
+let hmThemeStorageListenerReady = false;
 
 function hmNormalizeTheme(value) {
     const theme = String(value || '').trim().toLowerCase();
@@ -41,18 +44,40 @@ function hmResolveDisplayMode(mode) {
     if (safe !== 'system') return safe;
     return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
 }
+function hmPulseThemeTransition() {
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    document.documentElement.classList.add('hm-theme-changing');
+    clearTimeout(hmThemeTransitionTimer);
+    hmThemeTransitionTimer = setTimeout(() => document.documentElement.classList.remove('hm-theme-changing'), 380);
+}
+function hmUpdateLiveThemeState() {
+    const target = document.getElementById('themeLiveState');
+    if (!target) return;
+    const shared = hmSharedThemeEnabled && !!activeRoomCode;
+    const themeName = HM_THEME_NAMES[shared ? hmSharedTheme : hmPersonalTheme] || HM_THEME_NAMES[HM_THEME_DEFAULT];
+    const displayName = HM_DISPLAY_NAMES[hmDisplayMode] || HM_DISPLAY_NAMES[HM_DISPLAY_DEFAULT];
+    target.classList.toggle('is-shared', shared);
+    target.innerHTML = `<span>${shared ? '💞' : '👤'}</span><div><strong>${shared ? '우리의 공용 테마' : '내 개인 테마'}</strong><small>${themeName} · ${displayName} 화면</small></div>`;
+}
 function hmApplyTheme(theme, rememberLast = true) {
     const safeTheme = hmNormalizeTheme(theme);
+    const changed = document.documentElement.getAttribute('data-hm-theme') !== safeTheme;
+    if (changed) hmPulseThemeTransition();
     document.documentElement.setAttribute('data-hm-theme', safeTheme);
     hmCurrentTheme = safeTheme;
     if (rememberLast) { try { localStorage.setItem('hm_theme_last', safeTheme); } catch (e) { console.warn('[Theme] 마지막 테마 저장 실패', e); } }
+    hmUpdateLiveThemeState();
     return safeTheme;
 }
 function hmApplyDisplayMode(mode, rememberLast = true) {
     const safeMode = hmNormalizeDisplayMode(mode);
+    const resolved = hmResolveDisplayMode(safeMode);
+    const changed = document.documentElement.getAttribute('data-hm-display') !== resolved;
+    if (changed) hmPulseThemeTransition();
     document.documentElement.setAttribute('data-hm-display-mode', safeMode);
-    document.documentElement.setAttribute('data-hm-display', hmResolveDisplayMode(safeMode));
+    document.documentElement.setAttribute('data-hm-display', resolved);
     if (rememberLast) { try { localStorage.setItem('hm_display_mode_last', safeMode); } catch (e) { console.warn('[Theme] 표시 방식 저장 실패', e); } }
+    hmUpdateLiveThemeState();
     return safeMode;
 }
 function hmReadLocalTheme(uid) {
@@ -99,6 +124,23 @@ function hmInitSystemDisplayListener() {
     else if (hmSystemDisplayQuery.addListener) hmSystemDisplayQuery.addListener(handler);
 }
 
+function hmInitThemeStorageListener() {
+    if (hmThemeStorageListenerReady) return;
+    hmThemeStorageListenerReady = true;
+    window.addEventListener('storage', (event) => {
+        if (!currentUser) return;
+        if (event.key === hmThemeStorageKey(currentUser.uid) && !hmSharedThemeEnabled) {
+            hmPersonalTheme = hmNormalizeTheme(event.newValue);
+            hmApplyTheme(hmPersonalTheme, false);
+        }
+        if (event.key === hmDisplayStorageKey(currentUser.uid)) {
+            hmDisplayMode = hmNormalizeDisplayMode(event.newValue);
+            hmDisplayPreview = hmDisplayMode;
+            hmApplyDisplayMode(hmDisplayMode, false);
+        }
+    });
+}
+
 async function loadUserTheme() {
     const uid = currentUser ? currentUser.uid : 'guest';
     hmPersonalTheme = hmReadLocalTheme(uid);
@@ -107,6 +149,7 @@ async function loadUserTheme() {
     hmApplyTheme(hmPersonalTheme);
     hmApplyDisplayMode(hmDisplayMode);
     hmInitSystemDisplayListener();
+    hmInitThemeStorageListener();
     if (!currentUser) return hmCurrentTheme;
     try {
         const snap = await db.ref(`users/${currentUser.uid}/preferences`).once('value');
@@ -137,6 +180,7 @@ function hmStopSharedThemeListener() {
     if (hmSharedThemeRef) hmSharedThemeRef.off();
     hmSharedThemeRef = null;
     hmSharedThemeRoomCode = '';
+    hmSharedThemeSignature = '';
 }
 function hmListenSharedThemeForActiveRoom() {
     hmStopSharedThemeListener();
@@ -151,10 +195,16 @@ function hmListenSharedThemeForActiveRoom() {
     hmSharedThemeRef.on('value', (snap) => {
         if (hmSharedThemeRoomCode !== activeRoomCode) return;
         const value = snap.val() || {};
+        const previousSignature = hmSharedThemeSignature;
         hmSharedThemeEnabled = value.enabled === true;
         hmSharedTheme = value.theme === 'midnight' ? HM_THEME_DEFAULT : hmNormalizeTheme(value.theme);
+        hmSharedThemeSignature = `${activeRoomCode}|${hmSharedThemeEnabled}|${hmSharedTheme}|${value.updatedAt || 0}`;
         hmApplyEffectiveTheme();
         hmRefreshThemeModalState();
+        hmUpdateLiveThemeState();
+        if (previousSignature && previousSignature !== hmSharedThemeSignature && value.updatedByUid && value.updatedByUid !== currentUser.uid) {
+            if (typeof showSaveStatus === 'function') showSaveStatus(hmSharedThemeEnabled ? `💞 ${HM_THEME_NAMES[hmSharedTheme]} 공용 테마가 적용되었습니다.` : '👤 공용 테마가 해제되어 개인 테마로 돌아왔습니다.');
+        }
     }, (err) => {
         console.warn('[Theme] 공용 테마 listener 오류', err);
         hmSharedThemeEnabled = false;
@@ -203,6 +253,7 @@ function hmRefreshThemeModeUI() {
     }
     hmRefreshThemeOptions();
     hmRefreshDisplayOptions();
+    hmUpdateLiveThemeState();
 }
 function hmRefreshThemeModalState() {
     const overlay = document.getElementById('themeOverlay');

@@ -9696,7 +9696,7 @@ button:active {
 }
 
 /* =========================================================
-   STEP5.8.4 개인 테마
+   STEP5.8.5 개인 테마
    기존 레이아웃과 기능은 유지하고 핵심 색상만 CSS 변수로 전환한다.
    ========================================================= */
 :root,
@@ -9824,12 +9824,12 @@ button:active {
 .hm-theme-status.success { color:#2e9a68; }
 .hm-theme-status.error { color:#d34f61; }
 @media (max-width:360px){.hm-theme-grid{grid-template-columns:1fr}.hm-theme-option{padding:12px}.hm-theme-option.is-selected{padding:11px}}
-/* STEP5.8.4: 일반 사용자는 프로필/테마/데이터/로그아웃을 2×2로 간결하게 표시 */
+/* STEP5.8.5: 일반 사용자는 프로필/테마/데이터/로그아웃을 2×2로 간결하게 표시 */
 .user-bar-actions.hm-account-actions { grid-template-columns:repeat(2,minmax(0,1fr)); }
 .user-bar-actions.hm-account-actions:has(#dataAdminButton:not([hidden])) { grid-template-columns:repeat(3,minmax(0,1fr)); }
 
 
-/* STEP5.8.4 개인/공용 테마 적용 방식 */
+/* STEP5.8.5 개인/공용 테마 적용 방식 */
 .hm-theme-mode-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:0 0 8px}
 .hm-theme-mode-option{padding:12px;border:1px solid var(--hm-border);border-radius:15px;background:var(--hm-card);color:var(--hm-text);text-align:left;cursor:pointer}
 .hm-theme-mode-option strong,.hm-theme-mode-option small{display:block}.hm-theme-mode-option small{margin-top:4px;color:var(--hm-muted);font-size:.75rem}
@@ -9841,10 +9841,10 @@ button:active {
 
 
 /* =========================================================
-   STEP5.8.4 테마 엔진 기반 재설계
+   STEP5.8.5 테마 엔진 기반 재설계
    - 개별 색상 변경이 아니라 앱 전체 구성요소가 같은 디자인 토큰을 사용한다.
    - 레이아웃/기능/데이터 구조는 변경하지 않는다.
-   - STEP5.8.4에서 각 분위기별 팔레트를 본격 조정할 수 있는 기반이다.
+   - STEP5.8.5에서 각 분위기별 팔레트를 본격 조정할 수 있는 기반이다.
    ========================================================= */
 :root[data-hm-theme] {
     /* Surface hierarchy */
@@ -10025,7 +10025,7 @@ button:active {
 
 
 /* =========================================================
-   STEP5.8.4 테마 분위기 완성
+   STEP5.8.5 테마 분위기 완성
    - 각 테마가 배경만이 아니라 카드/버튼/입력/강조/그림자까지
      하나의 분위기로 느껴지도록 팔레트 차이를 강화한다.
    - 레이아웃과 기능은 변경하지 않는다.
@@ -10151,7 +10151,7 @@ button:active {
 
 
 /* =========================================================
-   STEP5.8.4 화면 표시 방식 분리
+   STEP5.8.5 화면 표시 방식 분리
    - 색상 테마와 라이트/다크/시스템 표시를 독립적으로 관리한다.
    - 다크 모드는 모든 테마의 포인트 색상을 유지하면서 표면과 글자 대비만 바꾼다.
    ========================================================= */
@@ -10228,3 +10228,17 @@ button:active {
 :root[data-hm-display="dark"] .daily-card{background:linear-gradient(145deg,#232a3d,#293149)}
 :root[data-hm-display="dark"] .daily-card-icon,
 :root[data-hm-display="dark"] .hm-chat-card-icon{background:linear-gradient(145deg,#312e49,#29354b);box-shadow:inset 0 1px 0 rgba(255,255,255,.06)}
+
+
+/* =========================================================
+   STEP5.8.5 테마 동기화 마무리
+   - 테마 전환은 짧고 부드럽게, 멀미 방지 설정에서는 즉시 적용한다.
+   - 현재 개인/공용 상태를 설정 화면에서 한눈에 확인할 수 있다.
+   ========================================================= */
+.hm-theme-live-state{display:flex;align-items:center;gap:10px;margin:0 0 13px;padding:10px 12px;border:1px solid var(--hm-line-soft);border-radius:14px;background:var(--hm-surface-card-soft);color:var(--hm-color-body)}
+.hm-theme-live-state>span{display:grid;place-items:center;width:34px;height:34px;border-radius:12px;background:var(--hm-surface-card);font-size:1rem;box-shadow:0 6px 14px var(--hm-shadow)}
+.hm-theme-live-state div{min-width:0}.hm-theme-live-state strong,.hm-theme-live-state small{display:block}.hm-theme-live-state strong{font-size:.82rem}.hm-theme-live-state small{margin-top:3px;color:var(--hm-color-muted);font-size:.73rem}
+.hm-theme-live-state.is-shared{border-color:color-mix(in srgb,var(--hm-action-accent) 38%,var(--hm-line-soft));background:color-mix(in srgb,var(--hm-surface-card-tint) 78%,var(--hm-surface-card) 22%)}
+:root.hm-theme-changing body,:root.hm-theme-changing .container,:root.hm-theme-changing :is(.user-bar,.summary-card,.daily-card,.hm-chat-card,.history-launch-card,.daily-modal,.room-settings-modal,input,textarea,select,button){transition:background-color .32s ease,background .32s ease,color .24s ease,border-color .24s ease,box-shadow .32s ease}
+@media(prefers-reduced-motion:reduce){:root.hm-theme-changing *{transition:none!important;animation:none!important}}
+:root[data-hm-display="dark"] .hm-theme-live-state{background:#283149;border-color:#46516c}
