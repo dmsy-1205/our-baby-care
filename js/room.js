@@ -634,25 +634,31 @@
     // =========================================================
     async function saveActiveRoom(roomCode, role = 'member', relationshipRole = '') {
         const myEmail = normalizeEmail(currentUser.email);
-        let existingRelationshipRole = '';
+        let existingMember = null;
         try {
-            const existingSnap = await db.ref(`roomMembers/${roomCode}/${currentUser.uid}/relationshipRole`).once('value');
-            existingRelationshipRole = existingSnap.val() || '';
+            const existingSnap = await db.ref(`roomMembers/${roomCode}/${currentUser.uid}`).once('value');
+            existingMember = existingSnap.exists() ? (existingSnap.val() || {}) : null;
         } catch (e) {
             console.warn(e);
         }
-        const userDefaultRelationshipRole = await getUserDefaultRelationshipRole();
-        const finalRelationshipRole = relationshipRole || existingRelationshipRole || pendingRelationshipRole || userDefaultRelationshipRole || (role === 'owner' ? 'dom' : 'sub');
 
-        // STEP5: 방 권한은 roomMembers 하나만 기준으로 관리합니다.
-        // rooms 내부에 members를 중복 저장하지 않습니다.
+        const existingRelationshipRole = existingMember && existingMember.relationshipRole ? existingMember.relationshipRole : '';
+        const resolvedRole = existingMember && existingMember.role ? existingMember.role : role;
+        const userDefaultRelationshipRole = await getUserDefaultRelationshipRole();
+        const finalRelationshipRole = relationshipRole || existingRelationshipRole || pendingRelationshipRole || userDefaultRelationshipRole || (resolvedRole === 'owner' ? 'dom' : 'sub');
+
+        // 기존 Room 전환 시에는 이미 존재하는 멤버십을 절대 다시 쓰지 않는다.
+        // joinedAt / inviteCode 등 가입 당시 보안 필드를 보존하고,
+        // 사용자별 활성 Room 정보만 갱신한다.
         const updates = {};
-        updates[`roomMembers/${roomCode}/${currentUser.uid}`] = {
-            email: myEmail,
-            role: role,
-            relationshipRole: finalRelationshipRole,
-            joinedAt: firebase.database.ServerValue.TIMESTAMP
-        };
+        if (!existingMember) {
+            updates[`roomMembers/${roomCode}/${currentUser.uid}`] = {
+                email: myEmail,
+                role: resolvedRole,
+                relationshipRole: finalRelationshipRole,
+                joinedAt: firebase.database.ServerValue.TIMESTAMP
+            };
+        }
         updates[`userRooms/${currentUser.uid}/${roomCode}`] = true;
         updates[`users/${currentUser.uid}/activeRoom`] = roomCode;
         updates[`users/${currentUser.uid}/email`] = myEmail;
@@ -661,7 +667,7 @@
         await db.ref().update(updates);
 
         activeRoomCode = roomCode;
-        activeRoomRole = role;
+        activeRoomRole = resolvedRole;
         activeRelationshipRole = finalRelationshipRole;
         pendingRelationshipRole = finalRelationshipRole;
         const roomInput = document.getElementById('roomCode');

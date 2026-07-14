@@ -1,3 +1,24 @@
+# STEP5.6.4.6.6 — Previous Room Switch Hotfix
+
+- Existing Room switching no longer rewrites `roomMembers/{roomCode}/{uid}`.
+- Preserves original `joinedAt`, `inviteCode`, role, and membership security fields.
+- Only `users/{uid}/activeRoom`, `userRooms`, login timestamp, and local active Room state are updated.
+- No Realtime Database Rules change. STEP5.6.4.6.5 Rules remain the security baseline.
+
+# STEP5.6.4.6.5 — Invite Field Rules Hotfix
+
+- Fixed RTDB invite creation denial caused by `$other` matching all undeclared invite fields.
+- Declared each supported invite field explicitly.
+- Unknown invite fields remain blocked.
+- No application data migration.
+
+# STEP5.6.4.6.3 — RTDB Rules Compatibility Hotfix
+
+- Removed unsupported `numChildren()` from Realtime Database Rules.
+- Kept exact meta schema enforcement with `hasChildren()` plus `$other.validate = false`.
+- Audited Rules for previously identified unsupported `hasOnly()` and `numChildren()` calls.
+- No application data structure or feature behavior changed.
+
 # STEP5.6.4.6 — Invite & Room Join Security
 
 - 초대코드 사용을 Firebase transaction으로 원자적 귀속 처리
@@ -20,7 +41,7 @@
 - 관리 기록 쓰기는 관리자/Room Owner/Dom만 허용
 - 기록 삭제는 관리자/Room Owner/Dom만 허용하며 두 경로를 함께 삭제
 - 기록실/복사/결과 생성 시 두 경로를 병합해 기존 화면 호환 유지
-## HearMe2nite v1.0 STEP5.6.4.6.2
+## HearMe2nite v1.0 STEP5.6.4.6.6
 
 - 주요 사용자 입력값의 앱/RTDB 이중 검증 추가
 - 닉네임, 피드백, 선물 메모, 비공개 메모 길이 제한
@@ -128,3 +149,10 @@
 - Restricted custom card and mission library management to Room Owner/Dom/admin.
 - Preserved shared member access for daily records and anniversaries.
 - Blocked writes to undefined Room child paths.
+
+
+## STEP5.6.4.6.5 — Invite Rules Stable
+- Rebuilt invite creation/claim rules around authenticated UID.
+- Normal Room Owner can create a new invite when no partner is connected.
+- Removed email equality from authorization decisions; email remains validated metadata.
+- Preserved atomic false-to-true invite claim and reuse protection.
