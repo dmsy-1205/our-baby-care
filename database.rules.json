@@ -25,13 +25,16 @@
         },
         "preferences": {
           "theme": {
-            ".validate": "!newData.exists() || (newData.isString() && (newData.val() === 'lavender' || newData.val() === 'blossom' || newData.val() === 'ocean' || newData.val() === 'forest' || newData.val() === 'cream' || newData.val() === 'midnight'))"
+            ".validate": "!newData.exists() || (newData.isString() && (newData.val() === 'lavender' || newData.val() === 'blossom' || newData.val() === 'ocean' || newData.val() === 'forest' || newData.val() === 'cream'))"
           },
           "updatedAt": {
             ".validate": "!newData.exists() || newData.isNumber()"
           },
           "$other": {
             ".validate": false
+          },
+          "displayMode": {
+            ".validate": "!newData.exists() || (newData.isString() && (newData.val() === 'light' || newData.val() === 'dark' || newData.val() === 'system'))"
           }
         }
       }
@@ -189,7 +192,7 @@
             ".validate": "newData.isBoolean()"
           },
           "theme": {
-            ".validate": "newData.isString() && (newData.val() === 'lavender' || newData.val() === 'blossom' || newData.val() === 'ocean' || newData.val() === 'forest' || newData.val() === 'cream' || newData.val() === 'midnight')"
+            ".validate": "newData.isString() && (newData.val() === 'lavender' || newData.val() === 'blossom' || newData.val() === 'ocean' || newData.val() === 'forest' || newData.val() === 'cream')"
           },
           "updatedByUid": {
             ".validate": "newData.isString() && newData.val() === auth.uid"

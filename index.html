@@ -4,16 +4,26 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💗</text></svg>">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>HearMe2nite v1.0 STEP5.8.2</title>
+    <title>HearMe2nite v1.0 STEP5.8.4</title>
     <script>
-        // STEP5.8.2: 저장된 개인 테마를 Firebase 연결 전에 먼저 적용해 화면 깜빡임을 줄입니다.
+        // STEP5.8.4: 테마와 표시 모드를 Firebase 연결 전에 먼저 적용해 화면 깜빡임을 줄입니다.
         (function () {
             try {
                 var theme = localStorage.getItem('hm_theme_last') || 'lavender';
-                if (!/^(lavender|blossom|ocean|forest|cream|midnight)$/.test(theme)) theme = 'lavender';
+                var displayMode = localStorage.getItem('hm_display_mode_last') || 'system';
+                if (theme === 'midnight') { theme = 'lavender'; displayMode = 'dark'; }
+                if (!/^(lavender|blossom|ocean|forest|cream)$/.test(theme)) theme = 'lavender';
+                if (!/^(light|dark|system)$/.test(displayMode)) displayMode = 'system';
+                var resolved = displayMode === 'system'
+                    ? (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+                    : displayMode;
                 document.documentElement.setAttribute('data-hm-theme', theme);
+                document.documentElement.setAttribute('data-hm-display-mode', displayMode);
+                document.documentElement.setAttribute('data-hm-display', resolved);
             } catch (e) {
                 document.documentElement.setAttribute('data-hm-theme', 'lavender');
+                document.documentElement.setAttribute('data-hm-display-mode', 'system');
+                document.documentElement.setAttribute('data-hm-display', 'light');
             }
         })();
     </script>
@@ -25,7 +35,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-functions-compat.js"></script>
 
-    <link rel="stylesheet" href="css/style.css?v=step5-8-2-theme-engine-20260715">
+    <link rel="stylesheet" href="css/style.css?v=step5-8-4-display-mode-20260715">
 </head>
 <body class="hm-booting">
 
@@ -106,7 +116,7 @@
     </div>
     <div class="app-subtitle">우리의 하루를, 함께 기록합니다.</div>
     <div class="app-meta-row">
-        <div class="app-version-badge" id="appVersionBadge">Version v1.0 STEP5.8.2</div>
+        <div class="app-version-badge" id="appVersionBadge">Version v1.0 STEP5.8.4</div>
         <div class="home-presence-indicator" id="homePresenceIndicator" title="접속 상태 확인 중">
             <span class="home-presence-dot self offline" id="homePresenceSelfDot" aria-label="나 오프라인"></span>
             <span class="home-presence-dot partner offline" id="homePresencePartnerDot" aria-label="상대 오프라인"></span>
@@ -1024,9 +1034,17 @@
             <button type="button" class="hm-theme-option" data-theme="cream" onclick="previewPersonalTheme('cream')" role="radio" aria-checked="false">
                 <span class="hm-theme-swatches"><i></i><i></i><i></i></span><strong>크림</strong><small>따뜻한 아이보리</small>
             </button>
-            <button type="button" class="hm-theme-option" data-theme="midnight" onclick="previewPersonalTheme('midnight')" role="radio" aria-checked="false">
-                <span class="hm-theme-swatches"><i></i><i></i><i></i></span><strong>미드나이트</strong><small>편안한 어두운 화면</small>
-            </button>
+        </div>
+        <div class="hm-display-section" aria-labelledby="displayModeTitle">
+            <div class="hm-display-section-head">
+                <strong id="displayModeTitle">화면 표시 방식</strong>
+                <small>테마 색상과 별도로 밝기를 선택합니다.</small>
+            </div>
+            <div class="hm-display-mode-grid" role="radiogroup" aria-label="화면 표시 방식 선택">
+                <button type="button" class="hm-display-mode-option" data-display-mode="light" onclick="previewDisplayMode('light')" role="radio" aria-checked="false"><span>☀️</span><strong>라이트</strong><small>밝은 화면</small></button>
+                <button type="button" class="hm-display-mode-option" data-display-mode="dark" onclick="previewDisplayMode('dark')" role="radio" aria-checked="false"><span>🌙</span><strong>다크</strong><small>어두운 화면</small></button>
+                <button type="button" class="hm-display-mode-option" data-display-mode="system" onclick="previewDisplayMode('system')" role="radio" aria-checked="false"><span>⚙️</span><strong>시스템</strong><small>기기 설정 사용</small></button>
+            </div>
         </div>
         <p class="hm-theme-status" id="themeStatus" aria-live="polite"></p>
         <button type="button" class="daily-modal-save" id="themeSaveBtn" onclick="savePersonalTheme()">이 테마 저장</button>
@@ -1132,26 +1150,26 @@
 </div>
 
 <div class="toast" id="toast">기록이 복사되었습니다! 💕</div>
-    <script src="js/config.js?v=step5-8-2-theme-engine-20260715"></script>
-    <script src="js/utils.js?v=step5-8-2-theme-engine-20260715"></script>
-    <script src="js/popup.js?v=step5-8-2-theme-engine-20260715"></script>
-    <script src="js/auth.js?v=step5-8-2-theme-engine-20260715"></script>
-    <script src="js/room.js?v=step5-8-2-theme-engine-20260715"></script>
-    <script src="js/presence.js?v=step5-8-2-theme-engine-20260715"></script>
-    <script src="js/daily.js?v=step5-8-2-theme-engine-20260715"></script>
-    <script src="js/mission.js?v=step5-8-2-theme-engine-20260715"></script>
-    <script src="js/custom-routine.js?v=step5-8-2-theme-engine-20260715"></script>
-    <script src="js/history.js?v=step5-8-2-theme-engine-20260715"></script>
-    <script src="js/anniversary.js?v=step5-8-2-theme-engine-20260715"></script>
-    <script src="js/theme.js?v=step5-8-2-theme-engine-20260715"></script>
-    <script src="js/profile.js?v=step5-8-2-theme-engine-20260715"></script>
-    <script src="js/chat.js?v=step5-8-2-theme-engine-20260715"></script>
-    <script src="js/autosave.js?v=step5-8-2-theme-engine-20260715"></script>
-    <script src="js/qa.js?v=step5-8-2-theme-engine-20260715"></script>
-    <script src="js/motion.js?v=step5-8-2-theme-engine-20260715"></script>
-    <script src="js/product.js?v=step5-8-2-theme-engine-20260715"></script>
-    <script src="js/help-center.js?v=step5-8-2-theme-engine-20260715"></script>
-    <script src="js/data-management.js?v=step5-8-2-theme-engine-20260715"></script>
-    <script src="js/app.js?v=step5-8-2-theme-engine-20260715"></script>
+    <script src="js/config.js?v=step5-8-4-display-mode-20260715"></script>
+    <script src="js/utils.js?v=step5-8-4-display-mode-20260715"></script>
+    <script src="js/popup.js?v=step5-8-4-display-mode-20260715"></script>
+    <script src="js/auth.js?v=step5-8-4-display-mode-20260715"></script>
+    <script src="js/room.js?v=step5-8-4-display-mode-20260715"></script>
+    <script src="js/presence.js?v=step5-8-4-display-mode-20260715"></script>
+    <script src="js/daily.js?v=step5-8-4-display-mode-20260715"></script>
+    <script src="js/mission.js?v=step5-8-4-display-mode-20260715"></script>
+    <script src="js/custom-routine.js?v=step5-8-4-display-mode-20260715"></script>
+    <script src="js/history.js?v=step5-8-4-display-mode-20260715"></script>
+    <script src="js/anniversary.js?v=step5-8-4-display-mode-20260715"></script>
+    <script src="js/theme.js?v=step5-8-4-display-mode-20260715"></script>
+    <script src="js/profile.js?v=step5-8-4-display-mode-20260715"></script>
+    <script src="js/chat.js?v=step5-8-4-display-mode-20260715"></script>
+    <script src="js/autosave.js?v=step5-8-4-display-mode-20260715"></script>
+    <script src="js/qa.js?v=step5-8-4-display-mode-20260715"></script>
+    <script src="js/motion.js?v=step5-8-4-display-mode-20260715"></script>
+    <script src="js/product.js?v=step5-8-4-display-mode-20260715"></script>
+    <script src="js/help-center.js?v=step5-8-4-display-mode-20260715"></script>
+    <script src="js/data-management.js?v=step5-8-4-display-mode-20260715"></script>
+    <script src="js/app.js?v=step5-8-4-display-mode-20260715"></script>
 </body>
 </html>
