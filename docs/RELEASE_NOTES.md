@@ -1,4 +1,12 @@
-## HearMe2nite v1.0 STEP5.6.4.2
+## HearMe2nite v1.0 STEP5.6.4.4
+
+- 주요 사용자 입력값의 앱/RTDB 이중 검증 추가
+- 닉네임, 피드백, 선물 메모, 비공개 메모 길이 제한
+- ownerNotes 허용 필드 외 데이터 차단
+- 잘못된 비밀번호 등 예상 가능한 인증 실패의 콘솔 스택 축소
+- 기존 데이터 구조 및 읽기 호환 유지
+
+## HearMe2nite v1.0 STEP5.6.4.2.1
 
 ### 채팅 및 읽음 상태 세부 보안 강화
 
@@ -83,3 +91,8 @@
 - 채팅 Presence 리스너 `hmChatPresenceRef`도 함께 해제하고 참조를 초기화합니다.
 - 이전 Room의 `chatReadStatus/{uid}` 접근으로 발생하던 `permission_denied` 콘솔 오류를 방지합니다.
 - Firebase 데이터 구조와 Rules는 변경하지 않았습니다.
+
+
+## STEP5.6.4.2.1 — RTDB Rules Syntax Hotfix
+- Replaced unsupported `hasOnly()` with Realtime Database-compatible child validation rules.
+- Allowed only `lastReadAt` and `updatedAt` under `chatReadStatus/{uid}`; all other fields are rejected through `$other`.

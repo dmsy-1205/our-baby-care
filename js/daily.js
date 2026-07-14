@@ -312,7 +312,7 @@
         if (!(await hmRequireRoomAccess('관리 전용 메모 저장', roomCode))) return;
         const date = document.getElementById('recordDate').value;
         const noteEl = document.getElementById('ownerPrivateNote');
-        const note = noteEl ? noteEl.value : '';
+        const note = noteEl ? String(noteEl.value || '').slice(0, 1000) : '';
         try {
             await db.ref(`ownerNotes/${roomCode}/${date}`).set({
                 note,

@@ -4,7 +4,7 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💗</text></svg>">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>HearMe2nite v1.0 STEP5.6.4.2</title>
+    <title>HearMe2nite v1.0 STEP5.6.4.4</title>
     <!-- RC2.16.0 Branding STEP1: Quiet Love UI polish / 기능 구조 유지 -->
     <!-- RC2 v2.6.0 STEP5 FINAL QA: component-ready module map / UI and data logic preserved -->
     
@@ -94,7 +94,7 @@
     </div>
     <div class="app-subtitle">우리의 하루를, 함께 기록합니다.</div>
     <div class="app-meta-row">
-        <div class="app-version-badge">Version v1.0 STEP5.6.4.2</div>
+        <div class="app-version-badge">Version v1.0 STEP5.6.4.4</div>
         <div class="home-presence-indicator" id="homePresenceIndicator" title="접속 상태 확인 중">
             <span class="home-presence-dot self offline" id="homePresenceSelfDot" aria-label="나 오프라인"></span>
             <span class="home-presence-dot partner offline" id="homePresencePartnerDot" aria-label="상대 오프라인"></span>
@@ -917,7 +917,7 @@
             <button type="button" class="feedback-type-btn" data-feedback-type="together" onclick="selectFeedbackType('together')">🤍<span>함께할게요</span></button>
         </div>
         <label class="todays-gift-label" for="replyMessage">한마디</label>
-        <textarea id="replyMessage" rows="5" placeholder="오늘의 기록을 읽고 따뜻한 한마디를 남겨주세요." oninput="handleDailyFieldChanged()"></textarea>
+        <textarea id="replyMessage" rows="5" maxlength="1000" placeholder="오늘의 기록을 읽고 따뜻한 한마디를 남겨주세요." oninput="handleDailyFieldChanged()"></textarea>
         <label class="feedback-confirm-row"><input type="checkbox" id="feedbackConfirmed" onchange="handleFeedbackConfirmedChanged()"><span>오늘의 기록을 확인했어요</span></label>
         <button type="button" class="daily-modal-save" onclick="closeDailyModal('feedback')">저장하고 닫기</button>
     </div>
@@ -943,7 +943,7 @@
                 </button>
             </div>
             <label class="todays-gift-label" for="rewardNote">오늘의 메시지</label>
-            <textarea id="rewardNote" rows="3" placeholder="예: 오늘 정말 잘했어요. 좋아하는 디저트 먹어요 😊" oninput="handleDailyFieldChanged()"></textarea>
+            <textarea id="rewardNote" rows="3" maxlength="1000" placeholder="예: 오늘 정말 잘했어요. 좋아하는 디저트 먹어요 😊" oninput="handleDailyFieldChanged()"></textarea>
         </div>
         <button type="button" class="daily-modal-save" onclick="closeDailyModal('reward')">저장하고 닫기</button>
     </div>
@@ -954,7 +954,7 @@
         <div class="daily-modal-head"><h2 id="ownerNoteModalTitle">👑 주인 비공개 메모</h2><button type="button" class="modal-close-btn" onclick="closeDailyModal('ownerNote')">닫기</button></div>
         <div class="trust-card owner-only-note">
             <div class="trust-card-help">주인만 보는 장기 관찰 메모입니다. 서브의 상태를 이해하고 다음 미션을 조절하기 위한 공간입니다.</div>
-            <textarea id="ownerPrivateNote" rows="4" placeholder="예: 이번 주는 피곤해 보임. 내일은 쉬는 미션 권장." oninput="handleOwnerNoteFieldChanged()"></textarea>
+            <textarea id="ownerPrivateNote" rows="4" maxlength="1000" placeholder="예: 이번 주는 피곤해 보임. 내일은 쉬는 미션 권장." oninput="handleOwnerNoteFieldChanged()"></textarea>
         </div>
         <button type="button" class="daily-modal-save" onclick="closeDailyModal('ownerNote')">저장하고 닫기</button>
     </div>
@@ -1082,25 +1082,25 @@
 </div>
 
 <div class="toast" id="toast">기록이 복사되었습니다! 💕</div>
-    <script src="js/config.js?v=step5-6-4-2-chat-read-security-20260713"></script>
-    <script src="js/utils.js?v=step5-6-4-2-chat-read-security-20260713"></script>
-    <script src="js/popup.js?v=step5-6-4-2-chat-read-security-20260713"></script>
-    <script src="js/auth.js?v=step5-6-4-2-chat-read-security-20260713"></script>
-    <script src="js/room.js?v=step5-6-4-2-chat-read-security-20260713"></script>
-    <script src="js/presence.js?v=step5-6-4-2-chat-read-security-20260713"></script>
-    <script src="js/daily.js?v=step5-6-4-2-chat-read-security-20260713"></script>
-    <script src="js/mission.js?v=step5-6-4-2-chat-read-security-20260713"></script>
-    <script src="js/custom-routine.js?v=step5-6-4-2-chat-read-security-20260713"></script>
-    <script src="js/history.js?v=step5-6-4-2-chat-read-security-20260713"></script>
-    <script src="js/anniversary.js?v=step5-6-4-2-chat-read-security-20260713"></script>
-    <script src="js/profile.js?v=step5-6-4-2-chat-read-security-20260713"></script>
-    <script src="js/chat.js?v=step5-6-4-2-chat-read-security-20260713"></script>
-    <script src="js/autosave.js?v=step5-6-4-2-chat-read-security-20260713"></script>
-    <script src="js/qa.js?v=step5-6-4-2-chat-read-security-20260713"></script>
-    <script src="js/motion.js?v=step5-6-4-2-chat-read-security-20260713"></script>
-    <script src="js/product.js?v=step5-6-4-2-chat-read-security-20260713"></script>
-    <script src="js/help-center.js?v=step5-6-4-2-chat-read-security-20260713"></script>
-    <script src="js/data-management.js?v=step5-6-4-2-chat-read-security-20260713"></script>
-    <script src="js/app.js?v=step5-6-4-2-chat-read-security-20260713"></script>
+    <script src="js/config.js?v=step5-6-4-4-input-validation-security-20260714"></script>
+    <script src="js/utils.js?v=step5-6-4-4-input-validation-security-20260714"></script>
+    <script src="js/popup.js?v=step5-6-4-4-input-validation-security-20260714"></script>
+    <script src="js/auth.js?v=step5-6-4-4-input-validation-security-20260714"></script>
+    <script src="js/room.js?v=step5-6-4-4-input-validation-security-20260714"></script>
+    <script src="js/presence.js?v=step5-6-4-4-input-validation-security-20260714"></script>
+    <script src="js/daily.js?v=step5-6-4-4-input-validation-security-20260714"></script>
+    <script src="js/mission.js?v=step5-6-4-4-input-validation-security-20260714"></script>
+    <script src="js/custom-routine.js?v=step5-6-4-4-input-validation-security-20260714"></script>
+    <script src="js/history.js?v=step5-6-4-4-input-validation-security-20260714"></script>
+    <script src="js/anniversary.js?v=step5-6-4-4-input-validation-security-20260714"></script>
+    <script src="js/profile.js?v=step5-6-4-4-input-validation-security-20260714"></script>
+    <script src="js/chat.js?v=step5-6-4-4-input-validation-security-20260714"></script>
+    <script src="js/autosave.js?v=step5-6-4-4-input-validation-security-20260714"></script>
+    <script src="js/qa.js?v=step5-6-4-4-input-validation-security-20260714"></script>
+    <script src="js/motion.js?v=step5-6-4-4-input-validation-security-20260714"></script>
+    <script src="js/product.js?v=step5-6-4-4-input-validation-security-20260714"></script>
+    <script src="js/help-center.js?v=step5-6-4-4-input-validation-security-20260714"></script>
+    <script src="js/data-management.js?v=step5-6-4-4-input-validation-security-20260714"></script>
+    <script src="js/app.js?v=step5-6-4-4-input-validation-security-20260714"></script>
 </body>
 </html>

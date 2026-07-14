@@ -35,3 +35,7 @@
 - chatReadStatus는 본인 UID 또는 관리자만 갱신 가능
 - 기존 rooms 상위 쓰기 구조는 호환성을 위해 유지하고 하위 `.validate`로 보강
 - GitHub Actions는 Hosting 전용이며 database.rules.json은 자동 배포되지 않음
+
+
+# STEP5.6.4.4
+주요 입력값 앱/Realtime Database 이중 검증 완료. Rules는 별도 게시 필요.

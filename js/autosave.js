@@ -296,7 +296,8 @@
         const goingOut = document.getElementById('goingOut').value || '기록 없음';
         const sleepTime = document.getElementById('sleepTime').value || '기록 없음';
         const diary = document.getElementById('diary').value || '기록 없음';
-        const replyMessage = document.getElementById('replyMessage').value || '기록 없음';
+        const replyMessageRaw = document.getElementById('replyMessage').value || '';
+        const replyMessage = replyMessageRaw ? replyMessageRaw.slice(0, 1000) : '기록 없음';
         const feedbackType = selectedFeedbackType || '';
         const feedbackTypeLabel = (typeof getFeedbackTypeLabel === 'function' ? getFeedbackTypeLabel(feedbackType) : '') || '선택 없음';
         const missions = collectMissions();
@@ -307,7 +308,7 @@
         const moodNote = document.getElementById('moodNote').value || '';
         const dailyChoice = selectedDailyChoice || '';
         const dailyChoiceLabel = getDailyChoiceLabel(dailyChoice);
-        const rewardNote = document.getElementById('rewardNote').value || '';
+        const rewardNote = (document.getElementById('rewardNote').value || '').slice(0, 1000);
         const hasPhotoText = uploadedPhotoBase64 ? '📷 사진 첨부 완료' : '사진 없음';
         const customRoutineReport = (typeof hmBuildCustomRoutineReportText === 'function') ? hmBuildCustomRoutineReportText() : '';
         const customCardValues = (typeof hmCollectCustomRoutineValues === 'function') ? hmCollectCustomRoutineValues() : {};

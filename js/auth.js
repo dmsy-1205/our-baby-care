@@ -313,8 +313,11 @@
                 showSaveStatus('☁️ 로그인 완료');
             }
         } catch (err) {
-            console.error(err);
-            alert(firebaseAuthErrorToKorean(err.code || err.message));
+            const authCode = String(err && (err.code || err.message) || '');
+            const expectedAuthError = ['auth/invalid-credential', 'auth/wrong-password', 'auth/user-not-found', 'auth/invalid-email', 'auth/email-already-in-use', 'auth/weak-password'].some((code) => authCode.includes(code));
+            if (expectedAuthError) console.warn('[HearMe2nite Auth] 인증 요청이 거절되었습니다:', authCode);
+            else console.error('[HearMe2nite Auth] 예상하지 못한 인증 오류', err);
+            alert(firebaseAuthErrorToKorean(authCode));
             showSaveStatus(signup ? '❌ 회원가입 실패' : '❌ 로그인 실패');
         } finally {
             if (submitBtn) submitBtn.disabled = false;
