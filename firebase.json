@@ -4,7 +4,16 @@
     "ignore": [
       "firebase.json",
       "**/.*",
-      "**/node_modules/**"
+      "**/node_modules/**",
+      "database.rules.json",
+      "storage.rules",
+      "MASTEROS_REALTIME_DATABASE_RULES_v0.10.17.json",
+      "README.md",
+      "docs/**",
+      "functions/**",
+      "**/*.bak",
+      "**/*.zip",
+      "**/*.map"
     ]
   },
   "database": {

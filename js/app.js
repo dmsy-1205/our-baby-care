@@ -218,7 +218,7 @@
 })();
 
 
-// STEP5.6.4.6.10: 내부 버전과 화면 표시를 항상 동기화한다.
+// STEP5.6.4.7: 내부 버전과 화면 표시를 항상 동기화한다.
 (function hmSyncVisibleAppVersion() {
   function syncVersion() {
     var badge = document.getElementById('appVersionBadge');

@@ -1,4 +1,15 @@
-# STEP5.6.4.6.10 — Invite 24H + Version Sync
+# STEP5.6.4.7 — Final Security Stable
+
+- Completed final security audit without adding new app features.
+- Confirmed room isolation, role-specific writes, private owner notes, chat sender validation, read-status ownership, dayAdmin separation, and invite claim protection.
+- Removed the deployable `js/room.js.bak` backup file.
+- Hardened Firebase Hosting ignore rules so database rules, storage rules, Functions source, internal docs, backups, ZIPs, and source maps are not published.
+- Confirmed Realtime Database Rules do not use unsupported `hasOnly()` or `numChildren()` syntax.
+- Synchronized internal, visible, QA, title, and cache versions to STEP5.6.4.7.
+
+---
+
+# STEP5.6.4.7 — Invite 24H + Version Sync
 
 - Invite TTL fixed to exactly 24 hours using Firebase server-adjusted time.
 - Invite UI and copied text show expiry information.
@@ -68,7 +79,7 @@
 - 관리 기록 쓰기는 관리자/Room Owner/Dom만 허용
 - 기록 삭제는 관리자/Room Owner/Dom만 허용하며 두 경로를 함께 삭제
 - 기록실/복사/결과 생성 시 두 경로를 병합해 기존 화면 호환 유지
-## HearMe2nite v1.0 STEP5.6.4.6.10
+## HearMe2nite v1.0 STEP5.6.4.7
 
 - 주요 사용자 입력값의 앱/RTDB 이중 검증 추가
 - 닉네임, 피드백, 선물 메모, 비공개 메모 길이 제한

@@ -43,3 +43,7 @@
 
 ## STEP5.6.4.6 Security Note
 The broad parent write permission under `rooms/{roomCode}` was removed. Rules now grant writes per known child path. Daily record field-level role separation remains deferred because the app saves the whole day with `.set()`.
+
+## STEP5.6.4.7 final security baseline
+
+STEP5.6.4.7 is the security-stable baseline after Room path hardening, day-role separation, invite/Room join protection, 24-hour invite expiry, previous-Room switching compatibility, and Hosting exposure hardening. UI work should start from this Full Source baseline.
