@@ -47,10 +47,10 @@
     "rooms": {
       "$roomCode": {
         ".read": "auth != null && (root.child('admins').child(auth.uid).val() === true || root.child('roomMembers').child($roomCode).child(auth.uid).exists())",
-        ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (root.child('roomMembers').child($roomCode).child(auth.uid).exists() && (!root.child('users').child(auth.uid).child('emailVerificationRequired').exists() || auth.token.email_verified === true)))",
         "messages": {
           "$messageId": {
-            ".validate": "!data.exists() && newData.exists() && newData.child('senderUid').val() === auth.uid && newData.child('sender').isString() && newData.child('sender').val().length >= 1 && newData.child('sender').val().length <= 80 && newData.child('senderEmail').isString() && newData.child('senderEmail').val() === auth.token.email && newData.child('senderEmail').val().length <= 254 && newData.child('text').isString() && newData.child('text').val().length >= 1 && newData.child('text').val().length <= 2000 && newData.child('timestamp').isNumber()"
+            ".validate": "!data.exists() && newData.exists() && newData.child('senderUid').val() === auth.uid && newData.child('sender').isString() && newData.child('sender').val().length >= 1 && newData.child('sender').val().length <= 80 && newData.child('senderEmail').isString() && newData.child('senderEmail').val() === auth.token.email && newData.child('senderEmail').val().length <= 254 && newData.child('text').isString() && newData.child('text').val().length >= 1 && newData.child('text').val().length <= 2000 && newData.child('timestamp').isNumber()",
+            ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (root.child('roomMembers').child($roomCode).child(auth.uid).exists() && (!root.child('users').child(auth.uid).child('emailVerificationRequired').exists() || auth.token.email_verified === true)))"
           }
         },
         "chatReadStatus": {
@@ -64,7 +64,8 @@
             },
             "$other": {
               ".validate": false
-            }
+            },
+            ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (auth.uid === $uid && root.child('roomMembers').child($roomCode).child(auth.uid).exists() && (!root.child('users').child(auth.uid).child('emailVerificationRequired').exists() || auth.token.email_verified === true)))"
           }
         },
         "days": {
@@ -80,8 +81,56 @@
             },
             "moodNote": {
               ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 1000)"
-            }
+            },
+            ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (root.child('roomMembers').child($roomCode).child(auth.uid).exists() && (!root.child('users').child(auth.uid).child('emailVerificationRequired').exists() || auth.token.email_verified === true)))"
           }
+        },
+        "meta": {
+          "ownerUid": {
+            ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (!data.exists() && root.child('roomMembers').child($roomCode).child(auth.uid).child('role').val() === 'owner' && newData.val() === auth.uid))",
+            ".validate": "newData.isString() && newData.val().length > 0 && (newData.val() === data.val() || !data.exists())"
+          },
+          "ownerEmail": {
+            ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (!data.exists() && root.child('roomMembers').child($roomCode).child(auth.uid).child('role').val() === 'owner' && newData.val() === auth.token.email))",
+            ".validate": "newData.isString() && newData.val().length <= 254 && (newData.val() === data.val() || !data.exists())"
+          },
+          "createdAt": {
+            ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (!data.exists() && root.child('roomMembers').child($roomCode).child(auth.uid).child('role').val() === 'owner'))",
+            ".validate": "newData.isNumber() && (newData.val() === data.val() || !data.exists())"
+          },
+          "app": {
+            ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (!data.exists() && root.child('roomMembers').child($roomCode).child(auth.uid).child('role').val() === 'owner' && newData.val() === 'hearme2nite'))",
+            ".validate": "newData.isString() && newData.val() === 'hearme2nite' && (newData.val() === data.val() || !data.exists())"
+          },
+          "partnerUid": {
+            ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (root.child('roomMembers').child($roomCode).child(auth.uid).child('role').val() === 'partner' && auth.uid === newData.val()))",
+            ".validate": "newData.isString() && newData.val().length > 0"
+          },
+          "partnerEmail": {
+            ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (root.child('roomMembers').child($roomCode).child(auth.uid).child('role').val() === 'partner' && newData.val() === auth.token.email))",
+            ".validate": "newData.isString() && newData.val().length <= 254"
+          },
+          "firstMetDate": {
+            ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (root.child('roomMembers').child($roomCode).child(auth.uid).exists() && (!root.child('users').child(auth.uid).child('emailVerificationRequired').exists() || auth.token.email_verified === true)))",
+            ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 10)"
+          },
+          "anniversaries": {
+            "$anniversaryId": {
+              ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (root.child('roomMembers').child($roomCode).child(auth.uid).exists() && (!root.child('users').child(auth.uid).child('emailVerificationRequired').exists() || auth.token.email_verified === true)))"
+            }
+          },
+          "$other": {
+            ".write": false
+          }
+        },
+        "customCards": {
+          ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (root.child('roomMembers').child($roomCode).child(auth.uid).exists() && (root.child('roomMembers').child($roomCode).child(auth.uid).child('role').val() === 'owner' || root.child('roomMembers').child($roomCode).child(auth.uid).child('relationshipRole').val() === 'dom') && (!root.child('users').child(auth.uid).child('emailVerificationRequired').exists() || auth.token.email_verified === true)))"
+        },
+        "missionLibrary": {
+          ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (root.child('roomMembers').child($roomCode).child(auth.uid).exists() && (root.child('roomMembers').child($roomCode).child(auth.uid).child('role').val() === 'owner' || root.child('roomMembers').child($roomCode).child(auth.uid).child('relationshipRole').val() === 'dom') && (!root.child('users').child(auth.uid).child('emailVerificationRequired').exists() || auth.token.email_verified === true)))"
+        },
+        "$other": {
+          ".write": false
         }
       }
     },

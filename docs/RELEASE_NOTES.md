@@ -1,4 +1,4 @@
-## HearMe2nite v1.0 STEP5.6.4.4
+## HearMe2nite v1.0 STEP5.6.4.5B-1
 
 - 주요 사용자 입력값의 앱/RTDB 이중 검증 추가
 - 닉네임, 피드백, 선물 메모, 비공개 메모 길이 제한
@@ -96,3 +96,13 @@
 ## STEP5.6.4.2.1 — RTDB Rules Syntax Hotfix
 - Replaced unsupported `hasOnly()` with Realtime Database-compatible child validation rules.
 - Allowed only `lastReadAt` and `updatedAt` under `chatReadStatus/{uid}`; all other fields are rejected through `$other`.
+
+
+## STEP5.6.4.5B-1 — Room Path Rules Hardening
+
+- Removed the broad `rooms/{roomCode}` member write grant.
+- Added explicit write permissions for `days`, `messages`, `chatReadStatus`, `meta`, `customCards`, and `missionLibrary`.
+- Protected immutable Room owner metadata.
+- Restricted custom card and mission library management to Room Owner/Dom/admin.
+- Preserved shared member access for daily records and anniversaries.
+- Blocked writes to undefined Room child paths.
