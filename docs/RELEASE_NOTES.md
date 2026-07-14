@@ -1,4 +1,8 @@
-# STEP5.6.4.6.6 — Previous Room Switch Hotfix
+# STEP5.6.4.6.7 — Invite Server Time Hotfix
+
+- 초대 생성/만료/귀속 판단을 Firebase `.info/serverTimeOffset` 기준으로 통일
+- Dom/Sub 기기 시계 차이로 신규 초대가 즉시 만료되는 오판 수정
+- 최종 만료 차단은 Realtime Database Rules의 `now` 검증 유지
 
 - Existing Room switching no longer rewrites `roomMembers/{roomCode}/{uid}`.
 - Preserves original `joinedAt`, `inviteCode`, role, and membership security fields.
@@ -41,7 +45,7 @@
 - 관리 기록 쓰기는 관리자/Room Owner/Dom만 허용
 - 기록 삭제는 관리자/Room Owner/Dom만 허용하며 두 경로를 함께 삭제
 - 기록실/복사/결과 생성 시 두 경로를 병합해 기존 화면 호환 유지
-## HearMe2nite v1.0 STEP5.6.4.6.6
+## HearMe2nite v1.0 STEP5.6.4.6.7
 
 - 주요 사용자 입력값의 앱/RTDB 이중 검증 추가
 - 닉네임, 피드백, 선물 메모, 비공개 메모 길이 제한

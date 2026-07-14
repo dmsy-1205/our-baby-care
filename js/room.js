@@ -729,6 +729,17 @@
 
     // 초대코드 생성
     // 현재 방 기준으로 초대 링크와 코드를 만들고 roomAccess 권한 흐름과 연결한다.
+    async function hmGetFirebaseServerNow() {
+        try {
+            const offsetSnap = await db.ref('.info/serverTimeOffset').once('value');
+            const offset = Number(offsetSnap.val());
+            return Date.now() + (Number.isFinite(offset) ? offset : 0);
+        } catch (error) {
+            console.warn('[HearMe2nite Invite] 서버 시간 보정값을 불러오지 못해 기기 시간을 사용합니다.');
+            return Date.now();
+        }
+    }
+
     async function createInviteCode() {
         if (!currentUser) { alert('먼저 로그인해 주세요.'); return; }
         if (!activeRoomCode) { alert('먼저 내 방을 만들거나 기존 방에 연결해 주세요.'); return; }
@@ -756,12 +767,13 @@
 
         const inviteLink = `${window.location.origin}${window.location.pathname}?invite=${code}`;
         try {
+            const serverNow = await hmGetFirebaseServerNow();
             await db.ref(`invites/${code}`).set({
                 roomCode: activeRoomCode,
                 ownerUid: currentUser.uid,
                 ownerEmail: normalizeEmail(currentUser.email),
                 createdAt: firebase.database.ServerValue.TIMESTAMP,
-                expiresAt: Date.now() + (1000 * 60 * 60 * 24),
+                expiresAt: serverNow + (1000 * 60 * 60 * 24),
                 used: false
             });
             const box = document.getElementById('inviteResult');
@@ -858,7 +870,8 @@
                 showSaveStatus('🔒 이미 사용된 초대코드');
                 return;
             }
-            if (!initialInvite.used && initialInvite.expiresAt && Date.now() > initialInvite.expiresAt) {
+            const serverNow = await hmGetFirebaseServerNow();
+            if (!initialInvite.used && initialInvite.expiresAt && serverNow > initialInvite.expiresAt) {
                 if (fromPending) sessionStorage.removeItem('pendingInviteCode');
                 alert('만료된 초대코드입니다. 방 주인에게 새 초대코드를 요청해 주세요.');
                 showSaveStatus('🔒 만료된 초대코드');
@@ -876,13 +889,13 @@
                     if (!currentInvite) return;
                     if (currentInvite.roomCode !== roomCode || currentInvite.ownerUid !== initialInvite.ownerUid) return;
                     if (currentInvite.used === true) return;
-                    if (currentInvite.expiresAt && Date.now() > currentInvite.expiresAt) return;
+                    if (currentInvite.expiresAt && serverNow > currentInvite.expiresAt) return;
 
                     return Object.assign({}, currentInvite, {
                         used: true,
                         usedByUid: currentUser.uid,
                         usedByEmail: myEmail,
-                        usedAt: Date.now()
+                        usedAt: serverNow
                     });
                 }, undefined, false);
 
