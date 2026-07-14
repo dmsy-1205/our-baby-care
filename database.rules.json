@@ -173,6 +173,7 @@
           }
         },
         "meta": {
+          ".write": "auth != null && !data.exists() && (root.child('admins').child(auth.uid).val() === true || (root.child('roomMembers').child($roomCode).child(auth.uid).child('role').val() === 'owner' && newData.child('ownerUid').val() === auth.uid && newData.child('ownerEmail').val() === auth.token.email && newData.child('createdAt').isNumber() && newData.child('app').val() === 'hearme2nite' && newData.hasChildren(['ownerUid', 'ownerEmail', 'createdAt', 'app']) && newData.numChildren() === 4))",
           "ownerUid": {
             ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (!data.exists() && root.child('roomMembers').child($roomCode).child(auth.uid).child('role').val() === 'owner' && newData.val() === auth.uid))",
             ".validate": "newData.isString() && newData.val().length > 0 && (newData.val() === data.val() || !data.exists())"
@@ -207,7 +208,8 @@
             }
           },
           "$other": {
-            ".write": false
+            ".write": false,
+            ".validate": false
           }
         },
         "customCards": {
@@ -284,7 +286,7 @@
       "$code": {
         ".read": "auth != null && (!root.child('users').child(auth.uid).child('emailVerificationRequired').exists() || auth.token.email_verified === true)",
         ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (!data.exists() && newData.child('ownerUid').val() === auth.uid && newData.child('ownerEmail').val() === auth.token.email && newData.child('used').val() === false && newData.child('roomCode').isString() && root.child('roomMembers').child(newData.child('roomCode').val()).child(auth.uid).child('role').val() === 'owner' && root.child('rooms').child(newData.child('roomCode').val()).child('meta').child('ownerUid').val() === auth.uid && !root.child('rooms').child(newData.child('roomCode').val()).child('meta').child('partnerUid').exists() && (!root.child('users').child(auth.uid).child('emailVerificationRequired').exists() || auth.token.email_verified === true)) || (data.exists() && data.child('used').val() === false && newData.child('used').val() === true && newData.child('usedByUid').val() === auth.uid && newData.child('usedByEmail').val() === auth.token.email && newData.child('usedAt').isNumber() && newData.child('ownerUid').val() === data.child('ownerUid').val() && newData.child('ownerEmail').val() === data.child('ownerEmail').val() && newData.child('roomCode').val() === data.child('roomCode').val() && newData.child('createdAt').val() === data.child('createdAt').val() && newData.child('expiresAt').val() === data.child('expiresAt').val() && root.child('rooms').child(data.child('roomCode').val()).child('meta').child('ownerUid').val() === data.child('ownerUid').val() && !root.child('rooms').child(data.child('roomCode').val()).child('meta').child('partnerUid').exists() && (!data.child('expiresAt').exists() || data.child('expiresAt').val() >= now) && (!root.child('users').child(auth.uid).child('emailVerificationRequired').exists() || auth.token.email_verified === true)))",
-        ".validate": "!newData.exists() || (newData.child('roomCode').isString() && newData.child('roomCode').val().length >= 3 && newData.child('roomCode').val().length <= 60 && newData.child('ownerUid').isString() && newData.child('ownerUid').val().length > 0 && newData.child('ownerEmail').isString() && newData.child('ownerEmail').val().length <= 254 && newData.child('createdAt').isNumber() && newData.child('expiresAt').isNumber() && newData.child('expiresAt').val() > newData.child('createdAt').val() && newData.child('used').isBoolean() && ((!newData.child('used').val() && !newData.child('usedByUid').exists() && !newData.child('usedByEmail').exists() && !newData.child('usedAt').exists()) || (newData.child('used').val() && newData.child('usedByUid').isString() && newData.child('usedByEmail').isString() && newData.child('usedAt').isNumber())))",
+        ".validate": "!newData.exists() || (newData.child('roomCode').isString() && newData.child('roomCode').val().length >= 3 && newData.child('roomCode').val().length <= 60 && newData.child('ownerUid').isString() && newData.child('ownerUid').val().length > 0 && newData.child('ownerEmail').isString() && newData.child('ownerEmail').val().length <= 254 && newData.child('createdAt').isNumber() && newData.child('expiresAt').isNumber() && newData.child('expiresAt').val() > newData.child('createdAt').val() && newData.child('used').isBoolean() && ((newData.child('used').val() === false && !newData.child('usedByUid').exists() && !newData.child('usedByEmail').exists() && !newData.child('usedAt').exists()) || (newData.child('used').val() === true && newData.child('usedByUid').isString() && newData.child('usedByEmail').isString() && newData.child('usedAt').isNumber())))",
         "$other": {
           ".validate": false
         }

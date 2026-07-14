@@ -1,4 +1,4 @@
-# HearMe2nite v1.0 STEP5.6.4.6
+# HearMe2nite v1.0 STEP5.6.4.6.2
 
 초대코드와 Room 가입 보안을 강화한 Full Source입니다.
 
@@ -9,3 +9,8 @@
 - partnerUid 위조 및 추가 Partner 차단
 
 GitHub Actions는 Hosting만 배포합니다. `database.rules.json`은 Firebase Realtime Database Rules에 별도로 게시해야 합니다.
+
+
+## STEP5.6.4.6.2 RTDB Rules Boolean Hotfix
+- Replaced unsupported boolean negation on `newData.child('used').val()` with explicit `=== false` / `=== true` comparisons.
+- No application behavior or Firebase path changes.
