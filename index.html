@@ -4,7 +4,19 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💗</text></svg>">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>HearMe2nite v1.0 STEP5.7.2</title>
+    <title>HearMe2nite v1.0 STEP5.8.0</title>
+    <script>
+        // STEP5.8.0: 저장된 개인 테마를 Firebase 연결 전에 먼저 적용해 화면 깜빡임을 줄입니다.
+        (function () {
+            try {
+                var theme = localStorage.getItem('hm_theme_last') || 'lavender';
+                if (!/^(lavender|blossom|ocean|forest|cream|midnight)$/.test(theme)) theme = 'lavender';
+                document.documentElement.setAttribute('data-hm-theme', theme);
+            } catch (e) {
+                document.documentElement.setAttribute('data-hm-theme', 'lavender');
+            }
+        })();
+    </script>
     <!-- RC2.16.0 Branding STEP1: Quiet Love UI polish / 기능 구조 유지 -->
     <!-- RC2 v2.6.0 STEP5 FINAL QA: component-ready module map / UI and data logic preserved -->
     
@@ -13,7 +25,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-functions-compat.js"></script>
 
-    <link rel="stylesheet" href="css/style.css?v=step5-6-3-8-legacy-routine-management-20260713">
+    <link rel="stylesheet" href="css/style.css?v=step5-8-0-personal-theme-20260715">
 </head>
 <body class="hm-booting">
 
@@ -94,7 +106,7 @@
     </div>
     <div class="app-subtitle">우리의 하루를, 함께 기록합니다.</div>
     <div class="app-meta-row">
-        <div class="app-version-badge" id="appVersionBadge">Version v1.0 STEP5.7.2</div>
+        <div class="app-version-badge" id="appVersionBadge">Version v1.0 STEP5.8.0</div>
         <div class="home-presence-indicator" id="homePresenceIndicator" title="접속 상태 확인 중">
             <span class="home-presence-dot self offline" id="homePresenceSelfDot" aria-label="나 오프라인"></span>
             <span class="home-presence-dot partner offline" id="homePresencePartnerDot" aria-label="상대 오프라인"></span>
@@ -114,6 +126,7 @@
         </div>
         <div class="user-bar-actions hm-account-actions">
             <button type="button" class="btn-small btn-secondary" onclick="openProfileModal()">프로필</button>
+            <button type="button" class="btn-small btn-secondary" onclick="openThemeModal()">테마</button>
             <button type="button" class="btn-small btn-secondary" onclick="openDataManagementModal()">데이터</button>
             <button type="button" class="btn-small btn-secondary hm-admin-only" id="dataAdminButton" onclick="openDataAdminModal()" hidden>관리</button>
             <button type="button" class="btn-small btn-secondary" onclick="logoutUser()">로그아웃</button>
@@ -983,6 +996,38 @@
     </div>
 </div>
 
+<div class="daily-modal-overlay hm-theme-overlay" id="themeOverlay" onclick="if(event.target.id==='themeOverlay') closeThemeModal()" aria-hidden="true">
+    <div class="daily-modal hm-theme-modal" role="dialog" aria-modal="true" aria-labelledby="themeModalTitle">
+        <div class="daily-modal-head">
+            <h2 id="themeModalTitle">🎨 개인 테마</h2>
+            <button type="button" class="modal-close-btn" onclick="closeThemeModal()">닫기</button>
+        </div>
+        <p class="hm-theme-intro">내 화면에만 적용할 테마를 선택합니다. 이번 단계에서는 상대방 화면에는 영향을 주지 않습니다.</p>
+        <div class="hm-theme-grid" id="themeGrid" role="radiogroup" aria-label="개인 테마 선택">
+            <button type="button" class="hm-theme-option" data-theme="lavender" onclick="previewPersonalTheme('lavender')" role="radio" aria-checked="false">
+                <span class="hm-theme-swatches"><i></i><i></i><i></i></span><strong>라벤더</strong><small>현재 기본 테마</small>
+            </button>
+            <button type="button" class="hm-theme-option" data-theme="blossom" onclick="previewPersonalTheme('blossom')" role="radio" aria-checked="false">
+                <span class="hm-theme-swatches"><i></i><i></i><i></i></span><strong>블라썸</strong><small>부드러운 분홍빛</small>
+            </button>
+            <button type="button" class="hm-theme-option" data-theme="ocean" onclick="previewPersonalTheme('ocean')" role="radio" aria-checked="false">
+                <span class="hm-theme-swatches"><i></i><i></i><i></i></span><strong>오션</strong><small>시원한 하늘과 바다</small>
+            </button>
+            <button type="button" class="hm-theme-option" data-theme="forest" onclick="previewPersonalTheme('forest')" role="radio" aria-checked="false">
+                <span class="hm-theme-swatches"><i></i><i></i><i></i></span><strong>포레스트</strong><small>차분한 숲의 색감</small>
+            </button>
+            <button type="button" class="hm-theme-option" data-theme="cream" onclick="previewPersonalTheme('cream')" role="radio" aria-checked="false">
+                <span class="hm-theme-swatches"><i></i><i></i><i></i></span><strong>크림</strong><small>따뜻한 아이보리</small>
+            </button>
+            <button type="button" class="hm-theme-option" data-theme="midnight" onclick="previewPersonalTheme('midnight')" role="radio" aria-checked="false">
+                <span class="hm-theme-swatches"><i></i><i></i><i></i></span><strong>미드나이트</strong><small>편안한 어두운 화면</small>
+            </button>
+        </div>
+        <p class="hm-theme-status" id="themeStatus" aria-live="polite"></p>
+        <button type="button" class="daily-modal-save" id="themeSaveBtn" onclick="savePersonalTheme()">이 테마 저장</button>
+    </div>
+</div>
+
 <div class="daily-modal-overlay data-management-overlay" id="dataManagementOverlay" onclick="if(event.target.id==='dataManagementOverlay') closeDataManagementModal()">
     <div class="daily-modal data-management-modal" role="dialog" aria-modal="true" aria-labelledby="dataManagementTitle">
         <div class="daily-modal-head">
@@ -1082,25 +1127,26 @@
 </div>
 
 <div class="toast" id="toast">기록이 복사되었습니다! 💕</div>
-    <script src="js/config.js?v=step5-7-2-section-order-fix-20260715"></script>
-    <script src="js/utils.js?v=step5-7-2-section-order-fix-20260715"></script>
-    <script src="js/popup.js?v=step5-7-2-section-order-fix-20260715"></script>
-    <script src="js/auth.js?v=step5-7-2-section-order-fix-20260715"></script>
-    <script src="js/room.js?v=step5-7-2-section-order-fix-20260715"></script>
-    <script src="js/presence.js?v=step5-7-2-section-order-fix-20260715"></script>
-    <script src="js/daily.js?v=step5-7-2-section-order-fix-20260715"></script>
-    <script src="js/mission.js?v=step5-7-2-section-order-fix-20260715"></script>
-    <script src="js/custom-routine.js?v=step5-7-2-section-order-fix-20260715"></script>
-    <script src="js/history.js?v=step5-7-2-section-order-fix-20260715"></script>
-    <script src="js/anniversary.js?v=step5-7-2-section-order-fix-20260715"></script>
-    <script src="js/profile.js?v=step5-7-2-section-order-fix-20260715"></script>
-    <script src="js/chat.js?v=step5-7-2-section-order-fix-20260715"></script>
-    <script src="js/autosave.js?v=step5-7-2-section-order-fix-20260715"></script>
-    <script src="js/qa.js?v=step5-7-2-section-order-fix-20260715"></script>
-    <script src="js/motion.js?v=step5-7-2-section-order-fix-20260715"></script>
-    <script src="js/product.js?v=step5-7-2-section-order-fix-20260715"></script>
-    <script src="js/help-center.js?v=step5-7-2-section-order-fix-20260715"></script>
-    <script src="js/data-management.js?v=step5-7-2-section-order-fix-20260715"></script>
-    <script src="js/app.js?v=step5-7-2-section-order-fix-20260715"></script>
+    <script src="js/config.js?v=step5-8-0-personal-theme-20260715"></script>
+    <script src="js/utils.js?v=step5-8-0-personal-theme-20260715"></script>
+    <script src="js/popup.js?v=step5-8-0-personal-theme-20260715"></script>
+    <script src="js/auth.js?v=step5-8-0-personal-theme-20260715"></script>
+    <script src="js/room.js?v=step5-8-0-personal-theme-20260715"></script>
+    <script src="js/presence.js?v=step5-8-0-personal-theme-20260715"></script>
+    <script src="js/daily.js?v=step5-8-0-personal-theme-20260715"></script>
+    <script src="js/mission.js?v=step5-8-0-personal-theme-20260715"></script>
+    <script src="js/custom-routine.js?v=step5-8-0-personal-theme-20260715"></script>
+    <script src="js/history.js?v=step5-8-0-personal-theme-20260715"></script>
+    <script src="js/anniversary.js?v=step5-8-0-personal-theme-20260715"></script>
+    <script src="js/theme.js?v=step5-8-0-personal-theme-20260715"></script>
+    <script src="js/profile.js?v=step5-8-0-personal-theme-20260715"></script>
+    <script src="js/chat.js?v=step5-8-0-personal-theme-20260715"></script>
+    <script src="js/autosave.js?v=step5-8-0-personal-theme-20260715"></script>
+    <script src="js/qa.js?v=step5-8-0-personal-theme-20260715"></script>
+    <script src="js/motion.js?v=step5-8-0-personal-theme-20260715"></script>
+    <script src="js/product.js?v=step5-8-0-personal-theme-20260715"></script>
+    <script src="js/help-center.js?v=step5-8-0-personal-theme-20260715"></script>
+    <script src="js/data-management.js?v=step5-8-0-personal-theme-20260715"></script>
+    <script src="js/app.js?v=step5-8-0-personal-theme-20260715"></script>
 </body>
 </html>

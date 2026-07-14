@@ -22,6 +22,17 @@
           "$other": {
             ".validate": false
           }
+        },
+        "preferences": {
+          "theme": {
+            ".validate": "!newData.exists() || (newData.isString() && (newData.val() === 'lavender' || newData.val() === 'blossom' || newData.val() === 'ocean' || newData.val() === 'forest' || newData.val() === 'cream' || newData.val() === 'midnight'))"
+          },
+          "updatedAt": {
+            ".validate": "!newData.exists() || newData.isNumber()"
+          },
+          "$other": {
+            ".validate": false
+          }
         }
       }
     },

@@ -141,6 +141,7 @@
                 document.getElementById('authBox').style.display = 'none';
                 document.getElementById('appContent').style.display = 'flex';
                 hmFinishBooting();
+                if (typeof loadUserTheme === 'function') await loadUserTheme();
                 if (typeof loadUserProfile === 'function') await loadUserProfile();
                 if (typeof hmRefreshDataAdminAccess === 'function') await hmRefreshDataAdminAccess();
                 await loadUserActiveRoom();

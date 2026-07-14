@@ -9694,3 +9694,144 @@ button:active {
         height: 32px;
     }
 }
+
+/* =========================================================
+   STEP5.8.0 개인 테마
+   기존 레이아웃과 기능은 유지하고 핵심 색상만 CSS 변수로 전환한다.
+   ========================================================= */
+:root,
+:root[data-hm-theme="lavender"] {
+    --hm-bg-1:#fff7fb; --hm-bg-2:#f4ecff; --hm-bg-3:#fffaf2;
+    --hm-primary:#ff7f96; --hm-primary-strong:#ef657f; --hm-accent:#8e5cf4;
+    --hm-soft:#f7f0ff; --hm-soft-2:#fff3f7; --hm-card:#ffffff;
+    --hm-text:#2d3436; --hm-muted:#7c6f78; --hm-border:#eadcff;
+    --hm-shadow:rgba(142,92,244,.11); --hm-input:#fffafd;
+}
+:root[data-hm-theme="blossom"] {
+    --hm-bg-1:#fff5f7; --hm-bg-2:#ffe8ef; --hm-bg-3:#fff9f2;
+    --hm-primary:#f06f98; --hm-primary-strong:#db557f; --hm-accent:#c65b91;
+    --hm-soft:#fff0f5; --hm-soft-2:#fff7fa; --hm-card:#fffefe;
+    --hm-text:#3b2931; --hm-muted:#846a74; --hm-border:#f2cad8;
+    --hm-shadow:rgba(198,91,145,.12); --hm-input:#fff9fb;
+}
+:root[data-hm-theme="ocean"] {
+    --hm-bg-1:#effaff; --hm-bg-2:#e5f4ff; --hm-bg-3:#f2fffc;
+    --hm-primary:#3d9ed8; --hm-primary-strong:#247fb7; --hm-accent:#287fbd;
+    --hm-soft:#edf8ff; --hm-soft-2:#effcfb; --hm-card:#ffffff;
+    --hm-text:#233642; --hm-muted:#637b89; --hm-border:#cde8f6;
+    --hm-shadow:rgba(40,127,189,.12); --hm-input:#f8fdff;
+}
+:root[data-hm-theme="forest"] {
+    --hm-bg-1:#f3fbf5; --hm-bg-2:#e8f5ea; --hm-bg-3:#fffaf0;
+    --hm-primary:#54a878; --hm-primary-strong:#39845d; --hm-accent:#477d63;
+    --hm-soft:#edf8f0; --hm-soft-2:#f8f4e9; --hm-card:#fffefb;
+    --hm-text:#28372e; --hm-muted:#6b7d71; --hm-border:#cfe5d5;
+    --hm-shadow:rgba(71,125,99,.13); --hm-input:#f9fcf9;
+}
+:root[data-hm-theme="cream"] {
+    --hm-bg-1:#fffaf0; --hm-bg-2:#f8eedb; --hm-bg-3:#fffdf8;
+    --hm-primary:#d89052; --hm-primary-strong:#bb7337; --hm-accent:#a8784d;
+    --hm-soft:#fff6e7; --hm-soft-2:#faf3e8; --hm-card:#fffdf8;
+    --hm-text:#40362d; --hm-muted:#837467; --hm-border:#ead9bd;
+    --hm-shadow:rgba(168,120,77,.13); --hm-input:#fffcf6;
+}
+:root[data-hm-theme="midnight"] {
+    color-scheme:dark;
+    --hm-bg-1:#171927; --hm-bg-2:#22243a; --hm-bg-3:#151c26;
+    --hm-primary:#ff8fa5; --hm-primary-strong:#ff7895; --hm-accent:#b89cff;
+    --hm-soft:#292b42; --hm-soft-2:#252838; --hm-card:#202231;
+    --hm-text:#f4f1f6; --hm-muted:#b8b1bf; --hm-border:#3d4058;
+    --hm-shadow:rgba(0,0,0,.28); --hm-input:#292b3b;
+}
+
+:root[data-hm-theme] {
+    --primary-color:var(--hm-primary);
+    --accent-purple:var(--hm-accent);
+    --soft-purple:var(--hm-soft);
+    --soft-pink:var(--hm-soft-2);
+    --bg-color:var(--hm-bg-2);
+    --card-color:var(--hm-card);
+    --text-color:var(--hm-text);
+    --border-color:var(--hm-border);
+}
+:root[data-hm-theme] body {
+    background:radial-gradient(circle at top left,var(--hm-bg-1) 0,transparent 32%),linear-gradient(135deg,var(--hm-bg-1) 0%,var(--hm-bg-2) 52%,var(--hm-bg-3) 100%);
+    color:var(--hm-text);
+}
+:root[data-hm-theme] .container,
+:root[data-hm-theme] .daily-modal,
+:root[data-hm-theme] .room-settings-modal,
+:root[data-hm-theme] .guide-modal,
+:root[data-hm-theme] .mission-modal {
+    background:var(--hm-card);
+    color:var(--hm-text);
+    border-color:var(--hm-border);
+    box-shadow:0 16px 40px var(--hm-shadow);
+}
+:root[data-hm-theme] .user-bar,
+:root[data-hm-theme] .room-settings-card,
+:root[data-hm-theme] .summary-card,
+:root[data-hm-theme] .dashboard-card,
+:root[data-hm-theme] .history-card,
+:root[data-hm-theme] .trust-card,
+:root[data-hm-theme] .hm-profile-summary,
+:root[data-hm-theme] .hm-profile-preview {
+    border-color:var(--hm-border);
+    background:linear-gradient(135deg,var(--hm-soft-2),var(--hm-soft));
+    color:var(--hm-text);
+}
+:root[data-hm-theme] h1,
+:root[data-hm-theme] .daily-modal-head h2,
+:root[data-hm-theme] .room-settings-title,
+:root[data-hm-theme] .hm-account-value,
+:root[data-hm-theme] .hm-profile-summary strong { color:var(--hm-text); }
+:root[data-hm-theme] .app-subtitle,
+:root[data-hm-theme] .hm-account-label,
+:root[data-hm-theme] .room-settings-sub,
+:root[data-hm-theme] .hm-profile-help,
+:root[data-hm-theme] .hm-profile-summary span { color:var(--hm-muted); }
+:root[data-hm-theme] input,
+:root[data-hm-theme] textarea,
+:root[data-hm-theme] select {
+    background:var(--hm-input);
+    color:var(--hm-text);
+    border-color:var(--hm-border);
+}
+:root[data-hm-theme] .btn-primary,
+:root[data-hm-theme] .daily-modal-save {
+    background:linear-gradient(135deg,var(--hm-primary),var(--hm-primary-strong));
+    color:#fff;
+}
+:root[data-hm-theme] .btn-secondary,
+:root[data-hm-theme] .modal-close-btn,
+:root[data-hm-theme] .app-version-badge {
+    background:var(--hm-soft-2);
+    color:var(--hm-primary-strong);
+    border-color:var(--hm-border);
+}
+
+.hm-theme-overlay { display:none; z-index:10060; }
+.hm-theme-modal { max-width:470px; }
+.hm-theme-intro { margin:-2px 2px 16px; font-size:.86rem; line-height:1.55; color:var(--hm-muted); }
+.hm-theme-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:11px; }
+.hm-theme-option { min-width:0; padding:14px 12px; border:1px solid var(--hm-border); border-radius:16px; background:var(--hm-card); color:var(--hm-text); text-align:left; cursor:pointer; transition:transform .16s ease,border-color .16s ease,box-shadow .16s ease; }
+.hm-theme-option:active { transform:scale(.98); }
+.hm-theme-option.is-selected { border:2px solid var(--hm-accent); padding:13px 11px; box-shadow:0 0 0 3px color-mix(in srgb,var(--hm-accent) 14%,transparent); }
+.hm-theme-option strong,.hm-theme-option small { display:block; }
+.hm-theme-option strong { margin-top:9px; font-size:.96rem; }
+.hm-theme-option small { margin-top:4px; color:var(--hm-muted); font-size:.75rem; line-height:1.3; }
+.hm-theme-swatches { display:flex; height:24px; overflow:hidden; border-radius:999px; border:1px solid rgba(0,0,0,.06); }
+.hm-theme-swatches i { flex:1; }
+.hm-theme-option[data-theme="lavender"] .hm-theme-swatches i:nth-child(1){background:#ff8da1}.hm-theme-option[data-theme="lavender"] .hm-theme-swatches i:nth-child(2){background:#8e5cf4}.hm-theme-option[data-theme="lavender"] .hm-theme-swatches i:nth-child(3){background:#f4ecff}
+.hm-theme-option[data-theme="blossom"] .hm-theme-swatches i:nth-child(1){background:#f06f98}.hm-theme-option[data-theme="blossom"] .hm-theme-swatches i:nth-child(2){background:#c65b91}.hm-theme-option[data-theme="blossom"] .hm-theme-swatches i:nth-child(3){background:#ffe8ef}
+.hm-theme-option[data-theme="ocean"] .hm-theme-swatches i:nth-child(1){background:#3d9ed8}.hm-theme-option[data-theme="ocean"] .hm-theme-swatches i:nth-child(2){background:#287fbd}.hm-theme-option[data-theme="ocean"] .hm-theme-swatches i:nth-child(3){background:#e5f4ff}
+.hm-theme-option[data-theme="forest"] .hm-theme-swatches i:nth-child(1){background:#54a878}.hm-theme-option[data-theme="forest"] .hm-theme-swatches i:nth-child(2){background:#477d63}.hm-theme-option[data-theme="forest"] .hm-theme-swatches i:nth-child(3){background:#e8f5ea}
+.hm-theme-option[data-theme="cream"] .hm-theme-swatches i:nth-child(1){background:#d89052}.hm-theme-option[data-theme="cream"] .hm-theme-swatches i:nth-child(2){background:#a8784d}.hm-theme-option[data-theme="cream"] .hm-theme-swatches i:nth-child(3){background:#f8eedb}
+.hm-theme-option[data-theme="midnight"] .hm-theme-swatches i:nth-child(1){background:#ff8fa5}.hm-theme-option[data-theme="midnight"] .hm-theme-swatches i:nth-child(2){background:#b89cff}.hm-theme-option[data-theme="midnight"] .hm-theme-swatches i:nth-child(3){background:#202231}
+.hm-theme-status { min-height:22px; margin:13px 2px 8px; color:var(--hm-muted); font-size:.82rem; line-height:1.45; }
+.hm-theme-status.success { color:#2e9a68; }
+.hm-theme-status.error { color:#d34f61; }
+@media (max-width:360px){.hm-theme-grid{grid-template-columns:1fr}.hm-theme-option{padding:12px}.hm-theme-option.is-selected{padding:11px}}
+/* STEP5.8.0: 일반 사용자는 프로필/테마/데이터/로그아웃을 2×2로 간결하게 표시 */
+.user-bar-actions.hm-account-actions { grid-template-columns:repeat(2,minmax(0,1fr)); }
+.user-bar-actions.hm-account-actions:has(#dataAdminButton:not([hidden])) { grid-template-columns:repeat(3,minmax(0,1fr)); }
