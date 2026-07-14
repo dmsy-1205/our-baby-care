@@ -190,6 +190,7 @@
         updateOwnerOnlySections();
         updateManagedFieldAccessControls();
         hmRefreshPresenceFromRoom();
+        if (typeof hmRefreshThemeForActiveRoom === 'function') hmRefreshThemeForActiveRoom();
     }
 
 

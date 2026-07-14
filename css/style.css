@@ -9696,7 +9696,7 @@ button:active {
 }
 
 /* =========================================================
-   STEP5.8.0 개인 테마
+   STEP5.8.1 개인 테마
    기존 레이아웃과 기능은 유지하고 핵심 색상만 CSS 변수로 전환한다.
    ========================================================= */
 :root,
@@ -9832,6 +9832,17 @@ button:active {
 .hm-theme-status.success { color:#2e9a68; }
 .hm-theme-status.error { color:#d34f61; }
 @media (max-width:360px){.hm-theme-grid{grid-template-columns:1fr}.hm-theme-option{padding:12px}.hm-theme-option.is-selected{padding:11px}}
-/* STEP5.8.0: 일반 사용자는 프로필/테마/데이터/로그아웃을 2×2로 간결하게 표시 */
+/* STEP5.8.1: 일반 사용자는 프로필/테마/데이터/로그아웃을 2×2로 간결하게 표시 */
 .user-bar-actions.hm-account-actions { grid-template-columns:repeat(2,minmax(0,1fr)); }
 .user-bar-actions.hm-account-actions:has(#dataAdminButton:not([hidden])) { grid-template-columns:repeat(3,minmax(0,1fr)); }
+
+
+/* STEP5.8.1 개인/공용 테마 적용 방식 */
+.hm-theme-mode-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:0 0 8px}
+.hm-theme-mode-option{padding:12px;border:1px solid var(--hm-border);border-radius:15px;background:var(--hm-card);color:var(--hm-text);text-align:left;cursor:pointer}
+.hm-theme-mode-option strong,.hm-theme-mode-option small{display:block}.hm-theme-mode-option small{margin-top:4px;color:var(--hm-muted);font-size:.75rem}
+.hm-theme-mode-option.is-selected{border:2px solid var(--hm-accent);padding:11px;background:var(--hm-soft);box-shadow:0 0 0 3px color-mix(in srgb,var(--hm-accent) 12%,transparent)}
+.hm-theme-mode-option:disabled{opacity:.48;cursor:not-allowed}
+.hm-theme-mode-notice{min-height:38px;margin:7px 2px 13px;padding:9px 11px;border-radius:12px;background:var(--hm-soft-2);color:var(--hm-muted);font-size:.76rem;line-height:1.4}
+.hm-theme-option:disabled{opacity:.55;cursor:not-allowed}
+@media(max-width:360px){.hm-theme-mode-grid{grid-template-columns:1fr}}

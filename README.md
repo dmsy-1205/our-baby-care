@@ -1,4 +1,4 @@
-# HearMe2nite v1.0 STEP5.8.0
+# HearMe2nite v1.0 STEP5.8.1
 
 초대코드와 Room 가입 보안을 강화한 Full Source입니다.
 

@@ -25,6 +25,7 @@
         if (currentDayAdminRef) currentDayAdminRef.off();
         if (entireDayAdminRef) entireDayAdminRef.off();
         if (typeof hmStopCustomRoutineCards === 'function') hmStopCustomRoutineCards();
+        if (typeof hmStopSharedThemeListener === 'function') hmStopSharedThemeListener();
         if (chatRef) chatRef.off();
         if (typeof hmChatReadRef !== 'undefined' && hmChatReadRef) hmChatReadRef.off();
         if (typeof hmChatPresenceRef !== 'undefined' && hmChatPresenceRef) hmChatPresenceRef.off();

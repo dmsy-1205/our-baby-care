@@ -47,7 +47,7 @@
             'openMissionModal', 'closeMissionModal', 'listenChat', 'sendChatMessage',
             'checkEmailVerificationStatus', 'resendEmailVerification', 'showEmailVerificationPanel',
             'loadUserProfile', 'openProfileModal', 'saveProfileNickname', 'hmGetChatDisplayName',
-            'loadUserTheme', 'openThemeModal', 'previewPersonalTheme', 'savePersonalTheme'
+            'loadUserTheme', 'openThemeModal', 'previewPersonalTheme', 'savePersonalTheme', 'selectThemeMode', 'hmRefreshThemeForActiveRoom'
         ];
         requiredFunctions.forEach((name) => {
             // eval 결과가 function인지 확인한다. 일부 함수는 전역 프로퍼티가 아닌 스크립트 스코프에 존재한다.
