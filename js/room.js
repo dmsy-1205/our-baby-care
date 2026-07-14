@@ -881,31 +881,32 @@
             const roomCode = initialInvite.roomCode;
             const myEmail = normalizeEmail(currentUser.email);
 
-            // STEP5.6.4.6: 초대 코드를 트랜잭션으로 먼저 현재 계정에 귀속한다.
-            // 동시에 여러 계정이 같은 코드를 사용해도 한 계정만 used=false → true 전환에 성공한다.
+            // STEP5.6.4.6.8: 초대 코드 귀속을 트랜잭션 콜백이 아닌 서버 검증 update로 처리한다.
+            // RTDB Rules가 used=false → true 전환을 단 한 번만 허용하므로 동시에 여러 계정이 시도해도 한 계정만 성공한다.
+            // 같은 계정이 앞선 시도에서 코드 귀속만 완료하고 멤버십 생성에 실패한 경우에는 재시도를 계속 허용한다.
             let claimedInvite = initialInvite;
             if (!initialInvite.used) {
-                const claimResult = await inviteRef.transaction((currentInvite) => {
-                    if (!currentInvite) return;
-                    if (currentInvite.roomCode !== roomCode || currentInvite.ownerUid !== initialInvite.ownerUid) return;
-                    if (currentInvite.used === true) return;
-                    if (currentInvite.expiresAt && serverNow > currentInvite.expiresAt) return;
-
-                    return Object.assign({}, currentInvite, {
+                try {
+                    await inviteRef.update({
                         used: true,
                         usedByUid: currentUser.uid,
                         usedByEmail: myEmail,
                         usedAt: serverNow
                     });
-                }, undefined, false);
-
-                claimedInvite = claimResult && claimResult.snapshot ? (claimResult.snapshot.val() || {}) : {};
-                if (!claimResult || !claimResult.committed) {
-                    if (fromPending) sessionStorage.removeItem('pendingInviteCode');
-                    alert('이 초대코드는 이미 사용되었거나 만료되었습니다. 방 주인에게 새 초대코드를 요청해 주세요.');
-                    showSaveStatus('🔒 초대코드 사용 불가');
-                    return;
+                } catch (claimError) {
+                    // 다른 요청이 먼저 처리되었을 수 있으므로 서버 상태를 다시 읽어 현재 계정의 귀속인지 확인한다.
+                    const latestClaimSnap = await inviteRef.once('value');
+                    const latestClaim = latestClaimSnap.val() || {};
+                    if (latestClaim.usedByUid !== currentUser.uid || normalizeEmail(latestClaim.usedByEmail) !== myEmail) {
+                        if (fromPending) sessionStorage.removeItem('pendingInviteCode');
+                        alert('이 초대코드는 이미 다른 사용자가 사용했거나 만료되었습니다. 방 주인에게 새 초대코드를 요청해 주세요.');
+                        showSaveStatus('🔒 초대코드 사용 불가');
+                        return;
+                    }
                 }
+
+                const claimedSnap = await inviteRef.once('value');
+                claimedInvite = claimedSnap.val() || {};
             }
 
             if (claimedInvite.usedByUid !== currentUser.uid || claimedInvite.usedByEmail !== myEmail || claimedInvite.roomCode !== roomCode || claimedInvite.ownerUid !== initialInvite.ownerUid) {
