@@ -35,7 +35,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-functions-compat.js"></script>
 
-    <link rel="stylesheet" href="css/style.css?v=step5-10-9-user-guide-release-sync-20260715">
+    <link rel="stylesheet" href="css/style.css?v=step5-10-10-record-deletion-safety-20260715">
 </head>
 <body class="hm-booting">
 
@@ -567,6 +567,7 @@
     <span class="history-launch-version">v1.0</span>
     <span class="history-launch-arrow">›</span>
 </button>
+<div id="recordDeletionNoticeHome" class="record-deletion-home" hidden></div>
 </div>
 
 
@@ -663,6 +664,7 @@
             <button type="button" class="modal-close-btn" onclick="closeHistoryPanelModal()">닫기</button>
         </div>
         <div class="history-intro-note">달을 넘기며 기록과 기념일을 확인하고, 날짜를 누르면 하루 기록이 열립니다.</div>
+        <div id="recordDeletionNoticeHistory" hidden></div>
         <div id="calendarBox"></div>
         <div id="anniversaryPanel" class="anniversary-panel"></div>
         <div class="history-v2-toolbar history-v2-toolbar-below" aria-label="History 2.0 controls">
@@ -801,6 +803,7 @@
 
             <section class="help-panel" data-help-panel="history">
                 <article class="help-mini-card" data-help-keywords="기록실 캘린더 날짜 하루 기록"><h3>📅 기록실</h3><p>달력을 이전·다음 달로 이동하고 날짜를 누르면 그날의 약속, 루틴, 컨디션, 기록, 피드백을 확인할 수 있습니다.</p></article>
+                <article class="help-mini-card" data-help-keywords="기록 삭제 알림 휴지통 복구 30일"><h3>🗑️ 기록 삭제와 복구</h3><p>Dom이 기록을 삭제하면 Sub에게 삭제 날짜와 시간이 표시됩니다. 삭제 원본은 30일 동안 보관되며 Dom이 기록실에서 복구할 수 있습니다.</p></article>
                 <article class="help-mini-card" data-help-keywords="사진 모아보기"><h3>📷 사진 모아보기</h3><p>저장된 사진을 한곳에서 확인하고 원하는 날짜의 기록으로 이동할 수 있습니다.</p></article>
                 <article class="help-mini-card" data-help-keywords="기념일 만난지 날짜"><h3>💕 우리의 기념일</h3><p>생일, 여행, 데이트 등 기념일을 등록할 수 있으며 대표 기념일은 ‘함께한 지 N일’ 요약에 반영됩니다.</p></article>
             </section>
@@ -1239,28 +1242,28 @@
 </div>
 
 <div class="toast" id="toast">기록이 복사되었습니다! 💕</div>
-    <script src="js/release-info.js?v=step5-10-9-user-guide-release-sync-20260715"></script>
-    <script src="js/config.js?v=step5-10-9-user-guide-release-sync-20260715"></script>
-    <script src="js/utils.js?v=step5-10-9-user-guide-release-sync-20260715"></script>
-    <script src="js/popup.js?v=step5-10-9-user-guide-release-sync-20260715"></script>
-    <script src="js/auth.js?v=step5-10-9-user-guide-release-sync-20260715"></script>
-    <script src="js/room.js?v=step5-10-9-user-guide-release-sync-20260715"></script>
-    <script src="js/presence.js?v=step5-10-9-user-guide-release-sync-20260715"></script>
-    <script src="js/daily.js?v=step5-10-9-user-guide-release-sync-20260715"></script>
-    <script src="js/mission.js?v=step5-10-9-user-guide-release-sync-20260715"></script>
-    <script src="js/custom-routine.js?v=step5-10-9-user-guide-release-sync-20260715"></script>
-    <script src="js/sub-routine.js?v=step5-10-9-user-guide-release-sync-20260715"></script>
-    <script src="js/history.js?v=step5-10-9-user-guide-release-sync-20260715"></script>
-    <script src="js/anniversary.js?v=step5-10-9-user-guide-release-sync-20260715"></script>
-    <script src="js/theme.js?v=step5-10-9-user-guide-release-sync-20260715"></script>
-    <script src="js/profile.js?v=step5-10-9-user-guide-release-sync-20260715"></script>
-    <script src="js/chat.js?v=step5-10-9-user-guide-release-sync-20260715"></script>
-    <script src="js/autosave.js?v=step5-10-9-user-guide-release-sync-20260715"></script>
-    <script src="js/qa.js?v=step5-10-9-user-guide-release-sync-20260715"></script>
-    <script src="js/motion.js?v=step5-10-9-user-guide-release-sync-20260715"></script>
-    <script src="js/product.js?v=step5-10-9-user-guide-release-sync-20260715"></script>
-    <script src="js/help-center.js?v=step5-10-9-user-guide-release-sync-20260715"></script>
-    <script src="js/data-management.js?v=step5-10-9-user-guide-release-sync-20260715"></script>
-    <script src="js/app.js?v=step5-10-9-user-guide-release-sync-20260715"></script>
+    <script src="js/release-info.js?v=step5-10-10-record-deletion-safety-20260715"></script>
+    <script src="js/config.js?v=step5-10-10-record-deletion-safety-20260715"></script>
+    <script src="js/utils.js?v=step5-10-10-record-deletion-safety-20260715"></script>
+    <script src="js/popup.js?v=step5-10-10-record-deletion-safety-20260715"></script>
+    <script src="js/auth.js?v=step5-10-10-record-deletion-safety-20260715"></script>
+    <script src="js/room.js?v=step5-10-10-record-deletion-safety-20260715"></script>
+    <script src="js/presence.js?v=step5-10-10-record-deletion-safety-20260715"></script>
+    <script src="js/daily.js?v=step5-10-10-record-deletion-safety-20260715"></script>
+    <script src="js/mission.js?v=step5-10-10-record-deletion-safety-20260715"></script>
+    <script src="js/custom-routine.js?v=step5-10-10-record-deletion-safety-20260715"></script>
+    <script src="js/sub-routine.js?v=step5-10-10-record-deletion-safety-20260715"></script>
+    <script src="js/history.js?v=step5-10-10-record-deletion-safety-20260715"></script>
+    <script src="js/anniversary.js?v=step5-10-10-record-deletion-safety-20260715"></script>
+    <script src="js/theme.js?v=step5-10-10-record-deletion-safety-20260715"></script>
+    <script src="js/profile.js?v=step5-10-10-record-deletion-safety-20260715"></script>
+    <script src="js/chat.js?v=step5-10-10-record-deletion-safety-20260715"></script>
+    <script src="js/autosave.js?v=step5-10-10-record-deletion-safety-20260715"></script>
+    <script src="js/qa.js?v=step5-10-10-record-deletion-safety-20260715"></script>
+    <script src="js/motion.js?v=step5-10-10-record-deletion-safety-20260715"></script>
+    <script src="js/product.js?v=step5-10-10-record-deletion-safety-20260715"></script>
+    <script src="js/help-center.js?v=step5-10-10-record-deletion-safety-20260715"></script>
+    <script src="js/data-management.js?v=step5-10-10-record-deletion-safety-20260715"></script>
+    <script src="js/app.js?v=step5-10-10-record-deletion-safety-20260715"></script>
 </body>
 </html>

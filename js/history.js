@@ -137,18 +137,47 @@
     async function deleteRecord(event, date) {
         event.stopPropagation();
         const roomCode = getRoomCodeForData();
-        if (!date) return;
+        const user = firebase.auth().currentUser;
+        if (!date || !roomCode || !user) return;
         if (!(await hmRequireRoomAccess('기록 삭제', roomCode)) || !canManageRelationshipCards()) { alert('기록 삭제는 관리(Dom) 또는 Room Owner만 가능합니다.'); return; }
-        if (confirm(`${date} 기록을 서버에서 완전히 삭제할까요?`)) {
-            try {
-                const updates = {};
-                updates['rooms/' + roomCode + '/days/' + date] = null;
-                updates['rooms/' + roomCode + '/dayAdmin/' + date] = null;
-                await db.ref().update(updates);
-                showSaveStatus('🗑️ 기록 삭제 완료');
-            } catch (err) {
-                hmReportError('deleteRecord', err, hmIsFirebasePermissionError(err) ? '❌ 삭제 권한 없음' : '❌ 기록 삭제 실패');
+        const confirmed = confirm(`${date} 기록을 삭제하시겠습니까?
+
+삭제 사실은 상대방에게 표시되며, 삭제된 원본은 30일 동안 복구할 수 있도록 보관됩니다.`);
+        if (!confirmed) return;
+        try {
+            const [daySnap, adminSnap] = await Promise.all([
+                db.ref(`rooms/${roomCode}/days/${date}`).once('value'),
+                db.ref(`rooms/${roomCode}/dayAdmin/${date}`).once('value')
+            ]);
+            if (!daySnap.exists() && !adminSnap.exists()) {
+                alert('삭제할 기록을 찾을 수 없습니다. 화면을 새로고침한 뒤 다시 확인해 주세요.');
+                return;
             }
+            const now = Date.now();
+            const archive = {
+                recordDate: date,
+                action: 'record_deleted',
+                reason: 'manual_delete',
+                deletedAt: firebase.database.ServerValue.TIMESTAMP,
+                deletedAtClient: now,
+                expiresAt: now + (30 * 24 * 60 * 60 * 1000),
+                deletedByUid: user.uid,
+                deletedByEmail: user.email || '',
+                deletedByRole: 'dom',
+                appVersion: (window.HM_RELEASE && window.HM_RELEASE.appVersion) || 'HearMe2nite',
+                originalDay: daySnap.val() || null,
+                originalDayAdmin: adminSnap.val() || null,
+                restored: false
+            };
+            const updates = {};
+            updates[`rooms/${roomCode}/deletedRecords/${date}`] = archive;
+            updates[`rooms/${roomCode}/days/${date}`] = null;
+            updates[`rooms/${roomCode}/dayAdmin/${date}`] = null;
+            await db.ref().update(updates);
+            showSaveStatus('🗑️ 기록 삭제 완료 · 30일 동안 복구 가능');
+            if (typeof closeHistoryDetailModal === 'function') closeHistoryDetailModal();
+        } catch (err) {
+            hmReportError('deleteRecord', err, hmIsFirebasePermissionError(err) ? '❌ 삭제 보관 권한 없음 · Firebase Rules 배포를 확인하세요.' : '❌ 기록 삭제 실패');
         }
     }
 
@@ -925,3 +954,106 @@ function displayHistory(daysData) {
             <button type="button" class="history-open-again" onclick="openHistoryDetailModal('${date}')">다시 열기</button>
         </div>`;
 }
+
+
+// =========================================================
+// STEP5.10.10 RECORD DELETION SAFETY
+// - Keeps a 30-day recoverable snapshot under deletedRecords.
+// - Shows deletion history to both Room members.
+// - Allows Dom/Owner to restore while preserving the audit entry.
+// =========================================================
+(function () {
+    let deletionRoomCode = '';
+    let deletionRef = null;
+    let deletionItems = {};
+
+    function esc(value) {
+        return String(value == null ? '' : value).replace(/[&<>"']/g, (ch) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[ch]));
+    }
+    function fmt(ts) {
+        const n = Number(ts || 0);
+        if (!n) return '시간 확인 중';
+        return new Date(n).toLocaleString('ko-KR', {year:'numeric',month:'long',day:'numeric',hour:'2-digit',minute:'2-digit'});
+    }
+    function currentUid() {
+        const u = firebase.auth().currentUser;
+        return u ? u.uid : '';
+    }
+    function canRestore() {
+        try { return typeof canManageRelationshipCards === 'function' && canManageRelationshipCards(); }
+        catch (_) { return false; }
+    }
+    function unseen(item) {
+        const uid = currentUid();
+        return uid && !(item.seenBy && item.seenBy[uid]);
+    }
+    function render() {
+        const items = Object.values(deletionItems || {}).filter(Boolean).sort((a,b) => Number(b.deletedAtClient || b.deletedAt || 0) - Number(a.deletedAtClient || a.deletedAt || 0));
+        const active = items.filter((item) => item.restored !== true);
+        const unseenCount = active.filter(unseen).length;
+        const home = document.getElementById('recordDeletionNoticeHome');
+        const panel = document.getElementById('recordDeletionNoticeHistory');
+        if (home) {
+            if (!active.length || !unseenCount) home.hidden = true;
+            else {
+                home.hidden = false;
+                home.innerHTML = `<button type="button" class="record-deletion-home-button" onclick="openHistoryPanelModal()"><span>🗑️</span><span><strong>삭제된 기록 ${unseenCount}건을 확인해 주세요</strong><small>관리자가 삭제한 날짜와 시간을 기록실에서 확인할 수 있습니다.</small></span><span>›</span></button>`;
+            }
+        }
+        if (!panel) return;
+        if (!items.length) { panel.hidden = true; panel.innerHTML = ''; return; }
+        panel.hidden = false;
+        panel.innerHTML = `<section class="record-deletion-panel"><div class="record-deletion-head"><div><strong>🗑️ 삭제된 기록</strong><small>삭제 이력은 남으며, 삭제 후 30일 동안 Dom이 복구할 수 있습니다.</small></div></div><div class="record-deletion-list">${items.map((item) => {
+            const isRestored = item.restored === true;
+            const showRestore = !isRestored && canRestore() && Number(item.expiresAt || 0) >= Date.now();
+            return `<article class="record-deletion-item ${unseen(item)?'is-unseen':''} ${isRestored?'is-restored':''}"><div><strong>${esc(item.recordDate || '날짜 미상')} 기록 ${isRestored?'복구됨':'삭제됨'}</strong><small>${fmt(item.deletedAtClient || item.deletedAt)} · ${esc(item.appVersion || '')}</small>${isRestored?`<small>복구: ${fmt(item.restoredAtClient || item.restoredAt)}</small>`:''}</div><div class="record-deletion-actions">${unseen(item)?`<button type="button" onclick="hmAcknowledgeDeletedRecord('${esc(item.recordDate)}')">확인</button>`:''}${showRestore?`<button type="button" class="restore" onclick="hmRestoreDeletedRecord('${esc(item.recordDate)}')">복구</button>`:''}</div></article>`;
+        }).join('')}</div></section>`;
+    }
+    function detach() {
+        if (deletionRef) deletionRef.off();
+        deletionRef = null; deletionRoomCode = ''; deletionItems = {};
+        render();
+    }
+    function attach() {
+        const user = firebase.auth().currentUser;
+        const room = (typeof getRoomCodeForData === 'function' && getRoomCodeForData()) || '';
+        if (!user || !room) { if (deletionRef) detach(); return; }
+        if (room === deletionRoomCode && deletionRef) return;
+        detach();
+        deletionRoomCode = room;
+        deletionRef = db.ref(`rooms/${room}/deletedRecords`);
+        deletionRef.on('value', (snap) => { deletionItems = snap.val() || {}; render(); }, (err) => {
+            if (!(typeof hmIsFirebasePermissionError === 'function' && hmIsFirebasePermissionError(err))) console.warn('[DeletedRecords]', err);
+        });
+    }
+    window.hmAcknowledgeDeletedRecord = async function (date) {
+        const uid = currentUid();
+        if (!uid || !deletionRoomCode || !date) return;
+        try {
+            await db.ref(`rooms/${deletionRoomCode}/deletedRecords/${date}/seenBy/${uid}`).set(firebase.database.ServerValue.TIMESTAMP);
+        } catch (err) { hmReportError('hmAcknowledgeDeletedRecord', err, '삭제 알림 확인 저장 실패'); }
+    };
+    window.hmRestoreDeletedRecord = async function (date) {
+        if (!canRestore() || !deletionRoomCode || !date) return;
+        if (!confirm(`${date} 삭제 기록을 원래 위치로 복구하시겠습니까?\n\n삭제 이력은 감사 기록으로 계속 보존됩니다.`)) return;
+        try {
+            const snap = await db.ref(`rooms/${deletionRoomCode}/deletedRecords/${date}`).once('value');
+            const item = snap.val();
+            if (!item || item.restored === true) return alert('복구할 기록이 없거나 이미 복구되었습니다.');
+            if (Number(item.expiresAt || 0) < Date.now()) return alert('30일 복구 기간이 지났습니다. 관리자 백업을 확인해 주세요.');
+            const user = firebase.auth().currentUser;
+            const updates = {};
+            if (item.originalDay) updates[`rooms/${deletionRoomCode}/days/${date}`] = item.originalDay;
+            if (item.originalDayAdmin) updates[`rooms/${deletionRoomCode}/dayAdmin/${date}`] = item.originalDayAdmin;
+            updates[`rooms/${deletionRoomCode}/deletedRecords/${date}/restored`] = true;
+            updates[`rooms/${deletionRoomCode}/deletedRecords/${date}/restoredAt`] = firebase.database.ServerValue.TIMESTAMP;
+            updates[`rooms/${deletionRoomCode}/deletedRecords/${date}/restoredAtClient`] = Date.now();
+            updates[`rooms/${deletionRoomCode}/deletedRecords/${date}/restoredByUid`] = user.uid;
+            await db.ref().update(updates);
+            showSaveStatus('♻️ 삭제 기록 복구 완료');
+        } catch (err) { hmReportError('hmRestoreDeletedRecord', err, hmIsFirebasePermissionError(err) ? '❌ 기록 복구 권한 없음' : '❌ 기록 복구 실패'); }
+    };
+    firebase.auth().onAuthStateChanged(() => setTimeout(attach, 300));
+    setInterval(attach, 2500);
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) attach(); });
+})();
