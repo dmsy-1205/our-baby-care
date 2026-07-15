@@ -139,7 +139,7 @@ async function saveProfileNickname() {
 }
 
 
-// STEP5.10.1 홈 상단 계정 메뉴를 중앙 팝업으로 정리한다.
+// STEP5.10.2 홈 상단 계정 메뉴를 중앙 팝업으로 정리한다.
 function openAccountMenuModal() {
     if (!currentUser) return;
     hmApplyNicknameToUI();

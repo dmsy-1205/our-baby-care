@@ -10454,7 +10454,7 @@ button:active {
 
 
 /* =========================================================
-   STEP5.10.1 Account Card Compact Fix
+   STEP5.10.2 Account Card Compact Fix
    - 아래 '우리의 공간' 카드와 같은 크기와 가로 정렬 유지
    - 과거 user-bar 규칙과의 충돌 방지
    ========================================================= */
@@ -10510,7 +10510,7 @@ button:active {
 
 
 /* =========================================================
-   STEP5.10.1 Dark Central Modal Header Fix
+   STEP5.10.2 Dark Central Modal Header Fix
    - 중앙 팝업 상단 제목 영역이 라이트 배경으로 남는 문제 수정
    - 채팅/오늘의 약속/일일 입력/관리 팝업 제목 가독성 통일
    ========================================================= */
@@ -10559,7 +10559,7 @@ button:active {
 
 
 /* =========================================================
-   STEP5.10.1 기록(Sub) 자기주도 나의 루틴 1단계
+   STEP5.10.2 기록(Sub) 자기주도 나의 루틴 1단계
    - 기존 테마/다크모드/중앙 모달 디자인 시스템을 그대로 사용
    ========================================================= */
 .sub-routine-section{margin:0 0 14px}
@@ -10582,3 +10582,18 @@ html[data-display-mode="dark"] .sub-routine-hub-card,html.hm-dark .sub-routine-h
 html[data-display-mode="dark"] .sub-routine-icon,html.hm-dark .sub-routine-icon{background:color-mix(in srgb,var(--theme-accent,#7c5cff) 18%,var(--theme-card,#25283c))!important}
 html[data-display-mode="dark"] .sub-routine-row,html.hm-dark .sub-routine-row,html[data-display-mode="dark"] .sub-routine-empty,html.hm-dark .sub-routine-empty{background:var(--theme-card,#25283c)!important;color:var(--theme-text,#f5f3ff)!important}
 @media(max-width:640px){.sub-routine-hub-card{min-height:74px!important;padding:14px 16px!important}.sub-routine-row{grid-template-columns:42px minmax(0,1fr);}.sub-routine-row-actions,.sub-routine-readonly{grid-column:2;justify-self:start}}
+
+/* STEP5.10.2: 나의 루틴 홈 카드 / 관리 화면 분리 */
+.sub-routine-home-list{display:grid;gap:10px;margin:10px 0 0}
+.sub-routine-home-card{width:100%;display:grid;grid-template-columns:48px minmax(0,1fr) 34px;gap:12px;align-items:center;text-align:left;padding:14px 16px;border:1px solid color-mix(in srgb,var(--theme-accent,#7c5cff) 28%,transparent);border-radius:20px;background:var(--theme-card,#fff);box-shadow:var(--theme-shadow,0 8px 22px rgba(80,55,120,.08));color:var(--theme-text,#2f2940);cursor:pointer}
+.sub-routine-home-card.is-done{background:color-mix(in srgb,var(--theme-card,#fff) 82%,#dff8ea 18%);opacity:.84}
+.sub-routine-home-icon{width:46px;height:46px;border-radius:16px;display:grid;place-items:center;background:color-mix(in srgb,var(--theme-accent,#7c5cff) 14%,var(--theme-card,#fff));font-size:1.25rem}
+.sub-routine-home-text{min-width:0;display:grid;gap:4px}.sub-routine-home-text strong{font-size:.98rem;color:var(--theme-text,#2f2940)}.sub-routine-home-text small{font-size:.78rem;color:var(--theme-text-muted,#837b99);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sub-routine-home-card.is-done .sub-routine-home-text strong{text-decoration:line-through}
+.sub-routine-home-check{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;border:1px solid color-mix(in srgb,var(--theme-accent,#7c5cff) 60%,transparent);color:var(--theme-accent,#7c5cff);font-weight:900}
+.sub-routine-toolbar{display:flex;align-items:center;gap:10px;margin:10px 0 0}.sub-routine-toolbar .custom-routine-help{flex:1}
+.sub-routine-check.is-status{display:grid;place-items:center;cursor:default}
+html[data-display-mode="dark"] .sub-routine-home-card,html.hm-dark .sub-routine-home-card{background:var(--theme-card,#25283c)!important;border-color:color-mix(in srgb,var(--theme-accent,#7c5cff) 38%,transparent)!important}
+html[data-display-mode="dark"] .sub-routine-home-card.is-done,html.hm-dark .sub-routine-home-card.is-done{background:color-mix(in srgb,var(--theme-card,#25283c) 78%,var(--theme-accent,#7c5cff) 22%)!important}
+html[data-display-mode="dark"] .sub-routine-home-icon,html.hm-dark .sub-routine-home-icon{background:color-mix(in srgb,var(--theme-accent,#7c5cff) 22%,var(--theme-card,#25283c))!important}
+@media(max-width:640px){.sub-routine-home-card{grid-template-columns:46px minmax(0,1fr) 30px;padding:13px 14px}.sub-routine-toolbar{display:grid}.sub-routine-toolbar .custom-routine-help{font-size:.72rem}}
