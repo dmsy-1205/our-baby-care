@@ -1,4 +1,13 @@
-# HearMe2nite v1.0 STEP5.10.0
+# HearMe2nite v1.0 STEP5.10.1 릴리스 노트
+
+## 나의 루틴 카드 열기 긴급 수정
+- Dom과 Sub 모두 홈의 `나의 루틴` 카드를 눌러 중앙 모달을 열 수 있도록 수정
+- 기존 공통 중앙 모달 시스템(`openModalOverlayById`)과 연결
+- 인라인 클릭 함수의 전역 연결을 명시하여 모바일 브라우저에서도 안정적으로 호출
+- Sub는 생성·수정·삭제·완료 체크 가능, Dom은 읽기 전용 구조 유지
+- Firebase 경로와 Rules는 STEP5.10.0 그대로 유지
+
+# HearMe2nite v1.0 STEP5.10.1
 
 ## 기록(Sub) 자기주도 「나의 루틴」 1단계
 - 오늘의 약속 바로 아래에 나의 루틴 홈 카드 추가
@@ -8,13 +17,13 @@
 - Room, 초대, 오늘의 약속, 기록 데이터 구조는 유지
 - 신규 RTDB 경로: rooms/{roomCode}/subRoutines, subRoutineDays
 
-# STEP5.10.0
+# STEP5.10.1
 
 - 다크모드 중앙 모달의 흰색 제목 영역을 다크 표면으로 통일했습니다.
 - 채팅, 오늘의 약속, 일일 입력 및 관리 팝업 제목과 상태 문구의 대비를 강화했습니다.
 - 기능, Firebase 경로와 Rules는 변경하지 않았습니다.
 
-# HearMe2nite v1.0 STEP5.10.0
+# HearMe2nite v1.0 STEP5.10.1
 
 ## 계정 카드 높이 및 정렬 보정
 

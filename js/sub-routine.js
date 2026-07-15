@@ -1,5 +1,5 @@
 // =========================================================
-// HearMe2nite v1.0 STEP5.10.0
+// HearMe2nite v1.0 STEP5.10.1
 // sub-routine.js - 기록(Sub) 자기주도 루틴 1단계
 // 정의: rooms/{roomCode}/subRoutines/{routineId}
 // 완료: rooms/{roomCode}/subRoutineDays/{date}/{routineId}
@@ -25,8 +25,28 @@ function hmSubRoutineRows() {
 }
 function hmSubRoutineEscape(v){ return typeof escapeHtml==='function'?escapeHtml(String(v||'')):String(v||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
 function hmSubRoutineId(){ return `sr_${Date.now().toString(36)}_${Math.random().toString(36).slice(2,7)}`; }
-function hmOpenOverlay(id){ const el=document.getElementById(id); if(!el)return; el.classList.add('active'); el.setAttribute('aria-hidden','false'); el.removeAttribute('inert'); document.body.classList.add('modal-open'); }
-function hmCloseOverlay(id){ const el=document.getElementById(id); if(!el)return; el.classList.remove('active'); el.setAttribute('aria-hidden','true'); el.setAttribute('inert',''); if(!document.querySelector('.daily-modal-overlay.active')) document.body.classList.remove('modal-open'); }
+function hmOpenSubRoutineOverlay(id) {
+    if (typeof openModalOverlayById === 'function') {
+        openModalOverlayById(id);
+        return;
+    }
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.removeAttribute('inert');
+    el.style.display = 'flex';
+    el.setAttribute('aria-hidden', 'false');
+}
+function hmCloseSubRoutineOverlay(id) {
+    if (typeof closeModalOverlayById === 'function') {
+        closeModalOverlayById(id);
+        return;
+    }
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.style.display = 'none';
+    el.setAttribute('aria-hidden', 'true');
+    el.setAttribute('inert', '');
+}
 
 function hmStartSubRoutines(roomCode){
     hmStopSubRoutines();
@@ -57,17 +77,17 @@ function renderSubRoutine(){
     if(!rows.length){list.innerHTML=`<div class="sub-routine-empty">${hmCanManageSubRoutine()?'아직 만든 루틴이 없습니다.<br>아래 버튼으로 첫 루틴을 만들어보세요.':'아직 등록된 나의 루틴이 없습니다.'}</div>`;return;}
     list.innerHTML=rows.map(r=>{const checked=hmSubRoutineChecks?.[r.id]?.done===true;return `<article class="sub-routine-row ${checked?'is-done':''}"><button type="button" class="sub-routine-check" ${hmCanManageSubRoutine()?'':'disabled'} onclick="toggleSubRoutine('${r.id}')" aria-label="${checked?'완료 취소':'완료'}">${checked?'✓':'○'}</button><div class="sub-routine-row-text"><strong>${hmSubRoutineEscape(r.title||'나의 루틴')}</strong><small>${hmSubRoutineEscape(r.description||'내가 정한 하루 루틴')}</small></div>${hmCanManageSubRoutine()?`<div class="sub-routine-row-actions"><button type="button" onclick="openSubRoutineEditor('${r.id}')">수정</button><button type="button" class="danger" onclick="deleteSubRoutine('${r.id}')">삭제</button></div>`:'<span class="sub-routine-readonly">확인</span>'}</article>`}).join('');
 }
-function openSubRoutineHub(){ if(!hmSubRoutineRoomCode)return alert('먼저 우리의 공간을 연결해 주세요.'); renderSubRoutine();hmOpenOverlay('subRoutineHubOverlay'); }
-function closeSubRoutineHub(){hmCloseOverlay('subRoutineHubOverlay');}
+function openSubRoutineHub(){ if(!hmSubRoutineRoomCode)return alert('먼저 우리의 공간을 연결해 주세요.'); renderSubRoutine();hmOpenSubRoutineOverlay('subRoutineHubOverlay'); }
+function closeSubRoutineHub(){hmCloseSubRoutineOverlay('subRoutineHubOverlay');}
 function openSubRoutineEditor(id=''){
     if(!hmCanManageSubRoutine())return alert('나의 루틴은 기록(Sub)만 만들고 관리할 수 있습니다.');
     const rows=hmSubRoutineRows(); if(!id&&rows.length>=HM_SUB_ROUTINE_MAX)return alert(`나의 루틴은 최대 ${HM_SUB_ROUTINE_MAX}개까지 만들 수 있습니다.`);
     hmSubRoutineEditingId=id; const row=id?hmSubRoutines[id]||{}:{};
     document.getElementById('subRoutineEditorTitle').textContent=id?'🌱 나의 루틴 수정':'🌱 나의 루틴 만들기';
     document.getElementById('subRoutineTitleInput').value=row.title||''; document.getElementById('subRoutineDescInput').value=row.description||'';
-    hmOpenOverlay('subRoutineEditorOverlay'); setTimeout(()=>document.getElementById('subRoutineTitleInput')?.focus(),50);
+    hmOpenSubRoutineOverlay('subRoutineEditorOverlay'); setTimeout(()=>document.getElementById('subRoutineTitleInput')?.focus(),50);
 }
-function closeSubRoutineEditor(){hmSubRoutineEditingId='';hmCloseOverlay('subRoutineEditorOverlay');}
+function closeSubRoutineEditor(){hmSubRoutineEditingId='';hmCloseSubRoutineOverlay('subRoutineEditorOverlay');}
 async function saveSubRoutine(){
     if(!hmCanManageSubRoutine()||!currentUser||!hmSubRoutineRoomCode)return alert('저장 권한이 없습니다.');
     const title=String(document.getElementById('subRoutineTitleInput')?.value||'').trim().slice(0,30); const description=String(document.getElementById('subRoutineDescInput')?.value||'').trim().slice(0,100);
@@ -88,3 +108,12 @@ async function deleteSubRoutine(id){
     catch(err){hmReportError('deleteSubRoutine',err,'❌ 나의 루틴 삭제 실패');}
 }
 window.addEventListener('DOMContentLoaded',()=>{document.getElementById('recordDate')?.addEventListener('change',()=>hmListenSubRoutineDay());renderSubRoutine();});
+
+// STEP5.10.1: inline 버튼 호출 안정화를 위한 명시적 전역 연결
+window.openSubRoutineHub = openSubRoutineHub;
+window.closeSubRoutineHub = closeSubRoutineHub;
+window.openSubRoutineEditor = openSubRoutineEditor;
+window.closeSubRoutineEditor = closeSubRoutineEditor;
+window.saveSubRoutine = saveSubRoutine;
+window.toggleSubRoutine = toggleSubRoutine;
+window.deleteSubRoutine = deleteSubRoutine;
