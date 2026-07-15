@@ -957,7 +957,7 @@ function displayHistory(daysData) {
 
 
 // =========================================================
-// STEP5.10.10 RECORD DELETION SAFETY
+// STEP5.10.11 RECORD DELETION AUDIT MANAGEMENT
 // - Keeps a 30-day recoverable snapshot under deletedRecords.
 // - Shows deletion history to both Room members.
 // - Allows Dom/Owner to restore while preserving the audit entry.
@@ -966,6 +966,7 @@ function displayHistory(daysData) {
     let deletionRoomCode = '';
     let deletionRef = null;
     let deletionItems = {};
+    let deletionFilter = 'all';
 
     function esc(value) {
         return String(value == null ? '' : value).replace(/[&<>"']/g, (ch) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[ch]));
@@ -987,9 +988,22 @@ function displayHistory(daysData) {
         const uid = currentUid();
         return uid && !(item.seenBy && item.seenBy[uid]);
     }
+    function daysRemaining(item) {
+        const ms = Number(item.expiresAt || 0) - Date.now();
+        return Math.max(0, Math.ceil(ms / 86400000));
+    }
+    function actorLabel(item) {
+        const email = String(item.deletedByEmail || '').trim();
+        return email ? `관리(Dom) · ${email}` : '관리(Dom)';
+    }
+    function itemStatus(item) {
+        if (item.restored === true) return 'restored';
+        if (Number(item.expiresAt || 0) < Date.now()) return 'expired';
+        return 'active';
+    }
     function render() {
-        const items = Object.values(deletionItems || {}).filter(Boolean).sort((a,b) => Number(b.deletedAtClient || b.deletedAt || 0) - Number(a.deletedAtClient || a.deletedAt || 0));
-        const active = items.filter((item) => item.restored !== true);
+        const allItems = Object.values(deletionItems || {}).filter(Boolean).sort((a,b) => Number(b.deletedAtClient || b.deletedAt || 0) - Number(a.deletedAtClient || a.deletedAt || 0));
+        const active = allItems.filter((item) => itemStatus(item) === 'active');
         const unseenCount = active.filter(unseen).length;
         const home = document.getElementById('recordDeletionNoticeHome');
         const panel = document.getElementById('recordDeletionNoticeHistory');
@@ -997,18 +1011,54 @@ function displayHistory(daysData) {
             if (!active.length || !unseenCount) home.hidden = true;
             else {
                 home.hidden = false;
-                home.innerHTML = `<button type="button" class="record-deletion-home-button" onclick="openHistoryPanelModal()"><span>🗑️</span><span><strong>삭제된 기록 ${unseenCount}건을 확인해 주세요</strong><small>관리자가 삭제한 날짜와 시간을 기록실에서 확인할 수 있습니다.</small></span><span>›</span></button>`;
+                home.innerHTML = `<button type="button" class="record-deletion-home-button" onclick="openHistoryPanelModal()"><span>🗑️</span><span><strong>삭제된 기록 ${unseenCount}건을 확인해 주세요</strong><small>삭제 날짜·삭제자·시간을 기록실에서 확인할 수 있습니다.</small></span><span>›</span></button>`;
             }
         }
         if (!panel) return;
-        if (!items.length) { panel.hidden = true; panel.innerHTML = ''; return; }
+        if (!allItems.length) { panel.hidden = true; panel.innerHTML = ''; return; }
+        const counts = {
+            all: allItems.length,
+            active: allItems.filter((item) => itemStatus(item) === 'active').length,
+            restored: allItems.filter((item) => itemStatus(item) === 'restored').length,
+            expired: allItems.filter((item) => itemStatus(item) === 'expired').length
+        };
+        const items = deletionFilter === 'all' ? allItems : allItems.filter((item) => itemStatus(item) === deletionFilter);
         panel.hidden = false;
-        panel.innerHTML = `<section class="record-deletion-panel"><div class="record-deletion-head"><div><strong>🗑️ 삭제된 기록</strong><small>삭제 이력은 남으며, 삭제 후 30일 동안 Dom이 복구할 수 있습니다.</small></div></div><div class="record-deletion-list">${items.map((item) => {
-            const isRestored = item.restored === true;
-            const showRestore = !isRestored && canRestore() && Number(item.expiresAt || 0) >= Date.now();
-            return `<article class="record-deletion-item ${unseen(item)?'is-unseen':''} ${isRestored?'is-restored':''}"><div><strong>${esc(item.recordDate || '날짜 미상')} 기록 ${isRestored?'복구됨':'삭제됨'}</strong><small>${fmt(item.deletedAtClient || item.deletedAt)} · ${esc(item.appVersion || '')}</small>${isRestored?`<small>복구: ${fmt(item.restoredAtClient || item.restoredAt)}</small>`:''}</div><div class="record-deletion-actions">${unseen(item)?`<button type="button" onclick="hmAcknowledgeDeletedRecord('${esc(item.recordDate)}')">확인</button>`:''}${showRestore?`<button type="button" class="restore" onclick="hmRestoreDeletedRecord('${esc(item.recordDate)}')">복구</button>`:''}</div></article>`;
-        }).join('')}</div></section>`;
+        panel.innerHTML = `<section class="record-deletion-panel">
+            <div class="record-deletion-head"><div><strong>🗑️ 삭제 기록 관리</strong><small>삭제·확인·복구 이력을 보존하여 업데이트 오류와 수동 삭제를 구분합니다.</small></div></div>
+            <div class="record-deletion-summary">
+                <span><strong>${counts.active}</strong><small>복구 가능</small></span>
+                <span><strong>${counts.restored}</strong><small>복구 완료</small></span>
+                <span><strong>${counts.expired}</strong><small>기간 만료</small></span>
+                <span><strong>${unseenCount}</strong><small>미확인</small></span>
+            </div>
+            <div class="record-deletion-filters" role="tablist" aria-label="삭제 기록 상태 필터">
+                ${[['all','전체',counts.all],['active','복구 가능',counts.active],['restored','복구 완료',counts.restored],['expired','기간 만료',counts.expired]].map(([key,label,count]) => `<button type="button" class="${deletionFilter===key?'active':''}" onclick="hmSetDeletedRecordFilter('${key}')">${label} ${count}</button>`).join('')}
+            </div>
+            <div class="record-deletion-list">${items.length ? items.map((item) => {
+                const status = itemStatus(item);
+                const isRestored = status === 'restored';
+                const isExpired = status === 'expired';
+                const showRestore = status === 'active' && canRestore();
+                const remaining = daysRemaining(item);
+                const seenCount = item.seenBy ? Object.keys(item.seenBy).length : 0;
+                const statusText = isRestored ? '복구 완료' : (isExpired ? '복구 기간 만료' : `복구 가능 · ${remaining}일 남음`);
+                return `<article class="record-deletion-item ${unseen(item)?'is-unseen':''} ${isRestored?'is-restored':''} ${isExpired?'is-expired':''}">
+                    <div class="record-deletion-main"><div class="record-deletion-title"><strong>${esc(item.recordDate || '날짜 미상')} 기록</strong><span class="record-deletion-status ${status}">${statusText}</span></div>
+                    <small>삭제: ${fmt(item.deletedAtClient || item.deletedAt)}</small>
+                    <small>삭제자: ${esc(actorLabel(item))}</small>
+                    <small>사유: 수동 삭제 · 버전 ${esc(item.appVersion || '확인 불가')}</small>
+                    ${isRestored?`<small>복구: ${fmt(item.restoredAtClient || item.restoredAt)} · ${esc(item.restoredByEmail || item.restoredByUid || 'Dom')}</small>`:''}
+                    <small>Room 확인 기록: ${seenCount}명</small></div>
+                    <div class="record-deletion-actions">${unseen(item)?`<button type="button" onclick="hmAcknowledgeDeletedRecord('${esc(item.recordDate)}')">확인</button>`:''}${showRestore?`<button type="button" class="restore" onclick="hmRestoreDeletedRecord('${esc(item.recordDate)}')">복구</button>`:''}</div>
+                </article>`;
+            }).join('') : '<div class="record-deletion-empty">선택한 상태의 삭제 기록이 없습니다.</div>'}</div>
+        </section>`;
     }
+    window.hmSetDeletedRecordFilter = function (filter) {
+        deletionFilter = ['all','active','restored','expired'].includes(filter) ? filter : 'all';
+        render();
+    };
     function detach() {
         if (deletionRef) deletionRef.off();
         deletionRef = null; deletionRoomCode = ''; deletionItems = {};
@@ -1049,6 +1099,7 @@ function displayHistory(daysData) {
             updates[`rooms/${deletionRoomCode}/deletedRecords/${date}/restoredAt`] = firebase.database.ServerValue.TIMESTAMP;
             updates[`rooms/${deletionRoomCode}/deletedRecords/${date}/restoredAtClient`] = Date.now();
             updates[`rooms/${deletionRoomCode}/deletedRecords/${date}/restoredByUid`] = user.uid;
+            updates[`rooms/${deletionRoomCode}/deletedRecords/${date}/restoredByEmail`] = user.email || '';
             await db.ref().update(updates);
             showSaveStatus('♻️ 삭제 기록 복구 완료');
         } catch (err) { hmReportError('hmRestoreDeletedRecord', err, hmIsFirebasePermissionError(err) ? '❌ 기록 복구 권한 없음' : '❌ 기록 복구 실패'); }
