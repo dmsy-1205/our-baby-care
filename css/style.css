@@ -10454,7 +10454,7 @@ button:active {
 
 
 /* =========================================================
-   STEP5.10.6 Account Card Compact Fix
+   STEP5.10.7 Account Card Compact Fix
    - 아래 '우리의 공간' 카드와 같은 크기와 가로 정렬 유지
    - 과거 user-bar 규칙과의 충돌 방지
    ========================================================= */
@@ -10510,7 +10510,7 @@ button:active {
 
 
 /* =========================================================
-   STEP5.10.6 Dark Central Modal Header Fix
+   STEP5.10.7 Dark Central Modal Header Fix
    - 중앙 팝업 상단 제목 영역이 라이트 배경으로 남는 문제 수정
    - 채팅/오늘의 약속/일일 입력/관리 팝업 제목 가독성 통일
    ========================================================= */
@@ -10559,7 +10559,7 @@ button:active {
 
 
 /* =========================================================
-   STEP5.10.6 기록(Sub) 자기주도 나의 루틴 1단계
+   STEP5.10.7 기록(Sub) 자기주도 나의 루틴 1단계
    - 기존 테마/다크모드/중앙 모달 디자인 시스템을 그대로 사용
    ========================================================= */
 .sub-routine-section{margin:0 0 14px}
@@ -10583,7 +10583,7 @@ html[data-display-mode="dark"] .sub-routine-icon,html.hm-dark .sub-routine-icon{
 html[data-display-mode="dark"] .sub-routine-row,html.hm-dark .sub-routine-row,html[data-display-mode="dark"] .sub-routine-empty,html.hm-dark .sub-routine-empty{background:var(--theme-card,#25283c)!important;color:var(--theme-text,#f5f3ff)!important}
 @media(max-width:640px){.sub-routine-hub-card{min-height:74px!important;padding:14px 16px!important}.sub-routine-row{grid-template-columns:42px minmax(0,1fr);}.sub-routine-row-actions,.sub-routine-readonly{grid-column:2;justify-self:start}}
 
-/* STEP5.10.6: 나의 루틴 홈 카드 / 관리 화면 분리 */
+/* STEP5.10.7: 나의 루틴 홈 카드 / 관리 화면 분리 */
 .sub-routine-home-list{display:grid;gap:10px;margin:10px 0 0}
 .sub-routine-home-card{width:100%;display:grid;grid-template-columns:48px minmax(0,1fr) 34px;gap:12px;align-items:center;text-align:left;padding:14px 16px;border:1px solid color-mix(in srgb,var(--theme-accent,#7c5cff) 28%,transparent);border-radius:20px;background:var(--theme-card,#fff);box-shadow:var(--theme-shadow,0 8px 22px rgba(80,55,120,.08));color:var(--theme-text,#2f2940);cursor:pointer}
 .sub-routine-home-card.is-done{background:color-mix(in srgb,var(--theme-card,#fff) 82%,#dff8ea 18%);opacity:.84}
@@ -10600,7 +10600,7 @@ html[data-display-mode="dark"] .sub-routine-home-icon,html.hm-dark .sub-routine-
 
 
 /* =========================================================
-   STEP5.10.6 나의 루틴 2단계: 반복 요일 / 오늘만 / 일시 중지
+   STEP5.10.7 나의 루틴 2단계: 반복 요일 / 오늘만 / 일시 중지
    ========================================================= */
 .sub-routine-schedule-fieldset{margin:4px 0 0;padding:12px;border:1px solid var(--theme-border,rgba(124,92,255,.24));border-radius:16px;background:var(--theme-card-soft,rgba(255,255,255,.55));display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
 .sub-routine-schedule-fieldset legend{padding:0 6px;font-weight:900;color:var(--theme-text,#2f2940);font-size:.82rem}
@@ -10614,3 +10614,127 @@ html[data-display-mode="dark"] .sub-routine-home-icon,html.hm-dark .sub-routine-
 html[data-display-mode="dark"] .sub-routine-schedule-fieldset,html.hm-dark .sub-routine-schedule-fieldset,html[data-display-mode="dark"] .sub-routine-pause-option,html.hm-dark .sub-routine-pause-option{background:var(--theme-card-soft,#202438)!important}
 html[data-display-mode="dark"] .sub-routine-schedule-option,html.hm-dark .sub-routine-schedule-option,html[data-display-mode="dark"] .sub-routine-weekday-grid label,html.hm-dark .sub-routine-weekday-grid label{background:var(--theme-card,#25283c)!important;color:var(--theme-text,#f5f3ff)!important}
 @media(max-width:480px){.sub-routine-schedule-fieldset{grid-template-columns:1fr}.sub-routine-weekday-grid{gap:4px}.sub-routine-weekday-grid label{min-height:34px;font-size:.7rem}}
+
+/* =========================================================
+   STEP5.10.7 다크모드 미적용 영역 통합 보정
+   - 기록실/캘린더/기념일
+   - 일일 입력 팝업(기분/외출 등)
+   - 나의 루틴 홈·관리 카드
+   - 우리의 공간 내부 패널
+   ========================================================= */
+:root[data-hm-theme][data-hm-display="dark"] :is(
+  .history-panel-head,
+  .history-intro-note,
+  .history-calendar-title-row,
+  .history-calendar-nav-row,
+  .history-selected-record-section,
+  .history-story-section,
+  .anniversary-card,
+  .anniversary-empty-panel,
+  .anniversary-panel-item,
+  .history-selected-hint,
+  .history-day-card,
+  .history-story-row,
+  .history-detail-summary-card,
+  .history-detail-block,
+  .history-gallery-card
+){
+  background:linear-gradient(145deg,var(--hm-dark-card),var(--hm-dark-card-soft)) !important;
+  color:var(--hm-color-body) !important;
+  border-color:var(--hm-dark-line) !important;
+  box-shadow:0 10px 24px rgba(0,0,0,.22) !important;
+}
+:root[data-hm-theme][data-hm-display="dark"] .history-panel-head{
+  background:linear-gradient(180deg,var(--hm-dark-shell),color-mix(in srgb,var(--hm-dark-shell) 88%,var(--hm-primary) 12%)) !important;
+}
+:root[data-hm-theme][data-hm-display="dark"] :is(
+  .history-panel-head h2,.history-calendar-title-row strong,.history-calendar-current-month strong,
+  .anniversary-title,.anniversary-panel-title,.history-section-headline strong,
+  .history-day-title,.history-story-body strong,.history-detail-block-title
+){color:#fff !important;-webkit-text-fill-color:#fff !important;}
+:root[data-hm-theme][data-hm-display="dark"] :is(
+  .history-intro-note,.history-calendar-title-row span,.history-calendar-current-month small,
+  .anniversary-sub,.anniversary-panel-date,.history-day-sub,.history-story-body small,
+  .history-detail-block-body,.history-month-count
+){color:var(--hm-color-muted) !important;-webkit-text-fill-color:var(--hm-color-muted) !important;}
+:root[data-hm-theme][data-hm-display="dark"] :is(.history-month-nav-btn,.history-today-btn,.history-open-again,.anniversary-toggle-btn){
+  background:var(--hm-dark-input) !important;color:#f7f4fb !important;border-color:var(--hm-dark-line) !important;
+}
+:root[data-hm-theme][data-hm-display="dark"] :is(.calendar-grid .calendar-day,.history-calendar-grid .calendar-day,.history-calendar-grid button,.calendar-grid button){
+  background:var(--hm-dark-card) !important;color:var(--hm-color-body) !important;border-color:var(--hm-line-soft) !important;
+}
+:root[data-hm-theme][data-hm-display="dark"] :is(.calendar-grid .calendar-day.today,.history-calendar-grid .calendar-day.today,.history-calendar-grid button.today){
+  background:color-mix(in srgb,var(--hm-primary) 28%,var(--hm-dark-card)) !important;
+  color:#fff !important;border-color:color-mix(in srgb,var(--hm-primary) 62%,#fff 10%) !important;
+}
+:root[data-hm-theme][data-hm-display="dark"] :is(.calendar-grid .calendar-day.has-record,.history-calendar-grid .calendar-day.has-record,.history-calendar-grid button.has-record){
+  background:color-mix(in srgb,var(--hm-accent) 18%,var(--hm-dark-card)) !important;
+}
+
+/* 일일 입력 팝업 내부 표면 */
+:root[data-hm-theme][data-hm-display="dark"] :is(
+  .mood-box,.mission-box,.water-counter-box,.meal-container,.feedback-hint,.mood-helper,
+  .preview-box,.file-label
+){
+  background:var(--hm-dark-card-soft) !important;
+  color:var(--hm-color-body) !important;
+  border-color:var(--hm-dark-line) !important;
+}
+:root[data-hm-theme][data-hm-display="dark"] .file-label{
+  background:var(--hm-dark-input) !important;color:#f2eef8 !important;border-color:var(--hm-dark-line) !important;
+}
+:root[data-hm-theme][data-hm-display="dark"] :is(.mood-btn,.choice-btn,.feedback-type-btn,.gift-choice-btn){
+  background:var(--hm-dark-input) !important;color:#f7f4fb !important;border-color:var(--hm-dark-line) !important;
+}
+:root[data-hm-theme][data-hm-display="dark"] :is(.mood-btn.selected,.mood-btn.active,.choice-btn.selected,.choice-btn.active){
+  background:color-mix(in srgb,var(--hm-primary) 34%,var(--hm-dark-card-soft)) !important;
+  border-color:var(--hm-primary) !important;color:#fff !important;
+}
+
+/* 나의 루틴: 기존 잘못된 data-display-mode 선택자를 실제 속성으로 보정 */
+:root[data-hm-theme][data-hm-display="dark"] :is(
+  .sub-routine-hub-card,.sub-routine-home-card,.sub-routine-row,.sub-routine-empty,
+  .sub-routine-home-empty,.sub-routine-schedule-fieldset,.sub-routine-pause-option
+){
+  background:linear-gradient(145deg,var(--hm-dark-card),var(--hm-dark-card-soft)) !important;
+  color:var(--hm-color-body) !important;
+  border-color:var(--hm-dark-line) !important;
+}
+:root[data-hm-theme][data-hm-display="dark"] .sub-routine-home-card.is-done,
+:root[data-hm-theme][data-hm-display="dark"] .sub-routine-row.is-done{
+  background:linear-gradient(145deg,color-mix(in srgb,var(--hm-dark-card) 76%,#2f9b70 24%),var(--hm-dark-card-soft)) !important;
+}
+:root[data-hm-theme][data-hm-display="dark"] :is(.sub-routine-icon,.sub-routine-home-icon,.sub-routine-row-check){
+  background:color-mix(in srgb,var(--hm-primary) 22%,var(--hm-dark-card-soft)) !important;
+  border-color:color-mix(in srgb,var(--hm-primary) 52%,var(--hm-dark-line)) !important;
+}
+:root[data-hm-theme][data-hm-display="dark"] :is(.sub-routine-home-text strong,.sub-routine-row-text strong){color:#fff !important;}
+:root[data-hm-theme][data-hm-display="dark"] :is(.sub-routine-home-text small,.sub-routine-row-text small,.sub-routine-note){color:var(--hm-color-muted) !important;}
+:root[data-hm-theme][data-hm-display="dark"] :is(.sub-routine-row-actions button,.sub-routine-readonly,.sub-routine-schedule-option,.sub-routine-weekday-grid label){
+  background:var(--hm-dark-input) !important;color:var(--hm-color-body) !important;border-color:var(--hm-dark-line) !important;
+}
+
+/* 우리의 공간 팝업 내부의 흰 패널 제거 */
+:root[data-hm-theme][data-hm-display="dark"] :is(
+  .room-settings-modal .sync-box,.relationship-role-box,.relationship-role-note,
+  .room-list-box,.room-empty-state,#inviteResult
+){
+  background:linear-gradient(145deg,var(--hm-dark-card),var(--hm-dark-card-soft)) !important;
+  color:var(--hm-color-body) !important;
+  border-color:var(--hm-dark-line) !important;
+}
+:root[data-hm-theme][data-hm-display="dark"] #currentRoomInfo,
+:root[data-hm-theme][data-hm-display="dark"] .room-settings-modal details,
+:root[data-hm-theme][data-hm-display="dark"] .room-settings-modal details > div,
+:root[data-hm-theme][data-hm-display="dark"] .relationship-role-note,
+:root[data-hm-theme][data-hm-display="dark"] .relationship-role-help{
+  color:var(--hm-color-muted) !important;
+}
+:root[data-hm-theme][data-hm-display="dark"] .relationship-role-btn{
+  background:var(--hm-dark-input) !important;color:var(--hm-color-body) !important;border-color:var(--hm-dark-line) !important;
+}
+:root[data-hm-theme][data-hm-display="dark"] .relationship-role-btn.active{
+  background:color-mix(in srgb,var(--hm-primary) 34%,var(--hm-dark-card-soft)) !important;
+  color:#fff !important;border-color:var(--hm-primary) !important;
+}
+:root[data-hm-theme][data-hm-display="dark"] .room-settings-modal summary{color:color-mix(in srgb,var(--hm-primary) 62%,#fff 38%) !important;}
