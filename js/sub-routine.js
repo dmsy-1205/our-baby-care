@@ -1,325 +1,72 @@
 // =========================================================
-// HearMe2nite v1.0 STEP5.10.7
-// sub-routine.js - 기록(Sub) 자기주도 루틴 2단계
+// HearMe2nite v1.0 STEP5.10.8
+// sub-routine.js - 기록(Sub) 자기주도 루틴 입력 카드
 // 정의: rooms/{roomCode}/subRoutines/{routineId}
-// 완료: rooms/{roomCode}/subRoutineDays/{date}/{routineId}
-// 기능: 매일 / 요일 선택 / 오늘만 / 일시 중지 / 기록실·최종 복사 연동
+// 날짜 입력: rooms/{roomCode}/subRoutineDays/{date}/{routineId}
 // =========================================================
 const HM_SUB_ROUTINE_MAX = 7;
+const HM_SUB_ROUTINE_ITEM_MAX = 7;
+const HM_SUB_ROUTINE_TYPES = ['text','checkbox','number','time'];
 let hmSubRoutineRoomCode = '';
 let hmSubRoutinesRef = null;
 let hmSubRoutineDayRef = null;
 let hmSubRoutines = {};
 let hmSubRoutineChecks = {};
 let hmSubRoutineEditingId = '';
+let hmSubRoutineInputId = '';
+let hmSubRoutineDraftItems = [];
 let hmSubRoutineDefsLoaded = false;
 let hmSubRoutineDayLoaded = false;
 let hmSubRoutineSnapshotSyncing = false;
 
-function hmCanManageSubRoutine() {
-    return !!currentUser && activeRelationshipRole === 'sub';
+function hmCanManageSubRoutine(){ return !!currentUser && activeRelationshipRole === 'sub'; }
+function hmSubRoutineDate(){ const v=document.getElementById('recordDate')?.value||''; return /^\d{4}-\d{2}-\d{2}$/.test(v)?v:new Date().toISOString().slice(0,10); }
+function hmSubRoutineDateObject(d=hmSubRoutineDate()){ const [y,m,day]=String(d).split('-').map(Number); return new Date(y,(m||1)-1,day||1,12); }
+function hmSubRoutineEscape(v){ return typeof escapeHtml==='function'?escapeHtml(String(v??'')):String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+function hmSubRoutineId(prefix='sr'){ return `${prefix}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2,7)}`; }
+function hmOpenSubRoutineOverlay(id){ if(typeof openModalOverlayById==='function'){openModalOverlayById(id);return;} const e=document.getElementById(id);if(e){e.removeAttribute('inert');e.style.display='flex';e.setAttribute('aria-hidden','false');} }
+function hmCloseSubRoutineOverlay(id){ if(typeof closeModalOverlayById==='function'){closeModalOverlayById(id);return;} const e=document.getElementById(id);if(e){e.style.display='none';e.setAttribute('aria-hidden','true');e.setAttribute('inert','');} }
+function hmSubRoutineRows(){ return Object.entries(hmSubRoutines||{}).map(([id,v])=>({id,...(v||{})})).filter(v=>v.deleted!==true).sort((a,b)=>Number(a.order||0)-Number(b.order||0)||Number(a.createdAt||0)-Number(b.createdAt||0)); }
+function hmSubRoutineScheduleType(r){ return ['daily','weekdays','once'].includes(r?.scheduleType)?r.scheduleType:'daily'; }
+function hmSubRoutineWeekdays(r){ if(Array.isArray(r?.weekdays))return r.weekdays.map(Number).filter(v=>v>=0&&v<=6); if(r?.weekdays&&typeof r.weekdays==='object')return Object.values(r.weekdays).map(Number).filter(v=>v>=0&&v<=6); return []; }
+function hmSubRoutineAppliesOnDate(r,d=hmSubRoutineDate()){ if(r?.paused===true)return false; const t=hmSubRoutineScheduleType(r); if(t==='once')return String(r?.activeDate||'')===String(d); if(t==='weekdays')return hmSubRoutineWeekdays(r).includes(hmSubRoutineDateObject(d).getDay()); return true; }
+function hmSubRoutineActiveRows(d=hmSubRoutineDate()){ return hmSubRoutineRows().filter(r=>hmSubRoutineAppliesOnDate(r,d)); }
+function hmSubRoutineScheduleLabel(r){ if(r?.paused===true)return '일시 중지';const t=hmSubRoutineScheduleType(r);if(t==='once')return `${r.activeDate||hmSubRoutineDate()} 하루만`;if(t==='weekdays'){const n=['일','월','화','수','목','금','토'],d=hmSubRoutineWeekdays(r);return d.length?d.map(x=>n[x]).join('·')+' 반복':'요일 미선택';}return '매일'; }
+function hmSubRoutineItemRows(r){ const raw=r?.items||{}; return Object.entries(raw).map(([id,v])=>({id,...(v||{})})).filter(x=>x.active!==false).sort((a,b)=>Number(a.order||0)-Number(b.order||0)); }
+function hmSubRoutineLegacyItems(r){ const rows=hmSubRoutineItemRows(r); return rows.length?rows:[{id:'complete',label:'루틴 완료',type:'checkbox',placeholder:'',required:true,order:1,active:true}]; }
+function hmSubRoutineValueFilled(item,value){ if(item.type==='checkbox')return value===true; return String(value??'').trim()!==''; }
+function hmSubRoutineCompletion(r, saved={}){ const items=hmSubRoutineLegacyItems(r), values=saved?.values||{}; const required=items.filter(i=>i.required===true); const target=required.length?required:items; return target.length>0 && target.every(i=>hmSubRoutineValueFilled(i,values[i.id])); }
+function hmBuildSubRoutineSnapshot(definitions={},checks={},dateText=hmSubRoutineDate()){
+ const defs=Object.entries(definitions||{}).map(([id,v])=>({id,...(v||{})})); const byId=new Set(defs.map(x=>x.id)); const out=[];
+ defs.filter(r=>r.deleted!==true&&hmSubRoutineAppliesOnDate(r,dateText)).sort((a,b)=>Number(a.order||0)-Number(b.order||0)).forEach(r=>{const s=checks?.[r.id]||{};out.push({id:r.id,title:String(s.title||r.title||'나의 루틴').slice(0,30),description:String(s.description||r.description||'').slice(0,100),scheduleLabel:String(s.scheduleLabel||hmSubRoutineScheduleLabel(r)).slice(0,40),order:Number(s.order??r.order??0),done:s.done===true,values:s.values||{},items:s.items||r.items||{}});});
+ Object.entries(checks||{}).forEach(([id,s])=>{if(!s||typeof s!=='object'||byId.has(id)||id.startsWith('_'))return;out.push({id,title:String(s.title||'나의 루틴').slice(0,30),description:String(s.description||'').slice(0,100),scheduleLabel:String(s.scheduleLabel||'당시 루틴').slice(0,40),order:Number(s.order||9999),done:s.done===true,values:s.values||{},items:s.items||{}});});
+ return out.sort((a,b)=>Number(a.order||0)-Number(b.order||0)||a.title.localeCompare(b.title));
 }
-function hmSubRoutineDate() {
-    const value = document.getElementById('recordDate')?.value || '';
-    return /^\d{4}-\d{2}-\d{2}$/.test(value) ? value : new Date().toISOString().slice(0,10);
-}
-function hmSubRoutineDateObject(dateText = hmSubRoutineDate()) {
-    const [year, month, day] = String(dateText).split('-').map(Number);
-    return new Date(year, (month || 1) - 1, day || 1, 12, 0, 0);
-}
-function hmSubRoutineRows() {
-    return Object.entries(hmSubRoutines || {}).map(([id,v])=>({id,...(v||{})}))
-      .filter(v=>v.deleted!==true).sort((a,b)=>Number(a.order||0)-Number(b.order||0)||Number(a.createdAt||0)-Number(b.createdAt||0));
-}
-function hmSubRoutineScheduleType(row) {
-    return ['daily','weekdays','once'].includes(row?.scheduleType) ? row.scheduleType : 'daily';
-}
-function hmSubRoutineWeekdays(row) {
-    return Array.isArray(row?.weekdays) ? row.weekdays.map(Number).filter(v=>v>=0&&v<=6) : [];
-}
-function hmSubRoutineAppliesOnDate(row, dateText = hmSubRoutineDate()) {
-    if (row?.paused === true) return false;
-    const type = hmSubRoutineScheduleType(row);
-    if (type === 'once') return String(row?.activeDate || '') === String(dateText);
-    if (type === 'weekdays') return hmSubRoutineWeekdays(row).includes(hmSubRoutineDateObject(dateText).getDay());
-    return true;
-}
-function hmSubRoutineActiveRows(dateText = hmSubRoutineDate()) {
-    return hmSubRoutineRows().filter(row=>hmSubRoutineAppliesOnDate(row,dateText));
-}
-function hmSubRoutineScheduleLabel(row) {
-    if (row?.paused === true) return '일시 중지';
-    const type = hmSubRoutineScheduleType(row);
-    if (type === 'once') return `${row.activeDate || hmSubRoutineDate()} 하루만`;
-    if (type === 'weekdays') {
-        const names=['일','월','화','수','목','금','토'];
-        const days=hmSubRoutineWeekdays(row);
-        return days.length ? days.map(day=>names[day]).join('·') + ' 반복' : '요일 미선택';
-    }
-    return '매일';
-}
-function hmBuildSubRoutineSnapshot(definitions = {}, checks = {}, dateText = hmSubRoutineDate()) {
-    const definitionRows = Object.entries(definitions || {}).map(([id, value]) => ({ id, ...(value || {}) }));
-    const byId = new Map(definitionRows.map(row => [row.id, row]));
-    const result = [];
-
-    definitionRows
-        .filter(row => row.deleted !== true && hmSubRoutineAppliesOnDate(row, dateText))
-        .sort((a, b) => Number(a.order || 0) - Number(b.order || 0) || Number(a.createdAt || 0) - Number(b.createdAt || 0))
-        .forEach(row => {
-            const saved = checks?.[row.id] || {};
-            result.push({
-                id: row.id,
-                title: String(saved.title || row.title || '나의 루틴').slice(0, 30),
-                description: String(saved.description || row.description || '').slice(0, 100),
-                scheduleLabel: String(saved.scheduleLabel || hmSubRoutineScheduleLabel(row)).slice(0, 40),
-                order: Number(saved.order ?? row.order ?? 0),
-                done: saved.done === true
-            });
-        });
-
-    // 과거 날짜에서 루틴이 수정·삭제된 뒤에도 당시 저장된 항목은 보존한다.
-    Object.entries(checks || {}).forEach(([id, saved]) => {
-        if (!saved || typeof saved !== 'object' || byId.has(id) || id.startsWith('_')) return;
-        result.push({
-            id,
-            title: String(saved.title || '나의 루틴').slice(0, 30),
-            description: String(saved.description || '').slice(0, 100),
-            scheduleLabel: String(saved.scheduleLabel || '당시 루틴').slice(0, 40),
-            order: Number(saved.order || 9999),
-            done: saved.done === true
-        });
-    });
-
-    return result.sort((a, b) => Number(a.order || 0) - Number(b.order || 0) || a.title.localeCompare(b.title));
-}
-function hmBuildSubRoutineReportText(snapshot = []) {
-    if (!Array.isArray(snapshot) || !snapshot.length) return '';
-    const lines = snapshot.map(item => `  - ${item.title || '나의 루틴'}: ${item.done === true ? '완료' : '미완료'}${item.scheduleLabel ? ` (${item.scheduleLabel})` : ''}`);
-    return `🌱 나의 루틴:\n${lines.join('\n')}`;
-}
-async function hmLoadSubRoutineSnapshot(roomCode, dateText) {
-    if (!roomCode || !dateText) return [];
-    const [definitionsSnap, checksSnap] = await Promise.all([
-        db.ref(`rooms/${roomCode}/subRoutines`).once('value'),
-        db.ref(`rooms/${roomCode}/subRoutineDays/${dateText}`).once('value')
-    ]);
-    return hmBuildSubRoutineSnapshot(definitionsSnap.val() || {}, checksSnap.val() || {}, dateText);
-}
-function hmCurrentSubRoutineSnapshot() {
-    return hmBuildSubRoutineSnapshot(hmSubRoutines, hmSubRoutineChecks, hmSubRoutineDate());
-}
-async function hmPersistSubRoutineSnapshotToDay() {
-    if (!hmCanManageSubRoutine() || !currentUser || !hmSubRoutineRoomCode || hmSubRoutineSnapshotSyncing) return;
-    const dateText = hmSubRoutineDate();
-    const snapshot = hmCurrentSubRoutineSnapshot();
-    hmSubRoutineSnapshotSyncing = true;
-    try {
-        await db.ref(`rooms/${hmSubRoutineRoomCode}/days/${dateText}`).update({
-            date: dateText,
-            subRoutineSnapshot: snapshot,
-            updatedBy: currentUser.uid,
-            updatedByEmail: currentUser.email || '',
-            updatedAt: firebase.database.ServerValue.TIMESTAMP
-        });
-    } catch (err) {
-        hmReportError('hmPersistSubRoutineSnapshotToDay', err, hmIsFirebasePermissionError(err) ? '❌ 나의 루틴 기록 저장 권한 없음' : '❌ 나의 루틴 기록 연결 실패');
-    } finally {
-        hmSubRoutineSnapshotSyncing = false;
-    }
-}
-async function hmEnsureSubRoutineDaySnapshot() {
-    if (!hmCanManageSubRoutine() || !hmSubRoutineRoomCode || !hmSubRoutineDefsLoaded || !hmSubRoutineDayLoaded) return;
-    const dateText = hmSubRoutineDate();
-    const missing = {};
-    hmSubRoutineActiveRows(dateText).forEach(row => {
-        if (hmSubRoutineChecks?.[row.id]) return;
-        missing[row.id] = {
-            done: false,
-            title: String(row.title || '나의 루틴').slice(0, 30),
-            description: String(row.description || '').slice(0, 100),
-            scheduleLabel: String(hmSubRoutineScheduleLabel(row)).slice(0, 40),
-            order: Number(row.order || 0),
-            snapshotAt: firebase.database.ServerValue.TIMESTAMP,
-            updatedByUid: currentUser.uid,
-            updatedAt: firebase.database.ServerValue.TIMESTAMP
-        };
-    });
-    if (Object.keys(missing).length) {
-        try {
-            await db.ref(`rooms/${hmSubRoutineRoomCode}/subRoutineDays/${dateText}`).update(missing);
-        } catch (err) {
-            hmReportError('hmEnsureSubRoutineDaySnapshot', err, '❌ 나의 루틴 날짜 기록 준비 실패');
-            return;
-        }
-    }
-    await hmPersistSubRoutineSnapshotToDay();
-}
-
-function hmSubRoutineEscape(v){ return typeof escapeHtml==='function'?escapeHtml(String(v||'')):String(v||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
-function hmSubRoutineId(){ return `sr_${Date.now().toString(36)}_${Math.random().toString(36).slice(2,7)}`; }
-function hmOpenSubRoutineOverlay(id) {
-    if (typeof openModalOverlayById === 'function') { openModalOverlayById(id); return; }
-    const el = document.getElementById(id); if (!el) return;
-    el.removeAttribute('inert'); el.style.display = 'flex'; el.setAttribute('aria-hidden', 'false');
-}
-function hmCloseSubRoutineOverlay(id) {
-    if (typeof closeModalOverlayById === 'function') { closeModalOverlayById(id); return; }
-    const el = document.getElementById(id); if (!el) return;
-    el.style.display = 'none'; el.setAttribute('aria-hidden', 'true'); el.setAttribute('inert', '');
-}
-
-function hmStartSubRoutines(roomCode){
-    hmStopSubRoutines(); hmSubRoutineRoomCode = roomCode || '';
-    if(!roomCode || !currentUser){ renderSubRoutine(); return; }
-    hmSubRoutinesRef=db.ref(`rooms/${roomCode}/subRoutines`);
-    hmSubRoutinesRef.on('value',snap=>{hmSubRoutines=snap.val()||{};hmSubRoutineDefsLoaded=true;renderSubRoutine();hmEnsureSubRoutineDaySnapshot();},err=>hmReportError('hmStartSubRoutines',err,'❌ 나의 루틴 불러오기 실패'));
-    hmListenSubRoutineDay();
-}
-function hmStopSubRoutines(){
-    if(hmSubRoutinesRef)hmSubRoutinesRef.off(); if(hmSubRoutineDayRef)hmSubRoutineDayRef.off();
-    hmSubRoutinesRef=null;hmSubRoutineDayRef=null;hmSubRoutines={};hmSubRoutineChecks={};hmSubRoutineRoomCode='';hmSubRoutineDefsLoaded=false;hmSubRoutineDayLoaded=false;renderSubRoutine();
-}
-function hmListenSubRoutineDay(){
-    if(hmSubRoutineDayRef)hmSubRoutineDayRef.off(); hmSubRoutineDayRef=null; hmSubRoutineChecks={}; hmSubRoutineDayLoaded=false;
-    if(!hmSubRoutineRoomCode)return renderSubRoutine();
-    hmSubRoutineDayRef=db.ref(`rooms/${hmSubRoutineRoomCode}/subRoutineDays/${hmSubRoutineDate()}`);
-    hmSubRoutineDayRef.on('value',snap=>{hmSubRoutineChecks=snap.val()||{};hmSubRoutineDayLoaded=true;renderSubRoutine();hmEnsureSubRoutineDaySnapshot();},err=>hmReportError('hmListenSubRoutineDay',err,'❌ 나의 루틴 완료 상태 불러오기 실패'));
-}
-function renderSubRoutine(){
-    const allRows=hmSubRoutineRows();
-    const rows=hmSubRoutineActiveRows();
-    const done=rows.filter(r=>hmSubRoutineChecks?.[r.id]?.done===true).length;
-    const pausedCount=allRows.filter(r=>r.paused===true).length;
-    const sub=document.getElementById('subRoutineHubSub');
-    const count=document.getElementById('subRoutineCountText');
-    const homeList=document.getElementById('subRoutineHomeList');
-    const managerList=document.getElementById('subRoutineManagerList');
-
-    if(count) count.textContent=hmCanManageSubRoutine()
-        ? `${rows.length}개 · ${done}/${rows.length} 완료 · 기록(Sub)가 관리`
-        : `${rows.length}개 · ${done}/${rows.length} 완료 · Dom은 확인만`;
-    if(sub) sub.textContent=!hmSubRoutineRoomCode
-        ? '공간을 연결하면 나의 루틴을 사용할 수 있어요.'
-        : !allRows.length
-            ? (hmCanManageSubRoutine()?'나만의 하루 루틴을 만들어보세요.':'Sub가 루틴을 만들면 여기에 표시됩니다.')
-            : `${rows.length}개 오늘 루틴 · ${done}/${rows.length} 완료${pausedCount?` · ${pausedCount}개 중지`:''}`;
-
-    const add=document.getElementById('subRoutineAddBtn');
-    if(add) add.hidden=!hmCanManageSubRoutine();
-    const note=document.getElementById('subRoutineRoleNote');
-    if(note) note.textContent=hmCanManageSubRoutine()
-        ? '루틴을 만들고 반복 요일·오늘만·일시 중지를 설정합니다. 완료 체크는 홈 카드에서 진행합니다.'
-        : '기록(Sub)가 직접 관리하는 루틴입니다. Dom은 홈 화면에서 완료 상태만 확인할 수 있습니다.';
-
-    if(homeList){
-        if(!rows.length){
-            homeList.innerHTML=`<div class="sub-routine-home-empty">${allRows.length?(hmCanManageSubRoutine()?'선택한 날짜에 실행할 루틴이 없습니다. 나의 루틴 카드에서 반복 설정을 확인해 주세요.':'선택한 날짜에 실행할 루틴이 없습니다.'):(hmCanManageSubRoutine()?'아직 만든 루틴이 없습니다. 나의 루틴 카드를 눌러 첫 루틴을 만들어보세요.':'아직 등록된 나의 루틴이 없습니다.')}</div>`;
-        } else {
-            homeList.innerHTML=rows.map(r=>{
-                const checked=hmSubRoutineChecks?.[r.id]?.done===true;
-                const action=hmCanManageSubRoutine()?`onclick="toggleSubRoutine('${hmSubRoutineEscape(r.id)}')"`:'onclick="showSaveStatus(\'🌱 Sub가 직접 관리하는 루틴입니다.\')"';
-                return `<button type="button" class="sub-routine-home-card ${checked?'is-done':''}" ${action}>
-                    <span class="sub-routine-home-icon">🌱</span>
-                    <span class="sub-routine-home-text"><strong>${hmSubRoutineEscape(r.title||'나의 루틴')}</strong><small>${hmSubRoutineEscape(r.description||'내가 정한 하루 루틴')} · ${hmSubRoutineEscape(hmSubRoutineScheduleLabel(r))} · ${checked?'완료':'미완료'}</small></span>
-                    <span class="sub-routine-home-check">${checked?'✓':'○'}</span>
-                </button>`;
-            }).join('');
-        }
-    }
-
-    if(!managerList)return;
-    if(!allRows.length){
-        managerList.innerHTML=`<div class="sub-routine-empty">${hmCanManageSubRoutine()?'아직 만든 루틴이 없습니다.<br>아래 버튼으로 첫 루틴을 만들어보세요.':'아직 등록된 나의 루틴이 없습니다.'}</div>`;
-        return;
-    }
-    managerList.innerHTML=allRows.map(r=>{
-        const checked=hmSubRoutineChecks?.[r.id]?.done===true;
-        const paused=r.paused===true;
-        return `<article class="sub-routine-row ${checked?'is-done':''} ${paused?'is-paused':''}">
-            <span class="sub-routine-check is-status" aria-label="${paused?'일시 중지':checked?'완료':'미완료'}">${paused?'Ⅱ':checked?'✓':'○'}</span>
-            <div class="sub-routine-row-text"><strong>${hmSubRoutineEscape(r.title||'나의 루틴')}</strong><small>${hmSubRoutineEscape(r.description||'내가 정한 하루 루틴')}</small><em>${hmSubRoutineEscape(hmSubRoutineScheduleLabel(r))}</em></div>
-            ${hmCanManageSubRoutine()?`<div class="sub-routine-row-actions"><button type="button" onclick="openSubRoutineEditor('${hmSubRoutineEscape(r.id)}')">수정</button><button type="button" class="danger" onclick="deleteSubRoutine('${hmSubRoutineEscape(r.id)}')">삭제</button></div>`:'<span class="sub-routine-readonly">읽기 전용</span>'}
-        </article>`;
-    }).join('');
-}
-function openSubRoutineHub(){ if(!hmSubRoutineRoomCode)return alert('먼저 우리의 공간을 연결해 주세요.'); renderSubRoutine();hmOpenSubRoutineOverlay('subRoutineHubOverlay'); }
+function hmBuildSubRoutineReportText(snapshot=[]){ if(!Array.isArray(snapshot)||!snapshot.length)return '';const lines=[];snapshot.forEach(r=>{lines.push(`  - ${r.title||'나의 루틴'}: ${r.done===true?'완료':'미완료'}${r.scheduleLabel?` (${r.scheduleLabel})`:''}`);Object.entries(r.items||{}).map(([id,v])=>({id,...v})).sort((a,b)=>Number(a.order||0)-Number(b.order||0)).forEach(i=>{const v=r.values?.[i.id];if(i.type==='checkbox')lines.push(`      · ${i.label}: ${v===true?'완료':'미완료'}`);else if(String(v??'').trim())lines.push(`      · ${i.label}: ${String(v).trim()}`);});});return `🌱 나의 루틴:\n${lines.join('\n')}`; }
+async function hmLoadSubRoutineSnapshot(roomCode,dateText){ if(!roomCode||!dateText)return [];const [a,b]=await Promise.all([db.ref(`rooms/${roomCode}/subRoutines`).once('value'),db.ref(`rooms/${roomCode}/subRoutineDays/${dateText}`).once('value')]);return hmBuildSubRoutineSnapshot(a.val()||{},b.val()||{},dateText); }
+function hmCurrentSubRoutineSnapshot(){ return hmBuildSubRoutineSnapshot(hmSubRoutines,hmSubRoutineChecks,hmSubRoutineDate()); }
+async function hmPersistSubRoutineSnapshotToDay(){ if(!hmCanManageSubRoutine()||!currentUser||!hmSubRoutineRoomCode||hmSubRoutineSnapshotSyncing)return;hmSubRoutineSnapshotSyncing=true;const d=hmSubRoutineDate();try{await db.ref(`rooms/${hmSubRoutineRoomCode}/days/${d}`).update({date:d,subRoutineSnapshot:hmCurrentSubRoutineSnapshot(),updatedBy:currentUser.uid,updatedByEmail:currentUser.email||'',updatedAt:firebase.database.ServerValue.TIMESTAMP});}catch(e){hmReportError('hmPersistSubRoutineSnapshotToDay',e,hmIsFirebasePermissionError(e)?'❌ 나의 루틴 기록 저장 권한 없음':'❌ 나의 루틴 기록 연결 실패');}finally{hmSubRoutineSnapshotSyncing=false;} }
+async function hmEnsureSubRoutineDaySnapshot(){ if(!hmCanManageSubRoutine()||!hmSubRoutineRoomCode||!hmSubRoutineDefsLoaded||!hmSubRoutineDayLoaded)return;const d=hmSubRoutineDate(),missing={};hmSubRoutineActiveRows(d).forEach(r=>{if(hmSubRoutineChecks?.[r.id])return;missing[r.id]={done:false,title:String(r.title||'나의 루틴').slice(0,30),description:String(r.description||'').slice(0,100),scheduleLabel:String(hmSubRoutineScheduleLabel(r)).slice(0,40),order:Number(r.order||0),items:r.items||{},values:{},snapshotAt:firebase.database.ServerValue.TIMESTAMP,updatedByUid:currentUser.uid,updatedAt:firebase.database.ServerValue.TIMESTAMP};});if(Object.keys(missing).length){try{await db.ref(`rooms/${hmSubRoutineRoomCode}/subRoutineDays/${d}`).update(missing);}catch(e){hmReportError('hmEnsureSubRoutineDaySnapshot',e,'❌ 나의 루틴 날짜 기록 준비 실패');return;}}await hmPersistSubRoutineSnapshotToDay(); }
+function hmStartSubRoutines(roomCode){hmStopSubRoutines();hmSubRoutineRoomCode=roomCode||'';if(!roomCode||!currentUser){renderSubRoutine();return;}hmSubRoutinesRef=db.ref(`rooms/${roomCode}/subRoutines`);hmSubRoutinesRef.on('value',s=>{hmSubRoutines=s.val()||{};hmSubRoutineDefsLoaded=true;renderSubRoutine();hmEnsureSubRoutineDaySnapshot();},e=>{if(!window.hmIsLoggingOut)hmReportError('hmStartSubRoutines',e,'❌ 나의 루틴 불러오기 실패');});hmListenSubRoutineDay();}
+function hmStopSubRoutines(){if(hmSubRoutinesRef)hmSubRoutinesRef.off();if(hmSubRoutineDayRef)hmSubRoutineDayRef.off();hmSubRoutinesRef=hmSubRoutineDayRef=null;hmSubRoutines={};hmSubRoutineChecks={};hmSubRoutineRoomCode='';hmSubRoutineDefsLoaded=hmSubRoutineDayLoaded=false;renderSubRoutine();}
+function hmListenSubRoutineDay(){if(hmSubRoutineDayRef)hmSubRoutineDayRef.off();hmSubRoutineDayRef=null;hmSubRoutineChecks={};hmSubRoutineDayLoaded=false;if(!hmSubRoutineRoomCode||!currentUser||window.hmIsLoggingOut)return renderSubRoutine();hmSubRoutineDayRef=db.ref(`rooms/${hmSubRoutineRoomCode}/subRoutineDays/${hmSubRoutineDate()}`);hmSubRoutineDayRef.on('value',s=>{hmSubRoutineChecks=s.val()||{};hmSubRoutineDayLoaded=true;renderSubRoutine();hmEnsureSubRoutineDaySnapshot();},e=>{if(!window.hmIsLoggingOut)hmReportError('hmListenSubRoutineDay',e,'❌ 나의 루틴 완료 상태 불러오기 실패');});}
+function renderSubRoutine(){const all=hmSubRoutineRows(),rows=hmSubRoutineActiveRows(),done=rows.filter(r=>hmSubRoutineChecks?.[r.id]?.done===true).length;const sub=document.getElementById('subRoutineHubSub'),count=document.getElementById('subRoutineCountText'),home=document.getElementById('subRoutineHomeList'),list=document.getElementById('subRoutineManagerList');if(count)count.textContent=hmCanManageSubRoutine()?`${rows.length}개 · ${done}/${rows.length} 완료 · 기록(Sub)가 관리`:`${rows.length}개 · ${done}/${rows.length} 완료 · Dom은 확인만`;if(sub)sub.textContent=!hmSubRoutineRoomCode?'공간을 연결하면 사용할 수 있어요.':!all.length?(hmCanManageSubRoutine()?'나만의 하루 루틴을 만들어보세요.':'Sub가 루틴을 만들면 표시됩니다.'):`${rows.length}개 오늘 루틴 · ${done}/${rows.length} 완료`;const add=document.getElementById('subRoutineAddBtn');if(add)add.hidden=!hmCanManageSubRoutine();const note=document.getElementById('subRoutineRoleNote');if(note)note.textContent=hmCanManageSubRoutine()?'새 루틴을 만들고 텍스트·시간·숫자·체크 항목을 구성합니다. 실제 입력은 홈 카드에서 진행합니다.':'기록(Sub)가 직접 관리하는 루틴입니다. Dom은 입력 내용과 완료 상태만 확인합니다.';
+ if(home){home.innerHTML=!rows.length?`<div class="sub-routine-home-empty">${all.length?'선택한 날짜에 실행할 루틴이 없습니다.':hmCanManageSubRoutine()?'아직 만든 루틴이 없습니다. 나의 루틴 카드를 눌러 만들어보세요.':'아직 등록된 나의 루틴이 없습니다.'}</div>`:rows.map(r=>{const saved=hmSubRoutineChecks?.[r.id]||{},checked=saved.done===true,items=hmSubRoutineLegacyItems(r);return `<button type="button" class="sub-routine-home-card ${checked?'is-done':''}" onclick="openSubRoutineInput('${hmSubRoutineEscape(r.id)}')"><span class="sub-routine-home-icon">🌱</span><span class="sub-routine-home-text"><strong>${hmSubRoutineEscape(r.title||'나의 루틴')}</strong><small>${hmSubRoutineEscape(r.description||'내가 정한 하루 루틴')} · ${hmSubRoutineEscape(hmSubRoutineScheduleLabel(r))} · 항목 ${items.length}개 · ${checked?'완료':'입력 필요'}</small></span><span class="sub-routine-home-check">${checked?'✓':'›'}</span></button>`;}).join('');}
+ if(!list)return;if(!all.length){list.innerHTML=`<div class="sub-routine-empty">${hmCanManageSubRoutine()?'아직 만든 루틴이 없습니다. 위 버튼으로 첫 루틴을 만들어보세요.':'아직 등록된 나의 루틴이 없습니다.'}</div>`;return;}list.innerHTML=all.map(r=>{const items=hmSubRoutineLegacyItems(r),paused=r.paused===true;return `<article class="sub-routine-manager-card ${paused?'is-paused':''}"><span class="sub-routine-manager-card-icon">🌱</span><div><strong>${hmSubRoutineEscape(r.title||'나의 루틴')}</strong><small>${hmSubRoutineEscape(r.description||'설명 없음')} · ${hmSubRoutineEscape(hmSubRoutineScheduleLabel(r))} · 항목 ${items.length}개</small></div>${hmCanManageSubRoutine()?`<div class="sub-routine-manager-actions"><button onclick="openSubRoutineEditor('${hmSubRoutineEscape(r.id)}')">수정</button><button class="danger" onclick="deleteSubRoutine('${hmSubRoutineEscape(r.id)}')">삭제</button></div>`:'<span class="sub-routine-readonly">확인</span>'}</article>`;}).join(''); }
+function openSubRoutineHub(){if(!hmSubRoutineRoomCode)return alert('먼저 우리의 공간을 연결해 주세요.');renderSubRoutine();hmOpenSubRoutineOverlay('subRoutineHubOverlay');}
 function closeSubRoutineHub(){hmCloseSubRoutineOverlay('subRoutineHubOverlay');}
-function hmSetSubRoutineScheduleUI(type){
-    const weekdays=document.getElementById('subRoutineWeekdays');
-    if(weekdays) weekdays.hidden=type!=='weekdays';
-}
-function hmReadSubRoutineScheduleType(){
-    return document.querySelector('input[name="subRoutineScheduleType"]:checked')?.value || 'daily';
-}
-function openSubRoutineEditor(id=''){
-    if(!hmCanManageSubRoutine())return alert('나의 루틴은 기록(Sub)만 만들고 관리할 수 있습니다.');
-    const rows=hmSubRoutineRows(); if(!id&&rows.length>=HM_SUB_ROUTINE_MAX)return alert(`나의 루틴은 최대 ${HM_SUB_ROUTINE_MAX}개까지 만들 수 있습니다.`);
-    hmSubRoutineEditingId=id; const row=id?hmSubRoutines[id]||{}:{};
-    document.getElementById('subRoutineEditorTitle').textContent=id?'🌱 나의 루틴 수정':'🌱 나의 루틴 만들기';
-    document.getElementById('subRoutineTitleInput').value=row.title||'';
-    document.getElementById('subRoutineDescInput').value=row.description||'';
-    const type=hmSubRoutineScheduleType(row);
-    const radio=document.querySelector(`input[name="subRoutineScheduleType"][value="${type}"]`);
-    if(radio) radio.checked=true;
-    const selected=new Set(hmSubRoutineWeekdays(row));
-    document.querySelectorAll('#subRoutineWeekdays input[type="checkbox"]').forEach(input=>{input.checked=selected.has(Number(input.value));});
-    const pausedInput=document.getElementById('subRoutinePausedInput'); if(pausedInput) pausedInput.checked=row.paused===true;
-    hmSetSubRoutineScheduleUI(type);
-    hmOpenSubRoutineOverlay('subRoutineEditorOverlay'); setTimeout(()=>document.getElementById('subRoutineTitleInput')?.focus(),50);
-}
-function closeSubRoutineEditor(){hmSubRoutineEditingId='';hmCloseSubRoutineOverlay('subRoutineEditorOverlay');}
-async function saveSubRoutine(){
-    if(!hmCanManageSubRoutine()||!currentUser||!hmSubRoutineRoomCode)return alert('저장 권한이 없습니다.');
-    const title=String(document.getElementById('subRoutineTitleInput')?.value||'').trim().slice(0,30);
-    const description=String(document.getElementById('subRoutineDescInput')?.value||'').trim().slice(0,100);
-    if(title.length<2)return alert('루틴 이름을 2자 이상 입력해 주세요.');
-    const scheduleType=hmReadSubRoutineScheduleType();
-    const weekdays=[...document.querySelectorAll('#subRoutineWeekdays input[type="checkbox"]:checked')].map(input=>Number(input.value)).sort((a,b)=>a-b);
-    if(scheduleType==='weekdays'&&!weekdays.length)return alert('반복할 요일을 하나 이상 선택해 주세요.');
-    const id=hmSubRoutineEditingId||hmSubRoutineId(); const old=hmSubRoutines[id]||{};
-    const payload={
-        title, description, scheduleType,
-        weekdays:scheduleType==='weekdays'?weekdays:[],
-        activeDate:scheduleType==='once'?(old.scheduleType==='once'&&old.activeDate?old.activeDate:hmSubRoutineDate()):'',
-        paused:document.getElementById('subRoutinePausedInput')?.checked===true,
-        order:Number(old.order||hmSubRoutineRows().length+1),
-        createdByUid:old.createdByUid||currentUser.uid,
-        createdAt:Number(old.createdAt||Date.now()),
-        updatedAt:firebase.database.ServerValue.TIMESTAMP,
-        deleted:false
-    };
-    try{await db.ref(`rooms/${hmSubRoutineRoomCode}/subRoutines/${id}`).set(payload);showSaveStatus('🌱 나의 루틴 저장 완료');closeSubRoutineEditor();}
-    catch(err){hmReportError('saveSubRoutine',err,hmIsFirebasePermissionError(err)?'❌ 기록(Sub)만 나의 루틴을 저장할 수 있습니다.':'❌ 나의 루틴 저장 실패');}
-}
-async function toggleSubRoutine(id){
-    if(!hmCanManageSubRoutine()||!currentUser)return;
-    const routine=hmSubRoutines?.[id];
-    if(!routine||!hmSubRoutineAppliesOnDate(routine))return showSaveStatus('🌱 선택한 날짜에는 실행하지 않는 루틴입니다.');
-    const done=hmSubRoutineChecks?.[id]?.done===true;
-    try{await db.ref(`rooms/${hmSubRoutineRoomCode}/subRoutineDays/${hmSubRoutineDate()}/${id}`).update({done:!done,title:routine.title||'나의 루틴',description:routine.description||'',scheduleLabel:hmSubRoutineScheduleLabel(routine),order:Number(routine.order||0),updatedByUid:currentUser.uid,updatedAt:firebase.database.ServerValue.TIMESTAMP});await hmPersistSubRoutineSnapshotToDay();showSaveStatus(!done?'🌱 루틴 완료':'🌱 완료 취소');}
-    catch(err){hmReportError('toggleSubRoutine',err,'❌ 나의 루틴 완료 저장 실패');}
-}
-async function deleteSubRoutine(id){
-    if(!hmCanManageSubRoutine())return; if(!confirm('이 루틴을 삭제할까요? 기존 완료 기록은 보존됩니다.'))return;
-    try{await db.ref(`rooms/${hmSubRoutineRoomCode}/subRoutines/${id}`).update({deleted:true,updatedAt:firebase.database.ServerValue.TIMESTAMP});showSaveStatus('🌱 나의 루틴 삭제 완료');}
-    catch(err){hmReportError('deleteSubRoutine',err,'❌ 나의 루틴 삭제 실패');}
-}
-window.addEventListener('DOMContentLoaded',()=>{
-    document.getElementById('recordDate')?.addEventListener('change',()=>hmListenSubRoutineDay());
-    document.querySelectorAll('input[name="subRoutineScheduleType"]').forEach(input=>input.addEventListener('change',()=>hmSetSubRoutineScheduleUI(input.value)));
-    renderSubRoutine();
-});
-
-window.openSubRoutineHub = openSubRoutineHub;
-window.closeSubRoutineHub = closeSubRoutineHub;
-window.openSubRoutineEditor = openSubRoutineEditor;
-window.closeSubRoutineEditor = closeSubRoutineEditor;
-window.saveSubRoutine = saveSubRoutine;
-window.toggleSubRoutine = toggleSubRoutine;
-window.deleteSubRoutine = deleteSubRoutine;
-
-window.hmBuildSubRoutineSnapshot = hmBuildSubRoutineSnapshot;
-window.hmBuildSubRoutineReportText = hmBuildSubRoutineReportText;
-window.hmLoadSubRoutineSnapshot = hmLoadSubRoutineSnapshot;
-window.hmCurrentSubRoutineSnapshot = hmCurrentSubRoutineSnapshot;
+function hmSetSubRoutineScheduleUI(t){const e=document.getElementById('subRoutineWeekdays');if(e)e.hidden=t!=='weekdays';}
+function hmReadSubRoutineScheduleType(){return document.querySelector('input[name="subRoutineScheduleType"]:checked')?.value||'daily';}
+function addSubRoutineDraftItem(){syncSubRoutineDraftFromDom();if(hmSubRoutineDraftItems.length>=HM_SUB_ROUTINE_ITEM_MAX)return alert(`항목은 최대 ${HM_SUB_ROUTINE_ITEM_MAX}개까지 가능합니다.`);hmSubRoutineDraftItems.push({id:hmSubRoutineId('sri'),label:'',type:'text',placeholder:'',required:false,order:hmSubRoutineDraftItems.length+1,active:true});renderSubRoutineDraftItems();}
+function removeSubRoutineDraftItem(id){syncSubRoutineDraftFromDom();hmSubRoutineDraftItems=hmSubRoutineDraftItems.filter(x=>x.id!==id).map((x,i)=>({...x,order:i+1}));renderSubRoutineDraftItems();}
+function syncSubRoutineDraftFromDom(){const box=document.getElementById('subRoutineDraftItems');if(!box)return;hmSubRoutineDraftItems=[...box.querySelectorAll('[data-sub-draft-id]')].map((row,i)=>({id:row.dataset.subDraftId,label:String(row.querySelector('[data-field="label"]')?.value||'').trim().slice(0,24),type:HM_SUB_ROUTINE_TYPES.includes(row.querySelector('[data-field="type"]')?.value)?row.querySelector('[data-field="type"]').value:'text',placeholder:String(row.querySelector('[data-field="placeholder"]')?.value||'').trim().slice(0,40),required:row.querySelector('[data-field="required"]')?.checked===true,order:i+1,active:true}));}
+function renderSubRoutineDraftItems(){const box=document.getElementById('subRoutineDraftItems');if(!box)return;if(!hmSubRoutineDraftItems.length){box.innerHTML='<div class="sub-routine-empty small">항목 추가 버튼으로 입력 항목을 만들어 주세요.</div>';return;}box.innerHTML=hmSubRoutineDraftItems.map((i,n)=>`<div class="sub-routine-draft-row" data-sub-draft-id="${hmSubRoutineEscape(i.id)}"><span>${n+1}</span><input data-field="label" maxlength="24" placeholder="항목 이름" value="${hmSubRoutineEscape(i.label)}"><select data-field="type"><option value="text" ${i.type==='text'?'selected':''}>텍스트</option><option value="checkbox" ${i.type==='checkbox'?'selected':''}>체크</option><option value="number" ${i.type==='number'?'selected':''}>숫자</option><option value="time" ${i.type==='time'?'selected':''}>시간</option></select><input data-field="placeholder" maxlength="40" placeholder="안내 문구" value="${hmSubRoutineEscape(i.placeholder)}"><label><input type="checkbox" data-field="required" ${i.required?'checked':''}>필수</label><button class="danger" onclick="removeSubRoutineDraftItem('${hmSubRoutineEscape(i.id)}')">삭제</button></div>`).join('');}
+function openSubRoutineEditor(id=''){if(!hmCanManageSubRoutine())return alert('나의 루틴은 기록(Sub)만 만들고 관리할 수 있습니다.');const rows=hmSubRoutineRows();if(!id&&rows.length>=HM_SUB_ROUTINE_MAX)return alert(`나의 루틴은 최대 ${HM_SUB_ROUTINE_MAX}개까지 만들 수 있습니다.`);hmSubRoutineEditingId=id;const r=id?hmSubRoutines[id]||{}:{};document.getElementById('subRoutineEditorTitle').textContent=id?'🌱 나의 루틴 수정':'🌱 나의 루틴 만들기';document.getElementById('subRoutineTitleInput').value=r.title||'';document.getElementById('subRoutineDescInput').value=r.description||'';const type=hmSubRoutineScheduleType(r),radio=document.querySelector(`input[name="subRoutineScheduleType"][value="${type}"]`);if(radio)radio.checked=true;const selected=new Set(hmSubRoutineWeekdays(r));document.querySelectorAll('#subRoutineWeekdays input[type="checkbox"]').forEach(x=>x.checked=selected.has(Number(x.value)));document.getElementById('subRoutinePausedInput').checked=r.paused===true;hmSubRoutineDraftItems=hmSubRoutineItemRows(r).map(x=>({...x}));if(!hmSubRoutineDraftItems.length)hmSubRoutineDraftItems=[{id:hmSubRoutineId('sri'),label:'루틴 완료',type:'checkbox',placeholder:'',required:true,order:1,active:true}];renderSubRoutineDraftItems();hmSetSubRoutineScheduleUI(type);hmOpenSubRoutineOverlay('subRoutineEditorOverlay');}
+function closeSubRoutineEditor(){hmSubRoutineEditingId='';hmSubRoutineDraftItems=[];hmCloseSubRoutineOverlay('subRoutineEditorOverlay');}
+async function saveSubRoutine(){if(!hmCanManageSubRoutine()||!currentUser||!hmSubRoutineRoomCode)return alert('저장 권한이 없습니다.');syncSubRoutineDraftFromDom();const title=String(document.getElementById('subRoutineTitleInput')?.value||'').trim().slice(0,30),description=String(document.getElementById('subRoutineDescInput')?.value||'').trim().slice(0,100);if(title.length<2)return alert('루틴 이름을 2자 이상 입력해 주세요.');const clean=hmSubRoutineDraftItems.filter(x=>x.label).slice(0,HM_SUB_ROUTINE_ITEM_MAX);if(!clean.length)return alert('루틴 안 항목을 1개 이상 추가해 주세요.');const scheduleType=hmReadSubRoutineScheduleType(),weekdays=[...document.querySelectorAll('#subRoutineWeekdays input[type="checkbox"]:checked')].map(x=>Number(x.value)).sort((a,b)=>a-b);if(scheduleType==='weekdays'&&!weekdays.length)return alert('반복할 요일을 하나 이상 선택해 주세요.');const id=hmSubRoutineEditingId||hmSubRoutineId(),old=hmSubRoutines[id]||{},items={};clean.forEach((x,n)=>{const iid=x.id||hmSubRoutineId('sri');items[iid]={label:x.label,type:x.type,placeholder:x.placeholder||'',required:x.required===true,order:n+1,active:true};});const payload={title,description,scheduleType,weekdays:scheduleType==='weekdays'?weekdays:[],activeDate:scheduleType==='once'?(old.activeDate||hmSubRoutineDate()):'',paused:document.getElementById('subRoutinePausedInput')?.checked===true,items,order:Number(old.order||hmSubRoutineRows().length+1),createdByUid:old.createdByUid||currentUser.uid,createdAt:Number(old.createdAt||Date.now()),updatedAt:firebase.database.ServerValue.TIMESTAMP,deleted:false};try{await db.ref(`rooms/${hmSubRoutineRoomCode}/subRoutines/${id}`).set(payload);showSaveStatus('🌱 나의 루틴 저장 완료');closeSubRoutineEditor();}catch(e){hmReportError('saveSubRoutine',e,hmIsFirebasePermissionError(e)?'❌ 기록(Sub)만 저장할 수 있습니다.':'❌ 나의 루틴 저장 실패');}}
+function openSubRoutineInput(id){const r=hmSubRoutines?.[id];if(!r)return;hmSubRoutineInputId=id;const saved=hmSubRoutineChecks?.[id]||{};document.getElementById('subRoutineInputTitle').textContent=`🌱 ${r.title||'나의 루틴'}`;document.getElementById('subRoutineInputDesc').textContent=`${r.description||'내가 정한 하루 루틴'} · ${hmSubRoutineScheduleLabel(r)}`;const body=document.getElementById('subRoutineInputBody'),values=saved.values||{};body.innerHTML=hmSubRoutineLegacyItems(r).map(i=>{const v=(i.id==='complete'&&saved.done===true)?true:values[i.id];if(i.type==='checkbox')return `<label class="sub-routine-input-check"><input type="checkbox" data-sub-input-id="${hmSubRoutineEscape(i.id)}" ${v===true?'checked':''} ${hmCanManageSubRoutine()?'':'disabled'}><span><strong>${hmSubRoutineEscape(i.label)}</strong><small>${hmSubRoutineEscape(i.placeholder||'완료하면 체크해 주세요.')}</small></span></label>`;const type=i.type==='time'?'time':i.type==='number'?'number':'text';return `<label class="sub-routine-input-field"><span>${hmSubRoutineEscape(i.label)}${i.required?' *':''}</span><input type="${type}" data-sub-input-id="${hmSubRoutineEscape(i.id)}" value="${hmSubRoutineEscape(v??'')}" placeholder="${hmSubRoutineEscape(i.placeholder||'입력해 주세요.')}" ${hmCanManageSubRoutine()?'':'readonly'}></label>`;}).join('');const save=document.getElementById('subRoutineInputSaveBtn');if(save)save.hidden=!hmCanManageSubRoutine();hmOpenSubRoutineOverlay('subRoutineInputOverlay');}
+function closeSubRoutineInput(){hmSubRoutineInputId='';hmCloseSubRoutineOverlay('subRoutineInputOverlay');}
+async function saveSubRoutineInput(){if(!hmCanManageSubRoutine()||!currentUser||!hmSubRoutineInputId)return;const r=hmSubRoutines[hmSubRoutineInputId];if(!r)return;const values={};document.querySelectorAll('#subRoutineInputBody [data-sub-input-id]').forEach(e=>{values[e.dataset.subInputId]=e.type==='checkbox'?e.checked:String(e.value||'').slice(0,500);});const done=hmSubRoutineCompletion(r,{values});const d=hmSubRoutineDate();try{await db.ref(`rooms/${hmSubRoutineRoomCode}/subRoutineDays/${d}/${hmSubRoutineInputId}`).set({done,title:r.title||'나의 루틴',description:r.description||'',scheduleLabel:hmSubRoutineScheduleLabel(r),order:Number(r.order||0),items:r.items||{},values,updatedByUid:currentUser.uid,updatedAt:firebase.database.ServerValue.TIMESTAMP});await hmPersistSubRoutineSnapshotToDay();showSaveStatus(done?'🌱 루틴 완료':'🌱 루틴 입력 저장');closeSubRoutineInput();}catch(e){hmReportError('saveSubRoutineInput',e,'❌ 나의 루틴 입력 저장 실패');}}
+async function deleteSubRoutine(id){if(!hmCanManageSubRoutine())return;if(!confirm('이 루틴을 삭제할까요? 기존 기록은 보존됩니다.'))return;try{await db.ref(`rooms/${hmSubRoutineRoomCode}/subRoutines/${id}`).update({deleted:true,updatedAt:firebase.database.ServerValue.TIMESTAMP});showSaveStatus('🌱 나의 루틴 삭제 완료');}catch(e){hmReportError('deleteSubRoutine',e,'❌ 나의 루틴 삭제 실패');}}
+window.addEventListener('DOMContentLoaded',()=>{document.getElementById('recordDate')?.addEventListener('change',hmListenSubRoutineDay);document.querySelectorAll('input[name="subRoutineScheduleType"]').forEach(x=>x.addEventListener('change',()=>hmSetSubRoutineScheduleUI(x.value)));renderSubRoutine();});
+Object.assign(window,{openSubRoutineHub,closeSubRoutineHub,openSubRoutineEditor,closeSubRoutineEditor,saveSubRoutine,deleteSubRoutine,addSubRoutineDraftItem,removeSubRoutineDraftItem,openSubRoutineInput,closeSubRoutineInput,saveSubRoutineInput,hmStartSubRoutines,hmStopSubRoutines,hmListenSubRoutineDay,hmBuildSubRoutineSnapshot,hmBuildSubRoutineReportText,hmLoadSubRoutineSnapshot,hmCurrentSubRoutineSnapshot});

@@ -4,9 +4,9 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💗</text></svg>">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>HearMe2nite v1.0 STEP5.10.7</title>
+    <title>HearMe2nite v1.0 STEP5.10.8</title>
     <script>
-        // STEP5.10.7: 테마와 표시 모드를 Firebase 연결 전에 먼저 적용해 화면 깜빡임을 줄입니다.
+        // STEP5.10.8: 테마와 표시 모드를 Firebase 연결 전에 먼저 적용해 화면 깜빡임을 줄입니다.
         (function () {
             try {
                 var theme = localStorage.getItem('hm_theme_last') || 'lavender';
@@ -35,7 +35,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-functions-compat.js"></script>
 
-    <link rel="stylesheet" href="css/style.css?v=step5-10-7-dark-mode-coverage-20260715">
+    <link rel="stylesheet" href="css/style.css?v=step5-10-8-sub-routine-input-history-ui-20260715">
 </head>
 <body class="hm-booting">
 
@@ -116,7 +116,7 @@
     </div>
     <div class="app-subtitle">우리의 하루를, 함께 기록합니다.</div>
     <div class="app-meta-row">
-        <div class="app-version-badge" id="appVersionBadge">Version v1.0 STEP5.10.7</div>
+        <div class="app-version-badge" id="appVersionBadge">Version v1.0 STEP5.10.8</div>
         <div class="home-presence-indicator" id="homePresenceIndicator" title="접속 상태 확인 중">
             <span class="home-presence-dot self offline" id="homePresenceSelfDot" aria-label="나 오프라인"></span>
             <span class="home-presence-dot partner offline" id="homePresencePartnerDot" aria-label="상대 오프라인"></span>
@@ -465,9 +465,9 @@
                 <h2 id="subRoutineHubTitle">🌱 나의 루틴</h2>
                 <button type="button" class="modal-close-btn" onclick="closeSubRoutineHub()">닫기</button>
             </div>
-            <p class="sub-routine-note" id="subRoutineRoleNote">기록(Sub)가 스스로 정하고 완료하는 개인 루틴입니다.</p>
-            <div id="subRoutineManagerList" class="sub-routine-list"></div>
-            <button type="button" class="daily-modal-save sub-routine-add-btn" id="subRoutineAddBtn" onclick="openSubRoutineEditor()">+ 새 루틴 만들기</button>
+            <p class="sub-routine-note" id="subRoutineRoleNote">기록(Sub)가 스스로 정하고 입력하는 개인 루틴입니다.</p>
+            <button type="button" class="daily-modal-save sub-routine-add-btn sub-routine-add-top" id="subRoutineAddBtn" onclick="openSubRoutineEditor()">+ 새 루틴 만들기</button>
+            <div id="subRoutineManagerList" class="sub-routine-list sub-routine-manager-compact"></div>
         </div>
     </div>
 
@@ -479,9 +479,9 @@
             </div>
             <div class="sub-routine-editor-form">
                 <label for="subRoutineTitleInput">루틴 이름</label>
-                <input type="text" id="subRoutineTitleInput" maxlength="30" placeholder="예: 아침 물 한 잔 마시기">
+                <input type="text" id="subRoutineTitleInput" maxlength="30" placeholder="예: 아침 준비">
                 <label for="subRoutineDescInput">간단한 설명</label>
-                <textarea id="subRoutineDescInput" maxlength="100" rows="3" placeholder="예: 일어나자마자 천천히 한 잔 마시기"></textarea>
+                <textarea id="subRoutineDescInput" maxlength="100" rows="2" placeholder="예: 하루를 시작하며 상태를 기록하기"></textarea>
 
                 <fieldset class="sub-routine-schedule-fieldset">
                     <legend>반복 방식</legend>
@@ -489,30 +489,40 @@
                     <label class="sub-routine-schedule-option"><input type="radio" name="subRoutineScheduleType" value="weekdays"> 요일 선택</label>
                     <label class="sub-routine-schedule-option"><input type="radio" name="subRoutineScheduleType" value="once"> 오늘만</label>
                 </fieldset>
-
                 <div class="sub-routine-weekdays" id="subRoutineWeekdays" hidden>
                     <span>반복 요일</span>
                     <div class="sub-routine-weekday-grid">
-                        <label><input type="checkbox" value="1">월</label>
-                        <label><input type="checkbox" value="2">화</label>
-                        <label><input type="checkbox" value="3">수</label>
-                        <label><input type="checkbox" value="4">목</label>
-                        <label><input type="checkbox" value="5">금</label>
-                        <label><input type="checkbox" value="6">토</label>
-                        <label><input type="checkbox" value="0">일</label>
+                        <label><input type="checkbox" value="1">월</label><label><input type="checkbox" value="2">화</label><label><input type="checkbox" value="3">수</label><label><input type="checkbox" value="4">목</label><label><input type="checkbox" value="5">금</label><label><input type="checkbox" value="6">토</label><label><input type="checkbox" value="0">일</label>
                     </div>
                 </div>
+
+                <div class="sub-routine-item-editor-head">
+                    <strong>루틴 안 항목</strong>
+                    <button type="button" onclick="addSubRoutineDraftItem()">+ 항목 추가</button>
+                </div>
+                <div id="subRoutineDraftItems" class="sub-routine-draft-items"></div>
 
                 <label class="sub-routine-pause-option">
                     <input type="checkbox" id="subRoutinePausedInput">
                     <span><strong>일시 중지</strong><small>삭제하지 않고 홈에서 잠시 숨깁니다.</small></span>
                 </label>
-
                 <div class="sub-routine-editor-actions">
                     <button type="button" class="btn-secondary" onclick="closeSubRoutineEditor()">취소</button>
                     <button type="button" class="daily-modal-save" onclick="saveSubRoutine()">저장</button>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <div class="daily-modal-overlay" id="subRoutineInputOverlay" onclick="if(event.target.id==='subRoutineInputOverlay') closeSubRoutineInput()" aria-hidden="true" inert>
+        <div class="daily-modal sub-routine-input-modal" role="dialog" aria-modal="true" aria-labelledby="subRoutineInputTitle">
+            <div class="daily-modal-head">
+                <h2 id="subRoutineInputTitle">🌱 나의 루틴 입력</h2>
+                <button type="button" class="modal-close-btn" onclick="closeSubRoutineInput()">닫기</button>
+            </div>
+            <p class="sub-routine-note" id="subRoutineInputDesc"></p>
+            <div id="subRoutineInputBody" class="sub-routine-input-body"></div>
+            <button type="button" class="daily-modal-save" id="subRoutineInputSaveBtn" onclick="saveSubRoutineInput()">저장하고 닫기</button>
         </div>
     </div>
 
@@ -1243,27 +1253,27 @@
 </div>
 
 <div class="toast" id="toast">기록이 복사되었습니다! 💕</div>
-    <script src="js/config.js?v=step5-10-7-dark-mode-coverage-20260715"></script>
-    <script src="js/utils.js?v=step5-10-7-dark-mode-coverage-20260715"></script>
-    <script src="js/popup.js?v=step5-10-7-dark-mode-coverage-20260715"></script>
-    <script src="js/auth.js?v=step5-10-7-dark-mode-coverage-20260715"></script>
-    <script src="js/room.js?v=step5-10-7-dark-mode-coverage-20260715"></script>
-    <script src="js/presence.js?v=step5-10-7-dark-mode-coverage-20260715"></script>
-    <script src="js/daily.js?v=step5-10-7-dark-mode-coverage-20260715"></script>
-    <script src="js/mission.js?v=step5-10-7-dark-mode-coverage-20260715"></script>
-    <script src="js/custom-routine.js?v=step5-10-7-dark-mode-coverage-20260715"></script>
-    <script src="js/sub-routine.js?v=step5-10-7-dark-mode-coverage-20260715"></script>
-    <script src="js/history.js?v=step5-10-7-dark-mode-coverage-20260715"></script>
-    <script src="js/anniversary.js?v=step5-10-7-dark-mode-coverage-20260715"></script>
-    <script src="js/theme.js?v=step5-10-7-dark-mode-coverage-20260715"></script>
-    <script src="js/profile.js?v=step5-10-7-dark-mode-coverage-20260715"></script>
-    <script src="js/chat.js?v=step5-10-7-dark-mode-coverage-20260715"></script>
-    <script src="js/autosave.js?v=step5-10-7-dark-mode-coverage-20260715"></script>
-    <script src="js/qa.js?v=step5-10-7-dark-mode-coverage-20260715"></script>
-    <script src="js/motion.js?v=step5-10-7-dark-mode-coverage-20260715"></script>
-    <script src="js/product.js?v=step5-10-7-dark-mode-coverage-20260715"></script>
-    <script src="js/help-center.js?v=step5-10-7-dark-mode-coverage-20260715"></script>
-    <script src="js/data-management.js?v=step5-10-7-dark-mode-coverage-20260715"></script>
-    <script src="js/app.js?v=step5-10-7-dark-mode-coverage-20260715"></script>
+    <script src="js/config.js?v=step5-10-8-sub-routine-input-history-ui-20260715"></script>
+    <script src="js/utils.js?v=step5-10-8-sub-routine-input-history-ui-20260715"></script>
+    <script src="js/popup.js?v=step5-10-8-sub-routine-input-history-ui-20260715"></script>
+    <script src="js/auth.js?v=step5-10-8-sub-routine-input-history-ui-20260715"></script>
+    <script src="js/room.js?v=step5-10-8-sub-routine-input-history-ui-20260715"></script>
+    <script src="js/presence.js?v=step5-10-8-sub-routine-input-history-ui-20260715"></script>
+    <script src="js/daily.js?v=step5-10-8-sub-routine-input-history-ui-20260715"></script>
+    <script src="js/mission.js?v=step5-10-8-sub-routine-input-history-ui-20260715"></script>
+    <script src="js/custom-routine.js?v=step5-10-8-sub-routine-input-history-ui-20260715"></script>
+    <script src="js/sub-routine.js?v=step5-10-8-sub-routine-input-history-ui-20260715"></script>
+    <script src="js/history.js?v=step5-10-8-sub-routine-input-history-ui-20260715"></script>
+    <script src="js/anniversary.js?v=step5-10-8-sub-routine-input-history-ui-20260715"></script>
+    <script src="js/theme.js?v=step5-10-8-sub-routine-input-history-ui-20260715"></script>
+    <script src="js/profile.js?v=step5-10-8-sub-routine-input-history-ui-20260715"></script>
+    <script src="js/chat.js?v=step5-10-8-sub-routine-input-history-ui-20260715"></script>
+    <script src="js/autosave.js?v=step5-10-8-sub-routine-input-history-ui-20260715"></script>
+    <script src="js/qa.js?v=step5-10-8-sub-routine-input-history-ui-20260715"></script>
+    <script src="js/motion.js?v=step5-10-8-sub-routine-input-history-ui-20260715"></script>
+    <script src="js/product.js?v=step5-10-8-sub-routine-input-history-ui-20260715"></script>
+    <script src="js/help-center.js?v=step5-10-8-sub-routine-input-history-ui-20260715"></script>
+    <script src="js/data-management.js?v=step5-10-8-sub-routine-input-history-ui-20260715"></script>
+    <script src="js/app.js?v=step5-10-8-sub-routine-input-history-ui-20260715"></script>
 </body>
 </html>

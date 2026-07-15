@@ -361,16 +361,22 @@
     // =========================================================
 
     async function logoutUser() {
-        try { if (window.hmPresenceStop) window.hmPresenceStop(); } catch(e) { console.warn(e); }
-        disconnectAllListeners();
-        activeRoomCode = "";
-        activeRoomRole = "";
-        activeRelationshipRole = "";
-        clearRoomInputs();
-        clearFormFieldsExceptSync();
-        hmSignupFlowActive = false;
-        hideEmailVerificationPanel();
-        try { await babyAuth.signOut(); } catch(e) { console.warn(e); }
+        window.hmIsLoggingOut = true;
+        try {
+            try { if (typeof window.hmStopSubRoutines === 'function') window.hmStopSubRoutines(); } catch(e) { console.warn(e); }
+            try { if (window.hmPresenceStop) window.hmPresenceStop(); } catch(e) { console.warn(e); }
+            disconnectAllListeners();
+            activeRoomCode = "";
+            activeRoomRole = "";
+            activeRelationshipRole = "";
+            clearRoomInputs();
+            clearFormFieldsExceptSync();
+            hmSignupFlowActive = false;
+            hideEmailVerificationPanel();
+            try { await babyAuth.signOut(); } catch(e) { console.warn(e); }
+        } finally {
+            window.hmIsLoggingOut = false;
+        }
     }
 
     // =========================================================
