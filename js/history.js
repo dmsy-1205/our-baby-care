@@ -369,6 +369,18 @@ function openHistoryPanelModal() {
     let selectedHistoryDate = '';
     let hmHistoryCalendarViewDate = '';
 
+    function hmHistoryGetMergedData() {
+        try {
+            if (typeof hmMergeAllDaySecurityRecords === 'function') {
+                return hmMergeAllDaySecurityRecords(cachedDaysData || {}, cachedDayAdminData || {});
+            }
+        } catch (err) {
+            console.warn('[HearMe2nite][HISTORY] merged cache fallback', err);
+        }
+        return cachedDaysData || {};
+    }
+    window.hmHistoryGetMergedData = hmHistoryGetMergedData;
+
     function hmHistoryTodayYmd() {
         const d = new Date();
         return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
@@ -394,13 +406,13 @@ function openHistoryPanelModal() {
         const base = hmHistoryGetCalendarViewBase(cachedDaysData || {});
         base.setMonth(base.getMonth() + Number(delta || 0));
         hmHistorySetCalendarViewFromDate(`${base.getFullYear()}-${String(base.getMonth()+1).padStart(2,'0')}-01`);
-        if (cachedDaysData) displayHistory(cachedDaysData);
+        if (cachedDaysData || cachedDayAdminData) displayHistory(hmHistoryGetMergedData());
     }
 
     function hmHistoryGoToday() {
         hmHistorySetCalendarViewFromDate(hmHistoryTodayYmd());
         selectedHistoryDate = hmHistoryTodayYmd();
-        if (cachedDaysData) displayHistory(cachedDaysData);
+        if (cachedDaysData || cachedDayAdminData) displayHistory(hmHistoryGetMergedData());
     }
 
     window.hmHistoryChangeMonth = hmHistoryChangeMonth;
@@ -427,7 +439,7 @@ function openHistoryPanelModal() {
         hmHistorySetCalendarViewFromDate(date);
         const filterInput = document.getElementById('historyFilterDate');
         if (filterInput) filterInput.value = date;
-        if (cachedDaysData) displayHistory(cachedDaysData);
+        if (cachedDaysData || cachedDayAdminData) displayHistory(hmHistoryGetMergedData());
         // RC2.12.2: 캘린더 날짜를 누르면 하단 카드 경유 없이 바로 하루 기록 팝업을 연다.
         setTimeout(() => openHistoryDetailModal(date), 0);
     }
@@ -435,14 +447,14 @@ function openHistoryPanelModal() {
     function applyHistoryFilter() {
         const filterInput = document.getElementById('historyFilterDate');
         selectedHistoryDate = filterInput ? filterInput.value : selectedHistoryDate;
-        if (cachedDaysData) displayHistory(cachedDaysData);
+        if (cachedDaysData || cachedDayAdminData) displayHistory(hmHistoryGetMergedData());
     }
 
     function clearHistoryFilter() {
         selectedHistoryDate = '';
         const filterInput = document.getElementById('historyFilterDate');
         if (filterInput) filterInput.value = '';
-        if (cachedDaysData) displayHistory(cachedDaysData);
+        if (cachedDaysData || cachedDayAdminData) displayHistory(hmHistoryGetMergedData());
     }
 
 /* RC2 v2.6.0 STEP3: removed duplicate earlier `displayHistory()` implementation; final implementation below is authoritative. */
@@ -738,17 +750,54 @@ function historyDetailBlock(title, body) {
     return `<section class="history-detail-block history-detail-polished-block"><div class="history-detail-block-title">${title}</div><div class="history-detail-block-body">${escapeHtml(String(body))}</div></section>`;
 }
 async function openHistoryDetailModal(date) {
-    let record = cachedDaysData && cachedDaysData[date] ? cachedDaysData[date] : null;
+    const mergedCache = hmHistoryGetMergedData();
+    let record = mergedCache && mergedCache[date] ? mergedCache[date] : null;
     const roomCode = getRoomCodeForData();
+
+    // STEP5.10.11.3: Firebase에 날짜가 존재하지만 로컬 캐시/병합 타이밍 때문에
+    // 기록실에서 보이지 않는 경우 해당 날짜를 서버에서 직접 다시 읽는다.
+    if (roomCode && (!record || typeof record !== 'object')) {
+        try {
+            const [daySnap, adminSnap] = await Promise.all([
+                db.ref(`rooms/${roomCode}/days/${date}`).once('value'),
+                db.ref(`rooms/${roomCode}/dayAdmin/${date}`).once('value')
+            ]);
+            const publicDay = daySnap.val() || {};
+            const adminDay = adminSnap.val() || {};
+            if (daySnap.exists() || adminSnap.exists()) {
+                record = typeof hmMergeDaySecurityRecord === 'function'
+                    ? hmMergeDaySecurityRecord(publicDay, adminDay)
+                    : Object.assign({}, publicDay, adminDay);
+                cachedDaysData = cachedDaysData || {};
+                cachedDayAdminData = cachedDayAdminData || {};
+                if (daySnap.exists()) cachedDaysData[date] = publicDay;
+                if (adminSnap.exists()) cachedDayAdminData[date] = adminDay;
+                console.info('[HearMe2nite][HISTORY_RECOVERY] 서버 기록 직접 복구 표시', {
+                    roomCode,
+                    date,
+                    hasDay: daySnap.exists(),
+                    hasDayAdmin: adminSnap.exists()
+                });
+                displayHistory(hmHistoryGetMergedData());
+            }
+        } catch (err) {
+            console.warn('[HearMe2nite][HISTORY_RECOVERY] 날짜 직접 조회 실패', { roomCode, date, err });
+        }
+    }
+
     if ((!record || !Array.isArray(record.subRoutineSnapshot) || !record.subRoutineSnapshot.length) && roomCode && typeof hmLoadMergedDayRecord === 'function') {
         try {
             const merged = await hmLoadMergedDayRecord(roomCode, date);
-            if (merged) record = merged;
+            if (merged && Object.keys(merged).length) record = Object.assign({}, record || {}, merged);
         } catch (err) {
             console.warn('openHistoryDetailModal.subRoutine', err);
         }
     }
-    if (!record) return;
+    if (!record || !Object.keys(record).length) {
+        if (typeof showToast === 'function') showToast('해당 날짜 기록을 서버에서 찾지 못했습니다.');
+        console.warn('[HearMe2nite][HISTORY] 기록 없음', { roomCode, date });
+        return;
+    }
     const title = document.getElementById('historyDetailTitle');
     const content = document.getElementById('historyDetailContent');
     if (!title || !content) return;
@@ -833,7 +882,7 @@ function hmHistoryApplySearch() {
     const select = document.getElementById('historyTypeFilter');
     hmHistorySearchText = input ? input.value : '';
     hmHistoryTypeFilter = select ? select.value : 'all';
-    if (cachedDaysData) displayHistory(cachedDaysData);
+    if (cachedDaysData || cachedDayAdminData) displayHistory(hmHistoryGetMergedData());
 }
 
 function hmHistoryClearSearch() {
@@ -843,7 +892,7 @@ function hmHistoryClearSearch() {
     const select = document.getElementById('historyTypeFilter');
     if (input) input.value = '';
     if (select) select.value = 'all';
-    if (cachedDaysData) displayHistory(cachedDaysData);
+    if (cachedDaysData || cachedDayAdminData) displayHistory(hmHistoryGetMergedData());
 }
 
 function hmHistorySummaryChips(record) {
