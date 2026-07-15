@@ -1,7 +1,7 @@
-# STEP5.10.12.1 Record Restore Permission QA
+# STEP5.10.12.2 Record Restore Permission QA
 
 1. Deploy Realtime Database Rules: `firebase deploy --only database`.
-2. Deploy the complete web source and confirm BOOT shows STEP5.10.12.1.
+2. Deploy the complete web source and confirm BOOT shows STEP5.10.12.2.
 3. Sign in as Dom and delete a test date.
 4. Open Deleted Records and restore the date.
 5. Confirm `days/{date}` and `dayAdmin/{date}` are recreated when snapshots exist.

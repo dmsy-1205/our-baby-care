@@ -1162,8 +1162,13 @@ function displayHistory(daysData) {
         const user = auth.currentUser;
         if (!user) return alert('로그인 상태를 다시 확인해 주세요.');
 
-        const archiveRef = db.ref(`rooms/${deletionRoomCode}/deletedRecords/${date}`);
+        const room = deletionRoomCode;
+        const archiveRef = db.ref(`rooms/${room}/deletedRecords/${date}`);
+        const dayRef = db.ref(`rooms/${room}/days/${date}`);
+        const adminRef = db.ref(`rooms/${room}/dayAdmin/${date}`);
         let restoreMarkerWritten = false;
+        let dayRestored = false;
+        let adminRestored = false;
 
         try {
             const snap = await archiveRef.once('value');
@@ -1172,15 +1177,23 @@ function displayHistory(daysData) {
             if (Number(item.expiresAt || 0) < Date.now()) return alert('30일 복구 기간이 지났습니다. 관리자 백업을 확인해 주세요.');
             if (!item.originalDay && !item.originalDayAdmin) return alert('복구할 원본 데이터가 없습니다.');
 
-            // A short-lived marker lets Rules distinguish a legitimate restore
-            // from an arbitrary recreation of a deleted day.
+            const [currentDaySnap, currentAdminSnap] = await Promise.all([
+                dayRef.once('value'),
+                adminRef.once('value')
+            ]);
+            if (currentDaySnap.exists() || currentAdminSnap.exists()) {
+                return alert('같은 날짜에 현재 기록이 이미 존재합니다. 기존 기록을 보호하기 위해 복구를 중단했습니다.');
+            }
+
             await archiveRef.update({
                 restoreInProgressBy: user.uid,
                 restoreInProgressAt: firebase.database.ServerValue.TIMESTAMP
             });
             restoreMarkerWritten = true;
 
-            const updates = {};
+            // Do not combine the restore and audit updates at database root.
+            // RTDB evaluates a root multi-location update as one operation, which can
+            // invalidate the temporary restore marker before the day write is checked.
             if (item.originalDay) {
                 const restoredDay = Object.assign({}, item.originalDay, {
                     date,
@@ -1188,35 +1201,57 @@ function displayHistory(daysData) {
                     updatedByEmail: user.email || '',
                     updatedAt: firebase.database.ServerValue.TIMESTAMP
                 });
-                updates[`rooms/${deletionRoomCode}/days/${date}`] = restoredDay;
+                await dayRef.set(restoredDay);
+                dayRestored = true;
             }
+
             if (item.originalDayAdmin) {
                 const restoredAdmin = Object.assign({}, item.originalDayAdmin, {
                     updatedBy: user.uid,
                     updatedByEmail: user.email || '',
                     updatedAt: firebase.database.ServerValue.TIMESTAMP
                 });
-                updates[`rooms/${deletionRoomCode}/dayAdmin/${date}`] = restoredAdmin;
+                await adminRef.set(restoredAdmin);
+                adminRestored = true;
             }
 
-            updates[`rooms/${deletionRoomCode}/deletedRecords/${date}/restored`] = true;
-            updates[`rooms/${deletionRoomCode}/deletedRecords/${date}/restoredAt`] = firebase.database.ServerValue.TIMESTAMP;
-            updates[`rooms/${deletionRoomCode}/deletedRecords/${date}/restoredAtClient`] = Date.now();
-            updates[`rooms/${deletionRoomCode}/deletedRecords/${date}/restoredByUid`] = user.uid;
-            updates[`rooms/${deletionRoomCode}/deletedRecords/${date}/restoredByEmail`] = user.email || '';
-            updates[`rooms/${deletionRoomCode}/deletedRecords/${date}/restoreInProgressBy`] = null;
-            updates[`rooms/${deletionRoomCode}/deletedRecords/${date}/restoreInProgressAt`] = null;
+            await archiveRef.update({
+                restored: true,
+                restoredAt: firebase.database.ServerValue.TIMESTAMP,
+                restoredAtClient: Date.now(),
+                restoredByUid: user.uid,
+                restoredByEmail: user.email || '',
+                restoreInProgressBy: null,
+                restoreInProgressAt: null
+            });
+            restoreMarkerWritten = false;
 
-            await db.ref().update(updates);
             showSaveStatus('♻️ 삭제 기록 복구 완료');
-            console.info('[HearMe2nite][RECORD_RESTORE] 복구 완료', { roomCode: deletionRoomCode, date });
+            console.info('[HearMe2nite][RECORD_RESTORE] 순차 복구 완료', {
+                roomCode: room,
+                date,
+                restoredDay: dayRestored,
+                restoredDayAdmin: adminRestored
+            });
         } catch (err) {
+            // Roll back a partial restore. The archive remains untouched and can be retried.
+            try {
+                const rollbackTasks = [];
+                if (dayRestored) rollbackTasks.push(dayRef.remove());
+                if (adminRestored) rollbackTasks.push(adminRef.remove());
+                if (rollbackTasks.length) await Promise.all(rollbackTasks);
+            } catch (rollbackErr) {
+                console.error('[HearMe2nite][RECORD_RESTORE_ROLLBACK]', rollbackErr);
+            }
+
             if (restoreMarkerWritten) {
                 try {
                     await archiveRef.update({ restoreInProgressBy: null, restoreInProgressAt: null });
                 } catch (_) {}
             }
-            hmReportError('hmRestoreDeletedRecord', err, hmIsFirebasePermissionError(err) ? '❌ 기록 복구 권한 없음 · Firebase Rules 배포를 확인해 주세요' : '❌ 기록 복구 실패');
+            hmReportError('hmRestoreDeletedRecord', err, hmIsFirebasePermissionError(err)
+                ? '❌ 기록 복구 권한 없음 · 최신 Firebase Rules와 배포 상태를 확인해 주세요'
+                : '❌ 기록 복구 실패');
         }
     };
     auth.onAuthStateChanged(() => setTimeout(attach, 300));
