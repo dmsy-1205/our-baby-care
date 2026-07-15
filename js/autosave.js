@@ -116,6 +116,7 @@
         const choiceLabel = record?.dailyChoiceLabel || (typeof getDailyChoiceLabel === 'function' ? getDailyChoiceLabel(record?.dailyChoice || '') : '') || '기록 없음';
         const rewardNote = valueOrEmpty(record?.rewardNote);
         const promiseText = hmBuildRecordCustomRoutineReportText(record);
+        const subRoutineText = (typeof hmBuildSubRoutineReportText === 'function') ? hmBuildSubRoutineReportText(record?.subRoutineSnapshot || []) : '';
 
         const sections = [
             `📅 [${date}] 아가의 하루 기록 💕`
@@ -124,6 +125,7 @@
         // STEP5.7.2: 홈 화면의 큰 구역 순서와 동일하게 정렬합니다.
         // 오늘의 약속 → 오늘의 컨디션 → 오늘의 기록 → 관리와 피드백
         if (promiseText) sections.push(promiseText);
+        if (subRoutineText) sections.push(subRoutineText);
         sections.push(
             `😊 오늘의 기분:
   - 기분: ${moodLabel}${moodNote ? `
@@ -153,12 +155,15 @@
     }
 
     async function hmLoadMergedDayRecord(roomCode, date) {
-        const [publicSnap, adminSnap] = await Promise.all([
+        const [publicSnap, adminSnap, subRoutineSnapshot] = await Promise.all([
             db.ref(`rooms/${roomCode}/days/${date}`).once('value'),
-            db.ref(`rooms/${roomCode}/dayAdmin/${date}`).once('value')
+            db.ref(`rooms/${roomCode}/dayAdmin/${date}`).once('value'),
+            (typeof hmLoadSubRoutineSnapshot === 'function') ? hmLoadSubRoutineSnapshot(roomCode, date) : Promise.resolve([])
         ]);
-        if (!publicSnap.exists() && !adminSnap.exists()) return null;
-        return hmMergeDaySecurityRecord(publicSnap.val() || {}, adminSnap.val() || {});
+        if (!publicSnap.exists() && !adminSnap.exists() && !subRoutineSnapshot.length) return null;
+        const publicRecord = publicSnap.val() || {};
+        if (!Array.isArray(publicRecord.subRoutineSnapshot) || !publicRecord.subRoutineSnapshot.length) publicRecord.subRoutineSnapshot = subRoutineSnapshot;
+        return hmMergeDaySecurityRecord(publicRecord, adminSnap.val() || {});
     }
 
     function hmMergeAllDaySecurityRecords(days, dayAdmin) {
@@ -421,7 +426,8 @@
                 dailyChoice: record.dailyChoice,
                 rewardNote: record.rewardNote,
                 photo: record.photo ? record.photo.slice(0, 80) + ':' + record.photo.length : '',
-                customCardValues: (typeof hmCollectCustomRoutineValues === 'function') ? hmCollectCustomRoutineValues() : {}
+                customCardValues: (typeof hmCollectCustomRoutineValues === 'function') ? hmCollectCustomRoutineValues() : {},
+                subRoutineSnapshot: (typeof hmCurrentSubRoutineSnapshot === 'function') ? hmCurrentSubRoutineSnapshot() : []
             });
         } catch (err) {
             console.warn('autosave.signature', err);
@@ -474,9 +480,11 @@
         const hasPhotoText = uploadedPhotoBase64 ? '📷 사진 첨부 완료' : '사진 없음';
         const customRoutineReport = (typeof hmBuildCustomRoutineReportText === 'function') ? hmBuildCustomRoutineReportText() : '';
         const customCardValues = (typeof hmCollectCustomRoutineValues === 'function') ? hmCollectCustomRoutineValues() : {};
+        const subRoutineSnapshot = (typeof hmCurrentSubRoutineSnapshot === 'function') ? hmCurrentSubRoutineSnapshot() : [];
 
         const publicReportText = `📅 [${date}] 아가의 하루 기록 💕\n\n` +
                            (customRoutineReport ? `${customRoutineReport}\n\n` : '') +
+                           (typeof hmBuildSubRoutineReportText === 'function' && subRoutineSnapshot.length ? `${hmBuildSubRoutineReportText(subRoutineSnapshot)}\n\n` : '') +
                            `😊 오늘의 기분:\n` +
                            `  - 기분: ${moodLabel}${moodNote ? `\n  - 한마디: ${moodNote}` : ''}\n\n` +
                            `⚖️ 체중: ${weight}\n\n` +
@@ -499,6 +507,7 @@
             goingOut, sleepTime, diary,
             missions, mood, moodLabel, moodNote, missionSummary,
             customCardValues,
+            subRoutineSnapshot,
             photo: uploadedPhotoBase64,
             fullText: publicReportText,
             fullTextPublic: publicReportText,

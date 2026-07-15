@@ -671,6 +671,12 @@ function openHistoryPanelModal() {
 
 
 
+function buildHistorySubRoutineText(record) {
+    const snapshot = Array.isArray(record?.subRoutineSnapshot) ? record.subRoutineSnapshot : [];
+    if (!snapshot.length) return '';
+    return snapshot.map(item => `${item.title || '나의 루틴'}: ${item.done === true ? '완료' : '미완료'}${item.scheduleLabel ? ` (${item.scheduleLabel})` : ''}`).join('\n');
+}
+
 function buildHistoryCustomRoutineText(record) {
     const values = record && record.customCardValues ? record.customCardValues : null;
     if (!values || typeof values !== 'object') return '';
@@ -702,8 +708,17 @@ function historyDetailBlock(title, body) {
     if (!body || body === '기록 없음') return '';
     return `<section class="history-detail-block history-detail-polished-block"><div class="history-detail-block-title">${title}</div><div class="history-detail-block-body">${escapeHtml(String(body))}</div></section>`;
 }
-function openHistoryDetailModal(date) {
-    const record = cachedDaysData && cachedDaysData[date] ? cachedDaysData[date] : null;
+async function openHistoryDetailModal(date) {
+    let record = cachedDaysData && cachedDaysData[date] ? cachedDaysData[date] : null;
+    const roomCode = getRoomCodeForData();
+    if ((!record || !Array.isArray(record.subRoutineSnapshot) || !record.subRoutineSnapshot.length) && roomCode && typeof hmLoadMergedDayRecord === 'function') {
+        try {
+            const merged = await hmLoadMergedDayRecord(roomCode, date);
+            if (merged) record = merged;
+        } catch (err) {
+            console.warn('openHistoryDetailModal.subRoutine', err);
+        }
+    }
     if (!record) return;
     const title = document.getElementById('historyDetailTitle');
     const content = document.getElementById('historyDetailContent');
@@ -711,7 +726,8 @@ function openHistoryDetailModal(date) {
     title.innerText = `${getHistoryMoodIcon(record)} ${formatHistoryDateLabel(date)}`;
     const meals = [record.mealBreakfast ? `아침: ${record.mealBreakfast}` : '', record.mealLunch ? `점심: ${record.mealLunch}` : '', record.mealDinner ? `저녁: ${record.mealDinner}` : ''].filter(Boolean).join('\n');
     const customRoutineText = buildHistoryCustomRoutineText(record);
-    const summaryChips = [record.moodLabel && record.moodLabel !== '기록 없음' ? record.moodLabel : '', customRoutineText ? '💜 오늘의 약속' : '', record.photo ? '📷 사진 있음' : '', record.dailyChoiceLabel && record.dailyChoiceLabel !== '기록 없음' ? record.dailyChoiceLabel : ''].filter(Boolean).map(makeHistoryChip).join('');
+    const subRoutineText = buildHistorySubRoutineText(record);
+    const summaryChips = [record.moodLabel && record.moodLabel !== '기록 없음' ? record.moodLabel : '', customRoutineText ? '💜 오늘의 약속' : '', subRoutineText ? '🌱 나의 루틴' : '', record.photo ? '📷 사진 있음' : '', record.dailyChoiceLabel && record.dailyChoiceLabel !== '기록 없음' ? record.dailyChoiceLabel : ''].filter(Boolean).map(makeHistoryChip).join('');
     content.innerHTML = `
         <div class="history-detail-summary-card">
             <div class="history-detail-summary-icon">${getHistoryMoodIcon(record)}</div>
@@ -719,6 +735,7 @@ function openHistoryDetailModal(date) {
         </div>
         ${record.photo ? `<img src="${record.photo}" class="history-detail-photo" alt="${date} 사진">` : ''}
         ${historyDetailBlock('💜 오늘의 약속', customRoutineText)}
+        ${historyDetailBlock('🌱 나의 루틴', subRoutineText)}
         ${historyDetailBlock('😊 오늘의 기분', [record.moodLabel, record.moodNote].filter(Boolean).join('\n'))}
         ${historyDetailBlock('⚖️ 체중', record.weight)}
         ${historyDetailBlock('🏃 오늘의 운동', record.exercise)}
@@ -747,7 +764,7 @@ let hmHistorySearchText = '';
 let hmHistoryTypeFilter = 'all';
 
 function hmHistoryRecordHasRoutine(record) {
-    return !!(record && record.customCardValues && Object.keys(record.customCardValues || {}).length);
+    return !!(record && ((record.customCardValues && Object.keys(record.customCardValues || {}).length) || (Array.isArray(record.subRoutineSnapshot) && record.subRoutineSnapshot.length)));
 }
 
 function hmHistoryRecordText(record) {

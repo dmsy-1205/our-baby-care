@@ -1,9 +1,9 @@
 // =========================================================
-// HearMe2nite v1.0 STEP5.10.5
+// HearMe2nite v1.0 STEP5.10.6
 // sub-routine.js - 기록(Sub) 자기주도 루틴 2단계
 // 정의: rooms/{roomCode}/subRoutines/{routineId}
 // 완료: rooms/{roomCode}/subRoutineDays/{date}/{routineId}
-// 기능: 매일 / 요일 선택 / 오늘만 / 일시 중지
+// 기능: 매일 / 요일 선택 / 오늘만 / 일시 중지 / 기록실·최종 복사 연동
 // =========================================================
 const HM_SUB_ROUTINE_MAX = 7;
 let hmSubRoutineRoomCode = '';
@@ -12,6 +12,9 @@ let hmSubRoutineDayRef = null;
 let hmSubRoutines = {};
 let hmSubRoutineChecks = {};
 let hmSubRoutineEditingId = '';
+let hmSubRoutineDefsLoaded = false;
+let hmSubRoutineDayLoaded = false;
+let hmSubRoutineSnapshotSyncing = false;
 
 function hmCanManageSubRoutine() {
     return !!currentUser && activeRelationshipRole === 'sub';
@@ -55,6 +58,104 @@ function hmSubRoutineScheduleLabel(row) {
     }
     return '매일';
 }
+function hmBuildSubRoutineSnapshot(definitions = {}, checks = {}, dateText = hmSubRoutineDate()) {
+    const definitionRows = Object.entries(definitions || {}).map(([id, value]) => ({ id, ...(value || {}) }));
+    const byId = new Map(definitionRows.map(row => [row.id, row]));
+    const result = [];
+
+    definitionRows
+        .filter(row => row.deleted !== true && hmSubRoutineAppliesOnDate(row, dateText))
+        .sort((a, b) => Number(a.order || 0) - Number(b.order || 0) || Number(a.createdAt || 0) - Number(b.createdAt || 0))
+        .forEach(row => {
+            const saved = checks?.[row.id] || {};
+            result.push({
+                id: row.id,
+                title: String(saved.title || row.title || '나의 루틴').slice(0, 30),
+                description: String(saved.description || row.description || '').slice(0, 100),
+                scheduleLabel: String(saved.scheduleLabel || hmSubRoutineScheduleLabel(row)).slice(0, 40),
+                order: Number(saved.order ?? row.order ?? 0),
+                done: saved.done === true
+            });
+        });
+
+    // 과거 날짜에서 루틴이 수정·삭제된 뒤에도 당시 저장된 항목은 보존한다.
+    Object.entries(checks || {}).forEach(([id, saved]) => {
+        if (!saved || typeof saved !== 'object' || byId.has(id) || id.startsWith('_')) return;
+        result.push({
+            id,
+            title: String(saved.title || '나의 루틴').slice(0, 30),
+            description: String(saved.description || '').slice(0, 100),
+            scheduleLabel: String(saved.scheduleLabel || '당시 루틴').slice(0, 40),
+            order: Number(saved.order || 9999),
+            done: saved.done === true
+        });
+    });
+
+    return result.sort((a, b) => Number(a.order || 0) - Number(b.order || 0) || a.title.localeCompare(b.title));
+}
+function hmBuildSubRoutineReportText(snapshot = []) {
+    if (!Array.isArray(snapshot) || !snapshot.length) return '';
+    const lines = snapshot.map(item => `  - ${item.title || '나의 루틴'}: ${item.done === true ? '완료' : '미완료'}${item.scheduleLabel ? ` (${item.scheduleLabel})` : ''}`);
+    return `🌱 나의 루틴:\n${lines.join('\n')}`;
+}
+async function hmLoadSubRoutineSnapshot(roomCode, dateText) {
+    if (!roomCode || !dateText) return [];
+    const [definitionsSnap, checksSnap] = await Promise.all([
+        db.ref(`rooms/${roomCode}/subRoutines`).once('value'),
+        db.ref(`rooms/${roomCode}/subRoutineDays/${dateText}`).once('value')
+    ]);
+    return hmBuildSubRoutineSnapshot(definitionsSnap.val() || {}, checksSnap.val() || {}, dateText);
+}
+function hmCurrentSubRoutineSnapshot() {
+    return hmBuildSubRoutineSnapshot(hmSubRoutines, hmSubRoutineChecks, hmSubRoutineDate());
+}
+async function hmPersistSubRoutineSnapshotToDay() {
+    if (!hmCanManageSubRoutine() || !currentUser || !hmSubRoutineRoomCode || hmSubRoutineSnapshotSyncing) return;
+    const dateText = hmSubRoutineDate();
+    const snapshot = hmCurrentSubRoutineSnapshot();
+    hmSubRoutineSnapshotSyncing = true;
+    try {
+        await db.ref(`rooms/${hmSubRoutineRoomCode}/days/${dateText}`).update({
+            date: dateText,
+            subRoutineSnapshot: snapshot,
+            updatedBy: currentUser.uid,
+            updatedByEmail: currentUser.email || '',
+            updatedAt: firebase.database.ServerValue.TIMESTAMP
+        });
+    } catch (err) {
+        hmReportError('hmPersistSubRoutineSnapshotToDay', err, hmIsFirebasePermissionError(err) ? '❌ 나의 루틴 기록 저장 권한 없음' : '❌ 나의 루틴 기록 연결 실패');
+    } finally {
+        hmSubRoutineSnapshotSyncing = false;
+    }
+}
+async function hmEnsureSubRoutineDaySnapshot() {
+    if (!hmCanManageSubRoutine() || !hmSubRoutineRoomCode || !hmSubRoutineDefsLoaded || !hmSubRoutineDayLoaded) return;
+    const dateText = hmSubRoutineDate();
+    const missing = {};
+    hmSubRoutineActiveRows(dateText).forEach(row => {
+        if (hmSubRoutineChecks?.[row.id]) return;
+        missing[row.id] = {
+            done: false,
+            title: String(row.title || '나의 루틴').slice(0, 30),
+            description: String(row.description || '').slice(0, 100),
+            scheduleLabel: String(hmSubRoutineScheduleLabel(row)).slice(0, 40),
+            order: Number(row.order || 0),
+            snapshotAt: firebase.database.ServerValue.TIMESTAMP,
+            updatedByUid: currentUser.uid,
+            updatedAt: firebase.database.ServerValue.TIMESTAMP
+        };
+    });
+    if (Object.keys(missing).length) {
+        try {
+            await db.ref(`rooms/${hmSubRoutineRoomCode}/subRoutineDays/${dateText}`).update(missing);
+        } catch (err) {
+            hmReportError('hmEnsureSubRoutineDaySnapshot', err, '❌ 나의 루틴 날짜 기록 준비 실패');
+            return;
+        }
+    }
+    await hmPersistSubRoutineSnapshotToDay();
+}
+
 function hmSubRoutineEscape(v){ return typeof escapeHtml==='function'?escapeHtml(String(v||'')):String(v||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
 function hmSubRoutineId(){ return `sr_${Date.now().toString(36)}_${Math.random().toString(36).slice(2,7)}`; }
 function hmOpenSubRoutineOverlay(id) {
@@ -72,18 +173,18 @@ function hmStartSubRoutines(roomCode){
     hmStopSubRoutines(); hmSubRoutineRoomCode = roomCode || '';
     if(!roomCode || !currentUser){ renderSubRoutine(); return; }
     hmSubRoutinesRef=db.ref(`rooms/${roomCode}/subRoutines`);
-    hmSubRoutinesRef.on('value',snap=>{hmSubRoutines=snap.val()||{};renderSubRoutine();},err=>hmReportError('hmStartSubRoutines',err,'❌ 나의 루틴 불러오기 실패'));
+    hmSubRoutinesRef.on('value',snap=>{hmSubRoutines=snap.val()||{};hmSubRoutineDefsLoaded=true;renderSubRoutine();hmEnsureSubRoutineDaySnapshot();},err=>hmReportError('hmStartSubRoutines',err,'❌ 나의 루틴 불러오기 실패'));
     hmListenSubRoutineDay();
 }
 function hmStopSubRoutines(){
     if(hmSubRoutinesRef)hmSubRoutinesRef.off(); if(hmSubRoutineDayRef)hmSubRoutineDayRef.off();
-    hmSubRoutinesRef=null;hmSubRoutineDayRef=null;hmSubRoutines={};hmSubRoutineChecks={};hmSubRoutineRoomCode='';renderSubRoutine();
+    hmSubRoutinesRef=null;hmSubRoutineDayRef=null;hmSubRoutines={};hmSubRoutineChecks={};hmSubRoutineRoomCode='';hmSubRoutineDefsLoaded=false;hmSubRoutineDayLoaded=false;renderSubRoutine();
 }
 function hmListenSubRoutineDay(){
-    if(hmSubRoutineDayRef)hmSubRoutineDayRef.off(); hmSubRoutineDayRef=null; hmSubRoutineChecks={};
+    if(hmSubRoutineDayRef)hmSubRoutineDayRef.off(); hmSubRoutineDayRef=null; hmSubRoutineChecks={}; hmSubRoutineDayLoaded=false;
     if(!hmSubRoutineRoomCode)return renderSubRoutine();
     hmSubRoutineDayRef=db.ref(`rooms/${hmSubRoutineRoomCode}/subRoutineDays/${hmSubRoutineDate()}`);
-    hmSubRoutineDayRef.on('value',snap=>{hmSubRoutineChecks=snap.val()||{};renderSubRoutine();},err=>hmReportError('hmListenSubRoutineDay',err,'❌ 나의 루틴 완료 상태 불러오기 실패'));
+    hmSubRoutineDayRef.on('value',snap=>{hmSubRoutineChecks=snap.val()||{};hmSubRoutineDayLoaded=true;renderSubRoutine();hmEnsureSubRoutineDaySnapshot();},err=>hmReportError('hmListenSubRoutineDay',err,'❌ 나의 루틴 완료 상태 불러오기 실패'));
 }
 function renderSubRoutine(){
     const allRows=hmSubRoutineRows();
@@ -196,7 +297,7 @@ async function toggleSubRoutine(id){
     const routine=hmSubRoutines?.[id];
     if(!routine||!hmSubRoutineAppliesOnDate(routine))return showSaveStatus('🌱 선택한 날짜에는 실행하지 않는 루틴입니다.');
     const done=hmSubRoutineChecks?.[id]?.done===true;
-    try{await db.ref(`rooms/${hmSubRoutineRoomCode}/subRoutineDays/${hmSubRoutineDate()}/${id}`).set({done:!done,title:routine.title||'나의 루틴',updatedByUid:currentUser.uid,updatedAt:firebase.database.ServerValue.TIMESTAMP});showSaveStatus(!done?'🌱 루틴 완료':'🌱 완료 취소');}
+    try{await db.ref(`rooms/${hmSubRoutineRoomCode}/subRoutineDays/${hmSubRoutineDate()}/${id}`).update({done:!done,title:routine.title||'나의 루틴',description:routine.description||'',scheduleLabel:hmSubRoutineScheduleLabel(routine),order:Number(routine.order||0),updatedByUid:currentUser.uid,updatedAt:firebase.database.ServerValue.TIMESTAMP});await hmPersistSubRoutineSnapshotToDay();showSaveStatus(!done?'🌱 루틴 완료':'🌱 완료 취소');}
     catch(err){hmReportError('toggleSubRoutine',err,'❌ 나의 루틴 완료 저장 실패');}
 }
 async function deleteSubRoutine(id){
@@ -217,3 +318,8 @@ window.closeSubRoutineEditor = closeSubRoutineEditor;
 window.saveSubRoutine = saveSubRoutine;
 window.toggleSubRoutine = toggleSubRoutine;
 window.deleteSubRoutine = deleteSubRoutine;
+
+window.hmBuildSubRoutineSnapshot = hmBuildSubRoutineSnapshot;
+window.hmBuildSubRoutineReportText = hmBuildSubRoutineReportText;
+window.hmLoadSubRoutineSnapshot = hmLoadSubRoutineSnapshot;
+window.hmCurrentSubRoutineSnapshot = hmCurrentSubRoutineSnapshot;

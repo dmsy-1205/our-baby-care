@@ -183,6 +183,10 @@
             },
             "$other": {
               ".write": false
+            },
+            "subRoutineSnapshot": {
+              ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (root.child('roomMembers').child($roomCode).child(auth.uid).exists() && (!root.child('users').child(auth.uid).child('emailVerificationRequired').exists() || auth.token.email_verified === true)))",
+              ".validate": "!newData.exists() || newData.hasChildren() || newData.val() === null"
             }
           }
         },
@@ -299,7 +303,7 @@
           "$date": {
             "$routineId": {
               ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (root.child('roomMembers').child($roomCode).child(auth.uid).exists() && (root.child('roomMembers').child($roomCode).child(auth.uid).child('relationshipRole').val() === 'sub' || root.child('roomMembers').child($roomCode).child(auth.uid).child('role').val() === 'partner') && (!root.child('users').child(auth.uid).child('emailVerificationRequired').exists() || auth.token.email_verified === true)))",
-              ".validate": "!newData.exists() || (newData.child('done').isBoolean() && newData.child('title').isString() && newData.child('title').val().length <= 30 && newData.child('updatedByUid').val() === auth.uid && newData.child('updatedAt').isNumber())"
+              ".validate": "!newData.exists() || (newData.child('done').isBoolean() && newData.child('title').isString() && newData.child('title').val().length <= 30 && newData.child('updatedByUid').val() === auth.uid && newData.child('updatedAt').isNumber() && (!newData.child('description').exists() || (newData.child('description').isString() && newData.child('description').val().length <= 100)) && (!newData.child('scheduleLabel').exists() || (newData.child('scheduleLabel').isString() && newData.child('scheduleLabel').val().length <= 40)) && (!newData.child('order').exists() || newData.child('order').isNumber()) && (!newData.child('snapshotAt').exists() || newData.child('snapshotAt').isNumber()))"
             }
           }
         }

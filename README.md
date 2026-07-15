@@ -1,12 +1,20 @@
-# HearMe2nite v1.0 STEP5.10.5
+# HearMe2nite v1.0 STEP5.10.6
+
+## STEP5.10.6 — 나의 루틴 3단계
+
+- 나의 루틴을 최종 복사 결과와 기록실에 연동
+- 날짜별 루틴 스냅샷 보존
+- Dom 읽기 전용 확인 유지
+- 기존 테마, 다크모드, Room, 초대, 오늘의 약속 기능 유지
+
 
 ## 현재 변경 사항
 
 나의 루틴 2단계로 매일, 요일 선택, 오늘만, 일시 중지 기능을 추가했습니다. 기존 루틴은 별도 변경 없이 매일 루틴으로 계속 작동합니다.
 
-# HearMe2nite v1.0 STEP5.10.5
+# HearMe2nite v1.0 STEP5.10.6
 
-## STEP5.10.5
+## STEP5.10.6
 - 나의 루틴 관리 버튼 중복 제거
 - 나의 루틴 대표 카드에서 생성·수정·삭제 관리
 - 홈의 개별 루틴 카드는 완료 체크 전용
@@ -63,11 +71,11 @@ Realtime Database invite child fields are explicitly declared so normal invite c
 - No feature or Firebase data-path migration was added in this release.
 
 
-## STEP5.10.5
+## STEP5.10.6
 
 - 여섯 가지 테마의 배경·카드·버튼·입력·아이콘·그림자를 서로 다른 분위기로 완성했습니다.
 - 모바일 화면에서도 테마 차이를 즉시 확인할 수 있도록 색상 면적과 대비를 강화했습니다.
 앱 전체 구성요소를 의미 기반 테마 토큰으로 연결한 테마 엔진 기반 버전입니다.
 
 
-STEP5.10.5: 개인/공용 테마 동기화와 전환 UX 최종 마무리.
+STEP5.10.6: 개인/공용 테마 동기화와 전환 UX 최종 마무리.
