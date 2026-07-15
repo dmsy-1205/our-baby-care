@@ -144,7 +144,30 @@
     // =========================================================
 
 
+    function hmApplyManagerOnlyModalView(name) {
+        if (!['feedback', 'reward'].includes(name)) return;
+        const overlay = document.getElementById(`${name}ModalOverlay`);
+        const modal = overlay?.querySelector('.daily-modal');
+        if (!modal) return;
+
+        const restricted = !canManageRelationshipCards();
+        modal.classList.toggle('hm-sub-manager-restricted', restricted);
+
+        let notice = modal.querySelector('.hm-manager-restricted-message');
+        if (!notice) {
+            notice = document.createElement('div');
+            notice.className = 'hm-manager-restricted-message';
+            notice.setAttribute('role', 'status');
+            notice.innerHTML = '<span aria-hidden="true">🔒</span><strong>관리자가 사용하는 화면입니다.</strong><small>관리(Dom)가 내용을 작성하면 홈 카드와 기록실에서 확인할 수 있습니다.</small>';
+            const head = modal.querySelector('.daily-modal-head');
+            if (head) head.insertAdjacentElement('afterend', notice);
+            else modal.prepend(notice);
+        }
+        notice.hidden = !restricted;
+    }
+
     function openDailyModal(name) {
+        hmApplyManagerOnlyModalView(name);
         openModalOverlayById(`${name}ModalOverlay`);
         updateManagedFieldAccessControls();
         updateDailyCards();
@@ -153,7 +176,9 @@
     function closeDailyModal(name) {
         closeModalOverlayById(`${name}ModalOverlay`);
         updateDailyCards();
-        triggerAutoSave('daily-modal-save');
+        if (!(['feedback', 'reward'].includes(name) && !canManageRelationshipCards())) {
+            triggerAutoSave('daily-modal-save');
+        }
     }
 
     // =========================================================

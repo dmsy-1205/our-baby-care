@@ -10784,3 +10784,69 @@ html[data-hm-display="dark"] .hm-release-meta { color:var(--hm-text-muted, #b9b2
 
 /* STEP5.10.11.1: prominent Sub deletion notice below account card */
 .record-deletion-home-prominent{margin:10px 0 14px}.record-deletion-home-prominent .record-deletion-home-button{border-width:2px;box-shadow:0 10px 28px rgba(180,95,120,.13)}
+
+
+/* =========================================================
+   STEP5.10.11.2 Manager-only view guard / dark-mode full audit
+   ========================================================= */
+.hm-manager-restricted-message{
+  display:grid;justify-items:center;gap:8px;margin:18px 0 8px;padding:28px 20px;
+  border:1px solid var(--hm-line-soft,rgba(120,90,170,.18));border-radius:22px;
+  background:var(--hm-surface-card-soft,rgba(248,245,252,.92));text-align:center;
+}
+.hm-manager-restricted-message[hidden]{display:none!important}
+.hm-manager-restricted-message>span{font-size:2rem}
+.hm-manager-restricted-message strong{color:var(--hm-color-title,#2f2a3d);font-size:1rem;font-weight:900}
+.hm-manager-restricted-message small{max-width:360px;color:var(--hm-color-muted,#81798d);font-size:.82rem;line-height:1.55}
+.daily-modal.hm-sub-manager-restricted>:not(.daily-modal-head):not(.hm-manager-restricted-message){display:none!important}
+.daily-modal.hm-sub-manager-restricted{min-height:250px}
+
+:root[data-hm-theme][data-hm-display="dark"] :is(
+  .help-center-card,.help-center-header,.help-hero,.help-search-wrap,.help-center-panels,.help-panel,
+  .help-menu-card,.help-mini-card,.help-result-card,.help-empty-result,.faq-question,.faq-answer,
+  .help-tip-list div,.help-random-tip,.hm-release-card,.guide-faq .faq-item,
+  .manager-lock-note,.feedback-hint,.feedback-review-card,.trust-card,.todays-gift-intro,
+  .data-policy-card,.data-admin-summary,.record-deletion-home-button,.record-deletion-panel,
+  .record-deletion-summary span,.record-deletion-filters button,.record-deletion-item,
+  .hm-manager-restricted-message
+){
+  background:linear-gradient(145deg,var(--hm-dark-card),color-mix(in srgb,var(--hm-dark-card-soft) 82%,var(--hm-dark-card) 18%))!important;
+  color:var(--hm-color-body)!important;
+  border-color:var(--hm-dark-line)!important;
+  box-shadow:none!important;
+}
+:root[data-hm-theme][data-hm-display="dark"] :is(
+  .help-search-input,.help-center-card input,.help-center-card textarea,.help-center-card select,
+  .daily-modal input,.daily-modal textarea,.daily-modal select
+){
+  background:var(--hm-dark-input)!important;color:var(--hm-color-body)!important;
+  border-color:var(--hm-dark-line)!important;box-shadow:none!important;
+}
+:root[data-hm-theme][data-hm-display="dark"] :is(
+  .help-center-kicker,.help-hero p,.help-hero span,.help-search-label,.help-menu-card small,
+  .help-mini-card p,.help-result-card span,.help-empty-result,.faq-answer,.help-tip-list div,
+  .hm-release-meta,.manager-lock-note,.feedback-hint,.todays-gift-intro span,
+  .hm-manager-restricted-message small
+){color:var(--hm-color-muted)!important}
+:root[data-hm-theme][data-hm-display="dark"] :is(
+  .help-hero strong,.help-menu-card strong,.help-mini-card h3,.help-result-card strong,
+  .faq-question,.help-random-tip p,.guide-faq .faq-item strong,.hm-manager-restricted-message strong,
+  .feedback-review-head strong,.todays-gift-intro strong
+){color:var(--hm-color-title)!important}
+:root[data-hm-theme][data-hm-display="dark"] :is(.help-tab,.help-small-btn,.guide-primary,.guide-close){
+  background:color-mix(in srgb,var(--hm-dark-card-soft) 82%,var(--hm-primary) 18%)!important;
+  color:var(--hm-color-body)!important;border-color:var(--hm-dark-line)!important;
+}
+:root[data-hm-theme][data-hm-display="dark"] .help-tab.active{
+  background:linear-gradient(135deg,color-mix(in srgb,var(--hm-primary) 28%,var(--hm-dark-card-soft)),color-mix(in srgb,var(--hm-accent) 22%,var(--hm-dark-card)))!important;
+  color:#fff!important;
+}
+:root[data-hm-theme][data-hm-display="dark"] .help-tip{
+  background:color-mix(in srgb,#8a6940 20%,var(--hm-dark-card))!important;
+  color:#f1d7ac!important;border:1px solid color-mix(in srgb,#c89a59 32%,var(--hm-dark-line))!important;
+}
+:root[data-hm-theme][data-hm-display="dark"] :is(.help-center-header,.daily-modal-head){
+  background:transparent!important;color:var(--hm-color-title)!important;
+}
+:root[data-hm-theme][data-hm-display="dark"] .help-center-card::-webkit-scrollbar-track{background:var(--hm-dark-shell)}
+:root[data-hm-theme][data-hm-display="dark"] .help-center-card::-webkit-scrollbar-thumb{background:var(--hm-dark-line)}
