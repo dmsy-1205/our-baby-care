@@ -15,3 +15,11 @@
 ## 배포 안내
 
 Firebase Realtime Database Rules 변경은 없습니다. Hosting 또는 Netlify 전체 소스만 배포합니다.
+
+
+## STEP5.10.11.1 Firebase App Hotfix
+
+- Fixed deletion code calling the missing Firebase `[DEFAULT]` app.
+- Uses the existing named `babyApp` Auth/Database references.
+- Shows the unseen deletion notice directly below the account card on Home.
+- Verify Dom delete, Sub notice, acknowledgement, and Dom restore with two real accounts.

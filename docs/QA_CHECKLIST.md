@@ -58,3 +58,11 @@ await hmRunSecurityCompatibilityQA()
 ```js
 hmGetLastSecurityCompatibilityReport()
 ```
+
+
+## STEP5.10.11.1 Firebase App Hotfix
+
+- Fixed deletion code calling the missing Firebase `[DEFAULT]` app.
+- Uses the existing named `babyApp` Auth/Database references.
+- Shows the unseen deletion notice directly below the account card on Home.
+- Verify Dom delete, Sub notice, acknowledgement, and Dom restore with two real accounts.

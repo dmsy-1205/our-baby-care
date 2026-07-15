@@ -137,7 +137,7 @@
     async function deleteRecord(event, date) {
         event.stopPropagation();
         const roomCode = getRoomCodeForData();
-        const user = firebase.auth().currentUser;
+        const user = auth.currentUser;
         if (!date || !roomCode || !user) return;
         if (!(await hmRequireRoomAccess('기록 삭제', roomCode)) || !canManageRelationshipCards()) { alert('기록 삭제는 관리(Dom) 또는 Room Owner만 가능합니다.'); return; }
         const confirmed = confirm(`${date} 기록을 삭제하시겠습니까?
@@ -977,7 +977,7 @@ function displayHistory(daysData) {
         return new Date(n).toLocaleString('ko-KR', {year:'numeric',month:'long',day:'numeric',hour:'2-digit',minute:'2-digit'});
     }
     function currentUid() {
-        const u = firebase.auth().currentUser;
+        const u = auth.currentUser;
         return u ? u.uid : '';
     }
     function canRestore() {
@@ -1065,7 +1065,8 @@ function displayHistory(daysData) {
         render();
     }
     function attach() {
-        const user = firebase.auth().currentUser;
+        if (typeof auth === 'undefined' || typeof db === 'undefined') return;
+        const user = auth.currentUser;
         const room = (typeof getRoomCodeForData === 'function' && getRoomCodeForData()) || '';
         if (!user || !room) { if (deletionRef) detach(); return; }
         if (room === deletionRoomCode && deletionRef) return;
@@ -1091,7 +1092,7 @@ function displayHistory(daysData) {
             const item = snap.val();
             if (!item || item.restored === true) return alert('복구할 기록이 없거나 이미 복구되었습니다.');
             if (Number(item.expiresAt || 0) < Date.now()) return alert('30일 복구 기간이 지났습니다. 관리자 백업을 확인해 주세요.');
-            const user = firebase.auth().currentUser;
+            const user = auth.currentUser;
             const updates = {};
             if (item.originalDay) updates[`rooms/${deletionRoomCode}/days/${date}`] = item.originalDay;
             if (item.originalDayAdmin) updates[`rooms/${deletionRoomCode}/dayAdmin/${date}`] = item.originalDayAdmin;
@@ -1104,7 +1105,7 @@ function displayHistory(daysData) {
             showSaveStatus('♻️ 삭제 기록 복구 완료');
         } catch (err) { hmReportError('hmRestoreDeletedRecord', err, hmIsFirebasePermissionError(err) ? '❌ 기록 복구 권한 없음' : '❌ 기록 복구 실패'); }
     };
-    firebase.auth().onAuthStateChanged(() => setTimeout(attach, 300));
+    auth.onAuthStateChanged(() => setTimeout(attach, 300));
     setInterval(attach, 2500);
     document.addEventListener('visibilitychange', () => { if (!document.hidden) attach(); });
 })();

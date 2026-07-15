@@ -5,15 +5,18 @@
 (function () {
     const release = Object.freeze({
         product: 'HearMe2nite',
-        version: 'v1.0 STEP5.10.11',
-        appVersion: 'HearMe2nite v1.0 STEP5.10.11',
-        step: 'STEP5.10.11',
+        version: 'v1.0 STEP5.10.11.1',
+        appVersion: 'HearMe2nite v1.0 STEP5.10.11.1',
+        step: 'STEP5.10.11.1',
         build: '20260715',
         releaseDate: '2026.07.15',
         stage: 'Beta',
-        title: '삭제 기록 관리·상태 필터·복구 감사 강화',
-        description: '삭제 기록의 상태·삭제자·확인·복구 정보를 한 화면에서 관리하고 기록 소실 원인을 더 정확히 추적합니다.',
+        title: 'Firebase 앱 초기화·삭제 알림 표시 핫픽스',
+        description: '삭제 기능의 Firebase Auth 참조 오류를 수정하고 Sub 삭제 알림 카드를 홈 상단에서 명확하게 확인할 수 있도록 개선합니다.',
         changes: Object.freeze([
+            '삭제 기능이 이름 없는 Firebase 기본 앱을 호출하던 오류 수정',
+            '삭제·복구·확인 기능을 기존 babyApp Auth와 Database 연결로 통일',
+            'Sub 미확인 삭제 알림을 홈 계정 카드 바로 아래에 표시',
             '삭제 기록을 전체·복구 가능·복구 완료·기간 만료 상태로 구분하여 조회',
             '삭제자 이메일·삭제 시간·수동 삭제 사유·앱 버전을 기록실에 명확히 표시',
             '복구 가능 일수와 Room 구성원의 확인 기록을 함께 표시',
