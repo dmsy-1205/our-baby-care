@@ -35,7 +35,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-functions-compat.js"></script>
 
-    <link rel="stylesheet" href="css/style.css?v=step5-10-11-3-history-server-recovery-20260715">
+    <link rel="stylesheet" href="css/style.css?v=step5-10-12-history-center-renewal-20260715">
 </head>
 <body class="hm-booting">
 
@@ -686,6 +686,16 @@
     </div>
 </div>
 
+<div class="record-deletion-modal-overlay" id="recordDeletionModalOverlay" hidden onclick="if(event.target.id==='recordDeletionModalOverlay') closeDeletedRecordsModal()">
+  <div class="record-deletion-modal" role="dialog" aria-modal="true" aria-labelledby="recordDeletionModalTitle">
+    <div class="history-detail-head">
+      <div><div class="history-detail-kicker">Deletion History</div><h2 id="recordDeletionModalTitle">🗑️ 삭제된 기록</h2></div>
+      <button type="button" class="modal-close-btn" onclick="closeDeletedRecordsModal()">닫기</button>
+    </div>
+    <div id="recordDeletionModalContent"></div>
+  </div>
+</div>
+
 <div class="history-detail-overlay" id="historyDetailOverlay" onclick="if(event.target.id==='historyDetailOverlay') closeHistoryDetailModal()">
     <div class="history-detail-modal" role="dialog" aria-modal="true" aria-labelledby="historyDetailTitle">
         <div class="history-detail-head">
@@ -1243,28 +1253,28 @@
 </div>
 
 <div class="toast" id="toast">기록이 복사되었습니다! 💕</div>
-    <script src="js/release-info.js?v=step5-10-11-3-history-server-recovery-20260715"></script>
-    <script src="js/config.js?v=step5-10-11-3-history-server-recovery-20260715"></script>
-    <script src="js/utils.js?v=step5-10-11-3-history-server-recovery-20260715"></script>
-    <script src="js/popup.js?v=step5-10-11-3-history-server-recovery-20260715"></script>
-    <script src="js/auth.js?v=step5-10-11-3-history-server-recovery-20260715"></script>
-    <script src="js/room.js?v=step5-10-11-3-history-server-recovery-20260715"></script>
-    <script src="js/presence.js?v=step5-10-11-3-history-server-recovery-20260715"></script>
-    <script src="js/daily.js?v=step5-10-11-3-history-server-recovery-20260715"></script>
-    <script src="js/mission.js?v=step5-10-11-3-history-server-recovery-20260715"></script>
-    <script src="js/custom-routine.js?v=step5-10-11-3-history-server-recovery-20260715"></script>
-    <script src="js/sub-routine.js?v=step5-10-11-3-history-server-recovery-20260715"></script>
-    <script src="js/history.js?v=step5-10-11-3-history-server-recovery-20260715"></script>
-    <script src="js/anniversary.js?v=step5-10-11-3-history-server-recovery-20260715"></script>
-    <script src="js/theme.js?v=step5-10-11-3-history-server-recovery-20260715"></script>
-    <script src="js/profile.js?v=step5-10-11-3-history-server-recovery-20260715"></script>
-    <script src="js/chat.js?v=step5-10-11-3-history-server-recovery-20260715"></script>
-    <script src="js/autosave.js?v=step5-10-11-3-history-server-recovery-20260715"></script>
-    <script src="js/qa.js?v=step5-10-11-3-history-server-recovery-20260715"></script>
-    <script src="js/motion.js?v=step5-10-11-3-history-server-recovery-20260715"></script>
-    <script src="js/product.js?v=step5-10-11-3-history-server-recovery-20260715"></script>
-    <script src="js/help-center.js?v=step5-10-11-3-history-server-recovery-20260715"></script>
-    <script src="js/data-management.js?v=step5-10-11-3-history-server-recovery-20260715"></script>
-    <script src="js/app.js?v=step5-10-11-3-history-server-recovery-20260715"></script>
+    <script src="js/release-info.js?v=step5-10-12-history-center-renewal-20260715"></script>
+    <script src="js/config.js?v=step5-10-12-history-center-renewal-20260715"></script>
+    <script src="js/utils.js?v=step5-10-12-history-center-renewal-20260715"></script>
+    <script src="js/popup.js?v=step5-10-12-history-center-renewal-20260715"></script>
+    <script src="js/auth.js?v=step5-10-12-history-center-renewal-20260715"></script>
+    <script src="js/room.js?v=step5-10-12-history-center-renewal-20260715"></script>
+    <script src="js/presence.js?v=step5-10-12-history-center-renewal-20260715"></script>
+    <script src="js/daily.js?v=step5-10-12-history-center-renewal-20260715"></script>
+    <script src="js/mission.js?v=step5-10-12-history-center-renewal-20260715"></script>
+    <script src="js/custom-routine.js?v=step5-10-12-history-center-renewal-20260715"></script>
+    <script src="js/sub-routine.js?v=step5-10-12-history-center-renewal-20260715"></script>
+    <script src="js/history.js?v=step5-10-12-history-center-renewal-20260715"></script>
+    <script src="js/anniversary.js?v=step5-10-12-history-center-renewal-20260715"></script>
+    <script src="js/theme.js?v=step5-10-12-history-center-renewal-20260715"></script>
+    <script src="js/profile.js?v=step5-10-12-history-center-renewal-20260715"></script>
+    <script src="js/chat.js?v=step5-10-12-history-center-renewal-20260715"></script>
+    <script src="js/autosave.js?v=step5-10-12-history-center-renewal-20260715"></script>
+    <script src="js/qa.js?v=step5-10-12-history-center-renewal-20260715"></script>
+    <script src="js/motion.js?v=step5-10-12-history-center-renewal-20260715"></script>
+    <script src="js/product.js?v=step5-10-12-history-center-renewal-20260715"></script>
+    <script src="js/help-center.js?v=step5-10-12-history-center-renewal-20260715"></script>
+    <script src="js/data-management.js?v=step5-10-12-history-center-renewal-20260715"></script>
+    <script src="js/app.js?v=step5-10-12-history-center-renewal-20260715"></script>
 </body>
 </html>

@@ -10850,3 +10850,47 @@ html[data-hm-display="dark"] .hm-release-meta { color:var(--hm-text-muted, #b9b2
 }
 :root[data-hm-theme][data-hm-display="dark"] .help-center-card::-webkit-scrollbar-track{background:var(--hm-dark-shell)}
 :root[data-hm-theme][data-hm-display="dark"] .help-center-card::-webkit-scrollbar-thumb{background:var(--hm-dark-line)}
+
+
+/* =========================================================
+   STEP5.10.12 History Center UI Renewal
+   ========================================================= */
+#historyPanelOverlay .history-panel-modal{background:var(--hm-surface-card,#fff);color:var(--hm-color-body,#332d3d)}
+#calendarBox.history-calendar-premium{background:var(--hm-surface-card-soft,#f7f3fb)!important;border:1px solid var(--hm-line-soft,rgba(120,90,170,.18))!important;border-radius:24px!important;padding:14px!important;box-shadow:none!important}
+.history-calendar-title-row{background:transparent!important;color:var(--hm-color-title,#30293c)!important;border-color:var(--hm-line-soft,rgba(120,90,170,.18))!important}
+.history-calendar-current-month span,.history-month-count{color:var(--hm-color-muted,#81798d)!important}
+.history-calendar-grid{background:transparent!important;gap:8px!important}
+.calendar-head{color:var(--hm-color-muted,#81798d)!important;font-weight:800!important}
+.calendar-day{min-height:58px!important;border-radius:17px!important;background:var(--hm-surface-card,#fff)!important;color:var(--hm-color-title,#30293c)!important;border:1px solid var(--hm-line-soft,rgba(120,90,170,.18))!important;box-shadow:none!important}
+.calendar-day.empty-day{background:transparent!important;border-color:transparent!important}
+.calendar-day.has-record{background:color-mix(in srgb,var(--hm-primary,#8e5cf4) 12%,var(--hm-surface-card,#fff))!important;border-color:color-mix(in srgb,var(--hm-primary,#8e5cf4) 42%,transparent)!important}
+.calendar-day.today{outline:2px solid var(--hm-primary,#ef5f94)!important;outline-offset:1px}
+.calendar-day.selected-record{background:color-mix(in srgb,var(--hm-primary,#8e5cf4) 24%,var(--hm-surface-card,#fff))!important;box-shadow:0 0 0 2px color-mix(in srgb,var(--hm-primary,#8e5cf4) 28%,transparent)!important}
+.calendar-icons{font-size:.7rem!important;letter-spacing:1px!important;white-space:nowrap;overflow:hidden}
+#photoThumbs.history-thumb-row{display:block!important;overflow:visible!important;margin:14px 0!important;padding:0!important}
+.history-gallery-card{width:100%!important;min-height:92px!important;display:grid!important;grid-template-columns:auto 1fr auto!important;align-items:center!important;gap:12px!important;padding:12px!important;border-radius:20px!important;background:var(--hm-surface-card-soft,#f7f3fb)!important;border:1px solid var(--hm-line-soft,rgba(120,90,170,.18))!important;color:inherit!important;text-align:left!important}
+.history-gallery-mini-previews{display:flex;gap:6px;min-width:0}
+.history-gallery-mini-thumb{position:relative;width:48px;height:48px;border-radius:13px;overflow:hidden;display:grid;place-items:center;background:var(--hm-surface-card,#fff);border:1px solid var(--hm-line-soft,rgba(120,90,170,.18));flex:0 0 auto}
+.history-gallery-mini-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.history-gallery-more{position:absolute;inset:0;display:grid;place-items:center;background:rgba(20,15,28,.58);color:#fff;font-weight:900;font-size:.85rem}
+.history-gallery-empty-icon{width:48px;height:48px;display:grid;place-items:center;border-radius:13px;background:var(--hm-surface-card,#fff);border:1px solid var(--hm-line-soft,rgba(120,90,170,.18))}
+.history-gallery-card-copy{min-width:0}.history-gallery-card-copy strong,.history-gallery-card-copy small{display:block}.history-gallery-card-copy small{color:var(--hm-color-muted,#81798d);margin-top:4px}
+.history-gallery-card-count{white-space:nowrap;font-weight:900;color:var(--hm-primary,#8e5cf4)}
+.record-deletion-compact-card{width:100%;display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:12px;margin:12px 0;padding:13px 14px;border-radius:18px;background:var(--hm-surface-card-soft,#f7f3fb);border:1px solid var(--hm-line-soft,rgba(120,90,170,.18));color:inherit;text-align:left}
+.record-deletion-compact-card.has-unseen{border-color:var(--hm-primary,#ef5f94);box-shadow:0 0 0 2px color-mix(in srgb,var(--hm-primary,#ef5f94) 18%,transparent)}
+.record-deletion-compact-icon{font-size:1.4rem}.record-deletion-compact-copy strong,.record-deletion-compact-copy small{display:block}.record-deletion-compact-copy small{margin-top:3px;color:var(--hm-color-muted,#81798d)}.record-deletion-compact-arrow{font-size:1.5rem}
+.record-deletion-modal-overlay{position:fixed;inset:0;z-index:10040;display:none;align-items:center;justify-content:center;padding:16px;background:rgba(20,15,28,.68);backdrop-filter:blur(8px)}
+.record-deletion-modal-overlay[hidden]{display:none!important}.record-deletion-modal{width:min(680px,100%);max-height:min(86vh,820px);overflow:auto;border-radius:26px;padding:18px;background:var(--hm-surface-card,#fff);color:var(--hm-color-body,#332d3d);border:1px solid var(--hm-line-soft,rgba(120,90,170,.18));box-shadow:0 26px 80px rgba(0,0,0,.28)}
+.record-deletion-panel-modal{margin:0!important}
+:root[data-hm-theme][data-hm-display="dark"] #historyPanelOverlay .history-panel-modal,
+:root[data-hm-theme][data-hm-display="dark"] #calendarBox.history-calendar-premium,
+:root[data-hm-theme][data-hm-display="dark"] .calendar-day,
+:root[data-hm-theme][data-hm-display="dark"] .history-gallery-card,
+:root[data-hm-theme][data-hm-display="dark"] .history-gallery-mini-thumb,
+:root[data-hm-theme][data-hm-display="dark"] .history-gallery-empty-icon,
+:root[data-hm-theme][data-hm-display="dark"] .record-deletion-compact-card,
+:root[data-hm-theme][data-hm-display="dark"] .record-deletion-modal{background:var(--hm-dark-card)!important;color:var(--hm-color-body)!important;border-color:var(--hm-dark-line)!important}
+:root[data-hm-theme][data-hm-display="dark"] .calendar-day.has-record{background:color-mix(in srgb,var(--hm-primary) 18%,var(--hm-dark-card-soft))!important}
+:root[data-hm-theme][data-hm-display="dark"] .calendar-day.selected-record{background:color-mix(in srgb,var(--hm-primary) 30%,var(--hm-dark-card-soft))!important}
+:root[data-hm-theme][data-hm-display="dark"] .calendar-day.empty-day{background:transparent!important;border-color:transparent!important}
+@media(max-width:560px){#calendarBox.history-calendar-premium{padding:10px!important}.history-calendar-grid{gap:6px!important}.calendar-day{min-height:52px!important;border-radius:15px!important}.history-gallery-card{grid-template-columns:auto 1fr auto!important}.history-gallery-mini-thumb{width:42px;height:42px}.history-gallery-card-copy small{display:none}.record-deletion-modal{padding:14px;border-radius:22px}}

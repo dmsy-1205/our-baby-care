@@ -621,18 +621,23 @@ function openHistoryPanelModal() {
         const photos = hmGetHistoryPhotoDates(daysData);
         if (!photos.length) {
             box.innerHTML = `
-                <section class="history-gallery-card history-gallery-card-empty" aria-label="사진 모아보기">
-                    <span class="history-gallery-card-icon">📷</span>
+                <button type="button" class="history-gallery-card history-gallery-card-empty" onclick="openHistoryPhotoGallery()" aria-label="사진 모아보기 열기">
+                    <span class="history-gallery-mini-previews"><span class="history-gallery-empty-icon">📷</span></span>
                     <span class="history-gallery-card-copy"><strong>사진 모아보기</strong><small>저장된 사진 기록이 아직 없습니다.</small></span>
-                    <span class="history-gallery-card-count">0장</span>
-                </section>`;
+                    <span class="history-gallery-card-count">0장 <b>›</b></span>
+                </button>`;
             return;
         }
-        const latestPhoto = daysData[photos[0]]?.photo || '';
+        const previewDates = photos.slice(0, 3);
+        const previewHtml = previewDates.map((date, index) => {
+            const src = daysData[date]?.photo || '';
+            const extra = index === 2 && photos.length > 3 ? `<span class="history-gallery-more">+${photos.length - 2}</span>` : '';
+            return `<span class="history-gallery-mini-thumb">${src ? `<img src="${src}" alt="${date} 사진 미리보기">` : '📷'}${extra}</span>`;
+        }).join('');
         box.innerHTML = `
             <button type="button" class="history-gallery-card" onclick="openHistoryPhotoGallery()" aria-label="사진 ${photos.length}장 모아보기 열기">
-                <span class="history-gallery-card-preview">${latestPhoto ? `<img src="${latestPhoto}" alt="최근 사진 미리보기">` : '📷'}</span>
-                <span class="history-gallery-card-copy"><strong>📷 사진 모아보기</strong><small>우리의 추억을 한곳에서 확인해요.</small></span>
+                <span class="history-gallery-mini-previews">${previewHtml}</span>
+                <span class="history-gallery-card-copy"><strong>📷 사진 모아보기</strong><small>최근 사진 3장을 미리 보고 전체 사진을 열어요.</small></span>
                 <span class="history-gallery-card-count">${photos.length}장 <b>›</b></span>
             </button>`;
     }
@@ -1064,7 +1069,7 @@ function displayHistory(daysData) {
             }
         }
         if (!panel) return;
-        if (!allItems.length) { panel.hidden = true; panel.innerHTML = ''; return; }
+        if (!allItems.length) { panel.hidden = true; panel.innerHTML = ''; const modalContent=document.getElementById('recordDeletionModalContent'); if(modalContent) modalContent.innerHTML=''; return; }
         const counts = {
             all: allItems.length,
             active: allItems.filter((item) => itemStatus(item) === 'active').length,
@@ -1073,8 +1078,14 @@ function displayHistory(daysData) {
         };
         const items = deletionFilter === 'all' ? allItems : allItems.filter((item) => itemStatus(item) === deletionFilter);
         panel.hidden = false;
-        panel.innerHTML = `<section class="record-deletion-panel">
-            <div class="record-deletion-head"><div><strong>🗑️ 삭제 기록 관리</strong><small>삭제·확인·복구 이력을 보존하여 업데이트 오류와 수동 삭제를 구분합니다.</small></div></div>
+        panel.innerHTML = `<button type="button" class="record-deletion-compact-card ${unseenCount ? 'has-unseen' : ''}" onclick="openDeletedRecordsModal()">
+            <span class="record-deletion-compact-icon">🗑️</span>
+            <span class="record-deletion-compact-copy"><strong>삭제된 기록 ${counts.all}건</strong><small>${counts.active}건 복구 가능${unseenCount ? ` · ${unseenCount}건 미확인` : ''}</small></span>
+            <span class="record-deletion-compact-arrow">›</span>
+        </button>`;
+        const modalContent = document.getElementById('recordDeletionModalContent');
+        if (modalContent) modalContent.innerHTML = `<section class="record-deletion-panel record-deletion-panel-modal">
+            <div class="record-deletion-head"><div><strong>삭제 기록 관리</strong><small>삭제·확인·복구 이력은 데이터 손실 원인을 확인하기 위해 보존됩니다.</small></div></div>
             <div class="record-deletion-summary">
                 <span><strong>${counts.active}</strong><small>복구 가능</small></span>
                 <span><strong>${counts.restored}</strong><small>복구 완료</small></span>
@@ -1094,8 +1105,7 @@ function displayHistory(daysData) {
                 const statusText = isRestored ? '복구 완료' : (isExpired ? '복구 기간 만료' : `복구 가능 · ${remaining}일 남음`);
                 return `<article class="record-deletion-item ${unseen(item)?'is-unseen':''} ${isRestored?'is-restored':''} ${isExpired?'is-expired':''}">
                     <div class="record-deletion-main"><div class="record-deletion-title"><strong>${esc(item.recordDate || '날짜 미상')} 기록</strong><span class="record-deletion-status ${status}">${statusText}</span></div>
-                    <small>삭제: ${fmt(item.deletedAtClient || item.deletedAt)}</small>
-                    <small>삭제자: ${esc(actorLabel(item))}</small>
+                    <small>삭제: ${fmt(item.deletedAtClient || item.deletedAt)}</small><small>삭제자: ${esc(actorLabel(item))}</small>
                     <small>사유: 수동 삭제 · 버전 ${esc(item.appVersion || '확인 불가')}</small>
                     ${isRestored?`<small>복구: ${fmt(item.restoredAtClient || item.restoredAt)} · ${esc(item.restoredByEmail || item.restoredByUid || 'Dom')}</small>`:''}
                     <small>Room 확인 기록: ${seenCount}명</small></div>
@@ -1104,6 +1114,18 @@ function displayHistory(daysData) {
             }).join('') : '<div class="record-deletion-empty">선택한 상태의 삭제 기록이 없습니다.</div>'}</div>
         </section>`;
     }
+    window.openDeletedRecordsModal = function () {
+        const overlay = document.getElementById('recordDeletionModalOverlay');
+        if (!overlay) return;
+        overlay.hidden = false; overlay.style.display = 'flex'; overlay.removeAttribute('inert');
+        document.body.classList.add('modal-open');
+    };
+    window.closeDeletedRecordsModal = function () {
+        const overlay = document.getElementById('recordDeletionModalOverlay');
+        if (!overlay) return;
+        overlay.hidden = true; overlay.style.display = 'none'; overlay.setAttribute('inert','');
+        document.body.classList.remove('modal-open');
+    };
     window.hmSetDeletedRecordFilter = function (filter) {
         deletionFilter = ['all','active','restored','expired'].includes(filter) ? filter : 'all';
         render();
