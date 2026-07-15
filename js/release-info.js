@@ -5,13 +5,13 @@
 (function () {
     const release = Object.freeze({
         product: 'HearMe2nite',
-        version: 'v1.0 STEP5.10.12',
-        appVersion: 'HearMe2nite v1.0 STEP5.10.12',
-        step: 'STEP5.10.12',
+        version: 'v1.0 STEP5.10.12.1',
+        appVersion: 'HearMe2nite v1.0 STEP5.10.12.1',
+        step: 'STEP5.10.12.1',
         build: '20260715',
         releaseDate: '2026.07.15',
         stage: 'Beta',
-        title: '기록실 UI 리뉴얼·사진 미리보기·삭제 이력 팝업',
+        title: '기록 복구 권한 핫픽스·사진 미리보기·삭제 이력 팝업',
         description: '기록실 캘린더의 다크모드를 완성하고, 사진 모아보기를 최근 3장 미리보기 카드로 정리하며 삭제 이력을 별도 팝업으로 이동합니다.',
         changes: Object.freeze([
             '기록실 캘린더 배경·날짜 셀·요일·선택 상태의 라이트·다크 테마 통일',

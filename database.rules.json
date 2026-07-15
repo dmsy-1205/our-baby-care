@@ -84,7 +84,7 @@
         },
         "days": {
           "$date": {
-            ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (root.child('roomMembers').child($roomCode).child(auth.uid).exists() && (root.child('roomMembers').child($roomCode).child(auth.uid).child('role').val() === 'owner' || root.child('roomMembers').child($roomCode).child(auth.uid).child('relationshipRole').val() === 'dom') && (!root.child('users').child(auth.uid).child('emailVerificationRequired').exists() || auth.token.email_verified === true))) && !newData.exists()",
+            ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (root.child('roomMembers').child($roomCode).child(auth.uid).exists() && (root.child('roomMembers').child($roomCode).child(auth.uid).child('role').val() === 'owner' || root.child('roomMembers').child($roomCode).child(auth.uid).child('relationshipRole').val() === 'dom') && (!root.child('users').child(auth.uid).child('emailVerificationRequired').exists() || auth.token.email_verified === true))) && (!newData.exists() || (!data.exists() && root.child('rooms').child($roomCode).child('deletedRecords').child($date).child('restoreInProgressBy').val() === auth.uid && root.child('rooms').child($roomCode).child('deletedRecords').child($date).child('restored').val() === false))",
             "date": {
               ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (root.child('roomMembers').child($roomCode).child(auth.uid).exists() && (!root.child('users').child(auth.uid).child('emailVerificationRequired').exists() || auth.token.email_verified === true)))",
               ".validate": "newData.isString() && newData.val() === $date"

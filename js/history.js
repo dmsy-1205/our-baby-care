@@ -1158,23 +1158,66 @@ function displayHistory(daysData) {
     window.hmRestoreDeletedRecord = async function (date) {
         if (!canRestore() || !deletionRoomCode || !date) return;
         if (!confirm(`${date} 삭제 기록을 원래 위치로 복구하시겠습니까?\n\n삭제 이력은 감사 기록으로 계속 보존됩니다.`)) return;
+
+        const user = auth.currentUser;
+        if (!user) return alert('로그인 상태를 다시 확인해 주세요.');
+
+        const archiveRef = db.ref(`rooms/${deletionRoomCode}/deletedRecords/${date}`);
+        let restoreMarkerWritten = false;
+
         try {
-            const snap = await db.ref(`rooms/${deletionRoomCode}/deletedRecords/${date}`).once('value');
+            const snap = await archiveRef.once('value');
             const item = snap.val();
             if (!item || item.restored === true) return alert('복구할 기록이 없거나 이미 복구되었습니다.');
             if (Number(item.expiresAt || 0) < Date.now()) return alert('30일 복구 기간이 지났습니다. 관리자 백업을 확인해 주세요.');
-            const user = auth.currentUser;
+            if (!item.originalDay && !item.originalDayAdmin) return alert('복구할 원본 데이터가 없습니다.');
+
+            // A short-lived marker lets Rules distinguish a legitimate restore
+            // from an arbitrary recreation of a deleted day.
+            await archiveRef.update({
+                restoreInProgressBy: user.uid,
+                restoreInProgressAt: firebase.database.ServerValue.TIMESTAMP
+            });
+            restoreMarkerWritten = true;
+
             const updates = {};
-            if (item.originalDay) updates[`rooms/${deletionRoomCode}/days/${date}`] = item.originalDay;
-            if (item.originalDayAdmin) updates[`rooms/${deletionRoomCode}/dayAdmin/${date}`] = item.originalDayAdmin;
+            if (item.originalDay) {
+                const restoredDay = Object.assign({}, item.originalDay, {
+                    date,
+                    updatedBy: user.uid,
+                    updatedByEmail: user.email || '',
+                    updatedAt: firebase.database.ServerValue.TIMESTAMP
+                });
+                updates[`rooms/${deletionRoomCode}/days/${date}`] = restoredDay;
+            }
+            if (item.originalDayAdmin) {
+                const restoredAdmin = Object.assign({}, item.originalDayAdmin, {
+                    updatedBy: user.uid,
+                    updatedByEmail: user.email || '',
+                    updatedAt: firebase.database.ServerValue.TIMESTAMP
+                });
+                updates[`rooms/${deletionRoomCode}/dayAdmin/${date}`] = restoredAdmin;
+            }
+
             updates[`rooms/${deletionRoomCode}/deletedRecords/${date}/restored`] = true;
             updates[`rooms/${deletionRoomCode}/deletedRecords/${date}/restoredAt`] = firebase.database.ServerValue.TIMESTAMP;
             updates[`rooms/${deletionRoomCode}/deletedRecords/${date}/restoredAtClient`] = Date.now();
             updates[`rooms/${deletionRoomCode}/deletedRecords/${date}/restoredByUid`] = user.uid;
             updates[`rooms/${deletionRoomCode}/deletedRecords/${date}/restoredByEmail`] = user.email || '';
+            updates[`rooms/${deletionRoomCode}/deletedRecords/${date}/restoreInProgressBy`] = null;
+            updates[`rooms/${deletionRoomCode}/deletedRecords/${date}/restoreInProgressAt`] = null;
+
             await db.ref().update(updates);
             showSaveStatus('♻️ 삭제 기록 복구 완료');
-        } catch (err) { hmReportError('hmRestoreDeletedRecord', err, hmIsFirebasePermissionError(err) ? '❌ 기록 복구 권한 없음' : '❌ 기록 복구 실패'); }
+            console.info('[HearMe2nite][RECORD_RESTORE] 복구 완료', { roomCode: deletionRoomCode, date });
+        } catch (err) {
+            if (restoreMarkerWritten) {
+                try {
+                    await archiveRef.update({ restoreInProgressBy: null, restoreInProgressAt: null });
+                } catch (_) {}
+            }
+            hmReportError('hmRestoreDeletedRecord', err, hmIsFirebasePermissionError(err) ? '❌ 기록 복구 권한 없음 · Firebase Rules 배포를 확인해 주세요' : '❌ 기록 복구 실패');
+        }
     };
     auth.onAuthStateChanged(() => setTimeout(attach, 300));
     setInterval(attach, 2500);
