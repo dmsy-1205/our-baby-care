@@ -6,12 +6,12 @@
     const release = Object.freeze({
         product: 'HearMe2nite',
         version: 'v1.0 STEP5.10.12.3',
-        appVersion: 'HearMe2nite v1.0 STEP5.10.12.3',
-        step: 'STEP5.10.12.3',
+        appVersion: 'HearMe2nite v1.0 STEP5.10.13',
+        step: 'STEP5.10.13',
         build: '20260716',
         releaseDate: '2026.07.16',
         stage: 'Beta',
-        title: '전체 카드 다크모드 최종 보정·기록실 사진 카드 정렬 핫픽스',
+        title: '기록실 월별 서버 대조 복구·기록실 사진 카드 정렬 핫픽스',
         description: '첨부 화면에서 확인된 우리의 공간·오늘의 요약·대화·오늘의 약속·피드백·기록실 사진 카드의 잔여 라이트 표면을 다크모드로 통일합니다.',
         changes: Object.freeze([
             '우리의 공간 접속 상태 카드와 역할 선택 영역의 잔여 흰색 배경 제거',

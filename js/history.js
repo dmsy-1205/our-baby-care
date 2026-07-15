@@ -402,11 +402,58 @@ function openHistoryPanelModal() {
         return Number.isNaN(base.getTime()) ? new Date() : base;
     }
 
+    const hmHistoryMonthSyncState = new Map();
+
+    async function hmHistorySyncVisibleMonthFromServer(force) {
+        const roomCode = String(typeof activeRoomCode !== 'undefined' ? activeRoomCode || '' : '').trim();
+        if (!roomCode || typeof db === 'undefined' || !db) return false;
+        const base = hmHistoryGetCalendarViewBase(hmHistoryGetMergedData());
+        const year = base.getFullYear();
+        const month = String(base.getMonth() + 1).padStart(2, '0');
+        const monthKey = `${roomCode}:${year}-${month}`;
+        const previous = hmHistoryMonthSyncState.get(monthKey);
+        if (!force && (previous === 'pending' || previous === 'done')) return previous === 'done';
+        hmHistoryMonthSyncState.set(monthKey, 'pending');
+        const startKey = `${year}-${month}-01`;
+        const endKey = `${year}-${month}-31`;
+        try {
+            const [daysSnap, adminSnap] = await Promise.all([
+                db.ref(`rooms/${roomCode}/days`).orderByKey().startAt(startKey).endAt(endKey).once('value'),
+                db.ref(`rooms/${roomCode}/dayAdmin`).orderByKey().startAt(startKey).endAt(endKey).once('value')
+            ]);
+            if (roomCode !== activeRoomCode) return false;
+            const monthDays = daysSnap.val() || {};
+            const monthAdmin = adminSnap.val() || {};
+            cachedDaysData = cachedDaysData || {};
+            cachedDayAdminData = cachedDayAdminData || {};
+            Object.assign(cachedDaysData, monthDays);
+            Object.assign(cachedDayAdminData, monthAdmin);
+            hmHistoryMonthSyncState.set(monthKey, 'done');
+            const merged = hmHistoryGetMergedData();
+            displayHistory(merged);
+            console.info('[HearMe2nite][HISTORY_MONTH_SYNC] 월별 서버 기록 동기화 완료', {
+                roomCode,
+                month: `${year}-${month}`,
+                days: Object.keys(monthDays).length,
+                dayAdmin: Object.keys(monthAdmin).length,
+                dates: Array.from(new Set([...Object.keys(monthDays), ...Object.keys(monthAdmin)])).sort()
+            });
+            return true;
+        } catch (err) {
+            hmHistoryMonthSyncState.delete(monthKey);
+            if (typeof hmReportError === 'function') hmReportError('hmHistorySyncVisibleMonthFromServer', err, '❌ 기록실 월별 서버 확인 실패');
+            else console.error('[HearMe2nite][HISTORY_MONTH_SYNC]', err);
+            return false;
+        }
+    }
+    window.hmHistorySyncVisibleMonthFromServer = hmHistorySyncVisibleMonthFromServer;
+
     function hmHistoryChangeMonth(delta) {
         const base = hmHistoryGetCalendarViewBase(cachedDaysData || {});
         base.setMonth(base.getMonth() + Number(delta || 0));
         hmHistorySetCalendarViewFromDate(`${base.getFullYear()}-${String(base.getMonth()+1).padStart(2,'0')}-01`);
         if (cachedDaysData || cachedDayAdminData) displayHistory(hmHistoryGetMergedData());
+        hmHistorySyncVisibleMonthFromServer(false);
     }
 
     function hmHistoryGoToday() {
@@ -970,6 +1017,9 @@ function renderCalendar(daysData) {
     }
     html += '</div>';
     box.innerHTML = html;
+    // STEP5.10.13: 캘린더는 전체 Room 캐시만 신뢰하지 않고 현재 표시 월을 서버에서 직접 대조한다.
+    // 데이터가 Firebase에 있지만 캐시에서 누락된 날짜도 자동으로 복원 표시한다.
+    setTimeout(() => hmHistorySyncVisibleMonthFromServer(false), 0);
 }
 function displayHistory(daysData) {
     const historyList = document.getElementById('historyList');
