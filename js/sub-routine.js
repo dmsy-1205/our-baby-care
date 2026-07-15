@@ -1,5 +1,5 @@
 // =========================================================
-// HearMe2nite v1.0 STEP5.10.2
+// HearMe2nite v1.0 STEP5.10.4
 // sub-routine.js - 기록(Sub) 자기주도 루틴 1단계
 // 정의: rooms/{roomCode}/subRoutines/{routineId}
 // 완료: rooms/{roomCode}/subRoutineDays/{date}/{routineId}
@@ -156,7 +156,7 @@ async function deleteSubRoutine(id){
 }
 window.addEventListener('DOMContentLoaded',()=>{document.getElementById('recordDate')?.addEventListener('change',()=>hmListenSubRoutineDay());renderSubRoutine();});
 
-// STEP5.10.2: inline 버튼 호출 안정화를 위한 명시적 전역 연결
+// STEP5.10.4: inline 버튼 호출 안정화를 위한 명시적 전역 연결
 window.openSubRoutineHub = openSubRoutineHub;
 window.closeSubRoutineHub = closeSubRoutineHub;
 window.openSubRoutineEditor = openSubRoutineEditor;
