@@ -108,6 +108,7 @@
     }
 
     function resetHelpCenter() {
+        if (typeof window.hmRenderReleaseInfo === 'function') window.hmRenderReleaseInfo();
         const input = document.getElementById('helpSearchInput');
         if (input) input.value = '';
         selectHelpTab('home');

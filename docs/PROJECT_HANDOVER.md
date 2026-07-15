@@ -47,3 +47,8 @@ The broad parent write permission under `rooms/{roomCode}` was removed. Rules no
 ## STEP5.6.4.7 final security baseline
 
 STEP5.6.4.7 is the security-stable baseline after Room path hardening, day-role separation, invite/Room join protection, 24-hour invite expiry, previous-Room switching compatibility, and Hosting exposure hardening. UI work should start from this Full Source baseline.
+
+
+## STEP5.10.9 릴리스 관리 원칙
+
+버전·배포일·업데이트 목록은 `js/release-info.js`를 단일 기준으로 사용합니다. 새 기능의 상세 사용 설명은 자동 생성하지 않고 개발 시 사용자 설명서 본문과 함께 검토합니다.

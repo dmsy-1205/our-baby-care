@@ -29,6 +29,23 @@
         window.hmQaState = hmQaState;
         window.hmQaVersion = HM_APP_VERSION;
 
+        const releaseInfo = window.HM_RELEASE || null;
+        const releaseVersionOk = !!(releaseInfo && releaseInfo.appVersion === HM_APP_VERSION);
+        hmQaLog(releaseVersionOk ? 'info' : 'error', 'RELEASE_SYNC', releaseVersionOk
+            ? `릴리스 정보 동기화 OK (${HM_APP_VERSION})`
+            : `릴리스 정보 불일치: release=${releaseInfo ? releaseInfo.appVersion : '없음'}, app=${HM_APP_VERSION}`);
+        const versionBadge = document.getElementById('appVersionBadge');
+        const expectedBadge = releaseInfo ? `Version ${releaseInfo.version}` : '';
+        const badgeOk = !!(versionBadge && releaseInfo && versionBadge.textContent.trim() === expectedBadge);
+        hmQaLog(badgeOk ? 'info' : 'warn', 'RELEASE_SYNC', badgeOk
+            ? '홈 버전 표시 동기화 OK'
+            : `홈 버전 표시 확인 필요: expected=${expectedBadge}, actual=${versionBadge ? versionBadge.textContent.trim() : '없음'}`);
+        const guideVersion = document.querySelector('#helpLatestUpdateCard [data-hm-release-version]');
+        const guideOk = !!(guideVersion && releaseInfo && guideVersion.textContent.trim() === releaseInfo.version);
+        hmQaLog(guideOk ? 'info' : 'warn', 'RELEASE_SYNC', guideOk
+            ? '사용자 설명서 업데이트 버전 동기화 OK'
+            : '사용자 설명서 업데이트 버전 확인 필요');
+
         const requiredElementIds = [
             'recordDate', 'authEmail', 'authPassword', 'roomCode', 'currentRoomInfo',
             'saveStatus', 'historyList', 'historyPanelOverlay', 'historyDetailOverlay',

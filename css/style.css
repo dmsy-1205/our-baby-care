@@ -10765,3 +10765,11 @@ html[data-display-mode="dark"] .sub-routine-schedule-option,html.hm-dark .sub-ro
 .history-gallery-card{width:100%!important;box-sizing:border-box!important;margin:0!important;transform:none!important;position:relative!important;top:auto!important;bottom:auto!important;box-shadow:var(--theme-shadow,0 8px 22px rgba(80,55,120,.08))!important}
 :root[data-hm-theme][data-hm-display="dark"] .history-gallery-card{background:var(--hm-color-surface-2)!important;border:1px solid var(--hm-color-border)!important;color:var(--hm-color-text)!important;box-shadow:none!important}:root[data-hm-theme][data-hm-display="dark"] .history-gallery-card-copy strong{color:var(--hm-color-text)!important}:root[data-hm-theme][data-hm-display="dark"] .history-gallery-card-copy small{color:var(--hm-color-muted)!important}
 @media(max-width:760px){.sub-routine-draft-row{grid-template-columns:24px 1fr 90px}.sub-routine-draft-row [data-field="placeholder"]{grid-column:2/4}.sub-routine-draft-row label{grid-column:2}.sub-routine-draft-row button{grid-column:3}.sub-routine-manager-card{grid-template-columns:40px minmax(0,1fr)}.sub-routine-manager-actions,.sub-routine-readonly{grid-column:2;justify-self:start}.history-panel-head{align-items:flex-start!important}}
+
+
+/* STEP5.10.9 User Guide 2.0 / release information */
+.hm-release-meta { display:flex; align-items:center; justify-content:space-between; gap:10px; margin:10px 0; font-size:12px; color:var(--hm-text-muted, #756d88); }
+.hm-release-meta span:last-child { padding:4px 9px; border-radius:999px; background:var(--hm-accent-soft, #f2eaff); color:var(--hm-accent, #7b5cff); font-weight:800; }
+.hm-release-change-list { margin:12px 0 0; padding-left:20px; display:grid; gap:7px; line-height:1.5; }
+.hm-release-card code { font-size:.9em; }
+html[data-hm-display="dark"] .hm-release-meta { color:var(--hm-text-muted, #b9b2c8); }

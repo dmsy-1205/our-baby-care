@@ -4,9 +4,9 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💗</text></svg>">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>HearMe2nite v1.0 STEP5.10.8</title>
+    <title>HearMe2nite</title>
     <script>
-        // STEP5.10.8: 테마와 표시 모드를 Firebase 연결 전에 먼저 적용해 화면 깜빡임을 줄입니다.
+        // STEP5.10.9: 테마와 표시 모드를 Firebase 연결 전에 먼저 적용해 화면 깜빡임을 줄입니다.
         (function () {
             try {
                 var theme = localStorage.getItem('hm_theme_last') || 'lavender';
@@ -35,7 +35,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-functions-compat.js"></script>
 
-    <link rel="stylesheet" href="css/style.css?v=step5-10-8-sub-routine-input-history-ui-20260715">
+    <link rel="stylesheet" href="css/style.css?v=step5-10-9-user-guide-release-sync-20260715">
 </head>
 <body class="hm-booting">
 
@@ -116,7 +116,7 @@
     </div>
     <div class="app-subtitle">우리의 하루를, 함께 기록합니다.</div>
     <div class="app-meta-row">
-        <div class="app-version-badge" id="appVersionBadge">Version v1.0 STEP5.10.8</div>
+        <div class="app-version-badge" id="appVersionBadge" data-hm-release-version>Version v1.0 STEP5.10.9</div>
         <div class="home-presence-indicator" id="homePresenceIndicator" title="접속 상태 확인 중">
             <span class="home-presence-dot self offline" id="homePresenceSelfDot" aria-label="나 오프라인"></span>
             <span class="home-presence-dot partner offline" id="homePresencePartnerDot" aria-label="상대 오프라인"></span>
@@ -763,95 +763,81 @@
 
         <div class="help-center-panels">
             <section class="help-panel active" data-help-panel="home">
-                <div class="help-quick-flow" aria-label="처음 사용하는 순서">
-                    <span><b>1</b> 공간 연결</span><i>→</i><span><b>2</b> 약속 확인</span><i>→</i><span><b>3</b> 하루 기록</span>
-                </div>
-                <div class="help-card-grid">
-                    <button type="button" class="help-menu-card" onclick="selectHelpTab('start')"><span>🚀</span><strong>시작하기</strong><small>공간 만들기와 초대코드</small></button>
-                    <button type="button" class="help-menu-card" onclick="selectHelpTab('room')"><span>🏠</span><strong>우리의 공간</strong><small>상대 연결과 공간 관리</small></button>
-                    <button type="button" class="help-menu-card help-menu-card-featured" onclick="selectHelpTab('promise')"><span>💜</span><strong>오늘의 약속</strong><small>함께 지킬 약속과 오늘의 할 일</small><em>핵심 기능</em></button>
-                    <button type="button" class="help-menu-card" onclick="selectHelpTab('daily')"><span>📝</span><strong>오늘의 기록</strong><small>컨디션, 사진, 피드백</small></button>
-                    <button type="button" class="help-menu-card" onclick="selectHelpTab('anniversary')"><span>❤️</span><strong>우리의 기념일</strong><small>소중한 날짜 등록</small></button>
-                    <button type="button" class="help-menu-card" onclick="selectHelpTab('exercise')"><span>🏃</span><strong>오늘의 운동</strong><small>운동 기록 저장</small></button>
-                    <button type="button" class="help-menu-card" onclick="selectHelpTab('history')"><span>📅</span><strong>기록실</strong><small>날짜별 추억 보기</small></button>
-                    <button type="button" class="help-menu-card" onclick="selectHelpTab('faq')"><span>❓</span><strong>Q&A</strong><small>자주 묻는 질문</small></button>
-                    <button type="button" class="help-menu-card" onclick="selectHelpTab('tips')"><span>💡</span><strong>활용 팁</strong><small>더 편하게 쓰는 방법</small></button>
-                </div>
+                <article class="help-mini-card" data-help-keywords="처음 시작 홈 순서 사용법"><h3>👋 처음 사용하는 분께</h3><p>로그인 후 우리의 공간을 연결하고, 홈에서 오늘의 약속·나의 루틴·컨디션·기록을 차례로 사용하세요.</p><div class="help-tip">💡 관리(Dom)는 약속과 피드백을 관리하고, 기록(Sub)은 약속 수행과 자신의 루틴·하루 기록을 작성합니다.</div></article>
+                <article class="help-mini-card" data-help-keywords="홈 화면 순서 오늘의 요약 대화 약속 루틴 컨디션 기록 피드백"><h3>🏠 홈 화면 순서</h3><p>오늘의 요약 → 우리의 대화 → 오늘의 약속 → 나의 루틴 → 오늘의 컨디션 → 오늘의 기록 → 관리와 피드백 순서입니다.</p></article>
+                <article class="help-mini-card" data-help-keywords="계정 프로필 테마 데이터 로그아웃"><h3>👤 내 계정</h3><p>홈 상단의 계정 카드를 누르면 프로필, 테마, 데이터 관리, 관리자 메뉴, 로그아웃을 사용할 수 있습니다.</p></article>
             </section>
 
             <section class="help-panel" data-help-panel="start">
-                <article class="help-mini-card" data-help-keywords="시작 로그인 승인 방 만들기 초대코드 입장 복구"><h3>🚀 시작하기</h3><p>로그인 후 우리의 공간을 만들거나 초대코드로 입장하세요. 같은 공간에 있어야 기록과 채팅을 함께 볼 수 있어요.</p><div class="help-tip">💡 한 사람만 방을 만들고, 상대는 초대코드로 들어오면 됩니다.</div></article>
-                <article class="help-mini-card" data-help-keywords="혼자 사용 공간 나중 초대"><h3>👤 혼자 사용하기</h3><p>상대가 아직 없어도 혼자 공간을 만들고 기록을 시작할 수 있어요. 상대는 나중에 초대해도 됩니다.</p><div class="help-tip">💡 먼저 내 기록을 쌓아두면 나중에 함께 보기 좋아요.</div></article>
+                <article class="help-mini-card" data-help-keywords="회원가입 이메일 인증 로그인"><h3>1️⃣ 회원가입과 인증</h3><p>이메일과 비밀번호로 가입한 뒤 인증 메일의 링크를 눌러 인증을 완료합니다.</p></article>
+                <article class="help-mini-card" data-help-keywords="방 만들기 Room 생성 Dom Sub 역할"><h3>2️⃣ 우리의 공간 만들기</h3><p>먼저 공간을 만든 사용자는 관리(Dom) 또는 기록(Sub) 역할을 선택합니다. 선택한 역할은 일반 화면에서 임의로 변경할 수 없습니다.</p></article>
+                <article class="help-mini-card" data-help-keywords="초대코드 24시간 만료 입장"><h3>3️⃣ 상대방 초대</h3><p>초대코드는 생성 후 24시간 동안 사용할 수 있습니다. 상대방은 받은 코드를 입력해 같은 공간에 입장합니다.</p></article>
             </section>
 
             <section class="help-panel" data-help-panel="room">
-                <article class="help-mini-card" data-help-keywords="우리의 공간 방 room 상대 연결 owner partner"><h3>🏠 우리의 공간</h3><p>두 사람이 같은 기록을 함께 보는 공동 공간입니다. 한 사람이 공간을 만들고 상대가 초대코드로 들어오면 연결됩니다.</p><div class="help-steps"><span><b>1</b> 공간 만들기</span><span><b>2</b> 초대코드 보내기</span><span><b>3</b> 상대가 코드로 입장</span></div></article>
-                <article class="help-mini-card" data-help-keywords="초대코드 상대방 방 입장 연결"><h3>💌 상대 초대</h3><p>초대코드를 공유하면 상대방이 같은 공간에 들어올 수 있습니다. 서로 다른 공간에 있으면 기록도 따로 보입니다.</p><div class="help-tip">💡 상대가 보이지 않으면 두 계정의 공간 코드가 같은지 먼저 확인하세요.</div></article>
+                <article class="help-mini-card" data-help-keywords="우리의 공간 현재 방 역할 온라인 오프라인"><h3>🏡 우리의 공간</h3><p>현재 공간 코드, 내 역할, 상대방의 접속 상태를 확인할 수 있습니다.</p></article>
+                <article class="help-mini-card" data-help-keywords="이전 공간 불러오기 여러 Room 전환"><h3>🔁 이전 공간 전환</h3><p>이전에 참여했던 공간이 있다면 우리의 공간 메뉴에서 다시 불러오고 전환할 수 있습니다.</p></article>
+                <article class="help-mini-card" data-help-keywords="초대코드 만료 재사용"><h3>🔐 초대코드 보안</h3><p>초대코드는 24시간 후 만료되며, 이미 사용된 코드는 다시 사용할 수 없습니다.</p></article>
             </section>
 
             <section class="help-panel" data-help-panel="promise">
-                <article class="help-mini-card help-promise-hero" data-help-keywords="오늘의 약속 커스텀 미션 루틴 할 일 완료 체크 관리 dom 기록 sub">
-                    <div class="help-feature-badge">HearMe2nite 핵심 기능</div>
-                    <h3>💜 오늘의 약속</h3>
-                    <p>두 사람이 오늘 함께 지킬 약속이나 필요한 일과를 기록하는 공간입니다. 관리(Dom)가 약속 카드를 만들면 기록(Sub)이 내용을 확인하고 오늘의 결과를 입력할 수 있어요.</p>
-                    <div class="help-steps help-steps-vertical"><span><b>1</b><strong>약속 만들기</strong><small>관리(Dom)가 제목과 필요한 항목을 정해요.</small></span><span><b>2</b><strong>오늘 확인하기</strong><small>홈에서 오늘 해야 할 약속을 확인해요.</small></span><span><b>3</b><strong>결과 기록하기</strong><small>완료 여부, 시간, 메모 등을 남겨요.</small></span></div>
-                </article>
-                <article class="help-mini-card" data-help-keywords="오늘의 약속 예시 약 복용 샤워 집안일 루틴"><h3>✨ 이렇게 활용해 보세요</h3><div class="help-example-chips"><span>💊 영양제 먹기</span><span>🚿 샤워하기</span><span>🧹 집안일 하기</span><span>💧 물 마시기</span></div><div class="help-tip">💡 약속 이름은 짧게, 입력 항목은 꼭 필요한 것만 만들면 매일 사용하기 편해요.</div></article>
-                <article class="help-mini-card" data-help-keywords="오늘의 약속 권한 관리 Dom 기록 Sub 수정"><h3>🔐 누가 무엇을 하나요?</h3><p><b>관리(Dom)</b>은 약속 카드를 만들고 수정할 수 있습니다. <b>기록(Sub)</b>은 만들어진 약속을 확인하고 그날의 내용을 기록합니다.</p></article>
+                <article class="help-mini-card" data-help-keywords="오늘의 약속 Dom 관리 Sub 입력"><h3>💜 오늘의 약속</h3><p>관리(Dom)가 약속을 만들고, 기록(Sub)이 홈의 약속 카드에서 내용을 입력하거나 완료합니다.</p></article>
+                <article class="help-mini-card" data-help-keywords="약속 관리 텍스트 체크 숫자 시간"><h3>⚙️ 약속 관리</h3><p>관리 화면에서 텍스트·체크·숫자·시간 항목을 구성하고, 약속을 수정하거나 삭제할 수 있습니다.</p></article>
+                <article class="help-mini-card" data-help-keywords="약속 기록실 최종 복사"><h3>📚 기록 보존</h3><p>입력한 오늘의 약속은 최종 복사 결과와 기록실의 날짜별 기록에 함께 표시됩니다.</p></article>
+            </section>
+
+            <section class="help-panel" data-help-panel="routine">
+                <article class="help-mini-card" data-help-keywords="나의 루틴 Sub 직접 생성 관리"><h3>🌱 나의 루틴</h3><p>기록(Sub)이 자신의 하루 일과를 직접 만들고 수행하는 공간입니다. 관리(Dom)는 결과를 읽기 전용으로 확인합니다.</p></article>
+                <article class="help-mini-card" data-help-keywords="루틴 만들기 수정 삭제 반복 매일 요일 오늘만 일시중지"><h3>🛠️ 루틴 만들기</h3><p>나의 루틴 대표 카드를 눌러 새 루틴을 만들고, 매일·요일 선택·오늘만·일시 중지를 설정할 수 있습니다.</p></article>
+                <article class="help-mini-card" data-help-keywords="루틴 텍스트 체크 숫자 시간 입력"><h3>📝 루틴 입력 항목</h3><p>각 루틴에는 텍스트·체크·숫자·시간 항목을 추가할 수 있습니다. 실제 입력은 홈에 생성된 루틴 카드에서 진행합니다.</p></article>
+                <article class="help-mini-card" data-help-keywords="루틴 기록실 최종 복사 과거 기록"><h3>🗓️ 루틴 기록</h3><p>완료 상태와 입력 내용은 날짜별로 저장되고, 기록실과 최종 복사 결과에 오늘의 약속 다음 순서로 표시됩니다.</p></article>
             </section>
 
             <section class="help-panel" data-help-panel="daily">
-                <article class="help-mini-card" data-help-keywords="컨디션 기분 운동 체중 수분 물"><h3>😊 오늘의 컨디션</h3><p>기분, 운동, 체중, 수분을 간단히 남기는 공간입니다. 하루의 흐름을 서로 이해하는 데 도움이 됩니다.</p><div class="help-tip">💡 매일 같은 시간에 입력하면 변화를 보기 쉬워요.</div></article>
-                <article class="help-mini-card" data-help-keywords="오늘의 기록 기상시간 식사 외출 사진 메모 하루 정리"><h3>📝 오늘의 기록</h3><p>기상 시간, 식사, 외출과 오늘 있었던 일을 메모와 사진으로 남길 수 있습니다. 작성한 내용은 기록실에서 다시 볼 수 있어요.</p><div class="help-tip">💡 특별한 일이 없어도 한 줄만 남겨보세요.</div></article>
-                <article class="help-mini-card" data-help-keywords="관리 피드백 칭찬 응원"><h3>💬 관리 및 피드백</h3><p>서로에게 전하고 싶은 응원, 칭찬, 조정이 필요한 내용을 남기는 공간입니다.</p><div class="help-tip">💡 지적보다 칭찬을 먼저 적으면 더 따뜻하게 전달돼요.</div></article>
-            </section>
-
-            <section class="help-panel" data-help-panel="anniversary">
-                <article class="help-mini-card" data-help-keywords="기념일 생일 여행 데이트 휴가 사용자 지정 첫만남 함께한 지"><h3>❤️ 우리의 기념일</h3><p>두 사람의 소중한 날짜를 등록합니다. 생일, 여행, 데이트, 첫 만남 같은 날을 함께 기록할 수 있어요.</p><div class="help-tip">💡 대표 기념일은 첫 만남처럼 함께한 날짜로 설정하는 것을 추천합니다.</div></article>
-                <article class="help-mini-card" data-help-keywords="다가오는 순 정렬 캘린더 아이콘"><h3>📅 캘린더 표시</h3><p>등록한 기념일은 캘린더에 아이콘으로 표시됩니다. 다가오는 일정은 홈에서 더 쉽게 확인할 수 있어요.</p><div class="help-tip">💡 너무 많은 기념일보다 자주 보고 싶은 날짜부터 등록해 보세요.</div></article>
-            </section>
-
-            <section class="help-panel" data-help-panel="exercise">
-                <article class="help-mini-card" data-help-keywords="운동 오늘의 운동 산책 스트레칭 헬스 요가 홈트 기록실 최종 복사"><h3>🏃 오늘의 운동</h3><p>오늘 한 운동을 기록합니다. 운동 기록은 기록실에도 저장되고, 최종 복사 내용에도 함께 포함됩니다.</p><div class="help-tip">💡 산책 20분처럼 가벼운 운동도 충분히 기록할 가치가 있어요.</div></article>
+                <article class="help-mini-card" data-help-keywords="오늘의 컨디션 기분 운동 체중 수분"><h3>😊 오늘의 컨디션</h3><p>기분, 운동, 체중, 수분을 기록합니다. 값이 없으면 요약에는 ‘-’로 표시됩니다.</p></article>
+                <article class="help-mini-card" data-help-keywords="오늘의 기록 기상 식사 외출 취침 하루"><h3>📝 오늘의 기록</h3><p>기상 시간, 식사, 외출, 취침 예정, 오늘의 하루 메모와 사진을 남길 수 있습니다.</p></article>
+                <article class="help-mini-card" data-help-keywords="관리 피드백 선물 Dom"><h3>💌 관리와 피드백</h3><p>관리(Dom)가 피드백과 선물 등의 내용을 작성합니다. 기록(Sub)은 내용을 확인합니다.</p></article>
             </section>
 
             <section class="help-panel" data-help-panel="history">
-                <article class="help-mini-card" data-help-keywords="기록실 캘린더 날짜 하루 기록 사진 모아보기"><h3>📅 기록실</h3><p>달력에서 날짜를 선택하면 그날의 기록과 사진을 다시 확인할 수 있습니다.</p><div class="help-tip">💡 좋은 추억은 사진과 함께 남기면 나중에 더 잘 떠올라요.</div></article>
-                <article class="help-mini-card" data-help-keywords="기록 안보임 저장 날짜"><h3>🔎 기록이 안 보일 때</h3><p>선택한 날짜에 저장된 내용이 없을 수 있습니다. 홈에서 기록한 날짜와 기록실 날짜가 같은지 확인하세요.</p><div class="help-tip">💡 기록실은 날짜를 눌러 확인하는 방식입니다.</div></article>
+                <article class="help-mini-card" data-help-keywords="기록실 캘린더 날짜 하루 기록"><h3>📅 기록실</h3><p>달력을 이전·다음 달로 이동하고 날짜를 누르면 그날의 약속, 루틴, 컨디션, 기록, 피드백을 확인할 수 있습니다.</p></article>
+                <article class="help-mini-card" data-help-keywords="사진 모아보기"><h3>📷 사진 모아보기</h3><p>저장된 사진을 한곳에서 확인하고 원하는 날짜의 기록으로 이동할 수 있습니다.</p></article>
+                <article class="help-mini-card" data-help-keywords="기념일 만난지 날짜"><h3>💕 우리의 기념일</h3><p>생일, 여행, 데이트 등 기념일을 등록할 수 있으며 대표 기념일은 ‘함께한 지 N일’ 요약에 반영됩니다.</p></article>
+            </section>
+
+            <section class="help-panel" data-help-panel="theme">
+                <article class="help-mini-card" data-help-keywords="개인 테마 라벤더 블라썸 오션 포레스트 크림"><h3>🎨 개인 테마</h3><p>내 계정의 테마 메뉴에서 라벤더·블라썸·오션·포레스트·크림 중 하나를 선택할 수 있습니다.</p></article>
+                <article class="help-mini-card" data-help-keywords="우리의 공용 테마 커플 동기화 Dom"><h3>💞 우리의 공용 테마</h3><p>관리(Dom)가 공용 테마를 켜면 같은 공간의 두 사용자에게 동일한 색상 테마가 실시간 적용됩니다.</p></article>
+                <article class="help-mini-card" data-help-keywords="라이트 다크 시스템 모드"><h3>🌙 화면 표시 방식</h3><p>라이트·다크·시스템 따라가기를 개인별로 선택할 수 있습니다. 공용 색상 테마와 화면 밝기 설정은 서로 독립적으로 동작합니다.</p></article>
+            </section>
+
+            <section class="help-panel" data-help-panel="data">
+                <article class="help-mini-card" data-help-keywords="데이터 삭제 요청 계정 Room 전체"><h3>🗂️ 데이터 관리</h3><p>내 계정에서 개인 데이터 또는 Room 전체 데이터 삭제 요청을 보낼 수 있습니다.</p></article>
+                <article class="help-mini-card" data-help-keywords="삭제 요청 취소 관리자 승인 거절 메시지"><h3>🛡️ 요청 검토</h3><p>삭제는 즉시 실행되지 않고 관리자가 검토합니다. 처리 전에는 요청을 취소할 수 있고, 승인·거절 메시지를 확인할 수 있습니다.</p></article>
+                <article class="help-mini-card" data-help-keywords="로그아웃 데이터 유지"><h3>🚪 로그아웃</h3><p>로그아웃해도 서버에 저장된 기록은 삭제되지 않습니다. 같은 계정으로 다시 로그인하면 연결된 공간을 불러옵니다.</p></article>
             </section>
 
             <section class="help-panel guide-faq" data-help-panel="faq">
                 <div class="faq-accordion" data-help-keywords="질문 답변 Q&A FAQ">
-                    <button type="button" class="faq-question" onclick="toggleHelpFaq(this)">상대방이 안 보여요.<span>⌄</span></button>
-                    <div class="faq-answer">같은 공간에 입장했는지 확인해 주세요. 초대코드가 다르면 서로의 기록이 보이지 않습니다.</div>
-                    <button type="button" class="faq-question" onclick="toggleHelpFaq(this)">온라인 표시가 회색이에요.<span>⌄</span></button>
-                    <div class="faq-answer">상대방이 앱을 종료했거나 인터넷 연결이 끊어진 상태일 수 있습니다. 잠시 후 다시 확인해 주세요.</div>
-                    <button type="button" class="faq-question" onclick="toggleHelpFaq(this)">오늘 작성한 기록은 어디서 다시 보나요?<span>⌄</span></button>
-                    <div class="faq-answer">기록실에서 날짜를 선택하면 그날의 기록과 사진을 다시 볼 수 있습니다.</div>
-                    <button type="button" class="faq-question" onclick="toggleHelpFaq(this)">커스텀 미션은 어디에 쓰나요?<span>⌄</span></button>
-                    <div class="faq-answer">매일 반복하고 싶은 작은 습관이나 오늘만 필요한 미션을 적는 공간입니다.</div>
-                    <button type="button" class="faq-question" onclick="toggleHelpFaq(this)">운동 기록도 저장되나요?<span>⌄</span></button>
-                    <div class="faq-answer">네. 오늘의 운동에 입력한 내용은 기록실과 최종 복사 내용에 함께 반영됩니다.</div>
-                    <button type="button" class="faq-question" onclick="toggleHelpFaq(this)">기념일은 몇 개까지 등록할 수 있나요?<span>⌄</span></button>
-                    <div class="faq-answer">원하는 만큼 등록할 수 있습니다. 홈에는 중요한 기념일을 보기 쉽게 표시하는 방향으로 정리됩니다.</div>
-                    <button type="button" class="faq-question" onclick="toggleHelpFaq(this)">기존 공간을 다시 불러오고 싶어요.<span>⌄</span></button>
-                    <div class="faq-answer">우리의 공간에서 이전 공간 불러오기를 사용하세요. 필요한 경우 방코드를 직접 입력하면 됩니다.</div>
-                </div>
-            </section>
-
-            <section class="help-panel" data-help-panel="tips">
-                <article class="help-mini-card help-random-tip" data-help-keywords="활용 팁 추천"><h3>💡 오늘의 추천</h3><p id="helpRandomTip">매일 한 줄이라도 기록을 남겨보세요.</p><button type="button" class="help-small-btn" onclick="showRandomHelpTip()">다른 팁 보기</button></article>
-                <div class="help-tip-list">
-                    <div>💡 커스텀 미션은 “물 2L 마시기”처럼 짧게 쓰면 좋아요.</div>
-                    <div>💡 첫 여행, 첫 데이트도 기념일로 남겨보세요.</div>
-                    <div>💡 기록실은 사진과 메모를 함께 볼 때 가장 예뻐요.</div>
-                    <div>💡 운동은 거창하지 않아도 괜찮아요. 산책도 기록해 보세요.</div>
+                    <button type="button" class="faq-question" onclick="toggleHelpFaq(this)">상대방이 안 보여요.<span>⌄</span></button><div class="faq-answer">두 사용자가 같은 공간에 연결되어 있는지 확인하세요. 초대코드가 다르면 서로의 기록이 보이지 않습니다.</div>
+                    <button type="button" class="faq-question" onclick="toggleHelpFaq(this)">오늘의 약속과 나의 루틴은 무엇이 다른가요?<span>⌄</span></button><div class="faq-answer">오늘의 약속은 관리(Dom)가 만들고 기록(Sub)이 수행합니다. 나의 루틴은 기록(Sub)이 스스로 만들고 관리합니다.</div>
+                    <button type="button" class="faq-question" onclick="toggleHelpFaq(this)">공용 테마를 끄면 어떻게 되나요?<span>⌄</span></button><div class="faq-answer">각 사용자가 이전에 저장한 개인 테마로 즉시 돌아갑니다.</div>
+                    <button type="button" class="faq-question" onclick="toggleHelpFaq(this)">오늘 작성한 기록은 어디서 다시 보나요?<span>⌄</span></button><div class="faq-answer">기록실에서 날짜를 선택하면 그날의 약속, 루틴, 컨디션, 기록과 사진을 다시 볼 수 있습니다.</div>
+                    <button type="button" class="faq-question" onclick="toggleHelpFaq(this)">초대코드가 만료되었다고 나와요.<span>⌄</span></button><div class="faq-answer">초대코드는 24시간 동안만 유효합니다. 관리(Dom)에게 새 코드를 요청하세요.</div>
+                    <button type="button" class="faq-question" onclick="toggleHelpFaq(this)">다른 공간으로 돌아갈 수 있나요?<span>⌄</span></button><div class="faq-answer">우리의 공간 메뉴에서 이전 공간 목록을 열고 원하는 공간으로 전환할 수 있습니다.</div>
                 </div>
             </section>
 
             <section class="help-panel" data-help-panel="updates">
-                <article class="help-mini-card" data-help-keywords="업데이트 RC2.18 도움말 사용가이드"><h3>📝 RC2.18</h3><p>사용 가이드를 짧고 읽기 쉽게 리모델링했습니다. 검색, Q&A, 활용 팁이 추가되었습니다.</p><div class="help-tip">💡 이번 버전은 설명서보다 앱 안의 도움말을 더 쉽게 만드는 버전입니다.</div></article>
-                <article class="help-mini-card" data-help-keywords="RC2.17.3 운동"><h3>🏃 RC2.17.3</h3><p>오늘의 운동 카드가 추가되었고, 기록실 저장과 최종 복사에 반영되었습니다.</p></article>
+                <article class="help-mini-card hm-release-card" id="helpLatestUpdateCard" data-help-keywords="업데이트 최신 버전">
+                    <h3>📝 <span data-hm-release-version>v1.0 STEP5.10.9</span></h3>
+                    <p><strong data-hm-release-title>사용자 설명서 2.0 및 릴리스 정보 자동 동기화</strong></p>
+                    <div class="hm-release-meta"><span>배포일 <b data-hm-release-date>2026.07.15</b></span><span data-hm-release-stage>Beta</span></div>
+                    <p data-hm-release-description>최신 기능 안내와 버전·업데이트 항목을 하나의 릴리스 정보에서 자동으로 표시합니다.</p>
+                    <ul class="hm-release-change-list" id="helpLatestChanges"></ul>
+                </article>
+                <article class="help-mini-card" data-help-keywords="업데이트 자동 동기화 설명"><h3>🔄 자동 업데이트 항목</h3><p>앞으로 버전, 배포일, 제목, 최근 변경 목록은 <code>release-info.js</code>의 정보를 사용해 홈·설명서·브라우저 제목·QA에 동일하게 표시됩니다.</p><div class="help-tip">💡 기능별 상세 사용법은 새 기능을 만들 때 함께 검토하여 설명서 본문에 반영합니다.</div></article>
+            </section>
             </section>
         </div>
 
@@ -1253,27 +1239,28 @@
 </div>
 
 <div class="toast" id="toast">기록이 복사되었습니다! 💕</div>
-    <script src="js/config.js?v=step5-10-8-sub-routine-input-history-ui-20260715"></script>
-    <script src="js/utils.js?v=step5-10-8-sub-routine-input-history-ui-20260715"></script>
-    <script src="js/popup.js?v=step5-10-8-sub-routine-input-history-ui-20260715"></script>
-    <script src="js/auth.js?v=step5-10-8-sub-routine-input-history-ui-20260715"></script>
-    <script src="js/room.js?v=step5-10-8-sub-routine-input-history-ui-20260715"></script>
-    <script src="js/presence.js?v=step5-10-8-sub-routine-input-history-ui-20260715"></script>
-    <script src="js/daily.js?v=step5-10-8-sub-routine-input-history-ui-20260715"></script>
-    <script src="js/mission.js?v=step5-10-8-sub-routine-input-history-ui-20260715"></script>
-    <script src="js/custom-routine.js?v=step5-10-8-sub-routine-input-history-ui-20260715"></script>
-    <script src="js/sub-routine.js?v=step5-10-8-sub-routine-input-history-ui-20260715"></script>
-    <script src="js/history.js?v=step5-10-8-sub-routine-input-history-ui-20260715"></script>
-    <script src="js/anniversary.js?v=step5-10-8-sub-routine-input-history-ui-20260715"></script>
-    <script src="js/theme.js?v=step5-10-8-sub-routine-input-history-ui-20260715"></script>
-    <script src="js/profile.js?v=step5-10-8-sub-routine-input-history-ui-20260715"></script>
-    <script src="js/chat.js?v=step5-10-8-sub-routine-input-history-ui-20260715"></script>
-    <script src="js/autosave.js?v=step5-10-8-sub-routine-input-history-ui-20260715"></script>
-    <script src="js/qa.js?v=step5-10-8-sub-routine-input-history-ui-20260715"></script>
-    <script src="js/motion.js?v=step5-10-8-sub-routine-input-history-ui-20260715"></script>
-    <script src="js/product.js?v=step5-10-8-sub-routine-input-history-ui-20260715"></script>
-    <script src="js/help-center.js?v=step5-10-8-sub-routine-input-history-ui-20260715"></script>
-    <script src="js/data-management.js?v=step5-10-8-sub-routine-input-history-ui-20260715"></script>
-    <script src="js/app.js?v=step5-10-8-sub-routine-input-history-ui-20260715"></script>
+    <script src="js/release-info.js?v=step5-10-9-user-guide-release-sync-20260715"></script>
+    <script src="js/config.js?v=step5-10-9-user-guide-release-sync-20260715"></script>
+    <script src="js/utils.js?v=step5-10-9-user-guide-release-sync-20260715"></script>
+    <script src="js/popup.js?v=step5-10-9-user-guide-release-sync-20260715"></script>
+    <script src="js/auth.js?v=step5-10-9-user-guide-release-sync-20260715"></script>
+    <script src="js/room.js?v=step5-10-9-user-guide-release-sync-20260715"></script>
+    <script src="js/presence.js?v=step5-10-9-user-guide-release-sync-20260715"></script>
+    <script src="js/daily.js?v=step5-10-9-user-guide-release-sync-20260715"></script>
+    <script src="js/mission.js?v=step5-10-9-user-guide-release-sync-20260715"></script>
+    <script src="js/custom-routine.js?v=step5-10-9-user-guide-release-sync-20260715"></script>
+    <script src="js/sub-routine.js?v=step5-10-9-user-guide-release-sync-20260715"></script>
+    <script src="js/history.js?v=step5-10-9-user-guide-release-sync-20260715"></script>
+    <script src="js/anniversary.js?v=step5-10-9-user-guide-release-sync-20260715"></script>
+    <script src="js/theme.js?v=step5-10-9-user-guide-release-sync-20260715"></script>
+    <script src="js/profile.js?v=step5-10-9-user-guide-release-sync-20260715"></script>
+    <script src="js/chat.js?v=step5-10-9-user-guide-release-sync-20260715"></script>
+    <script src="js/autosave.js?v=step5-10-9-user-guide-release-sync-20260715"></script>
+    <script src="js/qa.js?v=step5-10-9-user-guide-release-sync-20260715"></script>
+    <script src="js/motion.js?v=step5-10-9-user-guide-release-sync-20260715"></script>
+    <script src="js/product.js?v=step5-10-9-user-guide-release-sync-20260715"></script>
+    <script src="js/help-center.js?v=step5-10-9-user-guide-release-sync-20260715"></script>
+    <script src="js/data-management.js?v=step5-10-9-user-guide-release-sync-20260715"></script>
+    <script src="js/app.js?v=step5-10-9-user-guide-release-sync-20260715"></script>
 </body>
 </html>

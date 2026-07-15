@@ -1,5 +1,5 @@
 // =========================================================
-// HearMe2nite v1.0 STEP5.10.8
+// HearMe2nite v1.0 STEP5.10.9
 // sub-routine.js - 기록(Sub) 자기주도 루틴 입력 카드
 // 정의: rooms/{roomCode}/subRoutines/{routineId}
 // 날짜 입력: rooms/{roomCode}/subRoutineDays/{date}/{routineId}
