@@ -180,12 +180,18 @@
     }
 
     async function hmRefreshDataAdminAccess() {
-        const user = getUser(); const button = document.getElementById('dataAdminButton');
-        hmDataAdmin = false; if (button) button.hidden = true;
+        const user = getUser();
+        const button = document.getElementById('dataAdminButton');
+        const consoleButton = document.getElementById('adminConsoleButton');
+        hmDataAdmin = false;
+        if (button) button.hidden = true;
+        if (consoleButton) consoleButton.hidden = true;
         if (!user) return false;
         try {
             const snap = await db.ref(`admins/${user.uid}`).once('value');
-            hmDataAdmin = snap.val() === true; if (button) button.hidden = !hmDataAdmin;
+            hmDataAdmin = snap.val() === true;
+            if (button) button.hidden = !hmDataAdmin;
+            if (consoleButton) consoleButton.hidden = !hmDataAdmin;
             return hmDataAdmin;
         } catch (error) { console.warn('[DataAdmin] access check failed', error); return false; }
     }

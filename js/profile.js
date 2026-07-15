@@ -175,6 +175,7 @@ function openAccountChildModal(type) {
         else if (type === 'theme' && typeof openThemeModal === 'function') openThemeModal();
         else if (type === 'data' && typeof openDataManagementModal === 'function') openDataManagementModal();
         else if (type === 'admin' && typeof openDataAdminModal === 'function') openDataAdminModal();
+        else if (type === 'console') window.location.href = 'admin.html';
     }, 80);
 }
 
