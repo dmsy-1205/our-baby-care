@@ -10894,3 +10894,108 @@ html[data-hm-display="dark"] .hm-release-meta { color:var(--hm-text-muted, #b9b2
 :root[data-hm-theme][data-hm-display="dark"] .calendar-day.selected-record{background:color-mix(in srgb,var(--hm-primary) 30%,var(--hm-dark-card-soft))!important}
 :root[data-hm-theme][data-hm-display="dark"] .calendar-day.empty-day{background:transparent!important;border-color:transparent!important}
 @media(max-width:560px){#calendarBox.history-calendar-premium{padding:10px!important}.history-calendar-grid{gap:6px!important}.calendar-day{min-height:52px!important;border-radius:15px!important}.history-gallery-card{grid-template-columns:auto 1fr auto!important}.history-gallery-mini-thumb{width:42px;height:42px}.history-gallery-card-copy small{display:none}.record-deletion-modal{padding:14px;border-radius:22px}}
+
+/* =========================================================
+   STEP5.10.12.3 Final dark-mode audit
+   Screens reviewed: Room, Today Summary, Chat, Promise,
+   Feedback, History / Photo Gallery
+   ========================================================= */
+:root[data-hm-theme][data-hm-display="dark"] :is(
+  .room-presence-box,.presence-user-card,.presence-empty,
+  .hm-summary-modal-row,.hm-summary-modal-icon,
+  .hm-chat-messages,.hm-chat-offline-note,.hm-chat-input-row,
+  .custom-routine-check-line,.custom-routine-editor-box,.custom-routine-draft-row,.custom-routine-manager-item,
+  .feedback-confirm-row,.manager-lock-note,.feedback-review-card,.feedback-hint,
+  .history-gallery-card,.history-gallery-mini-thumb,.history-gallery-empty-icon,
+  #photoThumbs.history-thumb-row
+){
+  background:linear-gradient(145deg,var(--hm-dark-card),var(--hm-dark-card-soft)) !important;
+  color:var(--hm-color-body) !important;
+  border-color:var(--hm-dark-line) !important;
+  box-shadow:none !important;
+}
+
+/* Room / presence */
+:root[data-hm-theme][data-hm-display="dark"] :is(
+  .room-presence-title,.presence-user-title,.relationship-role-title,
+  .relationship-role-btn strong,.sync-box>label
+){color:var(--hm-color-title) !important;}
+:root[data-hm-theme][data-hm-display="dark"] :is(
+  .presence-user-email,.presence-user-status,.presence-empty,
+  .relationship-role-note,.relationship-role-help,#currentRoomInfo
+){color:var(--hm-color-muted) !important;}
+:root[data-hm-theme][data-hm-display="dark"] .presence-user-status{border-top-color:var(--hm-dark-line) !important;}
+
+/* Today summary */
+:root[data-hm-theme][data-hm-display="dark"] .hm-summary-modal-row strong,
+:root[data-hm-theme][data-hm-display="dark"] .hm-summary-modal-updated strong{color:var(--hm-color-title) !important;}
+:root[data-hm-theme][data-hm-display="dark"] .hm-summary-modal-row small,
+:root[data-hm-theme][data-hm-display="dark"] .hm-summary-modal-updated{color:var(--hm-color-muted) !important;}
+:root[data-hm-theme][data-hm-display="dark"] .hm-summary-modal-row b{color:color-mix(in srgb,var(--hm-primary) 72%,#fff 28%) !important;}
+
+/* Chat */
+:root[data-hm-theme][data-hm-display="dark"] .hm-chat-messages{background:var(--hm-dark-card) !important;}
+:root[data-hm-theme][data-hm-display="dark"] .hm-chat-empty{color:var(--hm-color-muted) !important;}
+:root[data-hm-theme][data-hm-display="dark"] .hm-chat-offline-note{
+  background:color-mix(in srgb,var(--hm-dark-card-soft) 86%,var(--hm-primary) 14%) !important;
+  color:var(--hm-color-muted) !important;
+}
+:root[data-hm-theme][data-hm-display="dark"] .hm-chat-input-row{
+  padding:8px;border:1px solid var(--hm-dark-line) !important;border-radius:16px;
+}
+:root[data-hm-theme][data-hm-display="dark"] :is(.hm-chat-input-row #chatSender,.hm-chat-input-row #chatInput){
+  background:var(--hm-dark-input) !important;color:var(--hm-color-body) !important;border-color:var(--hm-dark-line) !important;
+}
+
+/* Promise / routine input */
+:root[data-hm-theme][data-hm-display="dark"] .custom-routine-check-line{
+  background:var(--hm-dark-input) !important;color:var(--hm-color-body) !important;
+}
+:root[data-hm-theme][data-hm-display="dark"] :is(
+  .custom-routine-editor-box input,.custom-routine-editor-box select,.custom-routine-input-line input,
+  .custom-routine-input-line textarea,.custom-routine-input-line select
+){background:var(--hm-dark-input) !important;color:var(--hm-color-body) !important;border-color:var(--hm-dark-line) !important;}
+:root[data-hm-theme][data-hm-display="dark"] :is(
+  .custom-routine-editor-box label,.custom-routine-input-line span,
+  .custom-routine-manager-item strong,.custom-routine-manager-item small
+){color:inherit !important;}
+
+/* Feedback / confirmation */
+:root[data-hm-theme][data-hm-display="dark"] .feedback-confirm-row{
+  background:var(--hm-dark-input) !important;color:var(--hm-color-body) !important;
+}
+:root[data-hm-theme][data-hm-display="dark"] :is(.feedback-type-btn,.choice-btn,.gift-choice-btn){
+  background:var(--hm-dark-card-soft) !important;color:var(--hm-color-body) !important;border-color:var(--hm-dark-line) !important;
+}
+:root[data-hm-theme][data-hm-display="dark"] :is(.feedback-type-btn.active,.choice-btn.active,.gift-choice-btn.active){
+  background:color-mix(in srgb,var(--hm-primary) 30%,var(--hm-dark-card-soft)) !important;
+  border-color:var(--hm-primary) !important;color:#fff !important;
+}
+
+/* History / photo gallery alignment */
+:root[data-hm-theme][data-hm-display="dark"] #photoThumbs.history-thumb-row{
+  background:transparent !important;border:0 !important;box-shadow:none !important;
+}
+:root[data-hm-theme][data-hm-display="dark"] .history-gallery-card{
+  background:linear-gradient(145deg,var(--hm-dark-card),var(--hm-dark-card-soft)) !important;
+  color:var(--hm-color-body) !important;border:1px solid var(--hm-dark-line) !important;
+  box-shadow:none !important;outline:0 !important;
+}
+:root[data-hm-theme][data-hm-display="dark"] .history-gallery-card::before,
+:root[data-hm-theme][data-hm-display="dark"] .history-gallery-card::after{display:none !important;}
+:root[data-hm-theme][data-hm-display="dark"] :is(.history-gallery-mini-thumb,.history-gallery-empty-icon){
+  background:var(--hm-dark-input) !important;border-color:var(--hm-dark-line) !important;
+}
+:root[data-hm-theme][data-hm-display="dark"] .history-gallery-card-copy strong{color:var(--hm-color-title) !important;}
+:root[data-hm-theme][data-hm-display="dark"] .history-gallery-card-copy small{color:var(--hm-color-muted) !important;}
+:root[data-hm-theme][data-hm-display="dark"] .history-gallery-card-count{color:color-mix(in srgb,var(--hm-primary) 72%,#fff 28%) !important;}
+
+/* Remove remaining light inline surfaces inside reviewed modals */
+:root[data-hm-theme][data-hm-display="dark"] :is(
+  #roomSettingsOverlay,#homeSummaryModalOverlay,#chatModalOverlay,#customRoutineInputOverlay,
+  #feedbackModalOverlay,#rewardModalOverlay,#historyPanelOverlay
+) :is([style*="background:white"],[style*="background: white"],[style*="background:#fff"],[style*="background: #fff"]){
+  background:var(--hm-dark-card-soft) !important;
+  color:var(--hm-color-body) !important;
+  border-color:var(--hm-dark-line) !important;
+}
