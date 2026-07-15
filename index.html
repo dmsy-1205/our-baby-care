@@ -4,9 +4,9 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💗</text></svg>">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>HearMe2nite v1.0 STEP5.9.2</title>
+    <title>HearMe2nite v1.0 STEP5.10.0</title>
     <script>
-        // STEP5.9.2: 테마와 표시 모드를 Firebase 연결 전에 먼저 적용해 화면 깜빡임을 줄입니다.
+        // STEP5.10.0: 테마와 표시 모드를 Firebase 연결 전에 먼저 적용해 화면 깜빡임을 줄입니다.
         (function () {
             try {
                 var theme = localStorage.getItem('hm_theme_last') || 'lavender';
@@ -35,7 +35,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-functions-compat.js"></script>
 
-    <link rel="stylesheet" href="css/style.css?v=step5-9-2-dark-modal-header-20260715">
+    <link rel="stylesheet" href="css/style.css?v=step5-10-0-sub-self-routine-phase1-20260715">
 </head>
 <body class="hm-booting">
 
@@ -116,7 +116,7 @@
     </div>
     <div class="app-subtitle">우리의 하루를, 함께 기록합니다.</div>
     <div class="app-meta-row">
-        <div class="app-version-badge" id="appVersionBadge">Version v1.0 STEP5.9.2</div>
+        <div class="app-version-badge" id="appVersionBadge">Version v1.0 STEP5.10.0</div>
         <div class="home-presence-indicator" id="homePresenceIndicator" title="접속 상태 확인 중">
             <span class="home-presence-dot self offline" id="homePresenceSelfDot" aria-label="나 오프라인"></span>
             <span class="home-presence-dot partner offline" id="homePresencePartnerDot" aria-label="상대 오프라인"></span>
@@ -440,6 +440,54 @@
         <span class="custom-routine-help">미션과 주간 루틴은 오늘의 약속 바로 아래에 표시됩니다.</span>
     </div>
 
+    <section class="sub-routine-section" id="subRoutineSection">
+        <div class="home-section-title sub-routine-title">
+            <span>나의 루틴</span>
+            <small id="subRoutineCountText">기록(Sub)가 직접 관리</small>
+        </div>
+        <div class="input-group sub-routine-home-wrap">
+            <button type="button" class="daily-card sub-routine-hub-card" id="subRoutineHubCard" onclick="openSubRoutineHub()">
+                <span class="daily-card-icon sub-routine-icon">🌱</span>
+                <span>
+                    <span class="daily-card-title">나의 루틴</span>
+                    <span class="daily-card-sub" id="subRoutineHubSub">나만의 하루 루틴을 만들어보세요.</span>
+                </span>
+                <span class="daily-card-arrow">›</span>
+            </button>
+        </div>
+    </section>
+
+
+    <div class="daily-modal-overlay" id="subRoutineHubOverlay" onclick="if(event.target.id==='subRoutineHubOverlay') closeSubRoutineHub()" aria-hidden="true" inert>
+        <div class="daily-modal sub-routine-modal" role="dialog" aria-modal="true" aria-labelledby="subRoutineHubTitle">
+            <div class="daily-modal-head">
+                <h2 id="subRoutineHubTitle">🌱 나의 루틴</h2>
+                <button type="button" class="modal-close-btn" onclick="closeSubRoutineHub()">닫기</button>
+            </div>
+            <p class="sub-routine-note" id="subRoutineRoleNote">기록(Sub)가 스스로 정하고 완료하는 개인 루틴입니다.</p>
+            <div id="subRoutineList" class="sub-routine-list"></div>
+            <button type="button" class="daily-modal-save sub-routine-add-btn" id="subRoutineAddBtn" onclick="openSubRoutineEditor()">+ 새 루틴 만들기</button>
+        </div>
+    </div>
+
+    <div class="daily-modal-overlay" id="subRoutineEditorOverlay" onclick="if(event.target.id==='subRoutineEditorOverlay') closeSubRoutineEditor()" aria-hidden="true" inert>
+        <div class="daily-modal sub-routine-editor-modal" role="dialog" aria-modal="true" aria-labelledby="subRoutineEditorTitle">
+            <div class="daily-modal-head">
+                <h2 id="subRoutineEditorTitle">🌱 나의 루틴 만들기</h2>
+                <button type="button" class="modal-close-btn" onclick="closeSubRoutineEditor()">닫기</button>
+            </div>
+            <div class="sub-routine-editor-form">
+                <label for="subRoutineTitleInput">루틴 이름</label>
+                <input type="text" id="subRoutineTitleInput" maxlength="30" placeholder="예: 아침 물 한 잔 마시기">
+                <label for="subRoutineDescInput">간단한 설명</label>
+                <textarea id="subRoutineDescInput" maxlength="100" rows="3" placeholder="예: 일어나자마자 천천히 한 잔 마시기"></textarea>
+                <div class="sub-routine-editor-actions">
+                    <button type="button" class="btn-secondary" onclick="closeSubRoutineEditor()">취소</button>
+                    <button type="button" class="daily-modal-save" onclick="saveSubRoutine()">저장</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <div class="daily-modal-overlay hm-chat-overlay" id="chatModalOverlay" onclick="if(event.target.id==='chatModalOverlay') closeChatModal()" aria-hidden="true" inert>
         <div class="daily-modal hm-chat-modal" role="dialog" aria-modal="true" aria-labelledby="chatModalTitle">
@@ -1168,26 +1216,27 @@
 </div>
 
 <div class="toast" id="toast">기록이 복사되었습니다! 💕</div>
-    <script src="js/config.js?v=step5-9-2-dark-modal-header-20260715"></script>
-    <script src="js/utils.js?v=step5-9-2-dark-modal-header-20260715"></script>
-    <script src="js/popup.js?v=step5-9-2-dark-modal-header-20260715"></script>
-    <script src="js/auth.js?v=step5-9-2-dark-modal-header-20260715"></script>
-    <script src="js/room.js?v=step5-9-2-dark-modal-header-20260715"></script>
-    <script src="js/presence.js?v=step5-9-2-dark-modal-header-20260715"></script>
-    <script src="js/daily.js?v=step5-9-2-dark-modal-header-20260715"></script>
-    <script src="js/mission.js?v=step5-9-2-dark-modal-header-20260715"></script>
-    <script src="js/custom-routine.js?v=step5-9-2-dark-modal-header-20260715"></script>
-    <script src="js/history.js?v=step5-9-2-dark-modal-header-20260715"></script>
-    <script src="js/anniversary.js?v=step5-9-2-dark-modal-header-20260715"></script>
-    <script src="js/theme.js?v=step5-9-2-dark-modal-header-20260715"></script>
-    <script src="js/profile.js?v=step5-9-2-dark-modal-header-20260715"></script>
-    <script src="js/chat.js?v=step5-9-2-dark-modal-header-20260715"></script>
-    <script src="js/autosave.js?v=step5-9-2-dark-modal-header-20260715"></script>
-    <script src="js/qa.js?v=step5-9-2-dark-modal-header-20260715"></script>
-    <script src="js/motion.js?v=step5-9-2-dark-modal-header-20260715"></script>
-    <script src="js/product.js?v=step5-9-2-dark-modal-header-20260715"></script>
-    <script src="js/help-center.js?v=step5-9-2-dark-modal-header-20260715"></script>
-    <script src="js/data-management.js?v=step5-9-2-dark-modal-header-20260715"></script>
-    <script src="js/app.js?v=step5-9-2-dark-modal-header-20260715"></script>
+    <script src="js/config.js?v=step5-10-0-sub-self-routine-phase1-20260715"></script>
+    <script src="js/utils.js?v=step5-10-0-sub-self-routine-phase1-20260715"></script>
+    <script src="js/popup.js?v=step5-10-0-sub-self-routine-phase1-20260715"></script>
+    <script src="js/auth.js?v=step5-10-0-sub-self-routine-phase1-20260715"></script>
+    <script src="js/room.js?v=step5-10-0-sub-self-routine-phase1-20260715"></script>
+    <script src="js/presence.js?v=step5-10-0-sub-self-routine-phase1-20260715"></script>
+    <script src="js/daily.js?v=step5-10-0-sub-self-routine-phase1-20260715"></script>
+    <script src="js/mission.js?v=step5-10-0-sub-self-routine-phase1-20260715"></script>
+    <script src="js/custom-routine.js?v=step5-10-0-sub-self-routine-phase1-20260715"></script>
+    <script src="js/sub-routine.js?v=step5-10-0-sub-self-routine-phase1-20260715"></script>
+    <script src="js/history.js?v=step5-10-0-sub-self-routine-phase1-20260715"></script>
+    <script src="js/anniversary.js?v=step5-10-0-sub-self-routine-phase1-20260715"></script>
+    <script src="js/theme.js?v=step5-10-0-sub-self-routine-phase1-20260715"></script>
+    <script src="js/profile.js?v=step5-10-0-sub-self-routine-phase1-20260715"></script>
+    <script src="js/chat.js?v=step5-10-0-sub-self-routine-phase1-20260715"></script>
+    <script src="js/autosave.js?v=step5-10-0-sub-self-routine-phase1-20260715"></script>
+    <script src="js/qa.js?v=step5-10-0-sub-self-routine-phase1-20260715"></script>
+    <script src="js/motion.js?v=step5-10-0-sub-self-routine-phase1-20260715"></script>
+    <script src="js/product.js?v=step5-10-0-sub-self-routine-phase1-20260715"></script>
+    <script src="js/help-center.js?v=step5-10-0-sub-self-routine-phase1-20260715"></script>
+    <script src="js/data-management.js?v=step5-10-0-sub-self-routine-phase1-20260715"></script>
+    <script src="js/app.js?v=step5-10-0-sub-self-routine-phase1-20260715"></script>
 </body>
 </html>

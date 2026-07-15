@@ -80,6 +80,8 @@
             // STEP5.6.3.6: 생성된 미션/주간 루틴은 메인 카드 바로 아래의 독립 카드 목록으로 표시한다.
             if (routineList && routineList.parentNode !== holder) holder.appendChild(routineList);
             if (toolbar && toolbar.parentNode !== holder) holder.appendChild(toolbar);
+            const subRoutineSection = $('subRoutineSection');
+            if (subRoutineSection && subRoutineSection.parentNode !== holder) holder.appendChild(subRoutineSection);
             title.dataset.hmMoved = '1';
         } catch(e) {}
     }

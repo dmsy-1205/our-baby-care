@@ -225,6 +225,7 @@
         listenChat();
         listenOwnerPrivateNote();
         if (typeof hmStartCustomRoutineCards === 'function') hmStartCustomRoutineCards(roomCode);
+        if (typeof hmStartSubRoutines === 'function') hmStartSubRoutines(roomCode);
 
         // STEP5.6.3.6: 기록실을 열지 않아도 Room 연결 직후 대표 기념일을 불러온다.
         // anniversary.js가 autosave.js보다 먼저 로드되지만 connectAndListenFirebase 호출 시점에는

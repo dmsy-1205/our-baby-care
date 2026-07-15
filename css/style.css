@@ -10454,7 +10454,7 @@ button:active {
 
 
 /* =========================================================
-   STEP5.9.2 Account Card Compact Fix
+   STEP5.10.0 Account Card Compact Fix
    - 아래 '우리의 공간' 카드와 같은 크기와 가로 정렬 유지
    - 과거 user-bar 규칙과의 충돌 방지
    ========================================================= */
@@ -10510,7 +10510,7 @@ button:active {
 
 
 /* =========================================================
-   STEP5.9.2 Dark Central Modal Header Fix
+   STEP5.10.0 Dark Central Modal Header Fix
    - 중앙 팝업 상단 제목 영역이 라이트 배경으로 남는 문제 수정
    - 채팅/오늘의 약속/일일 입력/관리 팝업 제목 가독성 통일
    ========================================================= */
@@ -10556,3 +10556,29 @@ button:active {
   border-bottom:1px solid var(--hm-line-soft) !important;
   border-radius:24px 24px 0 0 !important;
 }
+
+
+/* =========================================================
+   STEP5.10.0 기록(Sub) 자기주도 나의 루틴 1단계
+   - 기존 테마/다크모드/중앙 모달 디자인 시스템을 그대로 사용
+   ========================================================= */
+.sub-routine-section{margin:0 0 14px}
+.sub-routine-title{margin-top:14px!important;margin-bottom:8px!important}
+.sub-routine-home-wrap{margin-top:0!important}
+.sub-routine-hub-card{min-height:78px!important;padding:16px 18px!important;border-color:color-mix(in srgb,var(--theme-accent,#7c5cff) 28%,transparent)!important;background:linear-gradient(135deg,color-mix(in srgb,var(--theme-card,#fff) 92%,#dff8ea 8%),var(--theme-card,#fff))!important}
+.sub-routine-icon{background:linear-gradient(135deg,#e8fff0,#f7fff9)!important}
+.sub-routine-note{margin:0 0 12px;color:var(--theme-text-muted,#7f7896);font-size:.86rem;line-height:1.55}
+.sub-routine-list{display:grid;gap:10px;margin:8px 0 14px}
+.sub-routine-empty{padding:24px 14px;text-align:center;border:1px dashed var(--theme-border,rgba(124,92,255,.25));border-radius:18px;color:var(--theme-text-muted,#837b99);background:var(--theme-card-soft,rgba(255,255,255,.58));line-height:1.6}
+.sub-routine-row{display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:10px;align-items:center;padding:12px;border:1px solid var(--theme-border,rgba(124,92,255,.2));border-radius:18px;background:var(--theme-card,#fff);box-shadow:var(--theme-shadow,0 8px 22px rgba(80,55,120,.08))}
+.sub-routine-row.is-done{opacity:.78;background:color-mix(in srgb,var(--theme-card,#fff) 82%,#dff8ea 18%)}
+.sub-routine-check{width:42px;height:42px;border-radius:14px;border:1px solid color-mix(in srgb,var(--theme-accent,#7c5cff) 45%,transparent);background:color-mix(in srgb,var(--theme-accent,#7c5cff) 12%,var(--theme-card,#fff));color:var(--theme-accent,#7c5cff);font-size:1.25rem;font-weight:900}
+.sub-routine-check:disabled{cursor:default;opacity:.75}
+.sub-routine-row-text{min-width:0;display:grid;gap:4px}.sub-routine-row-text strong{color:var(--theme-text,#2f2940);font-size:.95rem}.sub-routine-row-text small{color:var(--theme-text-muted,#837b99);font-size:.76rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sub-routine-row.is-done .sub-routine-row-text strong{text-decoration:line-through}
+.sub-routine-row-actions{display:flex;gap:5px}.sub-routine-row-actions button,.sub-routine-readonly{border:0;border-radius:10px;padding:8px 9px;background:color-mix(in srgb,var(--theme-accent,#7c5cff) 10%,var(--theme-card,#fff));color:var(--theme-accent,#7c5cff);font-size:.72rem;font-weight:800}.sub-routine-row-actions .danger{color:#e84d73;background:rgba(232,77,115,.1)}
+.sub-routine-editor-form{display:grid;gap:9px}.sub-routine-editor-form label{font-weight:900;color:var(--theme-text,#2f2940);font-size:.82rem}.sub-routine-editor-form input,.sub-routine-editor-form textarea{width:100%;box-sizing:border-box;border:1px solid var(--theme-border,rgba(124,92,255,.24));border-radius:15px;padding:12px 13px;background:var(--theme-input,#fff);color:var(--theme-text,#2f2940);font:inherit;resize:vertical}.sub-routine-editor-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:8px}
+html[data-display-mode="dark"] .sub-routine-hub-card,html.hm-dark .sub-routine-hub-card{background:linear-gradient(135deg,color-mix(in srgb,var(--theme-card,#25283c) 90%,var(--theme-accent,#7c5cff) 10%),var(--theme-card,#25283c))!important}
+html[data-display-mode="dark"] .sub-routine-icon,html.hm-dark .sub-routine-icon{background:color-mix(in srgb,var(--theme-accent,#7c5cff) 18%,var(--theme-card,#25283c))!important}
+html[data-display-mode="dark"] .sub-routine-row,html.hm-dark .sub-routine-row,html[data-display-mode="dark"] .sub-routine-empty,html.hm-dark .sub-routine-empty{background:var(--theme-card,#25283c)!important;color:var(--theme-text,#f5f3ff)!important}
+@media(max-width:640px){.sub-routine-hub-card{min-height:74px!important;padding:14px 16px!important}.sub-routine-row{grid-template-columns:42px minmax(0,1fr);}.sub-routine-row-actions,.sub-routine-readonly{grid-column:2;justify-self:start}}
