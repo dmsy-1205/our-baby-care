@@ -5,19 +5,19 @@
 (function () {
     const release = Object.freeze({
         product: 'HearMe2nite',
-        version: 'v1.0 STEP6.2.1',
-        appVersion: 'HearMe2nite v1.0 STEP6.2.1',
-        step: 'STEP6.2.1',
+        version: 'v1.0 STEP6.2.3',
+        appVersion: 'HearMe2nite v1.0 STEP6.2.3',
+        step: 'STEP6.2.3',
         build: '20260716',
         releaseDate: '2026.07.16',
         stage: 'Beta',
-        title: '피드백·선물 읽기 전용 화면 개선',
-        description: '기록(Sub)은 작성 화면 없이 관리(Dom)가 남긴 피드백과 오늘의 선물을 편안하게 확인할 수 있습니다.',
+        title: '모바일 기념일 닫기 긴급 수정',
+        description: '모바일에서 기념일 팝업을 닫은 직후 다시 열리는 터치 이벤트 충돌을 수정했습니다.',
         changes: Object.freeze([
-            '기록(Sub) 화면에서 관리자 작성 입력 영역 숨김',
-            '작성된 피드백을 읽기 전용 카드로 표시',
-            '작성된 보상·휴식과 메시지를 읽기 전용으로 표시',
-            '내용이 없을 때 안내 문구 표시'
+            '모바일 기념일 팝업 닫기 오류 수정',
+            '닫기 직후 팝업이 다시 열리는 터치 충돌 방지',
+            'Android·iPhone·Fold 닫기 동작 안정화',
+            '기념일 데이터와 등록 기능은 그대로 유지'
         ])
     });
 

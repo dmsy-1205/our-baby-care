@@ -391,8 +391,12 @@ async function hmDeleteCustomAnniversary(id) {
 }
 
 let hmAnniversaryBodyScrollY = 0;
+let hmAnniversaryCloseGuardUntil = 0;
 
 function hmOpenAnniversarySettings() {
+    // STEP6.2.3: Prevent the delayed synthetic mobile click from reopening
+    // the modal immediately after the close button hides the overlay.
+    if (Date.now() < hmAnniversaryCloseGuardUntil) return;
     hmAnniversaryState.isModalOpen = true;
     hmEnsureAnniversaryModal();
     hmRenderAnniversaryModal();
@@ -410,6 +414,7 @@ function hmOpenAnniversarySettings() {
 }
 
 function hmCloseAnniversarySettings() {
+    hmAnniversaryCloseGuardUntil = Date.now() + 900;
     hmAnniversaryState.isModalOpen = false;
     const overlay = document.getElementById('anniversarySettingsOverlay');
     if (overlay) {
@@ -490,37 +495,19 @@ function hmRenderAnniversaryModal() {
             <div class="anniversary-custom-list">${listHtml}</div>
         </div>`;
 
-    // STEP6.2.2: Mobile-safe close binding for the scrollable fixed modal.
+    // STEP6.2.3: Use one activation path and block mobile click-through.
+    // The previous pointerup + click combination could close the overlay and then
+    // let the delayed synthetic click hit the underlying “관리” button, reopening it.
     const closeButton = document.getElementById('anniversaryModalCloseButton');
     if (closeButton) {
-        let pointerHandled = false;
-        const closeFromButton = function(event) {
-            if (event) {
-                event.preventDefault();
-                event.stopPropagation();
+        closeButton.addEventListener('click', function(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            if (typeof event.stopImmediatePropagation === 'function') {
+                event.stopImmediatePropagation();
             }
             hmCloseAnniversarySettings();
-        };
-
-        closeButton.addEventListener('pointerup', function(event) {
-            pointerHandled = true;
-            closeFromButton(event);
-            window.setTimeout(function() { pointerHandled = false; }, 350);
-        });
-
-        closeButton.addEventListener('click', function(event) {
-            if (pointerHandled) {
-                event.preventDefault();
-                event.stopPropagation();
-                return;
-            }
-            closeFromButton(event);
-        });
-
-        closeButton.addEventListener('touchend', function(event) {
-            if (typeof window.PointerEvent !== 'undefined') return;
-            closeFromButton(event);
-        }, { passive: false });
+        }, { capture: true });
     }
 }
 function hmRenderAnniversaryPanel() {
