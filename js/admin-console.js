@@ -48,8 +48,11 @@
       state.connected=connectedSnap.val()===true;
       renderAll();
       $('lastUpdated').textContent=`업데이트 ${fmt(Date.now())}`;
-    }catch(error){console.error('[Admin Console] load failed',error);alert(`관리자 데이터 조회 실패: ${error.message}`);}
-    finally{$('refreshAdminBtn').disabled=false;}
+    }catch(error){
+      console.error('[Admin Console] load failed',error);
+      $('lastUpdated').textContent=`데이터 조회 실패: ${error.message}`;
+      throw error;
+    }finally{$('refreshAdminBtn').disabled=false;}
   }
 
   function renderAll(){
@@ -102,56 +105,44 @@
   $('refreshAdminBtn').addEventListener('click',loadData);$('userSearch').addEventListener('input',renderUsers);$('roomSearch').addEventListener('input',renderRooms);
   $('adminLogoutBtn').addEventListener('click',()=>babyAuth.signOut().then(()=>location.href='index.html'));
 
-  let booting=false;
-  let bootedUid='';
+  let startedUid = '';
 
-  async function bootstrapAdmin(user,source){
-    if(booting)return;
-    if(user&&bootedUid===user.uid&&!$('adminApp').hidden)return;
-    booting=true;
-    console.info('[Admin Console] bootstrap',source,user?.uid||'no-user');
-    showGate('관리자 인증 정보를 동기화하고 있습니다.');
+  async function startAdminConsole(user, source){
+    console.info('[Admin Console] start', source, user ? user.uid : 'no-user');
+
+    if(!user){
+      showGate('로그인된 계정이 없습니다. 사용자 앱에서 관리자 계정으로 로그인해 주세요.');
+      return;
+    }
+
+    if(startedUid === user.uid && !$('adminApp').hidden) return;
+    startedUid = user.uid;
+
+    // 관리자 페이지가 먼저 보이도록 한다.
+    // 실제 데이터 접근 권한은 Firebase Rules가 최종 검증한다.
+    showApp(user);
+    $('lastUpdated').textContent = '관리자 데이터를 불러오는 중입니다.';
+
     try{
-      if(!user){showGate('로그인된 계정이 없습니다. 사용자 앱에서 관리자 계정으로 로그인해 주세요.');return;}
-      let launchVerified=false;
-      try{
-        const launch=JSON.parse(sessionStorage.getItem('hmAdminLaunch')||'null');
-        launchVerified=!!(launch&&launch.uid===user.uid&&Date.now()-Number(launch.at||0)<120000);
-      }catch(_){launchVerified=false;}
-
-      if(launchVerified){
-        console.info('[Admin Console] trusted same-tab admin launcher');
-        bootedUid=user.uid;
-        showApp(user);
-        try{
-          await loadData();
-          sessionStorage.removeItem('hmAdminLaunch');
-          return;
-        }catch(error){
-          console.warn('[Admin Console] launcher data load fallback',error);
-        }
-      }
-
-      const allowed=await verifyAdmin(user);
-      if(!allowed){showGate('이 계정에는 관리자 권한이 없습니다. Firebase admins/{uid} 값을 확인해 주세요.');return;}
-      bootedUid=user.uid;
-      showApp(user);
       await loadData();
+      console.info('[Admin Console] dashboard ready');
     }catch(error){
-      console.error('[Admin Console] bootstrap failed',error);
-      showGate(`관리자 권한 확인 실패: ${error.message}`);
-    }finally{booting=false;}
+      console.error('[Admin Console] dashboard start failed', error);
+      $('lastUpdated').textContent = `데이터 조회 실패: ${error.message}`;
+    }
   }
 
-  babyAuth.onAuthStateChanged((user)=>bootstrapAdmin(user,'auth-state'));
+  babyAuth.onAuthStateChanged((user)=>startAdminConsole(user,'auth-state'));
 
-  // 일부 브라우저에서 인증 콜백 전달이 지연되는 경우 현재 세션으로 즉시 시작한다.
-  if(babyAuth.currentUser){bootstrapAdmin(babyAuth.currentUser,'current-user');}
+  // 캐시된 로그인 세션이 있으면 Auth 콜백을 기다리지 않고 즉시 화면을 연다.
+  if(babyAuth.currentUser){
+    startAdminConsole(babyAuth.currentUser,'current-user');
+  }
 
-  // 무한 대기 화면 방지: 12초 후에도 판정이 끝나지 않으면 원인을 화면에 표시한다.
+  // Firebase Auth 응답 자체가 없는 경우에만 안내한다.
   setTimeout(()=>{
-    if(!$('adminGate').hidden&&/확인|동기화/.test($('gateMessage').textContent)){
-      showGate('관리자 권한 확인 응답이 지연되고 있습니다. Firebase Rules의 admins/{uid} 읽기 권한과 네트워크 상태를 확인해 주세요.');
+    if(!$('adminGate').hidden && !babyAuth.currentUser){
+      showGate('로그인 세션을 확인할 수 없습니다. 사용자 앱에서 다시 로그인한 뒤 운영 콘솔을 열어 주세요.');
     }
-  },12000);
+  },8000);
 })();
