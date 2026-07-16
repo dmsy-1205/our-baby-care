@@ -11365,3 +11365,19 @@ body > .anniversary-settings-overlay .anniversary-modal-close {
     user-select: none;
     -webkit-user-select: none;
 }
+
+
+/* STEP6.2.4 EMERGENCY: Anniversary modal visibility state
+   Root cause: the STEP6.1.5 mobile rule forced the overlay to display:block
+   even after JavaScript attempted to close it. hidden is now authoritative. */
+body > .anniversary-settings-overlay[hidden] {
+  display: none !important;
+}
+@media (max-width: 640px) {
+  body > .anniversary-settings-overlay:not(.is-open) {
+    display: none !important;
+  }
+  body > .anniversary-settings-overlay.is-open {
+    display: block !important;
+  }
+}

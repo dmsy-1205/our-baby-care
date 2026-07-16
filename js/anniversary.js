@@ -407,7 +407,8 @@ function hmOpenAnniversarySettings() {
         document.body.classList.add('modal-open', 'anniversary-modal-open');
     } catch (err) {}
     if (overlay) {
-        overlay.style.display = 'flex';
+        overlay.hidden = false;
+        overlay.style.removeProperty('display');
         overlay.classList.add('is-open');
         overlay.scrollTop = 0;
     }
@@ -418,8 +419,9 @@ function hmCloseAnniversarySettings() {
     hmAnniversaryState.isModalOpen = false;
     const overlay = document.getElementById('anniversarySettingsOverlay');
     if (overlay) {
-        overlay.style.display = 'none';
         overlay.classList.remove('is-open');
+        overlay.hidden = true;
+        overlay.style.removeProperty('display');
         overlay.scrollTop = 0;
     }
     try {
@@ -435,6 +437,7 @@ function hmEnsureAnniversaryModal() {
     const overlay = document.createElement('div');
     overlay.id = 'anniversarySettingsOverlay';
     overlay.className = 'anniversary-settings-overlay';
+    overlay.hidden = true;
     overlay.innerHTML = '<div class="anniversary-settings-modal" id="anniversarySettingsModal"></div>';
     overlay.addEventListener('click', function(event) {
         if (event.target === overlay) hmCloseAnniversarySettings();
