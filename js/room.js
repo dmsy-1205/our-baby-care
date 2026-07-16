@@ -690,6 +690,24 @@
     // 주의: DB key/Room 구조는 Firebase Rules와 연결되어 있으므로 변경 금지.
     async function createMyRoom() {
         if (!currentUser) { alert('먼저 로그인해 주세요.'); return; }
+
+        // 신규 가입자는 Firebase Rules가 auth.token.email_verified를 확인한다.
+        // 이메일 인증 직후의 오래된 ID 토큰으로 방 생성을 시도하지 않도록
+        // 실제 생성 쓰기 직전에 토큰을 다시 발급받는다.
+        try {
+            const verificationPolicy = await hmGetEmailVerificationPolicy(currentUser);
+            if (verificationPolicy.required) {
+                const tokenReady = await hmEnsureVerifiedAuthToken(currentUser);
+                if (!tokenReady) {
+                    alert('이메일 인증 정보를 갱신하지 못했습니다. 다시 로그인한 뒤 방을 만들어 주세요.');
+                    return;
+                }
+            }
+        } catch (verificationError) {
+            console.error('[Room Create] 이메일 인증 토큰 갱신 실패:', verificationError);
+            alert('이메일 인증 정보를 확인하지 못했습니다. 인터넷 연결을 확인하고 다시 시도해 주세요.');
+            return;
+        }
         if (activeRoomCode) {
             if (activeRoomRole !== 'owner') {
                 alert('초대받은 사용자는 새 방을 만들 수 없습니다. 방 변경은 방주인만 가능합니다.');

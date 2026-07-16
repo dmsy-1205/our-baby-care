@@ -127,6 +127,10 @@
 
                 if (verificationPolicy.required && user.emailVerified) {
                     try {
+                        const tokenReady = await hmEnsureVerifiedAuthToken(user);
+                        if (!tokenReady) {
+                            throw new Error('auth/email-verification-token-not-refreshed');
+                        }
                         await db.ref(`users/${user.uid}`).update({
                             emailVerified: true,
                             emailVerifiedAt: firebase.database.ServerValue.TIMESTAMP

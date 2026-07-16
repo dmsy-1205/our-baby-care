@@ -200,6 +200,19 @@
         return { required, existingUser: !required, profile };
     }
 
+    // 신규 인증 사용자의 Realtime Database 쓰기 전에 ID 토큰의
+    // email_verified claim을 강제로 갱신한다. user.reload()만으로는
+    // user.emailVerified 값만 갱신되고 기존 ID 토큰이 남을 수 있다.
+    async function hmEnsureVerifiedAuthToken(user = babyAuth.currentUser) {
+        if (!user) return false;
+        await user.reload();
+        const refreshedUser = babyAuth.currentUser;
+        if (!refreshedUser || !refreshedUser.emailVerified) return false;
+
+        const tokenResult = await refreshedUser.getIdTokenResult(true);
+        return tokenResult && tokenResult.claims && tokenResult.claims.email_verified === true;
+    }
+
     async function hmSendVerificationEmail(user, force = false) {
         if (!user || user.emailVerified) return;
         const now = Date.now();
@@ -241,6 +254,10 @@
                 setVerificationStatus('아직 인증이 확인되지 않았습니다. 메일의 인증 링크를 누른 뒤 다시 확인해 주세요.', 'warning');
                 alert('아직 이메일 인증이 확인되지 않았습니다.\n받은편지함 또는 스팸함에서 인증 메일의 링크를 누른 뒤 다시 확인해 주세요.');
                 return;
+            }
+            const tokenReady = await hmEnsureVerifiedAuthToken(refreshedUser);
+            if (!tokenReady) {
+                throw new Error('auth/email-verification-token-not-refreshed');
             }
             await db.ref(`users/${refreshedUser.uid}`).update({
                 emailVerified: true,
