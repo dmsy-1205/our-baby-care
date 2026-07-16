@@ -5,15 +5,18 @@
 (function () {
     const release = Object.freeze({
         product: 'HearMe2nite',
-        version: 'v1.0 STEP6.1.2',
-        appVersion: 'HearMe2nite v1.0 STEP6.1.2',
-        step: 'STEP6.1.2',
+        version: 'v1.0 STEP6.1.3',
+        appVersion: 'HearMe2nite v1.0 STEP6.1.3',
+        step: 'STEP6.1.3',
         build: '20260716',
         releaseDate: '2026.07.16',
         stage: 'Beta',
-        title: '관리자 콘솔 세션 판정 핫픽스',
-        description: '관리자 세션이 존재해도 권한 확인 화면에서 멈추는 문제를 방지하고, 지연·권한 오류를 화면에 명확히 표시합니다.',
+        title: '기념일 모바일 스크롤·다크모드 핫픽스',
+        description: '모바일에서 우리의 기념일 목록을 끝까지 스크롤할 수 있도록 수정하고 기념일 설정 화면 전체에 다크모드를 적용합니다.',
         changes: Object.freeze([
+            '모바일에서 우리의 기념일 설정 목록 터치 스크롤 복구',
+            '기념일 모달 전체 높이·safe-area·overscroll 처리 보강',
+            '기념일 추가·목록·입력·버튼의 다크모드 표면과 글자 대비 통일',
             '관리자 권한 조회 10초 타임아웃 및 오류 안내 추가',
             'Auth 콜백 지연 시 currentUser로 즉시 관리자 콘솔 초기화',
             '관리자 세션 확인 화면의 무한 대기 방지',

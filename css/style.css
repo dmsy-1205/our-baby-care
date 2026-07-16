@@ -10999,3 +10999,126 @@ html[data-hm-display="dark"] .hm-release-meta { color:var(--hm-text-muted, #b9b2
   color:var(--hm-color-body) !important;
   border-color:var(--hm-dark-line) !important;
 }
+
+/* =========================================================
+   HearMe2nite v1.0 STEP6.1.3
+   Anniversary mobile scroll + dark mode hotfix
+   Scope: CSS only. Firebase / anniversary data / History logic unchanged.
+   ========================================================= */
+body.modal-open {
+  overflow: hidden !important;
+  touch-action: auto !important;
+}
+body > .anniversary-settings-overlay {
+  overflow: hidden !important;
+  touch-action: pan-y !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+body > .anniversary-settings-overlay .anniversary-settings-modal {
+  min-height: 0 !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  touch-action: pan-y !important;
+  overscroll-behavior-y: contain !important;
+  -webkit-overflow-scrolling: touch !important;
+  scrollbar-gutter: stable;
+}
+body > .anniversary-settings-overlay .anniversary-custom-list {
+  min-height: 0;
+  touch-action: pan-y !important;
+}
+@media (max-width: 640px) {
+  body > .anniversary-settings-overlay {
+    align-items: stretch !important;
+  }
+  body > .anniversary-settings-overlay .anniversary-settings-modal {
+    height: calc(100dvh - max(16px, env(safe-area-inset-top)) - max(16px, env(safe-area-inset-bottom))) !important;
+    max-height: none !important;
+    margin: 0 auto !important;
+  }
+}
+
+:root[data-hm-theme][data-hm-display="dark"] body > .anniversary-settings-overlay {
+  background: rgba(8, 10, 18, .74) !important;
+}
+:root[data-hm-theme][data-hm-display="dark"] body > .anniversary-settings-overlay .anniversary-settings-modal {
+  background: linear-gradient(180deg, var(--hm-dark-shell), var(--hm-dark-card)) !important;
+  border-color: var(--hm-dark-line) !important;
+  color: var(--hm-color-body) !important;
+  box-shadow: 0 28px 80px rgba(0,0,0,.52) !important;
+}
+:root[data-hm-theme][data-hm-display="dark"] body > .anniversary-settings-overlay .anniversary-settings-modal::before {
+  background: radial-gradient(circle at 18% 20%, rgba(255,119,169,.12), transparent 36%), radial-gradient(circle at 82% 12%, color-mix(in srgb,var(--hm-primary) 22%,transparent), transparent 34%) !important;
+}
+:root[data-hm-theme][data-hm-display="dark"] :is(
+  .anniversary-settings-hero,
+  .anniversary-settings-section,
+  .anniversary-custom-item,
+  .anniversary-empty-note
+) {
+  background: linear-gradient(145deg, var(--hm-dark-card), var(--hm-dark-card-soft)) !important;
+  border-color: var(--hm-dark-line) !important;
+  color: var(--hm-color-body) !important;
+  box-shadow: none !important;
+}
+:root[data-hm-theme][data-hm-display="dark"] .anniversary-settings-hero {
+  background: color-mix(in srgb,var(--hm-dark-shell) 92%,transparent) !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+}
+:root[data-hm-theme][data-hm-display="dark"] :is(
+  .anniversary-settings-hero h2,
+  .anniversary-settings-title,
+  .anniversary-section-label strong,
+  .anniversary-custom-title,
+  .anniversary-field > span
+) {
+  color: #fff !important;
+  -webkit-text-fill-color: #fff !important;
+}
+:root[data-hm-theme][data-hm-display="dark"] :is(
+  .anniversary-settings-kicker,
+  .anniversary-settings-hero p,
+  .anniversary-settings-help,
+  .anniversary-custom-date,
+  .anniversary-empty-note,
+  .anniversary-main-date-check
+) {
+  color: var(--hm-color-muted) !important;
+  -webkit-text-fill-color: var(--hm-color-muted) !important;
+}
+:root[data-hm-theme][data-hm-display="dark"] :is(
+  .anniversary-settings-modal input[type="date"],
+  .anniversary-settings-modal input[type="text"],
+  .anniversary-settings-modal select
+) {
+  background: var(--hm-dark-input) !important;
+  color: var(--hm-color-body) !important;
+  border-color: var(--hm-dark-line) !important;
+  color-scheme: dark;
+}
+:root[data-hm-theme][data-hm-display="dark"] .anniversary-type-chip {
+  background: var(--hm-dark-input) !important;
+  color: var(--hm-color-body) !important;
+  border-color: var(--hm-dark-line) !important;
+}
+:root[data-hm-theme][data-hm-display="dark"] .anniversary-type-chip.is-selected {
+  background: color-mix(in srgb,var(--hm-primary) 28%,var(--hm-dark-card)) !important;
+  color: #fff !important;
+  border-color: var(--hm-primary) !important;
+}
+:root[data-hm-theme][data-hm-display="dark"] :is(.anniversary-custom-icon,.anniversary-modal-close) {
+  background: color-mix(in srgb,var(--hm-primary) 18%,var(--hm-dark-input)) !important;
+  color: #f7f4ff !important;
+  border-color: var(--hm-dark-line) !important;
+}
+:root[data-hm-theme][data-hm-display="dark"] .anniversary-main-btn {
+  background: color-mix(in srgb,var(--hm-primary) 20%,var(--hm-dark-input)) !important;
+  color: #d9ccff !important;
+  border-color: color-mix(in srgb,var(--hm-primary) 42%,var(--hm-dark-line)) !important;
+}
+:root[data-hm-theme][data-hm-display="dark"] .anniversary-delete-btn {
+  background: rgba(232,77,115,.14) !important;
+  color: #ff9caf !important;
+  border-color: rgba(232,77,115,.36) !important;
+}
