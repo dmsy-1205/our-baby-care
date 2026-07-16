@@ -144,6 +144,55 @@
     // =========================================================
 
 
+    function hmEscapeReadonlyText(value) {
+        return String(value || '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
+    function hmFeedbackTypeLabel(type) {
+        const labels = {
+            praise: '💜 칭찬해요',
+            support: '🌱 응원해요',
+            talk: '💬 이야기해요',
+            together: '🤍 함께할게요'
+        };
+        return labels[type] || '';
+    }
+
+    function hmRenderManagerReadonlyContent(name, container) {
+        if (!container) return;
+
+        if (name === 'feedback') {
+            const message = document.getElementById('replyMessage')?.value?.trim() || '';
+            const typeLabel = hmFeedbackTypeLabel(selectedFeedbackType);
+            const confirmed = !!feedbackConfirmed;
+            const hasContent = !!(message || typeLabel || confirmed);
+
+            container.innerHTML = hasContent
+                ? `<div class="hm-readonly-eyebrow">관리(Dom)가 전한 피드백</div>
+                   ${typeLabel ? `<div class="hm-readonly-badge">${hmEscapeReadonlyText(typeLabel)}</div>` : ''}
+                   ${message ? `<p class="hm-readonly-message">${hmEscapeReadonlyText(message).replace(/\n/g, '<br>')}</p>` : '<p class="hm-readonly-empty">작성된 메시지가 없습니다.</p>'}
+                   ${confirmed ? '<div class="hm-readonly-confirmed">✓ 오늘의 기록을 확인했어요</div>' : ''}`
+                : '<div class="hm-readonly-empty-state"><span aria-hidden="true">💌</span><strong>아직 작성된 피드백이 없습니다.</strong><small>관리(Dom)가 작성하면 이곳에서 확인할 수 있습니다.</small></div>';
+            return;
+        }
+
+        const choiceLabel = getDailyChoiceLabel(selectedDailyChoice);
+        const note = document.getElementById('rewardNote')?.value?.trim() || '';
+        const hasChoice = selectedDailyChoice === 'reward' || selectedDailyChoice === 'rest';
+        const hasContent = !!(hasChoice || note);
+
+        container.innerHTML = hasContent
+            ? `<div class="hm-readonly-eyebrow">관리(Dom)가 전한 오늘의 선물</div>
+               ${hasChoice ? `<div class="hm-readonly-badge">${hmEscapeReadonlyText(choiceLabel)}</div>` : ''}
+               ${note ? `<p class="hm-readonly-message">${hmEscapeReadonlyText(note).replace(/\n/g, '<br>')}</p>` : '<p class="hm-readonly-empty">작성된 메시지가 없습니다.</p>'}`
+            : '<div class="hm-readonly-empty-state"><span aria-hidden="true">🎁</span><strong>아직 작성된 선물이 없습니다.</strong><small>관리(Dom)가 작성하면 이곳에서 확인할 수 있습니다.</small></div>';
+    }
+
     function hmApplyManagerOnlyModalView(name) {
         if (!['feedback', 'reward'].includes(name)) return;
         const overlay = document.getElementById(`${name}ModalOverlay`);
@@ -151,19 +200,21 @@
         if (!modal) return;
 
         const restricted = !canManageRelationshipCards();
-        modal.classList.toggle('hm-sub-manager-restricted', restricted);
+        modal.classList.toggle('hm-sub-manager-readonly', restricted);
 
-        let notice = modal.querySelector('.hm-manager-restricted-message');
-        if (!notice) {
-            notice = document.createElement('div');
-            notice.className = 'hm-manager-restricted-message';
-            notice.setAttribute('role', 'status');
-            notice.innerHTML = '<span aria-hidden="true">🔒</span><strong>관리자가 사용하는 화면입니다.</strong><small>관리(Dom)가 내용을 작성하면 홈 카드와 기록실에서 확인할 수 있습니다.</small>';
+        let readonlyCard = modal.querySelector('.hm-manager-readonly-card');
+        if (!readonlyCard) {
+            readonlyCard = document.createElement('section');
+            readonlyCard.className = 'hm-manager-readonly-card';
+            readonlyCard.setAttribute('role', 'status');
+            readonlyCard.setAttribute('aria-live', 'polite');
             const head = modal.querySelector('.daily-modal-head');
-            if (head) head.insertAdjacentElement('afterend', notice);
-            else modal.prepend(notice);
+            if (head) head.insertAdjacentElement('afterend', readonlyCard);
+            else modal.prepend(readonlyCard);
         }
-        notice.hidden = !restricted;
+
+        readonlyCard.hidden = !restricted;
+        if (restricted) hmRenderManagerReadonlyContent(name, readonlyCard);
     }
 
     function openDailyModal(name) {
