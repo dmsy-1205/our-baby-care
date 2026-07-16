@@ -68,3 +68,7 @@ STEP5.6.4.7 is the security-stable baseline after Room path hardening, day-role 
 - 사용자 가이드 메뉴 크기와 여백을 축소했습니다.
 - 앱 안의 업데이트 내용은 사용자에게 필요한 주요 변경사항만 표시합니다.
 - 관리자 콘솔과 Firebase 구조는 변경하지 않았습니다.
+
+## Admin Console 2.0 Phase 1
+
+Secure Foundation completed. The previous `js/admin-console.js` is retained only as legacy reference and is no longer loaded by `admin.html`. The new entry point is `admin/admin-bootstrap.js`, with authorization enforced before rendering the admin shell. Phase 2 should connect read-only Users, Rooms, Requests, Recovery, Audit, Releases, and System modules without adding write actions.

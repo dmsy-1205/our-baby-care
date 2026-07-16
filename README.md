@@ -29,3 +29,7 @@
 
 ## STEP6.1.1
 관리자 계정의 홈 계정 메뉴에서 운영 콘솔로 바로 이동하는 전용 버튼을 추가했습니다.
+
+## Admin Console 2.0
+
+`admin.html` now loads the Phase 1 secure foundation from the `admin/` directory. The legacy `js/admin-console.js` is not used by the new console.

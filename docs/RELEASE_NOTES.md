@@ -12,3 +12,10 @@
 - 작성·수정·삭제 권한은 관리(Dom)에게만 유지됩니다.
 - 기록(Sub)은 저장 동작을 실행하지 않으며 읽기만 가능합니다.
 - 기존 Firebase 데이터 구조와 기록실 표시 구조는 변경하지 않았습니다.
+
+## Admin Console 2.0 Phase 1 — Secure Foundation
+
+- Replaced the old admin page entry flow with a secure authentication gate.
+- The admin shell is created only after `/admins/{uid}` authorization succeeds.
+- Added an independent module router, shared sidebar, top bar, loading state, error state, responsive layout, and dark-mode foundation.
+- All Phase 1 screens remain read-only; no Firebase data mutation was added.
