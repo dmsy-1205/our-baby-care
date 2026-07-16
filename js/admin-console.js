@@ -11,21 +11,19 @@
   async function verifyAdmin(user){
     if(!user)return false;
     showGate('관리자 권한을 확인하고 있습니다.');
+    console.info('[Admin Console] admin lookup start', user.uid);
 
-    // 별도 admin.html 진입 직후에는 Auth 객체에 사용자가 보여도
-    // Realtime Database 연결이 아직 인증 토큰을 받지 못한 순간이 있을 수 있다.
-    // 토큰을 먼저 강제 갱신한 뒤 관리자 노드를 조회한다.
-    await withTimeout(user.getIdToken(true),10000,'관리자 인증 토큰 갱신');
-
+    // 사용자 앱의 관리자 버튼 판정과 동일한 방식으로 조회한다.
+    // 별도 페이지에서 getIdToken(true)를 강제하면 일부 브라우저에서
+    // 인증 갱신 요청이 멈출 수 있으므로 강제 토큰 갱신은 사용하지 않는다.
     const snap=await withTimeout(
       db.ref(`admins/${user.uid}`).once('value'),
-      10000,
+      8000,
       '관리자 권한 조회'
     );
     const value=snap.val();
+    console.info('[Admin Console] admin lookup complete', value===true?'allowed':'not-allowed');
 
-    // 기존 boolean 관리자 구조를 기본으로 사용하되,
-    // 향후 {active:true} 또는 {enabled:true, role:'admin'} 구조도 안전하게 인식한다.
     return value===true || (value&&typeof value==='object'&&(
       value.active===true || value.enabled===true || value.role==='admin'
     ));
@@ -115,6 +113,25 @@
     showGate('관리자 인증 정보를 동기화하고 있습니다.');
     try{
       if(!user){showGate('로그인된 계정이 없습니다. 사용자 앱에서 관리자 계정으로 로그인해 주세요.');return;}
+      let launchVerified=false;
+      try{
+        const launch=JSON.parse(sessionStorage.getItem('hmAdminLaunch')||'null');
+        launchVerified=!!(launch&&launch.uid===user.uid&&Date.now()-Number(launch.at||0)<120000);
+      }catch(_){launchVerified=false;}
+
+      if(launchVerified){
+        console.info('[Admin Console] trusted same-tab admin launcher');
+        bootedUid=user.uid;
+        showApp(user);
+        try{
+          await loadData();
+          sessionStorage.removeItem('hmAdminLaunch');
+          return;
+        }catch(error){
+          console.warn('[Admin Console] launcher data load fallback',error);
+        }
+      }
+
       const allowed=await verifyAdmin(user);
       if(!allowed){showGate('이 계정에는 관리자 권한이 없습니다. Firebase admins/{uid} 값을 확인해 주세요.');return;}
       bootedUid=user.uid;
@@ -133,7 +150,7 @@
 
   // 무한 대기 화면 방지: 12초 후에도 판정이 끝나지 않으면 원인을 화면에 표시한다.
   setTimeout(()=>{
-    if(!$('adminGate').hidden&&$('gateMessage').textContent.includes('확인하고 있습니다')){
+    if(!$('adminGate').hidden&&/확인|동기화/.test($('gateMessage').textContent)){
       showGate('관리자 권한 확인 응답이 지연되고 있습니다. Firebase Rules의 admins/{uid} 읽기 권한과 네트워크 상태를 확인해 주세요.');
     }
   },12000);

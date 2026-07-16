@@ -175,7 +175,13 @@ function openAccountChildModal(type) {
         else if (type === 'theme' && typeof openThemeModal === 'function') openThemeModal();
         else if (type === 'data' && typeof openDataManagementModal === 'function') openDataManagementModal();
         else if (type === 'admin' && typeof openDataAdminModal === 'function') openDataAdminModal();
-        else if (type === 'console') window.location.href = 'admin.html';
+        else if (type === 'console') {
+            try {
+                const user = (typeof babyAuth !== 'undefined' && babyAuth.currentUser) ? babyAuth.currentUser : null;
+                if (user) sessionStorage.setItem('hmAdminLaunch', JSON.stringify({ uid: user.uid, at: Date.now() }));
+            } catch (error) { console.warn('[Admin Console] launcher marker failed', error); }
+            window.location.href = 'admin.html';
+        }
     }, 80);
 }
 
