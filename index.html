@@ -759,18 +759,23 @@
             <input id="helpSearchInput" class="help-search-input" type="search" placeholder="예: 오늘의 약속, 초대코드, 운동, 기록실" oninput="searchHelpCenter(this.value)">
         </div>
 
-        <div class="help-center-tabs" role="tablist" aria-label="사용 가이드 메뉴">
-            <button type="button" class="help-tab active" data-help-tab="home" onclick="selectHelpTab('home')">홈</button>
-            <button type="button" class="help-tab" data-help-tab="start" onclick="selectHelpTab('start')">시작하기</button>
-            <button type="button" class="help-tab" data-help-tab="room" onclick="selectHelpTab('room')">우리의 공간</button>
-            <button type="button" class="help-tab help-tab-promise" data-help-tab="promise" onclick="selectHelpTab('promise')">오늘의 약속</button>
-            <button type="button" class="help-tab" data-help-tab="daily" onclick="selectHelpTab('daily')">오늘의 기록</button>
-            <button type="button" class="help-tab" data-help-tab="anniversary" onclick="selectHelpTab('anniversary')">기념일</button>
-            <button type="button" class="help-tab" data-help-tab="exercise" onclick="selectHelpTab('exercise')">운동</button>
-            <button type="button" class="help-tab" data-help-tab="history" onclick="selectHelpTab('history')">기록실</button>
-            <button type="button" class="help-tab" data-help-tab="faq" onclick="selectHelpTab('faq')">Q&A</button>
-            <button type="button" class="help-tab" data-help-tab="tips" onclick="selectHelpTab('tips')">활용 팁</button>
-            <button type="button" class="help-tab" data-help-tab="updates" onclick="selectHelpTab('updates')">업데이트</button>
+        <div class="help-menu-heading">
+            <strong>원하는 기능을 선택하세요</strong>
+            <span>가로로 밀지 않아도 모든 메뉴를 한눈에 볼 수 있어요.</span>
+        </div>
+
+        <div class="help-center-tabs help-menu-grid" role="tablist" aria-label="사용 가이드 메뉴">
+            <button type="button" class="help-tab active" data-help-tab="home" onclick="selectHelpTab('home')" aria-selected="true"><span class="help-tab-icon" aria-hidden="true">🏠</span><span>홈</span></button>
+            <button type="button" class="help-tab" data-help-tab="start" onclick="selectHelpTab('start')" aria-selected="false"><span class="help-tab-icon" aria-hidden="true">✨</span><span>시작하기</span></button>
+            <button type="button" class="help-tab" data-help-tab="room" onclick="selectHelpTab('room')" aria-selected="false"><span class="help-tab-icon" aria-hidden="true">🏡</span><span>우리의 공간</span></button>
+            <button type="button" class="help-tab help-tab-promise" data-help-tab="promise" onclick="selectHelpTab('promise')" aria-selected="false"><span class="help-tab-icon" aria-hidden="true">💜</span><span>오늘의 약속</span></button>
+            <button type="button" class="help-tab" data-help-tab="routine" onclick="selectHelpTab('routine')" aria-selected="false"><span class="help-tab-icon" aria-hidden="true">🌱</span><span>나의 루틴</span></button>
+            <button type="button" class="help-tab" data-help-tab="daily" onclick="selectHelpTab('daily')" aria-selected="false"><span class="help-tab-icon" aria-hidden="true">📝</span><span>오늘의 기록</span></button>
+            <button type="button" class="help-tab" data-help-tab="history" onclick="selectHelpTab('history')" aria-selected="false"><span class="help-tab-icon" aria-hidden="true">📅</span><span>기록실·기념일</span></button>
+            <button type="button" class="help-tab" data-help-tab="theme" onclick="selectHelpTab('theme')" aria-selected="false"><span class="help-tab-icon" aria-hidden="true">🎨</span><span>테마</span></button>
+            <button type="button" class="help-tab" data-help-tab="data" onclick="selectHelpTab('data')" aria-selected="false"><span class="help-tab-icon" aria-hidden="true">🗂️</span><span>데이터·계정</span></button>
+            <button type="button" class="help-tab" data-help-tab="faq" onclick="selectHelpTab('faq')" aria-selected="false"><span class="help-tab-icon" aria-hidden="true">💬</span><span>Q&amp;A</span></button>
+            <button type="button" class="help-tab" data-help-tab="updates" onclick="selectHelpTab('updates')" aria-selected="false"><span class="help-tab-icon" aria-hidden="true">🔔</span><span>업데이트</span></button>
         </div>
 
         <div id="helpSearchResults" class="help-search-results" hidden></div>
