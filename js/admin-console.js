@@ -11,8 +11,24 @@
   async function verifyAdmin(user){
     if(!user)return false;
     showGate('관리자 권한을 확인하고 있습니다.');
-    const snap=await withTimeout(db.ref(`admins/${user.uid}`).once('value'),10000,'관리자 권한 확인');
-    return snap.val()===true;
+
+    // 별도 admin.html 진입 직후에는 Auth 객체에 사용자가 보여도
+    // Realtime Database 연결이 아직 인증 토큰을 받지 못한 순간이 있을 수 있다.
+    // 토큰을 먼저 강제 갱신한 뒤 관리자 노드를 조회한다.
+    await withTimeout(user.getIdToken(true),10000,'관리자 인증 토큰 갱신');
+
+    const snap=await withTimeout(
+      db.ref(`admins/${user.uid}`).once('value'),
+      10000,
+      '관리자 권한 조회'
+    );
+    const value=snap.val();
+
+    // 기존 boolean 관리자 구조를 기본으로 사용하되,
+    // 향후 {active:true} 또는 {enabled:true, role:'admin'} 구조도 안전하게 인식한다.
+    return value===true || (value&&typeof value==='object'&&(
+      value.active===true || value.enabled===true || value.role==='admin'
+    ));
   }
 
   function showGate(message){$('adminApp').hidden=true;$('adminGate').hidden=false;$('gateMessage').textContent=message;}
@@ -96,6 +112,7 @@
     if(user&&bootedUid===user.uid&&!$('adminApp').hidden)return;
     booting=true;
     console.info('[Admin Console] bootstrap',source,user?.uid||'no-user');
+    showGate('관리자 인증 정보를 동기화하고 있습니다.');
     try{
       if(!user){showGate('로그인된 계정이 없습니다. 사용자 앱에서 관리자 계정으로 로그인해 주세요.');return;}
       const allowed=await verifyAdmin(user);
