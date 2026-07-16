@@ -5,15 +5,18 @@
 (function () {
     const release = Object.freeze({
         product: 'HearMe2nite',
-        version: 'v1.0 STEP6.1.1',
-        appVersion: 'HearMe2nite v1.0 STEP6.1.1',
-        step: 'STEP6.1.1',
+        version: 'v1.0 STEP6.1.2',
+        appVersion: 'HearMe2nite v1.0 STEP6.1.2',
+        step: 'STEP6.1.2',
         build: '20260716',
         releaseDate: '2026.07.16',
         stage: 'Beta',
-        title: '관리자 홈 운영 콘솔 바로가기',
-        description: '관리자 계정의 홈 계정 메뉴에서 읽기 전용 운영 콘솔로 바로 이동할 수 있는 전용 버튼을 추가합니다.',
+        title: '관리자 콘솔 세션 판정 핫픽스',
+        description: '관리자 세션이 존재해도 권한 확인 화면에서 멈추는 문제를 방지하고, 지연·권한 오류를 화면에 명확히 표시합니다.',
         changes: Object.freeze([
+            '관리자 권한 조회 10초 타임아웃 및 오류 안내 추가',
+            'Auth 콜백 지연 시 currentUser로 즉시 관리자 콘솔 초기화',
+            '관리자 세션 확인 화면의 무한 대기 방지',
             '관리자 계정에만 운영 콘솔 진입 버튼 표시',
             '홈 계정 메뉴에서 admin.html로 즉시 이동',
             '기존 삭제 요청 관리와 운영 콘솔 진입 버튼 분리',

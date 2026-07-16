@@ -6,9 +6,12 @@
   const fmt=(v)=>{if(!v)return '-';const n=Number(v);if(!Number.isFinite(n))return String(v);return new Intl.DateTimeFormat('ko-KR',{dateStyle:'medium',timeStyle:'short'}).format(new Date(n));};
   const entries=(obj)=>Object.entries(obj&&typeof obj==='object'?obj:{});
 
+  const withTimeout=(promise,ms,label)=>Promise.race([promise,new Promise((_,reject)=>setTimeout(()=>reject(new Error(`${label} 응답 시간 초과 (${Math.round(ms/1000)}초)`)),ms))]);
+
   async function verifyAdmin(user){
     if(!user)return false;
-    const snap=await db.ref(`admins/${user.uid}`).once('value');
+    showGate('관리자 권한을 확인하고 있습니다.');
+    const snap=await withTimeout(db.ref(`admins/${user.uid}`).once('value'),10000,'관리자 권한 확인');
     return snap.val()===true;
   }
 
@@ -85,5 +88,36 @@
   $('refreshAdminBtn').addEventListener('click',loadData);$('userSearch').addEventListener('input',renderUsers);$('roomSearch').addEventListener('input',renderRooms);
   $('adminLogoutBtn').addEventListener('click',()=>babyAuth.signOut().then(()=>location.href='index.html'));
 
-  babyAuth.onAuthStateChanged(async(user)=>{try{if(!user){showGate('로그인된 계정이 없습니다. 사용자 앱에서 관리자 계정으로 로그인해 주세요.');return;}if(!await verifyAdmin(user)){showGate('이 계정에는 관리자 권한이 없습니다.');return;}showApp(user);await loadData();}catch(error){console.error(error);showGate(`관리자 권한 확인 실패: ${error.message}`);}});
+  let booting=false;
+  let bootedUid='';
+
+  async function bootstrapAdmin(user,source){
+    if(booting)return;
+    if(user&&bootedUid===user.uid&&!$('adminApp').hidden)return;
+    booting=true;
+    console.info('[Admin Console] bootstrap',source,user?.uid||'no-user');
+    try{
+      if(!user){showGate('로그인된 계정이 없습니다. 사용자 앱에서 관리자 계정으로 로그인해 주세요.');return;}
+      const allowed=await verifyAdmin(user);
+      if(!allowed){showGate('이 계정에는 관리자 권한이 없습니다. Firebase admins/{uid} 값을 확인해 주세요.');return;}
+      bootedUid=user.uid;
+      showApp(user);
+      await loadData();
+    }catch(error){
+      console.error('[Admin Console] bootstrap failed',error);
+      showGate(`관리자 권한 확인 실패: ${error.message}`);
+    }finally{booting=false;}
+  }
+
+  babyAuth.onAuthStateChanged((user)=>bootstrapAdmin(user,'auth-state'));
+
+  // 일부 브라우저에서 인증 콜백 전달이 지연되는 경우 현재 세션으로 즉시 시작한다.
+  if(babyAuth.currentUser){bootstrapAdmin(babyAuth.currentUser,'current-user');}
+
+  // 무한 대기 화면 방지: 12초 후에도 판정이 끝나지 않으면 원인을 화면에 표시한다.
+  setTimeout(()=>{
+    if(!$('adminGate').hidden&&$('gateMessage').textContent.includes('확인하고 있습니다')){
+      showGate('관리자 권한 확인 응답이 지연되고 있습니다. Firebase Rules의 admins/{uid} 읽기 권한과 네트워크 상태를 확인해 주세요.');
+    }
+  },12000);
 })();
