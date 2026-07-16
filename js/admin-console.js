@@ -29,8 +29,8 @@
     ));
   }
 
-  function showGate(message){$('adminApp').hidden=true;$('adminGate').hidden=false;$('gateMessage').textContent=message;}
-  function showApp(user){$('adminGate').hidden=true;$('adminApp').hidden=false;$('adminIdentity').textContent=user.email||user.uid;}
+  function showGate(message){const app=$('adminApp');const gate=$('adminGate');app.hidden=true;app.setAttribute('hidden','');gate.hidden=false;gate.removeAttribute('hidden');$('gateMessage').textContent=message;}
+  function showApp(user){const gate=$('adminGate');const app=$('adminApp');gate.hidden=true;gate.setAttribute('hidden','');app.hidden=false;app.removeAttribute('hidden');$('adminIdentity').textContent=user.email||user.uid;}
 
   async function loadData(){
     $('refreshAdminBtn').disabled=true;
