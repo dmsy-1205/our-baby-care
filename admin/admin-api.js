@@ -1,10 +1,30 @@
 import { withTimeout } from './admin-utils.js';
 
-function requireFirebase() {
-  if (!window.babyAuth || !window.db) {
-    throw new Error('Firebase 초기화 정보를 찾지 못했습니다.');
+function resolveFirebaseServices() {
+  const firebaseSdk = window.firebase;
+
+  if (!firebaseSdk || typeof firebaseSdk.auth !== 'function' || typeof firebaseSdk.database !== 'function') {
+    throw new Error('Firebase SDK를 불러오지 못했습니다.');
   }
-  return { auth: window.babyAuth, database: window.db };
+
+  // config.js declares babyAuth/db with top-level const. Those bindings are
+  // available to classic scripts but are not properties of window, so an ES
+  // module cannot read them through window.babyAuth/window.db. Resolve the
+  // already initialized named app directly from the Firebase compat SDK.
+  const babyApp = firebaseSdk.apps.find((app) => app && app.name === 'babyApp');
+
+  if (!babyApp) {
+    throw new Error('HearMe2nite Firebase 앱(babyApp)이 초기화되지 않았습니다.');
+  }
+
+  return {
+    auth: firebaseSdk.auth(babyApp),
+    database: firebaseSdk.database(babyApp)
+  };
+}
+
+function requireFirebase() {
+  return resolveFirebaseServices();
 }
 
 export async function waitForAuthenticatedUser(timeoutMs = 10000) {
