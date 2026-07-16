@@ -471,7 +471,7 @@ function hmRenderAnniversaryModal() {
                 <h2>우리의 기념일</h2>
                 <p>둘만의 날짜를 등록하면 기록실 캘린더에 작은 아이콘으로 표시됩니다.</p>
             </div>
-            <button type="button" class="anniversary-modal-close" onclick="hmCloseAnniversarySettings()" aria-label="기념일 설정 닫기">×</button>
+            <button type="button" class="anniversary-modal-close" id="anniversaryModalCloseButton" aria-label="기념일 설정 닫기">×</button>
         </div>
         <div class="anniversary-settings-section anniversary-feature-card">
             <div class="anniversary-section-label"><span>🎉</span><strong>기념일 추가</strong></div>
@@ -489,6 +489,39 @@ function hmRenderAnniversaryModal() {
             <div class="anniversary-section-label"><span>📌</span><strong>등록된 기념일</strong></div>
             <div class="anniversary-custom-list">${listHtml}</div>
         </div>`;
+
+    // STEP6.2.2: Mobile-safe close binding for the scrollable fixed modal.
+    const closeButton = document.getElementById('anniversaryModalCloseButton');
+    if (closeButton) {
+        let pointerHandled = false;
+        const closeFromButton = function(event) {
+            if (event) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            hmCloseAnniversarySettings();
+        };
+
+        closeButton.addEventListener('pointerup', function(event) {
+            pointerHandled = true;
+            closeFromButton(event);
+            window.setTimeout(function() { pointerHandled = false; }, 350);
+        });
+
+        closeButton.addEventListener('click', function(event) {
+            if (pointerHandled) {
+                event.preventDefault();
+                event.stopPropagation();
+                return;
+            }
+            closeFromButton(event);
+        });
+
+        closeButton.addEventListener('touchend', function(event) {
+            if (typeof window.PointerEvent !== 'undefined') return;
+            closeFromButton(event);
+        }, { passive: false });
+    }
 }
 function hmRenderAnniversaryPanel() {
     const box = document.getElementById('anniversaryPanel');
