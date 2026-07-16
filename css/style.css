@@ -11122,3 +11122,98 @@ body > .anniversary-settings-overlay .anniversary-custom-list {
   color: #ff9caf !important;
   border-color: rgba(232,77,115,.36) !important;
 }
+
+
+/* =========================================================
+   HearMe2nite v1.0 STEP6.1.5
+   Anniversary real mobile scroll + dark contrast hotfix
+   - Mobile scroll owner: top-level overlay (avoids nested modal scroll lock)
+   - Desktop/tablet: modal remains the scroll owner
+   - Firebase/data behavior unchanged
+   ========================================================= */
+body.anniversary-modal-open {
+  position: fixed !important;
+  left: 0 !important;
+  right: 0 !important;
+  width: 100% !important;
+  overflow: hidden !important;
+  touch-action: none !important;
+}
+body > .anniversary-settings-overlay.is-open {
+  display: flex !important;
+}
+.anniversary-main-date-check {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  min-height: 58px !important;
+  margin-top: 14px !important;
+  padding: 12px 14px !important;
+  border: 1px solid rgba(109,76,255,.16) !important;
+  border-radius: 16px !important;
+  background: rgba(255,255,255,.82) !important;
+  color: #514b64 !important;
+  font-size: .82rem !important;
+  font-weight: 800 !important;
+  line-height: 1.4 !important;
+  cursor: pointer !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+.anniversary-main-date-check input[type="checkbox"] {
+  width: 22px !important;
+  min-width: 22px !important;
+  height: 22px !important;
+  min-height: 22px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  accent-color: var(--hm-primary, #7c5cff) !important;
+}
+:root[data-hm-theme][data-hm-display="dark"] .anniversary-main-date-check {
+  background: var(--hm-dark-input) !important;
+  border-color: color-mix(in srgb,var(--hm-primary) 38%,var(--hm-dark-line)) !important;
+  color: #f4f0ff !important;
+  -webkit-text-fill-color: #f4f0ff !important;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.025) !important;
+}
+:root[data-hm-theme][data-hm-display="dark"] .anniversary-main-date-check input[type="checkbox"] {
+  color-scheme: dark !important;
+}
+
+@media (max-width: 640px) {
+  body > .anniversary-settings-overlay,
+  body > .anniversary-settings-overlay.is-open {
+    display: block !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    height: 100dvh !important;
+    min-height: 100dvh !important;
+    padding: max(8px, env(safe-area-inset-top)) 8px max(14px, env(safe-area-inset-bottom)) !important;
+    touch-action: pan-y !important;
+    overscroll-behavior-y: contain !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+  body > .anniversary-settings-overlay .anniversary-settings-modal {
+    width: 100% !important;
+    height: auto !important;
+    min-height: calc(100dvh - max(16px, env(safe-area-inset-top)) - max(22px, env(safe-area-inset-bottom))) !important;
+    max-height: none !important;
+    margin: 0 auto !important;
+    overflow: visible !important;
+    touch-action: pan-y !important;
+  }
+  body > .anniversary-settings-overlay .anniversary-settings-head {
+    position: relative !important;
+    top: auto !important;
+  }
+  body > .anniversary-settings-overlay :is(
+    .anniversary-settings-section,
+    .anniversary-custom-list,
+    .anniversary-custom-item,
+    .anniversary-main-date-check
+  ) {
+    touch-action: pan-y !important;
+  }
+  .anniversary-main-date-check {
+    align-items: flex-start !important;
+  }
+}

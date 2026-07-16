@@ -390,21 +390,40 @@ async function hmDeleteCustomAnniversary(id) {
     }
 }
 
+let hmAnniversaryBodyScrollY = 0;
+
 function hmOpenAnniversarySettings() {
     hmAnniversaryState.isModalOpen = true;
     hmEnsureAnniversaryModal();
     hmRenderAnniversaryModal();
     const overlay = document.getElementById('anniversarySettingsOverlay');
-    if (overlay) overlay.style.display = 'flex';
-    try { document.body.classList.add('modal-open'); } catch (err) {}
+    hmAnniversaryBodyScrollY = window.scrollY || document.documentElement.scrollTop || 0;
+    try {
+        document.body.style.top = `-${hmAnniversaryBodyScrollY}px`;
+        document.body.classList.add('modal-open', 'anniversary-modal-open');
+    } catch (err) {}
+    if (overlay) {
+        overlay.style.display = 'flex';
+        overlay.classList.add('is-open');
+        overlay.scrollTop = 0;
+    }
 }
 
 function hmCloseAnniversarySettings() {
     hmAnniversaryState.isModalOpen = false;
     const overlay = document.getElementById('anniversarySettingsOverlay');
-    if (overlay) overlay.style.display = 'none';
-    try { document.body.classList.remove('modal-open'); } catch (err) {}
+    if (overlay) {
+        overlay.style.display = 'none';
+        overlay.classList.remove('is-open');
+        overlay.scrollTop = 0;
+    }
+    try {
+        document.body.classList.remove('modal-open', 'anniversary-modal-open');
+        document.body.style.top = '';
+        window.scrollTo(0, hmAnniversaryBodyScrollY || 0);
+    } catch (err) {}
 }
+
 
 function hmEnsureAnniversaryModal() {
     if (document.getElementById('anniversarySettingsOverlay')) return;
@@ -415,6 +434,10 @@ function hmEnsureAnniversaryModal() {
     overlay.addEventListener('click', function(event) {
         if (event.target === overlay) hmCloseAnniversarySettings();
     });
+    // Keep mobile vertical gestures inside this top-level overlay.
+    overlay.addEventListener('touchmove', function(event) {
+        event.stopPropagation();
+    }, { passive: true });
     document.body.appendChild(overlay);
 }
 
