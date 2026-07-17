@@ -1092,12 +1092,7 @@ function displayHistory(daysData) {
         historyList.innerHTML = '<div class="history-selected-hint"><strong>기록이 없습니다</strong>선택한 날짜에는 저장된 기록이 없습니다. 📅</div>';
         return;
     }
-    const date = selectedHistoryDate;
-    historyList.innerHTML = `
-        <div class="history-selected-hint history-popup-hint">
-            <strong>${formatHistoryDateLabel(date)} 기록</strong>
-            캘린더 날짜를 누르면 하루 기록이 바로 팝업으로 열립니다.
-        </div>`;
+    historyList.innerHTML = '';
 }
 
 

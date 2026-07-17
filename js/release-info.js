@@ -5,22 +5,21 @@
 (function () {
     const release = Object.freeze({
         product: 'HearMe2nite',
-        version: 'v1.0 STEP6.2.11.0',
-        appVersion: 'HearMe2nite v1.0 STEP6.2.11.0',
-        step: 'STEP6.2.11.0',
+        version: 'v1.0 STEP6.2.11.1',
+        appVersion: 'HearMe2nite v1.0 STEP6.2.11.1',
+        step: 'STEP6.2.11.1',
         build: '20260718',
         releaseDate: '2026.07.18',
         stage: 'Beta',
-        title: 'PWA Install Foundation',
-        description: 'HearMe2nite를 홈 화면에 설치해 앱처럼 실행할 수 있도록 PWA manifest, 앱 아이콘, Service Worker, 설치 버튼 기반을 추가했습니다.',
+        title: 'History Bottom Hint Removal',
+        description: '우리의 이야기에서 캘린더 날짜 클릭 후 바로 기록 팝업이 열리는 흐름에 맞춰 하단 안내 카드를 완전히 제거했습니다.',
         changes: Object.freeze([
-            'Added PWA web app manifest for installable app behavior',
-            'Added 192px, 512px, and maskable app icons',
-            'Added safe Service Worker registration with offline fallback',
-            'Added in-app install button for supported browsers',
-            'Added Firebase Hosting headers for Service Worker and manifest delivery',
+            'Removed the bottom selected-date hint card from Our Story',
+            'Kept calendar date click as the direct record-opening action',
+            'Kept empty/search/no-record guidance only for exceptional states',
+            'Confirmed PWA install flow remains unchanged',
             'Updated cache tags for immediate review',
-            'FCM/Push notification setup intentionally deferred to the next step'
+            '기존 기록 저장 구조 변경 없음'
         ])
     });
 
