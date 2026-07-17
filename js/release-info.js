@@ -5,19 +5,19 @@
 (function () {
     const release = Object.freeze({
         product: 'HearMe2nite',
-        version: 'v1.0 STEP6.2.10.4.3',
-        appVersion: 'HearMe2nite v1.0 STEP6.2.10.4.3',
-        step: 'STEP6.2.10.4.3',
+        version: 'v1.0 STEP6.2.10.4.4',
+        appVersion: 'HearMe2nite v1.0 STEP6.2.10.4.4',
+        step: 'STEP6.2.10.4.4',
         build: '20260717',
         releaseDate: '2026.07.17',
         stage: 'Beta',
-        title: 'Stats Modal Scroll And Period Fix',
-        description: '기록 통계 모달 메뉴 스크롤과 칩 크기를 정리하고, 통계 기간을 최근 기준에서 선택한 주간/선택한 달 기준으로 변경했습니다.',
+        title: 'Stats Menu Icon Polish',
+        description: '기록 통계 모달의 모바일 메뉴 아이콘 크기와 칩 높이를 정리해 메뉴 칸이 더 고르게 보이도록 수정했습니다.',
         changes: Object.freeze([
-            'Desktop stats menu now shows horizontal scrolling clearly',
-            'Stats menu chips now use equal width and icon alignment on mobile and desktop',
-            'Weekly stats now use the selected date week instead of recent 7 days',
-            'Monthly stats now use the selected month instead of recent 30 days',
+            'Reduced mobile stats menu icon size',
+            'Balanced stats menu chip height and text alignment',
+            'Kept desktop and mobile horizontal menu behavior unchanged',
+            'Prepared naming review for the home stats section',
             '기존 days 기록을 읽기만 하며 Firebase 저장 구조는 변경하지 않음'
         ])
     });
