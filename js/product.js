@@ -91,6 +91,166 @@
             return null;
         } catch(e) { return null; }
     }
+    const HM_HOME_STAT_ITEMS = [
+        { key:'promise', icon:'💜', label:'오늘의 약속', mode:'ratio' },
+        { key:'subRoutine', icon:'🌱', label:'나의 루틴', mode:'ratio' },
+        { key:'mood', icon:'😊', label:'오늘의 기분', mode:'mood' },
+        { key:'weight', icon:'⚖️', label:'체중', mode:'number' },
+        { key:'exercise', icon:'🏃', label:'오늘의 운동', mode:'check' },
+        { key:'water', icon:'💧', label:'오늘의 수분', mode:'sum' },
+        { key:'wake', icon:'☀️', label:'기상 시간', mode:'time' },
+        { key:'meal', icon:'🥗', label:'식사 기록', mode:'meal' },
+        { key:'outing', icon:'🚶‍♀️', label:'외출 기록', mode:'check' },
+        { key:'sleep', icon:'🌙', label:'취침 예정', mode:'time' },
+        { key:'diary', icon:'📝', label:'오늘의 하루', mode:'check' }
+    ];
+    let hmHomeStatsActiveKey = 'promise';
+    let hmHomeStatsPeriod = 'week';
+    function hmHomeStatsItem(key){ return HM_HOME_STAT_ITEMS.find(item => item.key === key) || HM_HOME_STAT_ITEMS[0]; }
+    function hmHomeStatIsFilled(value){
+        const text = String(value == null ? '' : value).trim();
+        return !!text && text !== '기록 없음' && text !== '-';
+    }
+    function hmHomeStatNumber(value){
+        const match = String(value == null ? '' : value).replace(/,/g,'').match(/[0-9]+(?:\.[0-9]+)?/);
+        return match ? Number(match[0]) : 0;
+    }
+    function hmHomeStatDateObj(key){ const [y,m,d]=String(key||'').split('-').map(Number); return new Date(y || 2000, (m || 1) - 1, d || 1, 12); }
+    function hmHomeStatDateKey(date){ return date.toISOString().slice(0,10); }
+    function hmHomeStatAddDays(date, offset){ return new Date(date.getFullYear(), date.getMonth(), date.getDate() + offset, 12); }
+    function hmHomeStatsAnchorDate(){ return $('recordDate')?.value || dayKeys().slice(-1)[0] || new Date().toISOString().slice(0,10); }
+    function hmHomeStatsPeriodKeys(period=hmHomeStatsPeriod){
+        const anchor = hmHomeStatDateObj(hmHomeStatsAnchorDate());
+        if (period === 'month') {
+            const y = anchor.getFullYear(), m = anchor.getMonth();
+            const last = new Date(y, m + 1, 0, 12).getDate();
+            return Array.from({length:last}, (_,i)=>hmHomeStatDateKey(new Date(y,m,i+1,12)));
+        }
+        return Array.from({length:7}, (_,i)=>hmHomeStatDateKey(hmHomeStatAddDays(anchor, i - 6)));
+    }
+    function hmHomeStatsRecordValue(item, rec){
+        if (!rec) return { hit:false, value:0, total:0, done:0, label:'-' };
+        if (item.key === 'promise') {
+            const values = rec.customCardValues && typeof rec.customCardValues === 'object' ? rec.customCardValues : {};
+            let total = 0, done = 0;
+            Object.values(values).forEach(card => Object.values(card || {}).forEach(saved => {
+                total += 1;
+                const v = saved && Object.prototype.hasOwnProperty.call(saved, 'value') ? saved.value : saved;
+                if (v === true || hmHomeStatIsFilled(v)) done += 1;
+            }));
+            return { hit:total > 0, total, done, value:done, label:total ? `${done}/${total}` : '-' };
+        }
+        if (item.key === 'subRoutine') {
+            const rows = Array.isArray(rec.subRoutineSnapshot) ? rec.subRoutineSnapshot : [];
+            const done = rows.filter(r => r && r.done === true).length;
+            return { hit:rows.length > 0, total:rows.length, done, value:done, label:rows.length ? `${done}/${rows.length}` : '-' };
+        }
+        if (item.key === 'mood') {
+            const label = rec.moodLabel || rec.mood || '';
+            return { hit:hmHomeStatIsFilled(label), value:1, label:label || '-' };
+        }
+        if (item.key === 'weight') {
+            const value = hmHomeStatNumber(rec.weight);
+            return { hit:value > 0, value, label:value ? `${value}kg` : '-' };
+        }
+        if (item.key === 'exercise') return { hit:hmHomeStatIsFilled(rec.exercise), value:hmHomeStatIsFilled(rec.exercise) ? 1 : 0, label:hmHomeStatIsFilled(rec.exercise) ? '완료' : '-' };
+        if (item.key === 'water') {
+            const value = hmHomeStatNumber(rec.water);
+            return { hit:value > 0, value, label:value ? `${value}ml` : '-' };
+        }
+        if (item.key === 'wake') return { hit:hmHomeStatIsFilled(rec.wakeTime), value:1, label:rec.wakeTime || '-' };
+        if (item.key === 'meal') {
+            const done = ['mealBreakfast','mealLunch','mealDinner'].filter(id => hmHomeStatIsFilled(rec[id])).length;
+            return { hit:done > 0, total:3, done, value:done, label:done ? `${done}/3` : '-' };
+        }
+        if (item.key === 'outing') return { hit:hmHomeStatIsFilled(rec.goingOut) || !!rec.photo, value:(hmHomeStatIsFilled(rec.goingOut) || !!rec.photo) ? 1 : 0, label:(hmHomeStatIsFilled(rec.goingOut) || !!rec.photo) ? '기록' : '-' };
+        if (item.key === 'sleep') return { hit:hmHomeStatIsFilled(rec.sleepTime), value:1, label:rec.sleepTime || '-' };
+        if (item.key === 'diary') return { hit:hmHomeStatIsFilled(rec.diary), value:hmHomeStatIsFilled(rec.diary) ? 1 : 0, label:hmHomeStatIsFilled(rec.diary) ? '작성' : '-' };
+        return { hit:false, value:0, label:'-' };
+    }
+    function hmHomeStatsSummary(item, keys){
+        const rows = keys.map(key => ({ key, rec: days()[key] || null })).map(row => ({ ...row, stat: hmHomeStatsRecordValue(item, row.rec) }));
+        const hitRows = rows.filter(row => row.stat.hit);
+        if (item.mode === 'ratio' || item.mode === 'meal') {
+            const total = rows.reduce((sum,row)=>sum + Number(row.stat.total || 0), 0);
+            const done = rows.reduce((sum,row)=>sum + Number(row.stat.done || 0), 0);
+            return { rows, main: total ? `${Math.round(done / total * 100)}%` : '-', sub: total ? `${done}/${total} 완료` : '기록 없음', hit: hitRows.length };
+        }
+        if (item.key === 'weight') {
+            const nums = hitRows.map(row => ({ key:row.key, value:row.stat.value })).filter(row => row.value > 0);
+            const first = nums[0]?.value || 0, last = nums[nums.length - 1]?.value || 0;
+            const diff = nums.length >= 2 ? Math.round((last - first) * 10) / 10 : 0;
+            return { rows, main: nums.length ? `${last}kg` : '-', sub: nums.length >= 2 ? `변화 ${diff > 0 ? '+' : ''}${diff}kg` : `${nums.length}일 기록`, hit: nums.length };
+        }
+        if (item.key === 'water') {
+            const total = hitRows.reduce((sum,row)=>sum + Number(row.stat.value || 0), 0);
+            const avg = hitRows.length ? Math.round(total / hitRows.length) : 0;
+            return { rows, main: total ? `${total}ml` : '-', sub: hitRows.length ? `평균 ${avg}ml · ${hitRows.length}일` : '기록 없음', hit: hitRows.length };
+        }
+        if (item.mode === 'time') {
+            return { rows, main: hitRows.length ? `${hitRows.length}일` : '-', sub: hitRows.length ? `최근 ${hitRows[hitRows.length - 1].stat.label}` : '기록 없음', hit: hitRows.length };
+        }
+        if (item.key === 'mood') {
+            const counts = {};
+            hitRows.forEach(row => { counts[row.stat.label] = (counts[row.stat.label] || 0) + 1; });
+            const top = Object.keys(counts).sort((a,b)=>counts[b]-counts[a])[0] || '-';
+            return { rows, main: top, sub: hitRows.length ? `${hitRows.length}일 선택` : '기록 없음', hit: hitRows.length };
+        }
+        return { rows, main: `${hitRows.length}/${keys.length}`, sub: hitRows.length ? `${hitRows.length}일 기록` : '기록 없음', hit: hitRows.length };
+    }
+    function buildHomeStatsCard(){
+        if ($('hmHomeStatsCard')) return;
+        const box = document.createElement('section');
+        box.id = 'hmHomeStatsCard';
+        box.className = 'hm-home-stats-card';
+        box.innerHTML = `<div class="hm-home-stats-head"><div><strong>기록 통계</strong><small>주간·한 달 흐름을 카드별로 확인해요</small></div><span>Beta</span></div><div class="hm-home-stats-menu">${HM_HOME_STAT_ITEMS.map(item => `<button type="button" data-home-stat="${item.key}" onclick="hmOpenHomeStatsModal('${item.key}')"><b>${item.icon}</b><span>${item.label}</span><small id="hmHomeStatMini_${item.key}">-</small></button>`).join('')}</div>`;
+        const recordDateInput = $('recordDate');
+        const recordDateGroup = recordDateInput ? recordDateInput.closest('.input-group') : null;
+        const dashboard = $('hmProductDashboard');
+        if (recordDateGroup) recordDateGroup.insertAdjacentElement('afterend', box);
+        else if (dashboard) dashboard.insertAdjacentElement('beforebegin', box);
+        else document.querySelector('.room-settings-card')?.insertAdjacentElement('afterend', box);
+    }
+    function ensureHomeStatsModal(){
+        let overlay = $('hmHomeStatsOverlay');
+        if (overlay) return overlay;
+        overlay = document.createElement('div');
+        overlay.id = 'hmHomeStatsOverlay';
+        overlay.className = 'daily-modal-overlay hm-home-stats-overlay';
+        overlay.style.display = 'none';
+        overlay.setAttribute('aria-hidden','true');
+        overlay.setAttribute('inert','');
+        overlay.innerHTML = `<div class="daily-modal hm-home-stats-modal" role="dialog" aria-modal="true" aria-labelledby="hmHomeStatsTitle"><div class="daily-modal-head"><h2 id="hmHomeStatsTitle">📊 기록 통계</h2><button type="button" class="modal-close-btn" onclick="hmCloseHomeStatsModal()">닫기</button></div><div class="hm-home-stats-period"><button type="button" data-stat-period="week" onclick="hmSetHomeStatsPeriod('week')">주간</button><button type="button" data-stat-period="month" onclick="hmSetHomeStatsPeriod('month')">한 달</button></div><div id="hmHomeStatsModalBody" class="hm-home-stats-modal-body"></div></div>`;
+        document.body.appendChild(overlay);
+        overlay.addEventListener('click', event => { if (event.target === overlay) window.hmCloseHomeStatsModal(); });
+        return overlay;
+    }
+    function renderHomeStatsModal(){
+        const item = hmHomeStatsItem(hmHomeStatsActiveKey);
+        const keys = hmHomeStatsPeriodKeys();
+        const stats = hmHomeStatsSummary(item, keys);
+        const body = $('hmHomeStatsModalBody') || ensureHomeStatsModal().querySelector('#hmHomeStatsModalBody');
+        document.querySelectorAll('[data-stat-period]').forEach(btn => btn.classList.toggle('active', btn.dataset.statPeriod === hmHomeStatsPeriod));
+        const calendar = stats.rows.map(row => {
+            const day = Number(row.key.slice(-2));
+            const state = row.stat.hit ? 'has-stat' : 'empty-stat';
+            return `<div class="hm-home-stats-day ${state}"><span>${day}</span><b>${item.icon}</b><small>${safe(row.stat.label)}</small></div>`;
+        }).join('');
+        if (body) body.innerHTML = `<section class="hm-home-stats-hero"><div class="hm-home-stats-hero-icon">${item.icon}</div><div><strong>${safe(item.label)}</strong><span>${hmHomeStatsPeriod === 'week' ? '최근 7일' : hmHomeStatsAnchorDate().slice(0,7)} 기준</span></div><em>${safe(stats.main)}</em></section><div class="hm-home-stats-metrics"><div><strong>${safe(stats.main)}</strong><small>대표 값</small></div><div><strong>${safe(stats.sub)}</strong><small>요약</small></div><div><strong>${stats.hit}일</strong><small>기록된 날</small></div></div><div class="hm-home-stats-calendar">${calendar}</div><p class="hm-home-stats-note">기존 기록을 읽어서 표시하며, 이 통계 화면에서는 데이터를 저장하거나 변경하지 않습니다.</p>`;
+    }
+    function updateHomeStatsCard(){
+        buildHomeStatsCard();
+        const weekKeys = hmHomeStatsPeriodKeys('week');
+        HM_HOME_STAT_ITEMS.forEach(item => {
+            const target = $(`hmHomeStatMini_${item.key}`);
+            if (!target) return;
+            const stats = hmHomeStatsSummary(item, weekKeys);
+            target.textContent = stats.main;
+        });
+    }
+    window.hmOpenHomeStatsModal = function(key){ hmHomeStatsActiveKey = key || hmHomeStatsActiveKey; ensureHomeStatsModal(); renderHomeStatsModal(); if (typeof openModalOverlayById === 'function') openModalOverlayById('hmHomeStatsOverlay'); else { const overlay = ensureHomeStatsModal(); overlay.removeAttribute('inert'); overlay.style.display = 'flex'; overlay.setAttribute('aria-hidden','false'); } };
+    window.hmCloseHomeStatsModal = function(){ if (typeof closeModalOverlayById === 'function') closeModalOverlayById('hmHomeStatsOverlay'); else { const overlay=$('hmHomeStatsOverlay'); if(overlay) overlay.style.display='none'; } };
+    window.hmSetHomeStatsPeriod = function(period){ hmHomeStatsPeriod = period === 'month' ? 'month' : 'week'; renderHomeStatsModal(); };
     function buildDashboard(){
         if (HM_STAGE < 2 || $('hmProductDashboard')) return;
         const anchor = document.querySelector('.room-settings-card'); if (!anchor) return;
@@ -113,7 +273,10 @@
         const recordDateGroup = recordDateInput ? recordDateInput.closest('.input-group') : null;
         if (recordDateGroup) {
             anchor.insertAdjacentElement('afterend', recordDateGroup);
-            recordDateGroup.insertAdjacentElement('afterend', box);
+            buildHomeStatsCard();
+            const statsCard = $('hmHomeStatsCard');
+            if (statsCard) statsCard.insertAdjacentElement('afterend', box);
+            else recordDateGroup.insertAdjacentElement('afterend', box);
         } else {
             anchor.insertAdjacentElement('afterend', box);
         }
@@ -132,6 +295,7 @@
         const togetherValue = $('hmProductTogetherDay');
         if (togetherItem) togetherItem.hidden = !togetherDay;
         if (togetherValue) togetherValue.textContent = togetherDay ? `${togetherDay}일` : '-';
+        updateHomeStatsCard();
         moveTodayPromiseSection();
     }
 
