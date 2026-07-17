@@ -229,12 +229,20 @@
         }
         return { rows, main: `${hitRows.length}/${keys.length}`, sub: hitRows.length ? `${hitRows.length}일 기록` : '기록 없음', hit: hitRows.length };
     }
-    function hmHomeStatsTimeMinutes(value){
-        const match = String(value || '').match(/(\d{1,2})\s*[:시]\s*(\d{1,2})?/);
+    function hmHomeStatsTimeMinutes(value, itemKey){
+        const match = String(value || '').match(/(\d{1,2})\s*(?::|시|\.)?\s*(\d{1,2})?/);
         if (!match) return null;
         const hour = Math.max(0, Math.min(23, Number(match[1] || 0)));
         const minute = Math.max(0, Math.min(59, Number(match[2] || 0)));
-        return hour * 60 + minute;
+        const minutes = hour * 60 + minute;
+        return itemKey === 'sleep' && minutes < 720 ? minutes + 1440 : minutes;
+    }
+    function hmHomeStatsFormatTimeMinutes(value){
+        if (!Number.isFinite(value)) return '-';
+        const normalized = ((Math.round(value) % 1440) + 1440) % 1440;
+        const hh = String(Math.floor(normalized / 60)).padStart(2,'0');
+        const mm = String(normalized % 60).padStart(2,'0');
+        return `${hh}:${mm}`;
     }
     function hmHomeStatsGraphValue(item, row){
         const stat = row?.stat || {};
@@ -244,7 +252,7 @@
         }
         if (!stat.hit) return null;
         if (item.key === 'weight' || item.key === 'water') return Number(stat.value || 0) || null;
-        if (item.mode === 'time') return hmHomeStatsTimeMinutes(stat.label);
+        if (item.mode === 'time') return hmHomeStatsTimeMinutes(stat.label, item.key);
         if (item.key === 'mood') return stat.hit ? 1 : null;
         return stat.hit ? Number(stat.value || 1) : null;
     }
@@ -255,25 +263,38 @@
         if (item.mode === 'time') return '시각';
         return '기록';
     }
-    function hmHomeStatsGraphHtml(item, stats){
+    function hmHomeStatsChartTitle(item){
+        if (item.mode === 'ratio') return '달성 흐름';
+        if (item.key === 'mood') return '기분 분포';
+        if (item.key === 'water') return '섭취 흐름';
+        if (item.mode === 'time' || item.key === 'weight') return '변화 흐름';
+        if (item.key === 'meal') return '식사 패턴';
+        return '기록 패턴';
+    }
+    function hmHomeStatsDayLabel(row, index, total){
+        if (hmHomeStatsPeriod === 'week' || index === 0 || index === total - 1) return Number(row.key.slice(-2));
+        return '';
+    }
+    function hmHomeStatsEmptyChart(item, message){
+        return `<section class="hm-home-stats-graph is-empty"><div><strong>${safe(hmHomeStatsChartTitle(item))}</strong><span>${safe(hmHomeStatsGraphUnit(item))}</span></div><p>${safe(message || '그래프를 보려면 같은 기간에 2일 이상 기록이 필요해요.')}</p></section>`;
+    }
+    function hmHomeStatsLinearChartHtml(item, stats, options={}){
         const rows = stats.rows || [];
         const values = rows.map(row => hmHomeStatsGraphValue(item, row));
         const valid = values.filter(value => Number.isFinite(value));
-        if (valid.length < 2) {
-            return `<section class="hm-home-stats-graph is-empty"><div><strong>흐름 그래프</strong><span>${safe(hmHomeStatsGraphUnit(item))}</span></div><p>그래프를 보려면 같은 기간에 2일 이상 기록이 필요해요.</p></section>`;
-        }
-        let min = Math.min(...valid);
-        let max = Math.max(...valid);
+        if (valid.length < 2) return hmHomeStatsEmptyChart(item);
+        const guideValues = (options.guides || []).map(g => g.value).filter(Number.isFinite);
+        let min = Math.min(...valid, ...guideValues);
+        let max = Math.max(...valid, ...guideValues);
         if (min === max) { min -= 1; max += 1; }
-        const width = 320, height = 118, left = 18, right = 12, top = 18, bottom = 24;
+        const pad = (max - min) * 0.08;
+        min -= pad; max += pad;
+        const width = 320, height = 124, left = 32, right = 14, top = 18, bottom = 24;
         const plotW = width - left - right;
         const plotH = height - top - bottom;
-        const points = values.map((value, index) => {
-            if (!Number.isFinite(value)) return null;
-            const x = rows.length <= 1 ? left + plotW / 2 : left + (plotW * index / (rows.length - 1));
-            const y = top + plotH - ((value - min) / (max - min)) * plotH;
-            return { x, y, value, key: rows[index].key };
-        });
+        const yFor = value => top + plotH - ((value - min) / (max - min)) * plotH;
+        const xFor = index => rows.length <= 1 ? left + plotW / 2 : left + (plotW * index / (rows.length - 1));
+        const points = values.map((value, index) => Number.isFinite(value) ? { x:xFor(index), y:yFor(value), value, key:rows[index].key } : null);
         let path = '';
         let drawing = false;
         points.forEach(point => {
@@ -281,15 +302,79 @@
             path += `${drawing ? ' L' : ' M'} ${point.x.toFixed(1)} ${point.y.toFixed(1)}`;
             drawing = true;
         });
+        const guides = (options.guides || []).map(guide => {
+            if (!Number.isFinite(guide.value)) return '';
+            const y = yFor(guide.value);
+            return `<g class="hm-flow-guide"><line x1="${left}" y1="${y.toFixed(1)}" x2="${width - right}" y2="${y.toFixed(1)}"></line><text x="2" y="${(y + 3).toFixed(1)}">${safe(guide.label)}</text></g>`;
+        }).join('');
         const dots = points.filter(Boolean).map(point => `<circle cx="${point.x.toFixed(1)}" cy="${point.y.toFixed(1)}" r="4.2"></circle>`).join('');
         const labels = rows.map((row, index) => {
-            if (hmHomeStatsPeriod === 'week' || index === 0 || index === rows.length - 1) {
-                const x = rows.length <= 1 ? left + plotW / 2 : left + (plotW * index / (rows.length - 1));
-                return `<text x="${x.toFixed(1)}" y="112">${Number(row.key.slice(-2))}</text>`;
-            }
-            return '';
+            const label = hmHomeStatsDayLabel(row, index, rows.length);
+            return label ? `<text class="hm-flow-x-label" x="${xFor(index).toFixed(1)}" y="118">${label}</text>` : '';
         }).join('');
-        return `<section class="hm-home-stats-graph"><div><strong>흐름 그래프</strong><span>${safe(hmHomeStatsGraphUnit(item))}</span></div><svg viewBox="0 0 ${width} ${height}" role="img" aria-label="${safe(item.label)} 흐름 그래프"><line x1="${left}" y1="${top}" x2="${left}" y2="${height - bottom}"></line><line x1="${left}" y1="${height - bottom}" x2="${width - right}" y2="${height - bottom}"></line><path d="${path}"></path>${dots}<g>${labels}</g></svg></section>`;
+        return `<section class="hm-home-stats-graph hm-flow-chart is-line"><div><strong>${safe(hmHomeStatsChartTitle(item))}</strong><span>${safe(hmHomeStatsGraphUnit(item))}</span></div><svg viewBox="0 0 ${width} ${height}" role="img" aria-label="${safe(item.label)} ${safe(hmHomeStatsChartTitle(item))}">${guides}<line x1="${left}" y1="${top}" x2="${left}" y2="${height - bottom}"></line><line x1="${left}" y1="${height - bottom}" x2="${width - right}" y2="${height - bottom}"></line><path d="${path}"></path>${dots}<g>${labels}</g></svg></section>`;
+    }
+    function hmHomeStatsBarsHtml(item, stats, options={}){
+        const rows = stats.rows || [];
+        const values = rows.map(row => hmHomeStatsGraphValue(item, row));
+        const valid = values.filter(value => Number.isFinite(value));
+        if (!valid.length) return hmHomeStatsEmptyChart(item, '표시할 기록이 아직 없어요.');
+        const maxBase = Math.max(...valid, ...(options.guides || []).map(g => g.value || 0), options.max || 0, 1);
+        const bars = rows.map((row, index) => {
+            const value = values[index];
+            const pct = Number.isFinite(value) ? Math.max(4, Math.min(100, value / maxBase * 100)) : 0;
+            const label = hmHomeStatsDayLabel(row, index, rows.length);
+            return `<div class="hm-flow-bar ${Number.isFinite(value) ? 'has-value' : 'is-empty'}"><i style="height:${pct}%"></i><small>${label}</small></div>`;
+        }).join('');
+        const guides = (options.guides || []).map(g => `<span style="bottom:${Math.max(0, Math.min(100, (g.value / maxBase) * 100))}%">${safe(g.label)}</span>`).join('');
+        return `<section class="hm-home-stats-graph hm-flow-chart is-bars"><div><strong>${safe(hmHomeStatsChartTitle(item))}</strong><span>${safe(hmHomeStatsGraphUnit(item))}</span></div><div class="hm-flow-bars"><div class="hm-flow-bar-guides">${guides}</div>${bars}</div></section>`;
+    }
+    function hmHomeStatsRatioHtml(item, stats){
+        const rows = stats.rows || [];
+        const totalDone = rows.reduce((sum,row)=>sum + Number(row.stat.done || 0), 0);
+        const totalGoal = rows.reduce((sum,row)=>sum + Number(row.stat.total || 0), 0);
+        const pct = totalGoal ? Math.round(totalDone / totalGoal * 100) : 0;
+        const bars = rows.map((row, index) => {
+            const total = Number(row.stat.total || 0);
+            const done = Number(row.stat.done || 0);
+            const dayPct = total ? Math.round(done / total * 100) : 0;
+            return `<div class="hm-flow-bar ${total ? 'has-value' : 'is-empty'}"><i style="height:${Math.max(4, dayPct)}%"></i><small>${hmHomeStatsDayLabel(row, index, rows.length)}</small></div>`;
+        }).join('');
+        return `<section class="hm-home-stats-graph hm-flow-chart is-ratio"><div><strong>${safe(hmHomeStatsChartTitle(item))}</strong><span>%</span></div><div class="hm-flow-progress"><i style="width:${pct}%"></i><b>${pct}%</b><small>${totalDone}/${totalGoal || 0} 완료</small></div><div class="hm-flow-bars is-percent">${bars}</div></section>`;
+    }
+    function hmHomeStatsMoodHtml(item, stats){
+        const rows = stats.rows || [];
+        const counts = {};
+        rows.forEach(row => { if (row.stat.hit) counts[row.stat.label] = (counts[row.stat.label] || 0) + 1; });
+        const labels = ['아주 좋음','좋음','괜찮음','보통','힘듦','나쁨'];
+        const allLabels = [...labels, ...Object.keys(counts).filter(label => !labels.includes(label))].filter(label => counts[label]);
+        if (!allLabels.length) return hmHomeStatsEmptyChart(item, '선택된 기간에 기분 기록이 없어요.');
+        const max = Math.max(...Object.values(counts), 1);
+        const rowsHtml = allLabels.map(label => `<div class="hm-flow-mood-row"><b>${safe(label)}</b><i><em style="width:${Math.round((counts[label] || 0) / max * 100)}%"></em></i><span>${counts[label] || 0}일</span></div>`).join('');
+        return `<section class="hm-home-stats-graph hm-flow-chart is-mood"><div><strong>${safe(hmHomeStatsChartTitle(item))}</strong><span>선택</span></div><div class="hm-flow-mood">${rowsHtml}</div></section>`;
+    }
+    function hmHomeStatsCheckHtml(item, stats){
+        const rows = stats.rows || [];
+        const dots = rows.map((row, index) => `<div class="hm-flow-dot ${row.stat.hit ? 'is-on' : 'is-off'}"><b>${row.stat.hit ? item.icon : '·'}</b><small>${hmHomeStatsDayLabel(row, index, rows.length)}</small></div>`).join('');
+        return `<section class="hm-home-stats-graph hm-flow-chart is-check"><div><strong>${safe(hmHomeStatsChartTitle(item))}</strong><span>기록</span></div><div class="hm-flow-dots">${dots}</div></section>`;
+    }
+    function hmHomeStatsMealHtml(item, stats){
+        const rows = stats.rows || [];
+        const bars = rows.map((row, index) => {
+            const done = Math.max(0, Math.min(3, Number(row.stat.done || 0)));
+            return `<div class="hm-flow-meal-day"><div><i class="${done >= 1 ? 'on' : ''}"></i><i class="${done >= 2 ? 'on' : ''}"></i><i class="${done >= 3 ? 'on' : ''}"></i></div><small>${hmHomeStatsDayLabel(row, index, rows.length)}</small></div>`;
+        }).join('');
+        return `<section class="hm-home-stats-graph hm-flow-chart is-meal"><div><strong>${safe(hmHomeStatsChartTitle(item))}</strong><span>아침·점심·저녁</span></div><div class="hm-flow-meals">${bars}</div></section>`;
+    }
+    function hmHomeStatsGraphHtml(item, stats){
+        if (item.mode === 'ratio') return hmHomeStatsRatioHtml(item, stats);
+        if (item.key === 'mood') return hmHomeStatsMoodHtml(item, stats);
+        if (item.key === 'weight') return hmHomeStatsLinearChartHtml(item, stats, { guides:[{value:50,label:'50kg'},{value:60,label:'60kg'},{value:70,label:'70kg'}] });
+        if (item.key === 'water') return hmHomeStatsBarsHtml(item, stats, { guides:[{value:500,label:'500'},{value:1000,label:'1000'},{value:1500,label:'1500'}], max:2000 });
+        if (item.key === 'wake') return hmHomeStatsLinearChartHtml(item, stats, { guides:[{value:360,label:'06:00'},{value:420,label:'07:00'},{value:480,label:'08:00'}] });
+        if (item.key === 'sleep') return hmHomeStatsLinearChartHtml(item, stats, { guides:[{value:1320,label:'22:00'},{value:1380,label:'23:00'},{value:1440,label:'00:00'}] });
+        if (item.key === 'meal') return hmHomeStatsMealHtml(item, stats);
+        return hmHomeStatsCheckHtml(item, stats);
     }
     function buildHomeStatsCard(){
         if ($('hmHomeStatsCard')) return;
