@@ -106,6 +106,7 @@
     ];
     let hmHomeStatsActiveKey = 'promise';
     let hmHomeStatsPeriod = 'week';
+    let hmHomeStatsCalendarOpen = false;
     function hmHomeStatsItem(key){ return HM_HOME_STAT_ITEMS.find(item => item.key === key) || HM_HOME_STAT_ITEMS[0]; }
     function hmHomeStatIsFilled(value){
         const text = String(value == null ? '' : value).trim();
@@ -200,8 +201,13 @@
         if ($('hmHomeStatsCard')) return;
         const box = document.createElement('section');
         box.id = 'hmHomeStatsCard';
-        box.className = 'input-group hm-home-stats-card';
-        box.innerHTML = `<button type="button" class="daily-card hm-home-stats-launch-card" onclick="hmOpenHomeStatsModal('promise')"><span class="daily-card-icon">📊</span><span><span class="daily-card-title">기록 통계</span><span class="daily-card-sub" id="hmHomeStatsLaunchSub">주간·한 달 흐름을 확인해요.</span></span><span class="daily-card-arrow">›</span></button>`;
+        box.className = 'hm-beta-dashboard hm-home-stats-card';
+        box.setAttribute('role','button');
+        box.setAttribute('tabindex','0');
+        box.setAttribute('aria-label','기록 통계 자세히 보기');
+        box.innerHTML = `<div class="hm-summary-strip-head"><strong>기록 통계</strong><small>눌러서 자세히 보기</small></div><div class="hm-summary-strip" aria-label="기록 통계"><div class="hm-summary-dot"><b>📊</b><span id="hmHomeStatMini_overview">통계</span></div><div class="hm-summary-dot"><b>💜</b><span id="hmHomeStatMini_promise">-</span></div><div class="hm-summary-dot"><b>🌱</b><span id="hmHomeStatMini_subRoutine">-</span></div><div class="hm-summary-dot"><b>📝</b><span id="hmHomeStatMini_diary">-</span></div><div class="hm-summary-dot"><b>💧</b><span id="hmHomeStatMini_water">-</span></div></div>`;
+        box.addEventListener('click', () => window.hmOpenHomeStatsModal('promise'));
+        box.addEventListener('keydown', event => { if(event.key === 'Enter' || event.key === ' ') { event.preventDefault(); window.hmOpenHomeStatsModal('promise'); } });
         const recordDateInput = $('recordDate');
         const recordDateGroup = recordDateInput ? recordDateInput.closest('.input-group') : null;
         const dashboard = $('hmProductDashboard');
@@ -235,13 +241,11 @@
             const state = row.stat.hit ? 'has-stat' : 'empty-stat';
             return `<div class="hm-home-stats-day ${state}"><span>${day}</span><b>${item.icon}</b><small>${safe(row.stat.label)}</small></div>`;
         }).join('');
-        if (body) body.innerHTML = `<section class="hm-home-stats-hero"><div class="hm-home-stats-hero-icon">${item.icon}</div><div><strong>${safe(item.label)}</strong><span>${hmHomeStatsPeriod === 'week' ? '최근 7일' : '최근 30일'} 기준</span></div><em>${safe(stats.main)}</em></section><div class="hm-home-stats-metrics"><div><strong>${safe(stats.main)}</strong><small>대표 값</small></div><div><strong>${safe(stats.sub)}</strong><small>요약</small></div><div><strong>${stats.hit}일</strong><small>기록된 날</small></div></div><div class="hm-home-stats-calendar ${hmHomeStatsPeriod === 'month' ? 'is-month' : 'is-week'}">${calendar}</div><p class="hm-home-stats-note">기존 기록을 읽어서 표시하며, 이 통계 화면에서는 데이터를 저장하거나 변경하지 않습니다.</p>`;
+        if (body) body.innerHTML = `<section class="hm-home-stats-hero"><div class="hm-home-stats-hero-icon">${item.icon}</div><div><strong>${safe(item.label)}</strong><span>${hmHomeStatsPeriod === 'week' ? '최근 7일' : '최근 30일'} 기준</span></div><em>${safe(stats.main)}</em></section><div class="hm-home-stats-metrics"><div><strong>${safe(stats.main)}</strong><small>대표 값</small></div><div><strong>${safe(stats.sub)}</strong><small>요약</small></div><div><strong>${stats.hit}일</strong><small>기록된 날</small></div></div><button type="button" class="hm-home-stats-calendar-toggle" onclick="hmToggleHomeStatsCalendar()" aria-expanded="${hmHomeStatsCalendarOpen ? 'true' : 'false'}">${hmHomeStatsCalendarOpen ? '날짜별 보기 접기' : '날짜별 보기 펼치기'}</button><div class="hm-home-stats-calendar ${hmHomeStatsPeriod === 'month' ? 'is-month' : 'is-week'} ${hmHomeStatsCalendarOpen ? 'is-open' : 'is-collapsed'}" ${hmHomeStatsCalendarOpen ? '' : 'hidden'}>${calendar}</div><p class="hm-home-stats-note">기존 기록을 읽어서 표시하며, 이 통계 화면에서는 데이터를 저장하거나 변경하지 않습니다.</p>`;
     }
     function updateHomeStatsCard(){
         buildHomeStatsCard();
         const weekKeys = hmHomeStatsPeriodKeys('week');
-        const launchSub = $('hmHomeStatsLaunchSub');
-        if (launchSub) launchSub.textContent = `이번 주 ${HM_HOME_STAT_ITEMS.length}개 항목 통계 보기`;
         HM_HOME_STAT_ITEMS.forEach(item => {
             const target = $(`hmHomeStatMini_${item.key}`);
             if (!target) return;
@@ -249,9 +253,10 @@
             target.textContent = stats.main;
         });
     }
-    window.hmOpenHomeStatsModal = function(key){ hmHomeStatsActiveKey = key || hmHomeStatsActiveKey; ensureHomeStatsModal(); renderHomeStatsModal(); if (typeof openModalOverlayById === 'function') openModalOverlayById('hmHomeStatsOverlay'); else { const overlay = ensureHomeStatsModal(); overlay.removeAttribute('inert'); overlay.style.display = 'flex'; overlay.setAttribute('aria-hidden','false'); } };
+    window.hmOpenHomeStatsModal = function(key){ hmHomeStatsActiveKey = key || hmHomeStatsActiveKey; const overlay = ensureHomeStatsModal(); if (overlay.getAttribute('aria-hidden') !== 'false') hmHomeStatsCalendarOpen = false; renderHomeStatsModal(); if (typeof openModalOverlayById === 'function') openModalOverlayById('hmHomeStatsOverlay'); else { overlay.removeAttribute('inert'); overlay.style.display = 'flex'; overlay.setAttribute('aria-hidden','false'); } };
     window.hmCloseHomeStatsModal = function(){ if (typeof closeModalOverlayById === 'function') closeModalOverlayById('hmHomeStatsOverlay'); else { const overlay=$('hmHomeStatsOverlay'); if(overlay) overlay.style.display='none'; } };
     window.hmSetHomeStatsPeriod = function(period){ hmHomeStatsPeriod = period === 'month' ? 'month' : 'week'; renderHomeStatsModal(); };
+    window.hmToggleHomeStatsCalendar = function(){ hmHomeStatsCalendarOpen = !hmHomeStatsCalendarOpen; renderHomeStatsModal(); };
     function buildDashboard(){
         if (HM_STAGE < 2 || $('hmProductDashboard')) return;
         const anchor = document.querySelector('.room-settings-card'); if (!anchor) return;

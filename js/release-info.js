@@ -5,19 +5,18 @@
 (function () {
     const release = Object.freeze({
         product: 'HearMe2nite',
-        version: 'v1.0 STEP6.2.10.2',
-        appVersion: 'HearMe2nite v1.0 STEP6.2.10.2',
-        step: 'STEP6.2.10.2',
+        version: 'v1.0 STEP6.2.10.4.1',
+        appVersion: 'HearMe2nite v1.0 STEP6.2.10.4.1',
+        step: 'STEP6.2.10.4.1',
         build: '20260717',
         releaseDate: '2026.07.17',
         stage: 'Beta',
-        title: '통계 기간 전환 표시 수정',
-        description: '기록 통계 모달에서 주간과 한 달 선택 상태가 분명히 보이도록 하고, 주간은 최근 7일·한 달은 최근 30일로 다르게 표시합니다.',
+        title: '기록 통계 카드 컬러 구분',
+        description: '홈 화면의 기록 통계 카드를 오늘의 요약 카드 계열로 유지하면서, 통계 카드만의 은은한 컬러로 구분했습니다.',
         changes: Object.freeze([
-            '주간/한 달 버튼 선택 색상을 명확하게 표시',
-            '선택된 기간 버튼에 active 및 aria-pressed 상태 적용',
-            '주간은 최근 7일, 한 달은 최근 30일 기준으로 분리',
-            '한 달 캘린더는 30일 표시용 밀도 레이아웃 적용',
+            '기록 통계 홈 카드에 보라-하늘빛 계열의 은은한 배경 적용',
+            '일반 입력 카드와는 다르게 보이면서 오늘의 요약과는 같은 계열로 유지',
+            '라이트/다크 화면 모두에서 내부 통계 칩이 읽기 좋도록 색상 보정',
             '기존 days 기록을 읽기만 하며 Firebase 저장 구조는 변경하지 않음'
         ])
     });
