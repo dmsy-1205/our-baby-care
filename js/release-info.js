@@ -5,21 +5,21 @@
 (function () {
     const release = Object.freeze({
         product: 'HearMe2nite',
-        version: 'v1.0 STEP6.2.10.11',
-        appVersion: 'HearMe2nite v1.0 STEP6.2.10.11',
-        step: 'STEP6.2.10.11',
+        version: 'v1.0 STEP6.2.10.12',
+        appVersion: 'HearMe2nite v1.0 STEP6.2.10.12',
+        step: 'STEP6.2.10.12',
         build: '20260718',
         releaseDate: '2026.07.18',
         stage: 'Beta',
-        title: 'History Center Layout Cleanup',
-        description: '히스토리 센터에서 검색을 캘린더 위로 이동하고, 우리의 기념일을 접힘형으로 정리했으며, 불필요한 다시 열기 버튼을 제거했습니다.',
+        title: 'User Guide Horizontal Menu Scroll',
+        description: '사용자 가이드의 기능 선택 메뉴를 모바일에서도 보기 편한 가로 스크롤 방식으로 정리하고, 우리의 흐름과 어울리는 스크롤 바 색상을 적용했습니다.',
         changes: Object.freeze([
-            'Moved History Center search controls above the calendar',
-            'Changed anniversary panel to a collapsible summary card',
-            'Removed redundant reopen buttons from the selected history area',
-            'Kept calendar date clicks as the primary way to open daily records',
+            'Changed User Guide feature menu from grid layout to horizontal scroll chips',
+            'Added visible purple-pink scrollbar styling inspired by Our Flow',
+            'Fixed guide menu sizing for mobile, foldable, tablet, and desktop screens',
+            'Kept existing guide tab selection behavior unchanged',
             'Updated cache tags for immediate review',
-            '기존 days/anniversary 저장 구조 변경 없음'
+            '기존 가이드 내용과 저장 구조 변경 없음'
         ])
     });
 
