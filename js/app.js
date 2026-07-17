@@ -237,10 +237,183 @@
   else syncVersion();
 })();
 
-// STEP6.2.12.0: 앱 안 알림 바 1차 자리 잡기.
-// 실제 기록/피드백 알림 데이터 연결은 다음 단계에서 분리해 붙인다.
-window.hmOpenNotificationCenter = function hmOpenNotificationCenter() {
-  if (typeof showToast === 'function') {
-    showToast('🔔 알림센터는 다음 단계에서 기록과 피드백 알림을 연결할게요.');
+// STEP6.2.12.3: 앱 안 알림 바를 실제 기록/피드백 상태와 연결한다.
+(function hmInAppNotificationBar() {
+  const READ_STORAGE_PREFIX = 'hm_notification_read_v1';
+  let hmCurrentNotificationItems = [];
+
+  function $(id) { return document.getElementById(id); }
+  function text(value) { return String(value == null ? '' : value).trim(); }
+  function isMeaningful(value) {
+    const v = text(value);
+    if (!v) return false;
+    const compact = v.replace(/\s+/g, '').toLowerCase();
+    return !['기록없음', '선택없음', '-', '0ml', '0ml'].includes(compact);
   }
-};
+  function getSafeRoomCode() {
+    try { return typeof getRoomCodeForData === 'function' ? getRoomCodeForData() : (activeRoomCode || ''); } catch (e) { return ''; }
+  }
+  function getSelectedDate() { return $('recordDate')?.value || ''; }
+  function getReadStorageKey() {
+    const uid = currentUser?.uid || 'guest';
+    const room = getSafeRoomCode() || 'no-room';
+    return `${READ_STORAGE_PREFIX}:${uid}:${room}`;
+  }
+  function readMap() {
+    try { return JSON.parse(localStorage.getItem(getReadStorageKey()) || '{}') || {}; } catch (e) { return {}; }
+  }
+  function writeRead(signature) {
+    if (!signature) return;
+    try {
+      const map = readMap();
+      map[signature] = Date.now();
+      localStorage.setItem(getReadStorageKey(), JSON.stringify(map));
+    } catch (e) {}
+  }
+  function shortDate(date) { return date ? date.slice(5).replace('-', '.') : '오늘'; }
+  function recordForDate(date) {
+    let publicRecord = {};
+    let adminRecord = {};
+    try { publicRecord = (window.cachedDaysData || cachedDaysData || {})?.[date] || {}; } catch (e) {}
+    try { adminRecord = (window.cachedDayAdminData || cachedDayAdminData || {})?.[date] || {}; } catch (e) {}
+    if (typeof hmMergeDaySecurityRecord === 'function') return hmMergeDaySecurityRecord(publicRecord, adminRecord);
+    return Object.assign({}, publicRecord, adminRecord);
+  }
+  function adminRecordForDate(date) {
+    try { return (window.cachedDayAdminData || cachedDayAdminData || {})?.[date] || {}; } catch (e) { return {}; }
+  }
+  function publicRecordForDate(date) {
+    try { return (window.cachedDaysData || cachedDaysData || {})?.[date] || {}; } catch (e) { return {}; }
+  }
+  function updatedByOther(record) {
+    if (!record || !currentUser) return false;
+    return !record.updatedBy || record.updatedBy !== currentUser.uid;
+  }
+  function hasPublicRecordContent(record) {
+    if (!record || typeof record !== 'object') return false;
+    const fields = ['wakeTime', 'weight', 'exercise', 'mealBreakfast', 'mealLunch', 'mealDinner', 'goingOut', 'sleepTime', 'diary', 'moodLabel', 'moodNote'];
+    const hasField = fields.some((key) => isMeaningful(record[key]));
+    const hasWater = Number(String(record.water || '').replace(/[^0-9.]/g, '')) > 0;
+    const hasMission = Array.isArray(record.missions) && record.missions.length > 0;
+    const hasCustom = record.customCardValues && Object.keys(record.customCardValues || {}).length > 0;
+    const hasSubRoutine = Array.isArray(record.subRoutineSnapshot) && record.subRoutineSnapshot.length > 0;
+    return hasField || hasWater || hasMission || hasCustom || hasSubRoutine || !!record.photo;
+  }
+  function makeSignature(type, date, record, fallbackText) {
+    const stamp = record?.updatedAt || record?.createdAt || '';
+    const author = record?.updatedBy || '';
+    const body = text(fallbackText).slice(0, 140);
+    return [type, date, stamp, author, body].join('|');
+  }
+  function buildItems() {
+    const date = getSelectedDate();
+    const room = getSafeRoomCode();
+    if (!currentUser || !room || !date) return [];
+
+    const merged = recordForDate(date);
+    const publicRecord = publicRecordForDate(date);
+    const adminRecord = adminRecordForDate(date);
+    const canManage = typeof canManageRelationshipCards === 'function' && canManageRelationshipCards();
+    const items = [];
+
+    if (canManage && hasPublicRecordContent(publicRecord) && updatedByOther(publicRecord)) {
+      items.push({
+        type: 'record',
+        icon: '📝',
+        title: '새 기록이 있어요',
+        sub: `${shortDate(date)} · 오늘의 요약에서 바로 확인`,
+        action: '보기',
+        signature: makeSignature('record', date, publicRecord, merged.fullText || 'record')
+      });
+    }
+
+    if (!canManage && updatedByOther(adminRecord)) {
+      if (isMeaningful(adminRecord.replyMessage) || isMeaningful(adminRecord.feedbackType) || adminRecord.feedbackConfirmed === true) {
+        items.push({
+          type: 'feedback',
+          icon: '💌',
+          title: '주인의 피드백 도착',
+          sub: `${shortDate(date)} · 피드백을 확인해 보세요`,
+          action: '확인',
+          signature: makeSignature('feedback', date, adminRecord, `${adminRecord.feedbackType || ''}${adminRecord.replyMessage || ''}${adminRecord.feedbackConfirmed ? 'confirmed' : ''}`)
+        });
+      }
+      if (isMeaningful(adminRecord.dailyChoiceLabel) || isMeaningful(adminRecord.rewardNote)) {
+        items.push({
+          type: 'reward',
+          icon: '🎁',
+          title: '오늘의 선물이 있어요',
+          sub: `${shortDate(date)} · 작은 보상을 확인해요`,
+          action: '열기',
+          signature: makeSignature('reward', date, adminRecord, `${adminRecord.dailyChoiceLabel || ''}${adminRecord.rewardNote || ''}`)
+        });
+      }
+    }
+
+    return items;
+  }
+  function renderNotificationBar() {
+    const bar = $('hmNotificationBar');
+    if (!bar) return;
+    const icon = $('hmNotificationBar')?.querySelector('.hm-notification-icon');
+    const title = $('hmNotificationTitle');
+    const sub = $('hmNotificationSub');
+    const action = $('hmNotificationAction');
+    const read = readMap();
+    const allItems = buildItems();
+    const unreadItems = allItems.filter((item) => !read[item.signature]);
+    hmCurrentNotificationItems = unreadItems;
+    const item = unreadItems[0];
+
+    bar.classList.toggle('has-unread', unreadItems.length > 0);
+    bar.setAttribute('aria-label', unreadItems.length ? `앱 안 알림 ${unreadItems.length}개 보기` : '앱 안 알림 보기');
+
+    if (!getSafeRoomCode()) {
+      if (icon) icon.textContent = '🔕';
+      if (title) title.textContent = '공간 연결 대기';
+      if (sub) sub.textContent = '공간을 연결하면 기록 알림을 보여줘요';
+      if (action) action.textContent = '보기';
+      return;
+    }
+
+    if (!item) {
+      if (icon) icon.textContent = '🔕';
+      if (title) title.textContent = '새 알림 없음';
+      if (sub) sub.textContent = '오늘은 조용해요';
+      if (action) action.textContent = '보기';
+      return;
+    }
+
+    if (icon) icon.textContent = item.icon;
+    if (title) title.textContent = unreadItems.length > 1 ? `${item.title} 외 ${unreadItems.length - 1}개` : item.title;
+    if (sub) sub.textContent = item.sub;
+    if (action) action.textContent = item.action;
+  }
+  function openItem(item) {
+    if (!item) {
+      if (typeof showToast === 'function') showToast('🔕 지금 확인할 새 알림은 없어요.');
+      return;
+    }
+    writeRead(item.signature);
+    renderNotificationBar();
+    if (item.type === 'feedback' && typeof openDailyModal === 'function') return openDailyModal('feedback');
+    if (item.type === 'reward' && typeof openDailyModal === 'function') return openDailyModal('reward');
+    if (item.type === 'record') {
+      const summaryCard = $('hmProductDashboard');
+      if (summaryCard) return summaryCard.click();
+      const promise = $('hmTodayPromiseSection');
+      if (promise) promise.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
+
+  window.hmRefreshNotificationBar = renderNotificationBar;
+  window.hmOpenNotificationCenter = function hmOpenNotificationCenter() {
+    openItem(hmCurrentNotificationItems[0] || null);
+  };
+
+  document.addEventListener('DOMContentLoaded', () => {
+    renderNotificationBar();
+    $('recordDate')?.addEventListener('change', () => setTimeout(renderNotificationBar, 80));
+  });
+  window.addEventListener('focus', () => setTimeout(renderNotificationBar, 120));
+})();

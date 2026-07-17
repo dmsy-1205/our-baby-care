@@ -42,6 +42,7 @@
         cachedDaysData = null;
         hmLastAutoSaveSignature = '';
         hmAutoSaveQueued = false;
+        if (typeof hmRefreshNotificationBar === 'function') setTimeout(hmRefreshNotificationBar, 0);
     }
 
 
@@ -276,6 +277,7 @@
                 selectedMood = record.mood || '';
                 updateMoodUI();
                 updateDailyCards();
+                if (typeof hmRefreshNotificationBar === 'function') setTimeout(hmRefreshNotificationBar, 0);
 
                 if (record.photo) {
                     uploadedPhotoBase64 = record.photo;
@@ -309,6 +311,7 @@
                 if (typeof updateFeedbackTypeButtons === 'function') updateFeedbackTypeButtons();
                 updateDailyChoiceButtons();
                 updateDailyCards();
+                if (typeof hmRefreshNotificationBar === 'function') setTimeout(hmRefreshNotificationBar, 0);
             }).catch((err) => hmReportError('currentDayAdminRef.merge', err));
         }, (err) => hmReportError('currentDayAdminRef.on', err, hmIsFirebasePermissionError(err) ? '❌ 관리 기록 읽기 권한 없음' : '❌ 관리 기록 읽기 실패'));
 
@@ -317,6 +320,7 @@
             if (roomCode !== activeRoomCode) return;
             cachedDaysData = snapshot.val() || {};
             displayHistory(hmMergeAllDaySecurityRecords(cachedDaysData, cachedDayAdminData));
+            if (typeof hmRefreshNotificationBar === 'function') setTimeout(hmRefreshNotificationBar, 0);
         }, (err) => {
             hmReportError('entireRoomRef.on', err, hmIsFirebasePermissionError(err) ? '❌ 기록실 읽기 권한 없음' : '❌ 기록실 불러오기 실패');
         });
@@ -326,6 +330,7 @@
             if (roomCode !== activeRoomCode) return;
             cachedDayAdminData = snapshot.val() || {};
             displayHistory(hmMergeAllDaySecurityRecords(cachedDaysData, cachedDayAdminData));
+            if (typeof hmRefreshNotificationBar === 'function') setTimeout(hmRefreshNotificationBar, 0);
         }, (err) => {
             hmReportError('entireDayAdminRef.on', err, hmIsFirebasePermissionError(err) ? '❌ 관리 기록 읽기 권한 없음' : '❌ 관리 기록실 불러오기 실패');
         });
@@ -534,6 +539,7 @@
         if (canManageRelationshipCards()) {
             await db.ref('rooms/' + roomCode + '/dayAdmin/' + date).set(adminRecord);
         }
+        if (typeof hmRefreshNotificationBar === 'function') setTimeout(hmRefreshNotificationBar, 0);
         hmLastAutoSaveSignature = signature;
         hmAutoSaveQueued = false;
         showSaveStatus('☁️ 서버 자동저장 완료');
@@ -564,5 +570,3 @@
     }
 
     // =========================================================
-
-
