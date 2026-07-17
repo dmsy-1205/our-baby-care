@@ -12495,6 +12495,30 @@ body.dark-mode .history-detail-summary-card > div:not(.history-detail-summary-ic
   max-width: 100%;
   box-sizing: border-box;
 }
+.hm-home-stats-graph > .hm-flow-progress {
+  display: grid !important;
+}
+.hm-home-stats-graph > .hm-flow-mood,
+.hm-home-stats-graph > .hm-flow-month-weekdays,
+.hm-home-stats-graph > .hm-flow-month-grid {
+  display: grid !important;
+  align-items: stretch !important;
+  justify-content: stretch !important;
+  margin-bottom: 0 !important;
+}
+.hm-home-stats-graph > .hm-flow-mood {
+  gap: 6px !important;
+}
+.hm-home-stats-graph > .hm-flow-month-weekdays,
+.hm-home-stats-graph > .hm-flow-month-grid {
+  grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
+}
+.hm-home-stats-graph > .hm-flow-month-weekdays {
+  gap: 7px !important;
+}
+.hm-home-stats-graph > .hm-flow-month-grid {
+  gap: 7px !important;
+}
 .hm-flow-chart svg {
   width: 100%;
   height: 150px;
@@ -12639,7 +12663,8 @@ body.dark-mode .history-detail-summary-card > div:not(.history-detail-summary-ic
 }
 .hm-flow-mood {
   display: grid;
-  gap: 7px;
+  grid-template-columns: 1fr;
+  gap: 6px;
   padding: 4px 0 2px;
   width: 100%;
   max-width: 100%;
@@ -12647,13 +12672,13 @@ body.dark-mode .history-detail-summary-card > div:not(.history-detail-summary-ic
 }
 .hm-flow-mood-row {
   display: grid;
-  grid-template-columns: minmax(70px, 88px) minmax(0, 1fr) 42px;
+  grid-template-columns: minmax(62px, 78px) minmax(0, 1fr) 32px;
   align-items: center;
-  gap: 10px;
+  gap: 7px;
   width: 100%;
   min-width: 0;
-  min-height: 34px;
-  padding: 7px 9px;
+  min-height: 30px;
+  padding: 6px 7px;
   border-radius: 13px;
   background: rgba(255,255,255,.045);
   border: 1px solid rgba(124,92,255,.10);
@@ -12671,6 +12696,7 @@ body.dark-mode .history-detail-summary-card > div:not(.history-detail-summary-ic
 .hm-flow-mood-row span {
   color: #ff7aa6;
   text-align: right;
+  font-size: .62rem;
 }
 .hm-flow-mood-row i {
   min-width: 0;
@@ -12769,7 +12795,7 @@ body.dark-mode .history-detail-summary-card > div:not(.history-detail-summary-ic
   grid-template-rows: auto 1fr;
   place-items: center;
   min-width: 0;
-  min-height: 58px;
+  min-height: 54px;
   aspect-ratio: 1 / .92;
   padding: 5px 2px 4px;
   border-radius: 14px;
@@ -12897,13 +12923,14 @@ body.dark-mode .history-detail-summary-card > div:not(.history-detail-summary-ic
     min-height: 68px;
   }
   .hm-flow-mood-row {
-    grid-template-columns: minmax(56px, 72px) minmax(0, 1fr) 32px;
-    gap: 7px;
-    padding: 6px 7px;
+    grid-template-columns: minmax(48px, 62px) minmax(0, 1fr) 28px;
+    gap: 5px;
+    min-height: 28px;
+    padding: 5px 6px;
   }
   .hm-flow-mood-row b,
   .hm-flow-mood-row span {
-    font-size: .62rem;
+    font-size: .56rem;
   }
   .hm-flow-dots,
   .hm-flow-meals {
@@ -12929,6 +12956,10 @@ body.dark-mode .history-detail-summary-card > div:not(.history-detail-summary-ic
   }
   .hm-flow-month-grid {
     gap: 4px;
+  }
+  .hm-home-stats-graph > .hm-flow-month-weekdays,
+  .hm-home-stats-graph > .hm-flow-month-grid {
+    gap: 4px !important;
   }
   .hm-flow-month-weekdays {
     gap: 4px;
