@@ -241,6 +241,7 @@
 (function hmInAppNotificationBar() {
   const READ_STORAGE_PREFIX = 'hm_notification_read_v1';
   let hmCurrentNotificationItems = [];
+  let hmOpeningFromNotification = false;
 
   function $(id) { return document.getElementById(id); }
   function text(value) { return String(value == null ? '' : value).trim(); }
@@ -492,13 +493,24 @@
     writeRead(item.signature);
     closeNotificationOverlay();
     renderNotificationBar();
-    if (item.type === 'feedback' && typeof openDailyModal === 'function') return openDailyModal('feedback');
-    if (item.type === 'reward' && typeof openDailyModal === 'function') return openDailyModal('reward');
-    if (item.type === 'record') return openRecordCard(item);
+    hmOpeningFromNotification = true;
+    try {
+      if (item.type === 'feedback' && typeof openDailyModal === 'function') return openDailyModal('feedback');
+      if (item.type === 'reward' && typeof openDailyModal === 'function') return openDailyModal('reward');
+      if (item.type === 'record') return openRecordCard(item);
+    } finally {
+      setTimeout(() => {
+        hmOpeningFromNotification = false;
+        renderNotificationBar();
+      }, 0);
+    }
   }
 
   window.hmRefreshNotificationBar = renderNotificationBar;
-  window.hmMarkNotificationCardRead = markItemsReadByKey;
+  window.hmMarkNotificationCardRead = function hmMarkNotificationCardRead(key) {
+    if (hmOpeningFromNotification) return;
+    markItemsReadByKey(key);
+  };
   window.hmOpenNotificationCenter = function hmOpenNotificationCenter() {
     if (hmCurrentNotificationItems.length > 1) return openNotificationOverlay();
     openItem(hmCurrentNotificationItems[0] || null);
