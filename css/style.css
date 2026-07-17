@@ -12880,9 +12880,12 @@ body.dark-mode .history-detail-summary-card > div:not(.history-detail-summary-ic
   margin: 0;
   border-radius: 999px;
   background: rgba(255,255,255,.14);
+  opacity: .38;
 }
 .hm-flow-meal-dots i.on {
   background: linear-gradient(180deg, #ff6f9c, #7c5cff);
+  opacity: 1;
+  box-shadow: 0 4px 8px rgba(124,92,255,.18);
 }
 .hm-flow-month-grid.is-meal .hm-flow-month-cell i {
   box-shadow: none;

@@ -126,6 +126,16 @@
         const text = String(value == null ? '' : value).trim();
         return !!text && text !== '기록 없음' && text !== '-';
     }
+    function hmHomeMealIsFilled(value, mealName){
+        const text = String(value == null ? '' : value).trim();
+        if (!text || text === '-' || text === '기록 없음') return false;
+        const compact = text.replace(/\s+/g, '');
+        const emptyWords = ['기록없음','없음','미입력','입력없음','안먹음','안 먹음'.replace(/\s+/g,''),'패스','skip'];
+        if (emptyWords.includes(compact.toLowerCase())) return false;
+        if (mealName && compact === `${mealName}기록`) return false;
+        if (/^(아침|점심|저녁)?기록(없음)?$/.test(compact)) return false;
+        return true;
+    }
     function hmHomeStatNumber(value){
         const match = String(value == null ? '' : value).replace(/,/g,'').match(/[0-9]+(?:\.[0-9]+)?/);
         return match ? Number(match[0]) : 0;
@@ -184,8 +194,14 @@
         }
         if (item.key === 'wake') return { hit:hmHomeStatIsFilled(rec.wakeTime), value:1, label:rec.wakeTime || '-' };
         if (item.key === 'meal') {
-            const done = ['mealBreakfast','mealLunch','mealDinner'].filter(id => hmHomeStatIsFilled(rec[id])).length;
-            return { hit:done > 0, total:3, done, value:done, label:done ? `${done}/3` : '-' };
+            const mealMap = [
+                { id:'mealBreakfast', name:'아침' },
+                { id:'mealLunch', name:'점심' },
+                { id:'mealDinner', name:'저녁' }
+            ];
+            const meals = mealMap.map(meal => hmHomeMealIsFilled(rec[meal.id], meal.name));
+            const done = meals.filter(Boolean).length;
+            return { hit:done > 0, total:3, done, value:done, meals, label:done ? `${done}/3` : '-' };
         }
         if (item.key === 'outing') return { hit:hmHomeStatIsFilled(rec.goingOut) || !!rec.photo, value:(hmHomeStatIsFilled(rec.goingOut) || !!rec.photo) ? 1 : 0, label:(hmHomeStatIsFilled(rec.goingOut) || !!rec.photo) ? '기록' : '-' };
         if (item.key === 'sleep') return { hit:hmHomeStatIsFilled(rec.sleepTime), value:1, label:rec.sleepTime || '-' };
@@ -200,7 +216,7 @@
             if (expectedDailyTotal) {
                 rows.forEach(row => {
                     const dayTotal = Number(row.stat.total || 0);
-                    if (!dayTotal) row.stat = { ...row.stat, total: expectedDailyTotal, done: 0, value: 0, label: '-' };
+                    if (!dayTotal) row.stat = { ...row.stat, total: expectedDailyTotal, done: 0, value: 0, meals: item.mode === 'meal' ? [false,false,false] : row.stat.meals, label: '-' };
                 });
             }
             const total = expectedDailyTotal ? expectedDailyTotal * rows.length : rows.reduce((sum,row)=>sum + Number(row.stat.total || 0), 0);
@@ -452,14 +468,15 @@
         const rows = stats.rows || [];
         if (hmHomeStatsPeriod === 'month') {
             const cells = rows.map(row => {
-                const done = Math.max(0, Math.min(3, Number(row.stat.done || 0)));
-                return `<div class="hm-flow-month-cell ${done ? 'has-value' : 'is-empty'}"><b>${Number(row.key.slice(-2))}</b><span class="hm-flow-meal-dots"><i class="${done >= 1 ? 'on' : ''}"></i><i class="${done >= 2 ? 'on' : ''}"></i><i class="${done >= 3 ? 'on' : ''}"></i></span><small>${done}/3</small></div>`;
+                const meals = Array.isArray(row.stat.meals) ? row.stat.meals : [false,false,false];
+                const done = meals.filter(Boolean).length;
+                return `<div class="hm-flow-month-cell ${done ? 'has-value' : 'is-empty'}"><b>${Number(row.key.slice(-2))}</b><span class="hm-flow-meal-dots" aria-label="아침 점심 저녁"><i class="${meals[0] ? 'on' : ''}" title="아침"></i><i class="${meals[1] ? 'on' : ''}" title="점심"></i><i class="${meals[2] ? 'on' : ''}" title="저녁"></i></span><small>${done}/3</small></div>`;
             }).join('');
             return `<section class="hm-home-stats-graph hm-flow-chart is-meal is-monthly"><div><strong>월간 식사 지도</strong><span>아침·점심·저녁</span></div>${hmHomeStatsMonthWeekdays()}<div class="hm-flow-month-grid is-meal">${hmHomeStatsMonthBlankCells(rows)}${cells}</div></section>`;
         }
         const bars = rows.map((row, index) => {
-            const done = Math.max(0, Math.min(3, Number(row.stat.done || 0)));
-            return `<div class="hm-flow-meal-day"><div><i class="${done >= 1 ? 'on' : ''}"></i><i class="${done >= 2 ? 'on' : ''}"></i><i class="${done >= 3 ? 'on' : ''}"></i></div><small>${hmHomeStatsPeriod === 'month' ? Number(row.key.slice(-2)) : hmHomeStatsDayLabel(row, index, rows.length)}</small></div>`;
+            const meals = Array.isArray(row.stat.meals) ? row.stat.meals : [false,false,false];
+            return `<div class="hm-flow-meal-day"><div><i class="${meals[0] ? 'on' : ''}"></i><i class="${meals[1] ? 'on' : ''}"></i><i class="${meals[2] ? 'on' : ''}"></i></div><small>${hmHomeStatsPeriod === 'month' ? Number(row.key.slice(-2)) : hmHomeStatsDayLabel(row, index, rows.length)}</small></div>`;
         }).join('');
         return `<section class="hm-home-stats-graph hm-flow-chart is-meal"><div><strong>${safe(hmHomeStatsChartTitle(item))}</strong><span>아침·점심·저녁</span></div><div class="hm-flow-meals ${hmHomeStatsPeriod === 'month' ? 'is-month' : 'is-week'}">${bars}</div></section>`;
     }
