@@ -13190,3 +13190,85 @@ body.dark-mode .history-detail-summary-card > div:not(.history-detail-summary-ic
         font-size: .9rem;
     }
 }
+
+/* STEP6.2.12.0 - Home notification bar */
+.hm-notification-bar {
+    width: 100%;
+    min-height: 46px;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 10px;
+    margin: -2px 0 14px;
+    padding: 9px 12px;
+    border: 1px solid rgba(142, 92, 244, .22);
+    border-radius: 17px;
+    color: var(--hm-premium-text, #2D2A35);
+    background: linear-gradient(135deg, rgba(255,255,255,.94), rgba(246,240,255,.9));
+    box-shadow: 0 10px 26px rgba(83, 58, 148, .08);
+    cursor: pointer;
+    text-align: left;
+}
+
+.hm-notification-icon {
+    width: 30px;
+    height: 30px;
+    display: inline-grid;
+    place-items: center;
+    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(244,95,154,.16), rgba(124,92,255,.18));
+    font-size: .98rem;
+}
+
+.hm-notification-body {
+    min-width: 0;
+    display: grid;
+    gap: 1px;
+}
+
+.hm-notification-body strong {
+    font-size: .86rem;
+    font-weight: 900;
+    line-height: 1.2;
+}
+
+.hm-notification-body small {
+    color: var(--hm-premium-sub, #7D7694);
+    font-size: .72rem;
+    font-weight: 800;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.hm-notification-action {
+    color: var(--hm-primary, #8e5cf4);
+    font-size: .75rem;
+    font-weight: 900;
+    white-space: nowrap;
+}
+
+.hm-notification-bar.has-unread {
+    border-color: rgba(244, 95, 154, .38);
+    background: linear-gradient(135deg, rgba(255,245,250,.96), rgba(242,236,255,.94));
+}
+
+.hm-notification-bar.has-unread .hm-notification-icon {
+    color: #fff;
+    background: linear-gradient(135deg, #f45f9a, #7c5cff);
+}
+
+@media (max-width: 640px) {
+    .hm-notification-bar {
+        min-height: 44px;
+        margin-bottom: 12px;
+        padding: 8px 10px;
+        border-radius: 16px;
+    }
+
+    .hm-notification-icon {
+        width: 28px;
+        height: 28px;
+        border-radius: 11px;
+    }
+}

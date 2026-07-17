@@ -5,22 +5,22 @@
 (function () {
     const release = Object.freeze({
         product: 'HearMe2nite',
-        version: 'v1.0 STEP6.2.11.2',
-        appVersion: 'HearMe2nite v1.0 STEP6.2.11.2',
-        step: 'STEP6.2.11.2',
+        version: 'v1.0 STEP6.2.12.0',
+        appVersion: 'HearMe2nite v1.0 STEP6.2.12.0',
+        step: 'STEP6.2.12.0',
         build: '20260718',
         releaseDate: '2026.07.18',
         stage: 'Beta',
-        title: 'PWA Install Prompt Comfort',
-        description: '앱 설치 안내가 데스크톱과 모바일에서 부담스럽게 반복되지 않도록 닫기 버튼과 일정 기간 숨김 처리를 추가했습니다.',
+        title: 'Home Notification Bar',
+        description: '홈 화면에서 우리의 대화를 우리의 공간 아래로 올리고, 기록 날짜 아래에 작은 앱 안 알림 바를 배치했습니다.',
         changes: Object.freeze([
-            'Changed PWA install prompt into a dismissible banner',
-            'Added close button for desktop and mobile install prompts',
-            'Hides install prompt for 7 days after manual close',
-            'Hides install prompt for 1 day after install cancellation',
-            'Keeps prompt hidden after app installation is completed',
+            'Moved Our Chat card directly below Our Space',
+            'Added compact in-app notification bar below the record date field',
+            'Kept chat unread count inside the chat card instead of notification center',
+            'Prepared notification bar IDs for future record and feedback notification data',
+            'Updated User Guide home order text',
             'Updated cache tags for immediate review',
-            'PWA manifest and Service Worker behavior unchanged'
+            '기존 기록/채팅 저장 구조 변경 없음'
         ])
     });
 

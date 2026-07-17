@@ -42,7 +42,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-functions-compat.js"></script>
 
-    <link rel="stylesheet" href="css/style.css?v=step6-2-11-2-pwa-install-prompt-comfort-20260718">
+    <link rel="stylesheet" href="css/style.css?v=step6-2-12-0-home-notification-bar-20260718">
 </head>
 <body class="hm-booting">
 
@@ -249,11 +249,6 @@
         </div>
     </div>
 
-    <div class="input-group">
-        <label>📅 기록 날짜</label>
-        <input type="date" id="recordDate" onchange="connectAndListenFirebase()">
-    </div>
-
     <button type="button" class="hm-chat-card" id="chatLaunchCard" onclick="openChatModal()" aria-label="우리의 대화 열기">
         <span class="hm-chat-card-icon">💬</span>
         <span class="hm-chat-card-content">
@@ -265,6 +260,20 @@
             <span class="hm-chat-card-meta"><span class="hm-chat-presence-dot" id="chatCardPresenceDot"></span><span id="chatCardPresenceText">상대방 상태 확인 중</span><span id="chatCardTime"></span></span>
         </span>
         <span class="hm-chat-card-arrow">›</span>
+    </button>
+
+    <div class="input-group">
+        <label>📅 기록 날짜</label>
+        <input type="date" id="recordDate" onchange="connectAndListenFirebase()">
+    </div>
+
+    <button type="button" class="hm-notification-bar" id="hmNotificationBar" onclick="hmOpenNotificationCenter()" aria-label="앱 안 알림 보기">
+        <span class="hm-notification-icon" aria-hidden="true">🔕</span>
+        <span class="hm-notification-body">
+            <strong id="hmNotificationTitle">새 알림 없음</strong>
+            <small id="hmNotificationSub">오늘은 조용해요</small>
+        </span>
+        <span class="hm-notification-action" id="hmNotificationAction">보기</span>
     </button>
 
     <div class="input-group hm-legacy-mission-hidden" aria-hidden="true">
@@ -788,7 +797,7 @@
         <div class="help-center-panels">
             <section class="help-panel active" data-help-panel="home">
                 <article class="help-mini-card" data-help-keywords="처음 시작 홈 순서 사용법"><h3>👋 처음 사용하는 분께</h3><p>로그인 후 우리의 공간을 연결하고, 홈에서 오늘의 약속·나의 루틴·컨디션·기록을 차례로 사용하세요.</p><div class="help-tip">💡 관리(Dom)는 약속과 피드백을 관리하고, 기록(Sub)은 약속 수행과 자신의 루틴·하루 기록을 작성합니다.</div></article>
-                <article class="help-mini-card" data-help-keywords="홈 화면 순서 오늘의 요약 대화 약속 루틴 컨디션 기록 피드백"><h3>🏠 홈 화면 순서</h3><p>오늘의 요약 → 우리의 대화 → 오늘의 약속 → 나의 루틴 → 오늘의 컨디션 → 오늘의 기록 → 관리와 피드백 순서입니다.</p></article>
+                <article class="help-mini-card" data-help-keywords="홈 화면 순서 우리의 공간 대화 기록 날짜 알림 요약 약속 루틴 컨디션 기록 피드백"><h3>🏠 홈 화면 순서</h3><p>우리의 공간 → 우리의 대화 → 기록 날짜 → 알림 바 → 우리의 흐름 → 오늘의 요약 순서로 확인한 뒤 오늘의 약속과 기록을 작성합니다.</p></article>
                 <article class="help-mini-card" data-help-keywords="계정 프로필 테마 데이터 로그아웃"><h3>👤 내 계정</h3><p>홈 상단의 계정 카드를 누르면 프로필, 테마, 데이터 관리, 관리자 메뉴, 로그아웃을 사용할 수 있습니다.</p></article>
             </section>
 
@@ -1267,7 +1276,7 @@
 </div>
 
 <div class="toast" id="toast">기록이 복사되었습니다! 💕</div>
-    <script src="js/release-info.js?v=step6-2-11-2-pwa-install-prompt-comfort-20260718"></script>
+    <script src="js/release-info.js?v=step6-2-12-0-home-notification-bar-20260718"></script>
     <script src="js/config.js?v=step5-10-13-history-month-server-reconciliation-20260716"></script>
     <script src="js/utils.js?v=step5-10-13-history-month-server-reconciliation-20260716"></script>
     <script src="js/popup.js?v=step6-2-1-manager-readonly-20260716"></script>
@@ -1289,7 +1298,7 @@
     <script src="js/product.js?v=step6-2-10-11-history-center-layout-cleanup-20260718"></script>
     <script src="js/help-center.js?v=step5-10-13-history-month-server-reconciliation-20260716"></script>
     <script src="js/data-management.js?v=step6-1-1-admin-console-launcher-20260716"></script>
-    <script src="js/app.js?v=step6-2-5-new-user-room-token-refresh-20260717"></script>
+    <script src="js/app.js?v=step6-2-12-0-home-notification-bar-20260718"></script>
     <script src="js/pwa.js?v=step6-2-11-2-pwa-install-prompt-comfort-20260718"></script>
 </body>
 </html>

@@ -236,3 +236,11 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', syncVersion);
   else syncVersion();
 })();
+
+// STEP6.2.12.0: 앱 안 알림 바 1차 자리 잡기.
+// 실제 기록/피드백 알림 데이터 연결은 다음 단계에서 분리해 붙인다.
+window.hmOpenNotificationCenter = function hmOpenNotificationCenter() {
+  if (typeof showToast === 'function') {
+    showToast('🔔 알림센터는 다음 단계에서 기록과 피드백 알림을 연결할게요.');
+  }
+};
