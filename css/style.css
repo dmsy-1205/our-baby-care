@@ -11629,3 +11629,67 @@ html.hm-dark #onboardingModal .guide-close {
     line-height: 1.45 !important;
   }
 }
+
+/* =========================================================
+   HearMe2nite v1.0 STEP6.2.8 - History detail compact header
+   Keep the existing summary-card footprint while improving
+   dark-mode contrast and mobile chip alignment.
+   ========================================================= */
+.history-detail-summary-card > div:not(.history-detail-summary-icon) {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.history-detail-summary-card > div:not(.history-detail-summary-icon) > strong {
+  color: var(--hm-color-title, #2f2a3d) !important;
+  -webkit-text-fill-color: currentColor !important;
+  line-height: 1.25;
+}
+.history-detail-summary-card > div:not(.history-detail-summary-icon) > span {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: center;
+  gap: 5px !important;
+  min-width: 0;
+}
+.history-detail-summary-card .history-chip {
+  display: inline-flex !important;
+  flex: 0 0 auto;
+  align-items: center;
+  max-width: 100%;
+  white-space: nowrap;
+}
+:root[data-hm-theme][data-hm-display="dark"] .history-detail-summary-card > div:not(.history-detail-summary-icon) > strong,
+[data-theme-mode="dark"] .history-detail-summary-card > div:not(.history-detail-summary-icon) > strong,
+body.dark-mode .history-detail-summary-card > div:not(.history-detail-summary-icon) > strong {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+@media (max-width: 640px) {
+  /* The outer card width, padding, margins and overall footprint stay unchanged. */
+  .history-detail-summary-card {
+    gap: 10px !important;
+  }
+  .history-detail-summary-icon {
+    width: 42px !important;
+    height: 42px !important;
+    min-width: 42px !important;
+    flex-basis: 42px !important;
+    border-radius: 14px !important;
+    font-size: 22px !important;
+  }
+  .history-detail-summary-card > div:not(.history-detail-summary-icon) > strong {
+    margin-bottom: 5px !important;
+    font-size: .9rem !important;
+  }
+  .history-detail-summary-card > div:not(.history-detail-summary-icon) > span {
+    gap: 4px !important;
+  }
+  .history-detail-summary-card .history-chip {
+    min-height: 22px !important;
+    height: 22px !important;
+    padding: 0 6px !important;
+    font-size: .64rem !important;
+    line-height: 1 !important;
+  }
+}
