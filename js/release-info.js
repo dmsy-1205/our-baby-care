@@ -5,19 +5,19 @@
 (function () {
     const release = Object.freeze({
         product: 'HearMe2nite',
-        version: 'v1.0 STEP6.2.10.6',
-        appVersion: 'HearMe2nite v1.0 STEP6.2.10.6',
-        step: 'STEP6.2.10.6',
+        version: 'v1.0 STEP6.2.10.6.1',
+        appVersion: 'HearMe2nite v1.0 STEP6.2.10.6.1',
+        step: 'STEP6.2.10.6.1',
         build: '20260717',
         releaseDate: '2026.07.17',
         stage: 'Beta',
-        title: 'Our Flow Chart Type Upgrade',
-        description: '우리의 흐름 그래프를 캘린더처럼 접기형으로 바꾸고, 날짜별 보기 위쪽에 배치했습니다.',
+        title: 'Our Flow Initial Data Refresh Fix',
+        description: '우리의 흐름을 처음 열었을 때 서버 기록이 늦게 도착해 비어 보이던 문제를 수정했습니다.',
         changes: Object.freeze([
-            'Our Flow graph is now collapsible like the calendar section',
-            'Moved the graph section above the calendar toggle',
-            'Graph starts folded when the modal opens',
-            'Kept selected week and selected month calculation rules',
+            'Our Flow now re-renders when history data arrives after the modal is opened',
+            'Added short initial refresh checks after opening the Our Flow modal',
+            'Uses merged history data when available before falling back to local cache',
+            'Prevents first-open empty stats that appear only after switching tabs',
             '기존 days 기록을 읽기만 하며 Firebase 저장 구조는 변경하지 않음'
         ])
     });

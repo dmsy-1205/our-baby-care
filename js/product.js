@@ -8,7 +8,20 @@
     const HM_HISTORY_TOOLS_ENABLED = false; // v0.9.21: 기록실 상단 통계/검색/타임라인 제거
     const $ = id => document.getElementById(id);
     const safe = v => String(v == null ? '' : v).replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
-    function days(){ try { return window.cachedDaysData || cachedDaysData || {}; } catch(e) { return {}; } }
+    let hmHomeStatsLatestDaysData = null;
+    function hmHomeStatsHasRecords(value){ return !!value && typeof value === 'object' && Object.keys(value).some(k => /^\d{4}-\d{2}-\d{2}$/.test(k)); }
+    function days(){
+        try {
+            if (typeof window.hmHistoryGetMergedData === 'function') {
+                const merged = window.hmHistoryGetMergedData();
+                if (hmHomeStatsHasRecords(merged)) return merged;
+            }
+        } catch(e) {}
+        try { if (hmHomeStatsHasRecords(window.cachedDaysData)) return window.cachedDaysData; } catch(e) {}
+        try { if (hmHomeStatsHasRecords(cachedDaysData)) return cachedDaysData; } catch(e) {}
+        if (hmHomeStatsHasRecords(hmHomeStatsLatestDaysData)) return hmHomeStatsLatestDaysData;
+        return {};
+    }
     function dayKeys(){ return Object.keys(days()).filter(k => /^\d{4}-\d{2}-\d{2}$/.test(k)).sort(); }
     function getCurrentRecord(){ const d = $('recordDate')?.value || ''; return d ? days()[d] : null; }
     function cleanNumberText(value, fallback='-'){
@@ -327,6 +340,15 @@
         }).join('');
         if (body) body.innerHTML = `<section class="hm-home-stats-hero"><div class="hm-home-stats-hero-icon">${item.icon}</div><div><strong>${safe(item.label)}</strong><span>${safe(hmHomeStatsPeriodLabel())}</span></div><em>${safe(stats.main)}</em></section><div class="hm-home-stats-metrics"><div><strong>${safe(stats.main)}</strong><small>대표 값</small></div><div><strong>${safe(stats.sub)}</strong><small>요약</small></div><div><strong>${stats.hit}일</strong><small>기록된 날</small></div></div><button type="button" class="hm-home-stats-graph-toggle" onclick="hmToggleHomeStatsGraph()" aria-expanded="${hmHomeStatsGraphOpen ? 'true' : 'false'}">${hmHomeStatsGraphOpen ? '흐름 보기 접기' : '흐름 보기 펼치기'}</button><div ${hmHomeStatsGraphOpen ? '' : 'hidden'}>${hmHomeStatsGraphHtml(item, stats)}</div><button type="button" class="hm-home-stats-calendar-toggle" onclick="hmToggleHomeStatsCalendar()" aria-expanded="${hmHomeStatsCalendarOpen ? 'true' : 'false'}">${hmHomeStatsCalendarOpen ? '날짜별 보기 접기' : '날짜별 보기 펼치기'}</button><div class="hm-home-stats-calendar ${hmHomeStatsPeriod === 'month' ? 'is-month' : 'is-week'} ${hmHomeStatsCalendarOpen ? 'is-open' : 'is-collapsed'}" ${hmHomeStatsCalendarOpen ? '' : 'hidden'}>${calendar}</div><p class="hm-home-stats-note">기존 기록을 읽어서 표시하며, 이 통계 화면에서는 데이터를 저장하거나 변경하지 않습니다.</p>`;
     }
+    function hmHomeStatsModalIsOpen(){
+        const overlay = $('hmHomeStatsOverlay');
+        return !!overlay && overlay.getAttribute('aria-hidden') === 'false';
+    }
+    function hmRefreshHomeStatsModalSoon(){
+        [120, 420, 900, 1600].forEach(delay => setTimeout(() => {
+            if (hmHomeStatsModalIsOpen()) renderHomeStatsModal();
+        }, delay));
+    }
     function updateHomeStatsCard(){
         buildHomeStatsCard();
         const weekKeys = hmHomeStatsPeriodKeys('week');
@@ -337,7 +359,7 @@
             target.textContent = stats.main;
         });
     }
-    window.hmOpenHomeStatsModal = function(key){ hmHomeStatsActiveKey = key || hmHomeStatsActiveKey; const overlay = ensureHomeStatsModal(); if (overlay.getAttribute('aria-hidden') !== 'false') { hmHomeStatsCalendarOpen = false; hmHomeStatsGraphOpen = false; } renderHomeStatsModal(); if (typeof openModalOverlayById === 'function') openModalOverlayById('hmHomeStatsOverlay'); else { overlay.removeAttribute('inert'); overlay.style.display = 'flex'; overlay.setAttribute('aria-hidden','false'); } };
+    window.hmOpenHomeStatsModal = function(key){ hmHomeStatsActiveKey = key || hmHomeStatsActiveKey; const overlay = ensureHomeStatsModal(); if (overlay.getAttribute('aria-hidden') !== 'false') { hmHomeStatsCalendarOpen = false; hmHomeStatsGraphOpen = false; } renderHomeStatsModal(); if (typeof openModalOverlayById === 'function') openModalOverlayById('hmHomeStatsOverlay'); else { overlay.removeAttribute('inert'); overlay.style.display = 'flex'; overlay.setAttribute('aria-hidden','false'); } hmRefreshHomeStatsModalSoon(); };
     window.hmCloseHomeStatsModal = function(){ if (typeof closeModalOverlayById === 'function') closeModalOverlayById('hmHomeStatsOverlay'); else { const overlay=$('hmHomeStatsOverlay'); if(overlay) overlay.style.display='none'; } };
     window.hmSetHomeStatsPeriod = function(period){ hmHomeStatsPeriod = period === 'month' ? 'month' : 'week'; renderHomeStatsModal(); };
     window.hmToggleHomeStatsCalendar = function(){ hmHomeStatsCalendarOpen = !hmHomeStatsCalendarOpen; renderHomeStatsModal(); };
@@ -490,6 +512,6 @@
     document.addEventListener('input',e=>{ if(e.target && e.target.closest('#appContent')) setTimeout(updateDashboard,0); },true);
     document.addEventListener('change',e=>{ if(e.target && e.target.closest('#appContent')) setTimeout(updateDashboard,0); },true);
     const od=window.displayHistory;
-    if(typeof od==='function') window.displayHistory=function(){ const r=od.apply(this,arguments); setTimeout(applyPolish,0); return r; };
-    else { const timer=setInterval(()=>{ if(typeof window.displayHistory==='function'){ clearInterval(timer); const fn=window.displayHistory; window.displayHistory=function(){ const r=fn.apply(this,arguments); setTimeout(applyPolish,0); return r; }; }},200); setTimeout(()=>clearInterval(timer),10000); }
+    if(typeof od==='function') window.displayHistory=function(daysData){ hmHomeStatsLatestDaysData = daysData || hmHomeStatsLatestDaysData; const r=od.apply(this,arguments); setTimeout(applyPolish,0); setTimeout(()=>{ if(hmHomeStatsModalIsOpen()) renderHomeStatsModal(); },0); return r; };
+    else { const timer=setInterval(()=>{ if(typeof window.displayHistory==='function'){ clearInterval(timer); const fn=window.displayHistory; window.displayHistory=function(daysData){ hmHomeStatsLatestDaysData = daysData || hmHomeStatsLatestDaysData; const r=fn.apply(this,arguments); setTimeout(applyPolish,0); setTimeout(()=>{ if(hmHomeStatsModalIsOpen()) renderHomeStatsModal(); },0); return r; }; }},200); setTimeout(()=>clearInterval(timer),10000); }
 })();
