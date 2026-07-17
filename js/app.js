@@ -522,3 +522,61 @@
   });
   window.addEventListener('focus', () => setTimeout(renderNotificationBar, 120));
 })();
+
+// STEP6.2.12.12: iOS native date input rendering can overflow the home card.
+// Keep the real date input for functionality, but show a stable custom date bar.
+(function hmStableRecordDateField() {
+  function formatRecordDate(value) {
+    return /^\d{4}-\d{2}-\d{2}$/.test(value || '') ? value : '날짜 선택';
+  }
+
+  function syncRecordDateDisplay(input) {
+    const valueEl = document.getElementById('hmRecordDateDisplayValue');
+    if (valueEl) valueEl.textContent = formatRecordDate(input?.value || '');
+  }
+
+  function initRecordDateDisplay() {
+    const input = document.getElementById('recordDate');
+    if (!input || input.closest('.hm-record-date-shell')) return;
+
+    const shell = document.createElement('div');
+    shell.className = 'hm-record-date-shell';
+    shell.setAttribute('role', 'button');
+    shell.setAttribute('tabindex', '0');
+    shell.setAttribute('aria-label', '기록 날짜 선택');
+    shell.innerHTML = `
+      <span class="hm-record-date-display-value" id="hmRecordDateDisplayValue">${formatRecordDate(input.value)}</span>
+      <span class="hm-record-date-display-icon" aria-hidden="true">📅</span>
+    `;
+
+    input.parentNode.insertBefore(shell, input);
+    shell.appendChild(input);
+    input.classList.add('hm-record-date-native');
+    input.setAttribute('aria-label', '기록 날짜');
+
+    const openPicker = () => {
+      try {
+        if (typeof input.showPicker === 'function') input.showPicker();
+        else input.focus();
+      } catch (error) {
+        input.focus();
+      }
+    };
+
+    shell.addEventListener('keydown', (event) => {
+      if (event.key !== 'Enter' && event.key !== ' ') return;
+      event.preventDefault();
+      openPicker();
+    });
+    input.addEventListener('input', () => syncRecordDateDisplay(input));
+    input.addEventListener('change', () => syncRecordDateDisplay(input));
+    window.addEventListener('load', () => setTimeout(() => syncRecordDateDisplay(input), 0), { once: true });
+    setTimeout(() => syncRecordDateDisplay(input), 0);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initRecordDateDisplay, { once: true });
+  } else {
+    initRecordDateDisplay();
+  }
+})();

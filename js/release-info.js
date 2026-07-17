@@ -5,19 +5,19 @@
 (function () {
     const release = Object.freeze({
         product: 'HearMe2nite',
-        version: 'v1.0 STEP6.2.12.10',
-        appVersion: 'HearMe2nite v1.0 STEP6.2.12.10',
-        step: 'STEP6.2.12.10',
+        version: 'v1.0 STEP6.2.12.12',
+        appVersion: 'HearMe2nite v1.0 STEP6.2.12.12',
+        step: 'STEP6.2.12.12',
         build: '20260718',
         releaseDate: '2026.07.18',
         stage: 'Beta',
-        title: 'iOS Record Date Field Fix',
-        description: '아이폰 Safari/PWA에서 기록 날짜 입력창이 기기별 기본 표시 방식 때문에 카드 폭을 벗어나 보이는 문제를 보정했습니다.',
+        title: 'iOS Record Date Stable Bar Fix',
+        description: '아이폰 Safari/PWA에서 기본 날짜 입력창이 카드 밖으로 밀려나는 문제를 커스텀 날짜 표시바로 안정화했습니다.',
         changes: Object.freeze([
-            'Fixed iOS record date field width overflow',
-            'Stabilized native date input sizing across iPhone, Android, tablet, and desktop',
-            'Kept the record date bar aligned inside the home card layout',
-            'Preserved login room loading flicker fix and notification behavior',
+            'Replaced visible native record date rendering with a stable custom date bar',
+            'Kept the real date input underneath so date picking still works',
+            'Prevented iPhone Safari/PWA date field overflow outside the home card',
+            'Preserved iOS PWA install guide and previous hotfix behavior',
             '기존 기록/채팅 저장 구조 변경 없음'
         ])
     });
