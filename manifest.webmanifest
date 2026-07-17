@@ -1,0 +1,35 @@
+{
+  "name": "HearMe2nite",
+  "short_name": "HearMe2nite",
+  "description": "우리의 하루를 함께 기록하는 HearMe2nite",
+  "lang": "ko",
+  "dir": "ltr",
+  "start_url": "/index.html?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#151827",
+  "theme_color": "#8e5cf4",
+  "prefer_related_applications": false,
+  "categories": ["lifestyle", "productivity"],
+  "icons": [
+    {
+      "src": "/assets/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/icons/maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
