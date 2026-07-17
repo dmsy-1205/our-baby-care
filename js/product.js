@@ -490,23 +490,54 @@
         if (item.key === 'meal') return hmHomeStatsMealHtml(item, stats);
         return hmHomeStatsCheckHtml(item, stats);
     }
-    function buildHomeStatsCard(){
-        if ($('hmHomeStatsCard')) return;
-        const box = document.createElement('section');
-        box.id = 'hmHomeStatsCard';
-        box.className = 'hm-beta-dashboard hm-home-stats-card';
-        box.setAttribute('role','button');
-        box.setAttribute('tabindex','0');
-        box.setAttribute('aria-label','우리의 흐름 자세히 보기');
-        box.innerHTML = `<div class="hm-summary-strip-head"><strong>우리의 흐름</strong><small>눌러서 자세히 보기</small></div><div class="hm-summary-strip" aria-label="우리의 흐름"><div class="hm-summary-dot"><b>📈</b><span id="hmHomeStatMini_overview">흐름</span></div><div class="hm-summary-dot"><b>💜</b><span id="hmHomeStatMini_promise">-</span></div><div class="hm-summary-dot"><b>🌱</b><span id="hmHomeStatMini_subRoutine">-</span></div><div class="hm-summary-dot"><b>📝</b><span id="hmHomeStatMini_diary">-</span></div><div class="hm-summary-dot"><b>💧</b><span id="hmHomeStatMini_water">-</span></div></div>`;
-        box.addEventListener('click', () => window.hmOpenHomeStatsModal('promise'));
-        box.addEventListener('keydown', event => { if(event.key === 'Enter' || event.key === ' ') { event.preventDefault(); window.hmOpenHomeStatsModal('promise'); } });
+    function syncHomeTopOrder(){
+        const roomEmpty = $('roomEmptyState');
+        const roomCard = document.querySelector('.room-settings-card');
+        const chatCard = $('chatLaunchCard');
         const recordDateInput = $('recordDate');
         const recordDateGroup = recordDateInput ? recordDateInput.closest('.input-group') : null;
+        const notificationBar = $('hmNotificationBar');
+
+        if (chatCard) {
+            const chatAnchor = roomEmpty || roomCard;
+            if (chatAnchor && chatCard.previousElementSibling !== chatAnchor) {
+                chatAnchor.insertAdjacentElement('afterend', chatCard);
+            }
+        }
+        if (recordDateGroup) {
+            const dateAnchor = chatCard || roomEmpty || roomCard;
+            if (dateAnchor && recordDateGroup.previousElementSibling !== dateAnchor) {
+                dateAnchor.insertAdjacentElement('afterend', recordDateGroup);
+            }
+        }
+        if (notificationBar) {
+            const noticeAnchor = recordDateGroup || chatCard || roomEmpty || roomCard;
+            if (noticeAnchor && notificationBar.previousElementSibling !== noticeAnchor) {
+                noticeAnchor.insertAdjacentElement('afterend', notificationBar);
+            }
+        }
+
+        return { roomCard, chatCard, recordDateGroup, notificationBar };
+    }
+    function buildHomeStatsCard(){
+        let box = $('hmHomeStatsCard');
+        if (!box) {
+            box = document.createElement('section');
+            box.id = 'hmHomeStatsCard';
+            box.className = 'hm-beta-dashboard hm-home-stats-card';
+            box.setAttribute('role','button');
+            box.setAttribute('tabindex','0');
+            box.setAttribute('aria-label','우리의 흐름 자세히 보기');
+            box.innerHTML = `<div class="hm-summary-strip-head"><strong>우리의 흐름</strong><small>눌러서 자세히 보기</small></div><div class="hm-summary-strip" aria-label="우리의 흐름"><div class="hm-summary-dot"><b>📈</b><span id="hmHomeStatMini_overview">흐름</span></div><div class="hm-summary-dot"><b>💜</b><span id="hmHomeStatMini_promise">-</span></div><div class="hm-summary-dot"><b>🌱</b><span id="hmHomeStatMini_subRoutine">-</span></div><div class="hm-summary-dot"><b>📝</b><span id="hmHomeStatMini_diary">-</span></div><div class="hm-summary-dot"><b>💧</b><span id="hmHomeStatMini_water">-</span></div></div>`;
+            box.addEventListener('click', () => window.hmOpenHomeStatsModal('promise'));
+            box.addEventListener('keydown', event => { if(event.key === 'Enter' || event.key === ' ') { event.preventDefault(); window.hmOpenHomeStatsModal('promise'); } });
+        }
+        const topOrder = syncHomeTopOrder();
         const dashboard = $('hmProductDashboard');
-        if (recordDateGroup) recordDateGroup.insertAdjacentElement('afterend', box);
+        if (topOrder.notificationBar) topOrder.notificationBar.insertAdjacentElement('afterend', box);
+        else if (topOrder.recordDateGroup) topOrder.recordDateGroup.insertAdjacentElement('afterend', box);
         else if (dashboard) dashboard.insertAdjacentElement('beforebegin', box);
-        else document.querySelector('.room-settings-card')?.insertAdjacentElement('afterend', box);
+        else topOrder.roomCard?.insertAdjacentElement('afterend', box);
     }
     function ensureHomeStatsModal(){
         let overlay = $('hmHomeStatsOverlay');
@@ -580,18 +611,14 @@
         <div class="hm-summary-dot" id="hmProductTogetherItem" hidden><b>💕</b><span id="hmProductTogetherDay">-</span></div></div>`;
         box.addEventListener('click', openHomeSummaryModal);
         box.addEventListener('keydown', (event)=>{ if(event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openHomeSummaryModal(); } });
-        // STEP5.6.2.0: 기록 날짜를 '우리의 공간'과 '오늘의 요약' 사이에 고정합니다.
-        const recordDateInput = $('recordDate');
-        const recordDateGroup = recordDateInput ? recordDateInput.closest('.input-group') : null;
-        if (recordDateGroup) {
-            anchor.insertAdjacentElement('afterend', recordDateGroup);
-            buildHomeStatsCard();
-            const statsCard = $('hmHomeStatsCard');
-            if (statsCard) statsCard.insertAdjacentElement('afterend', box);
-            else recordDateGroup.insertAdjacentElement('afterend', box);
-        } else {
-            anchor.insertAdjacentElement('afterend', box);
-        }
+        const topOrder = syncHomeTopOrder();
+        buildHomeStatsCard();
+        const statsCard = $('hmHomeStatsCard');
+        if (statsCard) statsCard.insertAdjacentElement('afterend', box);
+        else if (topOrder.notificationBar) topOrder.notificationBar.insertAdjacentElement('afterend', box);
+        else if (topOrder.recordDateGroup) topOrder.recordDateGroup.insertAdjacentElement('afterend', box);
+        else anchor.insertAdjacentElement('afterend', box);
+        syncHomeTopOrder();
         setTimeout(moveTodayPromiseSection, 0);
     }
     function updateDashboard(){
@@ -608,6 +635,12 @@
         if (togetherItem) togetherItem.hidden = !togetherDay;
         if (togetherValue) togetherValue.textContent = togetherDay ? `${togetherDay}일` : '-';
         updateHomeStatsCard();
+        const statsCard = $('hmHomeStatsCard');
+        const dashboard = $('hmProductDashboard');
+        if (statsCard && dashboard && dashboard.previousElementSibling !== statsCard) {
+            statsCard.insertAdjacentElement('afterend', dashboard);
+        }
+        syncHomeTopOrder();
         moveTodayPromiseSection();
     }
 
