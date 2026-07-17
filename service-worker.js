@@ -1,4 +1,4 @@
-const HM_PWA_VERSION = 'v1.0-step6-2-12-15';
+const HM_PWA_VERSION = 'v1.0-step6-2-12-16';
 const HM_STATIC_CACHE = `hearme2nite-static-${HM_PWA_VERSION}`;
 const HM_RUNTIME_CACHE = `hearme2nite-runtime-${HM_PWA_VERSION}`;
 const HM_OFFLINE_URL = '/offline.html';
@@ -50,16 +50,35 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  if (/\.(?:css|js|png|jpg|jpeg|svg|webp|gif|ico|webmanifest)$/i.test(url.pathname)) {
+  if (/\.(?:css|js|webmanifest)$/i.test(url.pathname)) {
+    event.respondWith(networkFirstAsset(request));
+    return;
+  }
+
+  if (/\.(?:png|jpg|jpeg|svg|webp|gif|ico)$/i.test(url.pathname)) {
     event.respondWith(staleWhileRevalidate(request));
   }
 });
 
 async function networkFirstNavigation(request) {
   try {
-    const fresh = await fetch(request);
+    const fresh = await fetch(request, { cache: 'no-store' });
     const cache = await caches.open(HM_RUNTIME_CACHE);
     cache.put(request, fresh.clone());
+    return fresh;
+  } catch (error) {
+    const cached = await caches.match(request);
+    return cached || caches.match(HM_OFFLINE_URL);
+  }
+}
+
+async function networkFirstAsset(request) {
+  try {
+    const fresh = await fetch(request, { cache: 'no-store' });
+    if (fresh && fresh.ok) {
+      const cache = await caches.open(HM_RUNTIME_CACHE);
+      cache.put(request, fresh.clone());
+    }
     return fresh;
   } catch (error) {
     const cached = await caches.match(request);

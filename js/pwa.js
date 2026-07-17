@@ -1,10 +1,12 @@
 // =========================================================
-// HearMe2nite v1.0 STEP6.2.12.15
+// HearMe2nite v1.0 STEP6.2.12.16
 // PWA install foundation: manifest + service worker registration
 // - FCM/push notification is intentionally separated into the next step.
 // =========================================================
 (function () {
-    const HM_PWA_SW_URL = '/service-worker.js?v=step6-2-12-15-record-date-picker-focus-fix-20260718';
+    const HM_PWA_APP_VERSION = 'v1.0-step6-2-12-16';
+    const HM_PWA_SW_URL = '/service-worker.js?v=step6-2-12-16-pwa-cache-recovery-20260718';
+    const HM_PWA_VERSION_KEY = 'hm_pwa_app_version';
     const HM_PWA_DISMISS_KEY = 'hm_pwa_install_dismiss_until';
     const HM_DAY_MS = 24 * 60 * 60 * 1000;
     let deferredInstallPrompt = null;
@@ -34,6 +36,27 @@
             localStorage.setItem(HM_PWA_DISMISS_KEY, String(Date.now() + days * HM_DAY_MS));
         } catch (error) {
             console.warn('[HearMe2nite][PWA] dismiss storage failed', error);
+        }
+    }
+
+    async function clearOldPwaCachesIfNeeded() {
+        try {
+            const previous = localStorage.getItem(HM_PWA_VERSION_KEY);
+            if (previous === HM_PWA_APP_VERSION) return;
+            if ('caches' in window) {
+                const keys = await caches.keys();
+                await Promise.all(
+                    keys
+                        .filter((key) => key.startsWith('hearme2nite-'))
+                        .map((key) => caches.delete(key))
+                );
+            }
+            localStorage.setItem(HM_PWA_VERSION_KEY, HM_PWA_APP_VERSION);
+            if (typeof console !== 'undefined') {
+                console.info('[HearMe2nite][PWA] old app caches cleared', { previous, current: HM_PWA_APP_VERSION });
+            }
+        } catch (error) {
+            console.warn('[HearMe2nite][PWA] cache recovery failed', error);
         }
     }
 
@@ -193,12 +216,14 @@
 
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', () => {
+            clearOldPwaCachesIfNeeded();
             registerServiceWorker();
             if (isIOSDevice() && !isStandaloneMode()) {
                 setTimeout(showInstallBanner, 900);
             }
         }, { once: true });
     } else {
+        clearOldPwaCachesIfNeeded();
         registerServiceWorker();
         if (isIOSDevice() && !isStandaloneMode()) {
             setTimeout(showInstallBanner, 900);
