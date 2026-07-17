@@ -1,10 +1,10 @@
 // =========================================================
-// HearMe2nite v1.0 STEP6.2.12.13
+// HearMe2nite v1.0 STEP6.2.12.14
 // PWA install foundation: manifest + service worker registration
 // - FCM/push notification is intentionally separated into the next step.
 // =========================================================
 (function () {
-    const HM_PWA_SW_URL = '/service-worker.js?v=step6-2-12-13-date-picker-cache-refresh-20260718';
+    const HM_PWA_SW_URL = '/service-worker.js?v=step6-2-12-14-custom-record-date-picker-20260718';
     const HM_PWA_DISMISS_KEY = 'hm_pwa_install_dismiss_until';
     const HM_DAY_MS = 24 * 60 * 60 * 1000;
     let deferredInstallPrompt = null;

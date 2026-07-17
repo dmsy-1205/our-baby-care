@@ -523,16 +523,150 @@
   window.addEventListener('focus', () => setTimeout(renderNotificationBar, 120));
 })();
 
-// STEP6.2.12.12: iOS native date input rendering can overflow the home card.
-// Keep the real date input for functionality, but show a stable custom date bar.
+// STEP6.2.12.14: Use a custom record date picker instead of native date UI.
+// Native date inputs differ too much across iPhone/desktop browsers.
 (function hmStableRecordDateField() {
+  let pickerMonth = '';
+
   function formatRecordDate(value) {
     return /^\d{4}-\d{2}-\d{2}$/.test(value || '') ? value : '날짜 선택';
+  }
+
+  function localDateToYmd(date) {
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+  }
+
+  function getTodayYmd() {
+    return localDateToYmd(new Date());
+  }
+
+  function normalizeYmd(value) {
+    return /^\d{4}-\d{2}-\d{2}$/.test(value || '') ? value : getTodayYmd();
+  }
+
+  function monthFromYmd(value) {
+    return normalizeYmd(value).slice(0, 7);
+  }
+
+  function shiftMonth(ym, diff) {
+    const [year, month] = String(ym || getTodayYmd().slice(0, 7)).split('-').map(Number);
+    const date = new Date(year, (month || 1) - 1 + diff, 1);
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
   }
 
   function syncRecordDateDisplay(input) {
     const valueEl = document.getElementById('hmRecordDateDisplayValue');
     if (valueEl) valueEl.textContent = formatRecordDate(input?.value || '');
+  }
+
+  function ensureDatePicker() {
+    let overlay = document.getElementById('hmRecordDatePickerOverlay');
+    if (overlay) return overlay;
+
+    overlay = document.createElement('div');
+    overlay.id = 'hmRecordDatePickerOverlay';
+    overlay.className = 'hm-record-date-picker-overlay';
+    overlay.hidden = true;
+    overlay.setAttribute('aria-hidden', 'true');
+    overlay.innerHTML = `
+      <div class="hm-record-date-picker-card" role="dialog" aria-modal="true" aria-label="기록 날짜 선택">
+        <div class="hm-record-date-picker-head">
+          <button type="button" data-hm-date-prev aria-label="이전 달">‹</button>
+          <strong id="hmRecordDatePickerTitle">날짜 선택</strong>
+          <button type="button" data-hm-date-next aria-label="다음 달">›</button>
+        </div>
+        <div class="hm-record-date-weekdays" aria-hidden="true">
+          <span>일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span>
+        </div>
+        <div class="hm-record-date-picker-grid" id="hmRecordDatePickerGrid"></div>
+        <div class="hm-record-date-picker-actions">
+          <button type="button" data-hm-date-today>오늘</button>
+          <button type="button" data-hm-date-close>닫기</button>
+        </div>
+      </div>
+    `;
+
+    overlay.addEventListener('click', (event) => {
+      const input = document.getElementById('recordDate');
+      if (event.target === overlay || event.target.closest('[data-hm-date-close]')) {
+        closePicker();
+        return;
+      }
+      if (event.target.closest('[data-hm-date-prev]')) {
+        pickerMonth = shiftMonth(pickerMonth, -1);
+        renderPicker(input);
+        return;
+      }
+      if (event.target.closest('[data-hm-date-next]')) {
+        pickerMonth = shiftMonth(pickerMonth, 1);
+        renderPicker(input);
+        return;
+      }
+      if (event.target.closest('[data-hm-date-today]')) {
+        setDateValue(input, getTodayYmd());
+        closePicker();
+        return;
+      }
+      const dayButton = event.target.closest('[data-hm-date-value]');
+      if (dayButton) {
+        setDateValue(input, dayButton.dataset.hmDateValue);
+        closePicker();
+      }
+    });
+
+    document.body.appendChild(overlay);
+    return overlay;
+  }
+
+  function renderPicker(input) {
+    const selected = normalizeYmd(input?.value || '');
+    pickerMonth = pickerMonth || monthFromYmd(selected);
+    const [year, month] = pickerMonth.split('-').map(Number);
+    const first = new Date(year, month - 1, 1);
+    const lastDay = new Date(year, month, 0).getDate();
+    const startBlank = first.getDay();
+    const title = document.getElementById('hmRecordDatePickerTitle');
+    const grid = document.getElementById('hmRecordDatePickerGrid');
+    if (title) title.textContent = `${year}.${String(month).padStart(2, '0')}`;
+    if (!grid) return;
+
+    const cells = [];
+    for (let i = 0; i < startBlank; i += 1) {
+      cells.push('<span class="hm-record-date-picker-empty"></span>');
+    }
+    for (let day = 1; day <= lastDay; day += 1) {
+      const ymd = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+      const isSelected = ymd === selected;
+      const isToday = ymd === getTodayYmd();
+      cells.push(`
+        <button type="button" data-hm-date-value="${ymd}" class="${isSelected ? 'is-selected' : ''} ${isToday ? 'is-today' : ''}">
+          ${day}
+        </button>
+      `);
+    }
+    grid.innerHTML = cells.join('');
+  }
+
+  function openPicker(input) {
+    const overlay = ensureDatePicker();
+    pickerMonth = monthFromYmd(input?.value || '');
+    renderPicker(input);
+    overlay.hidden = false;
+    overlay.setAttribute('aria-hidden', 'false');
+  }
+
+  function closePicker() {
+    const overlay = document.getElementById('hmRecordDatePickerOverlay');
+    if (!overlay) return;
+    overlay.hidden = true;
+    overlay.setAttribute('aria-hidden', 'true');
+  }
+
+  function setDateValue(input, value) {
+    if (!input || !/^\d{4}-\d{2}-\d{2}$/.test(value || '')) return;
+    input.value = value;
+    syncRecordDateDisplay(input);
+    input.dispatchEvent(new Event('change', { bubbles: true }));
   }
 
   function initRecordDateDisplay() {
@@ -554,24 +688,14 @@
     input.classList.add('hm-record-date-native');
     input.setAttribute('aria-label', '기록 날짜');
 
-    const openPicker = () => {
-      try {
-        if (typeof input.showPicker === 'function') input.showPicker();
-        else input.focus();
-      } catch (error) {
-        input.focus();
-      }
-    };
-
     shell.addEventListener('click', (event) => {
-      if (event.target === input) return;
       event.preventDefault();
-      openPicker();
+      openPicker(input);
     });
     shell.addEventListener('keydown', (event) => {
       if (event.key !== 'Enter' && event.key !== ' ') return;
       event.preventDefault();
-      openPicker();
+      openPicker(input);
     });
     input.addEventListener('input', () => syncRecordDateDisplay(input));
     input.addEventListener('change', () => syncRecordDateDisplay(input));

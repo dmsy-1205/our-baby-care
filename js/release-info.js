@@ -5,19 +5,20 @@
 (function () {
     const release = Object.freeze({
         product: 'HearMe2nite',
-        version: 'v1.0 STEP6.2.12.13',
-        appVersion: 'HearMe2nite v1.0 STEP6.2.12.13',
-        step: 'STEP6.2.12.13',
+        version: 'v1.0 STEP6.2.12.14',
+        appVersion: 'HearMe2nite v1.0 STEP6.2.12.14',
+        step: 'STEP6.2.12.14',
         build: '20260718',
         releaseDate: '2026.07.18',
         stage: 'Beta',
-        title: 'Date Picker Cache Refresh Fix',
-        description: '기록 날짜 커스텀 바의 클릭 동작을 안정화하고, 아이폰 PWA가 오래된 화면을 계속 보여주는 캐시 문제를 줄였습니다.',
+        title: 'Custom Record Date Picker Fix',
+        description: '브라우저 기본 날짜 입력창 의존을 제거하고, 컴퓨터·아이폰·갤럭시에서 동일하게 동작하는 자체 날짜 선택 모달로 변경했습니다.',
         changes: Object.freeze([
-            'Fixed custom record date bar click handling on desktop',
-            'Kept the native date input on top for reliable iPhone and browser picker behavior',
-            'Updated service worker cache version to reduce stale iPhone PWA screens',
-            'Removed index.html from precache so old home screens are less likely to persist',
+            'Replaced native record date picker with custom calendar modal',
+            'Fixed record date click behavior on desktop',
+            'Avoided iPhone native date input overflow entirely',
+            'Added no-cache hosting headers for HTML entry files',
+            'Updated service worker cache version for this release',
             '기존 기록/채팅 저장 구조 변경 없음'
         ])
     });
