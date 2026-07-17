@@ -563,6 +563,11 @@
       }
     };
 
+    shell.addEventListener('click', (event) => {
+      if (event.target === input) return;
+      event.preventDefault();
+      openPicker();
+    });
     shell.addEventListener('keydown', (event) => {
       if (event.key !== 'Enter' && event.key !== ' ') return;
       event.preventDefault();

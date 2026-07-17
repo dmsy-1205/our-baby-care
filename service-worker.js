@@ -1,11 +1,9 @@
-const HM_PWA_VERSION = 'v1.0-step6-2-11-0';
+const HM_PWA_VERSION = 'v1.0-step6-2-12-13';
 const HM_STATIC_CACHE = `hearme2nite-static-${HM_PWA_VERSION}`;
 const HM_RUNTIME_CACHE = `hearme2nite-runtime-${HM_PWA_VERSION}`;
 const HM_OFFLINE_URL = '/offline.html';
 
 const HM_PRECACHE_URLS = [
-  '/',
-  '/index.html',
   HM_OFFLINE_URL,
   '/manifest.webmanifest',
   '/assets/icons/icon-192.png',
@@ -19,6 +17,12 @@ self.addEventListener('install', (event) => {
       .then((cache) => cache.addAll(HM_PRECACHE_URLS))
       .then(() => self.skipWaiting())
   );
+});
+
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
 });
 
 self.addEventListener('activate', (event) => {

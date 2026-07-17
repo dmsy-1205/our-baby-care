@@ -1,15 +1,16 @@
 // =========================================================
-// HearMe2nite v1.0 STEP6.2.12.11
+// HearMe2nite v1.0 STEP6.2.12.13
 // PWA install foundation: manifest + service worker registration
 // - FCM/push notification is intentionally separated into the next step.
 // =========================================================
 (function () {
-    const HM_PWA_SW_URL = '/service-worker.js?v=step6-2-12-11-ios-pwa-install-guide-20260718';
+    const HM_PWA_SW_URL = '/service-worker.js?v=step6-2-12-13-date-picker-cache-refresh-20260718';
     const HM_PWA_DISMISS_KEY = 'hm_pwa_install_dismiss_until';
     const HM_DAY_MS = 24 * 60 * 60 * 1000;
     let deferredInstallPrompt = null;
     let installBanner = null;
     let iosGuideOverlay = null;
+    let refreshingForServiceWorker = false;
 
     function isStandaloneMode() {
         return window.matchMedia?.('(display-mode: standalone)').matches || window.navigator.standalone === true;
@@ -149,10 +150,30 @@
                 updateViaCache: 'none'
             });
             window.hmPwaServiceWorkerRegistration = registration;
+            if (registration.waiting) {
+                registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+            }
+            registration.addEventListener('updatefound', () => {
+                const worker = registration.installing;
+                if (!worker) return;
+                worker.addEventListener('statechange', () => {
+                    if (worker.state === 'installed' && navigator.serviceWorker.controller) {
+                        worker.postMessage({ type: 'SKIP_WAITING' });
+                    }
+                });
+            });
             setTimeout(() => registration.update().catch(() => {}), 1200);
         } catch (error) {
             console.warn('[HearMe2nite][PWA] service worker registration failed', error);
         }
+    }
+
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+            if (refreshingForServiceWorker) return;
+            refreshingForServiceWorker = true;
+            window.location.reload();
+        });
     }
 
     window.addEventListener('beforeinstallprompt', (event) => {

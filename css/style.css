@@ -6190,6 +6190,8 @@ body.hm-booting::before {
 }
 
 .hm-record-date-display-value {
+    position: relative !important;
+    z-index: 1 !important;
     min-width: 0 !important;
     width: 100% !important;
     overflow: hidden !important;
@@ -6204,6 +6206,7 @@ body.hm-booting::before {
 
 .hm-record-date-display-icon {
     position: absolute !important;
+    z-index: 1 !important;
     right: 15px !important;
     top: 50% !important;
     transform: translateY(-50%) !important;
@@ -6218,6 +6221,7 @@ body.hm-booting::before {
 
 #recordDate.hm-record-date-native {
     position: absolute !important;
+    z-index: 3 !important;
     inset: 0 !important;
     display: block !important;
     width: 100% !important;
@@ -6233,6 +6237,7 @@ body.hm-booting::before {
     opacity: 0 !important;
     box-shadow: none !important;
     cursor: pointer !important;
+    -webkit-tap-highlight-color: transparent !important;
 }
 
 :root[data-hm-theme][data-hm-display="dark"] .hm-record-date-shell {
