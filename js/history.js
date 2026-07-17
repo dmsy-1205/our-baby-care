@@ -792,6 +792,38 @@ function buildHistoryCustomRoutineText(record) {
     return blocks.join('\n\n');
 }
 
+
+// STEP6.2.9: 과거 날짜에 저장된 스냅샷만 사용해 요약 완료 수를 계산한다.
+// 현재 카드/루틴 정의를 다시 읽지 않으므로 이후 설정 변경이 과거 기록 수치에 영향을 주지 않는다.
+function getHistoryPromiseCompletion(record) {
+    const values = record && record.customCardValues ? record.customCardValues : null;
+    if (!values || typeof values !== 'object') return { done: 0, total: 0 };
+    let done = 0;
+    let total = 0;
+    Object.values(values).forEach(itemMap => {
+        if (!itemMap || typeof itemMap !== 'object') return;
+        Object.values(itemMap).forEach(item => {
+            if (!item || typeof item !== 'object') return;
+            total += 1;
+            if (item.type === 'checkbox') {
+                if (item.value === true) done += 1;
+                return;
+            }
+            if (item.value !== undefined && item.value !== null && String(item.value).trim() !== '') done += 1;
+        });
+    });
+    return { done, total };
+}
+
+function getHistorySubRoutineCompletion(record) {
+    const snapshot = Array.isArray(record?.subRoutineSnapshot) ? record.subRoutineSnapshot : [];
+    const rows = snapshot.filter(item => item && typeof item === 'object');
+    return {
+        done: rows.filter(item => item.done === true).length,
+        total: rows.length
+    };
+}
+
 /* v0.9.23 History Detail Polish - UI only override, data structure preserved */
 function hmHistoryValueText(value) {
     if (!value || value === '기록 없음') return '';
@@ -857,11 +889,22 @@ async function openHistoryDetailModal(date) {
     const meals = [record.mealBreakfast ? `아침: ${record.mealBreakfast}` : '', record.mealLunch ? `점심: ${record.mealLunch}` : '', record.mealDinner ? `저녁: ${record.mealDinner}` : ''].filter(Boolean).join('\n');
     const customRoutineText = buildHistoryCustomRoutineText(record);
     const subRoutineText = buildHistorySubRoutineText(record);
-    const summaryChips = [record.moodLabel && record.moodLabel !== '기록 없음' ? record.moodLabel : '', customRoutineText ? '💜 오늘의 약속' : '', subRoutineText ? '🌱 나의 루틴' : '', record.photo ? '📷 사진 있음' : '', record.dailyChoiceLabel && record.dailyChoiceLabel !== '기록 없음' ? record.dailyChoiceLabel : ''].filter(Boolean).map(makeHistoryChip).join('');
+    const promiseCompletion = getHistoryPromiseCompletion(record);
+    const routineCompletion = getHistorySubRoutineCompletion(record);
+    const summaryItems = [
+        record.moodLabel && record.moodLabel !== '기록 없음' ? record.moodLabel : '',
+        promiseCompletion.total > 0 ? `💜 약속 ${promiseCompletion.done}/${promiseCompletion.total}` : '',
+        routineCompletion.total > 0 ? `🌱 루틴 ${routineCompletion.done}/${routineCompletion.total}` : ''
+    ].filter(Boolean).slice(0, 3);
+    if (summaryItems.length < 3 && record.dailyChoiceLabel && record.dailyChoiceLabel !== '기록 없음') {
+        summaryItems.push(record.dailyChoiceLabel);
+    }
+    if (summaryItems.length < 3 && record.photo) summaryItems.push('📷 사진');
+    const summaryChips = summaryItems.slice(0, 3).map(makeHistoryChip).join('');
     content.innerHTML = `
         <div class="history-detail-summary-card">
             <div class="history-detail-summary-icon">${getHistoryMoodIcon(record)}</div>
-            <div><strong>${formatHistoryDateLabel(date)}의 기록</strong><span>${summaryChips || '저장된 세부 내용을 확인해 주세요.'}</span></div>
+            <div><strong>하루 한눈에 보기</strong><span>${summaryChips || '저장된 세부 내용을 확인해 주세요.'}</span></div>
         </div>
         ${record.photo ? `<img src="${record.photo}" class="history-detail-photo" alt="${date} 사진">` : ''}
         ${historyDetailBlock('💜 오늘의 약속', customRoutineText)}
