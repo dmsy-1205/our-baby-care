@@ -176,6 +176,10 @@ function openAccountChildModal(type) {
         else if (type === 'data' && typeof openDataManagementModal === 'function') openDataManagementModal();
         else if (type === 'admin' && typeof openDataAdminModal === 'function') openDataAdminModal();
         else if (type === 'console') {
+            if (typeof hmOpenAdminConsoleApp === 'function') {
+                hmOpenAdminConsoleApp();
+                return;
+            }
             try {
                 const user = (typeof babyAuth !== 'undefined' && babyAuth.currentUser) ? babyAuth.currentUser : null;
                 if (user) sessionStorage.setItem('hmAdminLaunch', JSON.stringify({ uid: user.uid, at: Date.now() }));

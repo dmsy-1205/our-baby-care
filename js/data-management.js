@@ -179,6 +179,12 @@
         }
     }
 
+    function hmIsActiveAdminProfile(profile) {
+        return profile === true || Boolean(profile && typeof profile === 'object' && (
+            profile.active === true || profile.enabled === true || profile.role === 'admin'
+        ));
+    }
+
     async function hmRefreshDataAdminAccess() {
         const user = getUser();
         const button = document.getElementById('dataAdminButton');
@@ -189,11 +195,26 @@
         if (!user) return false;
         try {
             const snap = await db.ref(`admins/${user.uid}`).once('value');
-            hmDataAdmin = snap.val() === true;
+            hmDataAdmin = hmIsActiveAdminProfile(snap.val());
             if (button) button.hidden = !hmDataAdmin;
             if (consoleButton) consoleButton.hidden = !hmDataAdmin;
             return hmDataAdmin;
         } catch (error) { console.warn('[DataAdmin] access check failed', error); return false; }
+    }
+
+    async function hmOpenAdminConsoleApp() {
+        try {
+            await hmRefreshDataAdminAccess();
+        } catch (error) {
+            console.warn('[Admin Console] access refresh before launch failed', error);
+        }
+        const user = getUser();
+        try {
+            if (user) sessionStorage.setItem('hmAdminLaunch', JSON.stringify({ uid: user.uid, at: Date.now() }));
+        } catch (error) {
+            console.warn('[Admin Console] launcher marker failed', error);
+        }
+        window.location.assign('admin.html');
     }
     async function openDataAdminModal() {
         if (!await hmRefreshDataAdminAccess()) return alert('관리자 권한이 없습니다.');
@@ -337,6 +358,7 @@
     window.loadDataDeleteRequests = loadDataDeleteRequests;
     window.cancelDataDeleteRequest = cancelDataDeleteRequest;
     window.hmRefreshDataAdminAccess = hmRefreshDataAdminAccess;
+    window.hmOpenAdminConsoleApp = hmOpenAdminConsoleApp;
     window.openDataAdminModal = openDataAdminModal;
     window.closeDataAdminModal = closeDataAdminModal;
     window.setDataAdminFilter = setDataAdminFilter;

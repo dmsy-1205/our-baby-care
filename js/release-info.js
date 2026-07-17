@@ -5,19 +5,19 @@
 (function () {
     const release = Object.freeze({
         product: 'HearMe2nite',
-        version: 'v1.0 STEP6.2.12.17',
-        appVersion: 'HearMe2nite v1.0 STEP6.2.12.17',
-        step: 'STEP6.2.12.17',
+        version: 'v1.0 STEP6.2.13.0',
+        appVersion: 'HearMe2nite v1.0 STEP6.2.13.0',
+        step: 'STEP6.2.13.0',
         build: '20260718',
         releaseDate: '2026.07.18',
         stage: 'Beta',
-        title: 'Theme Aware Notification Badge',
-        description: '홈 화면 알림배지가 다크모드와 개인 테마 색상을 자연스럽게 따라가도록 스타일을 정리했습니다.',
+        title: 'Admin Console Launch Bridge',
+        description: '관리자 권한 확인과 운영 콘솔 이동 흐름을 안정화했습니다.',
         changes: Object.freeze([
-            'Made the home notification badge follow theme card colors',
-            'Added dark-mode styling for notification badge and notification rows',
-            'Kept unread notification emphasis while matching the active theme',
-            'Preserved PWA cache recovery and custom record date picker behavior',
+            'Added a stable launch bridge from the user app to admin.html',
+            'Matched user-app admin permission checks with the admin console permission format',
+            'Refreshed profile and data-management cache keys for reliable deployment',
+            'Preserved notification badge, PWA recovery, and record date picker behavior',
             '기존 기록/채팅 저장 구조 변경 없음'
         ])
     });
