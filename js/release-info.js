@@ -5,20 +5,19 @@
 (function () {
     const release = Object.freeze({
         product: 'HearMe2nite',
-        version: 'v1.0 STEP6.2.12.6',
-        appVersion: 'HearMe2nite v1.0 STEP6.2.12.6',
-        step: 'STEP6.2.12.6',
+        version: 'v1.0 STEP6.2.12.7',
+        appVersion: 'HearMe2nite v1.0 STEP6.2.12.7',
+        step: 'STEP6.2.12.7',
         build: '20260718',
         releaseDate: '2026.07.18',
         stage: 'Beta',
-        title: 'Notification Read Sync',
-        description: '알림 목록이 아닌 실제 카드를 직접 열어 확인해도 해당 카드 작성 알림이 읽음 처리되도록 동기화했습니다.',
+        title: 'Notification Toast Message Fix',
+        description: '알림이 없을 때 알림 바를 눌러도 기록 복사 문구가 뜨지 않도록 토스트 메시지 표시 방식을 수정했습니다.',
         changes: Object.freeze([
-            'Direct card opening now clears matching notifications',
-            'Daily cards clear their own card-written alerts',
-            'Promise and routine hub cards clear their own alerts',
-            'Notification list selection still clears only the selected item',
-            'Unread notifications remain until their related card is opened',
+            'Fixed toast messages to display the requested text',
+            'No-notification click no longer shows copied-record text',
+            'Copy actions still keep their existing copied-record message',
+            'Other custom toast messages can now show correctly',
             'Chat unread count remains inside the chat card',
             '기존 기록/채팅 저장 구조 변경 없음'
         ])

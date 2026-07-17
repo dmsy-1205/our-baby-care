@@ -170,7 +170,15 @@ function executeCopy(text, onSuccess) {
 // ---------------------------------------------------------
 // showToast
 // ---------------------------------------------------------
-function showToast() {
-        const toast = document.getElementById('toast'); toast.style.display = 'block';
-        setTimeout(() => { toast.style.display = 'none'; }, 2000);
+function showToast(message) {
+        const toast = document.getElementById('toast');
+        if (!toast) return;
+        if (!toast.dataset.defaultText) toast.dataset.defaultText = toast.textContent || '알림';
+        toast.textContent = message || toast.dataset.defaultText;
+        toast.style.display = 'block';
+        clearTimeout(toast._hmToastTimer);
+        toast._hmToastTimer = setTimeout(() => {
+            toast.style.display = 'none';
+            toast.textContent = toast.dataset.defaultText;
+        }, 2000);
     }
