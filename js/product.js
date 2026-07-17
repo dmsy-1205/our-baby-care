@@ -122,9 +122,7 @@
     function hmHomeStatsPeriodKeys(period=hmHomeStatsPeriod){
         const anchor = hmHomeStatDateObj(hmHomeStatsAnchorDate());
         if (period === 'month') {
-            const y = anchor.getFullYear(), m = anchor.getMonth();
-            const last = new Date(y, m + 1, 0, 12).getDate();
-            return Array.from({length:last}, (_,i)=>hmHomeStatDateKey(new Date(y,m,i+1,12)));
+            return Array.from({length:30}, (_,i)=>hmHomeStatDateKey(hmHomeStatAddDays(anchor, i - 29)));
         }
         return Array.from({length:7}, (_,i)=>hmHomeStatDateKey(hmHomeStatAddDays(anchor, i - 6)));
     }
@@ -202,8 +200,8 @@
         if ($('hmHomeStatsCard')) return;
         const box = document.createElement('section');
         box.id = 'hmHomeStatsCard';
-        box.className = 'hm-home-stats-card';
-        box.innerHTML = `<div class="hm-home-stats-head"><div><strong>기록 통계</strong><small>주간·한 달 흐름을 카드별로 확인해요</small></div><span>Beta</span></div><div class="hm-home-stats-menu">${HM_HOME_STAT_ITEMS.map(item => `<button type="button" data-home-stat="${item.key}" onclick="hmOpenHomeStatsModal('${item.key}')"><b>${item.icon}</b><span>${item.label}</span><small id="hmHomeStatMini_${item.key}">-</small></button>`).join('')}</div>`;
+        box.className = 'input-group hm-home-stats-card';
+        box.innerHTML = `<button type="button" class="daily-card hm-home-stats-launch-card" onclick="hmOpenHomeStatsModal('promise')"><span class="daily-card-icon">📊</span><span><span class="daily-card-title">기록 통계</span><span class="daily-card-sub" id="hmHomeStatsLaunchSub">주간·한 달 흐름을 확인해요.</span></span><span class="daily-card-arrow">›</span></button>`;
         const recordDateInput = $('recordDate');
         const recordDateGroup = recordDateInput ? recordDateInput.closest('.input-group') : null;
         const dashboard = $('hmProductDashboard');
@@ -220,7 +218,7 @@
         overlay.style.display = 'none';
         overlay.setAttribute('aria-hidden','true');
         overlay.setAttribute('inert','');
-        overlay.innerHTML = `<div class="daily-modal hm-home-stats-modal" role="dialog" aria-modal="true" aria-labelledby="hmHomeStatsTitle"><div class="daily-modal-head"><h2 id="hmHomeStatsTitle">📊 기록 통계</h2><button type="button" class="modal-close-btn" onclick="hmCloseHomeStatsModal()">닫기</button></div><div class="hm-home-stats-period"><button type="button" data-stat-period="week" onclick="hmSetHomeStatsPeriod('week')">주간</button><button type="button" data-stat-period="month" onclick="hmSetHomeStatsPeriod('month')">한 달</button></div><div id="hmHomeStatsModalBody" class="hm-home-stats-modal-body"></div></div>`;
+        overlay.innerHTML = `<div class="daily-modal hm-home-stats-modal" role="dialog" aria-modal="true" aria-labelledby="hmHomeStatsTitle"><div class="daily-modal-head"><h2 id="hmHomeStatsTitle">📊 기록 통계</h2><button type="button" class="modal-close-btn" onclick="hmCloseHomeStatsModal()">닫기</button></div><div class="hm-home-stats-menu">${HM_HOME_STAT_ITEMS.map(item => `<button type="button" data-home-stat="${item.key}" onclick="hmOpenHomeStatsModal('${item.key}')"><b>${item.icon}</b><span>${item.label}</span><small id="hmHomeStatMini_${item.key}">-</small></button>`).join('')}</div><div class="hm-home-stats-period"><button type="button" data-stat-period="week" onclick="hmSetHomeStatsPeriod('week')">주간</button><button type="button" data-stat-period="month" onclick="hmSetHomeStatsPeriod('month')">한 달</button></div><div id="hmHomeStatsModalBody" class="hm-home-stats-modal-body"></div></div>`;
         document.body.appendChild(overlay);
         overlay.addEventListener('click', event => { if (event.target === overlay) window.hmCloseHomeStatsModal(); });
         return overlay;
@@ -230,17 +228,20 @@
         const keys = hmHomeStatsPeriodKeys();
         const stats = hmHomeStatsSummary(item, keys);
         const body = $('hmHomeStatsModalBody') || ensureHomeStatsModal().querySelector('#hmHomeStatsModalBody');
-        document.querySelectorAll('[data-stat-period]').forEach(btn => btn.classList.toggle('active', btn.dataset.statPeriod === hmHomeStatsPeriod));
+        document.querySelectorAll('[data-stat-period]').forEach(btn => { const active = btn.dataset.statPeriod === hmHomeStatsPeriod; btn.classList.toggle('active', active); btn.setAttribute('aria-pressed', active ? 'true' : 'false'); });
+        document.querySelectorAll('[data-home-stat]').forEach(btn => btn.classList.toggle('active', btn.dataset.homeStat === item.key));
         const calendar = stats.rows.map(row => {
             const day = Number(row.key.slice(-2));
             const state = row.stat.hit ? 'has-stat' : 'empty-stat';
             return `<div class="hm-home-stats-day ${state}"><span>${day}</span><b>${item.icon}</b><small>${safe(row.stat.label)}</small></div>`;
         }).join('');
-        if (body) body.innerHTML = `<section class="hm-home-stats-hero"><div class="hm-home-stats-hero-icon">${item.icon}</div><div><strong>${safe(item.label)}</strong><span>${hmHomeStatsPeriod === 'week' ? '최근 7일' : hmHomeStatsAnchorDate().slice(0,7)} 기준</span></div><em>${safe(stats.main)}</em></section><div class="hm-home-stats-metrics"><div><strong>${safe(stats.main)}</strong><small>대표 값</small></div><div><strong>${safe(stats.sub)}</strong><small>요약</small></div><div><strong>${stats.hit}일</strong><small>기록된 날</small></div></div><div class="hm-home-stats-calendar">${calendar}</div><p class="hm-home-stats-note">기존 기록을 읽어서 표시하며, 이 통계 화면에서는 데이터를 저장하거나 변경하지 않습니다.</p>`;
+        if (body) body.innerHTML = `<section class="hm-home-stats-hero"><div class="hm-home-stats-hero-icon">${item.icon}</div><div><strong>${safe(item.label)}</strong><span>${hmHomeStatsPeriod === 'week' ? '최근 7일' : '최근 30일'} 기준</span></div><em>${safe(stats.main)}</em></section><div class="hm-home-stats-metrics"><div><strong>${safe(stats.main)}</strong><small>대표 값</small></div><div><strong>${safe(stats.sub)}</strong><small>요약</small></div><div><strong>${stats.hit}일</strong><small>기록된 날</small></div></div><div class="hm-home-stats-calendar ${hmHomeStatsPeriod === 'month' ? 'is-month' : 'is-week'}">${calendar}</div><p class="hm-home-stats-note">기존 기록을 읽어서 표시하며, 이 통계 화면에서는 데이터를 저장하거나 변경하지 않습니다.</p>`;
     }
     function updateHomeStatsCard(){
         buildHomeStatsCard();
         const weekKeys = hmHomeStatsPeriodKeys('week');
+        const launchSub = $('hmHomeStatsLaunchSub');
+        if (launchSub) launchSub.textContent = `이번 주 ${HM_HOME_STAT_ITEMS.length}개 항목 통계 보기`;
         HM_HOME_STAT_ITEMS.forEach(item => {
             const target = $(`hmHomeStatMini_${item.key}`);
             if (!target) return;

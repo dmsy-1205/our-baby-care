@@ -11942,3 +11942,71 @@ body.dark-mode .history-detail-summary-card > div:not(.history-detail-summary-ic
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+
+/* STEP6.2.10.1 - 홈 통계는 기본 홈 카드와 같은 크기로 표시 */
+.hm-home-stats-card {
+  width: 100% !important;
+  margin: 0 0 15px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+.hm-home-stats-launch-card {
+  width: 100% !important;
+}
+.hm-home-stats-launch-card .daily-card-icon {
+  background: color-mix(in srgb, var(--theme-accent, #7c5cff) 14%, var(--theme-card, #fff));
+}
+.hm-home-stats-modal .hm-home-stats-menu {
+  margin: 0 0 12px;
+}
+.hm-home-stats-modal .hm-home-stats-menu button.active {
+  border-color: color-mix(in srgb, var(--theme-accent, #7c5cff) 62%, transparent);
+  background: color-mix(in srgb, var(--theme-accent, #7c5cff) 14%, var(--theme-card, #fff));
+}
+:root[data-hm-theme][data-hm-display="dark"] .hm-home-stats-card {
+  background: transparent !important;
+  border: 0 !important;
+}
+:root[data-hm-theme][data-hm-display="dark"] .hm-home-stats-launch-card .daily-card-icon {
+  background: color-mix(in srgb, var(--hm-primary, #7c5cff) 22%, var(--hm-dark-card-soft, #202438)) !important;
+}
+
+/* STEP6.2.10.2 - 통계 기간 전환 상태를 명확하게 표시 */
+.hm-home-stats-period button {
+  transition: background .16s ease, color .16s ease, border-color .16s ease, transform .16s ease;
+}
+.hm-home-stats-period button.active,
+.hm-home-stats-period button[aria-pressed="true"] {
+  background: linear-gradient(135deg, #8c6cff, #6d4cff) !important;
+  border-color: #8c6cff !important;
+  color: #ffffff !important;
+  box-shadow: 0 8px 18px rgba(109,76,255,.22) !important;
+}
+.hm-home-stats-calendar.is-week {
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+.hm-home-stats-calendar.is-month {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+.hm-home-stats-calendar.is-month .hm-home-stats-day {
+  min-height: 52px;
+}
+:root[data-hm-theme][data-hm-display="dark"] .hm-home-stats-period button.active,
+:root[data-hm-theme][data-hm-display="dark"] .hm-home-stats-period button[aria-pressed="true"] {
+  background: linear-gradient(135deg, var(--hm-primary, #8c6cff), #5f43ff) !important;
+  border-color: var(--hm-primary, #8c6cff) !important;
+  color: #ffffff !important;
+}
+@media (max-width: 420px) {
+  .hm-home-stats-calendar.is-month {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 4px;
+  }
+  .hm-home-stats-calendar.is-month .hm-home-stats-day {
+    min-height: 48px;
+    padding: 5px 2px;
+  }
+}

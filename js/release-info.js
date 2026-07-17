@@ -5,18 +5,19 @@
 (function () {
     const release = Object.freeze({
         product: 'HearMe2nite',
-        version: 'v1.0 STEP6.2.10',
-        appVersion: 'HearMe2nite v1.0 STEP6.2.10',
-        step: 'STEP6.2.10',
+        version: 'v1.0 STEP6.2.10.2',
+        appVersion: 'HearMe2nite v1.0 STEP6.2.10.2',
+        step: 'STEP6.2.10.2',
         build: '20260717',
         releaseDate: '2026.07.17',
         stage: 'Beta',
-        title: '홈 기록 통계 센터 준비',
-        description: '기록 날짜와 오늘의 요약 사이에서 주요 기록 항목의 주간·한 달 흐름을 카드와 캘린더로 확인할 수 있게 준비했습니다.',
+        title: '통계 기간 전환 표시 수정',
+        description: '기록 통계 모달에서 주간과 한 달 선택 상태가 분명히 보이도록 하고, 주간은 최근 7일·한 달은 최근 30일로 다르게 표시합니다.',
         changes: Object.freeze([
-            '기록 날짜와 오늘의 요약 사이에 기록 통계 카드 추가',
-            '오늘의 약속, 나의 루틴, 기분, 체중, 운동, 수분, 기상, 식사, 외출, 취침, 하루 기록 메뉴 제공',
-            '각 메뉴를 누르면 중앙 모달에서 주간·한 달 캘린더 통계 표시',
+            '주간/한 달 버튼 선택 색상을 명확하게 표시',
+            '선택된 기간 버튼에 active 및 aria-pressed 상태 적용',
+            '주간은 최근 7일, 한 달은 최근 30일 기준으로 분리',
+            '한 달 캘린더는 30일 표시용 밀도 레이아웃 적용',
             '기존 days 기록을 읽기만 하며 Firebase 저장 구조는 변경하지 않음'
         ])
     });
