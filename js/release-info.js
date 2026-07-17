@@ -5,19 +5,19 @@
 (function () {
     const release = Object.freeze({
         product: 'HearMe2nite',
-        version: 'v1.0 STEP6.2.10.4.2',
-        appVersion: 'HearMe2nite v1.0 STEP6.2.10.4.2',
-        step: 'STEP6.2.10.4.2',
+        version: 'v1.0 STEP6.2.10.4.3',
+        appVersion: 'HearMe2nite v1.0 STEP6.2.10.4.3',
+        step: 'STEP6.2.10.4.3',
         build: '20260717',
         releaseDate: '2026.07.17',
         stage: 'Beta',
-        title: 'Home Stats Card UI Fix',
-        description: '기록 통계와 오늘의 요약 홈 카드를 같은 요약 카드 계열로 맞추고, 통계 모달 메뉴가 모두 보이도록 수정했습니다.',
+        title: 'Stats Modal Scroll And Period Fix',
+        description: '기록 통계 모달 메뉴 스크롤과 칩 크기를 정리하고, 통계 기간을 최근 기준에서 선택한 주간/선택한 달 기준으로 변경했습니다.',
         changes: Object.freeze([
-            'Home stats and today summary cards now use the same visual family',
-            'Home stats card keeps a slightly stronger accent while staying close to today summary',
-            'Fixed the stats modal menu chips so all stat categories can be reached',
-            'Adjusted light and dark color states for better readability',
+            'Desktop stats menu now shows horizontal scrolling clearly',
+            'Stats menu chips now use equal width and icon alignment on mobile and desktop',
+            'Weekly stats now use the selected date week instead of recent 7 days',
+            'Monthly stats now use the selected month instead of recent 30 days',
             '기존 days 기록을 읽기만 하며 Firebase 저장 구조는 변경하지 않음'
         ])
     });

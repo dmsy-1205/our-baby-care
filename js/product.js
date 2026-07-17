@@ -123,9 +123,20 @@
     function hmHomeStatsPeriodKeys(period=hmHomeStatsPeriod){
         const anchor = hmHomeStatDateObj(hmHomeStatsAnchorDate());
         if (period === 'month') {
-            return Array.from({length:30}, (_,i)=>hmHomeStatDateKey(hmHomeStatAddDays(anchor, i - 29)));
+            const first = new Date(anchor.getFullYear(), anchor.getMonth(), 1, 12);
+            const last = new Date(anchor.getFullYear(), anchor.getMonth() + 1, 0, 12);
+            const total = last.getDate();
+            return Array.from({length:total}, (_,i)=>hmHomeStatDateKey(hmHomeStatAddDays(first, i)));
         }
-        return Array.from({length:7}, (_,i)=>hmHomeStatDateKey(hmHomeStatAddDays(anchor, i - 6)));
+        const mondayOffset = (anchor.getDay() + 6) % 7;
+        const first = hmHomeStatAddDays(anchor, -mondayOffset);
+        return Array.from({length:7}, (_,i)=>hmHomeStatDateKey(hmHomeStatAddDays(first, i)));
+    }
+    function hmHomeStatsPeriodLabel(period=hmHomeStatsPeriod){
+        const anchor = hmHomeStatDateObj(hmHomeStatsAnchorDate());
+        if (period === 'month') return `${anchor.getFullYear()}.${String(anchor.getMonth() + 1).padStart(2,'0')} 선택한 달 기준`;
+        const keys = hmHomeStatsPeriodKeys('week');
+        return `${keys[0].slice(5).replace('-','.')}~${keys[6].slice(5).replace('-','.')} 선택 주간 기준`;
     }
     function hmHomeStatsRecordValue(item, rec){
         if (!rec) return { hit:false, value:0, total:0, done:0, label:'-' };
@@ -244,7 +255,7 @@
             const state = row.stat.hit ? 'has-stat' : 'empty-stat';
             return `<div class="hm-home-stats-day ${state}"><span>${day}</span><b>${item.icon}</b><small>${safe(row.stat.label)}</small></div>`;
         }).join('');
-        if (body) body.innerHTML = `<section class="hm-home-stats-hero"><div class="hm-home-stats-hero-icon">${item.icon}</div><div><strong>${safe(item.label)}</strong><span>${hmHomeStatsPeriod === 'week' ? '최근 7일' : '최근 30일'} 기준</span></div><em>${safe(stats.main)}</em></section><div class="hm-home-stats-metrics"><div><strong>${safe(stats.main)}</strong><small>대표 값</small></div><div><strong>${safe(stats.sub)}</strong><small>요약</small></div><div><strong>${stats.hit}일</strong><small>기록된 날</small></div></div><button type="button" class="hm-home-stats-calendar-toggle" onclick="hmToggleHomeStatsCalendar()" aria-expanded="${hmHomeStatsCalendarOpen ? 'true' : 'false'}">${hmHomeStatsCalendarOpen ? '날짜별 보기 접기' : '날짜별 보기 펼치기'}</button><div class="hm-home-stats-calendar ${hmHomeStatsPeriod === 'month' ? 'is-month' : 'is-week'} ${hmHomeStatsCalendarOpen ? 'is-open' : 'is-collapsed'}" ${hmHomeStatsCalendarOpen ? '' : 'hidden'}>${calendar}</div><p class="hm-home-stats-note">기존 기록을 읽어서 표시하며, 이 통계 화면에서는 데이터를 저장하거나 변경하지 않습니다.</p>`;
+        if (body) body.innerHTML = `<section class="hm-home-stats-hero"><div class="hm-home-stats-hero-icon">${item.icon}</div><div><strong>${safe(item.label)}</strong><span>${safe(hmHomeStatsPeriodLabel())}</span></div><em>${safe(stats.main)}</em></section><div class="hm-home-stats-metrics"><div><strong>${safe(stats.main)}</strong><small>대표 값</small></div><div><strong>${safe(stats.sub)}</strong><small>요약</small></div><div><strong>${stats.hit}일</strong><small>기록된 날</small></div></div><button type="button" class="hm-home-stats-calendar-toggle" onclick="hmToggleHomeStatsCalendar()" aria-expanded="${hmHomeStatsCalendarOpen ? 'true' : 'false'}">${hmHomeStatsCalendarOpen ? '날짜별 보기 접기' : '날짜별 보기 펼치기'}</button><div class="hm-home-stats-calendar ${hmHomeStatsPeriod === 'month' ? 'is-month' : 'is-week'} ${hmHomeStatsCalendarOpen ? 'is-open' : 'is-collapsed'}" ${hmHomeStatsCalendarOpen ? '' : 'hidden'}>${calendar}</div><p class="hm-home-stats-note">기존 기록을 읽어서 표시하며, 이 통계 화면에서는 데이터를 저장하거나 변경하지 않습니다.</p>`;
     }
     function updateHomeStatsCard(){
         buildHomeStatsCard();

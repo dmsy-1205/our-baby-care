@@ -12184,3 +12184,86 @@ body.dark-mode .history-detail-summary-card > div:not(.history-detail-summary-ic
     padding: 7px 9px !important;
   }
 }
+
+/* STEP6.2.10.4.3 - desktop menu scroll, equal stat chips, selected week/month period */
+.hm-home-stats-modal .hm-home-stats-menu {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 8px !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow-x: scroll !important;
+  overflow-y: hidden !important;
+  padding: 0 4px 12px !important;
+  margin: 0 0 10px !important;
+  scrollbar-width: thin !important;
+  scrollbar-color: rgba(140,108,255,.55) rgba(255,255,255,.08) !important;
+  -webkit-overflow-scrolling: touch;
+}
+.hm-home-stats-modal .hm-home-stats-menu::-webkit-scrollbar {
+  display: block !important;
+  height: 7px;
+}
+.hm-home-stats-modal .hm-home-stats-menu::-webkit-scrollbar-track {
+  background: rgba(255,255,255,.08);
+  border-radius: 999px;
+}
+.hm-home-stats-modal .hm-home-stats-menu::-webkit-scrollbar-thumb {
+  background: rgba(140,108,255,.55);
+  border-radius: 999px;
+}
+.hm-home-stats-modal .hm-home-stats-menu button,
+.hm-home-stats-modal .hm-home-stats-menu button.active {
+  flex: 0 0 132px !important;
+  width: 132px !important;
+  min-width: 132px !important;
+  max-width: 132px !important;
+  min-height: 40px !important;
+  height: 40px !important;
+  display: inline-flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  padding: 8px 10px !important;
+  border-radius: 999px !important;
+  white-space: nowrap !important;
+}
+.hm-home-stats-modal .hm-home-stats-menu b {
+  width: 18px !important;
+  min-width: 18px !important;
+  height: 18px !important;
+  display: inline-grid !important;
+  place-items: center !important;
+  font-size: .94rem !important;
+  line-height: 1 !important;
+}
+.hm-home-stats-modal .hm-home-stats-menu span {
+  min-width: 0 !important;
+  max-width: 88px !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  font-size: .72rem !important;
+}
+@media (max-width: 640px) {
+  .hm-home-stats-modal .hm-home-stats-menu {
+    gap: 9px !important;
+    padding: 0 2px 12px !important;
+  }
+  .hm-home-stats-modal .hm-home-stats-menu button,
+  .hm-home-stats-modal .hm-home-stats-menu button.active {
+    flex-basis: 150px !important;
+    width: 150px !important;
+    min-width: 150px !important;
+    max-width: 150px !important;
+    height: 42px !important;
+    min-height: 42px !important;
+  }
+  .hm-home-stats-modal .hm-home-stats-menu span {
+    max-width: 104px !important;
+    font-size: .74rem !important;
+  }
+}
