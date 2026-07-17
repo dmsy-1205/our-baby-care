@@ -12495,6 +12495,10 @@ body.dark-mode .history-detail-summary-card > div:not(.history-detail-summary-ic
   max-width: 100%;
   box-sizing: border-box;
 }
+.hm-flow-chart svg {
+  width: 100%;
+  height: 150px;
+}
 .hm-home-stats-modal,
 .hm-home-stats-modal-body,
 .hm-home-stats-modal-body > * {
@@ -12635,14 +12639,19 @@ body.dark-mode .history-detail-summary-card > div:not(.history-detail-summary-ic
 }
 .hm-flow-mood {
   display: grid;
-  gap: 8px;
+  gap: 7px;
   padding: 4px 0 2px;
 }
 .hm-flow-mood-row {
   display: grid;
-  grid-template-columns: 72px 1fr 34px;
+  grid-template-columns: minmax(76px, auto) 1fr 42px;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
+  min-height: 34px;
+  padding: 7px 9px;
+  border-radius: 13px;
+  background: rgba(255,255,255,.045);
+  border: 1px solid rgba(124,92,255,.10);
 }
 .hm-flow-mood-row b,
 .hm-flow-mood-row span {
@@ -12655,7 +12664,7 @@ body.dark-mode .history-detail-summary-card > div:not(.history-detail-summary-ic
   text-align: right;
 }
 .hm-flow-mood-row i {
-  height: 12px;
+  height: 10px;
   overflow: hidden;
   border-radius: 999px;
   background: rgba(255,255,255,.12);
@@ -12723,6 +12732,102 @@ body.dark-mode .history-detail-summary-card > div:not(.history-detail-summary-ic
 .hm-flow-meal-day i.on {
   background: linear-gradient(180deg, #ff6f9c, #7c5cff);
 }
+.hm-flow-month-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 6px;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+  padding: 4px 0 2px;
+  box-sizing: border-box;
+}
+.hm-flow-month-cell {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  place-items: center;
+  min-width: 0;
+  min-height: 48px;
+  padding: 4px 2px 3px;
+  border-radius: 12px;
+  background: rgba(255,255,255,.052);
+  border: 1px solid rgba(124,92,255,.13);
+  overflow: hidden;
+  box-sizing: border-box;
+}
+.hm-flow-month-cell.is-blank {
+  visibility: hidden;
+}
+.hm-flow-month-cell b {
+  color: var(--theme-text-muted, #837b99);
+  font-size: .56rem;
+  font-weight: 950;
+  line-height: 1;
+}
+.hm-flow-month-cell i {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  margin: 2px 0;
+  border-radius: 999px;
+  color: #fff;
+  font-size: .72rem;
+  font-style: normal;
+  line-height: 1;
+  background: rgba(255,255,255,.10);
+}
+.hm-flow-month-cell small {
+  max-width: 100%;
+  color: var(--theme-text-muted, #837b99);
+  font-size: .48rem;
+  font-weight: 900;
+  line-height: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: clip;
+}
+.hm-flow-month-cell.has-value {
+  border-color: rgba(124,92,255,.35);
+  background: rgba(124,92,255,.12);
+}
+.hm-flow-month-cell.has-value i {
+  background: linear-gradient(145deg, #ff6f9c, #7c5cff);
+  box-shadow: 0 4px 10px rgba(124,92,255,.18);
+}
+.hm-flow-month-grid.is-ratio .hm-flow-month-cell {
+  background: rgba(124,92,255,var(--hm-flow-alpha));
+}
+.hm-flow-month-grid.is-ratio .hm-flow-month-cell i {
+  width: var(--hm-flow-dot, 14px);
+  height: var(--hm-flow-dot, 14px);
+  background: linear-gradient(145deg, #ff6f9c, #7c5cff);
+  opacity: var(--hm-flow-dot-opacity, .38);
+}
+.hm-flow-month-grid.is-ratio .hm-flow-month-cell.is-empty i {
+  opacity: .22;
+}
+.hm-flow-meal-dots {
+  display: flex;
+  gap: 2px;
+  align-items: end;
+  justify-content: center;
+  min-width: 0;
+}
+.hm-flow-meal-dots i {
+  width: 5px;
+  height: 16px;
+  margin: 0;
+  border-radius: 999px;
+  background: rgba(255,255,255,.14);
+}
+.hm-flow-meal-dots i.on {
+  background: linear-gradient(180deg, #ff6f9c, #7c5cff);
+}
+.hm-flow-month-grid.is-meal .hm-flow-month-cell i {
+  box-shadow: none;
+}
 .hm-flow-mini-bars {
   display: block;
   margin-top: 10px;
@@ -12743,6 +12848,13 @@ body.dark-mode .history-detail-summary-card > div:not(.history-detail-summary-ic
   color: var(--hm-color-text, #fff) !important;
 }
 @media (max-width: 640px) {
+  .hm-flow-chart {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+  .hm-flow-chart svg {
+    height: 138px;
+  }
   .hm-flow-bars {
     gap: 4px;
     min-height: 96px;
@@ -12752,7 +12864,9 @@ body.dark-mode .history-detail-summary-card > div:not(.history-detail-summary-ic
     min-height: 68px;
   }
   .hm-flow-mood-row {
-    grid-template-columns: 62px 1fr 30px;
+    grid-template-columns: minmax(58px, auto) 1fr 34px;
+    gap: 7px;
+    padding: 6px 7px;
   }
   .hm-flow-dots,
   .hm-flow-meals {
@@ -12775,5 +12889,39 @@ body.dark-mode .history-detail-summary-card > div:not(.history-detail-summary-ic
   .hm-flow-meal-day i {
     width: 6px;
     height: 20px;
+  }
+  .hm-flow-month-grid {
+    gap: 4px;
+  }
+  .hm-flow-month-cell {
+    min-height: 42px;
+    padding: 3px 1px 2px;
+    border-radius: 10px;
+  }
+  .hm-flow-month-cell b {
+    font-size: .5rem;
+  }
+  .hm-flow-month-cell i {
+    width: 17px;
+    height: 17px;
+    font-size: .62rem;
+  }
+  .hm-flow-month-cell small {
+    font-size: .42rem;
+  }
+  .hm-flow-meal-dots {
+    gap: 1px;
+  }
+  .hm-flow-meal-dots i {
+    width: 4px;
+    height: 14px;
+  }
+}
+@media (min-width: 641px) and (max-width: 920px) {
+  .hm-flow-month-grid {
+    gap: 5px;
+  }
+  .hm-flow-month-cell {
+    min-height: 46px;
   }
 }
