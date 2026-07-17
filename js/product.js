@@ -281,6 +281,9 @@
         const blanks = (firstDate.getDay() + 6) % 7;
         return Array.from({length:blanks}, () => '<div class="hm-flow-month-cell is-blank" aria-hidden="true"></div>').join('');
     }
+    function hmHomeStatsMonthWeekdays(){
+        return '<div class="hm-flow-month-weekdays" aria-hidden="true"><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span><span>일</span></div>';
+    }
     function hmHomeStatsEmptyChart(item, message){
         return `<section class="hm-home-stats-graph is-empty"><div><strong>${safe(hmHomeStatsChartTitle(item))}</strong><span>${safe(hmHomeStatsGraphUnit(item))}</span></div><p>${safe(message || '그래프를 보려면 같은 기간에 2일 이상 기록이 필요해요.')}</p></section>`;
     }
@@ -326,7 +329,7 @@
         if (valid.length < 2) return hmHomeStatsEmptyChart(item);
         const guidesData = options.guides || hmHomeStatsNiceGuides(valid, hmHomeStatsGraphUnit(item));
         const { min, max } = hmHomeStatsChartRange(valid, guidesData);
-        const width = 380, height = 150, left = 42, right = 10, top = 14, bottom = 24;
+        const width = 430, height = 158, left = 40, right = 6, top = 12, bottom = 24;
         const plotW = width - left - right;
         const plotH = height - top - bottom;
         const yFor = value => top + plotH - ((value - min) / (max - min)) * plotH;
@@ -347,7 +350,7 @@
         const dots = points.filter(Boolean).map(point => `<circle cx="${point.x.toFixed(1)}" cy="${point.y.toFixed(1)}" r="4.2"></circle>`).join('');
         const labels = rows.map((row, index) => {
             const label = hmHomeStatsDayLabel(row, index, rows.length);
-            return label ? `<text class="hm-flow-x-label" x="${xFor(index).toFixed(1)}" y="144">${label}</text>` : '';
+            return label ? `<text class="hm-flow-x-label" x="${xFor(index).toFixed(1)}" y="152">${label}</text>` : '';
         }).join('');
         return `<section class="hm-home-stats-graph hm-flow-chart is-line"><div><strong>${safe(hmHomeStatsChartTitle(item))}</strong><span>${safe(hmHomeStatsGraphUnit(item))}</span></div><svg viewBox="0 0 ${width} ${height}" role="img" aria-label="${safe(item.label)} ${safe(hmHomeStatsChartTitle(item))}">${guides}<line x1="${left}" y1="${top}" x2="${left}" y2="${height - bottom}"></line><line x1="${left}" y1="${height - bottom}" x2="${width - right}" y2="${height - bottom}"></line><path d="${path}"></path>${dots}<g>${labels}</g></svg></section>`;
     }
@@ -358,7 +361,7 @@
         if (!valid.length) return hmHomeStatsEmptyChart(item, '표시할 기록이 아직 없어요.');
         const guidesData = options.guides || [];
         const maxBase = Math.max(...valid, ...guidesData.map(g => g.value || 0), options.max || 0, 1);
-        const width = 380, height = 140, left = 42, right = 10, top = 12, bottom = 24;
+        const width = 430, height = 148, left = 40, right = 6, top = 10, bottom = 24;
         const plotW = width - left - right;
         const plotH = height - top - bottom;
         const xStep = rows.length <= 1 ? plotW : plotW / rows.length;
@@ -378,7 +381,7 @@
             const label = hmHomeStatsDayLabel(row, index, rows.length);
             if (!label) return '';
             const x = rows.length <= 1 ? left + plotW / 2 : left + index * xStep + xStep / 2;
-            return `<text class="hm-flow-x-label" x="${x.toFixed(1)}" y="134">${label}</text>`;
+            return `<text class="hm-flow-x-label" x="${x.toFixed(1)}" y="142">${label}</text>`;
         }).join('');
         return `<section class="hm-home-stats-graph hm-flow-chart is-bars"><div><strong>${safe(hmHomeStatsChartTitle(item))}</strong><span>${safe(hmHomeStatsGraphUnit(item))}</span></div><svg viewBox="0 0 ${width} ${height}" role="img" aria-label="${safe(item.label)} ${safe(hmHomeStatsChartTitle(item))}">${guides}<line x1="${left}" y1="${top}" x2="${left}" y2="${height - bottom}"></line><line x1="${left}" y1="${height - bottom}" x2="${width - right}" y2="${height - bottom}"></line>${bars}<g>${labels}</g></svg></section>`;
     }
@@ -393,13 +396,13 @@
                 const done = Number(row.stat.done || 0);
                 const dayPct = total ? Math.round(done / total * 100) : 0;
                 const alpha = (0.07 + dayPct * 0.006).toFixed(2);
-                const dotSize = Math.round(12 + dayPct * 0.12);
+                const dotSize = Math.round(8 + dayPct * 0.12);
                 const dotOpacity = (0.32 + dayPct * 0.006).toFixed(2);
                 return `<div class="hm-flow-month-cell ${total ? 'has-value' : 'is-empty'}" style="--hm-flow-alpha:${alpha};--hm-flow-dot:${dotSize}px;--hm-flow-dot-opacity:${dotOpacity}"><b>${Number(row.key.slice(-2))}</b><i></i><small>${total ? `${dayPct}%` : '-'}</small></div>`;
             }).join('');
-            return `<section class="hm-home-stats-graph hm-flow-chart is-ratio is-monthly"><div><strong>${safe(hmHomeStatsChartTitle(item))}</strong><span>%</span></div><div class="hm-flow-progress"><i style="width:${pct}%"></i><b>${pct}%</b><small>${totalDone}/${totalGoal || 0} 완료</small></div><div class="hm-flow-month-grid is-ratio">${hmHomeStatsMonthBlankCells(rows)}${cells}</div></section>`;
+            return `<section class="hm-home-stats-graph hm-flow-chart is-ratio is-monthly"><div><strong>월간 달성 지도</strong><span>%</span></div><div class="hm-flow-progress"><i style="width:${pct}%"></i><b>${pct}%</b><small>${totalDone}/${totalGoal || 0} 완료</small></div>${hmHomeStatsMonthWeekdays()}<div class="hm-flow-month-grid is-ratio">${hmHomeStatsMonthBlankCells(rows)}${cells}</div></section>`;
         }
-        const width = 380, height = 118, left = 42, right = 10, top = 12, bottom = 22;
+        const width = 430, height = 126, left = 40, right = 6, top = 10, bottom = 22;
         const plotW = width - left - right;
         const plotH = height - top - bottom;
         const xStep = rows.length <= 1 ? plotW : plotW / rows.length;
@@ -421,7 +424,7 @@
             const label = hmHomeStatsDayLabel(row, index, rows.length);
             if (!label) return '';
             const x = rows.length <= 1 ? left + plotW / 2 : left + index * xStep + xStep / 2;
-            return `<text class="hm-flow-x-label" x="${x.toFixed(1)}" y="112">${label}</text>`;
+            return `<text class="hm-flow-x-label" x="${x.toFixed(1)}" y="120">${label}</text>`;
         }).join('');
         return `<section class="hm-home-stats-graph hm-flow-chart is-ratio"><div><strong>${safe(hmHomeStatsChartTitle(item))}</strong><span>%</span></div><div class="hm-flow-progress"><i style="width:${pct}%"></i><b>${pct}%</b><small>${totalDone}/${totalGoal || 0} 완료</small></div><svg class="hm-flow-ratio-svg" viewBox="0 0 ${width} ${height}" role="img" aria-label="${safe(item.label)} 날짜별 달성률">${guides}<line x1="${left}" y1="${top}" x2="${left}" y2="${height - bottom}"></line><line x1="${left}" y1="${height - bottom}" x2="${width - right}" y2="${height - bottom}"></line>${bars}<g>${labels}</g></svg></section>`;
     }
@@ -439,8 +442,8 @@
     function hmHomeStatsCheckHtml(item, stats){
         const rows = stats.rows || [];
         if (hmHomeStatsPeriod === 'month') {
-            const cells = rows.map(row => `<div class="hm-flow-month-cell ${row.stat.hit ? 'has-value is-on' : 'is-empty'}"><b>${Number(row.key.slice(-2))}</b><i>${row.stat.hit ? item.icon : ''}</i><small>${row.stat.hit ? '기록' : '-'}</small></div>`).join('');
-            return `<section class="hm-home-stats-graph hm-flow-chart is-check is-monthly"><div><strong>${safe(hmHomeStatsChartTitle(item))}</strong><span>월간</span></div><div class="hm-flow-month-grid is-check">${hmHomeStatsMonthBlankCells(rows)}${cells}</div></section>`;
+            const cells = rows.map(row => `<div class="hm-flow-month-cell ${row.stat.hit ? 'has-value is-on' : 'is-empty'}"><b>${Number(row.key.slice(-2))}</b><i aria-hidden="true"></i><small>${row.stat.hit ? '기록' : '-'}</small></div>`).join('');
+            return `<section class="hm-home-stats-graph hm-flow-chart is-check is-monthly"><div><strong>월간 기록 지도</strong><span>월간</span></div>${hmHomeStatsMonthWeekdays()}<div class="hm-flow-month-grid is-check">${hmHomeStatsMonthBlankCells(rows)}${cells}</div></section>`;
         }
         const dots = rows.map((row, index) => `<div class="hm-flow-dot ${row.stat.hit ? 'is-on' : 'is-off'}"><b>${row.stat.hit ? item.icon : '·'}</b><small>${hmHomeStatsPeriod === 'month' ? Number(row.key.slice(-2)) : hmHomeStatsDayLabel(row, index, rows.length)}</small></div>`).join('');
         return `<section class="hm-home-stats-graph hm-flow-chart is-check"><div><strong>${safe(hmHomeStatsChartTitle(item))}</strong><span>기록</span></div><div class="hm-flow-dots ${hmHomeStatsPeriod === 'month' ? 'is-month' : 'is-week'}">${dots}</div></section>`;
@@ -452,7 +455,7 @@
                 const done = Math.max(0, Math.min(3, Number(row.stat.done || 0)));
                 return `<div class="hm-flow-month-cell ${done ? 'has-value' : 'is-empty'}"><b>${Number(row.key.slice(-2))}</b><span class="hm-flow-meal-dots"><i class="${done >= 1 ? 'on' : ''}"></i><i class="${done >= 2 ? 'on' : ''}"></i><i class="${done >= 3 ? 'on' : ''}"></i></span><small>${done}/3</small></div>`;
             }).join('');
-            return `<section class="hm-home-stats-graph hm-flow-chart is-meal is-monthly"><div><strong>${safe(hmHomeStatsChartTitle(item))}</strong><span>월간</span></div><div class="hm-flow-month-grid is-meal">${hmHomeStatsMonthBlankCells(rows)}${cells}</div></section>`;
+            return `<section class="hm-home-stats-graph hm-flow-chart is-meal is-monthly"><div><strong>월간 식사 지도</strong><span>아침·점심·저녁</span></div>${hmHomeStatsMonthWeekdays()}<div class="hm-flow-month-grid is-meal">${hmHomeStatsMonthBlankCells(rows)}${cells}</div></section>`;
         }
         const bars = rows.map((row, index) => {
             const done = Math.max(0, Math.min(3, Number(row.stat.done || 0)));

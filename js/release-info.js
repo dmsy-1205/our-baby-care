@@ -5,20 +5,20 @@
 (function () {
     const release = Object.freeze({
         product: 'HearMe2nite',
-        version: 'v1.0 STEP6.2.10.9',
-        appVersion: 'HearMe2nite v1.0 STEP6.2.10.9',
-        step: 'STEP6.2.10.9',
+        version: 'v1.0 STEP6.2.10.10',
+        appVersion: 'HearMe2nite v1.0 STEP6.2.10.10',
+        step: 'STEP6.2.10.10',
         build: '20260718',
         releaseDate: '2026.07.18',
         stage: 'Beta',
-        title: 'Our Flow Monthly Chart Redesign',
-        description: '우리의 흐름 월간 그래프를 모바일, 폴드, 태블릿, 컴퓨터 화면에서 가로로 깨지지 않도록 전용 히트맵 구조로 재설계했습니다.',
+        title: 'Our Flow Monthly Heatmap Redesign',
+        description: '우리의 흐름 한 달 통계를 작은 막대형 대신 달력형 히트맵으로 바꾸고, 모바일·폴드·태블릿·컴퓨터에서 가로 깨짐을 막았습니다.',
         changes: Object.freeze([
-            'Replaced monthly check charts with fixed seven-column heatmaps',
-            'Replaced monthly meal charts with compact three-dot meal heatmaps',
-            'Replaced monthly promise and routine bars with achievement heatmaps',
-            'Expanded line and water chart drawing area for better readability',
-            'Improved mood distribution grouping so each value belongs clearly to its item',
+            'Changed monthly promise and routine charts to calendar-style achievement heatmaps',
+            'Changed monthly check charts to calendar-style dot heatmaps',
+            'Changed monthly meal charts to calendar-style three-dot heatmaps',
+            'Added weekday headers and fixed seven-column monthly layout across screen sizes',
+            'Expanded line and water charts slightly for better readability',
             '기존 days 기록을 읽기만 하며 Firebase 저장 구조는 변경하지 않음'
         ])
     });

@@ -12641,12 +12641,17 @@ body.dark-mode .history-detail-summary-card > div:not(.history-detail-summary-ic
   display: grid;
   gap: 7px;
   padding: 4px 0 2px;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
 }
 .hm-flow-mood-row {
   display: grid;
-  grid-template-columns: minmax(76px, auto) 1fr 42px;
+  grid-template-columns: minmax(70px, 88px) minmax(0, 1fr) 42px;
   align-items: center;
   gap: 10px;
+  width: 100%;
+  min-width: 0;
   min-height: 34px;
   padding: 7px 9px;
   border-radius: 13px;
@@ -12658,12 +12663,17 @@ body.dark-mode .history-detail-summary-card > div:not(.history-detail-summary-ic
   color: var(--theme-text, #2f2940);
   font-size: .7rem;
   font-weight: 950;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 .hm-flow-mood-row span {
   color: #ff7aa6;
   text-align: right;
 }
 .hm-flow-mood-row i {
+  min-width: 0;
   height: 10px;
   overflow: hidden;
   border-radius: 999px;
@@ -12735,22 +12745,34 @@ body.dark-mode .history-detail-summary-card > div:not(.history-detail-summary-ic
 .hm-flow-month-grid {
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
-  gap: 6px;
+  gap: 7px;
   width: 100%;
   max-width: 100%;
   overflow: hidden;
-  padding: 4px 0 2px;
+  padding: 5px 0 2px;
   box-sizing: border-box;
+}
+.hm-flow-month-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 7px;
+  width: 100%;
+  margin: 8px 0 2px;
+  color: var(--theme-text-muted, #837b99);
+  font-size: .58rem;
+  font-weight: 950;
+  text-align: center;
 }
 .hm-flow-month-cell {
   position: relative;
   display: grid;
-  grid-template-rows: auto 1fr auto;
+  grid-template-rows: auto 1fr;
   place-items: center;
   min-width: 0;
-  min-height: 48px;
-  padding: 4px 2px 3px;
-  border-radius: 12px;
+  min-height: 58px;
+  aspect-ratio: 1 / .92;
+  padding: 5px 2px 4px;
+  border-radius: 14px;
   background: rgba(255,255,255,.052);
   border: 1px solid rgba(124,92,255,.13);
   overflow: hidden;
@@ -12760,25 +12782,31 @@ body.dark-mode .history-detail-summary-card > div:not(.history-detail-summary-ic
   visibility: hidden;
 }
 .hm-flow-month-cell b {
+  position: absolute;
+  top: 5px;
+  left: 6px;
   color: var(--theme-text-muted, #837b99);
-  font-size: .56rem;
+  font-size: .58rem;
   font-weight: 950;
   line-height: 1;
 }
 .hm-flow-month-cell i {
   display: grid;
   place-items: center;
-  width: 20px;
-  height: 20px;
-  margin: 2px 0;
+  width: 12px;
+  height: 12px;
+  margin: 10px 0 0;
   border-radius: 999px;
   color: #fff;
-  font-size: .72rem;
+  font-size: 0;
   font-style: normal;
   line-height: 1;
   background: rgba(255,255,255,.10);
 }
 .hm-flow-month-cell small {
+  position: absolute;
+  right: 5px;
+  bottom: 4px;
   max-width: 100%;
   color: var(--theme-text-muted, #837b99);
   font-size: .48rem;
@@ -12796,6 +12824,10 @@ body.dark-mode .history-detail-summary-card > div:not(.history-detail-summary-ic
   background: linear-gradient(145deg, #ff6f9c, #7c5cff);
   box-shadow: 0 4px 10px rgba(124,92,255,.18);
 }
+.hm-flow-month-grid.is-check .hm-flow-month-cell.has-value i {
+  width: 13px;
+  height: 13px;
+}
 .hm-flow-month-grid.is-ratio .hm-flow-month-cell {
   background: rgba(124,92,255,var(--hm-flow-alpha));
 }
@@ -12810,14 +12842,15 @@ body.dark-mode .history-detail-summary-card > div:not(.history-detail-summary-ic
 }
 .hm-flow-meal-dots {
   display: flex;
-  gap: 2px;
+  gap: 3px;
   align-items: end;
   justify-content: center;
   min-width: 0;
+  margin-top: 12px;
 }
 .hm-flow-meal-dots i {
-  width: 5px;
-  height: 16px;
+  width: 6px;
+  height: 18px;
   margin: 0;
   border-radius: 999px;
   background: rgba(255,255,255,.14);
@@ -12864,9 +12897,13 @@ body.dark-mode .history-detail-summary-card > div:not(.history-detail-summary-ic
     min-height: 68px;
   }
   .hm-flow-mood-row {
-    grid-template-columns: minmax(58px, auto) 1fr 34px;
+    grid-template-columns: minmax(56px, 72px) minmax(0, 1fr) 32px;
     gap: 7px;
     padding: 6px 7px;
+  }
+  .hm-flow-mood-row b,
+  .hm-flow-mood-row span {
+    font-size: .62rem;
   }
   .hm-flow-dots,
   .hm-flow-meals {
@@ -12893,35 +12930,47 @@ body.dark-mode .history-detail-summary-card > div:not(.history-detail-summary-ic
   .hm-flow-month-grid {
     gap: 4px;
   }
+  .hm-flow-month-weekdays {
+    gap: 4px;
+    font-size: .5rem;
+  }
   .hm-flow-month-cell {
-    min-height: 42px;
+    min-height: 40px;
     padding: 3px 1px 2px;
     border-radius: 10px;
   }
   .hm-flow-month-cell b {
-    font-size: .5rem;
+    top: 4px;
+    left: 4px;
+    font-size: .48rem;
   }
   .hm-flow-month-cell i {
-    width: 17px;
-    height: 17px;
-    font-size: .62rem;
+    width: 9px;
+    height: 9px;
+    margin-top: 10px;
   }
   .hm-flow-month-cell small {
-    font-size: .42rem;
+    right: 3px;
+    bottom: 3px;
+    font-size: .38rem;
   }
   .hm-flow-meal-dots {
     gap: 1px;
+    margin-top: 10px;
   }
   .hm-flow-meal-dots i {
     width: 4px;
-    height: 14px;
+    height: 12px;
   }
 }
 @media (min-width: 641px) and (max-width: 920px) {
   .hm-flow-month-grid {
     gap: 5px;
   }
+  .hm-flow-month-weekdays {
+    gap: 5px;
+  }
   .hm-flow-month-cell {
-    min-height: 46px;
+    min-height: 50px;
   }
 }
