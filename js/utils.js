@@ -103,18 +103,68 @@ function getTrimmedValue(id) {
 // ---------------------------------------------------------
 // copyToClipboard
 // ---------------------------------------------------------
-function copyToClipboard() { executeCopy(document.getElementById('resultBox').value); }
+function copyToClipboard() {
+        const resultBox = document.getElementById('resultBox');
+        const text = resultBox ? resultBox.value : '';
+
+        if (!text) {
+            alert('복사할 기록 결과가 없습니다.');
+            return;
+        }
+
+        executeCopy(text, () => {
+            // 복사 완료 안내가 사용자에게 보인 뒤 결과 패널만 닫는다.
+            // 다른 기록/기념일/방 모달의 닫기 상태에는 영향을 주지 않는다.
+            window.setTimeout(() => {
+                const resultContainer = document.getElementById('resultContainer');
+                if (resultContainer) resultContainer.style.display = 'none';
+            }, 700);
+        });
+    }
 
 // ---------------------------------------------------------
 // executeCopy
 // ---------------------------------------------------------
-function executeCopy(text) {
-        navigator.clipboard.writeText(text).then(() => { showToast(); }).catch(() => {
+function executeCopy(text, onSuccess) {
+        const handleSuccess = () => {
+            showToast();
+            if (typeof onSuccess === 'function') onSuccess();
+        };
+
+        const fallbackCopy = () => {
             const tempBox = document.createElement('textarea');
-            tempBox.value = text; document.body.appendChild(tempBox);
-            tempBox.select(); document.execCommand('copy');
-            document.body.removeChild(tempBox); showToast();
-        });
+            tempBox.value = text;
+            tempBox.setAttribute('readonly', '');
+            tempBox.style.position = 'fixed';
+            tempBox.style.opacity = '0';
+            document.body.appendChild(tempBox);
+            tempBox.select();
+            tempBox.setSelectionRange(0, tempBox.value.length);
+
+            let copied = false;
+            try {
+                copied = document.execCommand('copy');
+            } finally {
+                document.body.removeChild(tempBox);
+            }
+
+            if (!copied) throw new Error('clipboard fallback failed');
+            handleSuccess();
+        };
+
+        if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+            return navigator.clipboard.writeText(text)
+                .then(handleSuccess)
+                .catch(() => fallbackCopy());
+        }
+
+        try {
+            fallbackCopy();
+            return Promise.resolve();
+        } catch (error) {
+            alert('결과를 복사하지 못했습니다. 다시 시도해 주세요.');
+            return Promise.reject(error);
+        }
     }
 
 // ---------------------------------------------------------
