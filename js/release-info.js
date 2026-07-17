@@ -5,20 +5,20 @@
 (function () {
     const release = Object.freeze({
         product: 'HearMe2nite',
-        version: 'v1.0 STEP6.2.12.1',
-        appVersion: 'HearMe2nite v1.0 STEP6.2.12.1',
-        step: 'STEP6.2.12.1',
+        version: 'v1.0 STEP6.2.12.2',
+        appVersion: 'HearMe2nite v1.0 STEP6.2.12.2',
+        step: 'STEP6.2.12.2',
         build: '20260718',
         releaseDate: '2026.07.18',
         stage: 'Beta',
-        title: 'Home Notification Bar Position Fix',
-        description: '홈 화면에서 우리의 대화, 기록 날짜, 알림 바, 우리의 흐름, 오늘의 요약 순서가 실제 표시에서도 유지되도록 배치 고정 로직을 수정했습니다.',
+        title: 'Home Chat Position Fix',
+        description: '홈 화면에서 우리의 대화가 오늘의 요약 아래로 밀리지 않도록 기존 이동 로직을 제거하고, 상단 배치 순서를 고정했습니다.',
         changes: Object.freeze([
-            'Fixed actual home card order after render',
-            'Kept Our Chat above the record date field',
-            'Kept notification bar directly below the record date field',
+            'Fixed Our Chat card being moved below Today Summary',
+            'Kept Our Chat directly below Our Space',
+            'Kept record date below Our Chat',
+            'Kept notification bar below the record date field',
             'Kept Our Flow and Today Summary below the notification bar',
-            'Prevented summary/stat cards from moving the record date field',
             '기존 기록/채팅 저장 구조 변경 없음'
         ])
     });

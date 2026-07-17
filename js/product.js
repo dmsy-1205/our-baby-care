@@ -71,16 +71,15 @@
             const toolbar = $('customRoutineToolbar');
             const routineList = $('customRoutineList');
             if (!dash || !title || !wrap) return;
-            const chatCard = $('chatLaunchCard');
-            if (chatCard && chatCard.previousElementSibling !== dash) dash.insertAdjacentElement('afterend', chatCard);
+            syncHomeTopOrder();
             let holder = $('hmTodayPromiseSection');
             if (!holder) {
                 holder = document.createElement('section');
                 holder.id = 'hmTodayPromiseSection';
                 holder.className = 'hm-today-promise-section';
-                (chatCard || dash).insertAdjacentElement('afterend', holder);
-            } else if (holder.previousElementSibling !== (chatCard || dash)) {
-                (chatCard || dash).insertAdjacentElement('afterend', holder);
+                dash.insertAdjacentElement('afterend', holder);
+            } else if (holder.previousElementSibling !== dash) {
+                dash.insertAdjacentElement('afterend', holder);
             }
             // RC2.14.4: title만 이동되고 본문 카드가 남거나 숨는 상태를 방지한다.
             if (title.parentNode !== holder) holder.appendChild(title);
