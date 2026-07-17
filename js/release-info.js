@@ -5,20 +5,19 @@
 (function () {
     const release = Object.freeze({
         product: 'HearMe2nite',
-        version: 'v1.0 STEP6.2.12.16',
-        appVersion: 'HearMe2nite v1.0 STEP6.2.12.16',
-        step: 'STEP6.2.12.16',
+        version: 'v1.0 STEP6.2.12.17',
+        appVersion: 'HearMe2nite v1.0 STEP6.2.12.17',
+        step: 'STEP6.2.12.17',
         build: '20260718',
         releaseDate: '2026.07.18',
         stage: 'Beta',
-        title: 'PWA Cache Recovery Foundation',
-        description: '설치형 PWA가 오래된 화면과 오래된 JS/CSS에 갇히지 않도록 앱 캐시 갱신 구조를 최신 우선 방식으로 강화했습니다.',
+        title: 'Theme Aware Notification Badge',
+        description: '홈 화면 알림배지가 다크모드와 개인 테마 색상을 자연스럽게 따라가도록 스타일을 정리했습니다.',
         changes: Object.freeze([
-            'Changed service worker JS/CSS handling to network-first',
-            'Added no-cache hosting headers for JS and CSS files',
-            'Added app-side PWA cache recovery on version change',
-            'Kept custom record date picker as the cross-device fallback',
-            'Reduced risk of installed iPhone PWA staying on stale hotfix versions',
+            'Made the home notification badge follow theme card colors',
+            'Added dark-mode styling for notification badge and notification rows',
+            'Kept unread notification emphasis while matching the active theme',
+            'Preserved PWA cache recovery and custom record date picker behavior',
             '기존 기록/채팅 저장 구조 변경 없음'
         ])
     });
