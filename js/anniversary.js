@@ -12,7 +12,8 @@ let hmAnniversaryState = {
     firstMetDate: '',
     anniversaries: {},
     isLoaded: false,
-    isModalOpen: false
+    isModalOpen: false,
+    isPanelOpen: false
 };
 
 const HM_ANNIVERSARY_TYPES = [
@@ -519,6 +520,11 @@ function hmRenderAnniversaryPanel() {
     const ordered = hmSortAnniversariesByUpcoming(hmGetAnniversaryList());
     const preview = ordered.slice(0, 3);
     const hiddenCount = Math.max(ordered.length - preview.length, 0);
+    const isOpen = !!hmAnniversaryState.isPanelOpen;
+    const nearest = preview[0];
+    const nearestSummary = nearest
+        ? `${hmGetAnniversaryTypeMeta(nearest.type).icon} ${escapeHtml(nearest.title)} · ${escapeHtml(hmGetUpcomingDayInfo(nearest.date).label)}`
+        : '등록된 기념일이 없습니다';
     const listHtml = ordered.length
         ? `<div class="anniversary-panel-list anniversary-panel-preview-list">${preview.map(item => {
             const meta = hmGetAnniversaryTypeMeta(item.type);
@@ -539,17 +545,25 @@ function hmRenderAnniversaryPanel() {
                 <div class="anniversary-panel-date">생일, 여행, 데이트, 휴가처럼 기억하고 싶은 날짜를 추가해 보세요.</div>
             </div>
         </div>`;
-    box.innerHTML = `<div class="anniversary-card anniversary-card-compact">
+    box.innerHTML = `<div class="anniversary-card anniversary-card-compact ${isOpen ? 'is-open' : 'is-collapsed'}">
         <div class="anniversary-head">
             <div>
                 <div class="anniversary-title">💕 우리의 기념일</div>
-                <div class="anniversary-sub">다가오는 순서로 최대 3개만 보여주고, 캘린더에도 함께 표시됩니다.</div>
+                <div class="anniversary-sub">${isOpen ? '다가오는 순서로 최대 3개만 보여주고, 캘린더에도 함께 표시됩니다.' : nearestSummary}</div>
             </div>
-            <button type="button" class="anniversary-toggle-btn" onclick="hmOpenAnniversarySettings()">관리</button>
+            <div class="anniversary-panel-actions">
+                <button type="button" class="anniversary-toggle-btn anniversary-fold-btn" onclick="hmToggleAnniversaryPanel()" aria-expanded="${isOpen ? 'true' : 'false'}">${isOpen ? '접기' : '펼치기'}</button>
+                <button type="button" class="anniversary-toggle-btn" onclick="hmOpenAnniversarySettings()">관리</button>
+            </div>
         </div>
-        ${listHtml}
+        <div class="anniversary-panel-collapsible" ${isOpen ? '' : 'hidden'}>${listHtml}</div>
     </div>`;
 }
+
+window.hmToggleAnniversaryPanel = function() {
+    hmAnniversaryState.isPanelOpen = !hmAnniversaryState.isPanelOpen;
+    hmRenderAnniversaryPanel();
+};
 async function hmRefreshAnniversaryPanel() {
     await hmLoadAnniversarySettings();
     hmRenderAnniversaryPanel();

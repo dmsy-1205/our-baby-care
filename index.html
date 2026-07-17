@@ -35,7 +35,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-functions-compat.js"></script>
 
-    <link rel="stylesheet" href="css/style.css?v=step6-2-10-10-2-our-flow-meal-count-fix-20260718">
+    <link rel="stylesheet" href="css/style.css?v=step6-2-10-11-history-center-layout-cleanup-20260718">
 </head>
 <body class="hm-booting">
 
@@ -667,8 +667,6 @@
         </div>
         <div class="history-intro-note">달을 넘기며 기록과 기념일을 확인하고, 날짜를 누르면 하루 기록이 열립니다.</div>
         <div id="recordDeletionNoticeHistory" hidden></div>
-        <div id="calendarBox"></div>
-        <div id="anniversaryPanel" class="anniversary-panel"></div>
         <div class="history-v2-toolbar history-v2-toolbar-below" aria-label="History 2.0 controls">
             <input type="search" id="historySearchInput" placeholder="기록 검색: 미션, 메모, 루틴, 식사" oninput="hmHistoryApplySearch()">
             <select id="historyTypeFilter" onchange="hmHistoryApplySearch()" aria-label="기록 필터">
@@ -680,6 +678,8 @@
             </select>
             <button type="button" onclick="hmHistoryClearSearch()">초기화</button>
         </div>
+        <div id="calendarBox"></div>
+        <div id="anniversaryPanel" class="anniversary-panel"></div>
         <div id="photoThumbs" class="history-thumb-row"></div>
         <div class="history-selected-section-title">선택한 날짜의 기록</div>
         <div class="history-list" id="historyList"></div>
@@ -1260,7 +1260,7 @@
 </div>
 
 <div class="toast" id="toast">기록이 복사되었습니다! 💕</div>
-    <script src="js/release-info.js?v=step6-2-10-10-2-our-flow-meal-count-fix-20260718"></script>
+    <script src="js/release-info.js?v=step6-2-10-11-history-center-layout-cleanup-20260718"></script>
     <script src="js/config.js?v=step5-10-13-history-month-server-reconciliation-20260716"></script>
     <script src="js/utils.js?v=step5-10-13-history-month-server-reconciliation-20260716"></script>
     <script src="js/popup.js?v=step6-2-1-manager-readonly-20260716"></script>
@@ -1272,14 +1272,14 @@
     <script src="js/custom-routine.js?v=step5-10-13-history-month-server-reconciliation-20260716"></script>
     <script src="js/sub-routine.js?v=step5-10-13-history-month-server-reconciliation-20260716"></script>
     <script src="js/history.js?v=step6-2-9-history-glance-completion-20260717"></script>
-    <script src="js/anniversary.js?v=step6-2-4-anniversary-visibility-state-20260716"></script>
+    <script src="js/anniversary.js?v=step6-2-10-11-history-center-layout-cleanup-20260718"></script>
     <script src="js/theme.js?v=step5-10-13-history-month-server-reconciliation-20260716"></script>
     <script src="js/profile.js?v=step6-1-1-admin-console-launcher-20260716"></script>
     <script src="js/chat.js?v=step5-10-13-history-month-server-reconciliation-20260716"></script>
     <script src="js/autosave.js?v=step5-10-13-history-month-server-reconciliation-20260716"></script>
     <script src="js/qa.js?v=step5-10-13-history-month-server-reconciliation-20260716"></script>
     <script src="js/motion.js?v=step5-10-13-history-month-server-reconciliation-20260716"></script>
-    <script src="js/product.js?v=step6-2-10-10-2-our-flow-meal-count-fix-20260718"></script>
+    <script src="js/product.js?v=step6-2-10-11-history-center-layout-cleanup-20260718"></script>
     <script src="js/help-center.js?v=step5-10-13-history-month-server-reconciliation-20260716"></script>
     <script src="js/data-management.js?v=step6-1-1-admin-console-launcher-20260716"></script>
     <script src="js/app.js?v=step6-2-5-new-user-room-token-refresh-20260717"></script>

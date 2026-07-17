@@ -749,7 +749,6 @@ function openHistoryPanelModal() {
         <section class="history-selected-record-section">
             <div class="history-section-headline">
                 <div><strong>📝 선택한 날짜의 기록</strong><span>날짜를 누르면 하루 기록 팝업이 열립니다.</span></div>
-                ${selectedHistoryDate ? `<button type="button" class="history-open-again" onclick="openHistoryDetailModal('${selectedHistoryDate}')">다시 열기</button>` : ''}
             </div>
             ${selectedCard}
         </section>
@@ -1098,7 +1097,6 @@ function displayHistory(daysData) {
         <div class="history-selected-hint history-popup-hint">
             <strong>${formatHistoryDateLabel(date)} 기록</strong>
             캘린더 날짜를 누르면 하루 기록이 바로 팝업으로 열립니다.
-            <button type="button" class="history-open-again" onclick="openHistoryDetailModal('${date}')">다시 열기</button>
         </div>`;
 }
 

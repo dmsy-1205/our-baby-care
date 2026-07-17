@@ -5,21 +5,21 @@
 (function () {
     const release = Object.freeze({
         product: 'HearMe2nite',
-        version: 'v1.0 STEP6.2.10.10.2',
-        appVersion: 'HearMe2nite v1.0 STEP6.2.10.10.2',
-        step: 'STEP6.2.10.10.2',
+        version: 'v1.0 STEP6.2.10.11',
+        appVersion: 'HearMe2nite v1.0 STEP6.2.10.11',
+        step: 'STEP6.2.10.11',
         build: '20260718',
         releaseDate: '2026.07.18',
         stage: 'Beta',
-        title: 'Our Flow Meal Count Fix',
-        description: '우리의 흐름 식사 기록 통계에서 아침·점심·저녁 중 실제 입력된 끼니만 계산하고 표시하도록 수정했습니다.',
+        title: 'History Center Layout Cleanup',
+        description: '히스토리 센터에서 검색을 캘린더 위로 이동하고, 우리의 기념일을 접힘형으로 정리했으며, 불필요한 다시 열기 버튼을 제거했습니다.',
         changes: Object.freeze([
-            'Counts only actually entered breakfast, lunch, and dinner values',
-            'Ignores empty meal placeholders such as record labels and no-record values',
-            'Shows monthly meal dots by actual meal position instead of filling from the first dot',
-            'Reduced inactive meal-dot emphasis so partial meals are easier to read',
+            'Moved History Center search controls above the calendar',
+            'Changed anniversary panel to a collapsible summary card',
+            'Removed redundant reopen buttons from the selected history area',
+            'Kept calendar date clicks as the primary way to open daily records',
             'Updated cache tags for immediate review',
-            '기존 days 기록을 읽기만 하며 Firebase 저장 구조는 변경하지 않음'
+            '기존 days/anniversary 저장 구조 변경 없음'
         ])
     });
 

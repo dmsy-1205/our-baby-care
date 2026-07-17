@@ -13008,3 +13008,42 @@ body.dark-mode .history-detail-summary-card > div:not(.history-detail-summary-ic
     min-height: 50px;
   }
 }
+/* STEP6.2.10.11 - History Center layout cleanup */
+.history-v2-toolbar-below {
+    margin: 12px 0 14px !important;
+}
+
+.anniversary-card-compact.is-collapsed {
+    padding-bottom: 14px;
+}
+
+.anniversary-card-compact.is-collapsed .anniversary-head {
+    margin-bottom: 0 !important;
+}
+
+.anniversary-panel-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.anniversary-panel-collapsible[hidden] {
+    display: none !important;
+}
+
+.anniversary-fold-btn {
+    background: rgba(124, 92, 255, 0.14) !important;
+}
+
+@media (max-width: 640px) {
+    .anniversary-panel-actions {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .anniversary-card-compact.is-collapsed .anniversary-head {
+        gap: 10px;
+    }
+}
