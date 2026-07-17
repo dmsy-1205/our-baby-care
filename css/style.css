@@ -11974,16 +11974,23 @@ body.dark-mode .history-detail-summary-card > div:not(.history-detail-summary-ic
   background: color-mix(in srgb, var(--hm-primary, #7c5cff) 22%, var(--hm-dark-card-soft, #202438)) !important;
 }
 
-/* STEP6.2.10.4.1 - 기록 통계 카드를 오늘의 요약 계열 안에서 컬러 구분 */
+/* STEP6.2.10.4.2 - 기록 통계/오늘의 요약 카드 계열 정렬 및 메뉴 칩 복구 */
+#hmProductDashboard.hm-beta-dashboard,
 #hmHomeStatsCard.hm-beta-dashboard {
   margin: 10px 0 12px !important;
   padding: 10px 12px !important;
   border-radius: 18px !important;
-  border: 1px solid rgba(104, 139, 255, .24) !important;
+  border: 1px solid rgba(124, 92, 255, .18) !important;
   background:
-    radial-gradient(circle at 12% 0%, rgba(133, 98, 255, .16), transparent 34%),
-    linear-gradient(135deg, rgba(244, 249, 255, .96), rgba(248, 244, 255, .92)) !important;
-  box-shadow: 0 10px 24px rgba(91, 112, 214, .08) !important;
+    radial-gradient(circle at 12% 0%, rgba(124, 92, 255, .10), transparent 34%),
+    linear-gradient(135deg, rgba(247, 245, 255, .95), rgba(242, 244, 255, .90)) !important;
+  box-shadow: 0 10px 24px rgba(93, 69, 180, .07) !important;
+}
+#hmHomeStatsCard.hm-beta-dashboard {
+  border-color: rgba(124, 92, 255, .24) !important;
+  background:
+    radial-gradient(circle at 12% 0%, rgba(124, 92, 255, .18), transparent 34%),
+    linear-gradient(135deg, rgba(241, 244, 255, .96), rgba(246, 242, 255, .92)) !important;
   cursor: pointer;
   user-select: none;
 }
@@ -11993,9 +12000,11 @@ body.dark-mode .history-detail-summary-card > div:not(.history-detail-summary-ic
 #hmHomeStatsCard .hm-summary-strip-head {
   display: flex !important;
 }
+#hmProductDashboard .hm-summary-strip-head strong,
 #hmHomeStatsCard .hm-summary-strip-head strong {
   color: #374168 !important;
 }
+#hmProductDashboard .hm-summary-strip-head small,
 #hmHomeStatsCard .hm-summary-strip-head small {
   color: #7f88aa !important;
 }
@@ -12006,14 +12015,17 @@ body.dark-mode .history-detail-summary-card > div:not(.history-detail-summary-ic
   overflow: visible !important;
   padding: 0 !important;
 }
+#hmProductDashboard .hm-summary-dot,
 #hmHomeStatsCard .hm-summary-dot {
   min-width: 0 !important;
   border-color: rgba(104, 139, 255, .16) !important;
-  background: rgba(255,255,255,.66) !important;
+  background: rgba(255,255,255,.70) !important;
 }
+#hmProductDashboard .hm-summary-dot span,
 #hmHomeStatsCard .hm-summary-dot span {
   color: #56607f !important;
 }
+:root[data-hm-theme][data-hm-display="dark"] #hmProductDashboard.hm-beta-dashboard,
 :root[data-hm-theme][data-hm-display="dark"] #hmHomeStatsCard.hm-beta-dashboard {
   background:
     radial-gradient(circle at 12% 0%, rgba(124,92,255,.24), transparent 34%),
@@ -12021,13 +12033,17 @@ body.dark-mode .history-detail-summary-card > div:not(.history-detail-summary-ic
   border-color: rgba(150, 167, 255, .22) !important;
   box-shadow: none !important;
 }
+:root[data-hm-theme][data-hm-display="dark"] #hmProductDashboard .hm-summary-strip-head strong,
 :root[data-hm-theme][data-hm-display="dark"] #hmHomeStatsCard .hm-summary-strip-head strong {
   color: #f4f2ff !important;
 }
+:root[data-hm-theme][data-hm-display="dark"] #hmProductDashboard .hm-summary-strip-head small,
+:root[data-hm-theme][data-hm-display="dark"] #hmProductDashboard .hm-summary-dot span,
 :root[data-hm-theme][data-hm-display="dark"] #hmHomeStatsCard .hm-summary-strip-head small,
 :root[data-hm-theme][data-hm-display="dark"] #hmHomeStatsCard .hm-summary-dot span {
   color: #c6c7dc !important;
 }
+:root[data-hm-theme][data-hm-display="dark"] #hmProductDashboard .hm-summary-dot,
 :root[data-hm-theme][data-hm-display="dark"] #hmHomeStatsCard .hm-summary-dot {
   border-color: rgba(255,255,255,.10) !important;
   background: rgba(255,255,255,.06) !important;
@@ -12046,6 +12062,22 @@ body.dark-mode .history-detail-summary-card > div:not(.history-detail-summary-ic
   #hmHomeStatsCard.hm-beta-dashboard {
     padding: 8px 8px !important;
   }
+}
+
+.hm-home-stats-modal .hm-home-stats-menu {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  width: 100% !important;
+  max-width: 100% !important;
+}
+.hm-home-stats-modal .hm-home-stats-menu button,
+.hm-home-stats-modal .hm-home-stats-menu button.active {
+  width: auto !important;
+  max-width: none !important;
+  flex: 0 0 auto !important;
+  white-space: nowrap !important;
 }
 
 /* STEP6.2.10.2 - 통계 기간 전환 상태를 명확하게 표시 */

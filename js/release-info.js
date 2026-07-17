@@ -5,18 +5,19 @@
 (function () {
     const release = Object.freeze({
         product: 'HearMe2nite',
-        version: 'v1.0 STEP6.2.10.4.1',
-        appVersion: 'HearMe2nite v1.0 STEP6.2.10.4.1',
-        step: 'STEP6.2.10.4.1',
+        version: 'v1.0 STEP6.2.10.4.2',
+        appVersion: 'HearMe2nite v1.0 STEP6.2.10.4.2',
+        step: 'STEP6.2.10.4.2',
         build: '20260717',
         releaseDate: '2026.07.17',
         stage: 'Beta',
-        title: '기록 통계 카드 컬러 구분',
-        description: '홈 화면의 기록 통계 카드를 오늘의 요약 카드 계열로 유지하면서, 통계 카드만의 은은한 컬러로 구분했습니다.',
+        title: 'Home Stats Card UI Fix',
+        description: '기록 통계와 오늘의 요약 홈 카드를 같은 요약 카드 계열로 맞추고, 통계 모달 메뉴가 모두 보이도록 수정했습니다.',
         changes: Object.freeze([
-            '기록 통계 홈 카드에 보라-하늘빛 계열의 은은한 배경 적용',
-            '일반 입력 카드와는 다르게 보이면서 오늘의 요약과는 같은 계열로 유지',
-            '라이트/다크 화면 모두에서 내부 통계 칩이 읽기 좋도록 색상 보정',
+            'Home stats and today summary cards now use the same visual family',
+            'Home stats card keeps a slightly stronger accent while staying close to today summary',
+            'Fixed the stats modal menu chips so all stat categories can be reached',
+            'Adjusted light and dark color states for better readability',
             '기존 days 기록을 읽기만 하며 Firebase 저장 구조는 변경하지 않음'
         ])
     });

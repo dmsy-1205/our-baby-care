@@ -224,7 +224,7 @@
         overlay.style.display = 'none';
         overlay.setAttribute('aria-hidden','true');
         overlay.setAttribute('inert','');
-        overlay.innerHTML = `<div class="daily-modal hm-home-stats-modal" role="dialog" aria-modal="true" aria-labelledby="hmHomeStatsTitle"><div class="daily-modal-head"><h2 id="hmHomeStatsTitle">📊 기록 통계</h2><button type="button" class="modal-close-btn" onclick="hmCloseHomeStatsModal()">닫기</button></div><div class="hm-home-stats-menu">${HM_HOME_STAT_ITEMS.map(item => `<button type="button" data-home-stat="${item.key}" onclick="hmOpenHomeStatsModal('${item.key}')"><b>${item.icon}</b><span>${item.label}</span><small id="hmHomeStatMini_${item.key}">-</small></button>`).join('')}</div><div class="hm-home-stats-period"><button type="button" data-stat-period="week" onclick="hmSetHomeStatsPeriod('week')">주간</button><button type="button" data-stat-period="month" onclick="hmSetHomeStatsPeriod('month')">한 달</button></div><div id="hmHomeStatsModalBody" class="hm-home-stats-modal-body"></div></div>`;
+        overlay.innerHTML = `<div class="daily-modal hm-home-stats-modal" role="dialog" aria-modal="true" aria-labelledby="hmHomeStatsTitle"><div class="daily-modal-head"><h2 id="hmHomeStatsTitle">📊 기록 통계</h2><button type="button" class="modal-close-btn" onclick="hmCloseHomeStatsModal()">닫기</button></div><div class="hm-home-stats-menu">${HM_HOME_STAT_ITEMS.map(item => `<button type="button" data-home-stat="${item.key}" onclick="hmOpenHomeStatsModal('${item.key}')"><b>${item.icon}</b><span>${item.label}</span></button>`).join('')}</div><div class="hm-home-stats-period"><button type="button" data-stat-period="week" onclick="hmSetHomeStatsPeriod('week')">주간</button><button type="button" data-stat-period="month" onclick="hmSetHomeStatsPeriod('month')">한 달</button></div><div id="hmHomeStatsModalBody" class="hm-home-stats-modal-body"></div></div>`;
         document.body.appendChild(overlay);
         overlay.addEventListener('click', event => { if (event.target === overlay) window.hmCloseHomeStatsModal(); });
         return overlay;
@@ -236,6 +236,9 @@
         const body = $('hmHomeStatsModalBody') || ensureHomeStatsModal().querySelector('#hmHomeStatsModalBody');
         document.querySelectorAll('[data-stat-period]').forEach(btn => { const active = btn.dataset.statPeriod === hmHomeStatsPeriod; btn.classList.toggle('active', active); btn.setAttribute('aria-pressed', active ? 'true' : 'false'); });
         document.querySelectorAll('[data-home-stat]').forEach(btn => btn.classList.toggle('active', btn.dataset.homeStat === item.key));
+        const menu = ensureHomeStatsModal().querySelector('.hm-home-stats-menu');
+        const activeMenu = menu?.querySelector(`[data-home-stat="${item.key}"]`);
+        if (menu && activeMenu) activeMenu.scrollIntoView({ behavior:'smooth', inline:'center', block:'nearest' });
         const calendar = stats.rows.map(row => {
             const day = Number(row.key.slice(-2));
             const state = row.stat.hit ? 'has-stat' : 'empty-stat';
