@@ -107,6 +107,7 @@
     let hmHomeStatsActiveKey = 'promise';
     let hmHomeStatsPeriod = 'week';
     let hmHomeStatsCalendarOpen = false;
+    let hmHomeStatsGraphOpen = false;
     function hmHomeStatsItem(key){ return HM_HOME_STAT_ITEMS.find(item => item.key === key) || HM_HOME_STAT_ITEMS[0]; }
     function hmHomeStatIsFilled(value){
         const text = String(value == null ? '' : value).trim();
@@ -324,7 +325,7 @@
             const state = row.stat.hit ? 'has-stat' : 'empty-stat';
             return `<div class="hm-home-stats-day ${state}"><span>${day}</span><b>${item.icon}</b><small>${safe(row.stat.label)}</small></div>`;
         }).join('');
-        if (body) body.innerHTML = `<section class="hm-home-stats-hero"><div class="hm-home-stats-hero-icon">${item.icon}</div><div><strong>${safe(item.label)}</strong><span>${safe(hmHomeStatsPeriodLabel())}</span></div><em>${safe(stats.main)}</em></section>${hmHomeStatsGraphHtml(item, stats)}<div class="hm-home-stats-metrics"><div><strong>${safe(stats.main)}</strong><small>대표 값</small></div><div><strong>${safe(stats.sub)}</strong><small>요약</small></div><div><strong>${stats.hit}일</strong><small>기록된 날</small></div></div><button type="button" class="hm-home-stats-calendar-toggle" onclick="hmToggleHomeStatsCalendar()" aria-expanded="${hmHomeStatsCalendarOpen ? 'true' : 'false'}">${hmHomeStatsCalendarOpen ? '날짜별 보기 접기' : '날짜별 보기 펼치기'}</button><div class="hm-home-stats-calendar ${hmHomeStatsPeriod === 'month' ? 'is-month' : 'is-week'} ${hmHomeStatsCalendarOpen ? 'is-open' : 'is-collapsed'}" ${hmHomeStatsCalendarOpen ? '' : 'hidden'}>${calendar}</div><p class="hm-home-stats-note">기존 기록을 읽어서 표시하며, 이 통계 화면에서는 데이터를 저장하거나 변경하지 않습니다.</p>`;
+        if (body) body.innerHTML = `<section class="hm-home-stats-hero"><div class="hm-home-stats-hero-icon">${item.icon}</div><div><strong>${safe(item.label)}</strong><span>${safe(hmHomeStatsPeriodLabel())}</span></div><em>${safe(stats.main)}</em></section><div class="hm-home-stats-metrics"><div><strong>${safe(stats.main)}</strong><small>대표 값</small></div><div><strong>${safe(stats.sub)}</strong><small>요약</small></div><div><strong>${stats.hit}일</strong><small>기록된 날</small></div></div><button type="button" class="hm-home-stats-graph-toggle" onclick="hmToggleHomeStatsGraph()" aria-expanded="${hmHomeStatsGraphOpen ? 'true' : 'false'}">${hmHomeStatsGraphOpen ? '흐름 보기 접기' : '흐름 보기 펼치기'}</button><div ${hmHomeStatsGraphOpen ? '' : 'hidden'}>${hmHomeStatsGraphHtml(item, stats)}</div><button type="button" class="hm-home-stats-calendar-toggle" onclick="hmToggleHomeStatsCalendar()" aria-expanded="${hmHomeStatsCalendarOpen ? 'true' : 'false'}">${hmHomeStatsCalendarOpen ? '날짜별 보기 접기' : '날짜별 보기 펼치기'}</button><div class="hm-home-stats-calendar ${hmHomeStatsPeriod === 'month' ? 'is-month' : 'is-week'} ${hmHomeStatsCalendarOpen ? 'is-open' : 'is-collapsed'}" ${hmHomeStatsCalendarOpen ? '' : 'hidden'}>${calendar}</div><p class="hm-home-stats-note">기존 기록을 읽어서 표시하며, 이 통계 화면에서는 데이터를 저장하거나 변경하지 않습니다.</p>`;
     }
     function updateHomeStatsCard(){
         buildHomeStatsCard();
@@ -336,10 +337,11 @@
             target.textContent = stats.main;
         });
     }
-    window.hmOpenHomeStatsModal = function(key){ hmHomeStatsActiveKey = key || hmHomeStatsActiveKey; const overlay = ensureHomeStatsModal(); if (overlay.getAttribute('aria-hidden') !== 'false') hmHomeStatsCalendarOpen = false; renderHomeStatsModal(); if (typeof openModalOverlayById === 'function') openModalOverlayById('hmHomeStatsOverlay'); else { overlay.removeAttribute('inert'); overlay.style.display = 'flex'; overlay.setAttribute('aria-hidden','false'); } };
+    window.hmOpenHomeStatsModal = function(key){ hmHomeStatsActiveKey = key || hmHomeStatsActiveKey; const overlay = ensureHomeStatsModal(); if (overlay.getAttribute('aria-hidden') !== 'false') { hmHomeStatsCalendarOpen = false; hmHomeStatsGraphOpen = false; } renderHomeStatsModal(); if (typeof openModalOverlayById === 'function') openModalOverlayById('hmHomeStatsOverlay'); else { overlay.removeAttribute('inert'); overlay.style.display = 'flex'; overlay.setAttribute('aria-hidden','false'); } };
     window.hmCloseHomeStatsModal = function(){ if (typeof closeModalOverlayById === 'function') closeModalOverlayById('hmHomeStatsOverlay'); else { const overlay=$('hmHomeStatsOverlay'); if(overlay) overlay.style.display='none'; } };
     window.hmSetHomeStatsPeriod = function(period){ hmHomeStatsPeriod = period === 'month' ? 'month' : 'week'; renderHomeStatsModal(); };
     window.hmToggleHomeStatsCalendar = function(){ hmHomeStatsCalendarOpen = !hmHomeStatsCalendarOpen; renderHomeStatsModal(); };
+    window.hmToggleHomeStatsGraph = function(){ hmHomeStatsGraphOpen = !hmHomeStatsGraphOpen; renderHomeStatsModal(); };
     function buildDashboard(){
         if (HM_STAGE < 2 || $('hmProductDashboard')) return;
         const anchor = document.querySelector('.room-settings-card'); if (!anchor) return;

@@ -12154,7 +12154,8 @@ body.dark-mode .history-detail-summary-card > div:not(.history-detail-summary-ic
 .hm-home-stats-modal .hm-home-stats-menu small {
   display: none !important;
 }
-.hm-home-stats-calendar-toggle {
+.hm-home-stats-calendar-toggle,
+.hm-home-stats-graph-toggle {
   width: 100%;
   border: 1px solid var(--theme-border, rgba(124,92,255,.18));
   border-radius: 15px;
@@ -12167,7 +12168,8 @@ body.dark-mode .history-detail-summary-card > div:not(.history-detail-summary-ic
 .hm-home-stats-calendar[hidden] {
   display: none !important;
 }
-:root[data-hm-theme][data-hm-display="dark"] .hm-home-stats-calendar-toggle {
+:root[data-hm-theme][data-hm-display="dark"] .hm-home-stats-calendar-toggle,
+:root[data-hm-theme][data-hm-display="dark"] .hm-home-stats-graph-toggle {
   background: var(--hm-color-surface-2, #25283c) !important;
   border-color: var(--hm-color-border, rgba(255,255,255,.12)) !important;
   color: var(--hm-primary, #9f86ff) !important;
@@ -12466,4 +12468,16 @@ body.dark-mode .history-detail-summary-card > div:not(.history-detail-summary-ic
     height: 14px !important;
     font-size: .66rem !important;
   }
+}
+
+/* STEP6.2.10.6 - collapsible graph above calendar */
+.hm-home-stats-graph-toggle {
+  margin-top: 2px;
+  color: #ff6f9c;
+}
+.hm-home-stats-graph-toggle + div[hidden] {
+  display: none !important;
+}
+.hm-home-stats-graph-toggle + div:not([hidden]) {
+  display: block;
 }

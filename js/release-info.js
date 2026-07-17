@@ -5,19 +5,19 @@
 (function () {
     const release = Object.freeze({
         product: 'HearMe2nite',
-        version: 'v1.0 STEP6.2.10.5.1',
-        appVersion: 'HearMe2nite v1.0 STEP6.2.10.5.1',
-        step: 'STEP6.2.10.5.1',
+        version: 'v1.0 STEP6.2.10.6',
+        appVersion: 'HearMe2nite v1.0 STEP6.2.10.6',
+        step: 'STEP6.2.10.6',
         build: '20260717',
         releaseDate: '2026.07.17',
         stage: 'Beta',
-        title: 'Our Flow Ratio And Chip Fix',
-        description: '우리의 흐름에서 주간/월간 달성률 계산 기준과 모바일 메뉴·날짜 칸 아이콘 크기를 보정했습니다.',
+        title: 'Our Flow Chart Type Upgrade',
+        description: '우리의 흐름 그래프를 캘린더처럼 접기형으로 바꾸고, 날짜별 보기 위쪽에 배치했습니다.',
         changes: Object.freeze([
-            'Ratio stats now include the full selected week or month as the denominator',
-            'Missing planned days are counted as incomplete for promise, routine, and meal ratios',
-            'Reduced mobile menu and calendar icon sizes',
-            'Fixed menu chips and calendar day cells to more even sizes',
+            'Our Flow graph is now collapsible like the calendar section',
+            'Moved the graph section above the calendar toggle',
+            'Graph starts folded when the modal opens',
+            'Kept selected week and selected month calculation rules',
             '기존 days 기록을 읽기만 하며 Firebase 저장 구조는 변경하지 않음'
         ])
     });
