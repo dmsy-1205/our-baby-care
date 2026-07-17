@@ -1,5 +1,8 @@
 {
   "projects": {
-    "default": "our-baby-care"
-  }
+    "default": "our-baby-care",
+    "staging": "hearme2nite-36f3f"
+  },
+  "targets": {},
+  "etags": {}
 }

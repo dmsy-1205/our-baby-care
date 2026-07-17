@@ -5,19 +5,20 @@
 (function () {
     const release = Object.freeze({
         product: 'HearMe2nite',
-        version: 'v1.0 STEP6.2.3',
-        appVersion: 'HearMe2nite v1.0 STEP6.2.3',
-        step: 'STEP6.2.3',
-        build: '20260716',
-        releaseDate: '2026.07.16',
+        version: 'v1.0 STEP6.2.10',
+        appVersion: 'HearMe2nite v1.0 STEP6.2.10',
+        step: 'STEP6.2.10',
+        build: '20260717',
+        releaseDate: '2026.07.17',
         stage: 'Beta',
-        title: '모바일 기념일 닫기 긴급 수정',
-        description: '모바일에서 기념일 팝업을 닫은 직후 다시 열리는 터치 이벤트 충돌을 수정했습니다.',
+        title: '나의 루틴 통계 디자인',
+        description: '저장된 나의 루틴 기록을 읽어서 완료율, 연속 기록, 요일별 흐름을 카드형 통계로 보여줍니다.',
         changes: Object.freeze([
-            '모바일 기념일 팝업 닫기 오류 수정',
-            '닫기 직후 팝업이 다시 열리는 터치 충돌 방지',
-            'Android·iPhone·Fold 닫기 동작 안정화',
-            '기념일 데이터와 등록 기능은 그대로 유지'
+            '나의 루틴 허브에 통계 보기 버튼 추가',
+            '오늘, 7일, 30일, 전체 완료율 카드 추가',
+            '현재/최장 연속 기록과 총 완료 횟수 표시',
+            '요일별 흐름, 가장 잘 지킨 루틴, 조금 더 챙길 루틴 표시',
+            '기존 루틴 기록을 읽기만 하며 저장 구조는 변경하지 않음'
         ])
     });
 

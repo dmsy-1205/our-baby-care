@@ -11693,3 +11693,173 @@ body.dark-mode .history-detail-summary-card > div:not(.history-detail-summary-ic
     line-height: 1 !important;
   }
 }
+
+/* =========================================================
+   HearMe2nite v1.0 STEP6.2.10 - Routine Statistics Design
+   Read-only routine motivation cards. No Firebase write path changes.
+   ========================================================= */
+.sub-routine-stats-open-btn {
+  width: 100%;
+  margin: 0 0 12px;
+  border: 1px solid color-mix(in srgb, var(--theme-accent, #7c5cff) 34%, transparent);
+  border-radius: 16px;
+  padding: 12px 14px;
+  background: color-mix(in srgb, var(--theme-accent, #7c5cff) 10%, var(--theme-card, #fff));
+  color: var(--theme-accent, #7c5cff);
+  font-weight: 900;
+  cursor: pointer;
+}
+.sub-routine-stats-modal {
+  max-width: 620px;
+  max-height: min(86vh, 760px);
+  overflow-y: auto;
+}
+.sub-routine-stats-body {
+  display: grid;
+  gap: 12px;
+}
+.sub-routine-stats-empty {
+  padding: 18px 14px;
+  border: 1px dashed var(--theme-border, rgba(124, 92, 255, .24));
+  border-radius: 18px;
+  background: var(--theme-card-soft, rgba(255,255,255,.58));
+  color: var(--theme-text-muted, #837b99);
+  text-align: center;
+  line-height: 1.55;
+}
+.sub-routine-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 9px;
+}
+.sub-routine-stats-grid.compact {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.sub-routine-stat-tile,
+.sub-routine-stats-panel,
+.sub-routine-stats-pair article {
+  border: 1px solid var(--theme-border, rgba(124, 92, 255, .18));
+  border-radius: 18px;
+  background: var(--theme-card, #fff);
+  box-shadow: var(--theme-shadow, 0 8px 22px rgba(80,55,120,.07));
+}
+.sub-routine-stat-tile {
+  min-width: 0;
+  padding: 13px 11px;
+  text-align: center;
+}
+.sub-routine-stat-tile span,
+.sub-routine-stats-pair span {
+  display: block;
+  color: var(--theme-text-muted, #837b99);
+  font-size: .72rem;
+  font-weight: 900;
+}
+.sub-routine-stat-tile strong {
+  display: block;
+  margin: 5px 0 3px;
+  color: var(--theme-text, #2f2940);
+  font-size: 1.28rem;
+  line-height: 1;
+}
+.sub-routine-stat-tile small,
+.sub-routine-stats-pair small,
+.sub-routine-stats-panel-head small,
+.sub-routine-stats-footnote {
+  color: var(--theme-text-muted, #837b99);
+  font-size: .7rem;
+}
+.sub-routine-stats-panel {
+  padding: 14px;
+}
+.sub-routine-stats-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.sub-routine-stats-panel-head strong,
+.sub-routine-stats-pair strong {
+  color: var(--theme-text, #2f2940);
+}
+.sub-routine-weekday-trend {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 7px;
+  min-height: 124px;
+  align-items: end;
+}
+.sub-routine-weekday-bar {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: 6px;
+  min-width: 0;
+  text-align: center;
+}
+.sub-routine-weekday-bar span,
+.sub-routine-weekday-bar b {
+  color: var(--theme-text-muted, #837b99);
+  font-size: .68rem;
+}
+.sub-routine-weekday-bar i {
+  display: block;
+  align-self: end;
+  width: 100%;
+  min-height: 8px;
+  border-radius: 999px 999px 8px 8px;
+  background: linear-gradient(180deg, #9f86ff, var(--theme-accent, #7c5cff));
+}
+.sub-routine-stats-pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.sub-routine-stats-pair article {
+  padding: 14px;
+  min-width: 0;
+}
+.sub-routine-stats-pair strong {
+  display: block;
+  margin: 6px 0 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.sub-routine-stats-footnote {
+  margin: 0;
+  text-align: center;
+}
+:root[data-hm-theme][data-hm-display="dark"] :is(.sub-routine-stats-open-btn,.sub-routine-stats-empty,.sub-routine-stat-tile,.sub-routine-stats-panel,.sub-routine-stats-pair article) {
+  background: var(--hm-color-surface-2, #25283c) !important;
+  border-color: var(--hm-color-border, rgba(255,255,255,.12)) !important;
+  color: var(--hm-color-body, #f5f3ff) !important;
+  box-shadow: none !important;
+}
+:root[data-hm-theme][data-hm-display="dark"] :is(.sub-routine-stat-tile strong,.sub-routine-stats-panel-head strong,.sub-routine-stats-pair strong) {
+  color: var(--hm-color-text, #fff) !important;
+}
+:root[data-hm-theme][data-hm-display="dark"] :is(.sub-routine-stat-tile span,.sub-routine-stat-tile small,.sub-routine-stats-pair span,.sub-routine-stats-pair small,.sub-routine-stats-panel-head small,.sub-routine-stats-footnote,.sub-routine-weekday-bar span,.sub-routine-weekday-bar b) {
+  color: var(--hm-color-muted, #b8b1cc) !important;
+}
+@media (max-width: 640px) {
+  .sub-routine-stats-grid,
+  .sub-routine-stats-grid.compact {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .sub-routine-stats-pair {
+    grid-template-columns: 1fr;
+  }
+  .sub-routine-weekday-trend {
+    gap: 5px;
+  }
+  .sub-routine-stat-tile strong {
+    font-size: 1.12rem;
+  }
+}
+@media (max-width: 380px) {
+  .sub-routine-stats-grid,
+  .sub-routine-stats-grid.compact {
+    grid-template-columns: 1fr;
+  }
+}
