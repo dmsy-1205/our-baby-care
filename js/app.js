@@ -568,6 +568,7 @@
     overlay.className = 'hm-record-date-picker-overlay';
     overlay.hidden = true;
     overlay.setAttribute('aria-hidden', 'true');
+    overlay.setAttribute('inert', '');
     overlay.innerHTML = `
       <div class="hm-record-date-picker-card" role="dialog" aria-modal="true" aria-label="기록 날짜 선택">
         <div class="hm-record-date-picker-head">
@@ -651,6 +652,7 @@
     const overlay = ensureDatePicker();
     pickerMonth = monthFromYmd(input?.value || '');
     renderPicker(input);
+    overlay.removeAttribute('inert');
     overlay.hidden = false;
     overlay.setAttribute('aria-hidden', 'false');
   }
@@ -658,8 +660,14 @@
   function closePicker() {
     const overlay = document.getElementById('hmRecordDatePickerOverlay');
     if (!overlay) return;
+    if (overlay.contains(document.activeElement)) {
+      const shell = document.querySelector('.hm-record-date-shell');
+      if (shell && typeof shell.focus === 'function') shell.focus();
+      else if (document.activeElement && typeof document.activeElement.blur === 'function') document.activeElement.blur();
+    }
     overlay.hidden = true;
     overlay.setAttribute('aria-hidden', 'true');
+    overlay.setAttribute('inert', '');
   }
 
   function setDateValue(input, value) {

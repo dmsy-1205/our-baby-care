@@ -5,20 +5,19 @@
 (function () {
     const release = Object.freeze({
         product: 'HearMe2nite',
-        version: 'v1.0 STEP6.2.12.14',
-        appVersion: 'HearMe2nite v1.0 STEP6.2.12.14',
-        step: 'STEP6.2.12.14',
+        version: 'v1.0 STEP6.2.12.15',
+        appVersion: 'HearMe2nite v1.0 STEP6.2.12.15',
+        step: 'STEP6.2.12.15',
         build: '20260718',
         releaseDate: '2026.07.18',
         stage: 'Beta',
-        title: 'Custom Record Date Picker Fix',
-        description: '브라우저 기본 날짜 입력창 의존을 제거하고, 컴퓨터·아이폰·갤럭시에서 동일하게 동작하는 자체 날짜 선택 모달로 변경했습니다.',
+        title: 'Record Date Picker Focus Fix',
+        description: '기록 날짜 선택 모달을 닫을 때 포커스가 모달 안에 남아 접근성 경고가 발생하던 문제를 정리했습니다.',
         changes: Object.freeze([
-            'Replaced native record date picker with custom calendar modal',
-            'Fixed record date click behavior on desktop',
-            'Avoided iPhone native date input overflow entirely',
-            'Added no-cache hosting headers for HTML entry files',
-            'Updated service worker cache version for this release',
+            'Fixed focus handling when closing the custom record date picker',
+            'Added inert state to the hidden date picker overlay',
+            'Removed aria-hidden warning caused by focused modal descendants',
+            'Preserved custom record date picker and HTML no-cache behavior',
             '기존 기록/채팅 저장 구조 변경 없음'
         ])
     });
