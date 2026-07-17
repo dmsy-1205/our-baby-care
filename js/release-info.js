@@ -5,21 +5,22 @@
 (function () {
     const release = Object.freeze({
         product: 'HearMe2nite',
-        version: 'v1.0 STEP6.2.11.1',
-        appVersion: 'HearMe2nite v1.0 STEP6.2.11.1',
-        step: 'STEP6.2.11.1',
+        version: 'v1.0 STEP6.2.11.2',
+        appVersion: 'HearMe2nite v1.0 STEP6.2.11.2',
+        step: 'STEP6.2.11.2',
         build: '20260718',
         releaseDate: '2026.07.18',
         stage: 'Beta',
-        title: 'History Bottom Hint Removal',
-        description: '우리의 이야기에서 캘린더 날짜 클릭 후 바로 기록 팝업이 열리는 흐름에 맞춰 하단 안내 카드를 완전히 제거했습니다.',
+        title: 'PWA Install Prompt Comfort',
+        description: '앱 설치 안내가 데스크톱과 모바일에서 부담스럽게 반복되지 않도록 닫기 버튼과 일정 기간 숨김 처리를 추가했습니다.',
         changes: Object.freeze([
-            'Removed the bottom selected-date hint card from Our Story',
-            'Kept calendar date click as the direct record-opening action',
-            'Kept empty/search/no-record guidance only for exceptional states',
-            'Confirmed PWA install flow remains unchanged',
+            'Changed PWA install prompt into a dismissible banner',
+            'Added close button for desktop and mobile install prompts',
+            'Hides install prompt for 7 days after manual close',
+            'Hides install prompt for 1 day after install cancellation',
+            'Keeps prompt hidden after app installation is completed',
             'Updated cache tags for immediate review',
-            '기존 기록 저장 구조 변경 없음'
+            'PWA manifest and Service Worker behavior unchanged'
         ])
     });
 
