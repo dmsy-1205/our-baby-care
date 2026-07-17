@@ -5,20 +5,19 @@
 (function () {
     const release = Object.freeze({
         product: 'HearMe2nite',
-        version: 'v1.0 STEP6.2.12.8',
-        appVersion: 'HearMe2nite v1.0 STEP6.2.12.8',
-        step: 'STEP6.2.12.8',
+        version: 'v1.0 STEP6.2.12.9',
+        appVersion: 'HearMe2nite v1.0 STEP6.2.12.9',
+        step: 'STEP6.2.12.9',
         build: '20260718',
         releaseDate: '2026.07.18',
         stage: 'Beta',
-        title: 'Notification Single Read Fix',
-        description: '여러 알림 중 하나를 확인할 때 선택한 알림만 읽음 처리되고 나머지 알림은 유지되도록 읽음 처리 흐름을 분리했습니다.',
+        title: 'Login Room Loading Flicker Fix',
+        description: '로그인 직후 기존 공간을 불러오기 전에 공간 없음 화면이 잠깐 보이지 않도록 홈 화면 표시 시점을 공간 복구 이후로 조정했습니다.',
         changes: Object.freeze([
-            'Fixed multiple notifications disappearing after opening one item',
-            'Notification-list routing now marks only the selected notification as read',
-            'Direct card opening still clears matching card notifications',
-            'Separated notification routing read state from direct card read state',
-            'Chat unread count remains inside the chat card',
+            'Delayed home screen reveal until active room restore completes',
+            'Prevented temporary no-space onboarding screen after login',
+            'Kept authenticated loading state hidden until room data is ready',
+            'Preserved notification routing and previous hotfix behavior',
             '기존 기록/채팅 저장 구조 변경 없음'
         ])
     });

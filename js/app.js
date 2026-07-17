@@ -140,16 +140,16 @@
                 }
 
                 hideEmailVerificationPanel();
-                document.body.classList.add('hm-authenticated');
                 document.getElementById('authBox').classList.add('is-hidden');
                 document.getElementById('authBox').style.display = 'none';
-                document.getElementById('appContent').style.display = 'flex';
-                hmFinishBooting();
                 if (typeof loadUserTheme === 'function') await loadUserTheme();
                 if (typeof loadUserProfile === 'function') await loadUserProfile();
                 if (typeof hmRefreshDataAdminAccess === 'function') await hmRefreshDataAdminAccess();
                 await loadUserActiveRoom();
                 await acceptPendingInviteIfAny();
+                document.body.classList.add('hm-authenticated');
+                document.getElementById('appContent').style.display = 'flex';
+                hmFinishBooting();
                 await showGuideForFirstLogin();
             } else {
                 activeRoomCode = "";
