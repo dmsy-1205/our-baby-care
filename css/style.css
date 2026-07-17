@@ -12350,6 +12350,13 @@ body.dark-mode .history-detail-summary-card > div:not(.history-detail-summary-ic
   stroke: #8c6cff;
   stroke-width: 3;
 }
+.hm-home-stats-graph svg rect.has-value {
+  fill: #8c6cff;
+  filter: drop-shadow(0 4px 7px rgba(124,92,255,.16));
+}
+.hm-home-stats-graph svg rect.is-empty {
+  fill: rgba(255,255,255,.13);
+}
 .hm-home-stats-graph text {
   fill: var(--theme-text-muted, #837b99);
   font-size: 9px;
@@ -12485,6 +12492,15 @@ body.dark-mode .history-detail-summary-card > div:not(.history-detail-summary-ic
 /* STEP6.2.10.7 - Our Flow typed charts */
 .hm-flow-chart {
   overflow: hidden;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+.hm-home-stats-modal,
+.hm-home-stats-modal-body,
+.hm-home-stats-modal-body > * {
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 .hm-flow-chart svg .hm-flow-guide line {
   stroke: rgba(255,111,156,.18);
@@ -12501,6 +12517,19 @@ body.dark-mode .history-detail-summary-card > div:not(.history-detail-summary-ic
   font-size: 9px;
   font-weight: 900;
   text-anchor: middle;
+}
+.hm-flow-chart rect.has-value {
+  fill: url(#hmFlowBarGradient);
+}
+.hm-flow-chart rect.is-empty {
+  fill: rgba(255,255,255,.14);
+}
+.hm-flow-chart svg rect.has-value {
+  fill: #8c6cff;
+  filter: drop-shadow(0 4px 7px rgba(124,92,255,.16));
+}
+.hm-flow-chart svg rect.is-empty {
+  fill: rgba(255,255,255,.13);
 }
 .hm-flow-progress {
   position: relative;
@@ -12641,9 +12670,19 @@ body.dark-mode .history-detail-summary-card > div:not(.history-detail-summary-ic
 .hm-flow-dots,
 .hm-flow-meals {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(32px, 1fr));
   gap: 7px;
   padding: 4px 0 14px;
+  max-width: 100%;
+  overflow: hidden;
+}
+.hm-flow-dots.is-week,
+.hm-flow-meals.is-week {
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+.hm-flow-dots.is-month,
+.hm-flow-meals.is-month {
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 5px;
 }
 .hm-flow-dot,
 .hm-flow-meal-day {
@@ -12651,6 +12690,7 @@ body.dark-mode .history-detail-summary-card > div:not(.history-detail-summary-ic
   display: grid;
   place-items: center;
   min-height: 44px;
+  min-width: 0;
   border-radius: 14px;
   background: rgba(255,255,255,.055);
   border: 1px solid rgba(124,92,255,.12);
@@ -12683,6 +12723,21 @@ body.dark-mode .history-detail-summary-card > div:not(.history-detail-summary-ic
 .hm-flow-meal-day i.on {
   background: linear-gradient(180deg, #ff6f9c, #7c5cff);
 }
+.hm-flow-mini-bars {
+  display: block;
+  margin-top: 10px;
+  padding: 0;
+  background: transparent;
+  border: 0;
+}
+.hm-flow-mini-bars > div:first-child {
+  display: none;
+}
+.hm-flow-mini-bars svg {
+  height: 104px;
+  border-radius: 16px;
+  background: rgba(255,255,255,.045);
+}
 :root[data-hm-theme][data-hm-display="dark"] .hm-flow-progress b,
 :root[data-hm-theme][data-hm-display="dark"] .hm-flow-mood-row b {
   color: var(--hm-color-text, #fff) !important;
@@ -12701,6 +12756,24 @@ body.dark-mode .history-detail-summary-card > div:not(.history-detail-summary-ic
   }
   .hm-flow-dots,
   .hm-flow-meals {
-    grid-template-columns: repeat(auto-fit, minmax(30px, 1fr));
+    gap: 5px;
+  }
+  .hm-flow-dots.is-month,
+  .hm-flow-meals.is-month {
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+  }
+  .hm-flow-dot,
+  .hm-flow-meal-day {
+    min-height: 38px;
+    border-radius: 12px;
+  }
+  .hm-flow-dot b {
+    width: 19px;
+    height: 19px;
+    font-size: .72rem;
+  }
+  .hm-flow-meal-day i {
+    width: 6px;
+    height: 20px;
   }
 }
