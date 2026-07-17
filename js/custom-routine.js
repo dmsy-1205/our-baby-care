@@ -315,6 +315,7 @@ function openCustomRoutineHub() {
         alert('공간을 먼저 만들거나 연결해 주세요.');
         return;
     }
+    if (typeof hmMarkNotificationCardRead === 'function') hmMarkNotificationCardRead('promise');
     renderCustomRoutineHub();
     openModalOverlayById('customRoutineHubOverlay');
 }

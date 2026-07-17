@@ -248,7 +248,7 @@
     const v = text(value);
     if (!v) return false;
     const compact = v.replace(/\s+/g, '').toLowerCase();
-    return !['기록없음', '선택없음', '-', '0ml', '0ml'].includes(compact);
+    return !['기록없음', '선택없음', '-', '0ml'].includes(compact);
   }
   function getSafeRoomCode() {
     try { return typeof getRoomCodeForData === 'function' ? getRoomCodeForData() : (activeRoomCode || ''); } catch (e) { return ''; }
@@ -270,6 +270,17 @@
       localStorage.setItem(getReadStorageKey(), JSON.stringify(map));
     } catch (e) {}
   }
+  function markItemsReadByKey(key) {
+    if (!key) return;
+    try {
+      const map = readMap();
+      buildItems().forEach((item) => {
+        if (item.key === key && item.signature) map[item.signature] = Date.now();
+      });
+      localStorage.setItem(getReadStorageKey(), JSON.stringify(map));
+    } catch (e) {}
+    renderNotificationBar();
+  }
   function shortDate(date) { return date ? date.slice(5).replace('-', '.') : '오늘'; }
   function recordForDate(date) {
     let publicRecord = {};
@@ -289,15 +300,25 @@
     if (!record || !currentUser) return false;
     return !record.updatedBy || record.updatedBy !== currentUser.uid;
   }
-  function hasPublicRecordContent(record) {
+  function hasWaterRecord(record) {
+    return Number(String(record?.water || '').replace(/[^0-9.]/g, '')) > 0;
+  }
+  function cardWritten(record, key) {
     if (!record || typeof record !== 'object') return false;
-    const fields = ['wakeTime', 'weight', 'exercise', 'mealBreakfast', 'mealLunch', 'mealDinner', 'goingOut', 'sleepTime', 'diary', 'moodLabel', 'moodNote'];
-    const hasField = fields.some((key) => isMeaningful(record[key]));
-    const hasWater = Number(String(record.water || '').replace(/[^0-9.]/g, '')) > 0;
-    const hasMission = Array.isArray(record.missions) && record.missions.length > 0;
-    const hasCustom = record.customCardValues && Object.keys(record.customCardValues || {}).length > 0;
-    const hasSubRoutine = Array.isArray(record.subRoutineSnapshot) && record.subRoutineSnapshot.length > 0;
-    return hasField || hasWater || hasMission || hasCustom || hasSubRoutine || !!record.photo;
+    if (key === 'promise') return !!(record.customCardValues && Object.keys(record.customCardValues || {}).length);
+    if (key === 'subRoutine') return Array.isArray(record.subRoutineSnapshot) && record.subRoutineSnapshot.length > 0;
+    if (key === 'mood') return isMeaningful(record.moodLabel) || isMeaningful(record.mood) || isMeaningful(record.moodNote);
+    if (key === 'weight') return isMeaningful(record.weight);
+    if (key === 'exercise') return isMeaningful(record.exercise);
+    if (key === 'water') return hasWaterRecord(record);
+    if (key === 'wake') return isMeaningful(record.wakeTime);
+    if (key === 'meal') return isMeaningful(record.mealBreakfast) || isMeaningful(record.mealLunch) || isMeaningful(record.mealDinner);
+    if (key === 'outing') return isMeaningful(record.goingOut) || !!record.photo;
+    if (key === 'sleep') return isMeaningful(record.sleepTime);
+    if (key === 'diary') return isMeaningful(record.diary);
+    if (key === 'feedback') return isMeaningful(record.replyMessage) || isMeaningful(record.feedbackType) || record.feedbackConfirmed === true;
+    if (key === 'reward') return isMeaningful(record.dailyChoiceLabel) || isMeaningful(record.dailyChoice) || isMeaningful(record.rewardNote);
+    return false;
   }
   function makeSignature(type, date, record, fallbackText) {
     const stamp = record?.updatedAt || record?.createdAt || '';
@@ -305,49 +326,52 @@
     const body = text(fallbackText).slice(0, 140);
     return [type, date, stamp, author, body].join('|');
   }
+  function pushCardNotification(items, source, card) {
+    items.push({
+      type: card.open || card.key,
+      key: card.key,
+      icon: card.icon,
+      title: `${source}가 ${card.label} 카드 작성`,
+      sub: `${shortDate(card.date)} · ${card.label} 카드를 확인해 보세요`,
+      action: '확인',
+      signature: makeSignature(card.key, card.date, card.record, `${source}:${card.label}`)
+    });
+  }
   function buildItems() {
     const date = getSelectedDate();
     const room = getSafeRoomCode();
     if (!currentUser || !room || !date) return [];
 
-    const merged = recordForDate(date);
     const publicRecord = publicRecordForDate(date);
     const adminRecord = adminRecordForDate(date);
     const canManage = typeof canManageRelationshipCards === 'function' && canManageRelationshipCards();
     const items = [];
 
-    if (canManage && hasPublicRecordContent(publicRecord) && updatedByOther(publicRecord)) {
-      items.push({
-        type: 'record',
-        icon: '📝',
-        title: '새 기록이 있어요',
-        sub: `${shortDate(date)} · 오늘의 요약에서 바로 확인`,
-        action: '보기',
-        signature: makeSignature('record', date, publicRecord, merged.fullText || 'record')
+    if (canManage && updatedByOther(publicRecord)) {
+      [
+        { key:'promise', icon:'💜', label:'오늘의 약속', open:'record' },
+        { key:'subRoutine', icon:'🌱', label:'나의 루틴', open:'record' },
+        { key:'mood', icon:'😊', label:'오늘의 기분', open:'record' },
+        { key:'weight', icon:'⚖️', label:'체중', open:'record' },
+        { key:'exercise', icon:'🏃', label:'오늘의 운동', open:'record' },
+        { key:'water', icon:'💧', label:'오늘의 수분', open:'record' },
+        { key:'wake', icon:'☀️', label:'기상 시간', open:'record' },
+        { key:'meal', icon:'🥗', label:'식사 기록', open:'record' },
+        { key:'outing', icon:'🚶‍♀️', label:'외출 기록', open:'record' },
+        { key:'sleep', icon:'🌙', label:'취침 예정', open:'record' },
+        { key:'diary', icon:'📝', label:'오늘의 하루', open:'record' }
+      ].forEach((card) => {
+        if (cardWritten(publicRecord, card.key)) pushCardNotification(items, 'Sub', { ...card, date, record: publicRecord });
       });
     }
 
     if (!canManage && updatedByOther(adminRecord)) {
-      if (isMeaningful(adminRecord.replyMessage) || isMeaningful(adminRecord.feedbackType) || adminRecord.feedbackConfirmed === true) {
-        items.push({
-          type: 'feedback',
-          icon: '💌',
-          title: '주인의 피드백 도착',
-          sub: `${shortDate(date)} · 피드백을 확인해 보세요`,
-          action: '확인',
-          signature: makeSignature('feedback', date, adminRecord, `${adminRecord.feedbackType || ''}${adminRecord.replyMessage || ''}${adminRecord.feedbackConfirmed ? 'confirmed' : ''}`)
-        });
-      }
-      if (isMeaningful(adminRecord.dailyChoiceLabel) || isMeaningful(adminRecord.rewardNote)) {
-        items.push({
-          type: 'reward',
-          icon: '🎁',
-          title: '오늘의 선물이 있어요',
-          sub: `${shortDate(date)} · 작은 보상을 확인해요`,
-          action: '열기',
-          signature: makeSignature('reward', date, adminRecord, `${adminRecord.dailyChoiceLabel || ''}${adminRecord.rewardNote || ''}`)
-        });
-      }
+      [
+        { key:'feedback', icon:'💌', label:'주인의 피드백', open:'feedback' },
+        { key:'reward', icon:'🎁', label:'오늘의 선물', open:'reward' }
+      ].forEach((card) => {
+        if (cardWritten(adminRecord, card.key)) pushCardNotification(items, 'Dom', { ...card, date, record: adminRecord });
+      });
     }
 
     return items;
@@ -387,7 +411,78 @@
     if (icon) icon.textContent = item.icon;
     if (title) title.textContent = unreadItems.length > 1 ? `${item.title} 외 ${unreadItems.length - 1}개` : item.title;
     if (sub) sub.textContent = item.sub;
-    if (action) action.textContent = item.action;
+    if (action) action.textContent = unreadItems.length > 1 ? `${unreadItems.length}개` : item.action;
+  }
+  function ensureNotificationOverlay() {
+    let overlay = $('hmNotificationOverlay');
+    if (overlay) return overlay;
+    overlay = document.createElement('div');
+    overlay.id = 'hmNotificationOverlay';
+    overlay.className = 'daily-modal-overlay hm-notification-overlay';
+    overlay.style.display = 'none';
+    overlay.setAttribute('aria-hidden', 'true');
+    overlay.setAttribute('inert', '');
+    overlay.innerHTML = `
+      <div class="daily-modal hm-notification-modal" role="dialog" aria-modal="true" aria-labelledby="hmNotificationModalTitle">
+        <div class="daily-modal-head">
+          <h2 id="hmNotificationModalTitle">🔔 알림</h2>
+          <button type="button" class="modal-close-btn" data-hm-notification-close>닫기</button>
+        </div>
+        <div class="hm-notification-list" id="hmNotificationList"></div>
+      </div>`;
+    document.body.appendChild(overlay);
+    overlay.addEventListener('click', (event) => {
+      if (event.target === overlay || event.target.closest('[data-hm-notification-close]')) closeNotificationOverlay();
+      const row = event.target.closest('[data-hm-notification-index]');
+      if (!row) return;
+      const index = Number(row.dataset.hmNotificationIndex || 0);
+      openItem(hmCurrentNotificationItems[index] || null);
+    });
+    return overlay;
+  }
+  function closeNotificationOverlay() {
+    const overlay = $('hmNotificationOverlay');
+    if (!overlay) return;
+    overlay.setAttribute('aria-hidden', 'true');
+    overlay.setAttribute('inert', '');
+    overlay.classList.remove('is-open');
+    overlay.style.display = 'none';
+  }
+  function openNotificationOverlay() {
+    const overlay = ensureNotificationOverlay();
+    const list = $('hmNotificationList');
+    if (list) {
+      list.innerHTML = hmCurrentNotificationItems.map((item, index) => `
+        <button type="button" class="hm-notification-row" data-hm-notification-index="${index}">
+          <span>${item.icon}</span>
+          <strong>${item.title}</strong>
+          <small>${item.sub}</small>
+          <em>›</em>
+        </button>`).join('');
+    }
+    overlay.removeAttribute('inert');
+    overlay.setAttribute('aria-hidden', 'false');
+    overlay.classList.add('is-open');
+    overlay.style.display = 'flex';
+  }
+  function openRecordCard(item) {
+    const key = item?.key || '';
+    if (key === 'promise') {
+      const card = $('customRoutineHubCard');
+      if (card) return card.click();
+      if (typeof openCustomRoutineHub === 'function') return openCustomRoutineHub();
+    }
+    if (key === 'subRoutine') {
+      const card = $('subRoutineHubCard');
+      if (card) return card.click();
+      if (typeof openSubRoutineHub === 'function') return openSubRoutineHub();
+    }
+    const dailyKeys = ['mood', 'weight', 'exercise', 'water', 'wake', 'meal', 'outing', 'sleep', 'diary'];
+    if (dailyKeys.includes(key) && typeof openDailyModal === 'function') return openDailyModal(key);
+    const summaryCard = $('hmProductDashboard');
+    if (summaryCard) return summaryCard.click();
+    const promise = $('hmTodayPromiseSection');
+    if (promise) promise.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
   function openItem(item) {
     if (!item) {
@@ -395,19 +490,17 @@
       return;
     }
     writeRead(item.signature);
+    closeNotificationOverlay();
     renderNotificationBar();
     if (item.type === 'feedback' && typeof openDailyModal === 'function') return openDailyModal('feedback');
     if (item.type === 'reward' && typeof openDailyModal === 'function') return openDailyModal('reward');
-    if (item.type === 'record') {
-      const summaryCard = $('hmProductDashboard');
-      if (summaryCard) return summaryCard.click();
-      const promise = $('hmTodayPromiseSection');
-      if (promise) promise.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
+    if (item.type === 'record') return openRecordCard(item);
   }
 
   window.hmRefreshNotificationBar = renderNotificationBar;
+  window.hmMarkNotificationCardRead = markItemsReadByKey;
   window.hmOpenNotificationCenter = function hmOpenNotificationCenter() {
+    if (hmCurrentNotificationItems.length > 1) return openNotificationOverlay();
     openItem(hmCurrentNotificationItems[0] || null);
   };
 

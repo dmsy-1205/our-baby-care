@@ -218,6 +218,7 @@
     }
 
     function openDailyModal(name) {
+        if (typeof hmMarkNotificationCardRead === 'function') hmMarkNotificationCardRead(name);
         hmApplyManagerOnlyModalView(name);
         openModalOverlayById(`${name}ModalOverlay`);
         updateManagedFieldAccessControls();
@@ -259,6 +260,5 @@
 
 
     // =========================================================
-
 
 

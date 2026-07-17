@@ -5,19 +5,20 @@
 (function () {
     const release = Object.freeze({
         product: 'HearMe2nite',
-        version: 'v1.0 STEP6.2.12.3',
-        appVersion: 'HearMe2nite v1.0 STEP6.2.12.3',
-        step: 'STEP6.2.12.3',
+        version: 'v1.0 STEP6.2.12.6',
+        appVersion: 'HearMe2nite v1.0 STEP6.2.12.6',
+        step: 'STEP6.2.12.6',
         build: '20260718',
         releaseDate: '2026.07.18',
         stage: 'Beta',
-        title: 'Home Notification Badge Link',
-        description: '홈 화면 알림 바를 실제 기록과 피드백 상태에 연결해 역할에 맞는 새 알림을 작은 배지 카드로 표시합니다.',
+        title: 'Notification Read Sync',
+        description: '알림 목록이 아닌 실제 카드를 직접 열어 확인해도 해당 카드 작성 알림이 읽음 처리되도록 동기화했습니다.',
         changes: Object.freeze([
-            'Connected notification bar to real record and feedback data',
-            'Dom sees new Sub record alerts',
-            'Sub sees Dom feedback and reward alerts',
-            'Notification bar opens the related feedback, reward, or summary area',
+            'Direct card opening now clears matching notifications',
+            'Daily cards clear their own card-written alerts',
+            'Promise and routine hub cards clear their own alerts',
+            'Notification list selection still clears only the selected item',
+            'Unread notifications remain until their related card is opened',
             'Chat unread count remains inside the chat card',
             '기존 기록/채팅 저장 구조 변경 없음'
         ])
