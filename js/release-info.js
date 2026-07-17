@@ -5,19 +5,19 @@
 (function () {
     const release = Object.freeze({
         product: 'HearMe2nite',
-        version: 'v1.0 STEP6.2.10.4.4',
-        appVersion: 'HearMe2nite v1.0 STEP6.2.10.4.4',
-        step: 'STEP6.2.10.4.4',
+        version: 'v1.0 STEP6.2.10.5',
+        appVersion: 'HearMe2nite v1.0 STEP6.2.10.5',
+        step: 'STEP6.2.10.5',
         build: '20260717',
         releaseDate: '2026.07.17',
         stage: 'Beta',
-        title: 'Stats Menu Icon Polish',
-        description: '기록 통계 모달의 모바일 메뉴 아이콘 크기와 칩 높이를 정리해 메뉴 칸이 더 고르게 보이도록 수정했습니다.',
+        title: 'Our Flow Trend Graphs',
+        description: '기록 통계 메뉴명을 우리의 흐름으로 바꾸고, 선택한 주간/월간 기록 흐름을 선그래프로 볼 수 있게 추가했습니다.',
         changes: Object.freeze([
-            'Reduced mobile stats menu icon size',
-            'Balanced stats menu chip height and text alignment',
-            'Kept desktop and mobile horizontal menu behavior unchanged',
-            'Prepared naming review for the home stats section',
+            'Renamed the home stats section to Our Flow',
+            'Added soft trend line graphs to the Our Flow modal',
+            'Graphs use selected week or selected month records',
+            'Missing days are left empty instead of being forced into the line',
             '기존 days 기록을 읽기만 하며 Firebase 저장 구조는 변경하지 않음'
         ])
     });

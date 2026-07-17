@@ -208,6 +208,67 @@
         }
         return { rows, main: `${hitRows.length}/${keys.length}`, sub: hitRows.length ? `${hitRows.length}일 기록` : '기록 없음', hit: hitRows.length };
     }
+    function hmHomeStatsTimeMinutes(value){
+        const match = String(value || '').match(/(\d{1,2})\s*[:시]\s*(\d{1,2})?/);
+        if (!match) return null;
+        const hour = Math.max(0, Math.min(23, Number(match[1] || 0)));
+        const minute = Math.max(0, Math.min(59, Number(match[2] || 0)));
+        return hour * 60 + minute;
+    }
+    function hmHomeStatsGraphValue(item, row){
+        const stat = row?.stat || {};
+        if (!stat.hit) return null;
+        if (item.mode === 'ratio' || item.mode === 'meal') {
+            return stat.total ? Math.round(Number(stat.done || 0) / Number(stat.total || 1) * 100) : null;
+        }
+        if (item.key === 'weight' || item.key === 'water') return Number(stat.value || 0) || null;
+        if (item.mode === 'time') return hmHomeStatsTimeMinutes(stat.label);
+        if (item.key === 'mood') return stat.hit ? 1 : null;
+        return stat.hit ? Number(stat.value || 1) : null;
+    }
+    function hmHomeStatsGraphUnit(item){
+        if (item.mode === 'ratio' || item.mode === 'meal') return '%';
+        if (item.key === 'weight') return 'kg';
+        if (item.key === 'water') return 'ml';
+        if (item.mode === 'time') return '시각';
+        return '기록';
+    }
+    function hmHomeStatsGraphHtml(item, stats){
+        const rows = stats.rows || [];
+        const values = rows.map(row => hmHomeStatsGraphValue(item, row));
+        const valid = values.filter(value => Number.isFinite(value));
+        if (valid.length < 2) {
+            return `<section class="hm-home-stats-graph is-empty"><div><strong>흐름 그래프</strong><span>${safe(hmHomeStatsGraphUnit(item))}</span></div><p>그래프를 보려면 같은 기간에 2일 이상 기록이 필요해요.</p></section>`;
+        }
+        let min = Math.min(...valid);
+        let max = Math.max(...valid);
+        if (min === max) { min -= 1; max += 1; }
+        const width = 320, height = 118, left = 18, right = 12, top = 18, bottom = 24;
+        const plotW = width - left - right;
+        const plotH = height - top - bottom;
+        const points = values.map((value, index) => {
+            if (!Number.isFinite(value)) return null;
+            const x = rows.length <= 1 ? left + plotW / 2 : left + (plotW * index / (rows.length - 1));
+            const y = top + plotH - ((value - min) / (max - min)) * plotH;
+            return { x, y, value, key: rows[index].key };
+        });
+        let path = '';
+        let drawing = false;
+        points.forEach(point => {
+            if (!point) { drawing = false; return; }
+            path += `${drawing ? ' L' : ' M'} ${point.x.toFixed(1)} ${point.y.toFixed(1)}`;
+            drawing = true;
+        });
+        const dots = points.filter(Boolean).map(point => `<circle cx="${point.x.toFixed(1)}" cy="${point.y.toFixed(1)}" r="4.2"></circle>`).join('');
+        const labels = rows.map((row, index) => {
+            if (hmHomeStatsPeriod === 'week' || index === 0 || index === rows.length - 1) {
+                const x = rows.length <= 1 ? left + plotW / 2 : left + (plotW * index / (rows.length - 1));
+                return `<text x="${x.toFixed(1)}" y="112">${Number(row.key.slice(-2))}</text>`;
+            }
+            return '';
+        }).join('');
+        return `<section class="hm-home-stats-graph"><div><strong>흐름 그래프</strong><span>${safe(hmHomeStatsGraphUnit(item))}</span></div><svg viewBox="0 0 ${width} ${height}" role="img" aria-label="${safe(item.label)} 흐름 그래프"><line x1="${left}" y1="${top}" x2="${left}" y2="${height - bottom}"></line><line x1="${left}" y1="${height - bottom}" x2="${width - right}" y2="${height - bottom}"></line><path d="${path}"></path>${dots}<g>${labels}</g></svg></section>`;
+    }
     function buildHomeStatsCard(){
         if ($('hmHomeStatsCard')) return;
         const box = document.createElement('section');
@@ -215,8 +276,8 @@
         box.className = 'hm-beta-dashboard hm-home-stats-card';
         box.setAttribute('role','button');
         box.setAttribute('tabindex','0');
-        box.setAttribute('aria-label','기록 통계 자세히 보기');
-        box.innerHTML = `<div class="hm-summary-strip-head"><strong>기록 통계</strong><small>눌러서 자세히 보기</small></div><div class="hm-summary-strip" aria-label="기록 통계"><div class="hm-summary-dot"><b>📊</b><span id="hmHomeStatMini_overview">통계</span></div><div class="hm-summary-dot"><b>💜</b><span id="hmHomeStatMini_promise">-</span></div><div class="hm-summary-dot"><b>🌱</b><span id="hmHomeStatMini_subRoutine">-</span></div><div class="hm-summary-dot"><b>📝</b><span id="hmHomeStatMini_diary">-</span></div><div class="hm-summary-dot"><b>💧</b><span id="hmHomeStatMini_water">-</span></div></div>`;
+        box.setAttribute('aria-label','우리의 흐름 자세히 보기');
+        box.innerHTML = `<div class="hm-summary-strip-head"><strong>우리의 흐름</strong><small>눌러서 자세히 보기</small></div><div class="hm-summary-strip" aria-label="우리의 흐름"><div class="hm-summary-dot"><b>📈</b><span id="hmHomeStatMini_overview">흐름</span></div><div class="hm-summary-dot"><b>💜</b><span id="hmHomeStatMini_promise">-</span></div><div class="hm-summary-dot"><b>🌱</b><span id="hmHomeStatMini_subRoutine">-</span></div><div class="hm-summary-dot"><b>📝</b><span id="hmHomeStatMini_diary">-</span></div><div class="hm-summary-dot"><b>💧</b><span id="hmHomeStatMini_water">-</span></div></div>`;
         box.addEventListener('click', () => window.hmOpenHomeStatsModal('promise'));
         box.addEventListener('keydown', event => { if(event.key === 'Enter' || event.key === ' ') { event.preventDefault(); window.hmOpenHomeStatsModal('promise'); } });
         const recordDateInput = $('recordDate');
@@ -235,7 +296,7 @@
         overlay.style.display = 'none';
         overlay.setAttribute('aria-hidden','true');
         overlay.setAttribute('inert','');
-        overlay.innerHTML = `<div class="daily-modal hm-home-stats-modal" role="dialog" aria-modal="true" aria-labelledby="hmHomeStatsTitle"><div class="daily-modal-head"><h2 id="hmHomeStatsTitle">📊 기록 통계</h2><button type="button" class="modal-close-btn" onclick="hmCloseHomeStatsModal()">닫기</button></div><div class="hm-home-stats-menu">${HM_HOME_STAT_ITEMS.map(item => `<button type="button" data-home-stat="${item.key}" onclick="hmOpenHomeStatsModal('${item.key}')"><b>${item.icon}</b><span>${item.label}</span></button>`).join('')}</div><div class="hm-home-stats-period"><button type="button" data-stat-period="week" onclick="hmSetHomeStatsPeriod('week')">주간</button><button type="button" data-stat-period="month" onclick="hmSetHomeStatsPeriod('month')">한 달</button></div><div id="hmHomeStatsModalBody" class="hm-home-stats-modal-body"></div></div>`;
+        overlay.innerHTML = `<div class="daily-modal hm-home-stats-modal" role="dialog" aria-modal="true" aria-labelledby="hmHomeStatsTitle"><div class="daily-modal-head"><h2 id="hmHomeStatsTitle">📈 우리의 흐름</h2><button type="button" class="modal-close-btn" onclick="hmCloseHomeStatsModal()">닫기</button></div><div class="hm-home-stats-menu">${HM_HOME_STAT_ITEMS.map(item => `<button type="button" data-home-stat="${item.key}" onclick="hmOpenHomeStatsModal('${item.key}')"><b>${item.icon}</b><span>${item.label}</span></button>`).join('')}</div><div class="hm-home-stats-period"><button type="button" data-stat-period="week" onclick="hmSetHomeStatsPeriod('week')">주간</button><button type="button" data-stat-period="month" onclick="hmSetHomeStatsPeriod('month')">한 달</button></div><div id="hmHomeStatsModalBody" class="hm-home-stats-modal-body"></div></div>`;
         document.body.appendChild(overlay);
         overlay.addEventListener('click', event => { if (event.target === overlay) window.hmCloseHomeStatsModal(); });
         return overlay;
@@ -255,7 +316,7 @@
             const state = row.stat.hit ? 'has-stat' : 'empty-stat';
             return `<div class="hm-home-stats-day ${state}"><span>${day}</span><b>${item.icon}</b><small>${safe(row.stat.label)}</small></div>`;
         }).join('');
-        if (body) body.innerHTML = `<section class="hm-home-stats-hero"><div class="hm-home-stats-hero-icon">${item.icon}</div><div><strong>${safe(item.label)}</strong><span>${safe(hmHomeStatsPeriodLabel())}</span></div><em>${safe(stats.main)}</em></section><div class="hm-home-stats-metrics"><div><strong>${safe(stats.main)}</strong><small>대표 값</small></div><div><strong>${safe(stats.sub)}</strong><small>요약</small></div><div><strong>${stats.hit}일</strong><small>기록된 날</small></div></div><button type="button" class="hm-home-stats-calendar-toggle" onclick="hmToggleHomeStatsCalendar()" aria-expanded="${hmHomeStatsCalendarOpen ? 'true' : 'false'}">${hmHomeStatsCalendarOpen ? '날짜별 보기 접기' : '날짜별 보기 펼치기'}</button><div class="hm-home-stats-calendar ${hmHomeStatsPeriod === 'month' ? 'is-month' : 'is-week'} ${hmHomeStatsCalendarOpen ? 'is-open' : 'is-collapsed'}" ${hmHomeStatsCalendarOpen ? '' : 'hidden'}>${calendar}</div><p class="hm-home-stats-note">기존 기록을 읽어서 표시하며, 이 통계 화면에서는 데이터를 저장하거나 변경하지 않습니다.</p>`;
+        if (body) body.innerHTML = `<section class="hm-home-stats-hero"><div class="hm-home-stats-hero-icon">${item.icon}</div><div><strong>${safe(item.label)}</strong><span>${safe(hmHomeStatsPeriodLabel())}</span></div><em>${safe(stats.main)}</em></section>${hmHomeStatsGraphHtml(item, stats)}<div class="hm-home-stats-metrics"><div><strong>${safe(stats.main)}</strong><small>대표 값</small></div><div><strong>${safe(stats.sub)}</strong><small>요약</small></div><div><strong>${stats.hit}일</strong><small>기록된 날</small></div></div><button type="button" class="hm-home-stats-calendar-toggle" onclick="hmToggleHomeStatsCalendar()" aria-expanded="${hmHomeStatsCalendarOpen ? 'true' : 'false'}">${hmHomeStatsCalendarOpen ? '날짜별 보기 접기' : '날짜별 보기 펼치기'}</button><div class="hm-home-stats-calendar ${hmHomeStatsPeriod === 'month' ? 'is-month' : 'is-week'} ${hmHomeStatsCalendarOpen ? 'is-open' : 'is-collapsed'}" ${hmHomeStatsCalendarOpen ? '' : 'hidden'}>${calendar}</div><p class="hm-home-stats-note">기존 기록을 읽어서 표시하며, 이 통계 화면에서는 데이터를 저장하거나 변경하지 않습니다.</p>`;
     }
     function updateHomeStatsCard(){
         buildHomeStatsCard();
