@@ -12387,3 +12387,83 @@ body.dark-mode .history-detail-summary-card > div:not(.history-detail-summary-ic
     height: 104px;
   }
 }
+
+/* STEP6.2.10.5.1 - ratio denominator and mobile icon/cell balance */
+.hm-home-stats-modal .hm-home-stats-menu button,
+.hm-home-stats-modal .hm-home-stats-menu button.active {
+  flex: 0 0 126px !important;
+  width: 126px !important;
+  min-width: 126px !important;
+  max-width: 126px !important;
+  height: 38px !important;
+  min-height: 38px !important;
+  gap: 5px !important;
+}
+.hm-home-stats-modal .hm-home-stats-menu b {
+  width: 14px !important;
+  min-width: 14px !important;
+  height: 14px !important;
+  font-size: .72rem !important;
+  transform: none !important;
+}
+.hm-home-stats-modal .hm-home-stats-menu span {
+  max-width: 92px !important;
+  font-size: .7rem !important;
+  line-height: 1 !important;
+}
+.hm-home-stats-calendar {
+  align-items: stretch !important;
+}
+.hm-home-stats-day {
+  min-height: 54px !important;
+  height: 54px !important;
+  gap: 1px !important;
+  padding: 5px 3px !important;
+}
+.hm-home-stats-day b {
+  width: 16px !important;
+  height: 16px !important;
+  display: inline-grid !important;
+  place-items: center !important;
+  font-size: .78rem !important;
+  line-height: 1 !important;
+}
+.hm-home-stats-day span {
+  font-size: .62rem !important;
+}
+.hm-home-stats-day small {
+  font-size: .56rem !important;
+  line-height: 1 !important;
+}
+@media (max-width: 640px) {
+  .hm-home-stats-modal .hm-home-stats-menu button,
+  .hm-home-stats-modal .hm-home-stats-menu button.active {
+    flex-basis: 138px !important;
+    width: 138px !important;
+    min-width: 138px !important;
+    max-width: 138px !important;
+    height: 36px !important;
+    min-height: 36px !important;
+    padding: 6px 9px !important;
+  }
+  .hm-home-stats-modal .hm-home-stats-menu b {
+    width: 13px !important;
+    min-width: 13px !important;
+    height: 13px !important;
+    font-size: .68rem !important;
+  }
+  .hm-home-stats-modal .hm-home-stats-menu span {
+    max-width: 102px !important;
+    font-size: .7rem !important;
+  }
+  .hm-home-stats-day {
+    min-height: 50px !important;
+    height: 50px !important;
+    border-radius: 13px !important;
+  }
+  .hm-home-stats-day b {
+    width: 14px !important;
+    height: 14px !important;
+    font-size: .66rem !important;
+  }
+}

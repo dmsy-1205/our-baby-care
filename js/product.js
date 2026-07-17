@@ -182,7 +182,14 @@
         const rows = keys.map(key => ({ key, rec: days()[key] || null })).map(row => ({ ...row, stat: hmHomeStatsRecordValue(item, row.rec) }));
         const hitRows = rows.filter(row => row.stat.hit);
         if (item.mode === 'ratio' || item.mode === 'meal') {
-            const total = rows.reduce((sum,row)=>sum + Number(row.stat.total || 0), 0);
+            const expectedDailyTotal = item.mode === 'meal' ? 3 : Math.max(0, ...rows.map(row => Number(row.stat.total || 0)));
+            if (expectedDailyTotal) {
+                rows.forEach(row => {
+                    const dayTotal = Number(row.stat.total || 0);
+                    if (!dayTotal) row.stat = { ...row.stat, total: expectedDailyTotal, done: 0, value: 0, label: '-' };
+                });
+            }
+            const total = expectedDailyTotal ? expectedDailyTotal * rows.length : rows.reduce((sum,row)=>sum + Number(row.stat.total || 0), 0);
             const done = rows.reduce((sum,row)=>sum + Number(row.stat.done || 0), 0);
             return { rows, main: total ? `${Math.round(done / total * 100)}%` : '-', sub: total ? `${done}/${total} 완료` : '기록 없음', hit: hitRows.length };
         }
@@ -217,10 +224,11 @@
     }
     function hmHomeStatsGraphValue(item, row){
         const stat = row?.stat || {};
-        if (!stat.hit) return null;
         if (item.mode === 'ratio' || item.mode === 'meal') {
-            return stat.total ? Math.round(Number(stat.done || 0) / Number(stat.total || 1) * 100) : null;
+            const total = Number(stat.total || 0);
+            return total ? Math.round(Number(stat.done || 0) / total * 100) : null;
         }
+        if (!stat.hit) return null;
         if (item.key === 'weight' || item.key === 'water') return Number(stat.value || 0) || null;
         if (item.mode === 'time') return hmHomeStatsTimeMinutes(stat.label);
         if (item.key === 'mood') return stat.hit ? 1 : null;
