@@ -5,19 +5,19 @@
 (function () {
     const release = Object.freeze({
         product: 'HearMe2nite',
-        version: 'v1.0 STEP6.2.12.9',
-        appVersion: 'HearMe2nite v1.0 STEP6.2.12.9',
-        step: 'STEP6.2.12.9',
+        version: 'v1.0 STEP6.2.12.10',
+        appVersion: 'HearMe2nite v1.0 STEP6.2.12.10',
+        step: 'STEP6.2.12.10',
         build: '20260718',
         releaseDate: '2026.07.18',
         stage: 'Beta',
-        title: 'Login Room Loading Flicker Fix',
-        description: '로그인 직후 기존 공간을 불러오기 전에 공간 없음 화면이 잠깐 보이지 않도록 홈 화면 표시 시점을 공간 복구 이후로 조정했습니다.',
+        title: 'iOS Record Date Field Fix',
+        description: '아이폰 Safari/PWA에서 기록 날짜 입력창이 기기별 기본 표시 방식 때문에 카드 폭을 벗어나 보이는 문제를 보정했습니다.',
         changes: Object.freeze([
-            'Delayed home screen reveal until active room restore completes',
-            'Prevented temporary no-space onboarding screen after login',
-            'Kept authenticated loading state hidden until room data is ready',
-            'Preserved notification routing and previous hotfix behavior',
+            'Fixed iOS record date field width overflow',
+            'Stabilized native date input sizing across iPhone, Android, tablet, and desktop',
+            'Kept the record date bar aligned inside the home card layout',
+            'Preserved login room loading flicker fix and notification behavior',
             '기존 기록/채팅 저장 구조 변경 없음'
         ])
     });

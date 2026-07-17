@@ -6122,6 +6122,52 @@ body.hm-booting::before {
     z-index: 99999;
 }
 
+/* =========================================================
+   HearMe2nite v1.0 STEP6.2.12.10 - iOS Record Date Field Fix
+   iPhone Safari/PWA renders native date inputs with different
+   inner sizing. Keep the record date bar inside the card width.
+   ========================================================= */
+.container .input-group:has(#recordDate) {
+    width: 100% !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+}
+
+#recordDate {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    height: 58px !important;
+    min-height: 58px !important;
+    box-sizing: border-box !important;
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    border-radius: 18px !important;
+    padding: 0 46px 0 16px !important;
+    text-align: center !important;
+    font-size: clamp(16px, 4vw, 18px) !important;
+    line-height: 58px !important;
+    letter-spacing: -0.02em !important;
+    overflow: hidden !important;
+}
+
+#recordDate::-webkit-date-and-time-value {
+    display: block !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    text-align: center !important;
+    line-height: 58px !important;
+}
+
+#recordDate::-webkit-calendar-picker-indicator {
+    flex: 0 0 auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
 
 /* =========================================================
    HearMe2nite RC2.11 STEP16 - Custom Routine Card MVP
