@@ -1,25 +1,25 @@
-import { escapeHtml } from '../admin-utils.js';
+﻿import { escapeHtml } from '../admin-utils.js';
 
-const ADMIN_CONSOLE_STEP = 'STEP A10';
-const ADMIN_CONSOLE_STEP_LABEL = 'System Status Baseline';
+const ADMIN_CONSOLE_STEP = 'STEP A11';
+const ADMIN_CONSOLE_STEP_LABEL = 'Data Impact Preview';
 
 const items = [
-  ['dashboard', '대시보드', '▦'],
-  ['users', '사용자', '♙'],
-  ['rooms', 'Room', '⌂'],
-  ['requests', '데이터 요청', '☑'],
-  ['recovery', '복구 센터', '↺'],
-  ['audit', '감사 로그', '≣'],
-  ['releases', '릴리스', '⬆'],
-  ['system', '시스템', '⚙']
+  ['dashboard', '??쒕낫??, '??],
+  ['users', '?ъ슜??, '??],
+  ['rooms', 'Room', '??],
+  ['requests', '?곗씠???붿껌', '??],
+  ['recovery', '蹂듦뎄 ?쇳꽣', '??],
+  ['audit', '媛먯궗 濡쒓렇', '??],
+  ['releases', '由대━??, '燧?],
+  ['system', '?쒖뒪??, '??]
 ];
 
 export function renderSidebar({ route, userEmail }) {
   return `
-    <aside class="admin-sidebar" id="adminSidebar" aria-label="관리자 메뉴">
+    <aside class="admin-sidebar" id="adminSidebar" aria-label="愿由ъ옄 硫붾돱">
       <div class="sidebar-brand">
-        <span class="brand-symbol" aria-hidden="true">❤☾</span>
-        <span><strong>HearMe2nite</strong><small>Admin Console 2.0</small><em class="admin-step-badge">${ADMIN_CONSOLE_STEP} · ${ADMIN_CONSOLE_STEP_LABEL}</em></span>
+        <span class="brand-symbol" aria-hidden="true">?ㅲ샑</span>
+        <span><strong>HearMe2nite</strong><small>Admin Console 2.0</small><em class="admin-step-badge">${ADMIN_CONSOLE_STEP} 쨌 ${ADMIN_CONSOLE_STEP_LABEL}</em></span>
       </div>
       <nav class="sidebar-nav">
         ${items.map(([id, label, icon]) => `
@@ -28,9 +28,10 @@ export function renderSidebar({ route, userEmail }) {
           </button>`).join('')}
       </nav>
       <div class="sidebar-footer">
-        <small>로그인 관리자</small>
+        <small>濡쒓렇??愿由ъ옄</small>
         <strong title="${escapeHtml(userEmail)}">${escapeHtml(userEmail)}</strong>
-        <button id="adminSignOut" class="text-button" type="button">로그아웃</button>
+        <button id="adminSignOut" class="text-button" type="button">濡쒓렇?꾩썐</button>
       </div>
     </aside>`;
 }
+

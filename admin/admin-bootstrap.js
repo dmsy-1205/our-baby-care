@@ -1,8 +1,8 @@
-import { waitForAuthenticatedUser, readAdminProfile, isActiveAdmin, signOutAdmin } from './admin-api.js?v=admin-2-0-a10-system-status-baseline-20260718';
+﻿import { waitForAuthenticatedUser, readAdminProfile, isActiveAdmin, signOutAdmin } from './admin-api.js?v=admin-2-0-a11-data-impact-preview-20260718';
 import { setState } from './admin-state.js';
 import { setDocumentBusy } from './admin-utils.js';
-import { renderSidebar } from './components/sidebar.js?v=admin-2-0-a10-system-status-baseline-20260718';
-import { startRouter, navigate } from './admin-router.js?v=admin-2-0-a10-system-status-baseline-20260718';
+import { renderSidebar } from './components/sidebar.js?v=admin-2-0-a11-data-impact-preview-20260718';
+import { startRouter, navigate } from './admin-router.js?v=admin-2-0-a11-data-impact-preview-20260718';
 
 const boot = document.getElementById('adminBoot');
 const root = document.getElementById('adminRoot');
@@ -65,21 +65,21 @@ function closeSidebar() {
 async function bootstrap() {
   setDocumentBusy(true);
   setState({ phase: 'auth-check', bootError: null });
-  showBoot('로그인 세션을 확인하고 있습니다.');
+  showBoot('濡쒓렇???몄뀡???뺤씤?섍퀬 ?덉뒿?덈떎.');
 
   try {
     const user = await waitForAuthenticatedUser();
     if (!user) {
       setState({ phase: 'signed-out' });
-      showBoot('로그인된 계정이 없습니다. 사용자 앱에서 관리자 계정으로 로그인해 주세요.', { retry: true, error: true });
+      showBoot('濡쒓렇?몃맂 怨꾩젙???놁뒿?덈떎. ?ъ슜???깆뿉??愿由ъ옄 怨꾩젙?쇰줈 濡쒓렇?명빐 二쇱꽭??', { retry: true, error: true });
       return;
     }
 
-    showBoot('관리자 권한을 확인하고 있습니다.');
+    showBoot('愿由ъ옄 沅뚰븳???뺤씤?섍퀬 ?덉뒿?덈떎.');
     const adminProfile = await readAdminProfile(user.uid);
     if (!isActiveAdmin(adminProfile)) {
       setState({ phase: 'forbidden', user, adminProfile });
-      showBoot('접근 권한이 없습니다. 이 화면은 등록된 운영 관리자만 사용할 수 있습니다.', { retry: true, error: true });
+      showBoot('?묎렐 沅뚰븳???놁뒿?덈떎. ???붾㈃? ?깅줉???댁쁺 愿由ъ옄留??ъ슜?????덉뒿?덈떎.', { retry: true, error: true });
       return;
     }
 
@@ -90,7 +90,7 @@ async function bootstrap() {
   } catch (error) {
     console.error('[Admin 2.0] bootstrap failed', error);
     setState({ phase: 'error', bootError: error });
-    showBoot(`관리자 센터를 시작하지 못했습니다. ${error.message}`, { retry: true, error: true });
+    showBoot(`愿由ъ옄 ?쇳꽣瑜??쒖옉?섏? 紐삵뻽?듬땲?? ${error.message}`, { retry: true, error: true });
   } finally {
     setDocumentBusy(false);
   }
@@ -98,3 +98,4 @@ async function bootstrap() {
 
 retryButton.addEventListener('click', bootstrap);
 bootstrap();
+

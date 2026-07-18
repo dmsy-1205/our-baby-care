@@ -1,24 +1,24 @@
-import { getAdminDatabase } from '../admin-api.js?v=admin-2-0-a10-system-status-baseline-20260718';
-import { escapeHtml, formatDateTime } from '../admin-utils.js?v=admin-2-0-a10-system-status-baseline-20260718';
-import { renderEmptyState } from '../components/empty-state.js?v=admin-2-0-a10-system-status-baseline-20260718';
+﻿import { getAdminDatabase } from '../admin-api.js?v=admin-2-0-a11-data-impact-preview-20260718';
+import { escapeHtml, formatDateTime } from '../admin-utils.js?v=admin-2-0-a11-data-impact-preview-20260718';
+import { renderEmptyState } from '../components/empty-state.js?v=admin-2-0-a11-data-impact-preview-20260718';
 
 const REQUEST_TYPE_LABELS = {
-  account: '계정 삭제',
-  leave_room: 'Room 연결 해제',
-  delete_room: 'Room 전체 삭제'
+  account: '怨꾩젙 ??젣',
+  leave_room: 'Room ?곌껐 ?댁젣',
+  delete_room: 'Room ?꾩껜 ??젣'
 };
 
 const STATUS_LABELS = {
-  pending: '접수됨',
-  reviewing: '검토 중',
-  approved: '승인',
-  hold: '보류',
-  rejected: '거절',
-  canceled: '사용자 취소',
-  scheduled: '삭제 예정',
-  processing: '처리 중',
-  completed: '처리 완료',
-  failed: '처리 실패'
+  pending: '?묒닔??,
+  reviewing: '寃??以?,
+  approved: '?뱀씤',
+  hold: '蹂대쪟',
+  rejected: '嫄곗젅',
+  canceled: '?ъ슜??痍⑥냼',
+  scheduled: '??젣 ?덉젙',
+  processing: '泥섎━ 以?,
+  completed: '泥섎━ ?꾨즺',
+  failed: '泥섎━ ?ㅽ뙣'
 };
 
 const TYPE_ORDER = {
@@ -35,7 +35,7 @@ function shortUid(uid) {
   const text = String(uid || '');
   if (!text) return '-';
   if (text.length <= 14) return text;
-  return `${text.slice(0, 7)}…${text.slice(-5)}`;
+  return `${text.slice(0, 7)}??{text.slice(-5)}`;
 }
 
 function latestNumber(...values) {
@@ -46,11 +46,11 @@ function latestNumber(...values) {
 }
 
 function requestTypeLabel(requestType) {
-  return REQUEST_TYPE_LABELS[requestType] || requestType || '데이터 요청';
+  return REQUEST_TYPE_LABELS[requestType] || requestType || '?곗씠???붿껌';
 }
 
 function statusLabel(status) {
-  return STATUS_LABELS[status] || status || '상태 확인 필요';
+  return STATUS_LABELS[status] || status || '?곹깭 ?뺤씤 ?꾩슂';
 }
 
 function statusClass(status) {
@@ -92,11 +92,11 @@ function renderCheckList(items) {
 }
 
 function roomListText(roomCodes) {
-  return roomCodes.length ? roomCodes.join(', ') : '연결 Room 확인 필요';
+  return roomCodes.length ? roomCodes.join(', ') : '?곌껐 Room ?뺤씤 ?꾩슂';
 }
 
 function memberListText(members) {
-  if (!members.length) return 'Room 멤버 확인 필요';
+  if (!members.length) return 'Room 硫ㅻ쾭 ?뺤씤 ?꾩슂';
   return members
     .map((member) => `${member.email || member.nickname || shortUid(member.uid)} (${shortUid(member.uid)})`)
     .join(', ');
@@ -108,17 +108,17 @@ function buildBaseline(row) {
   const roomCode = request.roomCode || user.activeRoom || '';
   const userRoomCodes = collectUserRooms(row.ownerUid, users, userRooms, roomMembers);
   const roomMemberList = collectRoomMembers(roomCode, roomMembers, users);
-  const activeRoomMatch = roomCode && user.activeRoom === roomCode ? '예' : '아니오 또는 확인 필요';
-  const memberExists = roomCode && asObject(roomMembers[roomCode])[row.ownerUid] ? '존재' : '확인 필요';
+  const activeRoomMatch = roomCode && user.activeRoom === roomCode ? '?? : '?꾨땲???먮뒗 ?뺤씤 ?꾩슂';
+  const memberExists = roomCode && asObject(roomMembers[roomCode])[row.ownerUid] ? '議댁옱' : '?뺤씤 ?꾩슂';
 
   if (request.requestType === 'account') {
     return {
-      title: '계정 삭제 기준점',
+      title: '怨꾩젙 ??젣 湲곗???,
       summary: [
-        `사용자 UID: ${shortUid(row.ownerUid)}`,
-        `이메일: ${request.requestedByEmail || user.email || '-'}`,
+        `?ъ슜??UID: ${shortUid(row.ownerUid)}`,
+        `?대찓?? ${request.requestedByEmail || user.email || '-'}`,
         `activeRoom: ${user.activeRoom || '-'}`,
-        `연결 Room: ${roomListText(userRoomCodes)}`
+        `?곌껐 Room: ${roomListText(userRoomCodes)}`
       ],
       paths: [
         `users/${row.ownerUid}`,
@@ -127,76 +127,76 @@ function buildBaseline(row) {
         'dataDeleteRequests/{uid}/{requestId}'
       ],
       checklist: [
-        '계정 삭제 전 사용자 본인 요청과 현재 상태를 확인',
-        '공동 Room 기록은 상대방 권리와 보존 필요성을 함께 확인',
-        '관리자 메모와 감사 로그를 먼저 확인',
-        '실제 삭제는 별도 승인 단계에서만 진행'
+        '怨꾩젙 ??젣 ???ъ슜??蹂몄씤 ?붿껌怨??꾩옱 ?곹깭瑜??뺤씤',
+        '怨듬룞 Room 湲곕줉? ?곷?諛?沅뚮━? 蹂댁〈 ?꾩슂?깆쓣 ?④퍡 ?뺤씤',
+        '愿由ъ옄 硫붾え? 媛먯궗 濡쒓렇瑜?癒쇱? ?뺤씤',
+        '?ㅼ젣 ??젣??蹂꾨룄 ?뱀씤 ?④퀎?먯꽌留?吏꾪뻾'
       ]
     };
   }
 
   if (request.requestType === 'leave_room') {
     return {
-      title: 'Room 연결 해제 기준점',
+      title: 'Room ?곌껐 ?댁젣 湲곗???,
       summary: [
-        `대상 Room: ${roomCode || '-'}`,
-        `요청자 멤버십: ${memberExists}`,
-        `activeRoom 일치: ${activeRoomMatch}`,
-        `Room 멤버: ${roomMemberList.length}명`
+        `???Room: ${roomCode || '-'}`,
+        `?붿껌??硫ㅻ쾭?? ${memberExists}`,
+        `activeRoom ?쇱튂: ${activeRoomMatch}`,
+        `Room 硫ㅻ쾭: ${roomMemberList.length}紐?
       ],
       paths: [
         `userRooms/${row.ownerUid}/${roomCode || '{roomCode}'}`,
         `roomMembers/${roomCode || '{roomCode}'}/${row.ownerUid}`,
         `users/${row.ownerUid}/activeRoom`,
-        `rooms/${roomCode || '{roomCode}'} 기록은 보존`
+        `rooms/${roomCode || '{roomCode}'} 湲곕줉? 蹂댁〈`
       ],
       checklist: [
-        '요청자의 Room 연결만 해제하는 요청인지 확인',
-        '기존 공동 기록은 삭제하지 않고 보존',
-        'activeRoom이 대상 Room이면 해제 기준 확인',
-        '상대방 Room 접근권이 유지되는지 확인'
+        '?붿껌?먯쓽 Room ?곌껐留??댁젣?섎뒗 ?붿껌?몄? ?뺤씤',
+        '湲곗〈 怨듬룞 湲곕줉? ??젣?섏? ?딄퀬 蹂댁〈',
+        'activeRoom?????Room?대㈃ ?댁젣 湲곗? ?뺤씤',
+        '?곷?諛?Room ?묎렐沅뚯씠 ?좎??섎뒗吏 ?뺤씤'
       ]
     };
   }
 
   if (request.requestType === 'delete_room') {
     return {
-      title: 'Room 전체 삭제 기준점',
+      title: 'Room ?꾩껜 ??젣 湲곗???,
       summary: [
-        `대상 Room: ${roomCode || '-'}`,
-        `Room 멤버: ${roomMemberList.length}명`,
-        `멤버 목록: ${memberListText(roomMemberList)}`,
-        `공동 검토: ${request.partnerConsentRequired ? '필요' : '필요 여부 확인'}`
+        `???Room: ${roomCode || '-'}`,
+        `Room 硫ㅻ쾭: ${roomMemberList.length}紐?,
+        `硫ㅻ쾭 紐⑸줉: ${memberListText(roomMemberList)}`,
+        `怨듬룞 寃?? ${request.partnerConsentRequired ? '?꾩슂' : '?꾩슂 ?щ? ?뺤씤'}`
       ],
       paths: [
         `rooms/${roomCode || '{roomCode}'}`,
         `roomMembers/${roomCode || '{roomCode}'}`,
         `userRooms/{memberUid}/${roomCode || '{roomCode}'}`,
-        '사진·채팅·기록 삭제 범위 별도 확인'
+        '?ъ쭊쨌梨꾪똿쨌湲곕줉 ??젣 踰붿쐞 蹂꾨룄 ?뺤씤'
       ],
       checklist: [
-        'Room 전체 삭제는 상대방 권리와 보관 필요성을 함께 확인',
-        '채팅·기록·사진 등 공동 데이터 범위를 먼저 점검',
-        '실행 전 관리자 메모와 감사 로그를 남김',
-        '실제 삭제 전 별도 백업/복구 기준점을 확보'
+        'Room ?꾩껜 ??젣???곷?諛?沅뚮━? 蹂닿? ?꾩슂?깆쓣 ?④퍡 ?뺤씤',
+        '梨꾪똿쨌湲곕줉쨌?ъ쭊 ??怨듬룞 ?곗씠??踰붿쐞瑜?癒쇱? ?먭?',
+        '?ㅽ뻾 ??愿由ъ옄 硫붾え? 媛먯궗 濡쒓렇瑜??④?',
+        '?ㅼ젣 ??젣 ??蹂꾨룄 諛깆뾽/蹂듦뎄 湲곗??먯쓣 ?뺣낫'
       ]
     };
   }
 
   return {
-    title: '요청 기준점',
+    title: '?붿껌 湲곗???,
     summary: [
-      `사용자 UID: ${shortUid(row.ownerUid)}`,
-      `이메일: ${request.requestedByEmail || user.email || '-'}`,
-      `요청 유형: ${requestTypeLabel(request.requestType)}`,
+      `?ъ슜??UID: ${shortUid(row.ownerUid)}`,
+      `?대찓?? ${request.requestedByEmail || user.email || '-'}`,
+      `?붿껌 ?좏삎: ${requestTypeLabel(request.requestType)}`,
       `Room: ${roomCode || '-'}`
     ],
     paths: ['dataDeleteRequests/{uid}/{requestId}', 'users/{uid}', 'userRooms/{uid}', 'roomMembers/{roomCode}'],
     checklist: [
-      '요청 유형과 상태를 먼저 확인',
-      '실제 데이터 변경 전 관리자 메모를 남김',
-      '공동 데이터는 상대방 권리를 확인',
-      '이 화면에서는 실제 삭제를 실행하지 않음'
+      '?붿껌 ?좏삎怨??곹깭瑜?癒쇱? ?뺤씤',
+      '?ㅼ젣 ?곗씠??蹂寃???愿由ъ옄 硫붾え瑜??④?',
+      '怨듬룞 ?곗씠?곕뒗 ?곷?諛?沅뚮━瑜??뺤씤',
+      '???붾㈃?먯꽌???ㅼ젣 ??젣瑜??ㅽ뻾?섏? ?딆쓬'
     ]
   };
 }
@@ -245,10 +245,10 @@ function renderMetrics(rows) {
 
   return `
     <div class="metric-grid admin-recovery-metrics">
-      <article class="metric-card"><span>기준점 요청</span><strong>${rows.length}</strong><small>전체 데이터 요청</small></article>
-      <article class="metric-card"><span>계정 삭제</span><strong>${accountCount}</strong><small>개인 정보 중심</small></article>
-      <article class="metric-card"><span>Room 연결 해제</span><strong>${leaveRoomCount}</strong><small>공동 기록 보존</small></article>
-      <article class="metric-card"><span>Room 전체 삭제</span><strong>${deleteRoomCount}</strong><small>이중 검토 필요</small></article>
+      <article class="metric-card"><span>湲곗????붿껌</span><strong>${rows.length}</strong><small>?꾩껜 ?곗씠???붿껌</small></article>
+      <article class="metric-card"><span>怨꾩젙 ??젣</span><strong>${accountCount}</strong><small>媛쒖씤 ?뺣낫 以묒떖</small></article>
+      <article class="metric-card"><span>Room ?곌껐 ?댁젣</span><strong>${leaveRoomCount}</strong><small>怨듬룞 湲곕줉 蹂댁〈</small></article>
+      <article class="metric-card"><span>Room ?꾩껜 ??젣</span><strong>${deleteRoomCount}</strong><small>?댁쨷 寃???꾩슂</small></article>
     </div>`;
 }
 
@@ -271,10 +271,10 @@ function renderRecoveryCard(row) {
       </div>
       <div class="admin-recovery-meta">
         <span>UID ${escapeHtml(shortUid(row.ownerUid))}</span>
-        <span>요청 ID ${escapeHtml(shortUid(row.id))}</span>
+        <span>?붿껌 ID ${escapeHtml(shortUid(row.id))}</span>
         <span>Room ${escapeHtml(request.roomCode || user.activeRoom || '-')}</span>
-        <span>접수 ${escapeHtml(formatDateTime(requestedAt))}</span>
-        <span>갱신 ${escapeHtml(formatDateTime(updatedAt))}</span>
+        <span>?묒닔 ${escapeHtml(formatDateTime(requestedAt))}</span>
+        <span>媛깆떊 ${escapeHtml(formatDateTime(updatedAt))}</span>
       </div>
       <div class="admin-recovery-grid">
         <section>
@@ -282,15 +282,15 @@ function renderRecoveryCard(row) {
           ${renderCheckList(baseline.summary)}
         </section>
         <section>
-          <h3>확인 경로</h3>
+          <h3>?뺤씤 寃쎈줈</h3>
           ${renderCheckList(baseline.paths)}
         </section>
         <section>
-          <h3>실행 전 체크</h3>
+          <h3>?ㅽ뻾 ??泥댄겕</h3>
           ${renderCheckList(baseline.checklist)}
         </section>
       </div>
-      <p class="admin-recovery-warning">읽기 전용 기준점입니다. 이 화면에서는 실제 삭제, Room 연결 해제, Room 전체 삭제를 실행하지 않습니다.</p>
+      <p class="admin-recovery-warning">?쎄린 ?꾩슜 湲곗??먯엯?덈떎. ???붾㈃?먯꽌???ㅼ젣 ??젣, Room ?곌껐 ?댁젣, Room ?꾩껜 ??젣瑜??ㅽ뻾?섏? ?딆뒿?덈떎.</p>
     </article>`;
 }
 
@@ -301,22 +301,22 @@ export async function render() {
     return `
       <section class="module-view" aria-labelledby="adminRecoveryHeading">
         <div class="foundation-notice">
-          <span class="notice-icon">↺</span>
+          <span class="notice-icon">??/span>
           <div>
-            <h2 id="adminRecoveryHeading">복구 센터 · 실행 전 기준점</h2>
-            <p>삭제나 Room 연결 해제 전에 되돌릴 기준 정보를 확인합니다. 현재 단계에서는 데이터를 변경하지 않습니다.</p>
+            <h2 id="adminRecoveryHeading">蹂듦뎄 ?쇳꽣 쨌 ?ㅽ뻾 ??湲곗???/h2>
+            <p>??젣??Room ?곌껐 ?댁젣 ?꾩뿉 ?섎룎由?湲곗? ?뺣낫瑜??뺤씤?⑸땲?? ?꾩옱 ?④퀎?먯꽌???곗씠?곕? 蹂寃쏀븯吏 ?딆뒿?덈떎.</p>
           </div>
         </div>
         ${renderMetrics(rows)}
         <article class="panel">
           <div class="panel-header admin-recovery-panel-header">
             <div>
-              <h2>삭제 요청 기준점</h2>
-              <p>사용자 요청, 연결 Room, 멤버십, 공동 데이터 확인 경로를 읽기 전용으로 보여줍니다.</p>
+              <h2>??젣 ?붿껌 湲곗???/h2>
+              <p>?ъ슜???붿껌, ?곌껐 Room, 硫ㅻ쾭?? 怨듬룞 ?곗씠???뺤씤 寃쎈줈瑜??쎄린 ?꾩슜?쇰줈 蹂댁뿬以띾땲??</p>
             </div>
             <span class="phase-badge">Read Only</span>
           </div>
-          ${rows.length ? `<div class="admin-recovery-list">${rows.map(renderRecoveryCard).join('')}</div>` : renderEmptyState('복구 기준점 없음', '현재 확인할 데이터 삭제 요청이 없습니다.')}
+          ${rows.length ? `<div class="admin-recovery-list">${rows.map(renderRecoveryCard).join('')}</div>` : renderEmptyState('蹂듦뎄 湲곗????놁쓬', '?꾩옱 ?뺤씤???곗씠????젣 ?붿껌???놁뒿?덈떎.')}
         </article>
       </section>`;
   } catch (error) {
@@ -324,9 +324,10 @@ export async function render() {
     return `
       <section class="module-view">
         <article class="error-card">
-          <h2>복구 센터를 불러오지 못했습니다.</h2>
+          <h2>蹂듦뎄 ?쇳꽣瑜?遺덈윭?ㅼ? 紐삵뻽?듬땲??</h2>
           <p>${escapeHtml(error.message || error)}</p>
         </article>
       </section>`;
   }
 }
+
