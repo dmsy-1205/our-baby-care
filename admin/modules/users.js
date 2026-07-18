@@ -1,7 +1,7 @@
-import { getAdminDatabase } from '../admin-api.js?v=step6-2-13-4-admin-data-requests-readonly-20260718';
-import { getState } from '../admin-state.js?v=step6-2-13-4-admin-data-requests-readonly-20260718';
-import { escapeHtml, formatDateTime } from '../admin-utils.js?v=step6-2-13-4-admin-data-requests-readonly-20260718';
-import { renderEmptyState } from '../components/empty-state.js?v=step6-2-13-4-admin-data-requests-readonly-20260718';
+import { getAdminDatabase } from '../admin-api.js?v=step6-2-13-5-admin-data-requests-segmented-view-20260718';
+import { getState } from '../admin-state.js?v=step6-2-13-5-admin-data-requests-segmented-view-20260718';
+import { escapeHtml, formatDateTime } from '../admin-utils.js?v=step6-2-13-5-admin-data-requests-segmented-view-20260718';
+import { renderEmptyState } from '../components/empty-state.js?v=step6-2-13-5-admin-data-requests-segmented-view-20260718';
 
 function asObject(value) {
   return value && typeof value === 'object' ? value : {};

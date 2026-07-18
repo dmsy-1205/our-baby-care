@@ -1,11 +1,11 @@
 // =========================================================
-// HearMe2nite v1.0 STEP6.2.13.4
+// HearMe2nite v1.0 STEP6.2.13.5
 // PWA install foundation: manifest + service worker registration
 // - FCM/push notification is intentionally separated into the next step.
 // =========================================================
 (function () {
-    const HM_PWA_APP_VERSION = 'v1.0-step6-2-13-4';
-    const HM_PWA_SW_URL = '/service-worker.js?v=step6-2-13-4-admin-data-requests-readonly-20260718';
+    const HM_PWA_APP_VERSION = 'v1.0-step6-2-13-5';
+    const HM_PWA_SW_URL = '/service-worker.js?v=step6-2-13-5-admin-data-requests-segmented-view-20260718';
     const HM_PWA_VERSION_KEY = 'hm_pwa_app_version';
     const HM_PWA_DISMISS_KEY = 'hm_pwa_install_dismiss_until';
     const HM_DAY_MS = 24 * 60 * 60 * 1000;
