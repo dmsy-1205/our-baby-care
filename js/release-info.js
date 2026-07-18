@@ -5,19 +5,19 @@
 (function () {
     const release = Object.freeze({
         product: 'HearMe2nite',
-        version: 'v1.0 STEP6.2.13.2',
-        appVersion: 'HearMe2nite v1.0 STEP6.2.13.2',
-        step: 'STEP6.2.13.2',
+        version: 'v1.0 STEP6.2.13.3',
+        appVersion: 'HearMe2nite v1.0 STEP6.2.13.3',
+        step: 'STEP6.2.13.3',
         build: '20260718',
         releaseDate: '2026.07.18',
         stage: 'Beta',
-        title: 'Admin User Directory Permission Safe',
-        description: '관리자 사용자 목록이 현재 보안 규칙 안에서 안전하게 열리도록 수정했습니다.',
+        title: 'Admin Room Directory Readonly',
+        description: '관리자 Room 목록을 읽기 전용으로 연결하고 사용자 목록의 이메일 인증 표시를 오해 없게 정리했습니다.',
         changes: Object.freeze([
-            'Removed full /admins read from Admin User Directory',
-            'Shows user email, nickname, UID, Room connection, and Dom/Sub role without widening database rules',
-            'Added admin favicon and refreshed admin module cache keys',
-            'Kept all admin user operations readonly',
+            'Added readonly Admin Room Directory',
+            'Reads Room codes through roomMembers/userRooms and loads rooms/{roomCode}/meta individually',
+            'Renamed misleading user email verification warning to a DB reference flag',
+            'Refreshed admin and PWA cache keys for STEP6.2.13.3',
             '기존 기록/채팅 저장 구조 변경 없음'
         ])
     });

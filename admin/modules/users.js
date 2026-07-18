@@ -1,7 +1,7 @@
-import { getAdminDatabase } from '../admin-api.js?v=step6-2-13-2-admin-user-directory-permission-safe-20260718';
-import { getState } from '../admin-state.js?v=step6-2-13-2-admin-user-directory-permission-safe-20260718';
-import { escapeHtml, formatDateTime } from '../admin-utils.js?v=step6-2-13-2-admin-user-directory-permission-safe-20260718';
-import { renderEmptyState } from '../components/empty-state.js?v=step6-2-13-2-admin-user-directory-permission-safe-20260718';
+import { getAdminDatabase } from '../admin-api.js?v=step6-2-13-3-admin-room-directory-readonly-20260718';
+import { getState } from '../admin-state.js?v=step6-2-13-3-admin-room-directory-readonly-20260718';
+import { escapeHtml, formatDateTime } from '../admin-utils.js?v=step6-2-13-3-admin-room-directory-readonly-20260718';
+import { renderEmptyState } from '../components/empty-state.js?v=step6-2-13-3-admin-room-directory-readonly-20260718';
 
 function asObject(value) {
   return value && typeof value === 'object' ? value : {};
@@ -94,13 +94,15 @@ async function loadUserDirectory() {
 function renderStats(rows) {
   const linked = rows.filter((row) => row.roomCodes.length || row.activeRoom).length;
   const admins = rows.filter((row) => row.isAdmin).length;
-  const needsCheck = rows.filter((row) => row.requiresEmailVerification || (!row.email && !row.nickname)).length;
+  const needsCheck = rows.filter((row) => !row.email || (!row.roomCodes.length && !row.activeRoom)).length;
+  const verificationFlags = rows.filter((row) => row.requiresEmailVerification).length;
   return `
     <div class="metric-grid admin-user-metrics">
       <article class="metric-card"><span>전체 회원</span><strong>${rows.length}</strong><small>users/userRooms 기준</small></article>
       <article class="metric-card"><span>Room 연결</span><strong>${linked}</strong><small>activeRoom 또는 membership</small></article>
       <article class="metric-card"><span>현재 관리자</span><strong>${admins}</strong><small>로그인한 관리자 기준</small></article>
-      <article class="metric-card"><span>확인 필요</span><strong>${needsCheck}</strong><small>정보 부족 또는 인증 필요</small></article>
+      <article class="metric-card"><span>확인 참고</span><strong>${needsCheck}</strong><small>이메일 없음 또는 Room 미연결</small></article>
+      <article class="metric-card"><span>인증 플래그</span><strong>${verificationFlags}</strong><small>DB에 남은 보조 표시</small></article>
     </div>`;
 }
 
@@ -108,8 +110,10 @@ function renderUserCard(row) {
   const name = row.nickname || row.email || '이름 없음';
   const initial = String(name).trim().slice(0, 1).toUpperCase() || '♡';
   const room = roomLabel(row.activeRoom, row.roomCodes);
-  const statusClass = row.requiresEmailVerification ? 'needs-check' : 'ok';
-  const statusText = row.requiresEmailVerification ? '이메일 확인 필요' : '정상';
+  const connected = Boolean(row.activeRoom || row.roomCodes.length);
+  const statusClass = !row.email || !connected ? 'needs-check' : 'ok';
+  const statusText = !row.email ? '이메일 정보 없음' : (!connected ? 'Room 미연결' : '정상');
+  const verificationFlag = row.requiresEmailVerification ? '<span>인증 플래그 남음</span>' : '';
   return `
     <article class="admin-user-card" data-admin-user-row data-search="${escapeHtml(`${name} ${row.email} ${row.uid} ${room} ${row.role}`.toLowerCase())}">
       <div class="admin-user-avatar" aria-hidden="true">${escapeHtml(initial)}</div>
@@ -125,6 +129,7 @@ function renderUserCard(row) {
           <span>Room ${escapeHtml(room)}</span>
           <span>역할 ${escapeHtml(row.role)}</span>
           <span>최근 ${escapeHtml(formatDateTime(row.lastSeen))}</span>
+          ${verificationFlag}
         </div>
       </div>
     </article>`;
@@ -146,7 +151,7 @@ export async function render() {
           <div><span class="notice-icon" aria-hidden="true">👥</span></div>
           <div>
             <h2 id="adminUsersHeading">사용자 목록 읽기 전용</h2>
-            <p>가입 회원, Room 연결 상태, Dom/Sub 역할을 조회합니다. 이 화면에서는 데이터를 저장하거나 변경하지 않습니다.</p>
+            <p>가입 회원, Room 연결 상태, Dom/Sub 역할을 조회합니다. 이메일 인증 플래그는 실제 미인증 판정이 아니라 DB에 남은 참고 표시로만 다룹니다.</p>
           </div>
         </div>
         ${renderStats(rows)}

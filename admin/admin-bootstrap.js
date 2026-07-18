@@ -1,8 +1,8 @@
-import { waitForAuthenticatedUser, readAdminProfile, isActiveAdmin, signOutAdmin } from './admin-api.js?v=step6-2-13-2-admin-user-directory-permission-safe-20260718';
+import { waitForAuthenticatedUser, readAdminProfile, isActiveAdmin, signOutAdmin } from './admin-api.js?v=step6-2-13-3-admin-room-directory-readonly-20260718';
 import { setState } from './admin-state.js';
 import { setDocumentBusy } from './admin-utils.js';
 import { renderSidebar } from './components/sidebar.js';
-import { startRouter, navigate } from './admin-router.js?v=step6-2-13-2-admin-user-directory-permission-safe-20260718';
+import { startRouter, navigate } from './admin-router.js?v=step6-2-13-3-admin-room-directory-readonly-20260718';
 
 const boot = document.getElementById('adminBoot');
 const root = document.getElementById('adminRoot');
