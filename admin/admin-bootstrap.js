@@ -1,8 +1,8 @@
-import { waitForAuthenticatedUser, readAdminProfile, isActiveAdmin, signOutAdmin } from './admin-api.js?v=admin-2-0-a11-data-center-foundation-20260718';
+import { waitForAuthenticatedUser, readAdminProfile, isActiveAdmin, signOutAdmin } from './admin-api.js?v=admin-2-0-a12-action-guard-20260718';
 import { setState } from './admin-state.js';
 import { setDocumentBusy } from './admin-utils.js';
-import { renderSidebar } from './components/sidebar.js?v=admin-2-0-a11-data-center-foundation-20260718';
-import { startRouter, navigate } from './admin-router.js?v=admin-2-0-a11-data-center-foundation-20260718';
+import { renderSidebar } from './components/sidebar.js?v=admin-2-0-a12-action-guard-20260718';
+import { startRouter, navigate } from './admin-router.js?v=admin-2-0-a12-action-guard-20260718';
 
 const boot = document.getElementById('adminBoot');
 const root = document.getElementById('adminRoot');
@@ -88,7 +88,7 @@ async function bootstrap() {
     setState({ phase: 'ready', user, adminProfile, bootedAt: Date.now() });
     renderShell(user);
     startRouter();
-    console.info('[Admin 2.0] data center foundation ready');
+    console.info('[Admin 2.0] action guard ready');
   } catch (error) {
     console.error('[Admin 2.0] bootstrap failed', error);
     setState({ phase: 'error', bootError: error });

@@ -1,7 +1,7 @@
 import { escapeHtml } from '../admin-utils.js';
 
-const ADMIN_CONSOLE_STEP = 'STEP A11';
-const ADMIN_CONSOLE_STEP_LABEL = 'Data Center Foundation';
+const ADMIN_CONSOLE_STEP = 'STEP A12';
+const ADMIN_CONSOLE_STEP_LABEL = 'Action Guard';
 
 const items = [
   ['dashboard', '대시보드', '▦'],
@@ -9,7 +9,7 @@ const items = [
   ['rooms', 'Room', '⌂'],
   ['requests', '데이터 요청', '☑'],
   ['recovery', '복구 센터', '↺'],
-  ['audit', '감사 로그', '≣'],
+  ['audit', '감사 로그', '≡'],
   ['releases', '릴리스', '⬆'],
   ['system', '시스템', '⚙']
 ];

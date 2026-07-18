@@ -1,10 +1,10 @@
-import { getAdminDatabase } from '../admin-api.js?v=admin-2-0-a11-data-center-foundation-20260718';
-import { getState } from '../admin-state.js?v=admin-2-0-a11-data-center-foundation-20260718';
-import { escapeHtml, formatDateTime } from '../admin-utils.js?v=admin-2-0-a11-data-center-foundation-20260718';
+import { getAdminDatabase } from '../admin-api.js?v=admin-2-0-a12-action-guard-20260718';
+import { getState } from '../admin-state.js?v=admin-2-0-a12-action-guard-20260718';
+import { escapeHtml, formatDateTime } from '../admin-utils.js?v=admin-2-0-a12-action-guard-20260718';
 
-const ADMIN_SYSTEM_STEP = 'STEP A11';
-const ADMIN_SYSTEM_LABEL = 'Data Center Foundation';
-const ADMIN_CACHE_KEY = 'admin-2-0-a11-data-center-foundation-20260718';
+const ADMIN_SYSTEM_STEP = 'STEP A12';
+const ADMIN_SYSTEM_LABEL = 'Action Guard';
+const ADMIN_CACHE_KEY = 'admin-2-0-a12-action-guard-20260718';
 
 const HEALTH_PATHS = [
   { key: 'users', label: '사용자', path: 'users' },
@@ -31,9 +31,7 @@ function flattenRequestRows(requestRoot) {
         ownerUid,
         requestId,
         requestType: request?.requestType || request?.type || 'unknown',
-        status: request?.status || 'pending',
-        createdAt: Number(request?.createdAt || request?.requestedAt || 0),
-        updatedAt: Number(request?.updatedAt || request?.reviewedAt || 0)
+        status: request?.status || 'pending'
       });
     });
   });
@@ -113,21 +111,17 @@ function buildDataCenter(statusMap) {
     if (!countChildren(roomMembers[roomCode])) roomsWithoutMembers += 1;
   });
 
-  const requestStatus = countBy(requestRows, 'status');
-  const requestTypes = countBy(requestRows, 'requestType');
   const closedStatuses = ['approved', 'rejected', 'canceled', 'cancelled', 'completed', 'closed'];
   const openRequestCount = requestRows.filter((row) => !closedStatuses.includes(row.status)).length;
-
   const warnings = [
     orphanUserRoomLinks ? `사용자 Room 연결 불일치 ${orphanUserRoomLinks}건` : '',
-    missingUserProfiles ? `멤버십은 있으나 사용자 정보가 없는 항목 ${missingUserProfiles}건` : '',
-    roomsWithoutMembers ? `Room 데이터는 있으나 멤버가 없는 Room ${roomsWithoutMembers}건` : '',
+    missingUserProfiles ? `사용자 정보 없는 멤버십 ${missingUserProfiles}건` : '',
+    roomsWithoutMembers ? `멤버 없는 Room 데이터 ${roomsWithoutMembers}건` : '',
     openRequestCount ? `처리 중인 데이터 요청 ${openRequestCount}건` : ''
   ].filter(Boolean);
 
   return {
     totalUsers: countChildren(users),
-    totalUserRooms: Object.values(userRooms).reduce((sum, roomsByUser) => sum + countChildren(roomsByUser), 0),
     totalRooms: roomCodes.size,
     totalRoomMembers: Object.values(roomMembers).reduce((sum, members) => sum + countChildren(members), 0),
     totalRequests: requestRows.length,
@@ -136,8 +130,8 @@ function buildDataCenter(statusMap) {
     missingUserProfiles,
     roomsWithoutMembers,
     openRequestCount,
-    requestStatus,
-    requestTypes,
+    requestStatus: countBy(requestRows, 'status'),
+    requestTypes: countBy(requestRows, 'requestType'),
     warnings
   };
 }
@@ -156,7 +150,6 @@ async function loadSystemStatus() {
     firebaseAppName: resolveFirebaseAppName(),
     firebaseReady: Boolean(window.firebase && resolveFirebaseAppName() !== '-'),
     pathStatuses,
-    statusMap,
     dataCenter: buildDataCenter(statusMap),
     okCount,
     totalCount: pathStatuses.length
@@ -255,7 +248,7 @@ export async function render() {
     return `
       <section class="module-view" aria-labelledby="adminSystemHeading">
         <div class="foundation-notice">
-          <span class="notice-icon" aria-hidden="true">⚙</span>
+          <span class="notice-icon" aria-hidden="true">⚙️</span>
           <div>
             <h2 id="adminSystemHeading">시스템 · 데이터 센터 점검판</h2>
             <p>관리자 앱의 연결, 인증, 주요 데이터 읽기 상태를 확인합니다. 현재 화면은 읽기 전용입니다.</p>
@@ -297,7 +290,7 @@ export async function render() {
             <section class="admin-system-card">
               <h3>앱 기준</h3>
               <dl>
-                <div><dt>메인앱 버전</dt><dd>${escapeHtml(status.release.step || '-')}</dd></div>
+                <div><dt>메인앱 버전</dt><dd>${escapeHtml(status.release.step || 'STEP6.2.13.4')}</dd></div>
                 <div><dt>관리자 스텝</dt><dd>${ADMIN_SYSTEM_STEP}</dd></div>
                 <div><dt>캐시 키</dt><dd>${ADMIN_CACHE_KEY}</dd></div>
                 <div><dt>부팅 시간</dt><dd>${escapeHtml(formatDateTime(bootedAt))}</dd></div>

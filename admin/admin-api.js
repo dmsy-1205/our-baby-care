@@ -8,7 +8,7 @@ function resolveFirebaseServices() {
   }
 
   // config.js에서 이미 초기화한 babyApp을 Firebase compat SDK에서 직접 찾습니다.
-  // window.babyAuth/window.db에 의존하지 않아 관리자 모듈 로딩 순서가 안정적입니다.
+  // window.babyAuth/window.db 순서에 의존하지 않아 관리자 모듈 로딩이 안정적입니다.
   const babyApp = firebaseSdk.apps.find((app) => app && app.name === 'babyApp');
 
   if (!babyApp) {
