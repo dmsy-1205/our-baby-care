@@ -1,10 +1,10 @@
-import { getAdminDatabase } from '../admin-api.js?v=admin-2-0-a11-recovery-wrap-fix-20260719';
+﻿import { getAdminDatabase } from '../admin-api.js?v=admin-2-0-a11-1-clean-baseline-20260719';
 import { getState } from '../admin-state.js';
-import { escapeHtml } from '../admin-utils.js?v=admin-2-0-a11-recovery-wrap-fix-20260719';
+import { escapeHtml } from '../admin-utils.js?v=admin-2-0-a11-1-clean-baseline-20260719';
 
 const ADMIN_STEP = 'STEP A11';
 const ADMIN_LABEL = 'Data Center Readonly';
-const ADMIN_CACHE_KEY = 'admin-2-0-a11-recovery-wrap-fix-20260719';
+const ADMIN_CACHE_KEY = 'admin-2-0-a11-1-clean-baseline-20260719';
 
 function asObject(value) {
   return value && typeof value === 'object' ? value : {};
@@ -33,12 +33,12 @@ async function readPath(database, label, path) {
 async function loadSystemStatus() {
   const database = getAdminDatabase();
   const reads = await Promise.all([
-    readPath(database, '사용자', 'users'),
+    readPath(database, '?ъ슜??, 'users'),
     readPath(database, 'Room', 'rooms'),
-    readPath(database, 'Room 멤버', 'roomMembers'),
-    readPath(database, '사용자 Room 연결', 'userRooms'),
-    readPath(database, '데이터 요청', 'dataDeleteRequests'),
-    readPath(database, '감사 로그', 'adminAuditLogs')
+    readPath(database, 'Room 硫ㅻ쾭', 'roomMembers'),
+    readPath(database, '?ъ슜??Room ?곌껐', 'userRooms'),
+    readPath(database, '?곗씠???붿껌', 'dataDeleteRequests'),
+    readPath(database, '媛먯궗 濡쒓렇', 'adminAuditLogs')
   ]);
 
   const byPath = Object.fromEntries(reads.map((item) => [item.path, item]));
@@ -103,7 +103,7 @@ async function loadSystemStatus() {
 function renderCountList(title, items) {
   const entries = Object.entries(items);
   if (!entries.length) {
-    return `<div class="admin-list-row"><span>${escapeHtml(title)}</span><strong>0건</strong></div>`;
+    return `<div class="admin-list-row"><span>${escapeHtml(title)}</span><strong>0嫄?/strong></div>`;
   }
 
   return `
@@ -112,7 +112,7 @@ function renderCountList(title, items) {
       ${entries.map(([key, count]) => `
         <div class="admin-list-row">
           <span>${escapeHtml(key)}</span>
-          <strong>${count}건</strong>
+          <strong>${count}嫄?/strong>
         </div>
       `).join('')}
     </div>
@@ -128,42 +128,42 @@ export async function render() {
   return `
     <section class="module-view" aria-labelledby="systemHeading">
       <section class="admin-hero-card">
-        <div class="admin-hero-icon">⚙️</div>
+        <div class="admin-hero-icon">?숋툘</div>
         <div>
-          <h2 id="systemHeading">시스템 · 운영 상태 점검판</h2>
-          <p>관리자 앱의 연결, 인증, 주요 데이터 읽기 상태를 확인합니다. 이 화면은 읽기 전용입니다.</p>
+          <h2 id="systemHeading">?쒖뒪??쨌 ?댁쁺 ?곹깭 ?먭???/h2>
+          <p>愿由ъ옄 ?깆쓽 ?곌껐, ?몄쬆, 二쇱슂 ?곗씠???쎄린 ?곹깭瑜??뺤씤?⑸땲?? ???붾㈃? ?쎄린 ?꾩슜?낅땲??</p>
         </div>
       </section>
 
       <section class="admin-grid admin-grid-4">
-        <article class="admin-card admin-metric"><span>Firebase 앱</span><strong>babyApp</strong><small>연결 확인</small></article>
-        <article class="admin-card admin-metric"><span>관리자 인증</span><strong>${escapeHtml(state.user?.email || '-')}</strong><small>현재 로그인 관리자</small></article>
-        <article class="admin-card admin-metric"><span>읽기 점검</span><strong>${status.reads.length - failed}/${status.reads.length}</strong><small>주요 경로 읽기 가능</small></article>
-        <article class="admin-card admin-metric"><span>관리자 스텝</span><strong>${ADMIN_STEP}</strong><small>${ADMIN_LABEL}</small></article>
+        <article class="admin-card admin-metric"><span>Firebase ??/span><strong>babyApp</strong><small>?곌껐 ?뺤씤</small></article>
+        <article class="admin-card admin-metric"><span>愿由ъ옄 ?몄쬆</span><strong>${escapeHtml(state.user?.email || '-')}</strong><small>?꾩옱 濡쒓렇??愿由ъ옄</small></article>
+        <article class="admin-card admin-metric"><span>?쎄린 ?먭?</span><strong>${status.reads.length - failed}/${status.reads.length}</strong><small>二쇱슂 寃쎈줈 ?쎄린 媛??/small></article>
+        <article class="admin-card admin-metric"><span>愿由ъ옄 ?ㅽ뀦</span><strong>${ADMIN_STEP}</strong><small>${ADMIN_LABEL}</small></article>
       </section>
 
       <section class="admin-card admin-panel">
         <div class="admin-panel-head">
           <div>
-            <h2>운영 연결 상태</h2>
-            <p>관리자 화면이 정상적으로 데이터를 읽을 수 있는지 확인합니다.</p>
+            <h2>?댁쁺 ?곌껐 ?곹깭</h2>
+            <p>愿由ъ옄 ?붾㈃???뺤긽?곸쑝濡??곗씠?곕? ?쎌쓣 ???덈뒗吏 ?뺤씤?⑸땲??</p>
           </div>
           <span class="admin-status-pill muted">Read Only</span>
         </div>
         <div class="admin-grid admin-grid-2">
           <article class="admin-soft-card">
-            <h3>앱 기준</h3>
-            <div class="admin-key-value"><span>메인앱 버전</span><strong>${escapeHtml(release.step || 'STEP6.2.13.4')}</strong></div>
-            <div class="admin-key-value"><span>관리자 스텝</span><strong>${ADMIN_STEP}</strong></div>
-            <div class="admin-key-value"><span>캐시 키</span><strong>${ADMIN_CACHE_KEY}</strong></div>
+            <h3>??湲곗?</h3>
+            <div class="admin-key-value"><span>硫붿씤??踰꾩쟾</span><strong>${escapeHtml(release.step || 'STEP6.2.13.4')}</strong></div>
+            <div class="admin-key-value"><span>愿由ъ옄 ?ㅽ뀦</span><strong>${ADMIN_STEP}</strong></div>
+            <div class="admin-key-value"><span>罹먯떆 ??/span><strong>${ADMIN_CACHE_KEY}</strong></div>
           </article>
           <article class="admin-soft-card">
-            <h3>안전 기준</h3>
+            <h3>?덉쟾 湲곗?</h3>
             <ul>
-              <li>관리자 인증을 통과한 계정만 접근</li>
-              <li>현재 화면에서는 데이터 저장·삭제 기능 없음</li>
-              <li>주요 경로는 읽기 점검만 수행</li>
-              <li>메인앱 버전은 관리자 스텝과 분리 관리</li>
+              <li>愿由ъ옄 ?몄쬆???듦낵??怨꾩젙留??묎렐</li>
+              <li>?꾩옱 ?붾㈃?먯꽌???곗씠????Β룹궘??湲곕뒫 ?놁쓬</li>
+              <li>二쇱슂 寃쎈줈???쎄린 ?먭?留??섑뻾</li>
+              <li>硫붿씤??踰꾩쟾? 愿由ъ옄 ?ㅽ뀦怨?遺꾨━ 愿由?/li>
             </ul>
           </article>
         </div>
@@ -172,48 +172,48 @@ export async function render() {
       <section class="admin-card admin-panel">
         <div class="admin-panel-head">
           <div>
-            <h2>데이터 관리 센터 · 읽기 점검</h2>
-            <p>실제 데이터를 변경하지 않고, 운영자가 먼저 확인해야 할 데이터 구조와 위험 신호를 요약합니다.</p>
+            <h2>?곗씠??愿由??쇳꽣 쨌 ?쎄린 ?먭?</h2>
+            <p>?ㅼ젣 ?곗씠?곕? 蹂寃쏀븯吏 ?딄퀬, ?댁쁺?먭? 癒쇱? ?뺤씤?댁빞 ???곗씠??援ъ“? ?꾪뿕 ?좏샇瑜??붿빟?⑸땲??</p>
           </div>
           <span class="admin-status-pill muted">Read Only</span>
         </div>
 
         <section class="admin-grid admin-grid-4">
-          <article class="admin-card admin-metric"><span>사용자</span><strong>${status.usersCount}</strong><small>users 기준</small></article>
-          <article class="admin-card admin-metric"><span>Room</span><strong>${status.roomsCount}</strong><small>rooms/roomMembers 통합</small></article>
-          <article class="admin-card admin-metric"><span>Room 멤버</span><strong>${status.roomMembersCount}</strong><small>roomMembers 기준</small></article>
-          <article class="admin-card admin-metric"><span>데이터 요청</span><strong>${status.requestsCount}</strong><small>처리 중 ${status.openRequestsCount}건</small></article>
+          <article class="admin-card admin-metric"><span>?ъ슜??/span><strong>${status.usersCount}</strong><small>users 湲곗?</small></article>
+          <article class="admin-card admin-metric"><span>Room</span><strong>${status.roomsCount}</strong><small>rooms/roomMembers ?듯빀</small></article>
+          <article class="admin-card admin-metric"><span>Room 硫ㅻ쾭</span><strong>${status.roomMembersCount}</strong><small>roomMembers 湲곗?</small></article>
+          <article class="admin-card admin-metric"><span>?곗씠???붿껌</span><strong>${status.requestsCount}</strong><small>泥섎━ 以?${status.openRequestsCount}嫄?/small></article>
         </section>
 
         <div class="admin-grid admin-grid-2">
           <article class="admin-soft-card">
-            <h3>위험 신호</h3>
+            <h3>?꾪뿕 ?좏샇</h3>
             <ul>
-              <li>사용자 Room 연결 불일치: ${status.risks.userRoomMismatch.length}건</li>
-              <li>사용자 정보 없는 멤버십: ${status.risks.membershipsWithoutUser.length}건</li>
-              <li>멤버 없는 Room 데이터: ${status.risks.roomsWithoutMembers.length}건</li>
-              <li>열린 데이터 요청: ${status.risks.openRequests.length}건</li>
+              <li>?ъ슜??Room ?곌껐 遺덉씪移? ${status.risks.userRoomMismatch.length}嫄?/li>
+              <li>?ъ슜???뺣낫 ?녿뒗 硫ㅻ쾭?? ${status.risks.membershipsWithoutUser.length}嫄?/li>
+              <li>硫ㅻ쾭 ?녿뒗 Room ?곗씠?? ${status.risks.roomsWithoutMembers.length}嫄?/li>
+              <li>?대┛ ?곗씠???붿껌: ${status.risks.openRequests.length}嫄?/li>
             </ul>
           </article>
           <article class="admin-soft-card">
-            <h3>운영 판단</h3>
-            <p>${failed ? '읽기 실패 경로가 있습니다. 권한 또는 경로를 먼저 확인해야 합니다.' : '현재 읽기 점검 기준으로 큰 위험 신호는 없습니다.'}</p>
+            <h3>?댁쁺 ?먮떒</h3>
+            <p>${failed ? '?쎄린 ?ㅽ뙣 寃쎈줈媛 ?덉뒿?덈떎. 沅뚰븳 ?먮뒗 寃쎈줈瑜?癒쇱? ?뺤씤?댁빞 ?⑸땲??' : '?꾩옱 ?쎄린 ?먭? 湲곗??쇰줈 ???꾪뿕 ?좏샇???놁뒿?덈떎.'}</p>
           </article>
         </div>
 
         <div class="admin-grid admin-grid-2">
-          ${renderCountList('요청 상태 분포', status.requestStatusCounts)}
-          ${renderCountList('요청 유형 분포', status.requestTypeCounts)}
+          ${renderCountList('?붿껌 ?곹깭 遺꾪룷', status.requestStatusCounts)}
+          ${renderCountList('?붿껌 ?좏삎 遺꾪룷', status.requestTypeCounts)}
         </div>
       </section>
 
       <section class="admin-card admin-panel">
-        <h2>주요 데이터 경로 점검</h2>
+        <h2>二쇱슂 ?곗씠??寃쎈줈 ?먭?</h2>
         <div class="admin-path-list">
           ${status.reads.map((item) => `
             <div class="admin-list-row">
               <span><strong>${escapeHtml(item.label)}</strong><br><small>${escapeHtml(item.path)}</small></span>
-              <strong class="${item.ok ? 'admin-ok' : 'admin-danger'}">${item.ok ? `읽기 가능 · ${item.count}건` : '읽기 실패'}</strong>
+              <strong class="${item.ok ? 'admin-ok' : 'admin-danger'}">${item.ok ? `?쎄린 媛??쨌 ${item.count}嫄? : '?쎄린 ?ㅽ뙣'}</strong>
             </div>
           `).join('')}
         </div>
@@ -221,3 +221,4 @@ export async function render() {
     </section>
   `;
 }
+

@@ -1,8 +1,8 @@
-import { waitForAuthenticatedUser, readAdminProfile, isActiveAdmin, signOutAdmin } from './admin-api.js?v=admin-2-0-a11-recovery-wrap-fix-20260719';
+import { waitForAuthenticatedUser, readAdminProfile, isActiveAdmin, signOutAdmin } from './admin-api.js?v=admin-2-0-a11-1-clean-baseline-20260719';
 import { setState } from './admin-state.js';
-import { setDocumentBusy } from './admin-utils.js?v=admin-2-0-a11-recovery-wrap-fix-20260719';
-import { renderSidebar } from './components/sidebar.js?v=admin-2-0-a11-recovery-wrap-fix-20260719';
-import { startRouter, navigate } from './admin-router.js?v=admin-2-0-a11-recovery-wrap-fix-20260719';
+import { setDocumentBusy } from './admin-utils.js?v=admin-2-0-a11-1-clean-baseline-20260719';
+import { renderSidebar } from './components/sidebar.js?v=admin-2-0-a11-1-clean-baseline-20260719';
+import { startRouter, navigate } from './admin-router.js?v=admin-2-0-a11-1-clean-baseline-20260719';
 
 const boot = document.getElementById('adminBoot');
 const root = document.getElementById('adminRoot');
@@ -90,7 +90,7 @@ async function bootstrap() {
     setState({ phase: 'ready', user, adminProfile, bootedAt: Date.now() });
     renderShell(user);
     startRouter();
-    console.info('[Admin 2.0] A11 data center readonly ready');
+    console.info('[Admin 2.0] A11.1 clean baseline ready');
   } catch (error) {
     console.error('[Admin 2.0] bootstrap failed', error);
     setState({ phase: 'error', bootError: error });

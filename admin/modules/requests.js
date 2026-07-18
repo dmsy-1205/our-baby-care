@@ -1,7 +1,7 @@
-import { getAdminDatabase } from '../admin-api.js?v=admin-2-0-a11-recovery-wrap-fix-20260719';
+import { getAdminDatabase } from '../admin-api.js?v=admin-2-0-a11-1-clean-baseline-20260719';
 import { getState } from '../admin-state.js';
-import { escapeHtml, formatDateTime, compactId } from '../admin-utils.js?v=admin-2-0-a11-recovery-wrap-fix-20260719';
-import { renderEmptyState } from '../components/empty-state.js?v=admin-2-0-a11-recovery-wrap-fix-20260719';
+import { asObject, compactId, escapeHtml, formatDateTime, latestNumber } from '../admin-utils.js?v=admin-2-0-a11-1-clean-baseline-20260719';
+import { renderEmptyState } from '../components/empty-state.js?v=admin-2-0-a11-1-clean-baseline-20260719';
 
 const CLOSED_STATUSES = new Set(['completed', 'rejected', 'canceled', 'cancelled']);
 
@@ -52,26 +52,12 @@ let currentSearch = '';
 const openDetails = new Set();
 
 function escapeSelector(value) {
-  if (window.CSS && typeof window.CSS.escape === 'function') {
-    return window.CSS.escape(String(value));
-  }
-
+  if (window.CSS && typeof window.CSS.escape === 'function') return window.CSS.escape(String(value));
   return String(value).replace(/["\\\]]/g, '\\$&');
-}
-
-function asObject(value) {
-  return value && typeof value === 'object' ? value : {};
 }
 
 function serverTimestamp() {
   return window.firebase.database.ServerValue.TIMESTAMP;
-}
-
-function latestNumber(...values) {
-  return values
-    .map(Number)
-    .filter((value) => Number.isFinite(value) && value > 0)
-    .sort((a, b) => b - a)[0] || 0;
 }
 
 function requestKey(row) {
@@ -100,9 +86,9 @@ function isClosed(row) {
 
 function normalizeType(request) {
   const raw = request.requestType || request.type || request.deleteType || request.mode || '';
-  if (raw === 'account' || raw === 'account_delete' || raw === 'delete_account') return 'account';
-  if (raw === 'leave_room' || raw === 'disconnect_room' || raw === 'unlink_room') return 'leave_room';
-  if (raw === 'delete_room' || raw === 'room_delete' || raw === 'room') return 'delete_room';
+  if (['account', 'account_delete', 'delete_account'].includes(raw)) return 'account';
+  if (['leave_room', 'disconnect_room', 'unlink_room'].includes(raw)) return 'leave_room';
+  if (['delete_room', 'room_delete', 'room'].includes(raw)) return 'delete_room';
   return raw || 'account';
 }
 
@@ -117,7 +103,6 @@ function normalizeRows(requestsValue, notesValue) {
       const note = asObject(notesById[id] || notesById[`${ownerUid}_${id}`]);
       const status = request.status || request.state || 'pending';
       const requestType = normalizeType(request);
-      const updatedAt = latestNumber(request.updatedAt, request.reviewedAt, request.createdAt, request.requestedAt);
 
       output.push({
         ...request,
@@ -132,7 +117,7 @@ function normalizeRows(requestsValue, notesValue) {
         adminMessage: note.adminMessage || request.adminMessage || request.operatorMessage || '요청이 접수되었습니다. 운영자가 내용을 확인할 예정입니다.',
         internalMemo: note.internalMemo || request.internalMemo || '',
         createdAt: latestNumber(request.createdAt, request.requestedAt, request.submittedAt),
-        updatedAt
+        updatedAt: latestNumber(request.updatedAt, request.reviewedAt, request.createdAt, request.requestedAt)
       });
     });
   });
@@ -143,18 +128,15 @@ function normalizeRows(requestsValue, notesValue) {
 function getCounts() {
   const byType = { account: 0, leave_room: 0, delete_room: 0, all: rows.length };
   const open = rows.filter((row) => !isClosed(row)).length;
-
   rows.forEach((row) => {
     if (byType[row.requestType] !== undefined) byType[row.requestType] += 1;
   });
-
   return { byType, open };
 }
 
 function matchesFilter(row) {
   const segment = SEGMENTS.find((item) => item.key === currentSegment);
   if (segment?.type && row.requestType !== segment.type) return false;
-
   if (currentStatusFilter === 'open' && isClosed(row)) return false;
   if (currentStatusFilter === 'closed' && !isClosed(row)) return false;
   if (!['all', 'open', 'closed'].includes(currentStatusFilter) && row.status !== currentStatusFilter) return false;
@@ -171,7 +153,6 @@ function matchesFilter(row) {
     row.internalMemo,
     row.id
   ].join(' ').toLowerCase();
-
   return haystack.includes(currentSearch.toLowerCase());
 }
 
@@ -179,26 +160,10 @@ function renderMetrics() {
   const counts = getCounts();
   return `
     <section class="admin-grid admin-grid-4">
-      <article class="admin-card admin-metric">
-        <span>처리 필요</span>
-        <strong>${counts.open}</strong>
-        <small>열린 상태 요청</small>
-      </article>
-      <article class="admin-card admin-metric">
-        <span>계정 삭제</span>
-        <strong>${counts.byType.account}</strong>
-        <small>개인 정보 중심</small>
-      </article>
-      <article class="admin-card admin-metric">
-        <span>Room 연결 해제</span>
-        <strong>${counts.byType.leave_room}</strong>
-        <small>공동 기록 보존</small>
-      </article>
-      <article class="admin-card admin-metric">
-        <span>Room 전체 삭제</span>
-        <strong>${counts.byType.delete_room}</strong>
-        <small>추가 검토 필요</small>
-      </article>
+      <article class="admin-card admin-metric"><span>처리 필요</span><strong>${counts.open}</strong><small>열린 상태 요청</small></article>
+      <article class="admin-card admin-metric"><span>계정 삭제</span><strong>${counts.byType.account}</strong><small>개인 정보 중심</small></article>
+      <article class="admin-card admin-metric"><span>Room 연결 해제</span><strong>${counts.byType.leave_room}</strong><small>공동 기록 보존</small></article>
+      <article class="admin-card admin-metric"><span>Room 전체 삭제</span><strong>${counts.byType.delete_room}</strong><small>추가 검토 필요</small></article>
     </section>
   `;
 }
@@ -233,7 +198,13 @@ function renderTypeDescriptions() {
 function renderRequestList() {
   const filtered = rows.filter(matchesFilter);
   const segmentLabel = SEGMENTS.find((item) => item.key === currentSegment)?.label || '전체';
-  const statusSummary = currentStatusFilter === 'open' ? '처리 필요' : currentStatusFilter === 'all' ? '모든 상태' : currentStatusFilter === 'closed' ? '닫힌 상태' : statusLabel(currentStatusFilter);
+  const statusSummary = currentStatusFilter === 'open'
+    ? '처리 필요'
+    : currentStatusFilter === 'all'
+      ? '모든 상태'
+      : currentStatusFilter === 'closed'
+        ? '닫힌 상태'
+        : statusLabel(currentStatusFilter);
 
   if (!filtered.length) {
     return `
@@ -257,7 +228,7 @@ function renderRequestCard(row) {
   const updated = row.updatedAt || row.createdAt;
 
   return `
-    <article class="admin-card admin-request-card" data-request-card="${escapeHtml(key)}">
+    <article class="admin-card admin-request-card ${open ? '' : 'is-collapsed'}" data-request-card="${escapeHtml(key)}">
       <div class="admin-request-card-head">
         <div>
           <h3>${escapeHtml(typeLabel(row))}</h3>
@@ -285,6 +256,7 @@ function renderRequestDetail(row, closed) {
   const key = requestKey(row);
   return `
     <div class="admin-request-detail">
+      ${closed ? '<div class="admin-info-box"><strong>닫힌 요청</strong><p>사용자가 취소했거나 운영자가 종료한 요청입니다. 기록 확인과 내부 메모 저장만 가능합니다.</p></div>' : ''}
       <div class="admin-grid admin-grid-2">
         <label class="admin-field">
           <span>요청 사유</span>
@@ -300,13 +272,13 @@ function renderRequestDetail(row, closed) {
         </label>
         <div class="admin-info-box">
           <strong>${closed ? '닫힌 요청' : '처리 가능 요청'}</strong>
-          <p>${closed ? '이미 닫힌 요청입니다. 기록 확인과 내부 메모 저장만 권장합니다.' : '답변·메모·상태만 저장합니다. 실제 삭제나 Room 연결 해제는 실행하지 않습니다.'}</p>
+          <p>${closed ? '필요하면 기록 확인 후 별도 요청으로 다시 진행합니다.' : '이 화면에서는 답변·메모·상태만 저장합니다. 실제 데이터 삭제나 Room 연결 해제는 실행하지 않습니다.'}</p>
         </div>
       </div>
-      <div class="admin-action-row">
+      <div class="admin-action-row ${closed ? 'is-locked' : ''}">
         <button class="admin-button" type="button" data-save-request="${escapeHtml(key)}">관리자 메모 저장</button>
-        ${closed ? '' : ACTIONS.map((action) => `
-          <button class="admin-button admin-button-small" type="button" data-status="${escapeHtml(action.status)}" data-request="${escapeHtml(key)}">
+        ${closed ? '<span class="admin-request-locked-note">닫힌 요청입니다. 기록 확인과 내부 메모 저장만 가능합니다.</span>' : ACTIONS.map((action) => `
+          <button class="admin-button admin-button-small ${action.status === 'rejected' ? 'danger' : ''}" type="button" data-status="${escapeHtml(action.status)}" data-request="${escapeHtml(key)}">
             ${escapeHtml(action.label)}
           </button>
         `).join('')}
@@ -340,28 +312,30 @@ function getRequestPayload(root, key, nextStatus) {
 }
 
 async function saveRequest(root, key, nextStatus = null) {
-  const db = getAdminDatabase();
+  const database = getAdminDatabase();
   const payload = getRequestPayload(root, key, nextStatus);
+  const timestamp = serverTimestamp();
   const update = {
     adminMessage: payload.adminMessage,
+    operatorMessage: payload.adminMessage,
     internalMemo: payload.internalMemo,
     status: payload.status,
-    updatedAt: serverTimestamp(),
-    reviewedAt: serverTimestamp(),
+    updatedAt: timestamp,
+    reviewedAt: timestamp,
     reviewedBy: payload.adminEmail
   };
 
-  await db.ref(`dataDeleteRequests/${payload.row.ownerUid}/${payload.row.id}`).update(update);
+  await database.ref(`dataDeleteRequests/${payload.row.ownerUid}/${payload.row.id}`).update(update);
 
   try {
-    await db.ref(`dataDeleteRequestAdminNotes/${payload.row.id}`).update({
+    await database.ref(`dataDeleteRequestAdminNotes/${payload.row.id}`).update({
       ownerUid: payload.row.ownerUid,
       requestId: payload.row.id,
       requestType: payload.row.requestType,
       adminMessage: payload.adminMessage,
       internalMemo: payload.internalMemo,
       status: payload.status,
-      updatedAt: serverTimestamp(),
+      updatedAt: timestamp,
       updatedBy: payload.adminEmail
     });
   } catch (error) {
@@ -369,14 +343,14 @@ async function saveRequest(root, key, nextStatus = null) {
   }
 
   try {
-    await db.ref(`adminAuditLogs/${Date.now()}_${payload.row.id}`).set({
+    await database.ref(`adminAuditLogs/${Date.now()}_${payload.row.id}`).set({
       action: nextStatus ? 'request_status_update' : 'request_note_update',
       requestId: payload.row.id,
       ownerUid: payload.row.ownerUid,
       requestType: payload.row.requestType,
       status: payload.status,
       adminEmail: payload.adminEmail,
-      createdAt: serverTimestamp()
+      createdAt: timestamp
     });
   } catch (error) {
     console.warn('[Admin Requests] audit log skipped', error);
@@ -389,7 +363,7 @@ function renderShell() {
       <section class="admin-hero-card">
         <div class="admin-hero-icon">🛡️</div>
         <div>
-          <h2>데이터 요청 관리</h2>
+          <h2 id="requestsHeading">데이터 요청 관리</h2>
           <p>삭제 요청을 계정 삭제, Room 연결 해제, Room 전체 삭제로 나누어 확인합니다. 현재 화면은 답변·메모·상태 저장까지만 제공합니다.</p>
         </div>
       </section>
@@ -495,10 +469,10 @@ function bindEvents(root) {
 }
 
 async function loadRequests() {
-  const db = getAdminDatabase();
+  const database = getAdminDatabase();
   const [requestsSnapshot, notesSnapshot] = await Promise.all([
-    db.ref('dataDeleteRequests').once('value'),
-    db.ref('dataDeleteRequestAdminNotes').once('value').catch(() => ({ val: () => null }))
+    database.ref('dataDeleteRequests').once('value'),
+    database.ref('dataDeleteRequestAdminNotes').once('value').catch(() => ({ val: () => null }))
   ]);
 
   rows = normalizeRows(requestsSnapshot.val(), notesSnapshot.val());

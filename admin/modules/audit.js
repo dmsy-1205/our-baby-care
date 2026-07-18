@@ -1,15 +1,15 @@
-import { getAdminDatabase } from '../admin-api.js?v=admin-2-0-a11-recovery-wrap-fix-20260719';
-import { escapeHtml, formatDateTime, compactId } from '../admin-utils.js?v=admin-2-0-a11-recovery-wrap-fix-20260719';
-import { renderEmptyState } from '../components/empty-state.js?v=admin-2-0-a11-recovery-wrap-fix-20260719';
+﻿import { getAdminDatabase } from '../admin-api.js?v=admin-2-0-a11-1-clean-baseline-20260719';
+import { escapeHtml, formatDateTime, compactId } from '../admin-utils.js?v=admin-2-0-a11-1-clean-baseline-20260719';
+import { renderEmptyState } from '../components/empty-state.js?v=admin-2-0-a11-1-clean-baseline-20260719';
 
 const ACTION_LABELS = {
-  request_note_update: '관리자 메모 저장',
-  request_status_update: '요청 상태 변경',
-  request_memo_saved: '관리자 메모 저장',
-  request_status_reviewing: '요청 검토 중',
-  request_status_hold: '요청 보류',
-  request_status_approved: '요청 승인',
-  request_status_rejected: '요청 거절'
+  request_note_update: '愿由ъ옄 硫붾え ???,
+  request_status_update: '?붿껌 ?곹깭 蹂寃?,
+  request_memo_saved: '愿由ъ옄 硫붾え ???,
+  request_status_reviewing: '?붿껌 寃??以?,
+  request_status_hold: '?붿껌 蹂대쪟',
+  request_status_approved: '?붿껌 ?뱀씤',
+  request_status_rejected: '?붿껌 嫄곗젅'
 };
 
 let logs = [];
@@ -28,7 +28,7 @@ async function loadAuditLogs() {
 }
 
 function actionLabel(row) {
-  return row.actionLabel || ACTION_LABELS[row.action] || row.action || '관리자 작업';
+  return row.actionLabel || ACTION_LABELS[row.action] || row.action || '愿由ъ옄 ?묒뾽';
 }
 
 function visibleLogs() {
@@ -47,7 +47,7 @@ function visibleLogs() {
 
 function renderList() {
   const items = visibleLogs();
-  if (!items.length) return renderEmptyState('감사 로그 없음', '검색 조건에 맞는 관리자 작업 기록이 없습니다.');
+  if (!items.length) return renderEmptyState('媛먯궗 濡쒓렇 ?놁쓬', '寃??議곌굔??留욌뒗 愿由ъ옄 ?묒뾽 湲곕줉???놁뒿?덈떎.');
 
   return `
     <div class="admin-log-list">
@@ -56,15 +56,15 @@ function renderList() {
           <div class="admin-request-card-head">
             <div>
               <h3>${escapeHtml(actionLabel(row))}</h3>
-              <p>${escapeHtml(row.status ? `상태 ${row.status}` : '관리자 작업 기록')}</p>
+              <p>${escapeHtml(row.status ? `?곹깭 ${row.status}` : '愿由ъ옄 ?묒뾽 湲곕줉')}</p>
             </div>
             <span class="admin-status-pill muted">${escapeHtml(formatDateTime(row.createdAt || row.updatedAt))}</span>
           </div>
           <div class="admin-meta-row">
-            <span>관리자 ${escapeHtml(row.adminEmail || '-')}</span>
-            <span>요청자 ${escapeHtml(row.ownerUid || '-')}</span>
-            <span>요청 ${escapeHtml(compactId(row.requestId || row.id))}</span>
-            <span>유형 ${escapeHtml(row.requestType || '-')}</span>
+            <span>愿由ъ옄 ${escapeHtml(row.adminEmail || '-')}</span>
+            <span>?붿껌??${escapeHtml(row.ownerUid || '-')}</span>
+            <span>?붿껌 ${escapeHtml(compactId(row.requestId || row.id))}</span>
+            <span>?좏삎 ${escapeHtml(row.requestType || '-')}</span>
           </div>
         </article>
       `).join('')}
@@ -80,27 +80,27 @@ function renderShell() {
   return `
     <section class="module-view" aria-labelledby="auditHeading">
       <section class="admin-hero-card">
-        <div class="admin-hero-icon">☰</div>
+        <div class="admin-hero-icon">??/div>
         <div>
-          <h2 id="auditHeading">감사 로그</h2>
-          <p>관리자 요청 처리 과정에서 누가, 언제, 어떤 상태를 남겼는지 확인합니다. 실제 삭제 실행 전 기준점으로 사용합니다.</p>
+          <h2 id="auditHeading">媛먯궗 濡쒓렇</h2>
+          <p>愿由ъ옄 ?붿껌 泥섎━ 怨쇱젙?먯꽌 ?꾧?, ?몄젣, ?대뼡 ?곹깭瑜??④꼈?붿? ?뺤씤?⑸땲?? ?ㅼ젣 ??젣 ?ㅽ뻾 ??湲곗??먯쑝濡??ъ슜?⑸땲??</p>
         </div>
       </section>
 
       <section class="admin-grid admin-grid-4">
-        <article class="admin-card admin-metric"><span>최근 로그</span><strong>${logs.length}</strong><small>최대 80개 표시</small></article>
-        <article class="admin-card admin-metric"><span>데이터 요청</span><strong>${requestCount}</strong><small>요청관리 작업</small></article>
-        <article class="admin-card admin-metric"><span>승인 기록</span><strong>${approvalCount}</strong><small>실행 전 검토 기준</small></article>
-        <article class="admin-card admin-metric"><span>최근 작업</span><strong>${escapeHtml(formatDateTime(latest))}</strong><small>마지막 로그 시간</small></article>
+        <article class="admin-card admin-metric"><span>理쒓렐 濡쒓렇</span><strong>${logs.length}</strong><small>理쒕? 80媛??쒖떆</small></article>
+        <article class="admin-card admin-metric"><span>?곗씠???붿껌</span><strong>${requestCount}</strong><small>?붿껌愿由??묒뾽</small></article>
+        <article class="admin-card admin-metric"><span>?뱀씤 湲곕줉</span><strong>${approvalCount}</strong><small>?ㅽ뻾 ??寃??湲곗?</small></article>
+        <article class="admin-card admin-metric"><span>理쒓렐 ?묒뾽</span><strong>${escapeHtml(formatDateTime(latest))}</strong><small>留덉?留?濡쒓렇 ?쒓컙</small></article>
       </section>
 
       <section class="admin-card admin-panel">
         <div class="admin-panel-head">
           <div>
-            <h2>최근 관리자 작업</h2>
-            <p>요청관리의 답변·메모·상태 변경 기록을 최신순으로 보여줍니다.</p>
+            <h2>理쒓렐 愿由ъ옄 ?묒뾽</h2>
+            <p>?붿껌愿由ъ쓽 ?듬?쨌硫붾え쨌?곹깭 蹂寃?湲곕줉??理쒖떊?쒖쑝濡?蹂댁뿬以띾땲??</p>
           </div>
-          <input data-audit-search type="search" placeholder="로그 검색" value="${escapeHtml(search)}">
+          <input data-audit-search type="search" placeholder="濡쒓렇 寃?? value="${escapeHtml(search)}">
         </div>
         <div data-audit-list>${renderList()}</div>
       </section>
@@ -126,3 +126,4 @@ export async function render() {
 export function afterRender(root) {
   bindEvents(root);
 }
+

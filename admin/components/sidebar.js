@@ -1,7 +1,7 @@
-import { escapeHtml } from '../admin-utils.js?v=admin-2-0-a11-recovery-wrap-fix-20260719';
+import { escapeHtml } from '../admin-utils.js?v=admin-2-0-a11-1-clean-baseline-20260719';
 
-const ADMIN_CONSOLE_STEP = 'STEP A11';
-const ADMIN_CONSOLE_STEP_LABEL = 'Data Center Readonly';
+const ADMIN_CONSOLE_STEP = 'STEP A11.1';
+const ADMIN_CONSOLE_STEP_LABEL = 'Clean Admin Baseline';
 
 const items = [
   ['dashboard', '대시보드', '▦'],

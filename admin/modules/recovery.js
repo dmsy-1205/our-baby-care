@@ -1,6 +1,6 @@
-import { getAdminDatabase } from '../admin-api.js?v=admin-2-0-a11-recovery-wrap-fix-20260719';
-import { escapeHtml, formatDateTime, compactId } from '../admin-utils.js?v=admin-2-0-a11-recovery-wrap-fix-20260719';
-import { renderEmptyState } from '../components/empty-state.js?v=admin-2-0-a11-recovery-wrap-fix-20260719';
+﻿import { getAdminDatabase } from '../admin-api.js?v=admin-2-0-a11-1-clean-baseline-20260719';
+import { escapeHtml, formatDateTime, compactId } from '../admin-utils.js?v=admin-2-0-a11-1-clean-baseline-20260719';
+import { renderEmptyState } from '../components/empty-state.js?v=admin-2-0-a11-1-clean-baseline-20260719';
 
 function asObject(value) {
   return value && typeof value === 'object' ? value : {};
@@ -23,10 +23,10 @@ function normalizeType(request) {
 
 function typeLabel(type) {
   return {
-    account: '계정 삭제',
-    leave_room: 'Room 연결 해제',
-    delete_room: 'Room 전체 삭제'
-  }[type] || type || '데이터 요청';
+    account: '怨꾩젙 ??젣',
+    leave_room: 'Room ?곌껐 ?댁젣',
+    delete_room: 'Room ?꾩껜 ??젣'
+  }[type] || type || '?곗씠???붿껌';
 }
 
 function isClosed(status) {
@@ -83,36 +83,36 @@ async function loadRecoveryRows() {
 
 function renderBaselineCard(row) {
   const closed = isClosed(row.status);
-  const room = row.roomCode || '미연결';
+  const room = row.roomCode || '誘몄뿰寃?;
   return `
     <article class="admin-card admin-recovery-card">
       <div class="admin-request-card-head">
         <div>
           <h3>${escapeHtml(typeLabel(row.requestType))}</h3>
-          <p>${escapeHtml(row.email || row.ownerUid || '요청자 정보 없음')}</p>
+          <p>${escapeHtml(row.email || row.ownerUid || '?붿껌???뺣낫 ?놁쓬')}</p>
         </div>
-        <span class="admin-status-pill muted">${escapeHtml(closed ? '닫힌 요청' : '열린 요청')}</span>
+        <span class="admin-status-pill muted">${escapeHtml(closed ? '?ロ엺 ?붿껌' : '?대┛ ?붿껌')}</span>
       </div>
       <div class="admin-meta-row">
         <span>UID ${escapeHtml(compactId(row.ownerUid))}</span>
-        <span>요청 ID ${escapeHtml(compactId(row.requestId))}</span>
+        <span>?붿껌 ID ${escapeHtml(compactId(row.requestId))}</span>
         <span>Room ${escapeHtml(room)}</span>
-        <span>접수 ${escapeHtml(formatDateTime(row.createdAt))}</span>
-        <span>갱신 ${escapeHtml(formatDateTime(row.updatedAt))}</span>
+        <span>?묒닔 ${escapeHtml(formatDateTime(row.createdAt))}</span>
+        <span>媛깆떊 ${escapeHtml(formatDateTime(row.updatedAt))}</span>
       </div>
       <div class="admin-grid admin-grid-3">
         <article class="admin-soft-card">
-          <h4>${escapeHtml(typeLabel(row.requestType))} 기준점</h4>
+          <h4>${escapeHtml(typeLabel(row.requestType))} 湲곗???/h4>
           <ul>
-            <li>사용자 정보: ${row.hasUser ? '있음' : '없음'}</li>
-            <li>사용자 Room 연결: ${row.hasUserRoom ? '있음' : '없음'}</li>
-            <li>Room 멤버십: ${row.hasRoomMembership ? '있음' : '없음'}</li>
-            <li>Room 데이터: ${row.hasRoomData ? '있음' : '없음'}</li>
-            <li>Room 멤버 수: ${row.roomMemberCount}명</li>
+            <li>?ъ슜???뺣낫: ${row.hasUser ? '?덉쓬' : '?놁쓬'}</li>
+            <li>?ъ슜??Room ?곌껐: ${row.hasUserRoom ? '?덉쓬' : '?놁쓬'}</li>
+            <li>Room 硫ㅻ쾭?? ${row.hasRoomMembership ? '?덉쓬' : '?놁쓬'}</li>
+            <li>Room ?곗씠?? ${row.hasRoomData ? '?덉쓬' : '?놁쓬'}</li>
+            <li>Room 硫ㅻ쾭 ?? ${row.roomMemberCount}紐?/li>
           </ul>
         </article>
         <article class="admin-soft-card">
-          <h4>확인 경로</h4>
+          <h4>?뺤씤 寃쎈줈</h4>
           <ul>
             <li>users/${escapeHtml(row.ownerUid)}</li>
             <li>userRooms/${escapeHtml(row.ownerUid)}/${escapeHtml(room)}</li>
@@ -121,16 +121,16 @@ function renderBaselineCard(row) {
           </ul>
         </article>
         <article class="admin-soft-card">
-          <h4>실행 전 체크</h4>
+          <h4>?ㅽ뻾 ??泥댄겕</h4>
           <ul>
-            <li>요청자 본인 요청과 현재 상태 확인</li>
-            <li>공동 Room 기록은 상대방 권리와 보존 필요성 함께 확인</li>
-            <li>관리자 메모와 감사 로그를 먼저 확인</li>
-            <li>실제 삭제는 별도 승인 단계에서만 진행</li>
+            <li>?붿껌??蹂몄씤 ?붿껌怨??꾩옱 ?곹깭 ?뺤씤</li>
+            <li>怨듬룞 Room 湲곕줉? ?곷?諛?沅뚮━? 蹂댁〈 ?꾩슂???④퍡 ?뺤씤</li>
+            <li>愿由ъ옄 硫붾え? 媛먯궗 濡쒓렇瑜?癒쇱? ?뺤씤</li>
+            <li>?ㅼ젣 ??젣??蹂꾨룄 ?뱀씤 ?④퀎?먯꽌留?吏꾪뻾</li>
           </ul>
         </article>
       </div>
-      <div class="admin-warning-box">읽기 전용 기준점입니다. 이 화면에서는 실제 삭제, Room 연결 해제, Room 전체 삭제를 실행하지 않습니다.</div>
+      <div class="admin-warning-box">?쎄린 ?꾩슜 湲곗??먯엯?덈떎. ???붾㈃?먯꽌???ㅼ젣 ??젣, Room ?곌껐 ?댁젣, Room ?꾩껜 ??젣瑜??ㅽ뻾?섏? ?딆뒿?덈떎.</div>
     </article>
   `;
 }
@@ -144,30 +144,31 @@ export async function render() {
   return `
     <section class="module-view" aria-labelledby="recoveryHeading">
       <section class="admin-hero-card">
-        <div class="admin-hero-icon">↺</div>
+        <div class="admin-hero-icon">??/div>
         <div>
-          <h2 id="recoveryHeading">복구 센터 · 실행 전 기준점</h2>
-          <p>삭제나 Room 연결 해제 전에 되돌릴 기준 정보를 읽기 전용으로 확인합니다. 현재 단계에서는 데이터를 변경하지 않습니다.</p>
+          <h2 id="recoveryHeading">蹂듦뎄 ?쇳꽣 쨌 ?ㅽ뻾 ??湲곗???/h2>
+          <p>??젣??Room ?곌껐 ?댁젣 ?꾩뿉 ?섎룎由?湲곗? ?뺣낫瑜??쎄린 ?꾩슜?쇰줈 ?뺤씤?⑸땲?? ?꾩옱 ?④퀎?먯꽌???곗씠?곕? 蹂寃쏀븯吏 ?딆뒿?덈떎.</p>
         </div>
       </section>
 
       <section class="admin-grid admin-grid-4">
-        <article class="admin-card admin-metric"><span>기준점 요청</span><strong>${rows.length}</strong><small>전체 데이터 요청</small></article>
-        <article class="admin-card admin-metric"><span>계정 삭제</span><strong>${account}</strong><small>개인 정보 중심</small></article>
-        <article class="admin-card admin-metric"><span>Room 연결 해제</span><strong>${leaveRoom}</strong><small>공동 기록 보존</small></article>
-        <article class="admin-card admin-metric"><span>Room 전체 삭제</span><strong>${deleteRoom}</strong><small>이중 검토 필요</small></article>
+        <article class="admin-card admin-metric"><span>湲곗????붿껌</span><strong>${rows.length}</strong><small>?꾩껜 ?곗씠???붿껌</small></article>
+        <article class="admin-card admin-metric"><span>怨꾩젙 ??젣</span><strong>${account}</strong><small>媛쒖씤 ?뺣낫 以묒떖</small></article>
+        <article class="admin-card admin-metric"><span>Room ?곌껐 ?댁젣</span><strong>${leaveRoom}</strong><small>怨듬룞 湲곕줉 蹂댁〈</small></article>
+        <article class="admin-card admin-metric"><span>Room ?꾩껜 ??젣</span><strong>${deleteRoom}</strong><small>?댁쨷 寃???꾩슂</small></article>
       </section>
 
       <section class="admin-card admin-panel">
         <div class="admin-panel-head">
           <div>
-            <h2>삭제 요청 기준점</h2>
-            <p>사용자 요청, 연결 Room, 멤버십, 공동 데이터 확인 경로를 읽기 전용으로 보여줍니다.</p>
+            <h2>??젣 ?붿껌 湲곗???/h2>
+            <p>?ъ슜???붿껌, ?곌껐 Room, 硫ㅻ쾭?? 怨듬룞 ?곗씠???뺤씤 寃쎈줈瑜??쎄린 ?꾩슜?쇰줈 蹂댁뿬以띾땲??</p>
           </div>
           <span class="admin-status-pill muted">Read Only</span>
         </div>
-        ${rows.length ? rows.map(renderBaselineCard).join('') : renderEmptyState('기준점 없음', '현재 확인할 데이터 요청 기준점이 없습니다.')}
+        ${rows.length ? rows.map(renderBaselineCard).join('') : renderEmptyState('湲곗????놁쓬', '?꾩옱 ?뺤씤???곗씠???붿껌 湲곗??먯씠 ?놁뒿?덈떎.')}
       </section>
     </section>
   `;
 }
+

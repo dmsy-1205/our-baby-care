@@ -1,4 +1,4 @@
-import { withTimeout } from './admin-utils.js?v=admin-2-0-a11-recovery-wrap-fix-20260719';
+import { withTimeout } from './admin-utils.js?v=admin-2-0-a11-1-clean-baseline-20260719';
 
 const ADMIN_FIREBASE_CONFIG = {
   apiKey: 'AIzaSyDMVl65SWhqPcxrMY7h_ir7OgPbk7P1LAs',
