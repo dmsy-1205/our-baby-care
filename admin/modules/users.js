@@ -1,6 +1,7 @@
-import { getAdminDatabase, isActiveAdmin } from '../admin-api.js?v=step6-2-13-1-admin-user-directory-readonly-20260718';
-import { escapeHtml, formatDateTime } from '../admin-utils.js?v=step6-2-13-1-admin-user-directory-readonly-20260718';
-import { renderEmptyState } from '../components/empty-state.js?v=step6-2-13-1-admin-user-directory-readonly-20260718';
+import { getAdminDatabase } from '../admin-api.js?v=step6-2-13-2-admin-user-directory-permission-safe-20260718';
+import { getState } from '../admin-state.js?v=step6-2-13-2-admin-user-directory-permission-safe-20260718';
+import { escapeHtml, formatDateTime } from '../admin-utils.js?v=step6-2-13-2-admin-user-directory-permission-safe-20260718';
+import { renderEmptyState } from '../components/empty-state.js?v=step6-2-13-2-admin-user-directory-permission-safe-20260718';
 
 function asObject(value) {
   return value && typeof value === 'object' ? value : {};
@@ -36,18 +37,18 @@ function latestNumber(...values) {
 
 async function loadUserDirectory() {
   const database = getAdminDatabase();
-  const [usersSnap, userRoomsSnap, roomMembersSnap, adminsSnap] = await Promise.all([
+  const state = getState();
+  const currentAdminUid = state.user?.uid || '';
+  const [usersSnap, userRoomsSnap, roomMembersSnap] = await Promise.all([
     database.ref('users').once('value'),
     database.ref('userRooms').once('value'),
-    database.ref('roomMembers').once('value'),
-    database.ref('admins').once('value')
+    database.ref('roomMembers').once('value')
   ]);
 
   const users = asObject(usersSnap.val());
   const userRooms = asObject(userRoomsSnap.val());
   const roomMembers = asObject(roomMembersSnap.val());
-  const admins = asObject(adminsSnap.val());
-  const userIds = new Set([...Object.keys(users), ...Object.keys(userRooms), ...Object.keys(admins)]);
+  const userIds = new Set([...Object.keys(users), ...Object.keys(userRooms)]);
   const memberIndex = {};
 
   Object.entries(roomMembers).forEach(([roomCode, members]) => {
@@ -78,7 +79,7 @@ async function loadUserDirectory() {
       roomCodes: [...new Set(roomCodes)],
       role: roleLabel(primaryMember.role, primaryMember.relationshipRole || user.relationshipRole),
       relationshipRole: primaryMember.relationshipRole || user.relationshipRole || '',
-      isAdmin: isActiveAdmin(admins[uid]),
+      isAdmin: uid === currentAdminUid,
       requiresEmailVerification: user.emailVerificationRequired === true,
       lastSeen
     };
@@ -98,7 +99,7 @@ function renderStats(rows) {
     <div class="metric-grid admin-user-metrics">
       <article class="metric-card"><span>전체 회원</span><strong>${rows.length}</strong><small>users/userRooms 기준</small></article>
       <article class="metric-card"><span>Room 연결</span><strong>${linked}</strong><small>activeRoom 또는 membership</small></article>
-      <article class="metric-card"><span>관리자</span><strong>${admins}</strong><small>/admins 권한 기준</small></article>
+      <article class="metric-card"><span>현재 관리자</span><strong>${admins}</strong><small>로그인한 관리자 기준</small></article>
       <article class="metric-card"><span>확인 필요</span><strong>${needsCheck}</strong><small>정보 부족 또는 인증 필요</small></article>
     </div>`;
 }
@@ -145,7 +146,7 @@ export async function render() {
           <div><span class="notice-icon" aria-hidden="true">👥</span></div>
           <div>
             <h2 id="adminUsersHeading">사용자 목록 읽기 전용</h2>
-            <p>가입 회원, Room 연결 상태, Dom/Sub 역할, 관리자 여부를 조회합니다. 이 화면에서는 데이터를 저장하거나 변경하지 않습니다.</p>
+            <p>가입 회원, Room 연결 상태, Dom/Sub 역할을 조회합니다. 이 화면에서는 데이터를 저장하거나 변경하지 않습니다.</p>
           </div>
         </div>
         ${renderStats(rows)}
