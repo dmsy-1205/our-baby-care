@@ -166,6 +166,7 @@
                 const now = Date.now();
                 return {
                     ...item,
+                    requestId: item.requestId || requestId,
                     status: 'canceled',
                     adminMessage: '사용자가 요청을 취소했습니다.',
                     canceledAt: now,
