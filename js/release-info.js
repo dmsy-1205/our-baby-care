@@ -11,12 +11,13 @@
         build: '20260718',
         releaseDate: '2026.07.18',
         stage: 'Beta',
-        title: 'Main Stable Rollback Base',
-        description: '관리자 데이터 요청 메뉴에서 사용자 답변, 내부 메모, 검토 상태를 저장할 수 있게 했습니다.',
+        title: 'Admin Data Requests Readonly',
+        description: '관리자 데이터 요청 메뉴를 읽기 전용으로 연결해 삭제 요청 상태와 사유를 안전하게 확인할 수 있게 했습니다.',
         changes: Object.freeze([
-            'Restored the main app to the STEP6.2.13.4 stable rollback base',
-            'Separated admin console work from the main app release line',
-            'Removed PWA/service worker rollout residue from the main app path',
+            'Added readonly Admin Data Requests module',
+            'Shows request type, status, requester, Room code, reason, admin message, and internal memo',
+            'Added open/all/completed/closed filters and request search',
+            'Refreshed admin and PWA cache keys for STEP6.2.13.4',
             '기존 기록/채팅 저장 구조 변경 없음'
         ])
     });
