@@ -1,6 +1,6 @@
-import { getAdminDatabase } from '../admin-api.js?v=admin-2-0-a3-request-status-audit-20260718';
-import { escapeHtml, formatDateTime } from '../admin-utils.js?v=admin-2-0-a3-request-status-audit-20260718';
-import { renderEmptyState } from '../components/empty-state.js?v=admin-2-0-a3-request-status-audit-20260718';
+import { getAdminDatabase } from '../admin-api.js?v=admin-2-0-a11-data-center-foundation-20260718';
+import { escapeHtml, formatDateTime } from '../admin-utils.js?v=admin-2-0-a11-data-center-foundation-20260718';
+import { renderEmptyState } from '../components/empty-state.js?v=admin-2-0-a11-data-center-foundation-20260718';
 
 function asObject(value) {
   return value && typeof value === 'object' ? value : {};

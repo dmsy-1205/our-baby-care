@@ -1,8 +1,8 @@
-import { escapeHtml } from '../admin-utils.js?v=admin-2-0-a10-system-status-baseline-20260718';
+import { escapeHtml } from '../admin-utils.js?v=admin-2-0-a11-data-center-foundation-20260718';
 
-const ADMIN_RELEASE_STEP = 'STEP A10';
-const ADMIN_RELEASE_LABEL = 'System Status Baseline';
-const ADMIN_CACHE_KEY = 'admin-2-0-a10-system-status-baseline-20260718';
+const ADMIN_RELEASE_STEP = 'STEP A11';
+const ADMIN_RELEASE_LABEL = 'Data Center Foundation';
+const ADMIN_CACHE_KEY = 'admin-2-0-a11-data-center-foundation-20260718';
 
 function asArray(value) {
   return Array.isArray(value) ? value : [];
@@ -48,7 +48,7 @@ export function render() {
         </article>
         <article class="metric-card">
           <span>캐시 키</span>
-          <strong>A10</strong>
+          <strong>A11</strong>
           <small>${ADMIN_CACHE_KEY}</small>
         </article>
       </div>
@@ -79,7 +79,7 @@ export function render() {
               <div><dt>관리자 스텝</dt><dd>${ADMIN_RELEASE_STEP}</dd></div>
               <div><dt>작업명</dt><dd>${ADMIN_RELEASE_LABEL}</dd></div>
               <div><dt>범위</dt><dd>관리자 앱 전용</dd></div>
-              <div><dt>실행 기능</dt><dd>없음 · 읽기 전용</dd></div>
+              <div><dt>실행 기능</dt><dd>없음 · 읽기/점검 전용</dd></div>
             </dl>
           </section>
         </div>
@@ -89,7 +89,7 @@ export function render() {
         <div class="panel-header admin-release-panel-header">
           <div>
             <h2>배포 전 체크</h2>
-            <p>GitHub 업로드 전에 메인앱과 관리자 앱 기준을 나누어 확인합니다.</p>
+            <p>GitHub 업로드 전에 메인앱과 관리자 앱 기준을 나눠 확인합니다.</p>
           </div>
         </div>
         <div class="admin-release-checks">

@@ -1,8 +1,8 @@
-import { waitForAuthenticatedUser, readAdminProfile, isActiveAdmin, signOutAdmin } from './admin-api.js?v=admin-2-0-a10-system-status-baseline-20260718';
+import { waitForAuthenticatedUser, readAdminProfile, isActiveAdmin, signOutAdmin } from './admin-api.js?v=admin-2-0-a11-data-center-foundation-20260718';
 import { setState } from './admin-state.js';
 import { setDocumentBusy } from './admin-utils.js';
-import { renderSidebar } from './components/sidebar.js?v=admin-2-0-a10-system-status-baseline-20260718';
-import { startRouter, navigate } from './admin-router.js?v=admin-2-0-a10-system-status-baseline-20260718';
+import { renderSidebar } from './components/sidebar.js?v=admin-2-0-a11-data-center-foundation-20260718';
+import { startRouter, navigate } from './admin-router.js?v=admin-2-0-a11-data-center-foundation-20260718';
 
 const boot = document.getElementById('adminBoot');
 const root = document.getElementById('adminRoot');
@@ -38,11 +38,13 @@ function renderShell(user) {
       closeSidebar();
       return;
     }
+
     if (event.target.closest('#adminSignOut')) {
       await signOutAdmin();
       location.replace('index.html');
       return;
     }
+
     if (event.target.closest('#sidebarToggle')) toggleSidebar();
     if (event.target.closest('#sidebarBackdrop')) closeSidebar();
   });
@@ -86,7 +88,7 @@ async function bootstrap() {
     setState({ phase: 'ready', user, adminProfile, bootedAt: Date.now() });
     renderShell(user);
     startRouter();
-    console.info('[Admin 2.0] secure foundation ready');
+    console.info('[Admin 2.0] data center foundation ready');
   } catch (error) {
     console.error('[Admin 2.0] bootstrap failed', error);
     setState({ phase: 'error', bootError: error });

@@ -16,7 +16,8 @@ export function formatDateTime(value) {
   const number = Number(value);
   if (!Number.isFinite(number) || number <= 0) return '-';
   return new Intl.DateTimeFormat('ko-KR', {
-    dateStyle: 'medium', timeStyle: 'short'
+    dateStyle: 'medium',
+    timeStyle: 'short'
   }).format(new Date(number));
 }
 

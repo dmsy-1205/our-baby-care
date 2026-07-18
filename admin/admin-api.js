@@ -7,10 +7,8 @@ function resolveFirebaseServices() {
     throw new Error('Firebase SDK를 불러오지 못했습니다.');
   }
 
-  // config.js declares babyAuth/db with top-level const. Those bindings are
-  // available to classic scripts but are not properties of window, so an ES
-  // module cannot read them through window.babyAuth/window.db. Resolve the
-  // already initialized named app directly from the Firebase compat SDK.
+  // config.js에서 이미 초기화한 babyApp을 Firebase compat SDK에서 직접 찾습니다.
+  // window.babyAuth/window.db에 의존하지 않아 관리자 모듈 로딩 순서가 안정적입니다.
   const babyApp = firebaseSdk.apps.find((app) => app && app.name === 'babyApp');
 
   if (!babyApp) {

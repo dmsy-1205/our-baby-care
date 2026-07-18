@@ -1,7 +1,7 @@
 import { escapeHtml } from '../admin-utils.js';
 
-const ADMIN_CONSOLE_STEP = 'STEP A10';
-const ADMIN_CONSOLE_STEP_LABEL = 'System Status Baseline';
+const ADMIN_CONSOLE_STEP = 'STEP A11';
+const ADMIN_CONSOLE_STEP_LABEL = 'Data Center Foundation';
 
 const items = [
   ['dashboard', '대시보드', '▦'],
@@ -18,8 +18,12 @@ export function renderSidebar({ route, userEmail }) {
   return `
     <aside class="admin-sidebar" id="adminSidebar" aria-label="관리자 메뉴">
       <div class="sidebar-brand">
-        <span class="brand-symbol" aria-hidden="true">❤☾</span>
-        <span><strong>HearMe2nite</strong><small>Admin Console 2.0</small><em class="admin-step-badge">${ADMIN_CONSOLE_STEP} · ${ADMIN_CONSOLE_STEP_LABEL}</em></span>
+        <span class="brand-symbol" aria-hidden="true">💕</span>
+        <span>
+          <strong>HearMe2nite</strong>
+          <small>Admin Console 2.0</small>
+          <em class="admin-step-badge">${ADMIN_CONSOLE_STEP} · ${ADMIN_CONSOLE_STEP_LABEL}</em>
+        </span>
       </div>
       <nav class="sidebar-nav">
         ${items.map(([id, label, icon]) => `
