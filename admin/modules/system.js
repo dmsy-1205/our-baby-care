@@ -1,10 +1,10 @@
-import { getAdminDatabase } from '../admin-api.js?v=admin-2-0-a11-data-center-readonly-20260719';
+import { getAdminDatabase } from '../admin-api.js?v=admin-2-0-a11-route-render-fix-20260719';
 import { getState } from '../admin-state.js';
-import { escapeHtml } from '../admin-utils.js?v=admin-2-0-a11-data-center-readonly-20260719';
+import { escapeHtml } from '../admin-utils.js?v=admin-2-0-a11-route-render-fix-20260719';
 
 const ADMIN_STEP = 'STEP A11';
 const ADMIN_LABEL = 'Data Center Readonly';
-const ADMIN_CACHE_KEY = 'admin-2-0-a11-data-center-readonly-20260719';
+const ADMIN_CACHE_KEY = 'admin-2-0-a11-route-render-fix-20260719';
 
 function asObject(value) {
   return value && typeof value === 'object' ? value : {};

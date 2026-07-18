@@ -1,4 +1,4 @@
-import { escapeHtml } from '../admin-utils.js?v=admin-2-0-a11-data-center-readonly-20260719';
+import { escapeHtml } from '../admin-utils.js?v=admin-2-0-a11-route-render-fix-20260719';
 
 const ADMIN_CONSOLE_STEP = 'STEP A11';
 const ADMIN_CONSOLE_STEP_LABEL = 'Data Center Readonly';

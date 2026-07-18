@@ -1,8 +1,8 @@
-import { escapeHtml } from '../admin-utils.js?v=admin-2-0-a11-data-center-readonly-20260719';
+import { escapeHtml } from '../admin-utils.js?v=admin-2-0-a11-route-render-fix-20260719';
 
 const ADMIN_STEP = 'STEP A11';
 const ADMIN_LABEL = 'Data Center Readonly';
-const ADMIN_CACHE_KEY = 'admin-2-0-a11-data-center-readonly-20260719';
+const ADMIN_CACHE_KEY = 'admin-2-0-a11-route-render-fix-20260719';
 const MAIN_STEP = 'STEP6.2.13.4';
 const MAIN_VERSION = 'HearMe2nite v1.0 STEP6.2.13.4';
 const RELEASE_DATE = '2026.07.19';
