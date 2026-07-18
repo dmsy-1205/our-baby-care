@@ -43,7 +43,7 @@ export function compactId(value = '', head = 6, tail = 5) {
   const text = String(value || '');
   if (!text) return '-';
   if (text.length <= head + tail + 3) return text;
-  return `${text.slice(0, head)}···${text.slice(-tail)}`;
+  return `${text.slice(0, head)}…${text.slice(-tail)}`;
 }
 
 export function setDocumentBusy(isBusy) {

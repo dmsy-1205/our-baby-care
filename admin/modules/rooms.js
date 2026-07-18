@@ -1,16 +1,13 @@
-import { getAdminDatabase } from '../admin-api.js?v=admin-2-0-a10-recovery-clean-20260719';
-import { escapeHtml, formatDateTime, compactId } from '../admin-utils.js?v=admin-2-0-a10-recovery-clean-20260719';
-import { renderEmptyState } from '../components/empty-state.js?v=admin-2-0-a10-recovery-clean-20260719';
+import { getAdminDatabase } from '../admin-api.js?v=admin-2-0-a11-data-center-readonly-20260719';
+import { escapeHtml, formatDateTime, compactId } from '../admin-utils.js?v=admin-2-0-a11-data-center-readonly-20260719';
+import { renderEmptyState } from '../components/empty-state.js?v=admin-2-0-a11-data-center-readonly-20260719';
 
 function asObject(value) {
   return value && typeof value === 'object' ? value : {};
 }
 
 function latestNumber(...values) {
-  return values
-    .map(Number)
-    .filter((value) => Number.isFinite(value) && value > 0)
-    .sort((a, b) => b - a)[0] || 0;
+  return values.map(Number).filter((value) => Number.isFinite(value) && value > 0).sort((a, b) => b - a)[0] || 0;
 }
 
 function memberName(users, uid, member) {
@@ -104,7 +101,7 @@ export async function render() {
   const withoutMembers = rows.filter((row) => !row.members.length).length;
   const body = rows.length
     ? `<div class="admin-room-list">${rows.map(renderRoomCard).join('')}</div>`
-    : renderEmptyState('Room 없음', '읽어올 Room 데이터가 없습니다.', '🏠');
+    : renderEmptyState('Room 없음', '읽어온 Room 데이터가 없습니다.', '⌂');
 
   return `
     <section class="module-view" aria-labelledby="roomsHeading">

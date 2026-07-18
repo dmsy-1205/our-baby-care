@@ -1,9 +1,9 @@
 import { setState } from './admin-state.js';
-import { renderTopbar } from './components/topbar.js?v=admin-2-0-a10-recovery-clean-20260719';
-import { renderLoadingState } from './components/loading-state.js?v=admin-2-0-a10-recovery-clean-20260719';
+import { renderTopbar } from './components/topbar.js?v=admin-2-0-a11-data-center-readonly-20260719';
+import { renderLoadingState } from './components/loading-state.js?v=admin-2-0-a11-data-center-readonly-20260719';
 
 const routes = new Set(['dashboard', 'users', 'rooms', 'requests', 'recovery', 'audit', 'releases', 'system']);
-const ADMIN_MODULE_VERSION = 'admin-2-0-a10-recovery-clean-20260719';
+const ADMIN_MODULE_VERSION = 'admin-2-0-a11-data-center-readonly-20260719';
 
 function normalizeRoute(value) {
   const route = String(value || '').replace(/^#\/?/, '').trim();
