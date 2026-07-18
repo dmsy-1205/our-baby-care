@@ -1,7 +1,7 @@
 import { escapeHtml } from '../admin-utils.js';
 
-const ADMIN_CONSOLE_STEP = 'STEP A7';
-const ADMIN_CONSOLE_STEP_LABEL = 'Request Detail Drawer';
+const ADMIN_CONSOLE_STEP = 'STEP A8';
+const ADMIN_CONSOLE_STEP_LABEL = 'Recovery Center Baseline';
 
 const items = [
   ['dashboard', '대시보드', '▦'],
