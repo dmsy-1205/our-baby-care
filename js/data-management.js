@@ -157,40 +157,28 @@
         if (!confirmed) return;
         try {
             const ref = db.ref(requestItemPath(user.uid, requestId));
-            let cancelAllowed = false;
-            let currentStatus = '';
-            let blockReason = '';
-            const result = await ref.transaction((item) => {
-                currentStatus = item?.status || 'pending';
-                if (!item) {
-                    blockReason = '요청을 찾을 수 없음';
-                    return;
-                }
-                if (!isCancelableStatus(currentStatus)) {
-                    blockReason = '취소할 수 없는 상태';
-                    return;
-                }
-                cancelAllowed = true;
-                const now = Date.now();
-                return {
-                    ...item,
-                    requestId: item.requestId || requestId,
-                    requestedByUid: item.requestedByUid || user.uid,
-                    requestedByEmail: item.requestedByEmail || (user.email || '').toLowerCase(),
-                    status: 'canceled',
-                    adminMessage: '사용자가 요청을 취소했습니다.',
-                    canceledAt: now,
-                    updatedAt: now
-                };
-            }, undefined, false);
-            if (!cancelAllowed || !result.committed) {
+            const snap = await ref.once('value');
+            const item = snap.val();
+            const currentStatus = item?.status || 'pending';
+            if (!item || !isCancelableStatus(currentStatus)) {
                 const label = statusText(currentStatus);
-                const reason = blockReason ? `\n\n확인된 사유: ${blockReason}` : '';
+                const reason = !item ? '\n\n확인된 사유: 요청을 찾을 수 없음' : '\n\n확인된 사유: 취소할 수 없는 상태';
                 alert(`현재 요청 상태는 '${label}'입니다.${reason}\n\n${CANCELABLE_STATUS_TEXT} 상태에서만 직접 취소할 수 있습니다. 운영자 답변을 확인하거나 새 요청을 남겨주세요.`);
                 await loadDataDeleteRequests();
                 return;
             }
+            const now = Date.now();
+            await ref.update({
+                requestId,
+                requestedByUid: user.uid,
+                requestedByEmail: item.requestedByEmail || (user.email || '').toLowerCase(),
+                status: 'canceled',
+                adminMessage: '사용자가 요청을 취소했습니다.',
+                canceledAt: now,
+                updatedAt: now
+            });
             showToastSafe('삭제 요청이 취소되었습니다.');
+            alert('삭제 요청이 취소되었습니다.');
             await loadDataDeleteRequests();
         } catch (error) {
             console.warn('[DataManagement] cancel failed', error);
