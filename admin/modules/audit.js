@@ -72,12 +72,12 @@ function renderList() {
   `;
 }
 
-function renderShell(root) {
+function renderShell() {
   const approvalCount = logs.filter((row) => String(row.action || '').includes('approved')).length;
   const requestCount = logs.filter((row) => row.requestId).length;
   const latest = logs[0]?.createdAt || logs[0]?.updatedAt;
 
-  root.innerHTML = `
+  return `
     <section class="module-view" aria-labelledby="auditHeading">
       <section class="admin-hero-card">
         <div class="admin-hero-icon">☰</div>
@@ -118,8 +118,11 @@ function bindEvents(root) {
   });
 }
 
-export async function render(root) {
+export async function render() {
   await loadAuditLogs();
-  renderShell(root);
+  return renderShell();
+}
+
+export function afterRender(root) {
   bindEvents(root);
 }

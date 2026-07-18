@@ -383,8 +383,8 @@ async function saveRequest(root, key, nextStatus = null) {
   }
 }
 
-function renderShell(root) {
-  root.innerHTML = `
+function renderShell() {
+  return `
     <section class="admin-stack">
       <section class="admin-hero-card">
         <div class="admin-hero-icon">🛡️</div>
@@ -423,6 +423,10 @@ function renderShell(root) {
   `;
 }
 
+function refresh(root) {
+  root.innerHTML = renderShell();
+}
+
 function bindEvents(root) {
   if (root.dataset.requestsBound === '1') return;
   root.dataset.requestsBound = '1';
@@ -431,7 +435,7 @@ function bindEvents(root) {
     const segmentButton = event.target.closest('[data-segment]');
     if (segmentButton) {
       currentSegment = segmentButton.dataset.segment;
-      renderShell(root);
+      refresh(root);
       return;
     }
 
@@ -480,7 +484,7 @@ function bindEvents(root) {
   root.addEventListener('change', (event) => {
     if (!event.target.matches('[data-request-status-filter]')) return;
     currentStatusFilter = event.target.value;
-    renderShell(root);
+    refresh(root);
   });
 
   root.addEventListener('input', (event) => {
@@ -500,8 +504,11 @@ async function loadRequests() {
   rows = normalizeRows(requestsSnapshot.val(), notesSnapshot.val());
 }
 
-export async function render(root) {
+export async function render() {
   await loadRequests();
-  renderShell(root);
+  return renderShell();
+}
+
+export function afterRender(root) {
   bindEvents(root);
 }
