@@ -94,7 +94,9 @@
     window.onload = function() {
         const today = new Date();
         const dateInput = document.getElementById('recordDate');
-        dateInput.value = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+        if (dateInput) {
+            dateInput.value = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+        }
 
         captureInviteFromUrl();
         // 공유코드는 브라우저 저장소에서 불러오지 않습니다. 초대코드는 로그인 전 임시 보관만 합니다.

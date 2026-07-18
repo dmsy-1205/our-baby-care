@@ -192,7 +192,11 @@
         const sessionUid = currentUser && currentUser.uid;
         if (!sessionUid) { showSaveStatus('🔒 로그인이 필요합니다.'); return; }
         const roomCode = getRoomCodeForData();
-        const date = document.getElementById('recordDate').value;
+        const recordDateInput = document.getElementById('recordDate');
+        const todayFallback = new Date();
+        const fallbackDate = `${todayFallback.getFullYear()}-${String(todayFallback.getMonth() + 1).padStart(2, '0')}-${String(todayFallback.getDate()).padStart(2, '0')}`;
+        const date = recordDateInput?.value || fallbackDate;
+        if (recordDateInput && !recordDateInput.value) recordDateInput.value = date;
 
         if (!hmIsOnline) showSaveStatus('📴 오프라인 상태입니다. 연결되면 다시 동기화됩니다.');
 
