@@ -89,7 +89,7 @@ function statusLabel(status) {
 function statusClass(status) {
   if (['completed', 'approved'].includes(status)) return 'ok';
   if (['rejected', 'failed'].includes(status)) return 'danger';
-  if (['canceled'].includes(status)) return 'muted';
+  if (status === 'canceled') return 'muted';
   if (['hold', 'scheduled', 'processing'].includes(status)) return 'warn';
   return 'active';
 }
@@ -137,6 +137,7 @@ function findRow(ownerUid, requestId) {
 }
 
 function defaultAdminMessage(status, row) {
+  if (row?.status === 'canceled' || status === 'canceled') return '사용자가 요청을 취소했습니다.';
   if (status === 'reviewing') return '요청을 확인하고 있습니다. 필요한 내용을 검토한 뒤 다시 안내드리겠습니다.';
   if (status === 'hold') return '요청 내용 확인을 위해 처리를 잠시 보류했습니다. 추가 확인 후 다시 안내드리겠습니다.';
   if (status === 'approved') return '요청이 승인되었습니다. 실제 처리 일정과 범위는 운영자가 확인 후 안내드리겠습니다.';
@@ -144,143 +145,15 @@ function defaultAdminMessage(status, row) {
   return row?.adminMessage || '요청이 접수되었습니다. 운영자가 내용을 확인할 예정입니다.';
 }
 
-function collectUserRoomCodes(uid, users, userRooms, roomMembers) {
-  const user = asObject(users[uid]);
-  const roomCodes = new Set();
-  if (user.activeRoom) roomCodes.add(user.activeRoom);
-  Object.keys(asObject(userRooms[uid])).forEach((roomCode) => roomCodes.add(roomCode));
-  Object.entries(asObject(roomMembers)).forEach(([roomCode, members]) => {
-    if (asObject(members)[uid]) roomCodes.add(roomCode);
-  });
-  return Array.from(roomCodes).filter(Boolean).sort();
-}
-
-function collectRoomMemberRows(roomCode, users, roomMembers) {
-  return Object.entries(asObject(roomMembers[roomCode])).map(([uid, member]) => {
-    const memberData = asObject(member);
-    const userData = asObject(users[uid]);
-    return {
-      uid,
-      email: memberData.email || userData.email || '',
-      nickname: memberData.nickname || userData.nickname || userData.displayName || '',
-      role: memberData.role || memberData.relationshipRole || ''
-    };
-  });
-}
-
-function impactStatusText(value) {
-  if (value === true) return '확인됨';
-  if (value === false) return '없음';
-  return '확인 필요';
-}
-
-function buildImpactPreview(ownerUid, requestId, request, source) {
-  const users = asObject(source.users);
-  const userRooms = asObject(source.userRooms);
-  const roomMembers = asObject(source.roomMembers);
-  const rooms = asObject(source.rooms);
-  const user = asObject(users[ownerUid]);
-  const roomCode = request.roomCode || user.activeRoom || '';
-  const userRoomCodes = collectUserRoomCodes(ownerUid, users, userRooms, roomMembers);
-  const members = roomCode ? collectRoomMemberRows(roomCode, users, roomMembers) : [];
-  const roomExists = roomCode ? Boolean(rooms[roomCode]) : null;
-  const memberExists = roomCode ? Boolean(asObject(roomMembers[roomCode])[ownerUid]) : null;
-  const partnerReview = request.requestType === 'delete_room' || request.partnerConsentRequired === true;
-
-  const paths = [`dataDeleteRequests/${ownerUid}/${requestId}`];
-  const checks = [];
-  let title = '요청 영향도';
-  let risk = '낮음';
-
-  if (request.requestType === 'account') {
-    title = '계정 삭제 영향도';
-    risk = userRoomCodes.length > 1 ? '중간' : '낮음';
-    paths.push(`users/${ownerUid}`, `userRooms/${ownerUid}`, 'roomMembers/{roomCode}/{uid}');
-    checks.push('로그인 계정과 개인 프로필 삭제 범위 확인');
-    checks.push('공동 Room 기록은 상대방 권리와 함께 검토');
-    checks.push('실제 삭제 전 별도 승인 단계 필요');
-  } else if (request.requestType === 'leave_room') {
-    title = 'Room 연결 해제 영향도';
-    risk = roomCode ? '중간' : '확인 필요';
-    paths.push(`userRooms/${ownerUid}/${roomCode || '{roomCode}'}`, `roomMembers/${roomCode || '{roomCode}'}/${ownerUid}`, `users/${ownerUid}/activeRoom`);
-    checks.push('요청자의 Room 연결만 해제하는 요청인지 확인');
-    checks.push('기존 공동 기록은 보존되는지 확인');
-    checks.push('상대방 Room 접근권 유지 여부 확인');
-  } else if (request.requestType === 'delete_room') {
-    title = 'Room 전체 삭제 영향도';
-    risk = '높음';
-    paths.push(`rooms/${roomCode || '{roomCode}'}`, `roomMembers/${roomCode || '{roomCode}'}`, `userRooms/{memberUid}/${roomCode || '{roomCode}'}`);
-    checks.push('채팅·기록·사진 등 공동 데이터 범위 확인');
-    checks.push('상대방 권리와 보관 필요성 검토');
-    checks.push('실제 삭제 전 백업/복구 기준점 확보');
-  } else {
-    paths.push(`users/${ownerUid}`, `userRooms/${ownerUid}`);
-    checks.push('요청 유형과 대상 경로를 먼저 확인');
-    checks.push('실제 데이터 변경 전 관리자 메모를 남김');
-  }
-
-  return {
-    title,
-    risk,
-    roomCode,
-    roomExists,
-    memberExists,
-    partnerReview,
-    memberCount: members.length,
-    userRoomCount: userRoomCodes.length,
-    paths,
-    checks
-  };
-}
-
-function renderImpactPreview(row) {
-  const impact = row.impact || {};
-  const riskClass = impact.risk === '높음' ? 'danger' : impact.risk === '중간' ? 'warn' : 'ok';
-  return `
-    <section class="admin-impact-preview" aria-label="데이터 영향도 미리보기">
-      <div class="admin-impact-head">
-        <div>
-          <strong>${escapeHtml(impact.title || '요청 영향도')}</strong>
-          <p>실제 삭제나 연결 해제 없이, 이 요청이 건드릴 수 있는 데이터를 읽기 전용으로 보여줍니다.</p>
-        </div>
-        <span class="admin-impact-risk ${riskClass}">위험도 ${escapeHtml(impact.risk || '확인 필요')}</span>
-      </div>
-      <div class="admin-impact-grid">
-        <div><span>대상 Room</span><strong>${escapeHtml(impact.roomCode || '-')}</strong></div>
-        <div><span>Room 기록</span><strong>${escapeHtml(impactStatusText(impact.roomExists))}</strong></div>
-        <div><span>요청자 멤버십</span><strong>${escapeHtml(impactStatusText(impact.memberExists))}</strong></div>
-        <div><span>공동 검토</span><strong>${impact.partnerReview ? '필요' : '일반'}</strong></div>
-      </div>
-      <div class="admin-impact-columns">
-        <div>
-          <h4>확인 경로</h4>
-          <ul>${(impact.paths || []).map((path) => `<li>${escapeHtml(path)}</li>`).join('')}</ul>
-        </div>
-        <div>
-          <h4>실행 전 체크</h4>
-          <ul>${(impact.checks || []).map((check) => `<li>${escapeHtml(check)}</li>`).join('')}</ul>
-        </div>
-      </div>
-    </section>`;
-}
-
 async function loadRequests() {
   const database = getAdminDatabase();
-  const [requestSnap, noteSnap, userSnap, userRoomsSnap, roomMembersSnap, roomsSnap] = await Promise.all([
+  const [requestSnap, noteSnap] = await Promise.all([
     database.ref('dataDeleteRequests').once('value'),
-    database.ref('dataDeleteRequestAdminNotes').once('value'),
-    database.ref('users').once('value'),
-    database.ref('userRooms').once('value'),
-    database.ref('roomMembers').once('value'),
-    database.ref('rooms').once('value')
+    database.ref('dataDeleteRequestAdminNotes').once('value')
   ]);
 
   const requestRoot = asObject(requestSnap.val());
   const noteRoot = asObject(noteSnap.val());
-  const users = asObject(userSnap.val());
-  const userRooms = asObject(userRoomsSnap.val());
-  const roomMembers = asObject(roomMembersSnap.val());
-  const rooms = asObject(roomsSnap.val());
   const rows = [];
 
   Object.entries(requestRoot).forEach(([ownerUid, requests]) => {
@@ -303,13 +176,7 @@ async function loadRequests() {
         adminMessage: item.adminMessage || '',
         partnerConsentRequired: item.partnerConsentRequired === true,
         reviewedByUid: item.reviewedByUid || '',
-        memo: note.memo || '',
-        impact: buildImpactPreview(ownerUid, requestId, item, {
-          users,
-          userRooms,
-          roomMembers,
-          rooms
-        })
+        memo: note.memo || ''
       });
     });
   });
@@ -416,7 +283,6 @@ function renderRequestCard(row) {
         <span class="admin-request-flow-step ${isClosed ? 'done' : 'active'}">${escapeHtml(statusLabel(row.status))}</span>
         <p>${escapeHtml(flowText)}</p>
       </div>
-      ${renderImpactPreview(row)}
       <div class="admin-request-editor">
         <label>
           <span>사용자에게 전달할 답변</span>
@@ -485,7 +351,7 @@ export async function render() {
     return `
       <section class="module-view">
         <div class="error-card">
-          <strong>데이터 요청 목록을 불러오지 못했습니다.</strong>
+          <strong>데이터 요청 목록을 불러오지 못했습니다</strong>
           <p>${escapeHtml(error.message || error)}</p>
         </div>
       </section>`;
