@@ -1,7 +1,7 @@
-import { getAdminDatabase } from '../admin-api.js?v=admin-2-0-a6-sidebar-step-badge-20260718';
-import { getState } from '../admin-state.js?v=admin-2-0-a6-sidebar-step-badge-20260718';
-import { escapeHtml, formatDateTime } from '../admin-utils.js?v=admin-2-0-a6-sidebar-step-badge-20260718';
-import { renderEmptyState } from '../components/empty-state.js?v=admin-2-0-a6-sidebar-step-badge-20260718';
+import { getAdminDatabase } from '../admin-api.js?v=admin-2-0-a7-request-detail-drawer-20260718';
+import { getState } from '../admin-state.js?v=admin-2-0-a7-request-detail-drawer-20260718';
+import { escapeHtml, formatDateTime } from '../admin-utils.js?v=admin-2-0-a7-request-detail-drawer-20260718';
+import { renderEmptyState } from '../components/empty-state.js?v=admin-2-0-a7-request-detail-drawer-20260718';
 
 const OPEN_STATUSES = new Set(['pending', 'reviewing', 'approved', 'hold', 'scheduled', 'processing', 'failed']);
 const CLOSED_STATUSES = new Set(['rejected', 'canceled', 'completed']);
@@ -472,6 +472,28 @@ export function afterRender() {
 
   search?.addEventListener('input', applyFilter);
   filter?.addEventListener('change', applyFilter);
+
+  document.querySelectorAll('[data-admin-request-row]').forEach((card, index) => {
+    const head = card.querySelector('.admin-request-head');
+    if (!head || head.querySelector('[data-admin-detail-toggle]')) return;
+    card.classList.add('is-collapsed');
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'admin-request-detail-toggle';
+    button.dataset.adminDetailToggle = 'true';
+    button.setAttribute('aria-expanded', 'false');
+    button.textContent = '상세 보기';
+    button.addEventListener('click', () => {
+      const expanded = card.classList.toggle('is-expanded');
+      card.classList.toggle('is-collapsed', !expanded);
+      button.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+      button.textContent = expanded ? '상세 접기' : '상세 보기';
+    });
+    head.appendChild(button);
+    if (index === 0) {
+      button.click();
+    }
+  });
 
   document.querySelectorAll('[data-admin-request-row]').forEach((card) => {
     if (!CLOSED_STATUSES.has(card.dataset.status || '')) return;

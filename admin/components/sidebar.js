@@ -1,7 +1,7 @@
 import { escapeHtml } from '../admin-utils.js';
 
-const ADMIN_CONSOLE_STEP = 'STEP A6';
-const ADMIN_CONSOLE_STEP_LABEL = 'Closed Request Lock';
+const ADMIN_CONSOLE_STEP = 'STEP A7';
+const ADMIN_CONSOLE_STEP_LABEL = 'Request Detail Drawer';
 
 const items = [
   ['dashboard', '대시보드', '▦'],
