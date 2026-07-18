@@ -3,7 +3,7 @@ import { renderTopbar } from './components/topbar.js';
 import { renderLoadingState } from './components/loading-state.js';
 
 const routes = new Set(['dashboard', 'users', 'rooms', 'requests', 'recovery', 'audit', 'releases', 'system']);
-const ADMIN_MODULE_VERSION = 'step6-2-13-3-admin-room-directory-readonly-20260718';
+const ADMIN_MODULE_VERSION = 'step6-2-13-4-admin-data-requests-readonly-20260718';
 
 function normalizeRoute(value) {
   const route = String(value || '').replace(/^#\/?/, '').trim();
