@@ -1,5 +1,8 @@
 import { escapeHtml } from '../admin-utils.js';
 
+const ADMIN_CONSOLE_STEP = 'STEP A6';
+const ADMIN_CONSOLE_STEP_LABEL = 'Closed Request Lock';
+
 const items = [
   ['dashboard', '대시보드', '▦'],
   ['users', '사용자', '♙'],
@@ -16,7 +19,7 @@ export function renderSidebar({ route, userEmail }) {
     <aside class="admin-sidebar" id="adminSidebar" aria-label="관리자 메뉴">
       <div class="sidebar-brand">
         <span class="brand-symbol" aria-hidden="true">❤☾</span>
-        <span><strong>HearMe2nite</strong><small>Admin Console 2.0</small></span>
+        <span><strong>HearMe2nite</strong><small>Admin Console 2.0</small><em class="admin-step-badge">${ADMIN_CONSOLE_STEP} · ${ADMIN_CONSOLE_STEP_LABEL}</em></span>
       </div>
       <nav class="sidebar-nav">
         ${items.map(([id, label, icon]) => `

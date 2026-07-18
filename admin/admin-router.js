@@ -3,7 +3,7 @@ import { renderTopbar } from './components/topbar.js';
 import { renderLoadingState } from './components/loading-state.js';
 
 const routes = new Set(['dashboard', 'users', 'rooms', 'requests', 'recovery', 'audit', 'releases', 'system']);
-const ADMIN_MODULE_VERSION = 'admin-2-0-a5-closed-request-lock-20260718';
+const ADMIN_MODULE_VERSION = 'admin-2-0-a6-sidebar-step-badge-20260718';
 
 function normalizeRoute(value) {
   const route = String(value || '').replace(/^#\/?/, '').trim();
