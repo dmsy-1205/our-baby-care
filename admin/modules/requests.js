@@ -1,7 +1,7 @@
-import { getAdminDatabase } from '../admin-api.js?v=admin-2-0-a4-request-segment-visible-list-20260718';
-import { getState } from '../admin-state.js?v=admin-2-0-a4-request-segment-visible-list-20260718';
-import { escapeHtml, formatDateTime } from '../admin-utils.js?v=admin-2-0-a4-request-segment-visible-list-20260718';
-import { renderEmptyState } from '../components/empty-state.js?v=admin-2-0-a4-request-segment-visible-list-20260718';
+import { getAdminDatabase } from '../admin-api.js?v=admin-2-0-a5-closed-request-lock-20260718';
+import { getState } from '../admin-state.js?v=admin-2-0-a5-closed-request-lock-20260718';
+import { escapeHtml, formatDateTime } from '../admin-utils.js?v=admin-2-0-a5-closed-request-lock-20260718';
+import { renderEmptyState } from '../components/empty-state.js?v=admin-2-0-a5-closed-request-lock-20260718';
 
 const OPEN_STATUSES = new Set(['pending', 'reviewing', 'approved', 'hold', 'scheduled', 'processing', 'failed']);
 const CLOSED_STATUSES = new Set(['rejected', 'canceled', 'completed']);
@@ -388,6 +388,10 @@ async function saveMemo(row) {
 async function updateRequestStatus(row, status) {
   const action = ACTION_STATUSES[status];
   if (!action) return;
+  if (CLOSED_STATUSES.has(row.status)) {
+    window.alert('이미 닫힌 요청입니다. 기록 확인과 관리자 메모 저장만 가능합니다.');
+    return;
+  }
 
   const replyText = (getTextarea(row, 'reply')?.value || '').trim() || defaultAdminMessage(status, row);
   if (!replyText) {
@@ -468,6 +472,21 @@ export function afterRender() {
 
   search?.addEventListener('input', applyFilter);
   filter?.addEventListener('change', applyFilter);
+
+  document.querySelectorAll('[data-admin-request-row]').forEach((card) => {
+    if (!CLOSED_STATUSES.has(card.dataset.status || '')) return;
+    card.querySelectorAll('[data-admin-status]').forEach((button) => {
+      button.remove();
+    });
+    const actions = card.querySelector('.admin-request-actions');
+    if (actions && !actions.querySelector('.admin-request-locked-note')) {
+      actions.classList.add('is-locked');
+      actions.insertAdjacentHTML(
+        'beforeend',
+        '<span class="admin-request-locked-note">닫힌 요청입니다. 기록 확인과 내부 메모 저장만 가능합니다.</span>'
+      );
+    }
+  });
 
   document.querySelectorAll('[data-admin-request-segment]').forEach((button) => {
     button.addEventListener('click', () => {

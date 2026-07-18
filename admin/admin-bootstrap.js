@@ -1,8 +1,8 @@
-import { waitForAuthenticatedUser, readAdminProfile, isActiveAdmin, signOutAdmin } from './admin-api.js?v=admin-2-0-a4-request-segment-visible-list-20260718';
+import { waitForAuthenticatedUser, readAdminProfile, isActiveAdmin, signOutAdmin } from './admin-api.js?v=admin-2-0-a5-closed-request-lock-20260718';
 import { setState } from './admin-state.js';
 import { setDocumentBusy } from './admin-utils.js';
 import { renderSidebar } from './components/sidebar.js';
-import { startRouter, navigate } from './admin-router.js?v=admin-2-0-a4-request-segment-visible-list-20260718';
+import { startRouter, navigate } from './admin-router.js?v=admin-2-0-a5-closed-request-lock-20260718';
 
 const boot = document.getElementById('adminBoot');
 const root = document.getElementById('adminRoot');
