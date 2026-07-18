@@ -1,7 +1,7 @@
-import { getAdminDatabase } from '../admin-api.js?v=admin-2-0-a3-request-status-audit-20260718';
-import { getState } from '../admin-state.js?v=admin-2-0-a3-request-status-audit-20260718';
-import { escapeHtml, formatDateTime } from '../admin-utils.js?v=admin-2-0-a3-request-status-audit-20260718';
-import { renderEmptyState } from '../components/empty-state.js?v=admin-2-0-a3-request-status-audit-20260718';
+import { getAdminDatabase } from '../admin-api.js?v=admin-2-0-a4-request-segment-visible-list-20260718';
+import { getState } from '../admin-state.js?v=admin-2-0-a4-request-segment-visible-list-20260718';
+import { escapeHtml, formatDateTime } from '../admin-utils.js?v=admin-2-0-a4-request-segment-visible-list-20260718';
+import { renderEmptyState } from '../components/empty-state.js?v=admin-2-0-a4-request-segment-visible-list-20260718';
 
 const OPEN_STATUSES = new Set(['pending', 'reviewing', 'approved', 'hold', 'scheduled', 'processing', 'failed']);
 const CLOSED_STATUSES = new Set(['rejected', 'canceled', 'completed']);
@@ -307,7 +307,9 @@ function renderRows(rows) {
   if (!rows.length) {
     return renderEmptyState('표시할 데이터 요청이 없습니다', '아직 사용자가 보낸 삭제 또는 데이터 처리 요청이 없습니다.');
   }
-  return `<div class="admin-request-list">${rows.map(renderRequestCard).join('')}</div>`;
+  return `
+    <div class="admin-request-visible-note" id="adminRequestVisibleNote" aria-live="polite"></div>
+    <div class="admin-request-list">${rows.map(renderRequestCard).join('')}</div>`;
 }
 
 export async function render() {
@@ -433,9 +435,11 @@ async function refreshRequestsView() {
 function applyFilter() {
   const search = document.getElementById('adminRequestSearch');
   const filter = document.getElementById('adminRequestFilter');
+  const note = document.getElementById('adminRequestVisibleNote');
   const query = (search?.value || '').trim().toLowerCase();
   const mode = filter?.value || 'all';
   const segment = SEGMENTS.find((item) => item.key === currentSegment) || SEGMENTS[SEGMENTS.length - 1];
+  let visibleCount = 0;
 
   document.querySelectorAll('[data-admin-request-row]').forEach((row) => {
     const status = row.dataset.status || 'pending';
@@ -446,8 +450,16 @@ function applyFilter() {
       mode === 'all' ||
       (mode === 'open' && OPEN_STATUSES.has(status)) ||
       (mode === 'closed' && CLOSED_STATUSES.has(status));
-    row.hidden = !(matchesSegment && matchesQuery && matchesMode);
+    const visible = matchesSegment && matchesQuery && matchesMode;
+    row.hidden = !visible;
+    if (visible) visibleCount += 1;
   });
+
+  if (note) {
+    const segmentLabel = segment.label || '전체';
+    const modeLabel = filter?.selectedOptions?.[0]?.textContent || '모든 상태';
+    note.textContent = `${segmentLabel} · ${modeLabel} 기준 ${visibleCount}건 표시`;
+  }
 }
 
 export function afterRender() {
@@ -460,6 +472,7 @@ export function afterRender() {
   document.querySelectorAll('[data-admin-request-segment]').forEach((button) => {
     button.addEventListener('click', () => {
       currentSegment = button.dataset.adminRequestSegment || 'all';
+      if (filter) filter.value = 'all';
       document.querySelectorAll('[data-admin-request-segment]').forEach((item) => {
         const active = item.dataset.adminRequestSegment === currentSegment;
         item.classList.toggle('active', active);
