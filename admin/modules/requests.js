@@ -1,7 +1,7 @@
-import { getAdminDatabase } from '../admin-api.js?v=admin-2-0-a2-data-request-actions-20260718';
-import { getState } from '../admin-state.js?v=admin-2-0-a2-data-request-actions-20260718';
-import { escapeHtml, formatDateTime } from '../admin-utils.js?v=admin-2-0-a2-data-request-actions-20260718';
-import { renderEmptyState } from '../components/empty-state.js?v=admin-2-0-a2-data-request-actions-20260718';
+import { getAdminDatabase } from '../admin-api.js?v=admin-2-0-a3-request-status-audit-20260718';
+import { getState } from '../admin-state.js?v=admin-2-0-a3-request-status-audit-20260718';
+import { escapeHtml, formatDateTime } from '../admin-utils.js?v=admin-2-0-a3-request-status-audit-20260718';
+import { renderEmptyState } from '../components/empty-state.js?v=admin-2-0-a3-request-status-audit-20260718';
 
 const OPEN_STATUSES = new Set(['pending', 'reviewing', 'approved', 'hold', 'scheduled', 'processing', 'failed']);
 const CLOSED_STATUSES = new Set(['rejected', 'canceled', 'completed']);
@@ -57,6 +57,14 @@ const ACTION_STATUSES = {
   }
 };
 
+const AUDIT_ACTION_LABELS = {
+  request_memo_saved: '관리자 메모 저장',
+  request_status_reviewing: '요청 검토 중',
+  request_status_hold: '요청 보류',
+  request_status_approved: '요청 승인',
+  request_status_rejected: '요청 거절'
+};
+
 let currentRows = [];
 let currentSegment = 'all';
 
@@ -99,6 +107,29 @@ function pathKey(row) {
 
 function serverTimestamp() {
   return window.firebase.database.ServerValue.TIMESTAMP;
+}
+
+function pushAuditUpdate(database, updates, action, row, detail = {}) {
+  const state = getState();
+  const auditRef = database.ref('adminAuditLogs').push();
+  updates[`adminAuditLogs/${auditRef.key}`] = {
+    action,
+    actionLabel: AUDIT_ACTION_LABELS[action] || action,
+    target: 'dataDeleteRequest',
+    targetType: row.requestType || '',
+    targetLabel: row.typeLabel || requestTypeLabel(row),
+    ownerUid: row.ownerUid || '',
+    requestId: row.id || '',
+    roomCode: row.roomCode || '',
+    requestedByUid: row.requestedByUid || row.ownerUid || '',
+    requestedByEmail: row.requestedByEmail || '',
+    statusBefore: row.status || '',
+    statusAfter: detail.statusAfter || row.status || '',
+    note: detail.note || '',
+    adminUid: state.user?.uid || '',
+    adminEmail: state.user?.email || '',
+    createdAt: serverTimestamp()
+  };
 }
 
 function findRow(ownerUid, requestId) {
@@ -219,6 +250,13 @@ function renderRequestCard(row) {
     ? '<span class="admin-request-warning">공동 Room 검토 필요</span>'
     : '';
   const key = pathKey(row);
+  const isApproved = row.status === 'approved';
+  const isClosed = CLOSED_STATUSES.has(row.status);
+  const flowText = isApproved
+    ? '승인됨 · 실제 삭제/연결 해제 실행은 별도 안전 단계에서만 진행'
+    : isClosed
+      ? '닫힌 요청 · 필요하면 기록 확인 후 별도 요청으로 재진행'
+      : '열린 요청 · 답변/메모/상태를 남기고 검토 계속';
 
   return `
     <article class="admin-request-card" data-admin-request-row data-request-type="${escapeHtml(row.requestType)}" data-status="${escapeHtml(row.status)}" data-search="${escapeHtml(searchable)}">
@@ -239,6 +277,10 @@ function renderRequestCard(row) {
       <div class="admin-request-body">
         <div><strong>요청 사유</strong><p>${escapeHtml(row.reason || '-')}</p></div>
         <div><strong>운영자 답변</strong><p>${escapeHtml(row.adminMessage || '아직 운영자 답변이 없습니다.')}</p></div>
+      </div>
+      <div class="admin-request-flow">
+        <span class="admin-request-flow-step ${isClosed ? 'done' : 'active'}">${escapeHtml(statusLabel(row.status))}</span>
+        <p>${escapeHtml(flowText)}</p>
       </div>
       <div class="admin-request-editor">
         <label>
@@ -335,6 +377,9 @@ async function saveMemo(row) {
   } else {
     updates[notePath] = null;
   }
+  pushAuditUpdate(database, updates, 'request_memo_saved', row, {
+    note: memoText ? '관리자 내부 메모 저장' : '관리자 내부 메모 삭제'
+  });
   await database.ref().update(updates);
 }
 
@@ -369,6 +414,11 @@ async function updateRequestStatus(row, status) {
       updatedByUid: state.user?.uid || ''
     };
   }
+
+  pushAuditUpdate(database, updates, `request_status_${status}`, row, {
+    statusAfter: status,
+    note: `${statusLabel(row.status)} → ${statusLabel(status)}`
+  });
 
   await database.ref().update(updates);
 }
