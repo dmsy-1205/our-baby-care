@@ -331,8 +331,8 @@ export async function render() {
             </div>
             <div class="admin-request-tools">
               <select id="adminRequestFilter" class="admin-request-filter" aria-label="요청 상태 필터">
-                <option value="open">처리 필요</option>
                 <option value="all">모든 상태</option>
+                <option value="open">처리 필요</option>
                 <option value="closed">닫힌 요청</option>
               </select>
               <input id="adminRequestSearch" class="admin-user-search" type="search" placeholder="요청 검색">
@@ -434,7 +434,7 @@ function applyFilter() {
   const search = document.getElementById('adminRequestSearch');
   const filter = document.getElementById('adminRequestFilter');
   const query = (search?.value || '').trim().toLowerCase();
-  const mode = filter?.value || 'open';
+  const mode = filter?.value || 'all';
   const segment = SEGMENTS.find((item) => item.key === currentSegment) || SEGMENTS[SEGMENTS.length - 1];
 
   document.querySelectorAll('[data-admin-request-row]').forEach((row) => {

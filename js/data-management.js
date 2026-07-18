@@ -179,7 +179,11 @@
             });
             showToastSafe('삭제 요청이 취소되었습니다.');
             alert('삭제 요청이 취소되었습니다.');
-            await loadDataDeleteRequests();
+            try {
+                await loadDataDeleteRequests();
+            } catch (reloadError) {
+                console.warn('[DataManagement] reload after cancel failed', reloadError);
+            }
         } catch (error) {
             console.warn('[DataManagement] cancel failed', error);
             const message = String(error?.message || error || '');
