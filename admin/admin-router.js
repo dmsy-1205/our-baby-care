@@ -3,6 +3,7 @@ import { renderTopbar } from './components/topbar.js';
 import { renderLoadingState } from './components/loading-state.js';
 
 const routes = new Set(['dashboard', 'users', 'rooms', 'requests', 'recovery', 'audit', 'releases', 'system']);
+const ADMIN_MODULE_VERSION = 'step6-2-13-1-admin-user-directory-readonly-20260718';
 
 function normalizeRoute(value) {
   const route = String(value || '').replace(/^#\/?/, '').trim();
@@ -10,7 +11,7 @@ function normalizeRoute(value) {
 }
 
 async function loadModule(route) {
-  return import(`./modules/${route}.js`);
+  return import(`./modules/${route}.js?v=${ADMIN_MODULE_VERSION}`);
 }
 
 export async function navigate(route, { replace = false } = {}) {
@@ -31,7 +32,10 @@ export async function navigate(route, { replace = false } = {}) {
 
   try {
     const module = await loadModule(normalized);
-    outlet.innerHTML = module.render();
+    outlet.innerHTML = await Promise.resolve(module.render());
+    if (typeof module.afterRender === 'function') {
+      await Promise.resolve(module.afterRender());
+    }
     document.title = `${topbar.querySelector('h1')?.textContent || '관리자'} · HearMe2nite`;
   } catch (error) {
     console.error('[Admin 2.0] route load failed', error);

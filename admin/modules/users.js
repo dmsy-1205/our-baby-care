@@ -1,4 +1,184 @@
-import { renderEmptyState } from '../components/empty-state.js';
-export function render() {
-  return `<section class="module-view"><article class="panel"><div class="panel-header"><div><h2>사용자 모듈</h2><p>독립 모듈이 정상적으로 로드되었습니다.</p></div><span class="status-pill">준비됨</span></div>${renderEmptyState('Phase 2에서 데이터 연결', 'Phase 2에서 사용자 목록과 상세 조회를 연결합니다.')}</article></section>`;
+import { getAdminDatabase, isActiveAdmin } from '../admin-api.js?v=step6-2-13-1-admin-user-directory-readonly-20260718';
+import { escapeHtml, formatDateTime } from '../admin-utils.js?v=step6-2-13-1-admin-user-directory-readonly-20260718';
+import { renderEmptyState } from '../components/empty-state.js?v=step6-2-13-1-admin-user-directory-readonly-20260718';
+
+function asObject(value) {
+  return value && typeof value === 'object' ? value : {};
+}
+
+function shortUid(uid) {
+  const text = String(uid || '');
+  if (text.length <= 12) return text || '-';
+  return `${text.slice(0, 6)}…${text.slice(-5)}`;
+}
+
+function roleLabel(role, relationshipRole) {
+  if (relationshipRole === 'dom') return '관리(Dom)';
+  if (relationshipRole === 'sub') return '기록(Sub)';
+  if (role === 'owner') return 'Owner';
+  if (role === 'partner') return 'Partner';
+  return '-';
+}
+
+function roomLabel(activeRoom, roomCodes) {
+  const codes = [...new Set([activeRoom, ...roomCodes].filter(Boolean))];
+  if (!codes.length) return '미연결';
+  if (codes.length === 1) return codes[0];
+  return `${codes[0]} 외 ${codes.length - 1}`;
+}
+
+function latestNumber(...values) {
+  return values
+    .map(Number)
+    .filter((value) => Number.isFinite(value) && value > 0)
+    .sort((a, b) => b - a)[0] || 0;
+}
+
+async function loadUserDirectory() {
+  const database = getAdminDatabase();
+  const [usersSnap, userRoomsSnap, roomMembersSnap, adminsSnap] = await Promise.all([
+    database.ref('users').once('value'),
+    database.ref('userRooms').once('value'),
+    database.ref('roomMembers').once('value'),
+    database.ref('admins').once('value')
+  ]);
+
+  const users = asObject(usersSnap.val());
+  const userRooms = asObject(userRoomsSnap.val());
+  const roomMembers = asObject(roomMembersSnap.val());
+  const admins = asObject(adminsSnap.val());
+  const userIds = new Set([...Object.keys(users), ...Object.keys(userRooms), ...Object.keys(admins)]);
+  const memberIndex = {};
+
+  Object.entries(roomMembers).forEach(([roomCode, members]) => {
+    Object.entries(asObject(members)).forEach(([uid, member]) => {
+      userIds.add(uid);
+      if (!memberIndex[uid]) memberIndex[uid] = [];
+      memberIndex[uid].push({ roomCode, ...asObject(member) });
+    });
+  });
+
+  const rows = [...userIds].map((uid) => {
+    const user = asObject(users[uid]);
+    const profile = asObject(user.profile);
+    const memberships = memberIndex[uid] || [];
+    const roomCodes = [
+      ...Object.keys(asObject(userRooms[uid])),
+      ...memberships.map((item) => item.roomCode)
+    ].filter(Boolean);
+    const primaryMember = memberships.find((item) => item.roomCode === user.activeRoom) || memberships[0] || {};
+    const nickname = profile.nickname || user.nickname || user.displayName || '';
+    const email = user.email || primaryMember.email || '';
+    const lastSeen = latestNumber(user.lastLogin, user.lastSeenAt, user.updatedAt, profile.updatedAt, primaryMember.joinedAt);
+    return {
+      uid,
+      nickname,
+      email,
+      activeRoom: user.activeRoom || '',
+      roomCodes: [...new Set(roomCodes)],
+      role: roleLabel(primaryMember.role, primaryMember.relationshipRole || user.relationshipRole),
+      relationshipRole: primaryMember.relationshipRole || user.relationshipRole || '',
+      isAdmin: isActiveAdmin(admins[uid]),
+      requiresEmailVerification: user.emailVerificationRequired === true,
+      lastSeen
+    };
+  }).sort((a, b) => {
+    if (a.isAdmin !== b.isAdmin) return a.isAdmin ? -1 : 1;
+    return b.lastSeen - a.lastSeen;
+  });
+
+  return rows;
+}
+
+function renderStats(rows) {
+  const linked = rows.filter((row) => row.roomCodes.length || row.activeRoom).length;
+  const admins = rows.filter((row) => row.isAdmin).length;
+  const needsCheck = rows.filter((row) => row.requiresEmailVerification || (!row.email && !row.nickname)).length;
+  return `
+    <div class="metric-grid admin-user-metrics">
+      <article class="metric-card"><span>전체 회원</span><strong>${rows.length}</strong><small>users/userRooms 기준</small></article>
+      <article class="metric-card"><span>Room 연결</span><strong>${linked}</strong><small>activeRoom 또는 membership</small></article>
+      <article class="metric-card"><span>관리자</span><strong>${admins}</strong><small>/admins 권한 기준</small></article>
+      <article class="metric-card"><span>확인 필요</span><strong>${needsCheck}</strong><small>정보 부족 또는 인증 필요</small></article>
+    </div>`;
+}
+
+function renderUserCard(row) {
+  const name = row.nickname || row.email || '이름 없음';
+  const initial = String(name).trim().slice(0, 1).toUpperCase() || '♡';
+  const room = roomLabel(row.activeRoom, row.roomCodes);
+  const statusClass = row.requiresEmailVerification ? 'needs-check' : 'ok';
+  const statusText = row.requiresEmailVerification ? '이메일 확인 필요' : '정상';
+  return `
+    <article class="admin-user-card" data-admin-user-row data-search="${escapeHtml(`${name} ${row.email} ${row.uid} ${room} ${row.role}`.toLowerCase())}">
+      <div class="admin-user-avatar" aria-hidden="true">${escapeHtml(initial)}</div>
+      <div class="admin-user-main">
+        <div class="admin-user-title">
+          <strong>${escapeHtml(name)}</strong>
+          ${row.isAdmin ? '<span class="status-pill">Admin</span>' : ''}
+          <span class="admin-user-status ${statusClass}">${statusText}</span>
+        </div>
+        <div class="admin-user-sub">${escapeHtml(row.email || '이메일 없음')}</div>
+        <div class="admin-user-meta">
+          <span>UID ${escapeHtml(shortUid(row.uid))}</span>
+          <span>Room ${escapeHtml(room)}</span>
+          <span>역할 ${escapeHtml(row.role)}</span>
+          <span>최근 ${escapeHtml(formatDateTime(row.lastSeen))}</span>
+        </div>
+      </div>
+    </article>`;
+}
+
+function renderRows(rows) {
+  if (!rows.length) {
+    return renderEmptyState('표시할 회원이 없습니다', '아직 users 또는 userRooms 데이터가 없습니다.');
+  }
+  return `<div class="admin-user-list">${rows.map(renderUserCard).join('')}</div>`;
+}
+
+export async function render() {
+  try {
+    const rows = await loadUserDirectory();
+    return `
+      <section class="module-view" aria-labelledby="adminUsersHeading">
+        <div class="foundation-notice">
+          <div><span class="notice-icon" aria-hidden="true">👥</span></div>
+          <div>
+            <h2 id="adminUsersHeading">사용자 목록 읽기 전용</h2>
+            <p>가입 회원, Room 연결 상태, Dom/Sub 역할, 관리자 여부를 조회합니다. 이 화면에서는 데이터를 저장하거나 변경하지 않습니다.</p>
+          </div>
+        </div>
+        ${renderStats(rows)}
+        <article class="panel">
+          <div class="panel-header admin-user-panel-header">
+            <div>
+              <h2>회원 목록</h2>
+              <p>이메일, 닉네임, UID, Room 코드로 빠르게 찾을 수 있습니다.</p>
+            </div>
+            <input id="adminUserSearch" class="admin-user-search" type="search" placeholder="회원 검색">
+          </div>
+          ${renderRows(rows)}
+        </article>
+      </section>`;
+  } catch (error) {
+    console.error('[Admin Users] load failed', error);
+    return `
+      <section class="module-view">
+        <div class="error-card">
+          <strong>사용자 목록을 불러오지 못했습니다.</strong>
+          <p>${escapeHtml(error.message || error)}</p>
+        </div>
+      </section>`;
+  }
+}
+
+export function afterRender() {
+  const search = document.getElementById('adminUserSearch');
+  if (!search) return;
+  search.addEventListener('input', () => {
+    const query = search.value.trim().toLowerCase();
+    document.querySelectorAll('[data-admin-user-row]').forEach((row) => {
+      row.hidden = Boolean(query) && !String(row.dataset.search || '').includes(query);
+    });
+  });
 }

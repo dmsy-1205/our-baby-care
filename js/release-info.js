@@ -5,19 +5,19 @@
 (function () {
     const release = Object.freeze({
         product: 'HearMe2nite',
-        version: 'v1.0 STEP6.2.13.0',
-        appVersion: 'HearMe2nite v1.0 STEP6.2.13.0',
-        step: 'STEP6.2.13.0',
+        version: 'v1.0 STEP6.2.13.1',
+        appVersion: 'HearMe2nite v1.0 STEP6.2.13.1',
+        step: 'STEP6.2.13.1',
         build: '20260718',
         releaseDate: '2026.07.18',
         stage: 'Beta',
-        title: 'Admin Console Launch Bridge',
-        description: '관리자 권한 확인과 운영 콘솔 이동 흐름을 안정화했습니다.',
+        title: 'Admin User Directory Readonly',
+        description: '관리자 화면에서 회원 목록과 연결 상태를 읽기 전용으로 확인할 수 있게 했습니다.',
         changes: Object.freeze([
-            'Added a stable launch bridge from the user app to admin.html',
-            'Matched user-app admin permission checks with the admin console permission format',
-            'Refreshed profile and data-management cache keys for reliable deployment',
-            'Preserved notification badge, PWA recovery, and record date picker behavior',
+            'Added readonly user directory to Admin Console',
+            'Shows user email, nickname, UID, Room connection, Dom/Sub role, and admin status',
+            'Added admin module cache refresh for reliable deployment',
+            'Kept all admin user operations readonly',
             '기존 기록/채팅 저장 구조 변경 없음'
         ])
     });

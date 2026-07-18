@@ -27,6 +27,10 @@ function requireFirebase() {
   return resolveFirebaseServices();
 }
 
+export function getAdminDatabase() {
+  return requireFirebase().database;
+}
+
 export async function waitForAuthenticatedUser(timeoutMs = 10000) {
   const { auth } = requireFirebase();
   if (auth.currentUser) return auth.currentUser;
