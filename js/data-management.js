@@ -83,7 +83,7 @@
     async function getMyRequests(uid) {
         const snap = await db.ref(userRequestPath(uid)).once('value');
         const data = snap.val() || {};
-        return Object.entries(data).map(([id, item]) => ({ id, ...(item || {}) })).sort((a, b) => (b.requestedAt || 0) - (a.requestedAt || 0));
+        return Object.entries(data).map(([id, item]) => ({ ...(item || {}), id, requestKey: id })).sort((a, b) => (b.requestedAt || 0) - (a.requestedAt || 0));
     }
     function renderCurrentRequestSummary(requests) {
         const summary = document.getElementById('dataCurrentRequestSummary');
