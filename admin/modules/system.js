@@ -1,16 +1,16 @@
-﻿import { getAdminDatabase } from '../admin-api.js?v=admin-2-0-a11-data-impact-preview-20260718';
-import { getState } from '../admin-state.js?v=admin-2-0-a11-data-impact-preview-20260718';
-import { escapeHtml, formatDateTime } from '../admin-utils.js?v=admin-2-0-a11-data-impact-preview-20260718';
+import { getAdminDatabase } from '../admin-api.js?v=admin-2-0-a10-system-status-baseline-20260718';
+import { getState } from '../admin-state.js?v=admin-2-0-a10-system-status-baseline-20260718';
+import { escapeHtml, formatDateTime } from '../admin-utils.js?v=admin-2-0-a10-system-status-baseline-20260718';
 
-const ADMIN_SYSTEM_STEP = 'STEP A11';
-const ADMIN_SYSTEM_LABEL = 'Data Impact Preview';
-const ADMIN_CACHE_KEY = 'admin-2-0-a11-data-impact-preview-20260718';
+const ADMIN_SYSTEM_STEP = 'STEP A10';
+const ADMIN_SYSTEM_LABEL = 'System Status Baseline';
+const ADMIN_CACHE_KEY = 'admin-2-0-a10-system-status-baseline-20260718';
 
 const HEALTH_PATHS = [
-  { key: 'users', label: '?ъ슜??, path: 'users' },
-  { key: 'roomMembers', label: 'Room 硫ㅻ쾭??, path: 'roomMembers' },
-  { key: 'dataDeleteRequests', label: '?곗씠???붿껌', path: 'dataDeleteRequests' },
-  { key: 'adminAuditLogs', label: '媛먯궗 濡쒓렇', path: 'adminAuditLogs' }
+  { key: 'users', label: '사용자', path: 'users' },
+  { key: 'roomMembers', label: 'Room 멤버십', path: 'roomMembers' },
+  { key: 'dataDeleteRequests', label: '데이터 요청', path: 'dataDeleteRequests' },
+  { key: 'adminAuditLogs', label: '감사 로그', path: 'adminAuditLogs' }
 ];
 
 function asObject(value) {
@@ -34,14 +34,14 @@ async function readPathStatus(database, item) {
       ...item,
       ok: true,
       count: countChildren(snapshot.val()),
-      message: '?쎄린 媛??
+      message: '읽기 가능'
     };
   } catch (error) {
     return {
       ...item,
       ok: false,
       count: '-',
-      message: error?.message || '?쎄린 ?ㅽ뙣'
+      message: error?.message || '읽기 실패'
     };
   }
 }
@@ -77,7 +77,7 @@ function renderPathRows(pathStatuses) {
       </div>
       <div class="admin-system-path-result">
         ${renderStatusPill(item.ok, item.message)}
-        <span>${escapeHtml(item.count)}嫄?/span>
+        <span>${escapeHtml(item.count)}건</span>
       </div>
     </article>
   `).join('');
@@ -93,31 +93,31 @@ export async function render() {
     return `
       <section class="module-view" aria-labelledby="adminSystemHeading">
         <div class="foundation-notice">
-          <span class="notice-icon" aria-hidden="true">??/span>
+          <span class="notice-icon" aria-hidden="true">⚙</span>
           <div>
-            <h2 id="adminSystemHeading">?쒖뒪??쨌 ?댁쁺 ?곹깭 ?먭???/h2>
-            <p>愿由ъ옄 ?깆쓽 ?곌껐, ?몄쬆, 二쇱슂 ?곗씠???쎄린 ?곹깭瑜??뺤씤?⑸땲?? ???붾㈃? ?쎄린 ?꾩슜?낅땲??</p>
+            <h2 id="adminSystemHeading">시스템 · 운영 상태 점검판</h2>
+            <p>관리자 앱의 연결, 인증, 주요 데이터 읽기 상태를 확인합니다. 이 화면은 읽기 전용입니다.</p>
           </div>
         </div>
 
         <div class="metric-grid admin-system-metrics">
           <article class="metric-card">
-            <span>Firebase ??/span>
+            <span>Firebase 앱</span>
             <strong>${escapeHtml(status.firebaseAppName)}</strong>
-            <small>${status.firebaseReady ? '?곌껐 ?뺤씤' : '?곌껐 ?뺤씤 ?꾩슂'}</small>
+            <small>${status.firebaseReady ? '연결 확인' : '연결 확인 필요'}</small>
           </article>
           <article class="metric-card">
-            <span>愿由ъ옄 ?몄쬆</span>
+            <span>관리자 인증</span>
             <strong>${escapeHtml(adminEmail)}</strong>
             <small>UID ${escapeHtml(adminUid)}</small>
           </article>
           <article class="metric-card">
-            <span>?쎄린 ?먭?</span>
+            <span>읽기 점검</span>
             <strong>${status.okCount}/${status.totalCount}</strong>
-            <small>二쇱슂 寃쎈줈 ?쎄린 媛??/small>
+            <small>주요 경로 읽기 가능</small>
           </article>
           <article class="metric-card">
-            <span>愿由ъ옄 ?ㅽ뀦</span>
+            <span>관리자 스텝</span>
             <strong>${ADMIN_SYSTEM_STEP}</strong>
             <small>${ADMIN_SYSTEM_LABEL}</small>
           </article>
@@ -126,28 +126,28 @@ export async function render() {
         <article class="panel">
           <div class="panel-header admin-system-panel-header">
             <div>
-              <h2>?댁쁺 ?곌껐 ?곹깭</h2>
-              <p>愿由ъ옄 ?붾㈃???뺤긽?곸쑝濡??곗씠?곕? ?쎌쓣 ???덈뒗吏 ?뺤씤?⑸땲??</p>
+              <h2>운영 연결 상태</h2>
+              <p>관리자 화면이 정상적으로 데이터를 읽을 수 있는지 확인합니다.</p>
             </div>
             <span class="phase-badge">Read Only</span>
           </div>
           <div class="admin-system-grid">
             <section class="admin-system-card">
-              <h3>??湲곗?</h3>
+              <h3>앱 기준</h3>
               <dl>
-                <div><dt>硫붿씤??踰꾩쟾</dt><dd>${escapeHtml(status.release.step || '-')}</dd></div>
-                <div><dt>愿由ъ옄 ?ㅽ뀦</dt><dd>${ADMIN_SYSTEM_STEP}</dd></div>
-                <div><dt>罹먯떆 ??/dt><dd>${ADMIN_CACHE_KEY}</dd></div>
-                <div><dt>遺???쒓컙</dt><dd>${escapeHtml(formatDateTime(bootedAt))}</dd></div>
+                <div><dt>메인앱 버전</dt><dd>${escapeHtml(status.release.step || '-')}</dd></div>
+                <div><dt>관리자 스텝</dt><dd>${ADMIN_SYSTEM_STEP}</dd></div>
+                <div><dt>캐시 키</dt><dd>${ADMIN_CACHE_KEY}</dd></div>
+                <div><dt>부팅 시간</dt><dd>${escapeHtml(formatDateTime(bootedAt))}</dd></div>
               </dl>
             </section>
             <section class="admin-system-card">
-              <h3>?덉쟾 湲곗?</h3>
+              <h3>안전 기준</h3>
               <ul>
-                <li>愿由ъ옄 ?몄쬆???듦낵??怨꾩젙留??묎렐</li>
-                <li>?꾩옱 ?붾㈃?먯꽌???곗씠????Β룹궘??湲곕뒫 ?놁쓬</li>
-                <li>二쇱슂 寃쎈줈???쎄린 ?먭?留??섑뻾</li>
-                <li>硫붿씤??踰꾩쟾? 愿由ъ옄 ?ㅽ뀦怨?遺꾨━ 愿由?/li>
+                <li>관리자 인증을 통과한 계정만 접근</li>
+                <li>현재 화면에서는 데이터 저장·삭제 기능 없음</li>
+                <li>주요 경로는 읽기 점검만 수행</li>
+                <li>메인앱 버전은 관리자 스텝과 분리 관리</li>
               </ul>
             </section>
           </div>
@@ -156,8 +156,8 @@ export async function render() {
         <article class="panel">
           <div class="panel-header admin-system-panel-header">
             <div>
-              <h2>二쇱슂 ?곗씠??寃쎈줈 ?먭?</h2>
-              <p>沅뚰븳 ?먮뒗 寃쎈줈 臾몄젣媛 ?앷린硫??ш린??癒쇱? ?뺤씤?⑸땲??</p>
+              <h2>주요 데이터 경로 점검</h2>
+              <p>권한 또는 경로 문제가 생기면 여기서 먼저 확인합니다.</p>
             </div>
           </div>
           <div class="admin-system-path-list">
@@ -170,10 +170,9 @@ export async function render() {
     return `
       <section class="module-view">
         <article class="error-card">
-          <h2>?쒖뒪???곹깭瑜?遺덈윭?ㅼ? 紐삵뻽?듬땲??</h2>
+          <h2>시스템 상태를 불러오지 못했습니다.</h2>
           <p>${escapeHtml(error.message || error)}</p>
         </article>
       </section>`;
   }
 }
-

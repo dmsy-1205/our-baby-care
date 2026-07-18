@@ -1,9 +1,9 @@
-﻿import { setState } from './admin-state.js';
+import { setState } from './admin-state.js';
 import { renderTopbar } from './components/topbar.js';
 import { renderLoadingState } from './components/loading-state.js';
 
 const routes = new Set(['dashboard', 'users', 'rooms', 'requests', 'recovery', 'audit', 'releases', 'system']);
-const ADMIN_MODULE_VERSION = 'admin-2-0-a11-data-impact-preview-20260718';
+const ADMIN_MODULE_VERSION = 'admin-2-0-a10-system-status-baseline-20260718';
 
 function normalizeRoute(value) {
   const route = String(value || '').replace(/^#\/?/, '').trim();
@@ -36,10 +36,10 @@ export async function navigate(route, { replace = false } = {}) {
     if (typeof module.afterRender === 'function') {
       await Promise.resolve(module.afterRender());
     }
-    document.title = `${topbar.querySelector('h1')?.textContent || '愿由ъ옄'} 쨌 HearMe2nite`;
+    document.title = `${topbar.querySelector('h1')?.textContent || '관리자'} · HearMe2nite`;
   } catch (error) {
     console.error('[Admin 2.0] route load failed', error);
-    outlet.innerHTML = `<div class="error-card"><strong>?붾㈃??遺덈윭?ㅼ? 紐삵뻽?듬땲??</strong><p>${error.message}</p></div>`;
+    outlet.innerHTML = `<div class="error-card"><strong>화면을 불러오지 못했습니다.</strong><p>${error.message}</p></div>`;
   }
 }
 
@@ -47,4 +47,3 @@ export function startRouter() {
   navigate(location.hash, { replace: !location.hash });
   window.addEventListener('hashchange', () => navigate(location.hash, { replace: true }));
 }
-
