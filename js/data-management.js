@@ -50,6 +50,10 @@
     function escapeJs(str) { return String(str || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'"); }
     function isCancelableStatus(status) { return CANCELABLE_STATUSES.includes(status || 'pending'); }
     function statusText(status) { return String(STATUS_LABELS[status] || status || '접수됨').replace(/^[^\s]+\s*/, ''); }
+    function requestCancelLabel(item) {
+        const type = REQUEST_TYPES[item?.requestType] || { label: item?.requestTypeLabel || '데이터 처리 요청' };
+        return `${type.label} 요청`;
+    }
 
     function updateDeleteRequestTypeNotice() {
         const config = REQUEST_TYPES[getSelectedRequestType()] || REQUEST_TYPES.account;
@@ -147,7 +151,7 @@
         const status = item.status || 'pending';
         const type = REQUEST_TYPES[item.requestType] || { label: item.requestTypeLabel || '기존 삭제 요청' };
         const partnerNotice = item.requestType === 'delete_room' || item.partnerConsentRequired ? '<div class="data-shared-notice">공동 Room 전체 삭제 요청 · 상대방 확인이 필요할 수 있습니다.</div>' : '';
-        const cancelButton = isCancelableStatus(status) ? `<button type="button" class="data-small-action" onclick="cancelDataDeleteRequest('${escapeJs(item.id)}')" aria-label="${escapeHtml(type.label)} 삭제 요청 취소">삭제 요청 취소</button>` : '';
+        const cancelButton = isCancelableStatus(status) ? `<button type="button" class="data-small-action" onclick="cancelDataDeleteRequest('${escapeJs(item.id)}')" aria-label="${escapeHtml(type.label)} 요청 취소">요청 취소</button>` : '';
         return `<article class="data-request-card"><div class="data-request-head"><strong>${escapeHtml(STATUS_LABELS[status] || status)}</strong><small>${escapeHtml(formatDate(item.requestedAt))}</small></div><div class="data-request-type">${escapeHtml(type.label)}</div>${partnerNotice}<div class="data-request-body"><div><strong>요청 사유</strong><p>${escapeHtml(item.reason || '-')}</p></div><div><strong>운영자 답변</strong><p>${escapeHtml(item.adminMessage || '운영자 답변을 기다리는 중입니다.')}</p></div></div>${cancelButton}</article>`;
     }
     async function cancelDataDeleteRequest(requestId) {
@@ -160,6 +164,7 @@
             const snap = await ref.once('value');
             const item = snap.val();
             const currentStatus = item?.status || 'pending';
+            const cancelLabel = requestCancelLabel(item);
             if (!item || !isCancelableStatus(currentStatus)) {
                 const label = statusText(currentStatus);
                 const reason = !item ? '\n\n확인된 사유: 요청을 찾을 수 없음' : '\n\n확인된 사유: 취소할 수 없는 상태';
@@ -177,8 +182,9 @@
                 canceledAt: now,
                 updatedAt: now
             });
-            showToastSafe('삭제 요청이 취소되었습니다.');
-            alert('삭제 요청이 취소되었습니다.');
+            const successMessage = `${cancelLabel}이 취소되었습니다.`;
+            showToastSafe(successMessage);
+            alert(successMessage);
             try {
                 await loadDataDeleteRequests();
             } catch (reloadError) {
