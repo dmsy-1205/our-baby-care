@@ -1,8 +1,8 @@
-import { escapeHtml } from '../admin-utils.js?v=admin-2-0-a9-release-center-baseline-20260718';
+import { escapeHtml } from '../admin-utils.js?v=admin-2-0-a10-system-status-baseline-20260718';
 
-const ADMIN_RELEASE_STEP = 'STEP A9';
-const ADMIN_RELEASE_LABEL = 'Release Center Baseline';
-const ADMIN_CACHE_KEY = 'admin-2-0-a9-release-center-baseline-20260718';
+const ADMIN_RELEASE_STEP = 'STEP A10';
+const ADMIN_RELEASE_LABEL = 'System Status Baseline';
+const ADMIN_CACHE_KEY = 'admin-2-0-a10-system-status-baseline-20260718';
 
 function asArray(value) {
   return Array.isArray(value) ? value : [];

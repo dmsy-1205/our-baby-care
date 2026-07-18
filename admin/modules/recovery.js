@@ -1,6 +1,6 @@
-import { getAdminDatabase } from '../admin-api.js?v=admin-2-0-a9-release-center-baseline-20260718';
-import { escapeHtml, formatDateTime } from '../admin-utils.js?v=admin-2-0-a9-release-center-baseline-20260718';
-import { renderEmptyState } from '../components/empty-state.js?v=admin-2-0-a9-release-center-baseline-20260718';
+import { getAdminDatabase } from '../admin-api.js?v=admin-2-0-a10-system-status-baseline-20260718';
+import { escapeHtml, formatDateTime } from '../admin-utils.js?v=admin-2-0-a10-system-status-baseline-20260718';
+import { renderEmptyState } from '../components/empty-state.js?v=admin-2-0-a10-system-status-baseline-20260718';
 
 const REQUEST_TYPE_LABELS = {
   account: '계정 삭제',

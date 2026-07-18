@@ -1,7 +1,7 @@
 import { escapeHtml } from '../admin-utils.js';
 
-const ADMIN_CONSOLE_STEP = 'STEP A9';
-const ADMIN_CONSOLE_STEP_LABEL = 'Release Center Baseline';
+const ADMIN_CONSOLE_STEP = 'STEP A10';
+const ADMIN_CONSOLE_STEP_LABEL = 'System Status Baseline';
 
 const items = [
   ['dashboard', '대시보드', '▦'],
