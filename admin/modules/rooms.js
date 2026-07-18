@@ -1,6 +1,6 @@
-import { getAdminDatabase } from '../admin-api.js?v=admin-2-0-a11-route-render-fix-20260719';
-import { escapeHtml, formatDateTime, compactId } from '../admin-utils.js?v=admin-2-0-a11-route-render-fix-20260719';
-import { renderEmptyState } from '../components/empty-state.js?v=admin-2-0-a11-route-render-fix-20260719';
+import { getAdminDatabase } from '../admin-api.js?v=admin-2-0-a11-recovery-wrap-fix-20260719';
+import { escapeHtml, formatDateTime, compactId } from '../admin-utils.js?v=admin-2-0-a11-recovery-wrap-fix-20260719';
+import { renderEmptyState } from '../components/empty-state.js?v=admin-2-0-a11-recovery-wrap-fix-20260719';
 
 function asObject(value) {
   return value && typeof value === 'object' ? value : {};
