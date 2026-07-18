@@ -48,7 +48,7 @@ export function render() {
         </article>
         <article class="metric-card">
           <span>캐시 키</span>
-          <strong>A9</strong>
+          <strong>A10</strong>
           <small>${ADMIN_CACHE_KEY}</small>
         </article>
       </div>
@@ -89,7 +89,7 @@ export function render() {
         <div class="panel-header admin-release-panel-header">
           <div>
             <h2>배포 전 체크</h2>
-            <p>GitHub 업로드 전에 메인앱과 관리자 앱 기준을 나눠 확인합니다.</p>
+            <p>GitHub 업로드 전에 메인앱과 관리자 앱 기준을 나누어 확인합니다.</p>
           </div>
         </div>
         <div class="admin-release-checks">
