@@ -1,4 +1,4 @@
-import { escapeHtml } from '../admin-utils.js';
+import { escapeHtml } from '../admin-utils.js?v=admin-2-0-a10-recovery-clean-20260719';
 
 const titles = {
   dashboard: ['운영 대시보드', '서비스 상태와 주요 운영 항목을 확인합니다.'],
@@ -8,7 +8,7 @@ const titles = {
   recovery: ['복구 센터', '삭제 감사와 복구 가능 상태를 확인합니다.'],
   audit: ['감사 로그', '관리자 작업 이력을 확인합니다.'],
   releases: ['릴리스', '현재 배포 버전과 릴리스 정보를 확인합니다.'],
-  system: ['시스템', 'Firebase 연결, 데이터 경로, 운영 점검 상태를 확인합니다.']
+  system: ['시스템', 'Firebase 연결 및 운영 환경을 확인합니다.']
 };
 
 export function renderTopbar(route) {

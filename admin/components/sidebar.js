@@ -1,7 +1,7 @@
-import { escapeHtml } from '../admin-utils.js';
+import { escapeHtml } from '../admin-utils.js?v=admin-2-0-a10-recovery-clean-20260719';
 
-const ADMIN_CONSOLE_STEP = 'STEP A12';
-const ADMIN_CONSOLE_STEP_LABEL = 'Action Guard';
+const ADMIN_CONSOLE_STEP = 'STEP A10';
+const ADMIN_CONSOLE_STEP_LABEL = 'Recovery Clean';
 
 const items = [
   ['dashboard', '대시보드', '▦'],

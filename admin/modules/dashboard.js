@@ -1,37 +1,79 @@
-export function render() {
+import { getAdminDatabase } from '../admin-api.js?v=admin-2-0-a10-recovery-clean-20260719';
+import { escapeHtml } from '../admin-utils.js?v=admin-2-0-a10-recovery-clean-20260719';
+
+function asObject(value) {
+  return value && typeof value === 'object' ? value : {};
+}
+
+async function readCounts() {
+  const database = getAdminDatabase();
+  const [usersSnap, roomsSnap, roomMembersSnap, requestsSnap, auditSnap] = await Promise.all([
+    database.ref('users').once('value'),
+    database.ref('rooms').once('value'),
+    database.ref('roomMembers').once('value'),
+    database.ref('dataDeleteRequests').once('value'),
+    database.ref('adminAuditLogs').limitToLast(1).once('value')
+  ]);
+
+  const users = asObject(usersSnap.val());
+  const rooms = asObject(roomsSnap.val());
+  const roomMembers = asObject(roomMembersSnap.val());
+  const requestsRoot = asObject(requestsSnap.val());
+  const requests = Object.values(requestsRoot).flatMap((byUser) => Object.values(asObject(byUser)));
+  const openRequests = requests.filter((item) => !['completed', 'rejected', 'canceled'].includes(item?.status || 'pending'));
+
+  return {
+    users: Object.keys(users).length,
+    rooms: new Set([...Object.keys(rooms), ...Object.keys(roomMembers)]).size,
+    roomMembers: Object.values(roomMembers).reduce((sum, members) => sum + Object.keys(asObject(members)).length, 0),
+    requests: requests.length,
+    openRequests: openRequests.length,
+    auditReady: Object.keys(asObject(auditSnap.val())).length > 0
+  };
+}
+
+function renderDashboard(counts) {
   const release = window.HM_RELEASE || {};
   return `
     <section class="module-view" aria-labelledby="dashboardHeading">
       <div class="foundation-notice">
-        <span class="notice-icon" aria-hidden="true">🛡️</span>
+        <div><span class="notice-icon" aria-hidden="true">✓</span></div>
         <div>
-          <h2 id="dashboardHeading">관리자 센터 기준점</h2>
-          <p>메인앱은 STEP6.2.13.4 기준을 유지하고, 관리자 앱만 STEP A12로 분리 운영합니다.</p>
+          <h2 id="dashboardHeading">Secure Foundation 활성화</h2>
+          <p>관리자 인증을 통과한 계정만 이 화면에 접근합니다. 현재 단계는 데이터 변경보다 읽기 점검과 운영 판단에 집중합니다.</p>
         </div>
       </div>
+
       <div class="metric-grid">
-        <article class="metric-card"><span>관리자 인증</span><strong>정상</strong><small>/admins/{uid} 검증</small></article>
-        <article class="metric-card"><span>운영 모드</span><strong>읽기·검토 중심</strong><small>실제 삭제 기능 비활성</small></article>
-        <article class="metric-card"><span>메인앱 기준</span><strong>${release.step || 'STEP6.2.13.4'}</strong><small>${release.appVersion || 'HearMe2nite v1.0'}</small></article>
-        <article class="metric-card"><span>관리자 스텝</span><strong>STEP A12</strong><small>Action Guard</small></article>
+        <article class="metric-card"><span>전체 사용자</span><strong>${counts.users}</strong><small>users 기준</small></article>
+        <article class="metric-card"><span>전체 Room</span><strong>${counts.rooms}</strong><small>rooms · roomMembers 통합</small></article>
+        <article class="metric-card"><span>데이터 요청</span><strong>${counts.requests}</strong><small>열린 요청 ${counts.openRequests}건</small></article>
+        <article class="metric-card"><span>메인앱 기준</span><strong>${escapeHtml(release.step || 'STEP6.2.13.4')}</strong><small>관리자 작업과 분리 유지</small></article>
       </div>
+
       <article class="panel">
         <div class="panel-header">
           <div>
-            <h2>이번 단계 적용 범위</h2>
-            <p>데이터 요청 처리 화면에 안전 장치를 추가하고, 관리자 앱 인코딩과 캐시 기준을 A12로 통일했습니다.</p>
+            <h2>운영 기준</h2>
+            <p>이번 관리자 앱은 메인앱을 건드리지 않고, 데이터 구조를 읽어서 검토하는 기준판입니다.</p>
           </div>
+          <span class="phase-badge">Read Only 중심</span>
         </div>
         <div class="check-grid">
-          <div>✓ 메인앱 버전 유지</div>
-          <div>✓ 관리자 앱 캐시 분리</div>
-          <div>✓ 데이터 요청 상태 관리</div>
-          <div>✓ 관리자 답변·메모 저장</div>
-          <div>✓ 감사 로그 기록</div>
-          <div>✓ 실제 삭제 기능 미연결</div>
-          <div>✓ 깨진 한글 잔재 정리</div>
-          <div>✓ 좌측 스텝 배지 표시</div>
+          <div>✓ 관리자 인증 Gate</div>
+          <div>✓ 사용자 목록 읽기</div>
+          <div>✓ Room 관계 점검</div>
+          <div>✓ 데이터 요청 검토</div>
+          <div>✓ 복구 기준점 확인</div>
+          <div>✓ 감사 로그 확인</div>
+          <div>✓ 릴리스 기준 분리</div>
+          <div>✓ 시스템 상태 점검</div>
         </div>
       </article>
     </section>`;
+}
+
+export async function render() {
+  const counts = await readCounts();
+  return renderDashboard(counts);
 }
