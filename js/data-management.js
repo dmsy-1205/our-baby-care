@@ -16,6 +16,8 @@
         delete_room: { label: 'Room 전체 데이터 삭제', notice: '공동 기록 전체 삭제 요청입니다. 상대방 확인과 추가 검토가 필요하며 즉시 삭제되지 않습니다.', placeholder: '예: 두 사용자가 합의하여 Room의 모든 공동 기록 삭제를 요청합니다.' }
     };
     const OPEN_STATUSES = ['pending', 'reviewing', 'approved', 'hold', 'scheduled', 'processing', 'failed'];
+    const CANCELABLE_STATUSES = ['pending', 'reviewing', 'hold'];
+    const CANCELABLE_STATUS_TEXT = '접수됨 · 검토 중 · 보류';
     let hmDataAdmin = false;
     let hmAdminRequests = [];
     let hmAdminNotes = {};
@@ -46,6 +48,8 @@
     }
     function escapeHtml(str) { return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;'); }
     function escapeJs(str) { return String(str || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'"); }
+    function isCancelableStatus(status) { return CANCELABLE_STATUSES.includes(status || 'pending'); }
+    function statusText(status) { return String(STATUS_LABELS[status] || status || '접수됨').replace(/^[^\s]+\s*/, ''); }
 
     function updateDeleteRequestTypeNotice() {
         const config = REQUEST_TYPES[getSelectedRequestType()] || REQUEST_TYPES.account;
@@ -143,19 +147,21 @@
         const status = item.status || 'pending';
         const type = REQUEST_TYPES[item.requestType] || { label: item.requestTypeLabel || '기존 삭제 요청' };
         const partnerNotice = item.requestType === 'delete_room' || item.partnerConsentRequired ? '<div class="data-shared-notice">공동 Room 전체 삭제 요청 · 상대방 확인이 필요할 수 있습니다.</div>' : '';
-        const cancelButton = ['pending', 'reviewing', 'hold'].includes(status) ? `<button type="button" class="data-small-action" onclick="cancelDataDeleteRequest('${escapeJs(item.id)}')" aria-label="${escapeHtml(type.label)} 삭제 요청 취소">삭제 요청 취소</button>` : '';
+        const cancelButton = isCancelableStatus(status) ? `<button type="button" class="data-small-action" onclick="cancelDataDeleteRequest('${escapeJs(item.id)}')" aria-label="${escapeHtml(type.label)} 삭제 요청 취소">삭제 요청 취소</button>` : '';
         return `<article class="data-request-card"><div class="data-request-head"><strong>${escapeHtml(STATUS_LABELS[status] || status)}</strong><small>${escapeHtml(formatDate(item.requestedAt))}</small></div><div class="data-request-type">${escapeHtml(type.label)}</div>${partnerNotice}<div class="data-request-body"><div><strong>요청 사유</strong><p>${escapeHtml(item.reason || '-')}</p></div><div><strong>운영자 답변</strong><p>${escapeHtml(item.adminMessage || '운영자 답변을 기다리는 중입니다.')}</p></div></div>${cancelButton}</article>`;
     }
     async function cancelDataDeleteRequest(requestId) {
         const user = getUser();
         if (!user || !requestId) return;
-        const confirmed = confirm('이 데이터 삭제 요청을 취소할까요?\n\n접수됨 · 검토 중 · 보류 상태에서만 취소할 수 있습니다.');
+        const confirmed = confirm(`이 데이터 삭제 요청을 취소할까요?\n\n${CANCELABLE_STATUS_TEXT} 상태에서만 직접 취소할 수 있습니다.`);
         if (!confirmed) return;
         try {
             const ref = db.ref(requestItemPath(user.uid, requestId));
             let cancelAllowed = false;
+            let currentStatus = '';
             const result = await ref.transaction((item) => {
-                if (!item || item.requestedByUid !== user.uid || !['pending', 'reviewing', 'hold'].includes(item.status || 'pending')) return;
+                currentStatus = item?.status || 'pending';
+                if (!item || item.requestedByUid !== user.uid || !isCancelableStatus(currentStatus)) return;
                 cancelAllowed = true;
                 const now = Date.now();
                 return {
@@ -167,7 +173,8 @@
                 };
             }, undefined, false);
             if (!cancelAllowed || !result.committed) {
-                alert('관리자가 이미 승인했거나 처리 상태가 변경되어 취소할 수 없습니다.');
+                const label = statusText(currentStatus);
+                alert(`현재 요청 상태는 '${label}'입니다.\n\n${CANCELABLE_STATUS_TEXT} 상태에서만 직접 취소할 수 있습니다. 운영자 답변을 확인하거나 새 요청을 남겨주세요.`);
                 await loadDataDeleteRequests();
                 return;
             }
@@ -175,6 +182,12 @@
             await loadDataDeleteRequests();
         } catch (error) {
             console.warn('[DataManagement] cancel failed', error);
+            const message = String(error?.message || error || '');
+            if (message.includes('permission_denied')) {
+                alert(`요청 취소 권한 확인에 실패했습니다.\n\n${CANCELABLE_STATUS_TEXT} 상태라면 잠시 후 다시 시도해 주세요.`);
+                await loadDataDeleteRequests();
+                return;
+            }
             alert('요청 취소 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.');
         }
     }
