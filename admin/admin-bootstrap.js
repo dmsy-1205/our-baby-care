@@ -1,8 +1,8 @@
-import { waitForAuthenticatedUser, readAdminProfile, isActiveAdmin, signOutAdmin } from './admin-api.js?v=admin-2-0-a11-1-2-route-cleanup-20260719';
+import { waitForAuthenticatedUser, readAdminProfile, isActiveAdmin, signOutAdmin } from './admin-api.js?v=admin-2-0-a12-1-lifecycle-observer-20260719';
 import { setState } from './admin-state.js';
-import { setDocumentBusy } from './admin-utils.js?v=admin-2-0-a11-1-2-route-cleanup-20260719';
-import { renderSidebar } from './components/sidebar.js?v=admin-2-0-a11-1-2-route-cleanup-20260719';
-import { startRouter, navigate } from './admin-router.js?v=admin-2-0-a11-1-3-admin-route-hotfix-20260719';
+import { setDocumentBusy } from './admin-utils.js?v=admin-2-0-a12-1-lifecycle-observer-20260719';
+import { renderSidebar } from './components/sidebar.js?v=admin-2-0-a12-1-lifecycle-observer-20260719';
+import { startRouter, navigate } from './admin-router.js?v=admin-2-0-a12-1-lifecycle-observer-20260719';
 
 const boot = document.getElementById('adminBoot');
 const root = document.getElementById('adminRoot');

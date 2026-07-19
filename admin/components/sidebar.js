@@ -1,12 +1,13 @@
 import { escapeHtml } from '../admin-utils.js?v=admin-2-0-a11-1-clean-baseline-20260719';
 
-const ADMIN_CONSOLE_STEP = 'STEP A11.1';
-const ADMIN_CONSOLE_STEP_LABEL = 'Clean Admin Baseline';
+const ADMIN_CONSOLE_STEP = 'STEP A12.1';
+const ADMIN_CONSOLE_STEP_LABEL = 'Lifecycle Observer';
 
 const items = [
   ['dashboard', '대시보드', '▦'],
   ['users', '사용자', '♙'],
   ['rooms', 'Room', '⌂'],
+  ['lifecycle', '데이터 수명주기', '◉'],
   ['requests', '데이터 요청', '☑'],
   ['recovery', '복구 센터', '↺'],
   ['audit', '감사 로그', '≡'],

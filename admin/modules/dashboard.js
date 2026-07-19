@@ -35,10 +35,10 @@ export async function render() {
   return `
     <section class="module-view" aria-labelledby="dashboardHeading">
       <section class="admin-hero-card">
-        <div class="admin-hero-icon">✓</div>
+        <div class="admin-hero-icon">◉</div>
         <div>
-          <h2 id="dashboardHeading">Secure Foundation 활성화</h2>
-          <p>관리자 인증을 통과한 계정에만 이 화면이 생성됩니다. 현재 관리자 콘솔은 메인앱 데이터를 직접 변경하지 않는 안전 모드입니다.</p>
+          <h2 id="dashboardHeading">데이터 수명주기 관찰 모드</h2>
+          <p>관리자 인증을 통과한 계정만 접근할 수 있습니다. 베타 기간에는 정리 후보를 관찰하며 데이터 변경·휴면·삭제를 실행하지 않습니다.</p>
         </div>
       </section>
 
@@ -52,26 +52,26 @@ export async function render() {
       <section class="admin-card admin-panel">
         <div class="admin-panel-head">
           <div>
-            <h2>1단계 적용 범위</h2>
-            <p>기반 구조와 운영 점검 화면이 서로 독립된 모듈로 구성되어 있습니다.</p>
+            <h2>STEP A12.1 적용 범위</h2>
+            <p>빈 계정, 빈 Room, 휴면 가능성, 과다 생성 후보를 읽기 전용으로 분석합니다.</p>
           </div>
           <span class="admin-status-pill muted">Read Only</span>
         </div>
         <div class="admin-grid admin-grid-4">
-          <div class="admin-soft-card">✓ 안전한 인증 Gate</div>
-          <div class="admin-soft-card">✓ 관리자 권한 검증</div>
-          <div class="admin-soft-card">✓ 모듈 Router</div>
-          <div class="admin-soft-card">✓ 공통 Sidebar</div>
-          <div class="admin-soft-card">✓ 공통 Topbar</div>
-          <div class="admin-soft-card">✓ 오류·빈 상태 UI</div>
-          <div class="admin-soft-card">✓ 반응형 레이아웃</div>
-          <div class="admin-soft-card">✓ 한글 인코딩 정리</div>
+          <div class="admin-soft-card">✓ 둘러보기 계정 탐지</div>
+          <div class="admin-soft-card">✓ 미사용 계정 후보</div>
+          <div class="admin-soft-card">✓ 빈 1인 Room 탐지</div>
+          <div class="admin-soft-card">✓ 휴면 Room 후보</div>
+          <div class="admin-soft-card">✓ 소유 Room 생성 점검</div>
+          <div class="admin-soft-card">✓ 의미 있는 기록 보호</div>
+          <div class="admin-soft-card">✓ 판정 이유 표시</div>
+          <div class="admin-soft-card">✓ Dry Run 전용</div>
         </div>
       </section>
 
       <section class="admin-card admin-panel">
         <h2>운영 요약</h2>
-        <p>데이터 요청 ${data.requests}건, 감사 로그 ${data.auditLogs}건을 읽을 수 있습니다. 실제 삭제와 복구 실행은 아직 연결하지 않았습니다.</p>
+        <p>데이터 요청 ${data.requests}건, 감사 로그 ${data.auditLogs}건을 읽을 수 있습니다. 데이터 수명주기 메뉴에서 베타 관찰 후보를 확인할 수 있습니다.</p>
       </section>
     </section>
   `;
