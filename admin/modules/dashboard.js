@@ -52,7 +52,7 @@ export async function render() {
       <section class="admin-card admin-panel">
         <div class="admin-panel-head">
           <div>
-            <h2>STEP A12.2 적용 범위</h2>
+            <h2>STEP A12.3 적용 범위</h2>
             <p>관찰 후보의 기간 기준을 조정하고 안내 예정일, 휴면 유예 종료일, 관련 데이터 경로를 읽기 전용으로 미리 확인합니다.</p>
           </div>
           <span class="admin-status-pill muted">Read Only</span>
@@ -64,8 +64,8 @@ export async function render() {
           <div class="admin-soft-card">✓ 휴면 유예 종료일</div>
           <div class="admin-soft-card">✓ 영향 경로 표시</div>
           <div class="admin-soft-card">✓ 보호·제외 검토</div>
-          <div class="admin-soft-card">✓ 서버 저장 없음</div>
-          <div class="admin-soft-card">✓ Dry Run 전용</div>
+          <div class="admin-soft-card">✓ 수동 휴면 전환</div>
+          <div class="admin-soft-card">✓ 원클릭 복원</div>
         </div>
       </section>
 

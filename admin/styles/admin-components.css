@@ -50,7 +50,7 @@
 .admin-data-table code{color:#ded5ff;overflow-wrap:anywhere}
 @media(max-width:700px){.admin-panel-head{display:grid}.admin-table-search{width:100%}}
 
-/* STEP A12.2: lifecycle policy and dormancy preview. */
+/* STEP A12.3: lifecycle policy, dormancy and restore controls. */
 .admin-lifecycle-metrics .admin-metric strong{font-size:1.5rem}
 .admin-lifecycle-policy-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
 .admin-lifecycle-policy-grid>div{display:grid;gap:7px;padding:14px;border:1px solid rgba(255,255,255,.08);border-radius:14px;background:rgba(255,255,255,.035)}
@@ -69,7 +69,7 @@
 .admin-lifecycle-policy-field small{color:var(--muted);font-weight:900}.admin-primary-button{min-height:42px;align-self:end;border:1px solid rgba(255,120,170,.5);border-radius:12px;background:linear-gradient(135deg,#f45f9a,#7c5cff);color:#fff;padding:0 14px;font-weight:900;cursor:pointer}
 .admin-lifecycle-preview{display:grid;grid-template-columns:auto 1fr 1fr;gap:8px;padding:11px;border:1px solid rgba(120,180,255,.15);border-radius:13px;background:rgba(120,180,255,.055);font-size:.8rem}.admin-lifecycle-preview span{color:#cfd4e5}
 .admin-lifecycle-paths{display:grid;gap:7px;color:var(--muted);font-size:.8rem}.admin-lifecycle-paths summary{cursor:pointer;font-weight:900}.admin-lifecycle-paths code{display:block;padding:7px 9px;border-radius:9px;background:rgba(255,255,255,.04);color:#ded5ff;overflow-wrap:anywhere}
-.admin-lifecycle-actions{display:flex;gap:7px;flex-wrap:wrap}.admin-lifecycle-actions button{min-height:36px;border:1px solid rgba(255,255,255,.1);border-radius:999px;background:rgba(255,255,255,.05);color:#dfe4f4;padding:0 11px;font-weight:900;cursor:pointer}.admin-lifecycle-actions button.is-active{border-color:rgba(167,124,242,.5);background:rgba(167,124,242,.18);color:#fff}
+.admin-lifecycle-actions{display:flex;gap:7px;flex-wrap:wrap}.admin-lifecycle-actions button{min-height:36px;border:1px solid rgba(255,255,255,.1);border-radius:999px;background:rgba(255,255,255,.05);color:#dfe4f4;padding:0 11px;font-weight:900;cursor:pointer}.admin-lifecycle-actions button.is-active{border-color:rgba(167,124,242,.5);background:rgba(167,124,242,.18);color:#fff}.admin-lifecycle-actions button.danger{margin-left:auto;border-color:rgba(255,139,155,.3);background:rgba(255,139,155,.1);color:#ff9bb2}.admin-lifecycle-actions button:disabled{opacity:.58;cursor:wait}
 .admin-lifecycle-card.is-protected{border-color:rgba(114,213,173,.35);box-shadow:inset 3px 0 rgba(114,213,173,.55)}.admin-lifecycle-card.is-excluded{opacity:.68;border-style:dashed}
 @media(max-width:1100px){.admin-lifecycle-policy-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:1100px){.admin-lifecycle-policy-form{grid-template-columns:repeat(2,minmax(0,1fr))}}

@@ -13786,3 +13786,9 @@ body.dark-mode .hm-notification-row strong {
 body.dark-mode .hm-notification-row small {
     color: var(--hm-color-muted, #c1bbcb) !important;
 }
+/* STEP A12.3: dormant account restore gate. */
+.hm-dormant-overlay{position:fixed;inset:0;z-index:100000;display:grid;place-items:center;padding:20px;background:linear-gradient(145deg,rgba(14,17,29,.97),rgba(37,25,50,.97));box-sizing:border-box}
+.hm-dormant-overlay[hidden]{display:none}.hm-dormant-card{width:min(460px,100%);box-sizing:border-box;padding:30px;border:1px solid rgba(190,162,240,.3);border-radius:24px;background:#181b2a;color:#f7f4ff;text-align:center;box-shadow:0 24px 80px rgba(0,0,0,.4)}
+.hm-dormant-icon{display:grid;place-items:center;width:58px;height:58px;margin:0 auto 14px;border-radius:18px;background:rgba(167,124,242,.16);color:#d7c5ff;font-size:1.8rem}.hm-dormant-kicker{margin:0;color:#cdb9f5;font-size:.76rem;font-weight:900;letter-spacing:.12em}
+.hm-dormant-card h1{margin:10px 0 12px;font-size:1.55rem}.hm-dormant-card>p:not(.hm-dormant-kicker):not(.hm-dormant-safe){margin:0;color:#cbd0df;line-height:1.65}.hm-dormant-notice{display:grid;gap:5px;margin:20px 0;padding:14px;border-radius:15px;background:rgba(114,213,173,.09);color:#d7f4e9;text-align:left}.hm-dormant-notice span{color:#b7cfc6;font-size:.88rem;line-height:1.5}
+.hm-dormant-restore,.hm-dormant-logout{width:100%;min-height:48px;border-radius:14px;font:inherit;font-weight:900;cursor:pointer}.hm-dormant-restore{border:0;background:linear-gradient(135deg,#f45f9a,#7c5cff);color:#fff}.hm-dormant-restore:disabled{opacity:.65;cursor:wait}.hm-dormant-logout{margin-top:9px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);color:#dfe3ef}.hm-dormant-safe{margin:15px 0 0;color:#91d9bb;font-size:.8rem;font-weight:900}

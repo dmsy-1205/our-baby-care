@@ -22,6 +22,6 @@ export function renderTopbar(route) {
         <h1>${escapeHtml(title)}</h1>
         <p>${escapeHtml(description)}</p>
       </div>
-      <div class="topbar-actions"><span class="phase-badge">Beta · Policy Preview</span></div>
+      <div class="topbar-actions"><span class="phase-badge">Beta · Dormant Restore</span></div>
     </header>`;
 }

@@ -23,6 +23,34 @@
             ".validate": false
           }
         },
+        "lifecycle": {
+          "status": {
+            ".validate": "newData.isString() && (newData.val() === 'active' || newData.val() === 'dormant')"
+          },
+          "dormantAt": {
+            ".validate": "!newData.exists() || newData.isNumber()"
+          },
+          "restoredAt": {
+            ".validate": "!newData.exists() || newData.isNumber()"
+          },
+          "lastLoginAt": {
+            ".validate": "!newData.exists() || newData.isNumber()"
+          },
+          "updatedAt": {
+            ".validate": "newData.isNumber()"
+          },
+          "reason": {
+            ".validate": "!newData.exists() || (newData.isString() && (newData.val() === 'browse_account' || newData.val() === 'unused_account' || newData.val() === 'excessive_creation'))"
+          },
+          "archivedRoomCodes": {
+            "$roomCode": {
+              ".validate": "newData.val() === true"
+            }
+          },
+          "$other": {
+            ".validate": false
+          }
+        },
         "preferences": {
           "theme": {
             ".validate": "!newData.exists() || (newData.isString() && (newData.val() === 'lavender' || newData.val() === 'blossom' || newData.val() === 'ocean' || newData.val() === 'forest' || newData.val() === 'cream'))"
