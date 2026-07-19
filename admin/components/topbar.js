@@ -1,4 +1,4 @@
-import { escapeHtml } from '../admin-utils.js?v=admin-2-0-a11-1-clean-baseline-20260719';
+import { escapeHtml } from '../admin-utils.js?v=admin-2-0-a10-recovery-clean-20260719';
 
 const titles = {
   dashboard: ['운영 대시보드', '서비스 상태와 주요 운영 항목을 확인합니다.'],

@@ -43,22 +43,7 @@ export function compactId(value = '', head = 6, tail = 5) {
   const text = String(value || '');
   if (!text) return '-';
   if (text.length <= head + tail + 3) return text;
-  return `${text.slice(0, head)}...${text.slice(-tail)}`;
-}
-
-export function countObject(value) {
-  return value && typeof value === 'object' ? Object.keys(value).length : 0;
-}
-
-export function asObject(value) {
-  return value && typeof value === 'object' ? value : {};
-}
-
-export function latestNumber(...values) {
-  return values
-    .map(Number)
-    .filter((value) => Number.isFinite(value) && value > 0)
-    .sort((a, b) => b - a)[0] || 0;
+  return `${text.slice(0, head)}···${text.slice(-tail)}`;
 }
 
 export function setDocumentBusy(isBusy) {

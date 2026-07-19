@@ -1,19 +1,14 @@
-﻿import { getAdminDatabase } from '../admin-api.js?v=admin-2-0-a11-1-clean-baseline-20260719';
-import { escapeHtml, formatDateTime, compactId } from '../admin-utils.js?v=admin-2-0-a11-1-clean-baseline-20260719';
-import { renderEmptyState } from '../components/empty-state.js?v=admin-2-0-a11-1-clean-baseline-20260719';
+import { getAdminDatabase } from '../admin-api.js?v=admin-2-0-a10-recovery-clean-20260719';
+import { escapeHtml, formatDateTime, compactId } from '../admin-utils.js?v=admin-2-0-a10-recovery-clean-20260719';
+import { renderEmptyState } from '../components/empty-state.js?v=admin-2-0-a10-recovery-clean-20260719';
 
 const ACTION_LABELS = {
-  request_note_update: '愿由ъ옄 硫붾え ???,
-  request_status_update: '?붿껌 ?곹깭 蹂寃?,
-  request_memo_saved: '愿由ъ옄 硫붾え ???,
-  request_status_reviewing: '?붿껌 寃??以?,
-  request_status_hold: '?붿껌 蹂대쪟',
-  request_status_approved: '?붿껌 ?뱀씤',
-  request_status_rejected: '?붿껌 嫄곗젅'
+  request_memo_saved: '관리자 메모 저장',
+  request_status_reviewing: '요청 검토 중',
+  request_status_hold: '요청 보류',
+  request_status_approved: '요청 승인',
+  request_status_rejected: '요청 거절'
 };
-
-let logs = [];
-let search = '';
 
 function asObject(value) {
   return value && typeof value === 'object' ? value : {};
@@ -21,109 +16,87 @@ function asObject(value) {
 
 async function loadAuditLogs() {
   const database = getAdminDatabase();
-  const snapshot = await database.ref('adminAuditLogs').limitToLast(80).once('value');
-  logs = Object.entries(asObject(snapshot.val()))
+  const snap = await database.ref('adminAuditLogs').limitToLast(80).once('value');
+  return Object.entries(asObject(snap.val()))
     .map(([id, value]) => ({ id, ...asObject(value) }))
-    .sort((a, b) => Number(b.createdAt || b.updatedAt || 0) - Number(a.createdAt || a.updatedAt || 0));
+    .sort((a, b) => Number(b.createdAt || 0) - Number(a.createdAt || 0));
 }
 
 function actionLabel(row) {
-  return row.actionLabel || ACTION_LABELS[row.action] || row.action || '愿由ъ옄 ?묒뾽';
+  return row.actionLabel || ACTION_LABELS[row.action] || row.action || '관리자 작업';
 }
 
-function visibleLogs() {
-  if (!search) return logs;
-  const needle = search.toLowerCase();
-  return logs.filter((row) => [
-    actionLabel(row),
-    row.adminEmail,
-    row.ownerUid,
-    row.requestId,
-    row.requestType,
-    row.status,
-    row.id
-  ].join(' ').toLowerCase().includes(needle));
+function actionClass(action) {
+  if (String(action || '').includes('approved')) return 'ok';
+  if (String(action || '').includes('rejected')) return 'danger';
+  if (String(action || '').includes('hold')) return 'warn';
+  return 'active';
 }
 
-function renderList() {
-  const items = visibleLogs();
-  if (!items.length) return renderEmptyState('媛먯궗 濡쒓렇 ?놁쓬', '寃??議곌굔??留욌뒗 愿由ъ옄 ?묒뾽 湲곕줉???놁뒿?덈떎.');
+function renderStats(rows) {
+  const requestLogs = rows.filter((row) => row.target === 'dataDeleteRequest').length;
+  const approvals = rows.filter((row) => row.action === 'request_status_approved').length;
+  const memos = rows.filter((row) => row.action === 'request_memo_saved').length;
+  const latest = rows[0]?.createdAt || 0;
+  return `
+    <div class="metric-grid admin-audit-metrics">
+      <article class="metric-card"><span>최근 로그</span><strong>${rows.length}</strong><small>최대 80개 표시</small></article>
+      <article class="metric-card"><span>데이터 요청</span><strong>${requestLogs}</strong><small>요청관리 작업</small></article>
+      <article class="metric-card"><span>승인 기록</span><strong>${approvals}</strong><small>실행 전 검토 기준</small></article>
+      <article class="metric-card"><span>최근 작업</span><strong>${escapeHtml(formatDateTime(latest))}</strong><small>마지막 로그 시간</small></article>
+    </div>`;
+}
+
+function renderLogCard(row) {
+  const statusText = row.statusBefore && row.statusAfter && row.statusBefore !== row.statusAfter
+    ? `${row.statusBefore} → ${row.statusAfter}`
+    : row.statusAfter || row.statusBefore || '-';
+  const search = [row.action, actionLabel(row), row.adminEmail, row.requestedByEmail, row.roomCode, row.ownerUid, row.requestId].join(' ').toLowerCase();
 
   return `
-    <div class="admin-log-list">
-      ${items.map((row) => `
-        <article class="admin-card admin-log-card">
-          <div class="admin-request-card-head">
-            <div>
-              <h3>${escapeHtml(actionLabel(row))}</h3>
-              <p>${escapeHtml(row.status ? `?곹깭 ${row.status}` : '愿由ъ옄 ?묒뾽 湲곕줉')}</p>
-            </div>
-            <span class="admin-status-pill muted">${escapeHtml(formatDateTime(row.createdAt || row.updatedAt))}</span>
-          </div>
-          <div class="admin-meta-row">
-            <span>愿由ъ옄 ${escapeHtml(row.adminEmail || '-')}</span>
-            <span>?붿껌??${escapeHtml(row.ownerUid || '-')}</span>
-            <span>?붿껌 ${escapeHtml(compactId(row.requestId || row.id))}</span>
-            <span>?좏삎 ${escapeHtml(row.requestType || '-')}</span>
-          </div>
-        </article>
-      `).join('')}
-    </div>
-  `;
-}
-
-function renderShell() {
-  const approvalCount = logs.filter((row) => String(row.action || '').includes('approved')).length;
-  const requestCount = logs.filter((row) => row.requestId).length;
-  const latest = logs[0]?.createdAt || logs[0]?.updatedAt;
-
-  return `
-    <section class="module-view" aria-labelledby="auditHeading">
-      <section class="admin-hero-card">
-        <div class="admin-hero-icon">??/div>
+    <article class="admin-audit-card" data-admin-audit-row data-search="${escapeHtml(search)}">
+      <div class="admin-audit-head">
         <div>
-          <h2 id="auditHeading">媛먯궗 濡쒓렇</h2>
-          <p>愿由ъ옄 ?붿껌 泥섎━ 怨쇱젙?먯꽌 ?꾧?, ?몄젣, ?대뼡 ?곹깭瑜??④꼈?붿? ?뺤씤?⑸땲?? ?ㅼ젣 ??젣 ?ㅽ뻾 ??湲곗??먯쑝濡??ъ슜?⑸땲??</p>
+          <strong>${escapeHtml(actionLabel(row))}</strong>
+          <p>${escapeHtml(row.note || '관리자 작업 기록')}</p>
         </div>
-      </section>
-
-      <section class="admin-grid admin-grid-4">
-        <article class="admin-card admin-metric"><span>理쒓렐 濡쒓렇</span><strong>${logs.length}</strong><small>理쒕? 80媛??쒖떆</small></article>
-        <article class="admin-card admin-metric"><span>?곗씠???붿껌</span><strong>${requestCount}</strong><small>?붿껌愿由??묒뾽</small></article>
-        <article class="admin-card admin-metric"><span>?뱀씤 湲곕줉</span><strong>${approvalCount}</strong><small>?ㅽ뻾 ??寃??湲곗?</small></article>
-        <article class="admin-card admin-metric"><span>理쒓렐 ?묒뾽</span><strong>${escapeHtml(formatDateTime(latest))}</strong><small>留덉?留?濡쒓렇 ?쒓컙</small></article>
-      </section>
-
-      <section class="admin-card admin-panel">
-        <div class="admin-panel-head">
-          <div>
-            <h2>理쒓렐 愿由ъ옄 ?묒뾽</h2>
-            <p>?붿껌愿由ъ쓽 ?듬?쨌硫붾え쨌?곹깭 蹂寃?湲곕줉??理쒖떊?쒖쑝濡?蹂댁뿬以띾땲??</p>
-          </div>
-          <input data-audit-search type="search" placeholder="濡쒓렇 寃?? value="${escapeHtml(search)}">
-        </div>
-        <div data-audit-list>${renderList()}</div>
-      </section>
-    </section>
-  `;
-}
-
-function bindEvents(root) {
-  if (root.dataset.auditBound === '1') return;
-  root.dataset.auditBound = '1';
-  root.addEventListener('input', (event) => {
-    if (!event.target.matches('[data-audit-search]')) return;
-    search = event.target.value.trim();
-    root.querySelector('[data-audit-list]').innerHTML = renderList();
-  });
+        <span class="admin-request-status ${actionClass(row.action)}">${escapeHtml(formatDateTime(row.createdAt))}</span>
+      </div>
+      <div class="admin-request-meta">
+        <span>관리자 ${escapeHtml(row.adminEmail || '-')}</span>
+        <span>대상 ${escapeHtml(row.targetLabel || row.targetType || '-')}</span>
+        <span>상태 ${escapeHtml(statusText)}</span>
+        <span>Room ${escapeHtml(row.roomCode || '-')}</span>
+        <span>요청 ID ${escapeHtml(compactId(row.requestId))}</span>
+      </div>
+    </article>`;
 }
 
 export async function render() {
-  await loadAuditLogs();
-  return renderShell();
-}
+  const rows = await loadAuditLogs();
+  const list = rows.length
+    ? `<div class="admin-audit-list">${rows.map(renderLogCard).join('')}</div>`
+    : renderEmptyState('감사 로그 없음', '아직 기록된 관리자 작업이 없습니다.', '☰');
 
-export function afterRender(root) {
-  bindEvents(root);
+  return `
+    <section class="module-view" aria-labelledby="auditHeading">
+      <div class="foundation-notice">
+        <div><span class="notice-icon" aria-hidden="true">☰</span></div>
+        <div>
+          <h2 id="auditHeading">감사 로그</h2>
+          <p>관리자 요청 처리 과정에서 누가, 언제, 어떤 상태를 남겼는지 확인합니다. 실제 삭제 실행 전 기준점으로 사용합니다.</p>
+        </div>
+      </div>
+      ${renderStats(rows)}
+      <article class="panel">
+        <div class="panel-header admin-audit-panel-header">
+          <div>
+            <h2>최근 관리자 작업</h2>
+            <p>요청관리의 답변 · 메모 · 상태 변경 기록을 최신순으로 보여줍니다.</p>
+          </div>
+          <input class="admin-user-search" type="search" placeholder="로그 검색" data-admin-filter="admin-audit-row">
+        </div>
+        ${list}
+      </article>
+    </section>`;
 }
-

@@ -1,9 +1,30 @@
-import { getAdminDatabase } from '../admin-api.js?v=admin-2-0-a11-1-clean-baseline-20260719';
-import { asObject, compactId, escapeHtml, formatDateTime, latestNumber } from '../admin-utils.js?v=admin-2-0-a11-1-clean-baseline-20260719';
-import { renderEmptyState } from '../components/empty-state.js?v=admin-2-0-a11-1-clean-baseline-20260719';
+import { getAdminDatabase } from '../admin-api.js?v=admin-2-0-a10-recovery-clean-20260719';
+import { escapeHtml, formatDateTime, compactId } from '../admin-utils.js?v=admin-2-0-a10-recovery-clean-20260719';
+import { renderEmptyState } from '../components/empty-state.js?v=admin-2-0-a10-recovery-clean-20260719';
 
-let users = [];
-let query = '';
+function asObject(value) {
+  return value && typeof value === 'object' ? value : {};
+}
+
+function latestNumber(...values) {
+  return values
+    .map(Number)
+    .filter((value) => Number.isFinite(value) && value > 0)
+    .sort((a, b) => b - a)[0] || 0;
+}
+
+function profileName(user, uid) {
+  const profile = asObject(user.profile);
+  return profile.nickname || user.nickname || user.displayName || user.email || uid || '이름 없음';
+}
+
+function roleLabel(member) {
+  if (member.relationshipRole === 'dom') return '관리(Dom)';
+  if (member.relationshipRole === 'sub') return '기록(Sub)';
+  if (member.role === 'owner') return 'Owner';
+  if (member.role === 'partner') return 'Partner';
+  return member.role || '-';
+}
 
 async function loadUsers() {
   const database = getAdminDatabase();
@@ -13,104 +34,86 @@ async function loadUsers() {
     database.ref('roomMembers').once('value')
   ]);
 
-  const usersValue = asObject(usersSnap.val());
+  const users = asObject(usersSnap.val());
   const userRooms = asObject(userRoomsSnap.val());
   const roomMembers = asObject(roomMembersSnap.val());
-  const memberUids = new Set();
-  Object.values(roomMembers).forEach((members) => Object.keys(asObject(members)).forEach((uid) => memberUids.add(uid)));
+  const ids = new Set([...Object.keys(users), ...Object.keys(userRooms)]);
+  const membership = {};
 
-  const uidSet = new Set([...Object.keys(usersValue), ...Object.keys(userRooms), ...memberUids]);
-  users = [...uidSet].map((uid) => {
-    const profile = asObject(usersValue[uid]);
-    const rooms = Object.keys(asObject(userRooms[uid]));
-    const memberRooms = Object.entries(roomMembers)
-      .filter(([, members]) => Boolean(asObject(members)[uid]))
-      .map(([roomCode]) => roomCode);
-    const allRooms = [...new Set([...rooms, ...memberRooms])];
-    const role = allRooms.map((roomCode) => asObject(roomMembers[roomCode]?.[uid]).role).find(Boolean) || profile.role || '-';
+  Object.entries(roomMembers).forEach(([roomCode, members]) => {
+    Object.entries(asObject(members)).forEach(([uid, member]) => {
+      ids.add(uid);
+      if (!membership[uid]) membership[uid] = [];
+      membership[uid].push({ roomCode, ...asObject(member) });
+    });
+  });
 
+  return [...ids].map((uid) => {
+    const user = asObject(users[uid]);
+    const roomsFromUser = Object.keys(asObject(userRooms[uid]));
+    const roomsFromMembers = (membership[uid] || []).map((item) => item.roomCode);
+    const roomCodes = [...new Set([...roomsFromUser, ...roomsFromMembers].filter(Boolean))];
+    const latest = latestNumber(user.updatedAt, user.lastSeenAt, user.createdAt, ...(membership[uid] || []).map((item) => item.updatedAt));
+    const primaryMember = membership[uid]?.[0] || {};
     return {
       uid,
-      email: profile.email || profile.userEmail || '',
-      nickname: profile.nickname || profile.displayName || profile.name || profile.email || uid,
-      rooms: allRooms,
-      role,
-      lastSeen: latestNumber(profile.lastSeen, profile.updatedAt, profile.createdAt)
+      name: profileName(user, uid),
+      email: user.email || primaryMember.email || '',
+      roomCodes,
+      role: roleLabel(primaryMember),
+      latest,
+      connected: roomCodes.length > 0
     };
-  }).sort((a, b) => b.lastSeen - a.lastSeen);
+  }).sort((a, b) => b.latest - a.latest || a.name.localeCompare(b.name, 'ko'));
 }
 
-function filteredUsers() {
-  const keyword = query.toLowerCase();
-  if (!keyword) return users;
-  return users.filter((user) => [
-    user.uid,
-    user.email,
-    user.nickname,
-    user.role,
-    ...user.rooms
-  ].join(' ').toLowerCase().includes(keyword));
-}
-
-function renderUserCard(user) {
-  const initial = (user.nickname || user.email || '?').slice(0, 1).toUpperCase();
-  const roomText = user.rooms.length ? `Room ${user.rooms[0]}${user.rooms.length > 1 ? ` 외 ${user.rooms.length - 1}` : ''}` : 'Room 미연결';
+function renderUserCard(row) {
+  const search = [row.name, row.email, row.uid, row.roomCodes.join(' '), row.role].join(' ').toLowerCase();
   return `
-    <article class="admin-card admin-list-card">
-      <div class="admin-avatar">${escapeHtml(initial)}</div>
-      <div>
-        <h3>${escapeHtml(user.nickname || user.email || user.uid)}</h3>
-        <p>${escapeHtml(user.email || '이메일 없음')}</p>
-        <div class="admin-meta-row">
-          <span>UID ${escapeHtml(compactId(user.uid))}</span>
-          <span>${escapeHtml(roomText)}</span>
-          <span>역할 ${escapeHtml(user.role || '-')}</span>
-          <span>최근 ${escapeHtml(formatDateTime(user.lastSeen))}</span>
+    <article class="admin-user-card" data-admin-user-row data-search="${escapeHtml(search)}">
+      <div class="admin-user-avatar" aria-hidden="true">${escapeHtml((row.name || row.email || '?').slice(0, 1).toUpperCase())}</div>
+      <div class="admin-user-main">
+        <div class="admin-user-title">
+          <strong>${escapeHtml(row.name)}</strong>
+          <span class="admin-user-status ${row.connected ? 'ok' : 'needs-check'}">${row.connected ? '정상' : 'Room 미연결'}</span>
+        </div>
+        <div class="admin-user-sub">${escapeHtml(row.email || '이메일 없음')}</div>
+        <div class="admin-user-meta">
+          <span>UID ${escapeHtml(compactId(row.uid))}</span>
+          <span>Room ${escapeHtml(row.roomCodes[0] || '미연결')}${row.roomCodes.length > 1 ? ` 외 ${row.roomCodes.length - 1}` : ''}</span>
+          <span>역할 ${escapeHtml(row.role)}</span>
+          <span>최근 ${escapeHtml(formatDateTime(row.latest))}</span>
         </div>
       </div>
-    </article>
-  `;
+    </article>`;
 }
 
-function renderShell() {
-  const connected = users.filter((user) => user.rooms.length > 0).length;
-  const filtered = filteredUsers();
+export async function render() {
+  const rows = await loadUsers();
+  const connected = rows.filter((row) => row.connected).length;
+  const unlinked = rows.length - connected;
+  const body = rows.length
+    ? `<div class="admin-user-list">${rows.map(renderUserCard).join('')}</div>`
+    : renderEmptyState('사용자 없음', '읽어올 사용자 데이터가 없습니다.', '👤');
 
   return `
     <section class="module-view" aria-labelledby="usersHeading">
-      <section class="admin-grid admin-grid-4">
-        <article class="admin-card admin-metric"><span>전체 사용자</span><strong>${users.length}</strong><small>users/roomMembers 통합</small></article>
-        <article class="admin-card admin-metric"><span>Room 연결</span><strong>${connected}</strong><small>연결 확인</small></article>
-        <article class="admin-card admin-metric"><span>미연결</span><strong>${users.length - connected}</strong><small>Room 없음</small></article>
-        <article class="admin-card admin-metric"><span>운영 모드</span><strong>읽기 전용</strong><small>사용자 데이터 변경 없음</small></article>
-      </section>
+      <div class="metric-grid">
+        <article class="metric-card"><span>전체 사용자</span><strong>${rows.length}</strong><small>users · roomMembers 통합</small></article>
+        <article class="metric-card"><span>Room 연결</span><strong>${connected}</strong><small>연결 확인</small></article>
+        <article class="metric-card"><span>미연결</span><strong>${unlinked}</strong><small>Room 없음</small></article>
+        <article class="metric-card"><span>운영 모드</span><strong>읽기 전용</strong><small>사용자 데이터 변경 없음</small></article>
+      </div>
 
-      <section class="admin-card admin-panel">
-        <div class="admin-panel-head">
+      <article class="panel">
+        <div class="panel-header admin-user-panel-header">
           <div>
             <h2 id="usersHeading">사용자 목록</h2>
             <p>가입자, Room 연결, 역할 정보를 읽기 전용으로 확인합니다.</p>
           </div>
-          <input data-user-search type="search" placeholder="사용자 검색" value="${escapeHtml(query)}">
+          <input class="admin-user-search" type="search" placeholder="사용자 검색" data-admin-filter="admin-user-row">
         </div>
-        <div class="admin-list">
-          ${filtered.length ? filtered.map(renderUserCard).join('') : renderEmptyState('사용자 없음', '검색 조건에 맞는 사용자가 없습니다.')}
-        </div>
-      </section>
-    </section>
-  `;
-}
-
-export async function render() {
-  await loadUsers();
-  return renderShell();
-}
-
-export function afterRender(root) {
-  root.addEventListener('input', (event) => {
-    if (!event.target.matches('[data-user-search]')) return;
-    query = event.target.value.trim();
-    root.innerHTML = renderShell();
-    root.querySelector('[data-user-search]')?.focus();
-  });
+        ${body}
+      </article>
+    </section>`;
 }

@@ -1,94 +1,85 @@
-﻿import { escapeHtml } from '../admin-utils.js?v=admin-2-0-a11-1-clean-baseline-20260719';
+import { escapeHtml } from '../admin-utils.js?v=admin-2-0-a10-recovery-clean-20260719';
 
-const ADMIN_STEP = 'STEP A11';
-const ADMIN_LABEL = 'Data Center Readonly';
-const ADMIN_CACHE_KEY = 'admin-2-0-a11-1-clean-baseline-20260719';
+const ADMIN_STEP = 'STEP A10';
+const ADMIN_LABEL = 'Recovery Clean Baseline';
+const ADMIN_CACHE_KEY = 'admin-2-0-a10-recovery-clean-20260719';
 const MAIN_STEP = 'STEP6.2.13.4';
 const MAIN_VERSION = 'HearMe2nite v1.0 STEP6.2.13.4';
-const RELEASE_DATE = '2026.07.19';
 
 function safeChanges(release) {
   const changes = Array.isArray(release.changes) ? release.changes : [];
-  const fallback = [
-    '愿由ъ옄 怨듯넻 紐⑤뱢 UTF-8 臾몄옄???뺣━',
-    '?곗씠???붿껌 愿由??붾㈃ ?곹깭쨌硫붾え ????덉젙??,
-    '?쒖뒪???붾㈃???곗씠??愿由??쇳꽣 ?쎄린 ?먭? 異붽?',
-    '蹂듦뎄 ?쇳꽣瑜??ㅽ뻾 ??湲곗????뺤씤 ?붾㈃?쇰줈 ?뺣━',
-    '由대━?ㅼ? 愿由ъ옄 ?ㅽ뀦??硫붿씤??踰꾩쟾怨?遺꾨━ ?쒖떆',
-    '硫붿씤??STEP6.2.13.4 湲곗? ?좎?'
-  ];
-
-  return (changes.length ? changes : fallback).slice(0, 8);
+  return changes
+    .filter((item) => /^[\x00-\x7F가-힣ㄱ-ㅎㅏ-ㅣ\s.,:;()[\]/·'"!?+-]+$/.test(String(item || '')))
+    .slice(0, 8);
 }
 
 export function render() {
   const release = window.HM_RELEASE || {};
   const changes = safeChanges(release);
-
   return `
     <section class="module-view" aria-labelledby="releaseHeading">
-      <section class="admin-hero-card">
-        <div class="admin-hero-icon">燧놅툘</div>
+      <div class="foundation-notice">
+        <div><span class="notice-icon" aria-hidden="true">⬆</span></div>
         <div>
-          <h2 id="releaseHeading">由대━???쇳꽣 쨌 諛고룷 湲곗???/h2>
-          <p>硫붿씤??踰꾩쟾怨?愿由ъ옄 肄섏넄 ?ㅽ뀦??遺꾨━?댁꽌 ?뺤씤?⑸땲?? ???붾㈃? ?쎄린 ?꾩슜?낅땲??</p>
+          <h2 id="releaseHeading">릴리스 센터 · 배포 기준판</h2>
+          <p>메인앱 버전과 관리자 콘솔 스텝을 분리해서 확인합니다. 이 화면은 읽기 전용입니다.</p>
         </div>
-      </section>
+      </div>
 
-      <section class="admin-grid admin-grid-4">
-        <article class="admin-card admin-metric"><span>硫붿씤??湲곗?</span><strong>${MAIN_STEP}</strong><small>${MAIN_VERSION}</small></article>
-        <article class="admin-card admin-metric"><span>愿由ъ옄 湲곗?</span><strong>${ADMIN_STEP}</strong><small>${ADMIN_LABEL}</small></article>
-        <article class="admin-card admin-metric"><span>由대━???좎쭨</span><strong>${RELEASE_DATE}</strong><small>Beta</small></article>
-        <article class="admin-card admin-metric"><span>罹먯떆 ??/span><strong>A11</strong><small>${ADMIN_CACHE_KEY}</small></article>
-      </section>
+      <div class="metric-grid admin-release-metrics">
+        <article class="metric-card"><span>메인앱 기준</span><strong>${escapeHtml(MAIN_STEP)}</strong><small>${escapeHtml(MAIN_VERSION)}</small></article>
+        <article class="metric-card"><span>관리자 기준</span><strong>${escapeHtml(ADMIN_STEP)}</strong><small>${escapeHtml(ADMIN_LABEL)}</small></article>
+        <article class="metric-card"><span>릴리스 날짜</span><strong>2026.07.19</strong><small>Recovery Clean</small></article>
+        <article class="metric-card"><span>캐시 키</span><strong>A10</strong><small>${escapeHtml(ADMIN_CACHE_KEY)}</small></article>
+      </div>
 
-      <section class="admin-card admin-panel">
-        <div class="admin-panel-head">
+      <article class="panel">
+        <div class="panel-header admin-release-panel-header">
           <div>
-            <h2>?꾩옱 諛고룷 ?뺣낫</h2>
-            <p>愿由ъ옄 ?낅뜲?댄듃媛 硫붿씤??湲곗????щ━吏 ?딆븯?붿? ?뺤씤?섎뒗 湲곗??낅땲??</p>
+            <h2>현재 배포 정보</h2>
+            <p>관리자 업데이트가 메인앱 기준을 올리지 않았는지 확인하는 기준입니다.</p>
           </div>
-          <span class="admin-status-pill muted">Read Only</span>
+          <span class="phase-badge">Read Only</span>
         </div>
-        <div class="admin-grid admin-grid-2">
-          <article class="admin-soft-card">
-            <h3>硫붿씤???덉젙 湲곗?</h3>
-            <div class="admin-key-value"><span>?쒗뭹</span><strong>HearMe2nite</strong></div>
-            <div class="admin-key-value"><span>??踰꾩쟾</span><strong>${MAIN_VERSION}</strong></div>
-            <div class="admin-key-value"><span>?ㅽ뀦</span><strong>${MAIN_STEP}</strong></div>
-            <div class="admin-key-value"><span>鍮뚮뱶</span><strong>20260718</strong></div>
-          </article>
-          <article class="admin-soft-card">
-            <h3>愿由ъ옄 ?묒뾽 湲곗?</h3>
-            <div class="admin-key-value"><span>愿由ъ옄 ?ㅽ뀦</span><strong>${ADMIN_STEP}</strong></div>
-            <div class="admin-key-value"><span>?묒뾽紐?/span><strong>${ADMIN_LABEL}</strong></div>
-            <div class="admin-key-value"><span>踰붿쐞</span><strong>愿由ъ옄 ???꾩슜</strong></div>
-            <div class="admin-key-value"><span>?ㅽ뻾 湲곕뒫</span><strong>?놁쓬 쨌 ?쎄린/硫붾え/?곹깭 ???以묒떖</strong></div>
-          </article>
+        <div class="admin-release-grid">
+          <section class="admin-release-card">
+            <h3>메인앱 안정 기준</h3>
+            <dl>
+              <div><dt>제품</dt><dd>HearMe2nite</dd></div>
+              <div><dt>앱 버전</dt><dd>${escapeHtml(MAIN_VERSION)}</dd></div>
+              <div><dt>스텝</dt><dd>${escapeHtml(MAIN_STEP)}</dd></div>
+              <div><dt>빌드</dt><dd>${escapeHtml(release.build || '20260718')}</dd></div>
+            </dl>
+          </section>
+          <section class="admin-release-card">
+            <h3>관리자 작업 기준</h3>
+            <dl>
+              <div><dt>관리자 스텝</dt><dd>${escapeHtml(ADMIN_STEP)}</dd></div>
+              <div><dt>작업명</dt><dd>${escapeHtml(ADMIN_LABEL)}</dd></div>
+              <div><dt>범위</dt><dd>관리자 앱 전용</dd></div>
+              <div><dt>실행 기능</dt><dd>없음 · 읽기/검토 중심</dd></div>
+            </dl>
+          </section>
         </div>
-      </section>
+      </article>
 
-      <section class="admin-card admin-panel">
-        <h2>諛고룷 ??泥댄겕</h2>
-        <p>GitHub ?낅줈???꾩뿉 硫붿씤?깃낵 愿由ъ옄 ??湲곗????섎닠 ?뺤씤?⑸땲??</p>
-        <div class="admin-grid admin-grid-2">
-          <div class="admin-check-row">??硫붿씤??踰꾩쟾? ${MAIN_STEP} 湲곗? ?좎?</div>
-          <div class="admin-check-row">??愿由ъ옄 罹먯떆??${ADMIN_CACHE_KEY} 湲곗??쇰줈 媛깆떊</div>
-          <div class="admin-check-row">??愿由ъ옄 肄섏넄 醫뚯륫 諛곗??먯꽌 ?꾩옱 ?ㅽ뀦 ?뺤씤</div>
-          <div class="admin-check-row">???ㅼ젣 ??젣쨌蹂듦뎄 ?ㅽ뻾 湲곕뒫? ?꾩쭅 ?곌껐?섏? ?딆쓬</div>
-          <div class="admin-check-row">??諛고룷 ??愿由ъ옄 硫붾돱蹂??붾㈃ 吏꾩엯 ?뺤씤</div>
-          <div class="admin-check-row">??臾몄젣媛 ?앷린硫?硫붿씤???덉젙 湲곗?怨?愿由ъ옄 ?ㅽ뀦??遺꾨━?댁꽌 濡ㅻ갚 ?먮떒</div>
+      <article class="panel">
+        <div class="panel-header"><div><h2>배포 전 체크</h2><p>GitHub 업로드 전 메인앱과 관리자 앱 기준을 나눠 확인합니다.</p></div></div>
+        <div class="admin-release-checks">
+          <div>✓ 메인앱 버전은 ${escapeHtml(MAIN_STEP)} 기준 유지</div>
+          <div>✓ 관리자 캐시는 ${escapeHtml(ADMIN_CACHE_KEY)} 기준</div>
+          <div>✓ 관리자 콘솔 좌측 배지에서 현재 스텝 확인</div>
+          <div>✓ 실제 삭제 · 복구 실행 기능은 연결하지 않음</div>
+          <div>✓ 배포 후 관리자 메뉴별 화면 진입 확인</div>
+          <div>✓ 문제가 생기면 메인앱 안정 기준과 관리자 스텝을 분리해 롤백 판단</div>
         </div>
-      </section>
+      </article>
 
-      <section class="admin-card admin-panel">
-        <h2>?꾩옱 由대━??蹂寃??댁뿭</h2>
-        <p>愿由ъ옄 湲곗? ?뚯씪???깅줉??蹂寃??댁뿭?낅땲??</p>
-        <ul class="admin-change-list">
-          ${changes.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}
-        </ul>
-      </section>
-    </section>
-  `;
+      <article class="panel">
+        <div class="panel-header"><div><h2>현재 릴리스 변경 내역</h2><p>메인앱 기준 파일에 등록된 변경 내역 중 안전하게 읽을 수 있는 항목만 표시합니다.</p></div></div>
+        ${changes.length
+          ? `<ul class="admin-release-changes">${changes.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}</ul>`
+          : '<p class="admin-room-empty">표시할 안전한 변경 내역이 없습니다.</p>'}
+      </article>
+    </section>`;
 }
-

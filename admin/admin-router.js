@@ -1,9 +1,9 @@
 import { setState } from './admin-state.js';
-import { renderTopbar } from './components/topbar.js?v=admin-2-0-a11-1-clean-baseline-20260719';
-import { renderLoadingState } from './components/loading-state.js?v=admin-2-0-a11-1-clean-baseline-20260719';
+import { renderTopbar } from './components/topbar.js?v=admin-2-0-a10-recovery-clean-20260719';
+import { renderLoadingState } from './components/loading-state.js?v=admin-2-0-a10-recovery-clean-20260719';
 
 const routes = new Set(['dashboard', 'users', 'rooms', 'requests', 'recovery', 'audit', 'releases', 'system']);
-const ADMIN_MODULE_VERSION = 'admin-2-0-a11-1-clean-baseline-20260719';
+const ADMIN_MODULE_VERSION = 'admin-2-0-a10-recovery-clean-20260719';
 
 function normalizeRoute(value) {
   const route = String(value || '').replace(/^#\/?/, '').trim();
@@ -36,8 +36,7 @@ export async function navigate(route, { replace = false } = {}) {
 
   try {
     const module = await loadModule(normalized);
-    const html = await Promise.resolve(module.render());
-    outlet.innerHTML = html || '';
+    outlet.innerHTML = await Promise.resolve(module.render());
 
     if (typeof module.afterRender === 'function') {
       await Promise.resolve(module.afterRender(outlet));
@@ -49,7 +48,7 @@ export async function navigate(route, { replace = false } = {}) {
     outlet.innerHTML = `
       <div class="error-card">
         <strong>화면을 불러오지 못했습니다.</strong>
-        <p>${error.message || error}</p>
+        <p>${error.message}</p>
       </div>`;
   }
 }
