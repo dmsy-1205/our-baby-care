@@ -1,7 +1,7 @@
 import { escapeHtml } from '../admin-utils.js?v=admin-2-0-a11-1-clean-baseline-20260719';
 
-const ADMIN_CONSOLE_STEP = 'STEP A12.1';
-const ADMIN_CONSOLE_STEP_LABEL = 'Lifecycle Observer';
+const ADMIN_CONSOLE_STEP = 'STEP A12.2';
+const ADMIN_CONSOLE_STEP_LABEL = 'Policy Preview';
 
 const items = [
   ['dashboard', '대시보드', '▦'],

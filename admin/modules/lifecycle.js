@@ -1,8 +1,7 @@
-import { getAdminDatabase } from '../admin-api.js?v=admin-2-0-a12-1-lifecycle-observer-20260719';
-import { asObject, escapeHtml, formatDateTime, latestNumber, compactId } from '../admin-utils.js?v=admin-2-0-a12-1-lifecycle-observer-20260719';
+import { getAdminDatabase } from '../admin-api.js?v=admin-2-0-a12-2-policy-preview-20260719';
+import { asObject, escapeHtml, formatDateTime, latestNumber, compactId } from '../admin-utils.js?v=admin-2-0-a12-2-policy-preview-20260719';
 
 const DAY = 24 * 60 * 60 * 1000;
-const NOW = Date.now();
 const MEANINGFUL_ROOM_KEYS = new Set([
   'days', 'dayAdmin', 'chat', 'chats', 'messages', 'chatMessages', 'customCards',
   'missionLibrary', 'subRoutines', 'subRoutineDays', 'anniversaries', 'deletedRecords',
@@ -11,6 +10,16 @@ const MEANINGFUL_ROOM_KEYS = new Set([
 
 let analysis = null;
 let activeFilter = 'all';
+let policy = {
+  browseAccountDays: 3,
+  unusedAccountDays: 7,
+  emptyRoomDays: 3,
+  dormantRoomDays: 7,
+  noticeDays: 7,
+  dormantGraceDays: 30,
+  excessiveRoomCount: 3
+};
+const reviewStates = new Map();
 
 function values(value) {
   return Object.values(asObject(value));
@@ -18,7 +27,7 @@ function values(value) {
 
 function ageDays(timestamp) {
   if (!timestamp) return null;
-  return Math.max(0, Math.floor((NOW - Number(timestamp)) / DAY));
+  return Math.max(0, Math.floor((Date.now() - Number(timestamp)) / DAY));
 }
 
 function hasContent(value) {
@@ -52,8 +61,12 @@ function userProfile(raw) {
   return { ...base, ...asObject(base.profile) };
 }
 
-function candidate(kind, targetType, targetId, title, reason, details, severity = 'watch') {
-  return { kind, targetType, targetId, title, reason, details, severity };
+function candidate(kind, targetType, targetId, title, reason, details, severity = 'watch', lastActivityAt = 0) {
+  const root = targetType === 'user' ? `users/${targetId}` : `rooms/${targetId}`;
+  const paths = targetType === 'user'
+    ? [root, `userRooms/${targetId}`]
+    : [root, `roomMembers/${targetId}`];
+  return { kind, targetType, targetId, title, reason, details, severity, lastActivityAt, paths };
 }
 
 async function loadAnalysis() {
@@ -108,10 +121,10 @@ async function loadAnalysis() {
   roomRows.forEach((room) => {
     const createdAge = ageDays(room.createdAt);
     const inactiveDays = ageDays(room.lastActivityAt);
-    if (room.members.length <= 1 && !room.meaningful && createdAge != null && createdAge >= 3) {
-      candidates.push(candidate('empty_room', 'room', room.roomCode, '빈 Room', `${createdAge}일 동안 상대방과 기록이 없습니다.`, [`멤버 ${room.members.length}명`, '의미 있는 데이터 없음', `최근 활동 ${inactiveDays ?? '-'}일 전`], createdAge >= 7 ? 'review' : 'watch'));
-    } else if (room.members.length >= 2 && !room.meaningful && inactiveDays != null && inactiveDays >= 7) {
-      candidates.push(candidate('dormant_room', 'room', room.roomCode, '휴면 Room 후보', `두 사용자 모두 확인할 활동이 ${inactiveDays}일 동안 없습니다.`, [`멤버 ${room.members.length}명`, '의미 있는 데이터 없음', '자동 삭제 대상 아님'], 'watch'));
+    if (room.members.length <= 1 && !room.meaningful && createdAge != null && createdAge >= policy.emptyRoomDays) {
+      candidates.push(candidate('empty_room', 'room', room.roomCode, '빈 Room', `${createdAge}일 동안 상대방과 기록이 없습니다.`, [`멤버 ${room.members.length}명`, '의미 있는 데이터 없음', `최근 활동 ${inactiveDays ?? '-'}일 전`], createdAge >= policy.emptyRoomDays + policy.noticeDays ? 'review' : 'watch', room.lastActivityAt || room.createdAt));
+    } else if (room.members.length >= 2 && !room.meaningful && inactiveDays != null && inactiveDays >= policy.dormantRoomDays) {
+      candidates.push(candidate('dormant_room', 'room', room.roomCode, '휴면 Room 후보', `두 사용자 모두 확인할 활동이 ${inactiveDays}일 동안 없습니다.`, [`멤버 ${room.members.length}명`, '의미 있는 데이터 없음', '자동 삭제 대상 아님'], 'watch', room.lastActivityAt));
     }
   });
 
@@ -129,15 +142,15 @@ async function loadAnalysis() {
       return member.role === 'owner' || member.relationshipRole === 'dom';
     });
 
-    if (!linkedRooms.length && !verified && createdAge != null && createdAge >= 3) {
-      candidates.push(candidate('browse_account', 'user', uid, '둘러보기 계정', `${createdAge}일 전에 가입했지만 인증과 Room 연결이 없습니다.`, [profile.email || '이메일 정보 없음', 'Room 0개', `최근 활동 ${inactiveDays ?? '-'}일 전`], createdAge >= 7 ? 'review' : 'watch'));
-    } else if (!linkedRooms.length && inactiveDays != null && inactiveDays >= 7) {
-      candidates.push(candidate('unused_account', 'user', uid, '미사용 계정 후보', `${inactiveDays}일 동안 Room 연결과 의미 있는 활동이 없습니다.`, [profile.email || '이메일 정보 없음', 'Room 0개', verified ? '이메일 확인됨' : '이메일 미확인'], 'review'));
+    if (!linkedRooms.length && !verified && createdAge != null && createdAge >= policy.browseAccountDays) {
+      candidates.push(candidate('browse_account', 'user', uid, '둘러보기 계정', `${createdAge}일 전에 가입했지만 인증과 Room 연결이 없습니다.`, [profile.email || '이메일 정보 없음', 'Room 0개', `최근 활동 ${inactiveDays ?? '-'}일 전`], createdAge >= policy.browseAccountDays + policy.noticeDays ? 'review' : 'watch', lastActivityAt));
+    } else if (!linkedRooms.length && inactiveDays != null && inactiveDays >= policy.unusedAccountDays) {
+      candidates.push(candidate('unused_account', 'user', uid, '미사용 계정 후보', `${inactiveDays}일 동안 Room 연결과 의미 있는 활동이 없습니다.`, [profile.email || '이메일 정보 없음', 'Room 0개', verified ? '이메일 확인됨' : '이메일 미확인'], 'review', lastActivityAt));
     }
 
-    if (ownedRooms.length >= 3) {
+    if (ownedRooms.length >= policy.excessiveRoomCount) {
       const emptyOwned = ownedRooms.filter((room) => !room.meaningful && room.members.length <= 1).length;
-      candidates.push(candidate('excessive_creation', 'user', uid, 'Room 생성 점검', `소유 Room이 ${ownedRooms.length}개입니다.`, [profile.email || compactId(uid), `빈 1인 Room ${emptyOwned}개`, '24시간 생성 횟수는 다음 단계에서 서버 기록 필요'], emptyOwned >= 2 ? 'review' : 'watch'));
+      candidates.push(candidate('excessive_creation', 'user', uid, 'Room 생성 점검', `소유 Room이 ${ownedRooms.length}개입니다.`, [profile.email || compactId(uid), `빈 1인 Room ${emptyOwned}개`, '24시간 생성 횟수는 서버 기록 도입 후 판정'], emptyOwned >= 2 ? 'review' : 'watch', lastActivityAt));
     }
   });
 
@@ -167,17 +180,50 @@ function visibleCandidates() {
   return analysis.candidates.filter((item) => item.kind === activeFilter);
 }
 
+function stateFor(item) {
+  return reviewStates.get(`${item.targetType}:${item.targetId}`) || 'observe';
+}
+
+function scheduleFor(item) {
+  const threshold = {
+    browse_account: policy.browseAccountDays,
+    unused_account: policy.unusedAccountDays,
+    empty_room: policy.emptyRoomDays,
+    dormant_room: policy.dormantRoomDays,
+    excessive_creation: 0
+  }[item.kind] || 0;
+  const eligibleAt = (Number(item.lastActivityAt) || Date.now()) + threshold * DAY;
+  const noticeAt = Math.max(Date.now(), eligibleAt);
+  return {
+    noticeLabel: eligibleAt <= Date.now() ? `지금 안내 가능 · ${formatDateTime(Date.now())}` : formatDateTime(noticeAt),
+    dormantUntil: formatDateTime(noticeAt + policy.noticeDays * DAY + policy.dormantGraceDays * DAY)
+  };
+}
+
+function renderPolicyField(key, label, min = 1, max = 365) {
+  return `<label class="admin-lifecycle-policy-field"><span>${label}</span><div><input type="number" min="${min}" max="${max}" value="${policy[key]}" data-policy-key="${key}"><small>일</small></div></label>`;
+}
+
 function renderCandidate(item) {
   const statusClass = item.severity === 'review' ? 'warn' : 'pending';
+  const reviewState = stateFor(item);
+  const schedule = scheduleFor(item);
   return `
-    <article class="admin-lifecycle-card">
+    <article class="admin-lifecycle-card${reviewState !== 'observe' ? ` is-${reviewState}` : ''}">
       <div class="admin-lifecycle-head">
         <div><strong>${escapeHtml(item.title)}</strong><p>${escapeHtml(item.reason)}</p></div>
-        <span class="admin-status-pill ${statusClass}">${item.severity === 'review' ? '검토 우선' : '관찰'}</span>
+        <span class="admin-status-pill ${statusClass}">${reviewState === 'protected' ? '보호' : reviewState === 'excluded' ? '제외' : item.severity === 'review' ? '검토 우선' : '계속 관찰'}</span>
       </div>
       <div class="admin-lifecycle-target"><span>${item.targetType === 'user' ? '사용자' : 'Room'}</span><code title="${escapeHtml(item.targetId)}">${escapeHtml(compactId(item.targetId, 12, 8))}</code></div>
       <ul>${item.details.map((detail) => `<li>${escapeHtml(detail)}</li>`).join('')}</ul>
-      <p class="admin-lifecycle-readonly">읽기 전용 · 자동 처리 없음</p>
+      <div class="admin-lifecycle-preview"><strong>정책 미리보기</strong><span>안내 예정 ${escapeHtml(schedule.noticeLabel)}</span><span>휴면 유예 종료 ${escapeHtml(schedule.dormantUntil)}</span></div>
+      <details class="admin-lifecycle-paths"><summary>영향 경로 ${item.paths.length}개</summary>${item.paths.map((path) => `<code>${escapeHtml(path)}</code>`).join('')}</details>
+      <div class="admin-lifecycle-actions" data-review-target="${escapeHtml(`${item.targetType}:${item.targetId}`)}">
+        <button type="button" data-review-state="observe"${reviewState === 'observe' ? ' class="is-active"' : ''}>계속 관찰</button>
+        <button type="button" data-review-state="protected"${reviewState === 'protected' ? ' class="is-active"' : ''}>보호</button>
+        <button type="button" data-review-state="excluded"${reviewState === 'excluded' ? ' class="is-active"' : ''}>제외</button>
+      </div>
+      <p class="admin-lifecycle-readonly">브라우저 임시 검토 상태 · 서버 저장 및 자동 처리 없음</p>
     </article>`;
 }
 
@@ -197,9 +243,19 @@ function renderShell() {
       </section>
       <section class="admin-card admin-panel">
         <div class="admin-panel-head">
-          <div><h2>베타 관찰 기준</h2><p>가입 3일 후 미인증·미연결 계정, 3일 이상 비어 있는 1인 Room, 7일 이상 무활동 후보, 소유 Room 3개 이상을 표시합니다.</p></div>
-          <span class="admin-status-pill muted">Dry Run</span>
+          <div><h2>정책 설정 · 미리보기</h2><p>기간을 바꾸면 후보와 예정일만 다시 계산합니다. 설정은 새로고침하면 초기화되며 데이터베이스에는 저장하지 않습니다.</p></div>
+          <span class="admin-status-pill muted">A12.2 Dry Run</span>
         </div>
+        <form class="admin-lifecycle-policy-form" data-lifecycle-policy>
+          ${renderPolicyField('browseAccountDays', '미인증·미연결 계정')}
+          ${renderPolicyField('unusedAccountDays', '미사용 계정')}
+          ${renderPolicyField('emptyRoomDays', '빈 Room')}
+          ${renderPolicyField('dormantRoomDays', '2인 무활동 Room')}
+          ${renderPolicyField('noticeDays', '사용자 안내 유예')}
+          ${renderPolicyField('dormantGraceDays', '휴면 후 보존', 7, 730)}
+          <label class="admin-lifecycle-policy-field"><span>소유 Room 점검</span><div><input type="number" min="2" max="50" value="${policy.excessiveRoomCount}" data-policy-key="excessiveRoomCount"><small>개</small></div></label>
+          <button class="admin-primary-button" type="submit">정책 다시 계산</button>
+        </form>
         <div class="admin-lifecycle-policy-grid">
           <div><strong>둘러보기 계정</strong><span>${analysis.counts.browse_account}</span></div>
           <div><strong>미사용 계정</strong><span>${analysis.counts.unused_account}</span></div>
@@ -213,7 +269,7 @@ function renderShell() {
         <div class="admin-segment-row">${FILTERS.map(([id, label]) => `<button class="admin-chip${activeFilter === id ? ' is-active' : ''}" type="button" data-lifecycle-filter="${id}">${label}</button>`).join('')}</div>
         <div class="admin-lifecycle-list">${items.length ? items.map(renderCandidate).join('') : '<div class="state-card"><strong>현재 조건에 맞는 후보가 없습니다.</strong><p>다른 분류를 선택하거나 다음 분석 시점에 다시 확인하세요.</p></div>'}</div>
       </section>
-      <section class="admin-warning-box">이 화면의 결과는 운영 판단을 돕는 후보입니다. 후보로 표시되었다는 이유만으로 계정이나 Room을 삭제해서는 안 됩니다.</section>
+      <section class="admin-warning-box">보호·제외·계속 관찰 선택도 현재 브라우저에서만 유지됩니다. A12.3 전까지 실제 휴면, 복원, 자동 삭제는 모두 꺼져 있습니다.</section>
     </section>`;
 }
 
@@ -225,8 +281,27 @@ export async function render() {
 export function afterRender(root) {
   root.addEventListener('click', (event) => {
     const button = event.target.closest('[data-lifecycle-filter]');
-    if (!button) return;
-    activeFilter = button.dataset.lifecycleFilter || 'all';
+    if (button) {
+      activeFilter = button.dataset.lifecycleFilter || 'all';
+      root.innerHTML = renderShell();
+      return;
+    }
+    const reviewButton = event.target.closest('[data-review-state]');
+    const actionRow = reviewButton?.closest('[data-review-target]');
+    if (!reviewButton || !actionRow) return;
+    reviewStates.set(actionRow.dataset.reviewTarget, reviewButton.dataset.reviewState || 'observe');
+    root.innerHTML = renderShell();
+  });
+  root.addEventListener('submit', async (event) => {
+    const form = event.target.closest('[data-lifecycle-policy]');
+    if (!form) return;
+    event.preventDefault();
+    form.querySelectorAll('[data-policy-key]').forEach((input) => {
+      const value = Math.max(Number(input.min) || 1, Math.min(Number(input.max) || 730, Number(input.value) || 1));
+      policy[input.dataset.policyKey] = value;
+    });
+    root.innerHTML = '<div class="state-card"><strong>정책을 다시 계산하고 있습니다.</strong></div>';
+    analysis = await loadAnalysis();
     root.innerHTML = renderShell();
   });
 }
