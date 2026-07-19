@@ -1,6 +1,6 @@
 import { setState } from './admin-state.js';
-import { renderTopbar } from './components/topbar.js?v=admin-2-0-a14-1-backup-registry-20260719';
-import { renderLoadingState } from './components/loading-state.js?v=admin-2-0-a14-1-backup-registry-20260719';
+import { renderTopbar } from './components/topbar.js?v=admin-2-0-a14-2-4-recovery-safety-suite-20260719';
+import { renderLoadingState } from './components/loading-state.js?v=admin-2-0-a14-2-4-recovery-safety-suite-20260719';
 import { ADMIN_RELEASE } from './admin-release.js';
 
 const routes = new Set(['dashboard', 'users', 'rooms', 'lifecycle', 'requests', 'backups', 'recovery', 'audit', 'releases', 'system']);

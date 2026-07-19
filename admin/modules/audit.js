@@ -1,4 +1,4 @@
-import { getAdminDatabase } from '../admin-api.js?v=admin-2-0-a14-1-backup-registry-20260719';
+import { getAdminDatabase } from '../admin-api.js?v=admin-2-0-a14-2-4-recovery-safety-suite-20260719';
 import { ADMIN_RELEASE } from '../admin-release.js';
 
 const STEP_LABEL = `${ADMIN_RELEASE.step} · ${ADMIN_RELEASE.label}`;

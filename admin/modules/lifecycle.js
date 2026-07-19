@@ -1,5 +1,5 @@
-import { getAdminDatabase } from '../admin-api.js?v=admin-2-0-a14-1-backup-registry-20260719';
-import { asObject, escapeHtml, formatDateTime, latestNumber, compactId } from '../admin-utils.js?v=admin-2-0-a14-1-backup-registry-20260719';
+import { getAdminDatabase } from '../admin-api.js?v=admin-2-0-a14-2-4-recovery-safety-suite-20260719';
+import { asObject, escapeHtml, formatDateTime, latestNumber, compactId } from '../admin-utils.js?v=admin-2-0-a14-2-4-recovery-safety-suite-20260719';
 
 const DAY = 24 * 60 * 60 * 1000;
 const MEANINGFUL_ROOM_KEYS = new Set([

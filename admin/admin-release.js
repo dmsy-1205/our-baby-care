@@ -1,14 +1,14 @@
 export const ADMIN_RELEASE = Object.freeze({
-  step: 'STEP A14.1',
-  label: 'Backup Registry & Integrity',
-  cacheKey: 'admin-2-0-a14-1-backup-registry-20260719',
+  step: 'STEP A14.2~A14.4',
+  label: 'Recovery Safety Suite',
+  cacheKey: 'admin-2-0-a14-2-4-recovery-safety-suite-20260719',
   releaseDate: '2026.07.19',
   stage: 'Beta',
   deletionMode: 'LOCKED',
   changes: Object.freeze([
-    '삭제 요청별 서버 운영 스냅샷 생성',
-    'SHA-256 체크섬 무결성 검증',
-    '백업 등록부와 승인 엔진 연결',
-    '영구 삭제 실행 스위치 OFF 유지'
+    '복구 Dry Run 및 충돌 경로 분석',
+    '통제 복구 서버 잠금 구조',
+    '외부 백업 증빙 등록부',
+    '실제 복구·영구 삭제 스위치 OFF 유지'
   ])
 });

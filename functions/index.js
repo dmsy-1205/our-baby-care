@@ -115,6 +115,61 @@ function encodeSnapshotValue(value) {
   return value;
 }
 
+function decodeSnapshotValue(value) {
+  if (value && typeof value === "object" && !Array.isArray(value) && value.__hmSnapshotType) {
+    if (value.__hmSnapshotType === "empty_object") return {};
+    if (value.__hmSnapshotType === "empty_array") return [];
+    return null;
+  }
+  if (Array.isArray(value)) return value.map(decodeSnapshotValue);
+  if (value && typeof value === "object") {
+    return Object.fromEntries(Object.entries(value).map(([key, child]) => [key, decodeSnapshotValue(child)]));
+  }
+  return value;
+}
+
+function valuesEqual(left, right) {
+  return stableStringify(left) === stableStringify(right);
+}
+
+function compareRestoreValue(path, backupValue, currentValue, result) {
+  if (result.samples.length >= 200 && result.scanned >= 5000) return;
+  result.scanned += 1;
+  if (valuesEqual(backupValue, currentValue)) {
+    result.unchanged += 1;
+    return;
+  }
+  const backupObject = backupValue && typeof backupValue === "object" && !Array.isArray(backupValue);
+  const currentObject = currentValue && typeof currentValue === "object" && !Array.isArray(currentValue);
+  if (backupObject && currentObject) {
+    const keys = new Set([...Object.keys(backupValue), ...Object.keys(currentValue)]);
+    for (const key of keys) {
+      if (!(key in backupValue)) continue;
+      compareRestoreValue(`${path}/${key}`, backupValue[key], currentValue[key], result);
+      if (result.scanned >= 5000) break;
+    }
+    return;
+  }
+  const action = currentValue === undefined || currentValue === null ? "create" : "overwrite";
+  result[action] += 1;
+  if (result.samples.length < 200) result.samples.push({ path, action });
+}
+
+function restoreRoots(payload) {
+  const decoded = decodeSnapshotValue(payload);
+  if (decoded.requestType === "delete_room") {
+    return [
+      { path: `rooms/${decoded.roomCode}`, value: decoded.data?.room },
+      { path: `roomMembers/${decoded.roomCode}`, value: decoded.data?.roomMembers }
+    ].filter((item) => item.value !== null && item.value !== undefined);
+  }
+  return [
+    { path: `users/${decoded.targetUid}`, value: decoded.data?.user },
+    { path: `userRooms/${decoded.targetUid}`, value: decoded.data?.userRooms },
+    ...Object.entries(decoded.data?.memberships || {}).map(([roomCode, value]) => ({ path: `roomMembers/${roomCode}/${decoded.targetUid}`, value }))
+  ].filter((item) => item.value !== null && item.value !== undefined);
+}
+
 async function readDeletionRequest(db, targetUid, requestId) {
   const ref = db.ref(`dataDeleteRequests/${targetUid}/${requestId}`);
   const snap = await ref.get();
@@ -220,6 +275,86 @@ exports.verifyDeletionBackup = onCall(async (request) => {
     requestId, adminUid: caller.uid, checksum, createdAt: now
   });
   return { ok: verified, requestId, status: verified ? "verified" : "failed", checksum };
+});
+
+// STEP A14.2: compares a verified snapshot with live data and stores only a restore plan.
+exports.generateRestoreDryRun = onCall(async (request) => {
+  const caller = await requireAdminCaller(request);
+  const requestId = String(request.data?.requestId || "").trim();
+  if (!requestId) throw new HttpsError("invalid-argument", "요청 ID가 필요합니다.");
+  const db = admin.database();
+  const [snapshotSnap, registrySnap] = await Promise.all([
+    db.ref(`dataBackupSnapshots/${requestId}`).get(), db.ref(`dataBackups/${requestId}`).get()
+  ]);
+  if (!snapshotSnap.exists() || !registrySnap.exists()) throw new HttpsError("not-found", "검증 가능한 백업을 찾을 수 없습니다.");
+  const stored = snapshotSnap.val() || {};
+  const registry = registrySnap.val() || {};
+  const checksum = snapshotChecksum(stored.payload);
+  if (registry.status !== "verified" || checksum !== stored.checksum || checksum !== registry.checksum) {
+    throw new HttpsError("data-loss", "백업 체크섬이 일치하지 않아 복구 계획을 만들 수 없습니다.");
+  }
+
+  const roots = restoreRoots(stored.payload);
+  const result = { scanned: 0, create: 0, overwrite: 0, unchanged: 0, samples: [] };
+  for (const root of roots) {
+    const currentSnap = await db.ref(root.path).get();
+    compareRestoreValue(root.path, root.value, currentSnap.exists() ? currentSnap.val() : undefined, result);
+  }
+  const risk = result.overwrite > 0 ? "review_required" : result.create > 0 ? "restorable" : "no_changes";
+  const now = Date.now();
+  const plan = {
+    requestId, targetUid: registry.targetUid || "", requestType: registry.requestType || "",
+    roomCode: registry.roomCode || "", status: "dry_run_complete", risk,
+    checksum, backupVerified: true, restoreExecutionEnabled: false,
+    rootPaths: roots.map((item) => item.path), summary: result,
+    createdByUid: caller.uid, createdAt: now, updatedAt: now
+  };
+  await db.ref(`restorePlans/${requestId}`).set(plan);
+  await db.ref(`adminAuditLogs/${now}_${requestId}_restore_dry_run`).set({
+    action: "restore_dry_run_completed", requestId, adminUid: caller.uid,
+    risk, createCount: result.create, overwriteCount: result.overwrite,
+    unchangedCount: result.unchanged, restoreExecutionEnabled: false, createdAt: now
+  });
+  return { ok: true, plan };
+});
+
+// STEP A14.3 scaffold: deliberately hard-locked until test-room recovery approval.
+exports.executeControlledRestore = onCall(async (request) => {
+  await requireAdminCaller(request);
+  const requestId = String(request.data?.requestId || "").trim();
+  if (!requestId) throw new HttpsError("invalid-argument", "요청 ID가 필요합니다.");
+  throw new HttpsError("failed-precondition", "통제 복구 실행은 현재 서버에서 잠겨 있습니다. Dry Run 결과만 확인할 수 있습니다.");
+});
+
+// STEP A14.4: registers evidence of an external backup. It does not claim the file is verified.
+exports.registerExternalBackupEvidence = onCall(async (request) => {
+  const caller = await requireAdminCaller(request);
+  const requestId = String(request.data?.requestId || "").trim();
+  const provider = String(request.data?.provider || "").trim();
+  const objectRef = String(request.data?.objectRef || "").trim();
+  const checksum = String(request.data?.checksum || "").trim().toLowerCase();
+  const capturedAt = Number(request.data?.capturedAt || 0);
+  if (!requestId || !['google_cloud_storage', 'firebase_export', 'manual_export'].includes(provider)) {
+    throw new HttpsError("invalid-argument", "요청 ID와 허용된 외부 백업 방식을 입력해 주세요.");
+  }
+  if (!objectRef || objectRef.length > 500 || !/^[a-f0-9]{64}$/.test(checksum) || !capturedAt) {
+    throw new HttpsError("invalid-argument", "외부 객체 위치, SHA-256 체크섬과 생성 시각이 필요합니다.");
+  }
+  const db = admin.database();
+  const backupSnap = await db.ref(`dataBackups/${requestId}`).get();
+  if (!backupSnap.exists()) throw new HttpsError("failed-precondition", "먼저 프로젝트 내부 백업을 생성해 주세요.");
+  const now = Date.now();
+  const evidence = {
+    requestId, provider, objectRef, checksum, capturedAt,
+    status: "evidence_registered", verification: "manual_review_required",
+    registeredByUid: caller.uid, registeredAt: now, updatedAt: now
+  };
+  await db.ref(`externalBackupRegistry/${requestId}`).set(evidence);
+  await db.ref(`adminAuditLogs/${now}_${requestId}_external_backup`).set({
+    action: "external_backup_evidence_registered", requestId, provider,
+    adminUid: caller.uid, createdAt: now
+  });
+  return { ok: true, evidence };
 });
 
 // STEP A13.1: builds a server-side deletion preflight. It never deletes data.
