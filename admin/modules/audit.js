@@ -1,6 +1,7 @@
-import { getAdminDatabase } from '../admin-api.js?v=admin-2-0-a11-1-3-admin-route-hotfix-20260719';
+import { getAdminDatabase } from '../admin-api.js?v=admin-2-0-a13-2-approval-queue-visibility-20260719';
+import { ADMIN_RELEASE } from '../admin-release.js';
 
-const STEP_LABEL = 'STEP A11.1.3 - Admin Route Hotfix';
+const STEP_LABEL = `${ADMIN_RELEASE.step} · ${ADMIN_RELEASE.label}`;
 
 async function readPath(path) {
   const db = getAdminDatabase();
@@ -89,16 +90,19 @@ function logRow(record) {
 }
 
 export async function render() {
-  const [auditRaw, requestsRaw] = await Promise.all([
+  const [auditRaw, requestsRaw, queueRaw] = await Promise.all([
     readPath('adminAuditLogs'),
     readPath('dataDeleteRequests'),
+    readPath('deletionActionQueue'),
   ]);
 
   const logs = flattenRecords(auditRaw)
     .sort((a, b) => Number(recordTime(b) || 0) - Number(recordTime(a) || 0))
     .slice(0, 80);
   const requests = flattenRecords(requestsRaw);
+  const queue = flattenRecords(queueRaw);
   const approveCount = logs.filter((item) => String(item.status || item.action || '').includes('approve') || String(item.status || '').includes('approved')).length;
+  const backupReady = queue.filter((item) => item.preflight?.backupVerified === true || item.backupVerified === true).length;
   const latest = logs[0] ? fmtTime(recordTime(logs[0])) : '-';
 
   return `
@@ -115,7 +119,16 @@ export async function render() {
         <div class="admin-clean-card"><div>최근 로그</div><div class="admin-clean-kpi">${logs.length}</div><p class="admin-clean-muted">최대 80개 표시</p></div>
         <div class="admin-clean-card"><div>데이터 요청</div><div class="admin-clean-kpi">${requests.length}</div><p class="admin-clean-muted">요청관리 작업</p></div>
         <div class="admin-clean-card"><div>승인 기록</div><div class="admin-clean-kpi">${approveCount}</div><p class="admin-clean-muted">실행 전 검토 기준</p></div>
+        <div class="admin-clean-card"><div>승인 대기열</div><div class="admin-clean-kpi">${queue.length}</div><p class="admin-clean-muted">백업 확인 ${backupReady}건</p></div>
         <div class="admin-clean-card"><div>최근 작업</div><div class="admin-clean-kpi">${latest}</div><p class="admin-clean-muted">마지막 로그 시간</p></div>
+      </div>
+
+      <div class="admin-clean-card">
+        <h2>삭제 승인 대기열</h2>
+        <p class="admin-clean-muted">영구 삭제 실행은 잠겨 있으며 사전점검과 승인 상태만 표시합니다.</p>
+        <div class="admin-clean-list">
+          ${queue.length ? queue.map((item) => `<div class="admin-clean-row"><strong>${esc(item.requestType || '삭제 요청')}</strong><span class="admin-chip">${esc(item.status || '대기')}</span><span class="admin-chip">백업 ${item.preflight?.backupVerified || item.backupVerified ? '확인' : '미확인'}</span><div class="admin-path admin-clean-muted">요청 ${esc(item.requestId || item.id)} · 실행 ${item.executionEnabled === true ? '활성' : '잠금'}</div></div>`).join('') : '<div class="admin-clean-row admin-clean-muted">승인 대기 작업이 없습니다.</div>'}
+        </div>
       </div>
 
       <div class="admin-clean-card">

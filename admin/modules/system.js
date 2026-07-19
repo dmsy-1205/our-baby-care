@@ -1,10 +1,11 @@
-import { getAdminDatabase } from '../admin-api.js?v=admin-2-0-a11-1-2-route-cleanup-20260719';
+import { getAdminDatabase } from '../admin-api.js?v=admin-2-0-a13-2-approval-queue-visibility-20260719';
 import { getState } from '../admin-state.js';
-import { escapeHtml } from '../admin-utils.js?v=admin-2-0-a11-1-2-route-cleanup-20260719';
+import { escapeHtml } from '../admin-utils.js?v=admin-2-0-a13-2-approval-queue-visibility-20260719';
+import { ADMIN_RELEASE } from '../admin-release.js';
 
-const ADMIN_STEP = 'STEP A11.1.2';
-const ADMIN_LABEL = 'Route Cleanup';
-const ADMIN_CACHE_KEY = 'admin-2-0-a11-1-2-route-cleanup-20260719';
+const ADMIN_STEP = ADMIN_RELEASE.step;
+const ADMIN_LABEL = ADMIN_RELEASE.label;
+const ADMIN_CACHE_KEY = ADMIN_RELEASE.cacheKey;
 
 function asObject(value) {
   return value && typeof value === 'object' ? value : {};
@@ -33,7 +34,8 @@ async function loadSystemStatus() {
   const reads = await Promise.all([
     readPath(database, '사용자', 'users'), readPath(database, 'Room', 'rooms'),
     readPath(database, 'Room 멤버', 'roomMembers'), readPath(database, '사용자 Room 연결', 'userRooms'),
-    readPath(database, '데이터 요청', 'dataDeleteRequests'), readPath(database, '감사 로그', 'adminAuditLogs')
+    readPath(database, '데이터 요청', 'dataDeleteRequests'), readPath(database, '감사 로그', 'adminAuditLogs'),
+    readPath(database, '삭제 승인 대기열', 'deletionActionQueue'), readPath(database, '백업 확인', 'dataBackups')
   ]);
   const byPath = Object.fromEntries(reads.map((item) => [item.path, item]));
   const users = byPath.users.value;
@@ -41,6 +43,8 @@ async function loadSystemStatus() {
   const roomMembers = byPath.roomMembers.value;
   const userRooms = byPath.userRooms.value;
   const requests = flattenRequests(byPath.dataDeleteRequests.value);
+  const deletionQueue = asObject(byPath.deletionActionQueue.value);
+  const backups = asObject(byPath.dataBackups.value);
   const roomCodes = new Set([...Object.keys(rooms), ...Object.keys(roomMembers)]);
   const userRoomMismatch = [];
   const membershipsWithoutUser = [];
@@ -72,7 +76,10 @@ async function loadSystemStatus() {
     roomMembersCount: Object.values(roomMembers).reduce((sum, members) => sum + Object.keys(asObject(members)).length, 0),
     requestsCount: requests.length, openRequestsCount: openRequests.length,
     risks: { userRoomMismatch, membershipsWithoutUser, roomsWithoutMembers, openRequests },
-    requestStatusCounts, requestTypeCounts
+    requestStatusCounts, requestTypeCounts,
+    deletionQueueCount: Object.keys(deletionQueue).length,
+    backupVerifiedCount: Object.values(backups).filter((item) => item?.status === 'verified' && Number(item?.verifiedAt || 0) > 0).length,
+    deletionExecutionEnabledCount: Object.values(deletionQueue).filter((item) => item?.executionEnabled === true).length
   };
 }
 
@@ -100,8 +107,12 @@ export async function render() {
         <div class="admin-panel-head"><div><h2>운영 연결 상태</h2><p>관리자 화면이 정상적으로 데이터를 읽을 수 있는지 확인합니다.</p></div><span class="admin-status-pill muted">Read Only</span></div>
         <div class="admin-grid admin-grid-2">
           <article class="admin-soft-card"><h3>앱 기준</h3><div class="admin-key-value"><span>메인 앱 버전</span><strong>${escapeHtml(release.step || 'STEP6.2.13.4')}</strong></div><div class="admin-key-value"><span>관리자 스텝</span><strong>${ADMIN_STEP}</strong></div><div class="admin-key-value"><span>캐시 키</span><strong>${ADMIN_CACHE_KEY}</strong></div></article>
-          <article class="admin-soft-card"><h3>안전 기준</h3><ul><li>관리자 인증을 통과한 계정만 접근</li><li>현재 화면에서 데이터 저장·삭제 기능 없음</li><li>주요 경로의 읽기 점검만 수행</li><li>메인 앱 버전과 관리자 스텝을 분리 관리</li></ul></article>
+          <article class="admin-soft-card"><h3>안전 기준</h3><ul><li>관리자 인증을 통과한 계정만 접근</li><li>승인 대기열은 서버 함수만 기록</li><li>검증된 백업 전 2차 승인 차단</li><li>영구 삭제 실행 모드 ${ADMIN_RELEASE.deletionMode}</li></ul></article>
         </div>
+      </section>
+      <section class="admin-card admin-panel">
+        <div class="admin-panel-head"><div><h2>승인 엔진 안전 상태</h2><p>서버 사전점검, 백업 확인과 실행 잠금 상태를 확인합니다.</p></div><span class="admin-status-pill ${status.deletionExecutionEnabledCount ? 'danger' : 'ok'}">${status.deletionExecutionEnabledCount ? '실행 활성 감지' : '영구 삭제 잠금'}</span></div>
+        <section class="admin-grid admin-grid-3"><article class="admin-card admin-metric"><span>승인 대기열</span><strong>${status.deletionQueueCount}</strong><small>deletionActionQueue</small></article><article class="admin-card admin-metric"><span>검증된 백업</span><strong>${status.backupVerifiedCount}</strong><small>dataBackups</small></article><article class="admin-card admin-metric"><span>실행 활성</span><strong>${status.deletionExecutionEnabledCount}</strong><small>정상 기준 0건</small></article></section>
       </section>
       <section class="admin-card admin-panel">
         <div class="admin-panel-head"><div><h2>데이터 관리 센터 · 읽기 점검</h2><p>실제 데이터를 변경하지 않고 운영자가 먼저 확인해야 할 데이터 구조와 위험 신호를 요약합니다.</p></div><span class="admin-status-pill muted">Read Only</span></div>

@@ -1,5 +1,6 @@
 import { getAdminDatabase } from '../admin-api.js?v=admin-2-0-a11-1-clean-baseline-20260719';
 import { asObject, countObject } from '../admin-utils.js?v=admin-2-0-a11-1-clean-baseline-20260719';
+import { ADMIN_RELEASE } from '../admin-release.js';
 
 async function loadDashboardData() {
   const database = getAdminDatabase();
@@ -52,14 +53,14 @@ export async function render() {
       <section class="admin-card admin-panel">
         <div class="admin-panel-head">
           <div>
-            <h2>STEP A13.1 적용 범위</h2>
+            <h2>${ADMIN_RELEASE.step} 적용 범위</h2>
             <p>승인된 계정·Room 삭제 요청의 백업 상태, 대상 경로, 공동 데이터 권리를 서버에서 다시 점검합니다.</p>
           </div>
           <span class="admin-status-pill danger">Deletion Locked</span>
         </div>
         <div class="admin-grid admin-grid-4">
-          <div class="admin-soft-card">✓ 정책 기간 조정</div>
-          <div class="admin-soft-card">✓ 후보 재계산</div>
+          <div class="admin-soft-card">✓ 관리자 버전 통합</div>
+          <div class="admin-soft-card">✓ 승인 대기열 표시</div>
           <div class="admin-soft-card">✓ 안내 예정일</div>
           <div class="admin-soft-card">✓ 휴면 유예 종료일</div>
           <div class="admin-soft-card">✓ 영향 경로 표시</div>

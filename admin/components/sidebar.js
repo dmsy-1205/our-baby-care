@@ -1,7 +1,8 @@
 import { escapeHtml } from '../admin-utils.js?v=admin-2-0-a11-1-clean-baseline-20260719';
+import { ADMIN_RELEASE } from '../admin-release.js';
 
-const ADMIN_CONSOLE_STEP = 'STEP A13.1';
-const ADMIN_CONSOLE_STEP_LABEL = 'Approval Preflight';
+const ADMIN_CONSOLE_STEP = ADMIN_RELEASE.step;
+const ADMIN_CONSOLE_STEP_LABEL = ADMIN_RELEASE.label;
 
 const items = [
   ['dashboard', '대시보드', '▦'],

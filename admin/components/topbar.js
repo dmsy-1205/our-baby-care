@@ -1,4 +1,5 @@
 import { escapeHtml } from '../admin-utils.js?v=admin-2-0-a11-1-clean-baseline-20260719';
+import { ADMIN_RELEASE } from '../admin-release.js';
 
 const titles = {
   dashboard: ['운영 대시보드', '서비스 상태와 주요 운영 항목을 확인합니다.'],
@@ -22,6 +23,6 @@ export function renderTopbar(route) {
         <h1>${escapeHtml(title)}</h1>
         <p>${escapeHtml(description)}</p>
       </div>
-      <div class="topbar-actions"><span class="phase-badge">Beta · Approval Preflight</span></div>
+      <div class="topbar-actions"><span class="phase-badge">${escapeHtml(ADMIN_RELEASE.stage)} · ${escapeHtml(ADMIN_RELEASE.label)}</span></div>
     </header>`;
 }

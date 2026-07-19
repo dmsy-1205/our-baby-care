@@ -1,8 +1,9 @@
-import { waitForAuthenticatedUser, readAdminProfile, isActiveAdmin, signOutAdmin } from './admin-api.js?v=admin-2-0-a13-1-approval-preflight-20260719';
+import { waitForAuthenticatedUser, readAdminProfile, isActiveAdmin, signOutAdmin } from './admin-api.js?v=admin-2-0-a13-2-approval-queue-visibility-20260719';
 import { setState } from './admin-state.js';
-import { setDocumentBusy } from './admin-utils.js?v=admin-2-0-a13-1-approval-preflight-20260719';
-import { renderSidebar } from './components/sidebar.js?v=admin-2-0-a13-1-approval-preflight-20260719';
-import { startRouter, navigate } from './admin-router.js?v=admin-2-0-a13-1-approval-preflight-20260719';
+import { setDocumentBusy } from './admin-utils.js?v=admin-2-0-a13-2-approval-queue-visibility-20260719';
+import { renderSidebar } from './components/sidebar.js?v=admin-2-0-a13-2-approval-queue-visibility-20260719';
+import { startRouter, navigate } from './admin-router.js?v=admin-2-0-a13-2-approval-queue-visibility-20260719';
+import { ADMIN_RELEASE } from './admin-release.js';
 
 const boot = document.getElementById('adminBoot');
 const root = document.getElementById('adminRoot');
@@ -90,7 +91,7 @@ async function bootstrap() {
     setState({ phase: 'ready', user, adminProfile, bootedAt: Date.now() });
     renderShell(user);
     startRouter();
-    console.info('[Admin 2.0] A11.1 clean baseline ready');
+    console.info(`[Admin 2.0] ${ADMIN_RELEASE.step} ${ADMIN_RELEASE.label} ready`);
   } catch (error) {
     console.error('[Admin 2.0] bootstrap failed', error);
     setState({ phase: 'error', bootError: error });
