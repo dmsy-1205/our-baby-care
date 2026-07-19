@@ -1,35 +1,9 @@
-const STEP_LABEL = 'STEP A11.1.2 - Route Cleanup';
+import { getAdminDatabase } from '../admin-api.js?v=admin-2-0-a11-1-3-admin-route-hotfix-20260719';
 
-function resolveRoot(context = {}) {
-  return context.root || context.container || context.mount || context.app || context.el ||
-    document.querySelector('[data-admin-view]') ||
-    document.getElementById('admin-view') ||
-    document.getElementById('admin-content') ||
-    document.querySelector('.admin-main') ||
-    document.querySelector('main') ||
-    document.body;
-}
-
-function mount(context, html) {
-  const root = resolveRoot(context);
-  if (!root) {
-    throw new Error('관리자 화면 컨테이너를 찾을 수 없습니다.');
-  }
-  root.innerHTML = html;
-}
-
-function database() {
-  if (!window.firebase || !firebase.apps || !firebase.apps.length) {
-    return null;
-  }
-  return firebase.database();
-}
+const STEP_LABEL = 'STEP A11.1.3 - Admin Route Hotfix';
 
 async function readPath(path) {
-  const db = database();
-  if (!db) {
-    return null;
-  }
+  const db = getAdminDatabase();
   const snap = await db.ref(path).once('value');
   return snap.val();
 }
@@ -114,7 +88,7 @@ function logRow(record) {
   `;
 }
 
-export async function render(context = {}) {
+export async function render() {
   const [auditRaw, requestsRaw] = await Promise.all([
     readPath('adminAuditLogs'),
     readPath('dataDeleteRequests'),
@@ -127,7 +101,7 @@ export async function render(context = {}) {
   const approveCount = logs.filter((item) => String(item.status || item.action || '').includes('approve') || String(item.status || '').includes('approved')).length;
   const latest = logs[0] ? fmtTime(recordTime(logs[0])) : '-';
 
-  mount(context, `
+  return `
     ${styles()}
     <section class="admin-clean-wrap">
       <div class="admin-clean-card">
@@ -152,7 +126,7 @@ export async function render(context = {}) {
         </div>
       </div>
     </section>
-  `);
+  `;
 }
 
 export default { render };

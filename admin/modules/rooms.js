@@ -1,6 +1,5 @@
 import { getAdminDatabase } from '../admin-api.js?v=admin-2-0-a11-1-clean-baseline-20260719';
 import { asObject, escapeHtml, formatDateTime, latestNumber } from '../admin-utils.js?v=admin-2-0-a11-1-clean-baseline-20260719';
-import { renderEmptyState } from '../components/empty-state.js?v=admin-2-0-a11-1-clean-baseline-20260719';
 
 let rooms = [];
 let query = '';
@@ -25,7 +24,7 @@ async function loadRooms() {
       const info = asObject(member);
       return {
         uid,
-        role: info.role || '-',
+        role: info.relationshipRole || info.role || '-',
         email: users[uid]?.email || info.email || uid
       };
     });
@@ -48,47 +47,39 @@ function filteredRooms() {
   ].join(' ').toLowerCase().includes(keyword));
 }
 
-function renderRoomCard(room) {
+function renderRoomRow(room) {
+  const owner = room.members.find((member) => member.role === 'owner' || member.role === 'dom');
+  const partner = room.members.find((member) => member.role === 'partner' || member.role === 'sub');
   return `
-    <article class="admin-card admin-list-card">
-      <div>
-        <h3>${escapeHtml(room.roomCode)}</h3>
-        <p>${room.members.length}명 · Room 데이터 ${room.hasData ? '있음' : '없음'}</p>
-        <div class="admin-meta-row">
-          <span>${room.hasData ? '정상' : '점검 필요'}</span>
-          <span>최근 ${escapeHtml(formatDateTime(room.updatedAt))}</span>
-        </div>
-        <div class="admin-meta-row">
-          ${room.members.map((member) => `<span>${escapeHtml(member.email)} · ${escapeHtml(member.role)}</span>`).join('')}
-        </div>
-      </div>
-    </article>
+    <tr>
+      <td><strong>${escapeHtml(room.roomCode)}</strong><br><small>${room.hasData ? '데이터 있음' : '데이터 없음'}</small></td>
+      <td>${escapeHtml(owner?.email || '-')}</td>
+      <td>${escapeHtml(partner?.email || '-')}</td>
+      <td>${room.members.length}명</td>
+      <td><span class="admin-status-pill ${room.hasData ? 'ok' : 'warn'}">${room.hasData ? '정상' : '점검 필요'}</span></td>
+      <td>${escapeHtml(formatDateTime(room.updatedAt))}</td>
+    </tr>
   `;
 }
 
 function renderShell() {
-  const emptyRooms = rooms.filter((room) => room.members.length === 0).length;
   const filtered = filteredRooms();
 
   return `
     <section class="module-view" aria-labelledby="roomsHeading">
-      <section class="admin-grid admin-grid-4">
-        <article class="admin-card admin-metric"><span>전체 Room</span><strong>${rooms.length}</strong><small>통합 기준</small></article>
-        <article class="admin-card admin-metric"><span>Room 데이터</span><strong>${rooms.filter((room) => room.hasData).length}</strong><small>rooms 존재</small></article>
-        <article class="admin-card admin-metric"><span>멤버 없음</span><strong>${emptyRooms}</strong><small>점검 필요</small></article>
-        <article class="admin-card admin-metric"><span>운영 모드</span><strong>읽기 전용</strong><small>Room 변경 없음</small></article>
-      </section>
-
       <section class="admin-card admin-panel">
         <div class="admin-panel-head">
           <div>
-            <h2 id="roomsHeading">Room 목록</h2>
-            <p>Room 연결, 멤버 구성, 데이터 존재 여부를 읽기 전용으로 확인합니다.</p>
+            <h2 id="roomsHeading">Room 관리</h2>
+            <p>기존 관리자 콘솔 형식으로 Owner와 Partner 연결을 확인합니다. 전체 ${rooms.length}개</p>
           </div>
-          <input data-room-search type="search" placeholder="Room 검색" value="${escapeHtml(query)}">
+          <input class="admin-table-search" data-room-search type="search" placeholder="Room Code, 이메일, UID 검색" value="${escapeHtml(query)}">
         </div>
-        <div class="admin-list">
-          ${filtered.length ? filtered.map(renderRoomCard).join('') : renderEmptyState('Room 없음', '검색 조건에 맞는 Room이 없습니다.')}
+        <div class="admin-table-wrap">
+          <table class="admin-data-table">
+            <thead><tr><th>Room</th><th>Dom / Owner</th><th>Sub / Partner</th><th>멤버</th><th>상태</th><th>최근 갱신</th></tr></thead>
+            <tbody>${filtered.length ? filtered.map(renderRoomRow).join('') : '<tr><td colspan="6">검색 조건에 맞는 Room이 없습니다.</td></tr>'}</tbody>
+          </table>
         </div>
       </section>
     </section>

@@ -1,21 +1,5 @@
-const STEP_LABEL = 'STEP A11.1.2 - Route Cleanup';
-const ADMIN_CACHE_KEY = 'admin-2-0-a11-1-2-route-cleanup-20260719';
-
-function resolveRoot(context = {}) {
-  return context.root || context.container || context.mount || context.app || context.el ||
-    document.querySelector('[data-admin-view]') ||
-    document.getElementById('admin-view') ||
-    document.getElementById('admin-content') ||
-    document.querySelector('.admin-main') ||
-    document.querySelector('main') ||
-    document.body;
-}
-
-function mount(context, html) {
-  const root = resolveRoot(context);
-  if (!root) throw new Error('관리자 화면 컨테이너를 찾을 수 없습니다.');
-  root.innerHTML = html;
-}
+const STEP_LABEL = 'STEP A11.1.3 - Admin Route Hotfix';
+const ADMIN_CACHE_KEY = 'admin-2-0-a11-1-3-admin-route-hotfix-20260719';
 
 function styles() {
   return `
@@ -33,8 +17,8 @@ function styles() {
     </style>`;
 }
 
-export async function render(context = {}) {
-  mount(context, `
+export function render() {
+  return `
     ${styles()}
     <section class="admin-clean-wrap">
       <div class="admin-clean-card">
@@ -67,7 +51,7 @@ export async function render(context = {}) {
           <div class="admin-clean-row">✓ 문제 발생 시 메인 앱 버전과 관리자 스텝을 분리해 롤백 판단</div>
         </div>
       </div>
-    </section>`);
+    </section>`;
 }
 
 export default { render };

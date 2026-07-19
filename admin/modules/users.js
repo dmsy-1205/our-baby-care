@@ -1,6 +1,5 @@
 import { getAdminDatabase } from '../admin-api.js?v=admin-2-0-a11-1-clean-baseline-20260719';
 import { asObject, compactId, escapeHtml, formatDateTime, latestNumber } from '../admin-utils.js?v=admin-2-0-a11-1-clean-baseline-20260719';
-import { renderEmptyState } from '../components/empty-state.js?v=admin-2-0-a11-1-clean-baseline-20260719';
 
 let users = [];
 let query = '';
@@ -21,7 +20,8 @@ async function loadUsers() {
 
   const uidSet = new Set([...Object.keys(usersValue), ...Object.keys(userRooms), ...memberUids]);
   users = [...uidSet].map((uid) => {
-    const profile = asObject(usersValue[uid]);
+    const userData = asObject(usersValue[uid]);
+    const profile = { ...userData, ...asObject(userData.profile) };
     const rooms = Object.keys(asObject(userRooms[uid]));
     const memberRooms = Object.entries(roomMembers)
       .filter(([, members]) => Boolean(asObject(members)[uid]))
@@ -31,11 +31,11 @@ async function loadUsers() {
 
     return {
       uid,
-      email: profile.email || profile.userEmail || '',
+      email: userData.email || profile.email || profile.userEmail || '',
       nickname: profile.nickname || profile.displayName || profile.name || profile.email || uid,
       rooms: allRooms,
       role,
-      lastSeen: latestNumber(profile.lastSeen, profile.updatedAt, profile.createdAt)
+      lastSeen: latestNumber(profile.lastSeen, profile.updatedAt, userData.updatedAt, userData.createdAt)
     };
   }).sort((a, b) => b.lastSeen - a.lastSeen);
 }
@@ -52,49 +52,38 @@ function filteredUsers() {
   ].join(' ').toLowerCase().includes(keyword));
 }
 
-function renderUserCard(user) {
-  const initial = (user.nickname || user.email || '?').slice(0, 1).toUpperCase();
+function renderUserRow(user) {
   const roomText = user.rooms.length ? `Room ${user.rooms[0]}${user.rooms.length > 1 ? ` 외 ${user.rooms.length - 1}` : ''}` : 'Room 미연결';
   return `
-    <article class="admin-card admin-list-card">
-      <div class="admin-avatar">${escapeHtml(initial)}</div>
-      <div>
-        <h3>${escapeHtml(user.nickname || user.email || user.uid)}</h3>
-        <p>${escapeHtml(user.email || '이메일 없음')}</p>
-        <div class="admin-meta-row">
-          <span>UID ${escapeHtml(compactId(user.uid))}</span>
-          <span>${escapeHtml(roomText)}</span>
-          <span>역할 ${escapeHtml(user.role || '-')}</span>
-          <span>최근 ${escapeHtml(formatDateTime(user.lastSeen))}</span>
-        </div>
-      </div>
-    </article>
+    <tr>
+      <td><strong>${escapeHtml(user.nickname || '-')}</strong><br><small>${escapeHtml(user.email || '이메일 없음')}</small></td>
+      <td><span class="admin-status-pill ${user.email ? 'ok' : 'warn'}">${user.email ? '확인' : '정보 없음'}</span></td>
+      <td>${escapeHtml(roomText)}</td>
+      <td>${escapeHtml(user.role || '-')}</td>
+      <td>${escapeHtml(formatDateTime(user.lastSeen))}</td>
+      <td><code title="${escapeHtml(user.uid)}">${escapeHtml(compactId(user.uid))}</code></td>
+    </tr>
   `;
 }
 
 function renderShell() {
-  const connected = users.filter((user) => user.rooms.length > 0).length;
   const filtered = filteredUsers();
 
   return `
     <section class="module-view" aria-labelledby="usersHeading">
-      <section class="admin-grid admin-grid-4">
-        <article class="admin-card admin-metric"><span>전체 사용자</span><strong>${users.length}</strong><small>users/roomMembers 통합</small></article>
-        <article class="admin-card admin-metric"><span>Room 연결</span><strong>${connected}</strong><small>연결 확인</small></article>
-        <article class="admin-card admin-metric"><span>미연결</span><strong>${users.length - connected}</strong><small>Room 없음</small></article>
-        <article class="admin-card admin-metric"><span>운영 모드</span><strong>읽기 전용</strong><small>사용자 데이터 변경 없음</small></article>
-      </section>
-
       <section class="admin-card admin-panel">
         <div class="admin-panel-head">
           <div>
-            <h2 id="usersHeading">사용자 목록</h2>
-            <p>가입자, Room 연결, 역할 정보를 읽기 전용으로 확인합니다.</p>
+            <h2 id="usersHeading">사용자 관리</h2>
+            <p>기존 관리자 콘솔 형식으로 사용자, 인증, Room 연결 정보를 확인합니다. 전체 ${users.length}명</p>
           </div>
-          <input data-user-search type="search" placeholder="사용자 검색" value="${escapeHtml(query)}">
+          <input class="admin-table-search" data-user-search type="search" placeholder="이메일, 닉네임, UID 검색" value="${escapeHtml(query)}">
         </div>
-        <div class="admin-list">
-          ${filtered.length ? filtered.map(renderUserCard).join('') : renderEmptyState('사용자 없음', '검색 조건에 맞는 사용자가 없습니다.')}
+        <div class="admin-table-wrap">
+          <table class="admin-data-table">
+            <thead><tr><th>사용자</th><th>인증</th><th>Room</th><th>역할</th><th>가입/갱신</th><th>UID</th></tr></thead>
+            <tbody>${filtered.length ? filtered.map(renderUserRow).join('') : '<tr><td colspan="6">검색 조건에 맞는 사용자가 없습니다.</td></tr>'}</tbody>
+          </table>
         </div>
       </section>
     </section>
