@@ -10,6 +10,7 @@ const items = [
   ['rooms', 'Room', '⌂'],
   ['lifecycle', '데이터 수명주기', '◉'],
   ['requests', '데이터 요청', '☑'],
+  ['backups', '백업 센터', '▣'],
   ['recovery', '복구 센터', '↺'],
   ['audit', '감사 로그', '≡'],
   ['releases', '릴리스', '⬆'],

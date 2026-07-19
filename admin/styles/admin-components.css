@@ -74,3 +74,6 @@
 @media(max-width:1100px){.admin-lifecycle-policy-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:1100px){.admin-lifecycle-policy-form{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:760px){.admin-lifecycle-list,.admin-lifecycle-policy-grid,.admin-lifecycle-policy-form{grid-template-columns:1fr}.admin-lifecycle-head,.admin-lifecycle-preview{display:grid;grid-template-columns:1fr}.admin-lifecycle-head .admin-status-pill{width:max-content}}
+
+/* STEP A14.1: backup registry and integrity verification. */
+.admin-backup-list{display:grid;gap:14px}.admin-backup-card{display:grid;gap:14px;padding:18px}.admin-backup-card .admin-soft-card strong{display:block;color:#fff}.admin-backup-card .admin-soft-card p{margin:.35rem 0 0}.admin-backup-checksum{display:block;padding:11px 13px;border:1px solid rgba(255,255,255,.08);border-radius:12px;background:rgba(255,255,255,.035);color:#d9d0ff;overflow-wrap:anywhere;word-break:break-all}

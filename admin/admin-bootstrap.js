@@ -1,8 +1,8 @@
-import { waitForAuthenticatedUser, readAdminProfile, isActiveAdmin, signOutAdmin } from './admin-api.js?v=admin-2-0-a13-2-approval-queue-visibility-20260719';
+import { waitForAuthenticatedUser, readAdminProfile, isActiveAdmin, signOutAdmin } from './admin-api.js?v=admin-2-0-a14-1-backup-registry-20260719';
 import { setState } from './admin-state.js';
-import { setDocumentBusy } from './admin-utils.js?v=admin-2-0-a13-2-approval-queue-visibility-20260719';
-import { renderSidebar } from './components/sidebar.js?v=admin-2-0-a13-2-approval-queue-visibility-20260719';
-import { startRouter, navigate } from './admin-router.js?v=admin-2-0-a13-2-approval-queue-visibility-20260719';
+import { setDocumentBusy } from './admin-utils.js?v=admin-2-0-a14-1-backup-registry-20260719';
+import { renderSidebar } from './components/sidebar.js?v=admin-2-0-a14-1-backup-registry-20260719';
+import { startRouter, navigate } from './admin-router.js?v=admin-2-0-a14-1-backup-registry-20260719';
 import { ADMIN_RELEASE } from './admin-release.js';
 
 const boot = document.getElementById('adminBoot');

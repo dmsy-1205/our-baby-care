@@ -59,8 +59,8 @@ export async function render() {
           <span class="admin-status-pill danger">Deletion Locked</span>
         </div>
         <div class="admin-grid admin-grid-4">
-          <div class="admin-soft-card">✓ 관리자 버전 통합</div>
-          <div class="admin-soft-card">✓ 승인 대기열 표시</div>
+          <div class="admin-soft-card">✓ 서버 백업 등록부</div>
+          <div class="admin-soft-card">✓ SHA-256 무결성</div>
           <div class="admin-soft-card">✓ 안내 예정일</div>
           <div class="admin-soft-card">✓ 휴면 유예 종료일</div>
           <div class="admin-soft-card">✓ 영향 경로 표시</div>

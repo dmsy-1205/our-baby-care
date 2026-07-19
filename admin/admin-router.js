@@ -1,9 +1,9 @@
 import { setState } from './admin-state.js';
-import { renderTopbar } from './components/topbar.js?v=admin-2-0-a13-2-approval-queue-visibility-20260719';
-import { renderLoadingState } from './components/loading-state.js?v=admin-2-0-a13-2-approval-queue-visibility-20260719';
+import { renderTopbar } from './components/topbar.js?v=admin-2-0-a14-1-backup-registry-20260719';
+import { renderLoadingState } from './components/loading-state.js?v=admin-2-0-a14-1-backup-registry-20260719';
 import { ADMIN_RELEASE } from './admin-release.js';
 
-const routes = new Set(['dashboard', 'users', 'rooms', 'lifecycle', 'requests', 'recovery', 'audit', 'releases', 'system']);
+const routes = new Set(['dashboard', 'users', 'rooms', 'lifecycle', 'requests', 'backups', 'recovery', 'audit', 'releases', 'system']);
 const ADMIN_MODULE_VERSION = ADMIN_RELEASE.cacheKey;
 
 function normalizeRoute(value) {

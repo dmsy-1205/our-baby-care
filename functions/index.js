@@ -3,6 +3,7 @@
 const { onCall, HttpsError } = require("firebase-functions/v2/https");
 const { setGlobalOptions } = require("firebase-functions/v2");
 const admin = require("firebase-admin");
+const crypto = require("node:crypto");
 
 admin.initializeApp();
 setGlobalOptions({ region: "us-central1", maxInstances: 2, timeoutSeconds: 30, memory: "256MiB" });
@@ -90,6 +91,136 @@ async function requireAdminCaller(request) {
 function countChildren(snapshot) {
   return snapshot.exists() ? snapshot.numChildren() : 0;
 }
+
+function stableStringify(value) {
+  if (value === null || typeof value !== "object") return JSON.stringify(value);
+  if (Array.isArray(value)) return `[${value.map(stableStringify).join(",")}]`;
+  return `{${Object.keys(value).sort().map((key) => `${JSON.stringify(key)}:${stableStringify(value[key])}`).join(",")}}`;
+}
+
+function snapshotChecksum(payload) {
+  return crypto.createHash("sha256").update(stableStringify(payload)).digest("hex");
+}
+
+function encodeSnapshotValue(value) {
+  if (value === null || value === undefined) return { __hmSnapshotType: "null" };
+  if (Array.isArray(value)) {
+    return value.length ? value.map(encodeSnapshotValue) : { __hmSnapshotType: "empty_array" };
+  }
+  if (typeof value === "object") {
+    const keys = Object.keys(value);
+    if (!keys.length) return { __hmSnapshotType: "empty_object" };
+    return Object.fromEntries(keys.map((key) => [key, encodeSnapshotValue(value[key])]));
+  }
+  return value;
+}
+
+async function readDeletionRequest(db, targetUid, requestId) {
+  const ref = db.ref(`dataDeleteRequests/${targetUid}/${requestId}`);
+  const snap = await ref.get();
+  if (!snap.exists()) throw new HttpsError("not-found", "삭제 요청을 찾을 수 없습니다.");
+  const item = snap.val() || {};
+  if (item.requestedByUid !== targetUid) throw new HttpsError("failed-precondition", "요청 사용자 정보가 일치하지 않습니다.");
+  if (!['account', 'delete_room'].includes(item.requestType)) throw new HttpsError("failed-precondition", "백업 대상 요청이 아닙니다.");
+  if (item.status !== "approved") throw new HttpsError("failed-precondition", "승인 상태인 요청만 백업할 수 있습니다.");
+  return item;
+}
+
+async function buildDeletionSnapshot(db, targetUid, item) {
+  const roomCode = String(item.roomCode || "").trim();
+  if (item.requestType === "delete_room") {
+    if (!roomCode) throw new HttpsError("failed-precondition", "Room 코드가 없습니다.");
+    const [roomSnap, membersSnap] = await Promise.all([
+      db.ref(`rooms/${roomCode}`).get(), db.ref(`roomMembers/${roomCode}`).get()
+    ]);
+    return {
+      schemaVersion: 1, requestType: item.requestType, targetUid, roomCode,
+      capturedPaths: [`rooms/${roomCode}`, `roomMembers/${roomCode}`],
+      data: { room: roomSnap.val() ?? null, roomMembers: membersSnap.val() ?? null }
+    };
+  }
+
+  const [userSnap, userRoomsSnap] = await Promise.all([
+    db.ref(`users/${targetUid}`).get(), db.ref(`userRooms/${targetUid}`).get()
+  ]);
+  const linkedRooms = userRoomsSnap.val() || {};
+  const memberships = {};
+  await Promise.all(Object.keys(linkedRooms).map(async (roomCodeValue) => {
+    const memberSnap = await db.ref(`roomMembers/${roomCodeValue}/${targetUid}`).get();
+    memberships[roomCodeValue] = memberSnap.val() ?? null;
+  }));
+  return {
+    schemaVersion: 1, requestType: item.requestType, targetUid, roomCode,
+    capturedPaths: [`users/${targetUid}`, `userRooms/${targetUid}`, ...Object.keys(linkedRooms).map((code) => `roomMembers/${code}/${targetUid}`)],
+    data: { user: userSnap.val() ?? null, userRooms: linkedRooms, memberships }
+  };
+}
+
+// STEP A14.1: creates an in-project operational snapshot and verifies its SHA-256 checksum.
+// This is not an off-site disaster recovery backup and never deletes source data.
+exports.createDeletionBackup = onCall(async (request) => {
+  const caller = await requireAdminCaller(request);
+  const targetUid = String(request.data?.targetUid || "").trim();
+  const requestId = String(request.data?.requestId || "").trim();
+  if (!targetUid || !requestId) throw new HttpsError("invalid-argument", "대상 UID와 요청 ID가 필요합니다.");
+  const db = admin.database();
+  const item = await readDeletionRequest(db, targetUid, requestId);
+  const payload = encodeSnapshotValue(await buildDeletionSnapshot(db, targetUid, item));
+  const serialized = stableStringify(payload);
+  const sizeBytes = Buffer.byteLength(serialized, "utf8");
+  if (sizeBytes > 4 * 1024 * 1024) throw new HttpsError("resource-exhausted", "스냅샷이 4MB를 초과해 외부 백업이 필요합니다.");
+
+  const now = Date.now();
+  const checksum = snapshotChecksum(payload);
+  const snapshotRef = db.ref(`dataBackupSnapshots/${requestId}`);
+  const registryRef = db.ref(`dataBackups/${requestId}`);
+  await registryRef.set({
+    requestId, requestType: item.requestType, targetUid, roomCode: payload.roomCode,
+    status: "verifying", storageClass: "in_project_snapshot", checksumAlgorithm: "sha256",
+    checksum, sizeBytes, pathCount: payload.capturedPaths.length,
+    createdAt: now, createdByUid: caller.uid, updatedAt: now
+  });
+  await snapshotRef.set({ payload, checksum, createdAt: now, createdByUid: caller.uid });
+  const writtenSnap = await snapshotRef.get();
+  const written = writtenSnap.val() || {};
+  const verified = written.checksum === checksum && snapshotChecksum(written.payload) === checksum;
+  await registryRef.update({
+    status: verified ? "verified" : "failed", verifiedAt: verified ? Date.now() : null,
+    verifiedByUid: caller.uid, updatedAt: Date.now()
+  });
+  await db.ref(`adminAuditLogs/${now}_${requestId}_backup`).set({
+    action: verified ? "deletion_backup_verified" : "deletion_backup_failed",
+    requestId, targetUid, requestType: item.requestType, adminUid: caller.uid,
+    sizeBytes, checksum, storageClass: "in_project_snapshot", createdAt: now
+  });
+  if (!verified) throw new HttpsError("data-loss", "백업 무결성 검증에 실패했습니다.");
+  return { ok: true, requestId, status: "verified", checksum, sizeBytes, pathCount: payload.capturedPaths.length };
+});
+
+exports.verifyDeletionBackup = onCall(async (request) => {
+  const caller = await requireAdminCaller(request);
+  const requestId = String(request.data?.requestId || "").trim();
+  if (!requestId) throw new HttpsError("invalid-argument", "요청 ID가 필요합니다.");
+  const db = admin.database();
+  const [snapshotSnap, registrySnap] = await Promise.all([
+    db.ref(`dataBackupSnapshots/${requestId}`).get(), db.ref(`dataBackups/${requestId}`).get()
+  ]);
+  if (!snapshotSnap.exists() || !registrySnap.exists()) throw new HttpsError("not-found", "백업 스냅샷 또는 등록 정보를 찾을 수 없습니다.");
+  const snapshot = snapshotSnap.val() || {};
+  const registry = registrySnap.val() || {};
+  const checksum = snapshotChecksum(snapshot.payload);
+  const verified = checksum === snapshot.checksum && checksum === registry.checksum;
+  const now = Date.now();
+  await db.ref(`dataBackups/${requestId}`).update({
+    status: verified ? "verified" : "failed", verifiedAt: verified ? now : null,
+    verifiedByUid: caller.uid, updatedAt: now
+  });
+  await db.ref(`adminAuditLogs/${now}_${requestId}_backup_verify`).set({
+    action: verified ? "deletion_backup_reverified" : "deletion_backup_integrity_failed",
+    requestId, adminUid: caller.uid, checksum, createdAt: now
+  });
+  return { ok: verified, requestId, status: verified ? "verified" : "failed", checksum };
+});
 
 // STEP A13.1: builds a server-side deletion preflight. It never deletes data.
 exports.prepareDeletionAction = onCall(async (request) => {
