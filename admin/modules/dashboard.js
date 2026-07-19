@@ -37,8 +37,8 @@ export async function render() {
       <section class="admin-hero-card">
         <div class="admin-hero-icon">◉</div>
         <div>
-          <h2 id="dashboardHeading">데이터 수명주기 관찰 모드</h2>
-          <p>관리자 인증을 통과한 계정만 접근할 수 있습니다. 베타 기간에는 정책별 영향과 휴면 예정일을 미리 계산하며 데이터 변경·휴면·삭제를 실행하지 않습니다.</p>
+          <h2 id="dashboardHeading">승인형 데이터 운영 모드</h2>
+          <p>관리자 인증을 통과한 계정만 접근할 수 있습니다. 삭제 요청은 서버 사전점검과 독립된 2차 승인 구조를 사용하며 영구 삭제는 잠겨 있습니다.</p>
         </div>
       </section>
 
@@ -52,10 +52,10 @@ export async function render() {
       <section class="admin-card admin-panel">
         <div class="admin-panel-head">
           <div>
-            <h2>STEP A12.3 적용 범위</h2>
-            <p>관찰 후보의 기간 기준을 조정하고 안내 예정일, 휴면 유예 종료일, 관련 데이터 경로를 읽기 전용으로 미리 확인합니다.</p>
+            <h2>STEP A13.1 적용 범위</h2>
+            <p>승인된 계정·Room 삭제 요청의 백업 상태, 대상 경로, 공동 데이터 권리를 서버에서 다시 점검합니다.</p>
           </div>
-          <span class="admin-status-pill muted">Read Only</span>
+          <span class="admin-status-pill danger">Deletion Locked</span>
         </div>
         <div class="admin-grid admin-grid-4">
           <div class="admin-soft-card">✓ 정책 기간 조정</div>
@@ -64,14 +64,14 @@ export async function render() {
           <div class="admin-soft-card">✓ 휴면 유예 종료일</div>
           <div class="admin-soft-card">✓ 영향 경로 표시</div>
           <div class="admin-soft-card">✓ 보호·제외 검토</div>
-          <div class="admin-soft-card">✓ 수동 휴면 전환</div>
-          <div class="admin-soft-card">✓ 원클릭 복원</div>
+          <div class="admin-soft-card">✓ 서버 사전점검</div>
+          <div class="admin-soft-card">✓ 영구 삭제 잠금</div>
         </div>
       </section>
 
       <section class="admin-card admin-panel">
         <h2>운영 요약</h2>
-        <p>데이터 요청 ${data.requests}건, 감사 로그 ${data.auditLogs}건을 읽을 수 있습니다. 데이터 수명주기 메뉴에서 정책별 영향을 안전하게 비교할 수 있습니다.</p>
+        <p>데이터 요청 ${data.requests}건, 감사 로그 ${data.auditLogs}건을 확인할 수 있습니다. 데이터 요청 메뉴에서 승인된 요청의 서버 사전점검을 시작할 수 있습니다.</p>
       </section>
     </section>
   `;

@@ -1,4 +1,4 @@
-import { getAdminDatabase } from '../admin-api.js?v=admin-2-0-a11-1-clean-baseline-20260719';
+import { getAdminDatabase, getAdminFunctions } from '../admin-api.js?v=admin-2-0-a13-1-approval-preflight-20260719';
 import { getState } from '../admin-state.js';
 import { asObject, compactId, escapeHtml, formatDateTime, latestNumber } from '../admin-utils.js?v=admin-2-0-a11-1-clean-baseline-20260719';
 import { renderEmptyState } from '../components/empty-state.js?v=admin-2-0-a11-1-clean-baseline-20260719';
@@ -50,6 +50,7 @@ let currentSegment = 'all';
 let currentStatusFilter = 'open';
 let currentSearch = '';
 const openDetails = new Set();
+let queueByRequestId = {};
 
 function escapeSelector(value) {
   if (window.CSS && typeof window.CSS.escape === 'function') return window.CSS.escape(String(value));
@@ -254,6 +255,7 @@ function renderRequestCard(row) {
 
 function renderRequestDetail(row, closed) {
   const key = requestKey(row);
+  const queue = asObject(queueByRequestId[row.id]);
   return `
     <div class="admin-request-detail">
       ${closed ? '<div class="admin-info-box"><strong>닫힌 요청</strong><p>사용자가 취소했거나 운영자가 종료한 요청입니다. 기록 확인과 내부 메모 저장만 가능합니다.</p></div>' : ''}
@@ -275,6 +277,7 @@ function renderRequestDetail(row, closed) {
           <p>${closed ? '필요하면 기록 확인 후 별도 요청으로 다시 진행합니다.' : '이 화면에서는 답변·메모·상태만 저장합니다. 실제 데이터 삭제나 Room 연결 해제는 실행하지 않습니다.'}</p>
         </div>
       </div>
+      ${renderDeletionPreflight(row, queue)}
       <div class="admin-action-row ${closed ? 'is-locked' : ''}">
         <button class="admin-button" type="button" data-save-request="${escapeHtml(key)}">관리자 메모 저장</button>
         ${closed ? '<span class="admin-request-locked-note">닫힌 요청입니다. 기록 확인과 내부 메모 저장만 가능합니다.</span>' : ACTIONS.map((action) => `
@@ -286,6 +289,39 @@ function renderRequestDetail(row, closed) {
       <p class="admin-muted">이 화면에서는 답변·메모·상태만 저장합니다. 실제 데이터 삭제나 Room 연결 해제는 실행하지 않습니다.</p>
     </div>
   `;
+}
+
+function renderDeletionPreflight(row, queue) {
+  if (!['account', 'delete_room'].includes(row.requestType)) return '';
+  if (!Object.keys(queue).length) {
+    return `<div class="admin-impact-preview"><div class="admin-impact-head"><div><strong>서버 삭제 사전점검</strong><p>백업, 요청 상태, 대상 경로와 공동 데이터 권리를 서버에서 다시 확인합니다.</p></div><span class="admin-impact-risk warn">실행 잠금</span></div>${row.status === 'approved' ? `<button class="admin-button" type="button" data-prepare-deletion="${escapeHtml(requestKey(row))}">사전점검 대기열 만들기</button>` : '<p class="admin-muted">요청이 승인 상태가 되면 사전점검을 시작할 수 있습니다.</p>'}</div>`;
+  }
+  const preflight = asObject(queue.preflight);
+  const blockers = Array.isArray(queue.blockers) ? queue.blockers : Object.values(asObject(queue.blockers));
+  const blockerLabels = {
+    backup_not_verified: '검증된 백업 없음', partner_consent_missing: '상대방 동의 확인 필요', permanent_deletion_disabled: '영구 삭제 스위치 OFF'
+  };
+  return `<div class="admin-impact-preview">
+    <div class="admin-impact-head"><div><strong>A13 서버 사전점검</strong><p>상태 ${escapeHtml(queue.status || '대기')} · 마지막 확인 ${escapeHtml(formatDateTime(queue.updatedAt))}</p></div><span class="admin-impact-risk ${preflight.backupVerified ? 'ok' : 'danger'}">${preflight.backupVerified ? '백업 확인' : '실행 차단'}</span></div>
+    <div class="admin-impact-grid">
+      <div><span>요청 재검증</span><strong>${preflight.requestStillApproved ? '통과' : '실패'}</strong></div>
+      <div><span>사용자</span><strong>${preflight.targetUserExists ? '존재' : '없음'}</strong></div>
+      <div><span>연결 Room</span><strong>${Number(preflight.linkedRoomCount || 0)}개</strong></div>
+      <div><span>Room 멤버</span><strong>${Number(preflight.targetRoomMemberCount || 0)}명</strong></div>
+    </div>
+    <div class="admin-warning-box"><strong>차단 사유</strong><p>${blockers.map((code) => escapeHtml(blockerLabels[code] || code)).join(' · ') || '없음'}</p></div>
+    <div class="admin-action-row"><button class="admin-button" type="button" data-prepare-deletion="${escapeHtml(requestKey(row))}">서버에서 다시 점검</button><button class="admin-button" type="button" data-second-approval="${escapeHtml(row.id)}" ${preflight.backupVerified ? '' : 'disabled'}>다른 관리자 2차 승인</button><span class="admin-status-pill danger">영구 삭제 OFF</span></div>
+  </div>`;
+}
+
+async function callDeletionPreflight(row) {
+  const callable = getAdminFunctions().httpsCallable('prepareDeletionAction');
+  return callable({ targetUid: row.ownerUid, requestId: row.id });
+}
+
+async function callSecondApproval(requestId) {
+  const callable = getAdminFunctions().httpsCallable('approveDeletionAction');
+  return callable({ requestId });
 }
 
 function findRow(key) {
@@ -452,6 +488,39 @@ function bindEvents(root) {
       } finally {
         statusButton.disabled = false;
       }
+      return;
+    }
+
+    const prepareButton = event.target.closest('[data-prepare-deletion]');
+    if (prepareButton) {
+      const row = findRow(prepareButton.dataset.prepareDeletion);
+      if (!row || !confirm('서버에서 백업·대상 경로·요청 상태를 다시 점검할까요? 데이터는 삭제되지 않습니다.')) return;
+      prepareButton.disabled = true;
+      try {
+        await callDeletionPreflight(row);
+        await loadRequests();
+        root.querySelector('[data-request-list]').innerHTML = renderRequestList();
+      } catch (error) {
+        alert(`사전점검에 실패했습니다. ${error.message || error}`);
+      } finally {
+        prepareButton.disabled = false;
+      }
+      return;
+    }
+
+    const approvalButton = event.target.closest('[data-second-approval]');
+    if (approvalButton) {
+      if (!confirm('첫 승인자와 다른 관리자로서 백업 확인과 2차 승인을 기록할까요? 실제 삭제는 실행되지 않습니다.')) return;
+      approvalButton.disabled = true;
+      try {
+        await callSecondApproval(approvalButton.dataset.secondApproval);
+        await loadRequests();
+        root.querySelector('[data-request-list]').innerHTML = renderRequestList();
+      } catch (error) {
+        alert(`2차 승인에 실패했습니다. ${error.message || error}`);
+      } finally {
+        approvalButton.disabled = false;
+      }
     }
   });
 
@@ -470,12 +539,14 @@ function bindEvents(root) {
 
 async function loadRequests() {
   const database = getAdminDatabase();
-  const [requestsSnapshot, notesSnapshot] = await Promise.all([
+  const [requestsSnapshot, notesSnapshot, queueSnapshot] = await Promise.all([
     database.ref('dataDeleteRequests').once('value'),
-    database.ref('dataDeleteRequestAdminNotes').once('value').catch(() => ({ val: () => null }))
+    database.ref('dataDeleteRequestAdminNotes').once('value').catch(() => ({ val: () => null })),
+    database.ref('deletionActionQueue').once('value').catch(() => ({ val: () => null }))
   ]);
 
   rows = normalizeRows(requestsSnapshot.val(), notesSnapshot.val());
+  queueByRequestId = asObject(queueSnapshot.val());
 }
 
 export async function render() {

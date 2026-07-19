@@ -42,6 +42,10 @@ export function getAdminAuth() {
   return firebase.auth(getFirebaseApp());
 }
 
+export function getAdminFunctions() {
+  return firebase.app(getFirebaseApp().name).functions('us-central1');
+}
+
 export function waitForAuthenticatedUser() {
   return withTimeout(new Promise((resolve) => {
     const auth = getAdminAuth();

@@ -5,7 +5,7 @@ const titles = {
   users: ['사용자', '사용자의 연결 상태를 읽기 전용으로 확인합니다.'],
   rooms: ['Room', 'Room 구성과 관계 무결성을 확인합니다.'],
   lifecycle: ['데이터 수명주기', '빈 계정과 Room의 정리 후보를 읽기 전용으로 관찰합니다.'],
-  requests: ['데이터 요청', '삭제 및 데이터 관련 요청을 확인합니다.'],
+  requests: ['데이터 요청', '삭제 요청의 상태, 서버 사전점검과 승인 잠금을 확인합니다.'],
   recovery: ['복구 센터', '삭제 감사와 복구 가능 상태를 확인합니다.'],
   audit: ['감사 로그', '관리자 작업 이력을 확인합니다.'],
   releases: ['릴리스', '현재 배포 버전과 릴리스 정보를 확인합니다.'],
@@ -22,6 +22,6 @@ export function renderTopbar(route) {
         <h1>${escapeHtml(title)}</h1>
         <p>${escapeHtml(description)}</p>
       </div>
-      <div class="topbar-actions"><span class="phase-badge">Beta · Dormant Restore</span></div>
+      <div class="topbar-actions"><span class="phase-badge">Beta · Approval Preflight</span></div>
     </header>`;
 }
