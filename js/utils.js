@@ -39,6 +39,22 @@ function escapeHtml(text) {
     }
 
 // ---------------------------------------------------------
+// escapeJs
+// - onclick="fn('${value}')" 처럼 단일 인용부호로 감싼 인라인 핸들러 인자에
+//   값을 꽂아 넣을 때 속성/문자열 탈출을 막기 위한 이스케이프.
+// - 2026-07-20: history.js 등에서 날짜/ID 값이 이스케이프 없이 onclick에
+//   들어가던 지점을 통일하기 위해 전역 헬퍼로 추가.
+// ---------------------------------------------------------
+function escapeJs(text) {
+        return String(text || '')
+            .replace(/\\/g, '\\\\')
+            .replace(/'/g, "\\'")
+            .replace(/"/g, '&quot;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+    }
+
+// ---------------------------------------------------------
 // hmReportError
 // ---------------------------------------------------------
 function hmReportError(context, err, userMessage) {

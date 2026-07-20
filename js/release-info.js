@@ -5,20 +5,20 @@
 (function () {
     const release = Object.freeze({
         product: 'HearMe2nite',
-        version: 'v1.0 STEP6.2.13.4',
-        appVersion: 'HearMe2nite v1.0 STEP6.2.13.4',
-        step: 'STEP6.2.13.4',
-        build: '20260718',
-        releaseDate: '2026.07.18',
+        version: 'v1.0 STEP6.2.13.5',
+        appVersion: 'HearMe2nite v1.0 STEP6.2.13.5',
+        step: 'STEP6.2.13.5',
+        build: '20260720',
+        releaseDate: '2026.07.20',
         stage: 'Beta',
-        title: 'Admin Data Requests Readonly',
-        description: '관리자 데이터 요청 메뉴를 읽기 전용으로 연결해 삭제 요청 상태와 사유를 안전하게 확인할 수 있게 했습니다.',
+        title: 'Security Hardening Pass',
+        description: '보안 검수에서 발견된 항목을 수정했습니다: Hosting 보안 헤더 추가, 기록실 onclick 이스케이프 일원화, 프로필 사진 Storage 열람 범위 축소.',
         changes: Object.freeze([
-            'Added readonly Admin Data Requests module',
-            'Shows request type, status, requester, Room code, reason, admin message, and internal memo',
-            'Added open/all/completed/closed filters and request search',
-            'Refreshed admin and PWA cache keys for STEP6.2.13.4',
-            '기존 기록/채팅 저장 구조 변경 없음'
+            'Added CSP / X-Frame-Options / X-Content-Type-Options / Referrer-Policy / HSTS / Permissions-Policy hosting headers',
+            'Extracted index.html inline theme-init script into js/theme-init.js',
+            'Added global escapeJs() helper in js/utils.js and applied it to every date/id value previously interpolated unescaped into onclick attributes in js/history.js',
+            'storage.rules: profile photo read narrowed from "any authenticated user" to "owner only" (feature is not yet wired up client-side, so this is a safe tightening)',
+            '기존 기록/채팅 저장 구조 변경 없음 — 보안/인프라 항목만 수정'
         ])
     });
 

@@ -345,7 +345,7 @@ function openHistoryPanelModal() {
             ${historyDetailBlock('📝 오늘의 하루', record.diary)}
             ${historyDetailBlock('💌 주인의 피드백', record.replyMessage)}
             ${historyDetailBlock('🎁 오늘의 선물', [record.dailyChoiceLabel, record.rewardNote].filter(Boolean).join('\n'))}
-            <button type="button" class="history-detail-copy" onclick="copyDirectText(event, '${date}')">📋 이 기록 복사하기</button>
+            <button type="button" class="history-detail-copy" onclick="copyDirectText(event, '${escapeJs(date)}')">📋 이 기록 복사하기</button>
         `;
         openModalOverlayById('historyDetailOverlay');
     }
@@ -564,7 +564,7 @@ function openHistoryPanelModal() {
             const ymd = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
             const rec = (daysData || {})[ymd];
             const icons = rec ? `${rec.photo ? '📷' : ''}${getHistoryMissionText(rec) ? '🎯' : ''}${rec.mood === 'hard' || rec.mood === 'veryHard' ? '☁️' : ''}` : '';
-            html += `<div class="calendar-day ${rec ? 'has-record' : ''} ${ymd === todayYmd ? 'today' : ''} ${ymd === selectedHistoryDate ? 'selected-record' : ''}" ${rec ? `onclick="selectHistoryDate('${ymd}')"` : ''}>${day}<span class="calendar-icons">${icons}</span></div>`;
+            html += `<div class="calendar-day ${rec ? 'has-record' : ''} ${ymd === todayYmd ? 'today' : ''} ${ymd === selectedHistoryDate ? 'selected-record' : ''}" ${rec ? `onclick="selectHistoryDate('${escapeJs(ymd)}')"` : ''}>${day}<span class="calendar-icons">${icons}</span></div>`;
         }
         html += '</div>';
         box.innerHTML = html;
@@ -719,7 +719,7 @@ function openHistoryPanelModal() {
         const missionText = getHistoryMissionText(selectedRecord);
         const diaryPreview = hmHistoryTimelinePreview(selectedRecord);
         const chips = hmHistorySummaryChips(selectedRecord);
-        return `<button type="button" class="history-day-card history-premium-selected history-selected-record-card" onclick="openHistoryDetailModal('${selectedHistoryDate}')">
+        return `<button type="button" class="history-day-card history-premium-selected history-selected-record-card" onclick="openHistoryDetailModal('${escapeJs(selectedHistoryDate)}')">
             <span class="history-day-icon">${getHistoryMoodIcon(selectedRecord)}</span>
             <span class="history-day-main">
                 <span class="history-day-title">${formatHistoryDateLabel(selectedHistoryDate)}의 기록</span>
@@ -728,7 +728,7 @@ function openHistoryPanelModal() {
             </span>
             <span class="history-day-actions">
                 <span class="history-card-arrow">›</span>
-                <span class="btn-delete" onclick="deleteRecord(event, '${selectedHistoryDate}')">삭제</span>
+                <span class="btn-delete" onclick="deleteRecord(event, '${escapeJs(selectedHistoryDate)}')">삭제</span>
             </span>
         </button>`;
     })() : '<div class="history-selected-hint"><strong>기록이 없습니다</strong>선택한 날짜에는 저장된 기록이 없습니다. 📅</div>';
@@ -738,7 +738,7 @@ function openHistoryPanelModal() {
         const isSelected = date === selectedHistoryDate;
         const preview = hmHistoryTimelinePreview(record);
         const chips = hmHistorySummaryChips(record);
-        return `<button type="button" class="history-story-row ${isSelected ? 'is-selected' : ''}" onclick="selectHistoryDate('${date}')">
+        return `<button type="button" class="history-story-row ${isSelected ? 'is-selected' : ''}" onclick="selectHistoryDate('${escapeJs(date)}')">
             <span class="history-story-date"><strong>${String(new Date(date + 'T00:00:00').getDate()).padStart(2,'0')}</strong><small>${formatHistoryDateLabel(date).replace(/^\d+년\s*/, '')}</small></span>
             <span class="history-story-body"><strong>${getHistoryMoodIcon(record)} ${record.photo ? '사진과 함께한 기록' : '하루 기록'}</strong><small>${escapeHtml(preview)}${preview.length >= 78 ? '...' : ''}</small><em>${chips || '저장된 기록'}</em></span>
             <span class="history-story-arrow">›</span>
@@ -920,8 +920,8 @@ async function openHistoryDetailModal(date) {
         ${historyDetailBlock('💌 주인의 피드백', record.replyMessage)}
         ${historyDetailBlock('🎁 오늘의 선물', [record.dailyChoiceLabel, record.rewardNote].filter(Boolean).join('\n'))}
         <div class="history-detail-actions">
-            <button type="button" class="history-detail-copy" onclick="copyDirectText(event, '${date}')">📋 이 기록 복사하기</button>
-            <button type="button" class="history-detail-delete" onclick="deleteRecord(event, '${date}')">삭제</button>
+            <button type="button" class="history-detail-copy" onclick="copyDirectText(event, '${escapeJs(date)}')">📋 이 기록 복사하기</button>
+            <button type="button" class="history-detail-delete" onclick="deleteRecord(event, '${escapeJs(date)}')">삭제</button>
         </div>`;
     openModalOverlayById('historyDetailOverlay');
 }
@@ -1054,7 +1054,7 @@ function renderCalendar(daysData) {
         const rec = (daysData || {})[ymd];
         const visible = rec && visibleSet.has(ymd);
         const icons = visible ? `${rec.photo ? '📷' : ''}${getHistoryMissionText(rec) ? '🎯' : ''}${hmHistoryRecordHasRoutine(rec) ? '🧩' : ''}${rec.mood === 'hard' || rec.mood === 'veryHard' ? '☁️' : ''}` : '';
-        const clickable = visible ? `onclick="selectHistoryDate('${ymd}')"` : '';
+        const clickable = visible ? `onclick="selectHistoryDate('${escapeJs(ymd)}')"` : '';
         html += `<div class="calendar-day ${visible ? 'has-record' : ''} ${ymd === todayYmd ? 'today' : ''} ${ymd === selectedHistoryDate ? 'selected-record' : ''}" ${clickable}>${day}<span class="calendar-icons">${icons}</span></div>`;
     }
     html += '</div>';
