@@ -5,20 +5,20 @@
 (function () {
     const release = Object.freeze({
         product: 'HearMe2nite',
-        version: 'v1.0 STEP6.2.13.6',
-        appVersion: 'HearMe2nite v1.0 STEP6.2.13.6',
-        step: 'STEP6.2.13.6',
-        build: '20260720',
-        releaseDate: '2026.07.20',
+        version: 'v1.0 STEP6.2.13.4',
+        appVersion: 'HearMe2nite v1.0 STEP6.2.13.4',
+        step: 'STEP6.2.13.4',
+        build: '20260718',
+        releaseDate: '2026.07.18',
         stage: 'Beta',
-        title: 'Security Hardening',
-        description: '호스팅 보안 헤더, 기록실 동적 값 보호, 프로필 파일 접근 제한을 강화했습니다.',
+        title: 'Admin Data Requests Readonly',
+        description: '관리자 데이터 요청 메뉴를 읽기 전용으로 연결해 삭제 요청 상태와 사유를 안전하게 확인할 수 있게 했습니다.',
         changes: Object.freeze([
-            'Added Firebase Hosting security response headers',
-            'Moved the early theme initializer to an external script',
-            'Escaped all dynamic history date values used by inline handlers',
-            'Limited profile Storage reads to the owning user',
-            '기존 기록·채팅·문의·관리자 데이터 구조 변경 없음'
+            'Added readonly Admin Data Requests module',
+            'Shows request type, status, requester, Room code, reason, admin message, and internal memo',
+            'Added open/all/completed/closed filters and request search',
+            'Refreshed admin and PWA cache keys for STEP6.2.13.4',
+            '기존 기록/채팅 저장 구조 변경 없음'
         ])
     });
 

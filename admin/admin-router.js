@@ -1,6 +1,6 @@
 import { setState } from './admin-state.js';
-import { renderTopbar } from './components/topbar.js?v=admin-2-0-a17-1-guarded-deletion-execution-20260720';
-import { renderLoadingState } from './components/loading-state.js?v=admin-2-0-a17-1-guarded-deletion-execution-20260720';
+import { renderTopbar } from './components/topbar.js?v=admin-2-0-a17-1-1-main-baseline-compatibility-20260721';
+import { renderLoadingState } from './components/loading-state.js?v=admin-2-0-a17-1-1-main-baseline-compatibility-20260721';
 import { ADMIN_RELEASE } from './admin-release.js';
 
 const routes = new Set(['dashboard', 'users', 'rooms', 'lifecycle', 'requests', 'support', 'backups', 'recovery', 'audit', 'releases', 'system']);

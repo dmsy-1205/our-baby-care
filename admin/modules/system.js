@@ -1,6 +1,6 @@
-import { getAdminDatabase } from '../admin-api.js?v=admin-2-0-a17-1-guarded-deletion-execution-20260720';
+import { getAdminDatabase } from '../admin-api.js?v=admin-2-0-a17-1-1-main-baseline-compatibility-20260721';
 import { getState } from '../admin-state.js';
-import { escapeHtml } from '../admin-utils.js?v=admin-2-0-a17-1-guarded-deletion-execution-20260720';
+import { escapeHtml } from '../admin-utils.js?v=admin-2-0-a17-1-1-main-baseline-compatibility-20260721';
 import { ADMIN_RELEASE } from '../admin-release.js';
 
 const ADMIN_STEP = ADMIN_RELEASE.step;

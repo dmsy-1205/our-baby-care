@@ -244,76 +244,20 @@
         }
         return { rows, main: `${hitRows.length}/${keys.length}`, sub: hitRows.length ? `${hitRows.length}일 기록` : '기록 없음', hit: hitRows.length };
     }
-    // STEP6.2.13.5: 통계 시간축을 24시간 기준으로 정규화한다.
-    // 취침은 23시→24시→다음 날 01시가 하나의 연속 흐름이 되도록 24시 이후 값으로 이어 붙인다.
     function hmHomeStatsTimeMinutes(value, itemKey){
-        const raw = String(value || '').trim().toLowerCase();
-        const match = raw.match(/(\d{1,2})\s*(?::|시|\.)?\s*(\d{1,2})?/);
+        const match = String(value || '').match(/(\d{1,2})\s*(?::|시|\.)?\s*(\d{1,2})?/);
         if (!match) return null;
-
-        let hour = Math.max(0, Math.min(23, Number(match[1] || 0)));
+        const hour = Math.max(0, Math.min(23, Number(match[1] || 0)));
         const minute = Math.max(0, Math.min(59, Number(match[2] || 0)));
-        const hasPm = /(오후|저녁|밤|pm)/i.test(raw);
-        const hasAm = /(오전|새벽|am)/i.test(raw);
-
-        if (hasPm && hour < 12) hour += 12;
-        if (hasAm && hour === 12) hour = 0;
-
-        // 자유 입력에서 "밤 11시" 같은 표식 없이 1~11시만 저장된 기존 취침 기록도 보정한다.
-        if (itemKey === 'sleep' && !hasAm && !hasPm && hour >= 7 && hour <= 11) hour += 12;
-
-        let minutes = hour * 60 + minute;
-        if (itemKey === 'sleep' && minutes < 12 * 60) minutes += 24 * 60;
-        return minutes;
+        const minutes = hour * 60 + minute;
+        return itemKey === 'sleep' && minutes < 720 ? minutes + 1440 : minutes;
     }
-    function hmHomeStatsFormatTimeMinutes(value, itemKey){
+    function hmHomeStatsFormatTimeMinutes(value){
         if (!Number.isFinite(value)) return '-';
-        const rounded = Math.round(value);
-
-        // 취침 그래프에서는 자정을 00:00이 아닌 24:00으로 표시해 날짜 경계가 끊겨 보이지 않게 한다.
-        if (itemKey === 'sleep' && rounded === 1440) return '24:00';
-
-        const normalized = ((rounded % 1440) + 1440) % 1440;
+        const normalized = ((Math.round(value) % 1440) + 1440) % 1440;
         const hh = String(Math.floor(normalized / 60)).padStart(2,'0');
         const mm = String(normalized % 60).padStart(2,'0');
         return `${hh}:${mm}`;
-    }
-    function hmHomeStatsTimeGuides(values, itemKey){
-        const valid = values.filter(Number.isFinite);
-        if (!valid.length) return [];
-
-        let min = Math.min(...valid);
-        let max = Math.max(...valid);
-        if (min === max) {
-            min -= 60;
-            max += 60;
-        } else {
-            min = Math.floor((min - 30) / 30) * 30;
-            max = Math.ceil((max + 30) / 30) * 30;
-        }
-
-        const hourlyInside = [];
-        for (let value = Math.ceil(min / 60) * 60; value < max; value += 60) {
-            if (value > min) hourlyInside.push(value);
-        }
-
-        let middle = [];
-        if (hourlyInside.length <= 2) {
-            middle = hourlyInside;
-        } else {
-            const firstIndex = Math.floor((hourlyInside.length - 1) / 3);
-            const secondIndex = Math.ceil((hourlyInside.length - 1) * 2 / 3);
-            middle = [hourlyInside[firstIndex], hourlyInside[secondIndex]];
-        }
-
-        const guideValues = [min, ...middle, max]
-            .filter((value, index, arr) => arr.indexOf(value) === index)
-            .sort((a,b) => a - b);
-
-        return guideValues.map(value => ({
-            value,
-            label: hmHomeStatsFormatTimeMinutes(value, itemKey)
-        }));
     }
     function hmHomeStatsGraphValue(item, row){
         const stat = row?.stat || {};
@@ -381,7 +325,7 @@
         const mid = Math.round(((low + high) / 2) / step) * step;
         return [low, mid, high].filter((value, index, arr) => arr.indexOf(value) === index).map(value => ({
             value,
-            label: unit === '시각' ? hmHomeStatsFormatTimeMinutes(value, options.itemKey) : `${value}${unit}`
+            label: unit === '시각' ? hmHomeStatsFormatTimeMinutes(value) : `${value}${unit}`
         }));
     }
     function hmHomeStatsChartRange(values, guides){
@@ -398,7 +342,7 @@
         const values = rows.map(row => hmHomeStatsGraphValue(item, row));
         const valid = values.filter(value => Number.isFinite(value));
         if (valid.length < 2) return hmHomeStatsEmptyChart(item);
-        const guidesData = options.guides || (item.mode === 'time' ? hmHomeStatsTimeGuides(valid, item.key) : hmHomeStatsNiceGuides(valid, hmHomeStatsGraphUnit(item), { itemKey:item.key }));
+        const guidesData = options.guides || hmHomeStatsNiceGuides(valid, hmHomeStatsGraphUnit(item));
         const { min, max } = hmHomeStatsChartRange(valid, guidesData);
         const width = 430, height = 158, left = 40, right = 6, top = 12, bottom = 24;
         const plotW = width - left - right;

@@ -1,8 +1,8 @@
-import { waitForAuthenticatedUser, readAdminProfile, isActiveAdmin, signOutAdmin } from './admin-api.js?v=admin-2-0-a17-1-guarded-deletion-execution-20260720';
+import { waitForAuthenticatedUser, readAdminProfile, isActiveAdmin, signOutAdmin } from './admin-api.js?v=admin-2-0-a17-1-1-main-baseline-compatibility-20260721';
 import { setState } from './admin-state.js';
-import { setDocumentBusy } from './admin-utils.js?v=admin-2-0-a17-1-guarded-deletion-execution-20260720';
-import { renderSidebar } from './components/sidebar.js?v=admin-2-0-a17-1-guarded-deletion-execution-20260720';
-import { startRouter, navigate } from './admin-router.js?v=admin-2-0-a17-1-guarded-deletion-execution-20260720';
+import { setDocumentBusy } from './admin-utils.js?v=admin-2-0-a17-1-1-main-baseline-compatibility-20260721';
+import { renderSidebar } from './components/sidebar.js?v=admin-2-0-a17-1-1-main-baseline-compatibility-20260721';
+import { startRouter, navigate } from './admin-router.js?v=admin-2-0-a17-1-1-main-baseline-compatibility-20260721';
 import { ADMIN_RELEASE } from './admin-release.js';
 
 const boot = document.getElementById('adminBoot');

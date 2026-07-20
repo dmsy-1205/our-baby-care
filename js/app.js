@@ -140,13 +140,6 @@
                 }
 
                 hideEmailVerificationPanel();
-                if (typeof hmHandleLifecycleOnLogin === 'function') {
-                    const lifecycleReady = await hmHandleLifecycleOnLogin(user);
-                    if (!lifecycleReady) {
-                        hmFinishBooting();
-                        return;
-                    }
-                }
                 document.getElementById('authBox').classList.add('is-hidden');
                 document.getElementById('authBox').style.display = 'none';
                 if (typeof loadUserTheme === 'function') await loadUserTheme();
