@@ -1,11 +1,13 @@
 export const ADMIN_RELEASE = Object.freeze({
-  step: 'STEP A17.2',
-  label: 'User Support Bridge',
-  cacheKey: 'admin-2-0-a17-2-user-support-bridge-20260721',
+  step: 'STEP A17.2.1',
+  label: 'Duplicate Reply Guard',
+  cacheKey: 'admin-2-0-a17-2-1-duplicate-reply-guard-20260721',
   releaseDate: '2026.07.21',
   stage: 'Beta',
   deletionMode: 'GUARDED_BETA',
   changes: Object.freeze([
+    '문의 화면 재진입 시 누적되던 저장 이벤트 제거',
+    '문의별 중복 저장 잠금 추가',
     '사용자 앱 문의 작성·관리자 공개 답변 경로 재연결',
     '답변 알림·추가 답변·만족도 평가 연결 복원',
     '관리자 권한 데이터 형식 호환성 보강',

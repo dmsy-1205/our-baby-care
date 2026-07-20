@@ -1,9 +1,9 @@
-import { waitForAuthenticatedUser, readAdminProfile, isActiveAdmin, signOutAdmin } from './admin-api.js?v=admin-2-0-a17-2-user-support-bridge-20260721';
+import { waitForAuthenticatedUser, readAdminProfile, isActiveAdmin, signOutAdmin } from './admin-api.js?v=admin-2-0-a17-2-1-duplicate-reply-guard-20260721';
 import { setState } from './admin-state.js';
-import { setDocumentBusy } from './admin-utils.js?v=admin-2-0-a17-2-user-support-bridge-20260721';
-import { renderSidebar } from './components/sidebar.js?v=admin-2-0-a17-2-user-support-bridge-20260721';
-import { startRouter, navigate } from './admin-router.js?v=admin-2-0-a17-2-user-support-bridge-20260721';
-import { ADMIN_RELEASE } from './admin-release.js?v=admin-2-0-a17-2-user-support-bridge-20260721';
+import { setDocumentBusy } from './admin-utils.js?v=admin-2-0-a17-2-1-duplicate-reply-guard-20260721';
+import { renderSidebar } from './components/sidebar.js?v=admin-2-0-a17-2-1-duplicate-reply-guard-20260721';
+import { startRouter, navigate } from './admin-router.js?v=admin-2-0-a17-2-1-duplicate-reply-guard-20260721';
+import { ADMIN_RELEASE } from './admin-release.js?v=admin-2-0-a17-2-1-duplicate-reply-guard-20260721';
 
 const boot = document.getElementById('adminBoot');
 const root = document.getElementById('adminRoot');
@@ -31,6 +31,9 @@ function renderShell(user) {
         <div id="adminOutlet" class="admin-outlet"></div>
       </main>
     </div>`;
+
+  if (root.dataset.adminEventsBound === 'true') return;
+  root.dataset.adminEventsBound = 'true';
 
   root.addEventListener('click', async (event) => {
     const routeButton = event.target.closest('[data-route]');

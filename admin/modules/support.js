@@ -1,7 +1,7 @@
-import { getAdminDatabase } from '../admin-api.js?v=admin-2-0-a17-2-user-support-bridge-20260721';
+import { getAdminDatabase } from '../admin-api.js?v=admin-2-0-a17-2-1-duplicate-reply-guard-20260721';
 import { getState } from '../admin-state.js';
-import { asObject, escapeHtml, formatDateTime, compactId } from '../admin-utils.js?v=admin-2-0-a17-2-user-support-bridge-20260721';
-import { renderEmptyState } from '../components/empty-state.js?v=admin-2-0-a17-2-user-support-bridge-20260721';
+import { asObject, escapeHtml, formatDateTime, compactId } from '../admin-utils.js?v=admin-2-0-a17-2-1-duplicate-reply-guard-20260721';
+import { renderEmptyState } from '../components/empty-state.js?v=admin-2-0-a17-2-1-duplicate-reply-guard-20260721';
 
 const STATUS_LABELS = { received: '접수됨', reviewing: '확인 중', waiting_user: '추가 정보 필요', resolved: '답변 완료', closed: '종료' };
 const CATEGORY_LABELS = { usage: '앱 사용 문의', data_error: '데이터 오류', account_room: '계정·Room 문의', report: '신고·안전', suggestion: '기능 제안' };
@@ -17,6 +17,7 @@ let incidentEvents = {};
 let currentStatus = 'open';
 let currentSearch = '';
 const openTickets = new Set();
+const savingTickets = new Set();
 
 function timestamp() { return window.firebase.database.ServerValue.TIMESTAMP; }
 function keyOf(row) { return `${row.ownerUid}__${row.id}`; }
@@ -230,10 +231,13 @@ export function afterRender(root) {
     }
     const save = event.target.closest('[data-save-ticket]');
     if (!save) return;
+    const ticketKey = save.dataset.saveTicket;
+    if (savingTickets.has(ticketKey)) return;
+    savingTickets.add(ticketKey);
     save.disabled = true;
-    try { await saveTicket(root, save.dataset.saveTicket); await loadData(); root.innerHTML = renderShell(); }
+    try { await saveTicket(root, ticketKey); await loadData(); root.innerHTML = renderShell(); }
     catch (error) { alert(`문의 저장에 실패했습니다. ${error.message || error}`); }
-    finally { save.disabled = false; }
+    finally { savingTickets.delete(ticketKey); save.disabled = false; }
   }, { once: false });
   root.addEventListener('change', (event) => { if (event.target.matches('[data-support-filter]')) { currentStatus = event.target.value; root.querySelector('[data-support-list]').innerHTML = renderList(); } });
   root.addEventListener('input', (event) => { if (event.target.matches('[data-support-search]')) { currentSearch = event.target.value.trim(); root.querySelector('[data-support-list]').innerHTML = renderList(); } });
