@@ -789,6 +789,7 @@
             <button type="button" class="help-tab" data-help-tab="theme" onclick="selectHelpTab('theme')" aria-selected="false"><span class="help-tab-icon" aria-hidden="true">🎨</span><span>테마</span></button>
             <button type="button" class="help-tab" data-help-tab="data" onclick="selectHelpTab('data')" aria-selected="false"><span class="help-tab-icon" aria-hidden="true">🗂️</span><span>데이터·계정</span></button>
             <button type="button" class="help-tab" data-help-tab="faq" onclick="selectHelpTab('faq')" aria-selected="false"><span class="help-tab-icon" aria-hidden="true">💬</span><span>Q&amp;A</span></button>
+            <button type="button" class="help-tab" data-help-tab="support" onclick="selectHelpTab('support')" aria-selected="false"><span class="help-tab-icon" aria-hidden="true">📨</span><span>문의하기</span></button>
             <button type="button" class="help-tab" data-help-tab="updates" onclick="selectHelpTab('updates')" aria-selected="false"><span class="help-tab-icon" aria-hidden="true">🔔</span><span>업데이트</span></button>
         </div>
 
@@ -860,6 +861,24 @@
                     <button type="button" class="faq-question" onclick="toggleHelpFaq(this)">초대코드가 만료되었다고 나와요.<span>⌄</span></button><div class="faq-answer">초대코드는 24시간 동안만 유효합니다. 관리(Dom)에게 새 코드를 요청하세요.</div>
                     <button type="button" class="faq-question" onclick="toggleHelpFaq(this)">다른 공간으로 돌아갈 수 있나요?<span>⌄</span></button><div class="faq-answer">우리의 공간 메뉴에서 이전 공간 목록을 열고 원하는 공간으로 전환할 수 있습니다.</div>
                 </div>
+            </section>
+
+            <section class="help-panel" data-help-panel="support">
+                <article class="help-mini-card help-support-card" data-help-keywords="문의 고객센터 오류 건의 답변">
+                    <h3>📨 문의·고객센터</h3>
+                    <p>앱 사용 중 불편한 점이나 데이터 오류를 보내면 관리자가 확인한 뒤 이 화면으로 답변합니다.</p>
+                    <div class="help-support-notice">비밀번호, 인증번호, 주민등록번호, 금융정보 등 민감한 개인정보는 적지 마세요.</div>
+                    <form id="supportTicketForm" class="help-support-form" onsubmit="submitSupportTicket(event)">
+                        <label><span>문의 유형</span><select id="supportCategory" required><option value="usage">앱 사용 문의</option><option value="data_error">데이터 오류</option><option value="account_room">계정·Room 문의</option><option value="report">신고·안전</option><option value="suggestion">기능 제안</option></select></label>
+                        <label><span>제목</span><input id="supportTitle" type="text" maxlength="80" placeholder="문의 내용을 한 줄로 적어주세요" required></label>
+                        <label><span>문의 내용</span><textarea id="supportMessage" maxlength="2000" rows="5" placeholder="문제가 발생한 화면과 상황을 자세히 적어주세요" required></textarea></label>
+                        <div class="help-support-actions"><small>현재 로그인 계정과 Room 정보가 확인용으로 함께 전달됩니다.</small><button id="supportSubmitButton" type="submit" class="guide-primary">문의 보내기</button></div>
+                    </form>
+                </article>
+                <article class="help-mini-card help-support-list-card">
+                    <div class="help-support-list-head"><h3>내 문의</h3><button type="button" onclick="loadSupportTickets(true)">새로고침</button></div>
+                    <div id="supportTicketList" class="help-support-list"><p class="help-support-empty">문의 내역을 불러오려면 로그인해 주세요.</p></div>
+                </article>
             </section>
 
             <section class="help-panel" data-help-panel="updates">
@@ -1296,7 +1315,7 @@
     <script src="js/qa.js?v=step5-10-13-history-month-server-reconciliation-20260716"></script>
     <script src="js/motion.js?v=step5-10-13-history-month-server-reconciliation-20260716"></script>
     <script src="js/product.js?v=step6-2-13-5-time-axis-fix-20260719"></script>
-    <script src="js/help-center.js?v=step5-10-13-history-month-server-reconciliation-20260716"></script>
+    <script src="js/help-center.js?v=step-a15-1-support-center-20260720"></script>
     <script src="js/data-management.js?v=step6-2-13-4-request-cancel-type-message-20260718"></script>
     <script src="js/lifecycle.js?v=step-a12-3-dormant-restore-20260719"></script>
     <script src="js/app.js?v=step-a12-3-dormant-restore-20260719"></script>

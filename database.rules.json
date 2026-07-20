@@ -510,6 +510,32 @@
       ".read": "auth != null && root.child('admins').child(auth.uid).val() === true",
       ".write": false
     },
+    "supportTickets": {
+      ".read": "auth != null && root.child('admins').child(auth.uid).val() === true",
+      "$uid": {
+        ".read": "auth != null && (auth.uid === $uid || root.child('admins').child(auth.uid).val() === true)",
+        "$ticketId": {
+          ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (auth.uid === $uid && !data.exists() && newData.child('ownerUid').val() === auth.uid && newData.child('status').val() === 'received'))",
+          ".validate": "!newData.exists() || (newData.child('ticketId').val() === $ticketId && newData.child('ownerUid').val() === $uid && newData.child('ownerEmail').isString() && newData.child('category').isString() && newData.child('title').isString() && newData.child('title').val().length >= 2 && newData.child('title').val().length <= 80 && newData.child('message').isString() && newData.child('message').val().length >= 10 && newData.child('message').val().length <= 2000 && (newData.child('status').val() === 'received' || newData.child('status').val() === 'reviewing' || newData.child('status').val() === 'waiting_user' || newData.child('status').val() === 'resolved' || newData.child('status').val() === 'closed') && newData.child('createdAt').exists() && newData.child('updatedAt').exists())"
+        }
+      }
+    },
+    "supportReplies": {
+      ".read": "auth != null && root.child('admins').child(auth.uid).val() === true",
+      "$uid": {
+        ".read": "auth != null && (auth.uid === $uid || root.child('admins').child(auth.uid).val() === true)",
+        "$ticketId": {
+          "$replyId": {
+            ".write": "auth != null && root.child('admins').child(auth.uid).val() === true",
+            ".validate": "!newData.exists() || (newData.child('replyId').val() === $replyId && newData.child('ticketId').val() === $ticketId && newData.child('message').isString() && newData.child('message').val().length >= 1 && newData.child('message').val().length <= 2000 && newData.child('createdAt').exists())"
+          }
+        }
+      }
+    },
+    "supportInternalNotes": {
+      ".read": "auth != null && root.child('admins').child(auth.uid).val() === true",
+      ".write": "auth != null && root.child('admins').child(auth.uid).val() === true"
+    },
     "adminAuditLogs": {
       ".read": "auth != null && root.child('admins').child(auth.uid).val() === true",
       ".write": "auth != null && root.child('admins').child(auth.uid).val() === true"

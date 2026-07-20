@@ -1,8 +1,8 @@
-import { waitForAuthenticatedUser, readAdminProfile, isActiveAdmin, signOutAdmin } from './admin-api.js?v=admin-2-0-a14-2-4-recovery-safety-suite-20260719';
+import { waitForAuthenticatedUser, readAdminProfile, isActiveAdmin, signOutAdmin } from './admin-api.js?v=admin-2-0-a15-1-support-center-20260720';
 import { setState } from './admin-state.js';
-import { setDocumentBusy } from './admin-utils.js?v=admin-2-0-a14-2-4-recovery-safety-suite-20260719';
-import { renderSidebar } from './components/sidebar.js?v=admin-2-0-a14-2-4-recovery-safety-suite-20260719';
-import { startRouter, navigate } from './admin-router.js?v=admin-2-0-a14-2-4-recovery-safety-suite-20260719';
+import { setDocumentBusy } from './admin-utils.js?v=admin-2-0-a15-1-support-center-20260720';
+import { renderSidebar } from './components/sidebar.js?v=admin-2-0-a15-1-support-center-20260720';
+import { startRouter, navigate } from './admin-router.js?v=admin-2-0-a15-1-support-center-20260720';
 import { ADMIN_RELEASE } from './admin-release.js';
 
 const boot = document.getElementById('adminBoot');

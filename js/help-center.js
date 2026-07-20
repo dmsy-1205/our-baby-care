@@ -4,6 +4,21 @@
 // No Firebase, Room, History, Presence structure changes
 // =========================================================
 (function () {
+    const SUPPORT_STATUS_LABELS = {
+        received: '접수됨',
+        reviewing: '확인 중',
+        waiting_user: '추가 정보 필요',
+        resolved: '답변 완료',
+        closed: '종료'
+    };
+    const SUPPORT_CATEGORY_LABELS = {
+        usage: '앱 사용 문의',
+        data_error: '데이터 오류',
+        account_room: '계정·Room 문의',
+        report: '신고·안전',
+        suggestion: '기능 제안'
+    };
+    let supportLoading = false;
     const HELP_TIPS = [
         '매일 한 줄이라도 기록을 남겨보세요.',
         '커스텀 미션은 “물 2L 마시기”처럼 짧고 구체적으로 쓰면 좋아요.',
@@ -43,6 +58,8 @@
             results.hidden = true;
             results.innerHTML = '';
         }
+
+        if (tabName === 'support') loadSupportTickets();
     }
 
     function showRandomHelpTip() {
@@ -107,6 +124,122 @@
             .replace(/'/g, '&#039;');
     }
 
+    function supportUser() {
+        try { return currentUser || null; } catch (error) { return null; }
+    }
+
+    function supportDatabase() {
+        try { return db || null; } catch (error) { return null; }
+    }
+
+    function supportRoomCode() {
+        try { return String(activeRoomCode || ''); } catch (error) { return ''; }
+    }
+
+    function formatSupportDate(value) {
+        const timestamp = Number(value || 0);
+        if (!timestamp) return '시간 확인 중';
+        return new Intl.DateTimeFormat('ko-KR', {
+            year: 'numeric', month: 'numeric', day: 'numeric',
+            hour: '2-digit', minute: '2-digit'
+        }).format(new Date(timestamp));
+    }
+
+    function renderSupportReply(reply) {
+        return `<div class="help-support-reply"><strong>고객센터 답변</strong><p>${escapeHtml(reply.message || '')}</p><small>${escapeHtml(formatSupportDate(reply.createdAt))}</small></div>`;
+    }
+
+    function renderSupportTicket(ticket, replies) {
+        const status = ticket.status || 'received';
+        return `<article class="help-support-ticket">
+            <div class="help-support-ticket-head"><strong>${escapeHtml(ticket.title || '문의')}</strong><span data-status="${escapeHtml(status)}">${escapeHtml(SUPPORT_STATUS_LABELS[status] || status)}</span></div>
+            <div class="help-support-ticket-meta"><span>${escapeHtml(SUPPORT_CATEGORY_LABELS[ticket.category] || ticket.category || '일반 문의')}</span><span>${escapeHtml(formatSupportDate(ticket.createdAt))}</span></div>
+            <p>${escapeHtml(ticket.message || '')}</p>
+            ${replies.length ? `<div class="help-support-replies">${replies.map(renderSupportReply).join('')}</div>` : '<small class="help-support-waiting">답변을 준비하고 있습니다.</small>'}
+        </article>`;
+    }
+
+    async function loadSupportTickets(force) {
+        const list = document.getElementById('supportTicketList');
+        const user = supportUser();
+        const database = supportDatabase();
+        if (!list) return;
+        if (!user || !database) {
+            list.innerHTML = '<p class="help-support-empty">로그인 후 문의를 보내고 답변을 확인할 수 있습니다.</p>';
+            return;
+        }
+        if (supportLoading && !force) return;
+        supportLoading = true;
+        list.innerHTML = '<p class="help-support-empty">문의 내역을 불러오는 중입니다.</p>';
+        try {
+            const [ticketSnapshot, replySnapshot] = await Promise.all([
+                database.ref(`supportTickets/${user.uid}`).once('value'),
+                database.ref(`supportReplies/${user.uid}`).once('value')
+            ]);
+            const ticketRoot = ticketSnapshot.val() || {};
+            const replyRoot = replySnapshot.val() || {};
+            const tickets = Object.entries(ticketRoot)
+                .map(([id, value]) => ({ id, ...(value || {}) }))
+                .sort((a, b) => Number(b.updatedAt || b.createdAt || 0) - Number(a.updatedAt || a.createdAt || 0));
+            list.innerHTML = tickets.length ? tickets.map((ticket) => {
+                const replies = Object.values(replyRoot[ticket.id] || {}).sort((a, b) => Number(a.createdAt || 0) - Number(b.createdAt || 0));
+                return renderSupportTicket(ticket, replies);
+            }).join('') : '<p class="help-support-empty">아직 접수한 문의가 없습니다.</p>';
+        } catch (error) {
+            console.error('[Support Center] load failed', error);
+            list.innerHTML = '<p class="help-support-empty">문의 내역을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.</p>';
+        } finally {
+            supportLoading = false;
+        }
+    }
+
+    async function submitSupportTicket(event) {
+        if (event) event.preventDefault();
+        const user = supportUser();
+        const database = supportDatabase();
+        if (!user || !database) {
+            alert('로그인 후 문의를 보낼 수 있습니다.');
+            return false;
+        }
+
+        const category = document.getElementById('supportCategory')?.value || 'usage';
+        const title = String(document.getElementById('supportTitle')?.value || '').trim();
+        const message = String(document.getElementById('supportMessage')?.value || '').trim();
+        if (title.length < 2 || message.length < 10) {
+            alert('제목은 2자 이상, 문의 내용은 10자 이상 적어주세요.');
+            return false;
+        }
+
+        const button = document.getElementById('supportSubmitButton');
+        if (button) button.disabled = true;
+        try {
+            const ref = database.ref(`supportTickets/${user.uid}`).push();
+            await ref.set({
+                ticketId: ref.key,
+                ownerUid: user.uid,
+                ownerEmail: user.email || '',
+                category,
+                title: title.slice(0, 80),
+                message: message.slice(0, 2000),
+                status: 'received',
+                priority: 'normal',
+                roomCode: supportRoomCode(),
+                appVersion: document.querySelector('[data-hm-release-version]')?.textContent?.trim() || '',
+                createdAt: firebase.database.ServerValue.TIMESTAMP,
+                updatedAt: firebase.database.ServerValue.TIMESTAMP
+            });
+            document.getElementById('supportTicketForm')?.reset();
+            alert('문의가 접수되었습니다. 이 화면에서 답변 상태를 확인할 수 있습니다.');
+            await loadSupportTickets(true);
+        } catch (error) {
+            console.error('[Support Center] submit failed', error);
+            alert('문의를 보내지 못했습니다. 잠시 후 다시 시도해 주세요.');
+        } finally {
+            if (button) button.disabled = false;
+        }
+        return false;
+    }
+
     function resetHelpCenter() {
         if (typeof window.hmRenderReleaseInfo === 'function') window.hmRenderReleaseInfo();
         const input = document.getElementById('helpSearchInput');
@@ -121,6 +254,8 @@
     window.toggleHelpFaq = toggleHelpFaq;
     window.showRandomHelpTip = showRandomHelpTip;
     window.openHelpSearchMatch = openHelpSearchMatch;
+    window.loadSupportTickets = loadSupportTickets;
+    window.submitSupportTicket = submitSupportTicket;
 
     document.addEventListener('DOMContentLoaded', resetHelpCenter);
 })();
