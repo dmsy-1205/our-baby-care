@@ -1,6 +1,6 @@
-import { getAdminDatabase } from '../admin-api.js?v=admin-2-0-a16-2-risk-review-workflow-20260720';
+import { getAdminDatabase } from '../admin-api.js?v=admin-2-0-a17-1-guarded-deletion-execution-20260720';
 import { getState } from '../admin-state.js';
-import { escapeHtml } from '../admin-utils.js?v=admin-2-0-a16-2-risk-review-workflow-20260720';
+import { escapeHtml } from '../admin-utils.js?v=admin-2-0-a17-1-guarded-deletion-execution-20260720';
 import { ADMIN_RELEASE } from '../admin-release.js';
 
 const ADMIN_STEP = ADMIN_RELEASE.step;
@@ -193,7 +193,7 @@ export async function render() {
       </section>
       <section class="admin-card admin-panel"><div class="admin-panel-head"><div><h2>통합 운영 위험 검토</h2><p>발견된 위험을 검토하고 상태와 메모를 별도 기록합니다. 원본 사용자·Room·문의·백업 데이터는 변경하지 않습니다.</p></div><span class="admin-status-pill ${highRisks ? 'danger' : status.risks.items.length ? 'warn' : 'ok'}">전체 ${status.risks.items.length}건 · 높음 ${highRisks}건</span></div><section class="admin-grid admin-grid-4"><article class="admin-card admin-metric"><span>검토 완료</span><strong>${reviewedRisks}/${status.risks.items.length}</strong><small>확인 중 포함</small></article><article class="admin-card admin-metric"><span>해결</span><strong>${resolvedRisks}</strong><small>조치 완료 기록</small></article><article class="admin-card admin-metric"><span>예외 승인</span><strong>${acceptedRisks}</strong><small>관리자 판단 보존</small></article><article class="admin-card admin-metric"><span>미검토</span><strong>${status.risks.items.length - reviewedRisks}</strong><small>후속 확인 필요</small></article></section>${renderRiskItems(status.risks.items)}</section>
       <section class="admin-card admin-panel">
-        <div class="admin-panel-head"><div><h2>승인 엔진 안전 상태</h2><p>서버 사전점검, 백업 확인과 실행 잠금 상태를 확인합니다.</p></div><span class="admin-status-pill ${status.deletionExecutionEnabledCount ? 'danger' : 'ok'}">${status.deletionExecutionEnabledCount ? '실행 활성 감지' : '영구 삭제 잠금'}</span></div>
+        <div class="admin-panel-head"><div><h2>승인 엔진 안전 상태</h2><p>서버 사전점검, 백업 확인과 최종 실행 준비 상태를 확인합니다.</p></div><span class="admin-status-pill ${status.deletionExecutionEnabledCount ? 'warn' : 'ok'}">${status.deletionExecutionEnabledCount ? `실행 준비 ${status.deletionExecutionEnabledCount}건` : '실행 준비 없음'}</span></div>
         <section class="admin-grid admin-grid-3"><article class="admin-card admin-metric"><span>승인 대기열</span><strong>${status.deletionQueueCount}</strong><small>deletionActionQueue</small></article><article class="admin-card admin-metric"><span>검증된 백업</span><strong>${status.backupVerifiedCount}</strong><small>dataBackups</small></article><article class="admin-card admin-metric"><span>실행 활성</span><strong>${status.deletionExecutionEnabledCount}</strong><small>정상 기준 0건</small></article></section>
       </section>
       <section class="admin-card admin-panel">

@@ -274,7 +274,7 @@ function renderRequestDetail(row, closed) {
         </label>
         <div class="admin-info-box">
           <strong>${closed ? '닫힌 요청' : '처리 가능 요청'}</strong>
-          <p>${closed ? '필요하면 기록 확인 후 별도 요청으로 다시 진행합니다.' : '이 화면에서는 답변·메모·상태만 저장합니다. 실제 데이터 삭제나 Room 연결 해제는 실행하지 않습니다.'}</p>
+          <p>${closed ? '필요하면 기록 확인 후 별도 요청으로 다시 진행합니다.' : '승인 후 백업과 독립된 2차 검토가 완료된 요청만 서버에서 실제 실행할 수 있습니다.'}</p>
         </div>
       </div>
       ${renderDeletionPreflight(row, queue)}
@@ -286,7 +286,7 @@ function renderRequestDetail(row, closed) {
           </button>
         `).join('')}
       </div>
-      <p class="admin-muted">이 화면에서는 답변·메모·상태만 저장합니다. 실제 데이터 삭제나 Room 연결 해제는 실행하지 않습니다.</p>
+      <p class="admin-muted">영구 삭제는 검증된 백업과 독립된 2차 승인 후 최종 확인 문구를 입력해야 실행됩니다.</p>
     </div>
   `;
 }
@@ -299,8 +299,9 @@ function renderDeletionPreflight(row, queue) {
   const preflight = asObject(queue.preflight);
   const blockers = Array.isArray(queue.blockers) ? queue.blockers : Object.values(asObject(queue.blockers));
   const blockerLabels = {
-    backup_not_verified: '검증된 백업 없음', partner_consent_missing: '상대방 동의 확인 필요', permanent_deletion_disabled: '영구 삭제 스위치 OFF'
+    backup_not_verified: '검증된 백업 없음', partner_consent_missing: '상대방 동의 확인 필요'
   };
+  const executionReady = queue.status === 'ready_for_execution' && queue.executionEnabled === true && queue.secondApproval?.uid;
   return `<div class="admin-impact-preview">
     <div class="admin-impact-head"><div><strong>A13 서버 사전점검</strong><p>상태 ${escapeHtml(queue.status || '대기')} · 마지막 확인 ${escapeHtml(formatDateTime(queue.updatedAt))}</p></div><span class="admin-impact-risk ${preflight.backupVerified ? 'ok' : 'danger'}">${preflight.backupVerified ? '백업 확인' : '실행 차단'}</span></div>
     <div class="admin-impact-grid">
@@ -310,7 +311,7 @@ function renderDeletionPreflight(row, queue) {
       <div><span>Room 멤버</span><strong>${Number(preflight.targetRoomMemberCount || 0)}명</strong></div>
     </div>
     <div class="admin-warning-box"><strong>차단 사유</strong><p>${blockers.map((code) => escapeHtml(blockerLabels[code] || code)).join(' · ') || '없음'}</p></div>
-    <div class="admin-action-row"><button class="admin-button" type="button" data-prepare-deletion="${escapeHtml(requestKey(row))}">서버에서 다시 점검</button><button class="admin-button" type="button" data-second-approval="${escapeHtml(row.id)}" ${preflight.backupVerified ? '' : 'disabled'}>다른 관리자 2차 승인</button><span class="admin-status-pill danger">영구 삭제 OFF</span></div>
+    <div class="admin-action-row">${row.requestType === 'delete_room' && row.partnerConsentConfirmed !== true ? `<button class="admin-button" type="button" data-confirm-partner-consent="${escapeHtml(requestKey(row))}">상대방 동의 확인 기록</button>` : ''}<button class="admin-button" type="button" data-prepare-deletion="${escapeHtml(requestKey(row))}">서버에서 다시 점검</button><button class="admin-button" type="button" data-second-approval="${escapeHtml(row.id)}" ${preflight.backupVerified && preflight.partnerConsentConfirmed && !executionReady ? '' : 'disabled'}>다른 관리자 2차 승인</button>${executionReady ? `<button class="admin-button danger" type="button" data-execute-deletion="${escapeHtml(row.id)}">실제 영구 삭제 실행</button><span class="admin-status-pill danger">실행 준비 완료</span>` : '<span class="admin-status-pill warn">실행 잠금</span>'}</div>
   </div>`;
 }
 
@@ -322,6 +323,11 @@ async function callDeletionPreflight(row) {
 async function callSecondApproval(requestId) {
   const callable = getAdminFunctions().httpsCallable('approveDeletionAction');
   return callable({ requestId });
+}
+
+async function callDeletionExecution(requestId, confirmation) {
+  const callable = getAdminFunctions().httpsCallable('executeDeletionAction');
+  return callable({ requestId, confirmation });
 }
 
 function findRow(key) {
@@ -508,6 +514,43 @@ function bindEvents(root) {
       return;
     }
 
+    const consentButton = event.target.closest('[data-confirm-partner-consent]');
+    if (consentButton) {
+      const row = findRow(consentButton.dataset.confirmPartnerConsent);
+      if (!row || row.requestType !== 'delete_room') return;
+      const evidence = prompt('상대방 동의를 확인한 방법을 기록하세요.\n예: 앱 문의 답변, 이메일, 대면 확인')?.trim() || '';
+      if (evidence.length < 5) {
+        if (evidence) alert('동의 확인 근거를 5자 이상 입력해 주세요.');
+        return;
+      }
+      if (!confirm('상대방이 Room 전체 데이터 영구 삭제에 동의했음을 확인했습니까?')) return;
+      consentButton.disabled = true;
+      try {
+        const state = getState();
+        const timestamp = Date.now();
+        await getAdminDatabase().ref(`dataDeleteRequests/${row.ownerUid}/${row.id}`).update({
+          partnerConsentConfirmed: true,
+          partnerConsentEvidence: evidence.slice(0, 500),
+          partnerConsentConfirmedAt: timestamp,
+          partnerConsentConfirmedByUid: state.user?.uid || '',
+          partnerConsentConfirmedByEmail: state.user?.email || '',
+          updatedAt: timestamp
+        });
+        await getAdminDatabase().ref(`adminAuditLogs/${timestamp}_${row.id}_partner_consent`).set({
+          action: 'deletion_partner_consent_confirmed', requestId: row.id,
+          targetUid: row.ownerUid, roomCode: row.roomCode || '', evidence: evidence.slice(0, 500),
+          adminUid: state.user?.uid || '', adminEmail: state.user?.email || '', createdAt: timestamp
+        });
+        await loadRequests();
+        root.querySelector('[data-request-list]').innerHTML = renderRequestList();
+      } catch (error) {
+        alert(`상대방 동의 기록 저장에 실패했습니다. ${error.message || error}`);
+      } finally {
+        consentButton.disabled = false;
+      }
+      return;
+    }
+
     const approvalButton = event.target.closest('[data-second-approval]');
     if (approvalButton) {
       if (!confirm('첫 승인자와 다른 관리자로서 백업 확인과 2차 승인을 기록할까요? 실제 삭제는 실행되지 않습니다.')) return;
@@ -520,6 +563,34 @@ function bindEvents(root) {
         alert(`2차 승인에 실패했습니다. ${error.message || error}`);
       } finally {
         approvalButton.disabled = false;
+      }
+      return;
+    }
+
+    const executionButton = event.target.closest('[data-execute-deletion]');
+    if (executionButton) {
+      const requestId = executionButton.dataset.executeDeletion;
+      const requiredText = `DELETE ${requestId}`;
+      const confirmation = prompt(`이 작업은 되돌릴 수 없습니다.\n검증된 백업은 보존됩니다.\n계속하려면 아래 문구를 정확히 입력하세요.\n\n${requiredText}`) || '';
+      if (confirmation !== requiredText) {
+        if (confirmation) alert('확인 문구가 일치하지 않아 삭제하지 않았습니다.');
+        return;
+      }
+      if (!confirm('최종 확인입니다. 지금 실제 데이터를 영구 삭제할까요?')) return;
+      executionButton.disabled = true;
+      executionButton.textContent = '삭제 실행 중...';
+      try {
+        const response = await callDeletionExecution(requestId, confirmation);
+        const result = response?.data || {};
+        alert(`삭제가 완료되었습니다. 삭제 경로 ${Number(result.deletedPathCount || 0)}개`);
+        await loadRequests();
+        root.querySelector('[data-request-list]').innerHTML = renderRequestList();
+      } catch (error) {
+        alert(`영구 삭제 실행에 실패했습니다. ${error.message || error}`);
+        await loadRequests();
+        root.querySelector('[data-request-list]').innerHTML = renderRequestList();
+      } finally {
+        executionButton.disabled = false;
       }
     }
   });

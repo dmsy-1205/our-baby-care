@@ -8,6 +8,12 @@ const crypto = require("node:crypto");
 admin.initializeApp();
 setGlobalOptions({ region: "us-central1", maxInstances: 2, timeoutSeconds: 30, memory: "256MiB" });
 
+function isActiveAdminValue(value) {
+  if (value === true) return true;
+  if (!value || typeof value !== 'object') return false;
+  return value.active === true || value.enabled === true || value.role === 'owner' || value.role === 'admin';
+}
+
 exports.executeApprovedRoomDisconnect = onCall(async (request) => {
   const callerUid = request.auth?.uid;
   if (!callerUid) throw new HttpsError("unauthenticated", "로그인이 필요합니다.");
@@ -18,7 +24,7 @@ exports.executeApprovedRoomDisconnect = onCall(async (request) => {
 
   const db = admin.database();
   const adminSnap = await db.ref(`admins/${callerUid}`).get();
-  if (!adminSnap.exists()) throw new HttpsError("permission-denied", "관리자 권한이 없습니다.");
+  if (!adminSnap.exists() || !isActiveAdminValue(adminSnap.val())) throw new HttpsError("permission-denied", "활성 관리자 권한이 없습니다.");
 
   const requestRef = db.ref(`dataDeleteRequests/${targetUid}/${requestId}`);
   const requestSnap = await requestRef.get();
@@ -84,7 +90,7 @@ async function requireAdminCaller(request) {
   const callerUid = request.auth?.uid;
   if (!callerUid) throw new HttpsError("unauthenticated", "로그인이 필요합니다.");
   const snapshot = await admin.database().ref(`admins/${callerUid}`).get();
-  if (!snapshot.exists()) throw new HttpsError("permission-denied", "관리자 권한이 없습니다.");
+  if (!snapshot.exists() || !isActiveAdminValue(snapshot.val())) throw new HttpsError("permission-denied", "활성 관리자 권한이 없습니다.");
   return { uid: callerUid, email: String(request.auth?.token?.email || "") };
 }
 
@@ -160,13 +166,18 @@ function restoreRoots(payload) {
   if (decoded.requestType === "delete_room") {
     return [
       { path: `rooms/${decoded.roomCode}`, value: decoded.data?.room },
-      { path: `roomMembers/${decoded.roomCode}`, value: decoded.data?.roomMembers }
+      { path: `roomMembers/${decoded.roomCode}`, value: decoded.data?.roomMembers },
+      { path: `ownerNotes/${decoded.roomCode}`, value: decoded.data?.ownerNotes },
+      ...Object.entries(decoded.data?.userRoomLinks || {}).map(([uid, value]) => ({ path: `userRooms/${uid}/${decoded.roomCode}`, value })),
+      ...Object.entries(decoded.data?.invites || {}).map(([inviteCode, value]) => ({ path: `invites/${inviteCode}`, value }))
     ].filter((item) => item.value !== null && item.value !== undefined);
   }
   return [
     { path: `users/${decoded.targetUid}`, value: decoded.data?.user },
     { path: `userRooms/${decoded.targetUid}`, value: decoded.data?.userRooms },
-    ...Object.entries(decoded.data?.memberships || {}).map(([roomCode, value]) => ({ path: `roomMembers/${roomCode}/${decoded.targetUid}`, value }))
+    ...Object.entries(decoded.data?.memberships || {}).map(([roomCode, value]) => ({ path: `roomMembers/${roomCode}/${decoded.targetUid}`, value })),
+    ...Object.entries(decoded.data?.privateRoots || {}).map(([rootName, value]) => ({ path: `${rootName}/${decoded.targetUid}`, value })),
+    ...Object.entries(decoded.data?.auxiliaryRoots || {}).flatMap(([rootName, entries]) => Object.entries(entries || {}).map(([id, value]) => ({ path: `${rootName}/${id}`, value })))
   ].filter((item) => item.value !== null && item.value !== undefined);
 }
 
@@ -185,19 +196,37 @@ async function buildDeletionSnapshot(db, targetUid, item) {
   const roomCode = String(item.roomCode || "").trim();
   if (item.requestType === "delete_room") {
     if (!roomCode) throw new HttpsError("failed-precondition", "Room 코드가 없습니다.");
-    const [roomSnap, membersSnap] = await Promise.all([
-      db.ref(`rooms/${roomCode}`).get(), db.ref(`roomMembers/${roomCode}`).get()
+    const [roomSnap, membersSnap, ownerNotesSnap, invitesSnap] = await Promise.all([
+      db.ref(`rooms/${roomCode}`).get(), db.ref(`roomMembers/${roomCode}`).get(),
+      db.ref(`ownerNotes/${roomCode}`).get(), db.ref('invites').get()
     ]);
+    const members = membersSnap.val() || {};
+    const userRoomLinks = {};
+    await Promise.all(Object.keys(members).map(async (uid) => {
+      const linkSnap = await db.ref(`userRooms/${uid}/${roomCode}`).get();
+      userRoomLinks[uid] = linkSnap.val() ?? null;
+    }));
+    const invites = Object.fromEntries(Object.entries(invitesSnap.val() || {}).filter(([, invite]) => invite?.roomCode === roomCode));
     return {
-      schemaVersion: 1, requestType: item.requestType, targetUid, roomCode,
-      capturedPaths: [`rooms/${roomCode}`, `roomMembers/${roomCode}`],
-      data: { room: roomSnap.val() ?? null, roomMembers: membersSnap.val() ?? null }
+      schemaVersion: 2, requestType: item.requestType, targetUid, roomCode,
+      capturedPaths: [`rooms/${roomCode}`, `roomMembers/${roomCode}`, `ownerNotes/${roomCode}`, ...Object.keys(userRoomLinks).map((uid) => `userRooms/${uid}/${roomCode}`), ...Object.keys(invites).map((code) => `invites/${code}`)],
+      data: { room: roomSnap.val() ?? null, roomMembers: membersSnap.val() ?? null, ownerNotes: ownerNotesSnap.val() ?? null, userRoomLinks, invites }
     };
   }
 
-  const [userSnap, userRoomsSnap] = await Promise.all([
-    db.ref(`users/${targetUid}`).get(), db.ref(`userRooms/${targetUid}`).get()
+  const privateRootNames = ['supportTickets', 'supportReplies', 'supportUserMessages', 'supportRatings', 'supportNotifications'];
+  const [userSnap, userRoomsSnap, ...remainingSnaps] = await Promise.all([
+    db.ref(`users/${targetUid}`).get(), db.ref(`userRooms/${targetUid}`).get(),
+    ...privateRootNames.map((rootName) => db.ref(`${rootName}/${targetUid}`).get()),
+    db.ref('supportInternalNotes').get(), db.ref('supportIncidents').get(), db.ref('supportIncidentEvents').get()
   ]);
+  const privateSnaps = remainingSnaps.slice(0, privateRootNames.length);
+  const [notesSnap, incidentsSnap, eventsSnap] = remainingSnaps.slice(privateRootNames.length);
+  const ticketIds = new Set(Object.keys(privateSnaps[0].val() || {}));
+  const internalNotes = Object.fromEntries(Object.entries(notesSnap.val() || {}).filter(([id, note]) => note?.ownerUid === targetUid || ticketIds.has(id)));
+  const incidents = Object.fromEntries(Object.entries(incidentsSnap.val() || {}).filter(([, incident]) => incident?.ownerUid === targetUid));
+  const incidentEvents = Object.fromEntries(Object.keys(incidents).map((id) => [id, eventsSnap.val()?.[id] ?? null]));
+  const auxiliaryRoots = { supportInternalNotes: internalNotes, supportIncidents: incidents, supportIncidentEvents: incidentEvents };
   const linkedRooms = userRoomsSnap.val() || {};
   const memberships = {};
   await Promise.all(Object.keys(linkedRooms).map(async (roomCodeValue) => {
@@ -205,9 +234,9 @@ async function buildDeletionSnapshot(db, targetUid, item) {
     memberships[roomCodeValue] = memberSnap.val() ?? null;
   }));
   return {
-    schemaVersion: 1, requestType: item.requestType, targetUid, roomCode,
-    capturedPaths: [`users/${targetUid}`, `userRooms/${targetUid}`, ...Object.keys(linkedRooms).map((code) => `roomMembers/${code}/${targetUid}`)],
-    data: { user: userSnap.val() ?? null, userRooms: linkedRooms, memberships }
+    schemaVersion: 2, requestType: item.requestType, targetUid, roomCode,
+    capturedPaths: [`users/${targetUid}`, `userRooms/${targetUid}`, ...Object.keys(linkedRooms).map((code) => `roomMembers/${code}/${targetUid}`), ...privateRootNames.map((name) => `${name}/${targetUid}`), ...Object.entries(auxiliaryRoots).flatMap(([name, entries]) => Object.keys(entries).map((id) => `${name}/${id}`))],
+    data: { user: userSnap.val() ?? null, userRooms: linkedRooms, memberships, privateRoots: Object.fromEntries(privateRootNames.map((name, index) => [name, privateSnaps[index].val() ?? null])), auxiliaryRoots }
   };
 }
 
@@ -396,7 +425,6 @@ exports.prepareDeletionAction = onCall(async (request) => {
   const blockers = [];
   if (!backupVerified) blockers.push("backup_not_verified");
   if (!preflight.partnerConsentConfirmed) blockers.push("partner_consent_missing");
-  blockers.push("permanent_deletion_disabled");
 
   const now = Date.now();
   const readyForSecondApproval = backupVerified && preflight.partnerConsentConfirmed;
@@ -417,7 +445,6 @@ exports.prepareDeletionAction = onCall(async (request) => {
 });
 
 // Records an independent second approval only after backup verification.
-// Permanent deletion remains hard-disabled until a later audited release.
 exports.approveDeletionAction = onCall(async (request) => {
   const caller = await requireAdminCaller(request);
   const requestId = String(request.data?.requestId || "").trim();
@@ -427,6 +454,9 @@ exports.approveDeletionAction = onCall(async (request) => {
   const actionSnap = await actionRef.get();
   if (!actionSnap.exists()) throw new HttpsError("not-found", "승인 대기 작업을 찾을 수 없습니다.");
   const action = actionSnap.val() || {};
+  if (action.status !== "awaiting_second_approval" || action.preflight?.partnerConsentConfirmed !== true) {
+    throw new HttpsError("failed-precondition", "백업과 상대방 동의 확인을 포함한 사전점검을 먼저 통과해야 합니다.");
+  }
   if (action.firstApproval?.uid === caller.uid) throw new HttpsError("failed-precondition", "첫 승인자와 다른 관리자가 확인해야 합니다.");
 
   const backupSnap = await db.ref(`dataBackups/${requestId}`).get();
@@ -436,14 +466,138 @@ exports.approveDeletionAction = onCall(async (request) => {
   }
   const now = Date.now();
   await actionRef.update({
-    status: "approved_execution_locked", backupVerified: true,
+    status: "ready_for_execution", backupVerified: true,
     secondApproval: { uid: caller.uid, email: caller.email, approvedAt: now },
-    executionEnabled: false, updatedAt: now
+    executionEnabled: true, updatedAt: now
   });
   await db.ref(`adminAuditLogs/${now}_${requestId}_second_approval`).set({
     action: "deletion_second_approval_recorded", requestId,
     targetUid: action.targetUid || "", adminUid: caller.uid,
-    createdAt: now, executionEnabled: false
+    createdAt: now, executionEnabled: true
   });
-  return { ok: true, status: "approved_execution_locked", executionEnabled: false };
+  return { ok: true, status: "ready_for_execution", executionEnabled: true };
+});
+
+// STEP A17.1: executes a backed-up, independently approved deletion request.
+exports.executeDeletionAction = onCall({ timeoutSeconds: 120, memory: "512MiB" }, async (request) => {
+  const caller = await requireAdminCaller(request);
+  const requestId = String(request.data?.requestId || "").trim();
+  const confirmation = String(request.data?.confirmation || "").trim();
+  if (!requestId || confirmation !== `DELETE ${requestId}`) {
+    throw new HttpsError("invalid-argument", "삭제 확인 문구가 일치하지 않습니다.");
+  }
+
+  const db = admin.database();
+  const actionRef = db.ref(`deletionActionQueue/${requestId}`);
+  const [actionSnap, backupSnap, snapshotSnap] = await Promise.all([
+    actionRef.get(), db.ref(`dataBackups/${requestId}`).get(), db.ref(`dataBackupSnapshots/${requestId}`).get()
+  ]);
+  if (!actionSnap.exists()) throw new HttpsError("not-found", "삭제 대기 작업을 찾을 수 없습니다.");
+  const action = actionSnap.val() || {};
+  const backup = backupSnap.val() || {};
+  const stored = snapshotSnap.val() || {};
+  if (action.status === "completed") return { ok: true, alreadyCompleted: true, requestId };
+  if (action.status !== "ready_for_execution" || action.executionEnabled !== true || !action.secondApproval?.uid) {
+    throw new HttpsError("failed-precondition", "백업 및 2차 승인이 완료된 작업만 실행할 수 있습니다.");
+  }
+  if (action.firstApproval?.uid === action.secondApproval?.uid) {
+    throw new HttpsError("failed-precondition", "1차 승인자와 2차 승인자가 같을 수 없습니다.");
+  }
+  const checksum = snapshotChecksum(stored.payload);
+  const decodedForVersion = decodeSnapshotValue(stored.payload);
+  if (Number(decodedForVersion.schemaVersion || 0) < 2) {
+    throw new HttpsError("failed-precondition", "A17.1 범위로 백업을 다시 생성하고 검증해 주세요.");
+  }
+  if (backup.status !== "verified" || checksum !== backup.checksum || checksum !== stored.checksum) {
+    throw new HttpsError("data-loss", "실행 직전 백업 무결성 검증에 실패했습니다.");
+  }
+
+  const targetUid = String(action.targetUid || "");
+  const roomCode = String(action.roomCode || "");
+  const requestRef = db.ref(`dataDeleteRequests/${targetUid}/${requestId}`);
+  const requestSnap = await requestRef.get();
+  const item = requestSnap.val() || {};
+  if (!requestSnap.exists() || item.status !== "approved" || item.requestType !== action.requestType) {
+    throw new HttpsError("failed-precondition", "원본 삭제 요청 상태가 변경되었습니다.");
+  }
+  if (action.requestType === "account") {
+    const targetAdminSnap = await db.ref(`admins/${targetUid}`).get();
+    if (targetAdminSnap.exists()) throw new HttpsError("failed-precondition", "관리자 계정은 이 기능으로 삭제할 수 없습니다.");
+  }
+
+  const now = Date.now();
+  await actionRef.update({ status: "processing", executionEnabled: false, processingAt: now, executedByUid: caller.uid, updatedAt: now });
+  await requestRef.update({ status: "processing", processingAt: now, updatedAt: now, processedByUid: caller.uid });
+
+  try {
+    const payload = decodeSnapshotValue(stored.payload);
+    const updates = {};
+    const deletedPaths = [];
+    if (action.requestType === "delete_room") {
+      if (!roomCode || payload.roomCode !== roomCode) throw new Error("room_snapshot_mismatch");
+      [`rooms/${roomCode}`, `roomMembers/${roomCode}`, `ownerNotes/${roomCode}`].forEach((path) => { updates[path] = null; deletedPaths.push(path); });
+      const memberIds = Object.keys(payload.data?.userRoomLinks || {});
+      const activeRoomValues = await Promise.all(memberIds.map((uid) => db.ref(`users/${uid}/activeRoom`).get()));
+      memberIds.forEach((uid, index) => {
+        updates[`userRooms/${uid}/${roomCode}`] = null;
+        deletedPaths.push(`userRooms/${uid}/${roomCode}`);
+        if (activeRoomValues[index].val() === roomCode) {
+          updates[`users/${uid}/activeRoom`] = null;
+          deletedPaths.push(`users/${uid}/activeRoom`);
+        }
+      });
+      Object.keys(payload.data?.invites || {}).forEach((code) => { updates[`invites/${code}`] = null; deletedPaths.push(`invites/${code}`); });
+    } else if (action.requestType === "account") {
+      if (!targetUid || payload.targetUid !== targetUid) throw new Error("account_snapshot_mismatch");
+      [`users/${targetUid}`, `userRooms/${targetUid}`, 'supportTickets', 'supportReplies', 'supportUserMessages', 'supportRatings', 'supportNotifications'].forEach((path) => {
+        const fullPath = path.includes('/') ? path : `${path}/${targetUid}`;
+        updates[fullPath] = null;
+        deletedPaths.push(fullPath);
+      });
+      Object.keys(payload.data?.memberships || {}).forEach((code) => { updates[`roomMembers/${code}/${targetUid}`] = null; deletedPaths.push(`roomMembers/${code}/${targetUid}`); });
+      Object.entries(payload.data?.auxiliaryRoots || {}).forEach(([rootName, entries]) => {
+        Object.keys(entries || {}).forEach((id) => { updates[`${rootName}/${id}`] = null; deletedPaths.push(`${rootName}/${id}`); });
+      });
+      deletedPaths.push(`storage/profiles/${targetUid}/avatar.webp`);
+    } else {
+      throw new Error("unsupported_request_type");
+    }
+
+    updates[`dataDeleteRequests/${targetUid}/${requestId}/status`] = "completed";
+    updates[`dataDeleteRequests/${targetUid}/${requestId}/completedAt`] = now;
+    updates[`dataDeleteRequests/${targetUid}/${requestId}/updatedAt`] = now;
+    updates[`dataDeleteRequests/${targetUid}/${requestId}/requestedByEmail`] = "deleted-user";
+    updates[`dataDeleteRequests/${targetUid}/${requestId}/adminMessage`] = "요청된 데이터 삭제가 완료되었습니다.";
+    updates[`deletionActionQueue/${requestId}/status`] = "completed";
+    updates[`deletionActionQueue/${requestId}/completedAt`] = now;
+    updates[`deletionActionQueue/${requestId}/executionEnabled`] = false;
+    updates[`deletionActionQueue/${requestId}/updatedAt`] = now;
+    updates[`dataDeletionLogs/${requestId}`] = {
+      requestId, requestType: action.requestType, targetUid, roomCode,
+      status: "completed", processedByUid: caller.uid, completedAt: now,
+      backupChecksum: checksum, deletedPaths
+    };
+    updates[`adminAuditLogs/${now}_${requestId}_executed`] = {
+      action: "permanent_deletion_executed", requestId, requestType: action.requestType,
+      targetUid, roomCode, adminUid: caller.uid, backupChecksum: checksum,
+      deletedPathCount: deletedPaths.length, createdAt: now
+    };
+    await db.ref().update(updates);
+
+    if (action.requestType === "account") {
+      await admin.storage().bucket().file(`profiles/${targetUid}/avatar.webp`).delete({ ignoreNotFound: true });
+      try {
+        await admin.auth().deleteUser(targetUid);
+      } catch (authError) {
+        if (authError?.code !== 'auth/user-not-found') throw authError;
+      }
+    }
+    return { ok: true, requestId, requestType: action.requestType, completedAt: now, deletedPathCount: deletedPaths.length };
+  } catch (error) {
+    console.error("executeDeletionAction failed", { requestId, targetUid, roomCode, error });
+    const failedAt = Date.now();
+    await actionRef.update({ status: "failed", executionEnabled: false, failedAt, updatedAt: failedAt, failureCode: String(error?.code || error?.message || 'internal').slice(0, 120) });
+    await requestRef.update({ status: "failed", failedAt, updatedAt: failedAt, adminMessage: "삭제 실행 중 오류가 발생했습니다. 백업을 보존한 상태로 관리자가 확인하고 있습니다." });
+    throw new HttpsError("internal", "삭제 실행에 실패했습니다. 백업과 감사 기록을 확인해 주세요.");
+  }
 });

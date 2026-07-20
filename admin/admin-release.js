@@ -1,14 +1,14 @@
 export const ADMIN_RELEASE = Object.freeze({
-  step: 'STEP A16.2',
-  label: 'Risk Review Workflow',
-  cacheKey: 'admin-2-0-a16-2-risk-review-workflow-20260720',
+  step: 'STEP A17.1',
+  label: 'Guarded Deletion Execution',
+  cacheKey: 'admin-2-0-a17-1-guarded-deletion-execution-20260720',
   releaseDate: '2026.07.20',
   stage: 'Beta',
-  deletionMode: 'LOCKED',
+  deletionMode: 'GUARDED_BETA',
   changes: Object.freeze([
-    '운영 위험별 안정 식별자와 검토 상태',
-    '관리자 검토 메모와 담당 기록',
-    '위험 검토 저장 시 감사 로그 생성',
-    '원본 데이터와 분리된 읽기 안전 워크플로'
+    '검증 백업과 독립 2차 승인 후 실제 삭제',
+    'Room 전체 데이터와 연결 경로 일괄 삭제',
+    '계정 개인 데이터와 Firebase Auth 계정 삭제',
+    '실행 직전 체크섬 검증과 삭제 감사 로그'
   ])
 });

@@ -39,7 +39,7 @@ export async function render() {
         <div class="admin-hero-icon">◉</div>
         <div>
           <h2 id="dashboardHeading">승인형 데이터 운영 모드</h2>
-          <p>관리자 인증을 통과한 계정만 접근할 수 있습니다. 삭제 요청은 서버 사전점검과 독립된 2차 승인 구조를 사용하며 영구 삭제는 잠겨 있습니다.</p>
+          <p>관리자 인증을 통과한 계정만 접근할 수 있습니다. 실제 삭제는 검증 백업, 서버 사전점검, 독립된 2차 승인과 최종 확인을 모두 통과해야 합니다.</p>
         </div>
       </section>
 
@@ -66,7 +66,7 @@ export async function render() {
           <div class="admin-soft-card">✓ 영향 경로 표시</div>
           <div class="admin-soft-card">✓ 보호·제외 검토</div>
           <div class="admin-soft-card">✓ 서버 사전점검</div>
-          <div class="admin-soft-card">✓ 영구 삭제 잠금</div>
+          <div class="admin-soft-card">✓ 보호된 베타 삭제 실행</div>
         </div>
       </section>
 
