@@ -15,7 +15,7 @@ const items = [
   ['recovery', '복구 센터', '↺'],
   ['audit', '감사 로그', '≡'],
   ['releases', '릴리스', '⬆'],
-  ['system', '시스템', '⚙']
+  ['system', '운영 점검', '⚙']
 ];
 
 export function renderSidebar({ route, userEmail }) {

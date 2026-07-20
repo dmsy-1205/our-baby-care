@@ -1,7 +1,7 @@
-import { getAdminDatabase } from '../admin-api.js?v=admin-2-0-a15-2-support-operations-20260720';
+import { getAdminDatabase } from '../admin-api.js?v=admin-2-0-a15-3-support-followup-20260720';
 import { getState } from '../admin-state.js';
-import { asObject, escapeHtml, formatDateTime, compactId } from '../admin-utils.js?v=admin-2-0-a15-2-support-operations-20260720';
-import { renderEmptyState } from '../components/empty-state.js?v=admin-2-0-a15-2-support-operations-20260720';
+import { asObject, escapeHtml, formatDateTime, compactId } from '../admin-utils.js?v=admin-2-0-a15-3-support-followup-20260720';
+import { renderEmptyState } from '../components/empty-state.js?v=admin-2-0-a15-3-support-followup-20260720';
 
 const STATUS_LABELS = { received: '접수됨', reviewing: '확인 중', waiting_user: '추가 정보 필요', resolved: '답변 완료', closed: '종료' };
 const CATEGORY_LABELS = { usage: '앱 사용 문의', data_error: '데이터 오류', account_room: '계정·Room 문의', report: '신고·안전', suggestion: '기능 제안' };
@@ -9,9 +9,11 @@ const PRIORITY_LABELS = { low: '낮음', normal: '보통', high: '높음', urgen
 const STATUS_OPTIONS = Object.entries(STATUS_LABELS);
 let tickets = [];
 let replies = {};
+let userMessages = {};
+let ratings = {};
 let notes = {};
-let admins = {};
 let incidents = {};
+let incidentEvents = {};
 let currentStatus = 'open';
 let currentSearch = '';
 const openTickets = new Set();
@@ -29,8 +31,7 @@ function dateTimeInput(value) {
 
 function adminOptions(selectedUid) {
   const current = getState().user;
-  const entries = Object.entries(asObject(admins));
-  if (current?.uid && !entries.some(([uid]) => uid === current.uid)) entries.push([current.uid, { email: current.email || '' }]);
+  const entries = current?.uid ? [[current.uid, { email: current.email || '' }]] : [];
   return `<option value="">담당자 미배정</option>${entries.map(([uid, profile]) => {
     const value = asObject(profile);
     const label = value.email || value.name || (uid === current?.uid ? current.email : '') || compactId(uid);
@@ -51,6 +52,18 @@ function replyList(row) {
     .sort((a, b) => Number(a.createdAt || 0) - Number(b.createdAt || 0));
 }
 
+function userMessageList(row) {
+  return Object.values(asObject(asObject(userMessages[row.ownerUid])[row.id]))
+    .sort((a, b) => Number(a.createdAt || 0) - Number(b.createdAt || 0));
+}
+
+function conversationList(row) {
+  return [
+    ...replyList(row).map((item) => ({ ...item, author: 'admin' })),
+    ...userMessageList(row).map((item) => ({ ...item, author: 'user' }))
+  ].sort((a, b) => Number(a.createdAt || 0) - Number(b.createdAt || 0));
+}
+
 function matches(row) {
   if (currentStatus === 'open' && !isOpen(row)) return false;
   if (currentStatus === 'closed' && isOpen(row)) return false;
@@ -61,15 +74,18 @@ function matches(row) {
 }
 
 function renderDetail(row) {
-  const rowReplies = replyList(row);
+  const conversation = conversationList(row);
   const note = asObject(notes[row.id]);
   const incident = row.incidentId ? asObject(incidents[row.incidentId]) : null;
+  const rating = asObject(asObject(ratings[row.ownerUid])[row.id]);
+  const events = row.incidentId ? Object.values(asObject(incidentEvents[row.incidentId])).sort((a, b) => Number(a.createdAt || 0) - Number(b.createdAt || 0)) : [];
   return `<div class="admin-support-detail">
     <section class="admin-soft-card"><h4>문의 내용</h4><p>${escapeHtml(row.message || '')}</p></section>
     <div class="admin-meta-row"><span>UID ${escapeHtml(compactId(row.ownerUid))}</span><span>Room ${escapeHtml(row.roomCode || '미연결')}</span><span>접수 ${escapeHtml(formatDateTime(row.createdAt))}</span><span>버전 ${escapeHtml(row.appVersion || '-')}</span></div>
-    <section class="admin-support-history"><h4>사용자에게 공개된 답변</h4>${rowReplies.length ? rowReplies.map((reply) => `<div><p>${escapeHtml(reply.message || '')}</p><small>${escapeHtml(formatDateTime(reply.createdAt))} · ${escapeHtml(reply.createdByEmail || '관리자')}</small></div>`).join('') : '<p class="admin-muted">아직 공개 답변이 없습니다.</p>'}</section>
+    <section class="admin-support-history"><h4>사용자와 공개 대화</h4>${conversation.length ? conversation.map((item) => `<div class="${item.author === 'user' ? 'is-user' : 'is-admin'}"><p>${escapeHtml(item.message || '')}</p><small>${item.author === 'user' ? '사용자 추가 답변' : escapeHtml(item.createdByEmail || '관리자')} · ${escapeHtml(formatDateTime(item.createdAt))}</small></div>`).join('') : '<p class="admin-muted">아직 추가 대화가 없습니다.</p>'}</section>
+    ${rating.score ? `<section class="admin-info-box">사용자 만족도 <strong>${Number(rating.score)}점</strong>${rating.comment ? ` · ${escapeHtml(rating.comment)}` : ''}</section>` : ''}
     <section class="admin-support-operations"><label><span>담당자</span><select data-assignee="${escapeHtml(keyOf(row))}">${adminOptions(row.assigneeUid || '')}</select></label><label><span>우선순위</span><select data-priority="${escapeHtml(keyOf(row))}">${Object.entries(PRIORITY_LABELS).map(([value, label]) => `<option value="${value}" ${(row.priority || 'normal') === value ? 'selected' : ''}>${label}</option>`).join('')}</select></label><label><span>처리기한</span><input data-due-at="${escapeHtml(keyOf(row))}" type="datetime-local" value="${escapeHtml(dateTimeInput(row.dueAt))}"></label></section>
-    ${row.category === 'data_error' ? `<section class="admin-support-incident"><div><strong>복구 사건 연결</strong><p>${incident ? `${escapeHtml(incident.incidentId || row.incidentId)} · ${escapeHtml(incident.status || 'investigating')}` : '아직 연결된 복구 사건이 없습니다.'}</p></div>${incident ? '<span class="admin-status-pill warn">연결됨</span>' : `<button class="admin-button" type="button" data-create-incident="${escapeHtml(keyOf(row))}">복구 사건 생성</button>`}</section>` : ''}
+    ${row.category === 'data_error' ? `<section class="admin-support-incident"><div><strong>복구 사건 연결</strong><p>${incident ? `${escapeHtml(incident.incidentId || row.incidentId)} · ${escapeHtml(incident.status || 'investigating')}` : '아직 연결된 복구 사건이 없습니다.'}</p></div>${incident ? '<span class="admin-status-pill warn">연결됨</span>' : `<button class="admin-button" type="button" data-create-incident="${escapeHtml(keyOf(row))}">복구 사건 생성</button>`}</section>${incident ? `<section class="admin-incident-events"><h4>사건 진행 기록</h4>${events.length ? events.map((item) => `<div><strong>${escapeHtml(item.status || '')}</strong><p>${escapeHtml(item.message || '')}</p><small>${escapeHtml(formatDateTime(item.createdAt))}</small></div>`).join('') : '<p class="admin-muted">아직 진행 기록이 없습니다.</p>'}<form data-incident-event-form="${escapeHtml(keyOf(row))}"><select><option value="investigating">조사 중</option><option value="monitoring">관찰 중</option><option value="restored">복구 확인</option><option value="resolved">해결</option></select><input maxlength="500" placeholder="조사·복구 진행 내용을 기록하세요" required><button class="admin-button" type="submit">진행 기록 추가</button></form></section>` : ''}` : ''}
     <label class="admin-field"><span>공개 답변</span><textarea data-public-reply="${escapeHtml(keyOf(row))}" maxlength="2000" placeholder="사용자에게 보일 답변을 작성하세요."></textarea></label>
     <label class="admin-field"><span>내부 메모 (사용자에게 보이지 않음)</span><textarea data-internal-note="${escapeHtml(keyOf(row))}" maxlength="2000" placeholder="운영자 확인 사항을 기록하세요.">${escapeHtml(note.message || '')}</textarea></label>
     <div class="admin-support-actions"><select data-ticket-status="${escapeHtml(keyOf(row))}">${STATUS_OPTIONS.map(([value, label]) => `<option value="${value}" ${row.status === value ? 'selected' : ''}>${label}</option>`).join('')}</select><button class="admin-button" type="button" data-save-ticket="${escapeHtml(keyOf(row))}">답변·상태 저장</button></div>
@@ -79,7 +95,8 @@ function renderDetail(row) {
 function renderCard(row) {
   const key = keyOf(row);
   const open = openTickets.has(key);
-  return `<article class="admin-card admin-support-card"><div class="admin-request-card-head"><div><h3>${escapeHtml(row.title || '문의')}</h3><p>${escapeHtml(row.ownerEmail || row.ownerUid)} · ${escapeHtml(CATEGORY_LABELS[row.category] || row.category || '일반')} · ${escapeHtml(PRIORITY_LABELS[row.priority] || '보통')}${row.assigneeEmail ? ` · 담당 ${escapeHtml(row.assigneeEmail)}` : ''}</p></div><div class="admin-request-actions"><span class="admin-status-pill ${statusClass(row.status)}">${escapeHtml(STATUS_LABELS[row.status] || row.status || '접수됨')}</span><button class="admin-button admin-button-small" type="button" data-toggle-ticket="${escapeHtml(key)}">${open ? '접기' : '보기'}</button></div></div>${open ? renderDetail(row) : ''}</article>`;
+  const followUpCount = userMessageList(row).length;
+  return `<article class="admin-card admin-support-card"><div class="admin-request-card-head"><div><h3>${escapeHtml(row.title || '문의')}</h3><p>${escapeHtml(row.ownerEmail || row.ownerUid)} · ${escapeHtml(CATEGORY_LABELS[row.category] || row.category || '일반')} · ${escapeHtml(PRIORITY_LABELS[row.priority] || '보통')}${row.assigneeEmail ? ` · 담당 ${escapeHtml(row.assigneeEmail)}` : ''}${followUpCount ? ` · 사용자 추가답변 ${followUpCount}건` : ''}</p></div><div class="admin-request-actions"><span class="admin-status-pill ${statusClass(row.status)}">${escapeHtml(STATUS_LABELS[row.status] || row.status || '접수됨')}</span><button class="admin-button admin-button-small" type="button" data-toggle-ticket="${escapeHtml(key)}">${open ? '접기' : '보기'}</button></div></div>${open ? renderDetail(row) : ''}</article>`;
 }
 
 function filteredRows() { return tickets.filter(matches); }
@@ -93,9 +110,17 @@ function renderShell() {
   const waiting = tickets.filter((row) => row.status === 'waiting_user').length;
   const resolved = tickets.filter((row) => row.status === 'resolved').length;
   const incidentCount = Object.keys(incidents).length;
+  const overdueCount = tickets.filter((row) => isOpen(row) && Number(row.dueAt || 0) > 0 && Number(row.dueAt) < Date.now()).length;
+  const firstResponseMinutes = tickets.map((row) => {
+    const first = replyList(row)[0];
+    return first && row.createdAt ? Math.max(0, (Number(first.createdAt) - Number(row.createdAt)) / 60000) : null;
+  }).filter((value) => value !== null);
+  const averageResponse = firstResponseMinutes.length ? Math.round(firstResponseMinutes.reduce((sum, value) => sum + value, 0) / firstResponseMinutes.length) : 0;
+  const ratingRows = Object.values(ratings).flatMap((group) => Object.values(asObject(group))).filter((item) => Number(item?.score || 0) > 0);
+  const averageRating = ratingRows.length ? (ratingRows.reduce((sum, item) => sum + Number(item.score), 0) / ratingRows.length).toFixed(1) : '-';
   return `<section class="admin-stack" aria-labelledby="supportHeading">
     <section class="admin-hero-card"><div class="admin-hero-icon">✉</div><div><h2 id="supportHeading">문의·고객센터</h2><p>사용자 문의를 확인하고 공개 답변과 내부 운영 메모를 분리해 관리합니다.</p></div></section>
-    <section class="admin-grid admin-grid-4"><article class="admin-card admin-metric"><span>전체 문의</span><strong>${tickets.length}</strong><small>누적 접수</small></article><article class="admin-card admin-metric"><span>처리 필요</span><strong>${openCount}</strong><small>접수·확인 중</small></article><article class="admin-card admin-metric"><span>복구 사건</span><strong>${incidentCount}</strong><small>데이터 오류 연결</small></article><article class="admin-card admin-metric"><span>답변 완료</span><strong>${resolved}</strong><small>추가 정보 대기 ${waiting}건</small></article></section>
+    <section class="admin-grid admin-grid-4"><article class="admin-card admin-metric"><span>처리 필요</span><strong>${openCount}</strong><small>기한 초과 ${overdueCount}건</small></article><article class="admin-card admin-metric"><span>첫 답변 평균</span><strong>${averageResponse}분</strong><small>답변된 문의 기준</small></article><article class="admin-card admin-metric"><span>만족도</span><strong>${averageRating}</strong><small>평가 ${ratingRows.length}건</small></article><article class="admin-card admin-metric"><span>복구 사건</span><strong>${incidentCount}</strong><small>답변 완료 ${resolved}건 · 대기 ${waiting}건</small></article></section>
     <section class="admin-card admin-panel"><div class="admin-panel-head"><div><h2>문의 목록</h2><p>공개 답변만 사용자 화면에 표시됩니다. 내부 메모는 관리자만 읽을 수 있습니다.</p></div><div class="admin-filter-row"><select data-support-filter><option value="open" ${currentStatus === 'open' ? 'selected' : ''}>처리 필요</option><option value="all" ${currentStatus === 'all' ? 'selected' : ''}>전체</option><option value="closed" ${currentStatus === 'closed' ? 'selected' : ''}>완료·종료</option>${STATUS_OPTIONS.map(([value, label]) => `<option value="${value}" ${currentStatus === value ? 'selected' : ''}>${label}</option>`).join('')}</select><input data-support-search type="search" placeholder="이메일, 제목, Room 검색" value="${escapeHtml(currentSearch)}"></div></div><div class="admin-support-list" data-support-list>${renderList()}</div></section>
   </section>`;
 }
@@ -111,8 +136,7 @@ async function saveTicket(root, key) {
   const internal = root.querySelector(`[data-internal-note="${CSS.escape(key)}"]`)?.value.trim() || '';
   const status = root.querySelector(`[data-ticket-status="${CSS.escape(key)}"]`)?.value || row.status || 'received';
   const assigneeUid = root.querySelector(`[data-assignee="${CSS.escape(key)}"]`)?.value || '';
-  const assigneeProfile = asObject(admins[assigneeUid]);
-  const assigneeEmail = assigneeUid ? (assigneeProfile.email || (assigneeUid === state.user?.uid ? state.user?.email : '') || '') : '';
+  const assigneeEmail = assigneeUid === state.user?.uid ? (state.user?.email || '') : '';
   const priority = root.querySelector(`[data-priority="${CSS.escape(key)}"]`)?.value || 'normal';
   const dueValue = root.querySelector(`[data-due-at="${CSS.escape(key)}"]`)?.value || '';
   const dueAt = dueValue ? new Date(dueValue).getTime() : 0;
@@ -152,15 +176,47 @@ async function createIncident(key) {
   await database.ref().update(updates);
 }
 
+async function addIncidentEvent(root, key, form) {
+  const row = findTicket(key);
+  if (!row?.incidentId) throw new Error('연결된 복구 사건이 없습니다.');
+  const database = getAdminDatabase();
+  const state = getState();
+  const status = form.querySelector('select')?.value || 'investigating';
+  const message = String(form.querySelector('input')?.value || '').trim();
+  if (!message) throw new Error('진행 내용을 입력해 주세요.');
+  const ref = database.ref(`supportIncidentEvents/${row.incidentId}`).push();
+  const updates = {};
+  updates[`supportIncidentEvents/${row.incidentId}/${ref.key}`] = { eventId: ref.key, incidentId: row.incidentId, status, message: message.slice(0, 500), createdByUid: state.user?.uid || '', createdByEmail: state.user?.email || '', createdAt: timestamp() };
+  updates[`supportIncidents/${row.incidentId}/status`] = status;
+  updates[`supportIncidents/${row.incidentId}/updatedAt`] = timestamp();
+  const auditRef = database.ref('adminAuditLogs').push();
+  updates[`adminAuditLogs/${auditRef.key}`] = { action: 'support_incident_event_added', targetId: row.incidentId, ticketId: row.id, status, adminUid: state.user?.uid || '', adminEmail: state.user?.email || '', createdAt: timestamp() };
+  await database.ref().update(updates);
+}
+
 async function loadData() {
   const database = getAdminDatabase();
-  const [ticketSnap, replySnap, noteSnap, adminSnap, incidentSnap] = await Promise.all([database.ref('supportTickets').once('value'), database.ref('supportReplies').once('value'), database.ref('supportInternalNotes').once('value'), database.ref('admins').once('value'), database.ref('supportIncidents').once('value')]);
-  tickets = flattenTickets(ticketSnap.val()); replies = asObject(replySnap.val()); notes = asObject(noteSnap.val()); admins = asObject(adminSnap.val()); incidents = asObject(incidentSnap.val());
+  const [ticketSnap, replySnap, userMessageSnap, ratingSnap, noteSnap, incidentSnap, eventSnap] = await Promise.all([database.ref('supportTickets').once('value'), database.ref('supportReplies').once('value'), database.ref('supportUserMessages').once('value'), database.ref('supportRatings').once('value'), database.ref('supportInternalNotes').once('value'), database.ref('supportIncidents').once('value'), database.ref('supportIncidentEvents').once('value')]);
+  tickets = flattenTickets(ticketSnap.val()); replies = asObject(replySnap.val()); userMessages = asObject(userMessageSnap.val()); ratings = asObject(ratingSnap.val()); notes = asObject(noteSnap.val()); incidents = asObject(incidentSnap.val()); incidentEvents = asObject(eventSnap.val());
+  tickets.sort((a, b) => {
+    const latest = (row) => Math.max(Number(row.updatedAt || row.createdAt || 0), ...userMessageList(row).map((item) => Number(item.createdAt || 0)));
+    return latest(b) - latest(a);
+  });
 }
 
 export async function render() { await loadData(); return renderShell(); }
 
 export function afterRender(root) {
+  root.addEventListener('submit', async (event) => {
+    const form = event.target.closest('[data-incident-event-form]');
+    if (!form) return;
+    event.preventDefault();
+    const button = form.querySelector('button');
+    if (button) button.disabled = true;
+    try { await addIncidentEvent(root, form.dataset.incidentEventForm, form); await loadData(); root.innerHTML = renderShell(); }
+    catch (error) { alert(`진행 기록 저장에 실패했습니다. ${error.message || error}`); }
+    finally { if (button) button.disabled = false; }
+  });
   root.addEventListener('click', async (event) => {
     const toggle = event.target.closest('[data-toggle-ticket]');
     if (toggle) { const key = toggle.dataset.toggleTicket; openTickets.has(key) ? openTickets.delete(key) : openTickets.add(key); root.querySelector('[data-support-list]').innerHTML = renderList(); return; }

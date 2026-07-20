@@ -532,6 +532,28 @@
         }
       }
     },
+    "supportUserMessages": {
+      ".read": "auth != null && root.child('admins').child(auth.uid).val() === true",
+      "$uid": {
+        ".read": "auth != null && (auth.uid === $uid || root.child('admins').child(auth.uid).val() === true)",
+        "$ticketId": {
+          "$messageId": {
+            ".write": "auth != null && auth.uid === $uid && !data.exists() && root.child('supportTickets').child($uid).child($ticketId).exists() && root.child('supportTickets').child($uid).child($ticketId).child('status').val() != 'closed'",
+            ".validate": "newData.child('messageId').val() === $messageId && newData.child('ticketId').val() === $ticketId && newData.child('ownerUid').val() === $uid && newData.child('message').isString() && newData.child('message').val().length >= 2 && newData.child('message').val().length <= 1000 && newData.child('createdAt').exists()"
+          }
+        }
+      }
+    },
+    "supportRatings": {
+      ".read": "auth != null && root.child('admins').child(auth.uid).val() === true",
+      "$uid": {
+        ".read": "auth != null && (auth.uid === $uid || root.child('admins').child(auth.uid).val() === true)",
+        "$ticketId": {
+          ".write": "auth != null && auth.uid === $uid && !data.exists() && (root.child('supportTickets').child($uid).child($ticketId).child('status').val() === 'resolved' || root.child('supportTickets').child($uid).child($ticketId).child('status').val() === 'closed')",
+          ".validate": "newData.child('ticketId').val() === $ticketId && newData.child('ownerUid').val() === $uid && newData.child('score').isNumber() && newData.child('score').val() >= 1 && newData.child('score').val() <= 5 && newData.child('comment').isString() && newData.child('comment').val().length <= 300 && newData.child('createdAt').exists()"
+        }
+      }
+    },
     "supportInternalNotes": {
       ".read": "auth != null && root.child('admins').child(auth.uid).val() === true",
       ".write": "auth != null && root.child('admins').child(auth.uid).val() === true"
@@ -547,6 +569,10 @@
       }
     },
     "supportIncidents": {
+      ".read": "auth != null && root.child('admins').child(auth.uid).val() === true",
+      ".write": "auth != null && root.child('admins').child(auth.uid).val() === true"
+    },
+    "supportIncidentEvents": {
       ".read": "auth != null && root.child('admins').child(auth.uid).val() === true",
       ".write": "auth != null && root.child('admins').child(auth.uid).val() === true"
     },
