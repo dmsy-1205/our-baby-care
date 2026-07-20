@@ -1,7 +1,7 @@
-import { getAdminDatabase } from '../admin-api.js?v=admin-2-0-a17-1-2-firebase-data-sync-hotfix-20260721';
+import { getAdminDatabase } from '../admin-api.js?v=admin-2-0-a17-2-user-support-bridge-20260721';
 import { getState } from '../admin-state.js';
-import { escapeHtml } from '../admin-utils.js?v=admin-2-0-a17-1-2-firebase-data-sync-hotfix-20260721';
-import { ADMIN_RELEASE } from '../admin-release.js?v=admin-2-0-a17-1-2-firebase-data-sync-hotfix-20260721';
+import { escapeHtml } from '../admin-utils.js?v=admin-2-0-a17-2-user-support-bridge-20260721';
+import { ADMIN_RELEASE } from '../admin-release.js?v=admin-2-0-a17-2-user-support-bridge-20260721';
 
 const ADMIN_STEP = ADMIN_RELEASE.step;
 const ADMIN_LABEL = ADMIN_RELEASE.label;

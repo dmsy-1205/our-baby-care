@@ -1,5 +1,5 @@
 import { escapeHtml } from '../admin-utils.js?v=admin-2-0-a11-1-clean-baseline-20260719';
-import { ADMIN_RELEASE } from '../admin-release.js?v=admin-2-0-a17-1-2-firebase-data-sync-hotfix-20260721';
+import { ADMIN_RELEASE } from '../admin-release.js?v=admin-2-0-a17-2-user-support-bridge-20260721';
 
 const titles = {
   dashboard: ['운영 대시보드', '서비스 상태와 주요 운영 항목을 확인합니다.'],
