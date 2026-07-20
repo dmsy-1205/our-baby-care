@@ -3,6 +3,8 @@ import { asObject, compactId, escapeHtml, formatDateTime, latestNumber } from '.
 
 let users = [];
 let query = '';
+let lastLoadedAt = 0;
+let refreshInFlight = false;
 
 async function loadUsers() {
   const database = getAdminDatabase();
@@ -38,6 +40,19 @@ async function loadUsers() {
       lastSeen: latestNumber(profile.lastSeen, profile.updatedAt, userData.updatedAt, userData.createdAt)
     };
   }).sort((a, b) => b.lastSeen - a.lastSeen);
+  lastLoadedAt = Date.now();
+}
+
+async function refreshUsers(root) {
+  if (refreshInFlight || !root?.isConnected) return;
+  refreshInFlight = true;
+
+  try {
+    await loadUsers();
+    if (root.isConnected) root.innerHTML = renderShell();
+  } finally {
+    refreshInFlight = false;
+  }
 }
 
 function filteredUsers() {
@@ -77,7 +92,11 @@ function renderShell() {
             <h2 id="usersHeading">사용자 관리</h2>
             <p>기존 관리자 콘솔 형식으로 사용자, 인증, Room 연결 정보를 확인합니다. 전체 ${users.length}명</p>
           </div>
-          <input class="admin-table-search" data-user-search type="search" placeholder="이메일, 닉네임, UID 검색" value="${escapeHtml(query)}">
+          <div class="admin-filter-row">
+            <small data-user-updated>${lastLoadedAt ? `마지막 갱신 ${escapeHtml(formatDateTime(lastLoadedAt))}` : '갱신 대기'}</small>
+            <button class="admin-button" data-user-refresh type="button">새로고침</button>
+            <input class="admin-table-search" data-user-search type="search" placeholder="이메일, 닉네임, UID 검색" value="${escapeHtml(query)}">
+          </div>
         </div>
         <div class="admin-table-wrap">
           <table class="admin-data-table">
@@ -102,4 +121,22 @@ export function afterRender(root) {
     root.innerHTML = renderShell();
     root.querySelector('[data-user-search]')?.focus();
   });
+
+  root.addEventListener('click', (event) => {
+    if (!event.target.closest('[data-user-refresh]')) return;
+    refreshUsers(root).catch((error) => {
+      console.error('[Admin 2.0] user refresh failed', error);
+    });
+  });
+
+  const refreshTimer = window.setInterval(() => {
+    if (!root.isConnected) {
+      window.clearInterval(refreshTimer);
+      return;
+    }
+
+    refreshUsers(root).catch((error) => {
+      console.error('[Admin 2.0] user auto refresh failed', error);
+    });
+  }, 30000);
 }

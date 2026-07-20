@@ -1,5 +1,5 @@
 import { getAdminDatabase } from '../admin-api.js?v=admin-2-0-a14-2-4-recovery-safety-suite-20260719';
-import { ADMIN_RELEASE } from '../admin-release.js';
+import { ADMIN_RELEASE } from '../admin-release.js?v=admin-2-0-a17-1-2-firebase-data-sync-hotfix-20260721';
 
 const STEP_LABEL = `${ADMIN_RELEASE.step} · ${ADMIN_RELEASE.label}`;
 

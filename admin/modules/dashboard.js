@@ -1,6 +1,9 @@
 import { getAdminDatabase } from '../admin-api.js?v=admin-2-0-a11-1-clean-baseline-20260719';
 import { asObject, countObject } from '../admin-utils.js?v=admin-2-0-a11-1-clean-baseline-20260719';
-import { ADMIN_RELEASE } from '../admin-release.js';
+import { ADMIN_RELEASE } from '../admin-release.js?v=admin-2-0-a17-1-2-firebase-data-sync-hotfix-20260721';
+
+let dashboardData = null;
+let dashboardRefreshInFlight = false;
 
 async function loadDashboardData() {
   const database = getAdminDatabase();
@@ -30,9 +33,7 @@ async function loadDashboardData() {
   };
 }
 
-export async function render() {
-  const data = await loadDashboardData();
-
+function renderShell(data) {
   return `
     <section class="module-view" aria-labelledby="dashboardHeading">
       <section class="admin-hero-card">
@@ -76,4 +77,34 @@ export async function render() {
       </section>
     </section>
   `;
+}
+
+async function refreshDashboard(root) {
+  if (dashboardRefreshInFlight || !root?.isConnected) return;
+  dashboardRefreshInFlight = true;
+
+  try {
+    dashboardData = await loadDashboardData();
+    if (root.isConnected) root.innerHTML = renderShell(dashboardData);
+  } finally {
+    dashboardRefreshInFlight = false;
+  }
+}
+
+export async function render() {
+  dashboardData = await loadDashboardData();
+  return renderShell(dashboardData);
+}
+
+export function afterRender(root) {
+  const refreshTimer = window.setInterval(() => {
+    if (!root.isConnected) {
+      window.clearInterval(refreshTimer);
+      return;
+    }
+
+    refreshDashboard(root).catch((error) => {
+      console.error('[Admin 2.0] dashboard auto refresh failed', error);
+    });
+  }, 30000);
 }

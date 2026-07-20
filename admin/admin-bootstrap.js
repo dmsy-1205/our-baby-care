@@ -1,9 +1,9 @@
-import { waitForAuthenticatedUser, readAdminProfile, isActiveAdmin, signOutAdmin } from './admin-api.js?v=admin-2-0-a17-1-1-main-baseline-compatibility-20260721';
+import { waitForAuthenticatedUser, readAdminProfile, isActiveAdmin, signOutAdmin } from './admin-api.js?v=admin-2-0-a17-1-2-firebase-data-sync-hotfix-20260721';
 import { setState } from './admin-state.js';
-import { setDocumentBusy } from './admin-utils.js?v=admin-2-0-a17-1-1-main-baseline-compatibility-20260721';
-import { renderSidebar } from './components/sidebar.js?v=admin-2-0-a17-1-1-main-baseline-compatibility-20260721';
-import { startRouter, navigate } from './admin-router.js?v=admin-2-0-a17-1-1-main-baseline-compatibility-20260721';
-import { ADMIN_RELEASE } from './admin-release.js';
+import { setDocumentBusy } from './admin-utils.js?v=admin-2-0-a17-1-2-firebase-data-sync-hotfix-20260721';
+import { renderSidebar } from './components/sidebar.js?v=admin-2-0-a17-1-2-firebase-data-sync-hotfix-20260721';
+import { startRouter, navigate } from './admin-router.js?v=admin-2-0-a17-1-2-firebase-data-sync-hotfix-20260721';
+import { ADMIN_RELEASE } from './admin-release.js?v=admin-2-0-a17-1-2-firebase-data-sync-hotfix-20260721';
 
 const boot = document.getElementById('adminBoot');
 const root = document.getElementById('adminRoot');

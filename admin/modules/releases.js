@@ -1,4 +1,4 @@
-import { ADMIN_RELEASE } from '../admin-release.js';
+import { ADMIN_RELEASE } from '../admin-release.js?v=admin-2-0-a17-1-2-firebase-data-sync-hotfix-20260721';
 
 function styles() {
   return `
