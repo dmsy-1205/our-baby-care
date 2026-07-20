@@ -1,6 +1,6 @@
-import { getAdminDatabase } from '../admin-api.js?v=admin-2-0-a16-1-integrated-operations-health-20260720';
+import { getAdminDatabase } from '../admin-api.js?v=admin-2-0-a16-2-risk-review-workflow-20260720';
 import { getState } from '../admin-state.js';
-import { escapeHtml } from '../admin-utils.js?v=admin-2-0-a16-1-integrated-operations-health-20260720';
+import { escapeHtml } from '../admin-utils.js?v=admin-2-0-a16-2-risk-review-workflow-20260720';
 import { ADMIN_RELEASE } from '../admin-release.js';
 
 const ADMIN_STEP = ADMIN_RELEASE.step;
@@ -10,6 +10,18 @@ const ADMIN_CACHE_KEY = ADMIN_RELEASE.cacheKey;
 function asObject(value) {
   return value && typeof value === 'object' ? value : {};
 }
+
+function riskIdFor(item) {
+  const input = `${item.type}|${item.path}`;
+  let hash = 2166136261;
+  for (let index = 0; index < input.length; index += 1) {
+    hash ^= input.charCodeAt(index);
+    hash = Math.imul(hash, 16777619);
+  }
+  return `risk_${(hash >>> 0).toString(36)}`;
+}
+
+const REVIEW_LABELS = Object.freeze({ open: '미검토', acknowledged: '확인 중', resolved: '해결', accepted: '예외 승인' });
 
 function flattenRequests(requestsRoot) {
   const rows = [];
@@ -45,7 +57,8 @@ async function loadSystemStatus() {
     readPath(database, '데이터 요청', 'dataDeleteRequests'), readPath(database, '감사 로그', 'adminAuditLogs'),
     readPath(database, '삭제 승인 대기열', 'deletionActionQueue'), readPath(database, '백업 확인', 'dataBackups'),
     readPath(database, '문의', 'supportTickets'), readPath(database, '문의 복구 사건', 'supportIncidents'),
-    readPath(database, '외부 백업 증빙', 'externalBackupRegistry'), readPath(database, '복구 계획', 'restorePlans')
+    readPath(database, '외부 백업 증빙', 'externalBackupRegistry'), readPath(database, '복구 계획', 'restorePlans'),
+    readPath(database, '운영 위험 검토', 'operationRiskReviews')
   ]);
   const byPath = Object.fromEntries(reads.map((item) => [item.path, item]));
   const users = byPath.users.value;
@@ -59,6 +72,7 @@ async function loadSystemStatus() {
   const supportIncidents = asObject(byPath.supportIncidents.value);
   const externalBackups = asObject(byPath.externalBackupRegistry.value);
   const restorePlans = asObject(byPath.restorePlans.value);
+  const riskReviews = asObject(byPath.operationRiskReviews.value);
   const roomCodes = new Set([...Object.keys(rooms), ...Object.keys(roomMembers)]);
   const userRoomMismatch = [];
   const membershipsWithoutUser = [];
@@ -124,7 +138,11 @@ async function loadSystemStatus() {
     ...backupFailures.map((id) => ({ severity: 'high', type: '백업 검증 실패', path: `dataBackups/${id}`, summary: '백업 상태가 failed입니다.' })),
     ...externalReview.map((id) => ({ severity: 'warn', type: '외부 백업 검토 필요', path: `externalBackupRegistry/${id}`, summary: '외부 백업 증빙을 수동 검토해야 합니다.' })),
     ...restoreConflicts.map((id) => ({ severity: 'warn', type: '복구 충돌', path: `restorePlans/${id}`, summary: '복구 Dry Run에서 충돌 경로가 발견됐습니다.' }))
-  ];
+  ].map((item) => {
+    const riskId = riskIdFor(item);
+    const review = asObject(riskReviews[riskId]);
+    return { ...item, riskId, review: { status: review.status || 'open', note: review.note || '', updatedAt: review.updatedAt || 0, adminEmail: review.adminEmail || '' } };
+  });
   return {
     reads, usersCount: Object.keys(users).length, roomsCount: roomCodes.size,
     roomMembersCount: Object.values(roomMembers).reduce((sum, members) => sum + Object.keys(asObject(members)).length, 0),
@@ -139,7 +157,7 @@ async function loadSystemStatus() {
 
 function renderRiskItems(items) {
   if (!items.length) return '<div class="admin-info-box admin-ok">현재 통합 점검 기준에서 발견된 운영 위험이 없습니다.</div>';
-  return `<div class="admin-risk-list">${items.slice(0, 100).map((item) => `<article class="admin-risk-card ${escapeHtml(item.severity)}"><div><strong>${escapeHtml(item.type)}</strong><p>${escapeHtml(item.summary)}</p><code>${escapeHtml(item.path)}</code></div><span>${item.severity === 'high' ? '높음' : item.severity === 'warn' ? '주의' : '확인'}</span></article>`).join('')}</div>`;
+  return `<div class="admin-risk-list">${items.slice(0, 100).map((item) => `<article class="admin-risk-card ${escapeHtml(item.severity)}" data-risk-card="${escapeHtml(item.riskId)}"><div class="admin-risk-summary"><div><strong>${escapeHtml(item.type)}</strong><p>${escapeHtml(item.summary)}</p><code>${escapeHtml(item.path)}</code></div><span class="admin-risk-severity">${item.severity === 'high' ? '높음' : item.severity === 'warn' ? '주의' : '확인'}</span></div><div class="admin-risk-review"><label>검토 상태<select data-risk-status><option value="open" ${item.review.status === 'open' ? 'selected' : ''}>미검토</option><option value="acknowledged" ${item.review.status === 'acknowledged' ? 'selected' : ''}>확인 중</option><option value="resolved" ${item.review.status === 'resolved' ? 'selected' : ''}>해결</option><option value="accepted" ${item.review.status === 'accepted' ? 'selected' : ''}>예외 승인</option></select></label><label>관리자 메모<textarea data-risk-note maxlength="500" placeholder="확인 내용이나 후속 조치를 기록하세요.">${escapeHtml(item.review.note)}</textarea></label><div class="admin-risk-review-actions"><small data-risk-result>${item.review.updatedAt ? `${escapeHtml(item.review.adminEmail || '관리자')} · ${new Date(item.review.updatedAt).toLocaleString('ko-KR')}` : '아직 검토 기록이 없습니다.'}</small><button type="button" class="admin-button secondary" data-risk-save="${escapeHtml(item.riskId)}">검토 저장</button></div></div></article>`).join('')}</div>`;
 }
 
 function renderCountList(title, items) {
@@ -154,6 +172,9 @@ export async function render() {
   const release = window.HM_RELEASE || {};
   const failed = status.reads.filter((item) => !item.ok).length;
   const highRisks = status.risks.items.filter((item) => item.severity === 'high').length;
+  const reviewedRisks = status.risks.items.filter((item) => item.review.status !== 'open').length;
+  const resolvedRisks = status.risks.items.filter((item) => item.review.status === 'resolved').length;
+  const acceptedRisks = status.risks.items.filter((item) => item.review.status === 'accepted').length;
   return `
     <section class="module-view" aria-labelledby="systemHeading">
       <section class="admin-hero-card"><div class="admin-hero-icon">⚙️</div><div><h2 id="systemHeading">시스템 · 운영 상태 점검</h2><p>관리자 앱의 연결, 인증, 주요 데이터 읽기 상태를 확인합니다. 이 화면은 읽기 전용입니다.</p></div></section>
@@ -170,7 +191,7 @@ export async function render() {
           <article class="admin-soft-card"><h3>안전 기준</h3><ul><li>관리자 인증을 통과한 계정만 접근</li><li>승인 대기열은 서버 함수만 기록</li><li>검증된 백업 전 2차 승인 차단</li><li>영구 삭제 실행 모드 ${ADMIN_RELEASE.deletionMode}</li></ul></article>
         </div>
       </section>
-      <section class="admin-card admin-panel"><div class="admin-panel-head"><div><h2>통합 운영 위험 신호</h2><p>계정·Room 관계, 문의 처리, 백업·복구 상태를 한 번에 교차 점검합니다. 이 화면에서는 데이터를 변경하지 않습니다.</p></div><span class="admin-status-pill ${highRisks ? 'danger' : status.risks.items.length ? 'warn' : 'ok'}">전체 ${status.risks.items.length}건 · 높음 ${highRisks}건</span></div><section class="admin-grid admin-grid-4"><article class="admin-card admin-metric"><span>관계 무결성</span><strong>${status.risks.userRoomMismatch.length + status.risks.membershipsWithoutUserRoom.length + status.risks.membershipsWithoutUser.length + status.risks.activeRoomInvalid.length + status.risks.roomMetaMismatch.length}</strong><small>계정·Room 교차 검사</small></article><article class="admin-card admin-metric"><span>문의 운영</span><strong>${status.risks.supportOverdue.length + status.risks.supportUnassigned.length + status.risks.dataErrorsWithoutIncident.length}</strong><small>기한·담당자·사건 연결</small></article><article class="admin-card admin-metric"><span>백업·복구</span><strong>${status.risks.backupFailures.length + status.risks.externalReview.length + status.risks.restoreConflicts.length}</strong><small>검증·증빙·충돌</small></article><article class="admin-card admin-metric"><span>진행 중 사건</span><strong>${status.risks.openIncidents.length}</strong><small>문의 복구 사건</small></article></section>${renderRiskItems(status.risks.items)}</section>
+      <section class="admin-card admin-panel"><div class="admin-panel-head"><div><h2>통합 운영 위험 검토</h2><p>발견된 위험을 검토하고 상태와 메모를 별도 기록합니다. 원본 사용자·Room·문의·백업 데이터는 변경하지 않습니다.</p></div><span class="admin-status-pill ${highRisks ? 'danger' : status.risks.items.length ? 'warn' : 'ok'}">전체 ${status.risks.items.length}건 · 높음 ${highRisks}건</span></div><section class="admin-grid admin-grid-4"><article class="admin-card admin-metric"><span>검토 완료</span><strong>${reviewedRisks}/${status.risks.items.length}</strong><small>확인 중 포함</small></article><article class="admin-card admin-metric"><span>해결</span><strong>${resolvedRisks}</strong><small>조치 완료 기록</small></article><article class="admin-card admin-metric"><span>예외 승인</span><strong>${acceptedRisks}</strong><small>관리자 판단 보존</small></article><article class="admin-card admin-metric"><span>미검토</span><strong>${status.risks.items.length - reviewedRisks}</strong><small>후속 확인 필요</small></article></section>${renderRiskItems(status.risks.items)}</section>
       <section class="admin-card admin-panel">
         <div class="admin-panel-head"><div><h2>승인 엔진 안전 상태</h2><p>서버 사전점검, 백업 확인과 실행 잠금 상태를 확인합니다.</p></div><span class="admin-status-pill ${status.deletionExecutionEnabledCount ? 'danger' : 'ok'}">${status.deletionExecutionEnabledCount ? '실행 활성 감지' : '영구 삭제 잠금'}</span></div>
         <section class="admin-grid admin-grid-3"><article class="admin-card admin-metric"><span>승인 대기열</span><strong>${status.deletionQueueCount}</strong><small>deletionActionQueue</small></article><article class="admin-card admin-metric"><span>검증된 백업</span><strong>${status.backupVerifiedCount}</strong><small>dataBackups</small></article><article class="admin-card admin-metric"><span>실행 활성</span><strong>${status.deletionExecutionEnabledCount}</strong><small>정상 기준 0건</small></article></section>
@@ -191,4 +212,38 @@ export async function render() {
       </section>
       <section class="admin-card admin-panel"><h2>주요 데이터 경로 점검</h2><div class="admin-path-list">${status.reads.map((item) => `<div class="admin-list-row"><span><strong>${escapeHtml(item.label)}</strong><br><small>${escapeHtml(item.path)}</small></span><strong class="${item.ok ? 'admin-ok' : 'admin-danger'}">${item.ok ? `읽기 가능 · ${item.count}건` : '읽기 실패'}</strong></div>`).join('')}</div></section>
     </section>`;
+}
+
+export function afterRender(root) {
+  root.querySelectorAll('[data-risk-save]').forEach((button) => {
+    button.addEventListener('click', async () => {
+      const card = button.closest('[data-risk-card]');
+      const riskId = button.dataset.riskSave;
+      const status = card?.querySelector('[data-risk-status]')?.value || 'open';
+      const note = card?.querySelector('[data-risk-note]')?.value.trim() || '';
+      const result = card?.querySelector('[data-risk-result]');
+      if (!card || !REVIEW_LABELS[status] || note.length > 500) return;
+      const state = getState();
+      const timestamp = Date.now();
+      const database = getAdminDatabase();
+      const auditId = database.ref('adminAuditLogs').push().key;
+      const riskPath = card.querySelector('code')?.textContent || '';
+      const record = { riskId, path: riskPath, status, note, adminUid: state.user?.uid || '', adminEmail: state.user?.email || '', updatedAt: timestamp };
+      button.disabled = true;
+      button.textContent = '저장 중...';
+      try {
+        await database.ref().update({
+          [`operationRiskReviews/${riskId}`]: record,
+          [`adminAuditLogs/${auditId}`]: { action: 'operation_risk_review_saved', targetType: 'operationRisk', targetId: riskId, targetPath: riskPath, status, note, adminUid: record.adminUid, adminEmail: record.adminEmail, createdAt: timestamp }
+        });
+        if (result) result.textContent = `${record.adminEmail || '관리자'} · ${new Date(timestamp).toLocaleString('ko-KR')} · ${REVIEW_LABELS[status]}`;
+        button.textContent = '저장 완료';
+      } catch (error) {
+        if (result) result.textContent = `저장 실패: ${error?.message || error}`;
+        button.textContent = '다시 저장';
+      } finally {
+        button.disabled = false;
+      }
+    });
+  });
 }

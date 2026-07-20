@@ -538,4 +538,12 @@ supportReplies/{ticketId}/{replyId}/
 - [대한민국 개인정보 보호법 제21조](https://www.law.go.kr/LSW/lsLawLinkInfo.do?chrClsCd=010202&lsJoLnkSeq=900078981)
 - [NIST Privacy Framework](https://www.nist.gov/privacy-framework)
 
+### STEP A16.2 운영 위험 검토 워크플로 (2026-07-20)
+
+- 통합 운영 점검에서 발견된 각 위험에 안정적인 식별자를 부여한다.
+- 관리자는 위험을 `미검토`, `확인 중`, `해결`, `예외 승인`으로 분류하고 500자 이내 메모를 남길 수 있다.
+- 검토 기록은 `operationRiskReviews`에 별도 보관해 사용자, Room, 문의, 백업 원본 데이터를 변경하지 않는다.
+- 모든 검토 저장은 `adminAuditLogs`에 관리자, 대상 경로, 상태, 메모와 함께 기록한다.
+- 관리자 외 계정은 위험 검토 기록을 읽거나 쓸 수 없도록 데이터베이스 규칙으로 차단한다.
+
 > 이 문서는 제품·기술 설계안이며 정식 법률 자문을 대신하지 않는다. 실제 자동 파기 정책을 활성화하기 전에는 개인정보 처리방침, 이용약관, 사용자 고지 방법과 적용 법령을 별도로 검토해야 한다.
