@@ -1,6 +1,6 @@
 import { setState } from './admin-state.js';
-import { renderTopbar } from './components/topbar.js?v=admin-2-0-a15-1-support-center-20260720';
-import { renderLoadingState } from './components/loading-state.js?v=admin-2-0-a15-1-support-center-20260720';
+import { renderTopbar } from './components/topbar.js?v=admin-2-0-a15-2-support-operations-20260720';
+import { renderLoadingState } from './components/loading-state.js?v=admin-2-0-a15-2-support-operations-20260720';
 import { ADMIN_RELEASE } from './admin-release.js';
 
 const routes = new Set(['dashboard', 'users', 'rooms', 'lifecycle', 'requests', 'support', 'backups', 'recovery', 'audit', 'releases', 'system']);

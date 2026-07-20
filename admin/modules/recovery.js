@@ -71,6 +71,15 @@ async function loadRecoveryRows() {
   return rows.sort((a, b) => latestNumber(b.updatedAt, b.createdAt) - latestNumber(a.updatedAt, a.createdAt));
 }
 
+async function loadSupportIncidents() {
+  const snapshot = await getAdminDatabase().ref('supportIncidents').once('value');
+  return Object.values(asObject(snapshot.val())).sort((a, b) => latestNumber(b.updatedAt, b.createdAt) - latestNumber(a.updatedAt, a.createdAt));
+}
+
+function renderSupportIncident(row) {
+  return `<article class="admin-card admin-recovery-card"><div class="admin-request-card-head"><div><h3>${escapeHtml(row.summary || '데이터 오류 사건')}</h3><p>${escapeHtml(row.ownerEmail || row.ownerUid || '-')}</p></div><span class="admin-status-pill warn">${escapeHtml(row.status || 'investigating')}</span></div><div class="admin-meta-row"><span>사건 ${escapeHtml(compactId(row.incidentId))}</span><span>문의 ${escapeHtml(compactId(row.ticketId))}</span><span>Room ${escapeHtml(row.roomCode || '미연결')}</span><span>심각도 ${escapeHtml(row.severity || 'normal')}</span><span>생성 ${escapeHtml(formatDateTime(row.createdAt))}</span></div><div class="admin-warning-box">문의 센터에서 생성된 데이터 오류 사건입니다. 실제 데이터 복원은 계속 잠금 상태이며 조사와 기준점 확인만 진행합니다.</div></article>`;
+}
+
 function yesNo(value) {
   return value ? '있음' : '없음';
 }
@@ -114,7 +123,7 @@ function renderBaselineCard(row) {
 }
 
 export async function render() {
-  const rows = await loadRecoveryRows();
+  const [rows, supportIncidents] = await Promise.all([loadRecoveryRows(), loadSupportIncidents()]);
   const account = rows.filter((row) => row.requestType === 'account').length;
   const leaveRoom = rows.filter((row) => row.requestType === 'leave_room').length;
   const deleteRoom = rows.filter((row) => row.requestType === 'delete_room').length;
@@ -131,5 +140,6 @@ export async function render() {
         <div class="admin-panel-head"><div><h2>삭제 요청 기준점</h2><p>사용자 요청, 연결 Room, 멤버십, 공동 데이터 확인 경로를 읽기 전용으로 보여줍니다.</p></div><span class="admin-status-pill muted">Read Only</span></div>
         ${rows.length ? rows.map(renderBaselineCard).join('') : renderEmptyState('기준점 없음', '현재 확인할 데이터 요청 기준점이 없습니다.')}
       </section>
+      <section class="admin-card admin-panel"><div class="admin-panel-head"><div><h2>문의 연결 복구 사건</h2><p>문의 센터의 데이터 오류 문의에서 생성된 조사 사건입니다.</p></div><span class="admin-status-pill muted">${supportIncidents.length}건</span></div>${supportIncidents.length ? supportIncidents.map(renderSupportIncident).join('') : renderEmptyState('연결 사건 없음', '아직 데이터 오류 문의에서 생성된 복구 사건이 없습니다.')}</section>
     </section>`;
 }

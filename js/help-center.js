@@ -19,6 +19,8 @@
         suggestion: '기능 제안'
     };
     let supportLoading = false;
+    let supportNotificationRef = null;
+    let supportNotificationInitialLoad = true;
     const HELP_TIPS = [
         '매일 한 줄이라도 기록을 남겨보세요.',
         '커스텀 미션은 “물 2L 마시기”처럼 짧고 구체적으로 쓰면 좋아요.',
@@ -59,7 +61,10 @@
             results.innerHTML = '';
         }
 
-        if (tabName === 'support') loadSupportTickets();
+        if (tabName === 'support') {
+            loadSupportTickets();
+            markSupportNotificationsRead();
+        }
     }
 
     function showRandomHelpTip() {
@@ -240,6 +245,52 @@
         return false;
     }
 
+    function renderSupportNotificationBadge(value) {
+        const badge = document.getElementById('supportUnreadBadge');
+        if (!badge) return;
+        const unread = Object.values(value || {}).filter((item) => item && !Number(item.readAt || 0));
+        badge.textContent = String(unread.length);
+        badge.hidden = unread.length === 0;
+        badge.closest('[data-help-tab]')?.classList.toggle('has-support-unread', unread.length > 0);
+        if (!supportNotificationInitialLoad && unread.length && typeof showToast === 'function') {
+            showToast(`📨 고객센터 새 답변 ${unread.length}건이 도착했습니다.`);
+        }
+        supportNotificationInitialLoad = false;
+    }
+
+    function stopSupportNotificationWatcher() {
+        if (supportNotificationRef) supportNotificationRef.off();
+        supportNotificationRef = null;
+        renderSupportNotificationBadge({});
+        supportNotificationInitialLoad = true;
+    }
+
+    function startSupportNotificationWatcher(user) {
+        stopSupportNotificationWatcher();
+        const database = supportDatabase();
+        if (!user || !database) return;
+        supportNotificationRef = database.ref(`supportNotifications/${user.uid}`);
+        supportNotificationRef.on('value', (snapshot) => renderSupportNotificationBadge(snapshot.val()), (error) => {
+            console.warn('[Support Center] notification watcher failed', error);
+        });
+    }
+
+    async function markSupportNotificationsRead() {
+        const user = supportUser();
+        const database = supportDatabase();
+        if (!user || !database) return;
+        try {
+            const snapshot = await database.ref(`supportNotifications/${user.uid}`).once('value');
+            const updates = {};
+            snapshot.forEach((child) => {
+                if (!Number(child.child('readAt').val() || 0)) updates[`${child.key}/readAt`] = firebase.database.ServerValue.TIMESTAMP;
+            });
+            if (Object.keys(updates).length) await database.ref(`supportNotifications/${user.uid}`).update(updates);
+        } catch (error) {
+            console.warn('[Support Center] notification read failed', error);
+        }
+    }
+
     function resetHelpCenter() {
         if (typeof window.hmRenderReleaseInfo === 'function') window.hmRenderReleaseInfo();
         const input = document.getElementById('helpSearchInput');
@@ -256,6 +307,10 @@
     window.openHelpSearchMatch = openHelpSearchMatch;
     window.loadSupportTickets = loadSupportTickets;
     window.submitSupportTicket = submitSupportTicket;
+    window.markSupportNotificationsRead = markSupportNotificationsRead;
 
-    document.addEventListener('DOMContentLoaded', resetHelpCenter);
+    document.addEventListener('DOMContentLoaded', () => {
+        resetHelpCenter();
+        try { babyAuth.onAuthStateChanged(startSupportNotificationWatcher); } catch (error) { console.warn(error); }
+    });
 })();
