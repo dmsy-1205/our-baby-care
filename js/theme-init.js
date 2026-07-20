@@ -1,5 +1,4 @@
-// STEP5.10.9: 테마와 표시 모드를 Firebase 연결 전에 먼저 적용해 화면 깜빡임을 줄입니다.
-// 2026-07-20: index.html 인라인 <script>에서 분리 (CSP에서 script-src 'unsafe-inline' 제거를 위함).
+// Apply the saved theme before the main application renders.
 (function () {
     try {
         var theme = localStorage.getItem('hm_theme_last') || 'lavender';
@@ -13,7 +12,7 @@
         document.documentElement.setAttribute('data-hm-theme', theme);
         document.documentElement.setAttribute('data-hm-display-mode', displayMode);
         document.documentElement.setAttribute('data-hm-display', resolved);
-    } catch (e) {
+    } catch (error) {
         document.documentElement.setAttribute('data-hm-theme', 'lavender');
         document.documentElement.setAttribute('data-hm-display-mode', 'system');
         document.documentElement.setAttribute('data-hm-display', 'light');

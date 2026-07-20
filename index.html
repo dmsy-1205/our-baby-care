@@ -12,28 +12,7 @@
     <link rel="manifest" href="/manifest.webmanifest">
     <link rel="apple-touch-icon" href="/assets/icons/icon-192.png">
     <title>HearMe2nite</title>
-    <script>
-        // STEP5.10.9: 테마와 표시 모드를 Firebase 연결 전에 먼저 적용해 화면 깜빡임을 줄입니다.
-        (function () {
-            try {
-                var theme = localStorage.getItem('hm_theme_last') || 'lavender';
-                var displayMode = localStorage.getItem('hm_display_mode_last') || 'system';
-                if (theme === 'midnight') { theme = 'lavender'; displayMode = 'dark'; }
-                if (!/^(lavender|blossom|ocean|forest|cream)$/.test(theme)) theme = 'lavender';
-                if (!/^(light|dark|system)$/.test(displayMode)) displayMode = 'system';
-                var resolved = displayMode === 'system'
-                    ? (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
-                    : displayMode;
-                document.documentElement.setAttribute('data-hm-theme', theme);
-                document.documentElement.setAttribute('data-hm-display-mode', displayMode);
-                document.documentElement.setAttribute('data-hm-display', resolved);
-            } catch (e) {
-                document.documentElement.setAttribute('data-hm-theme', 'lavender');
-                document.documentElement.setAttribute('data-hm-display-mode', 'system');
-                document.documentElement.setAttribute('data-hm-display', 'light');
-            }
-        })();
-    </script>
+    <script src="js/theme-init.js?v=step6-2-13-6-security-hardening-20260720"></script>
     <!-- RC2.16.0 Branding STEP1: Quiet Love UI polish / 기능 구조 유지 -->
     <!-- RC2 v2.6.0 STEP5 FINAL QA: component-ready module map / UI and data logic preserved -->
     
@@ -1295,9 +1274,9 @@
 </div>
 
 <div class="toast" id="toast">기록이 복사되었습니다! 💕</div>
-    <script src="js/release-info.js?v=step6-2-13-4-admin-data-requests-readonly-20260718"></script>
+    <script src="js/release-info.js?v=step6-2-13-6-security-hardening-20260720"></script>
     <script src="js/config.js?v=step5-10-13-history-month-server-reconciliation-20260716"></script>
-    <script src="js/utils.js?v=step6-2-12-7-notification-toast-message-fix-20260718"></script>
+    <script src="js/utils.js?v=step6-2-13-6-security-hardening-20260720"></script>
     <script src="js/popup.js?v=step6-2-1-manager-readonly-20260716"></script>
     <script src="js/auth.js?v=step6-2-5-new-user-room-token-refresh-20260717"></script>
     <script src="js/room.js?v=step6-2-5-new-user-room-token-refresh-20260717"></script>
@@ -1306,7 +1285,7 @@
     <script src="js/mission.js?v=step5-10-13-history-month-server-reconciliation-20260716"></script>
     <script src="js/custom-routine.js?v=step6-2-12-6-notification-read-sync-20260718"></script>
     <script src="js/sub-routine.js?v=step6-2-12-6-notification-read-sync-20260718"></script>
-    <script src="js/history.js?v=step6-2-11-1-history-bottom-hint-removal-20260718"></script>
+    <script src="js/history.js?v=step6-2-13-6-security-hardening-20260720"></script>
     <script src="js/anniversary.js?v=step6-2-10-11-history-center-layout-cleanup-20260718"></script>
     <script src="js/theme.js?v=step5-10-13-history-month-server-reconciliation-20260716"></script>
     <script src="js/profile.js?v=step6-2-13-4-admin-data-requests-readonly-20260718"></script>

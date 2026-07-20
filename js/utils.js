@@ -38,6 +38,16 @@ function escapeHtml(text) {
         }[ch]));
     }
 
+// Escape a value embedded in a single-quoted JavaScript string inside HTML.
+function hmEscapeInlineJs(text) {
+        return String(text || '')
+            .replace(/\\/g, '\\\\')
+            .replace(/'/g, "\\'")
+            .replace(/"/g, '&quot;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+    }
+
 // ---------------------------------------------------------
 // hmReportError
 // ---------------------------------------------------------
