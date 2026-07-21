@@ -1,9 +1,9 @@
-import { waitForAuthenticatedUser, readAdminProfile, isActiveAdmin, signOutAdmin } from './admin-api.js?v=admin-2-0-a17-3-dual-firebase-environment-20260721';
+import { waitForAuthenticatedUser, readAdminProfile, isActiveAdmin, signOutAdmin, getAdminFirebaseEnvironment } from './admin-api.js?v=admin-2-0-a18-2-beta-safety-deletion-validation-20260721';
 import { setState } from './admin-state.js';
-import { setDocumentBusy } from './admin-utils.js?v=admin-2-0-a17-3-dual-firebase-environment-20260721';
-import { renderSidebar } from './components/sidebar.js?v=admin-2-0-a17-3-dual-firebase-environment-20260721';
-import { startRouter, navigate } from './admin-router.js?v=admin-2-0-a17-3-dual-firebase-environment-20260721';
-import { ADMIN_RELEASE } from './admin-release.js?v=admin-2-0-a17-3-dual-firebase-environment-20260721';
+import { setDocumentBusy } from './admin-utils.js?v=admin-2-0-a18-2-beta-safety-deletion-validation-20260721';
+import { renderSidebar } from './components/sidebar.js?v=admin-2-0-a18-2-beta-safety-deletion-validation-20260721';
+import { startRouter, navigate } from './admin-router.js?v=admin-2-0-a18-2-beta-safety-deletion-validation-20260721';
+import { ADMIN_RELEASE } from './admin-release.js?v=admin-2-0-a18-2-beta-safety-deletion-validation-20260721';
 
 const boot = document.getElementById('adminBoot');
 const root = document.getElementById('adminRoot');
@@ -91,10 +91,11 @@ async function bootstrap() {
       return;
     }
 
-    setState({ phase: 'ready', user, adminProfile, bootedAt: Date.now() });
+    const firebaseEnvironment = getAdminFirebaseEnvironment();
+    setState({ phase: 'ready', user, adminProfile, firebaseEnvironment, bootedAt: Date.now() });
     renderShell(user);
     startRouter();
-    console.info(`[Admin 2.0] ${ADMIN_RELEASE.step} ${ADMIN_RELEASE.label} ready`);
+    console.info(`[Admin 2.0] ${ADMIN_RELEASE.step} ${ADMIN_RELEASE.label} ready`, firebaseEnvironment);
   } catch (error) {
     console.error('[Admin 2.0] bootstrap failed', error);
     setState({ phase: 'error', bootError: error });

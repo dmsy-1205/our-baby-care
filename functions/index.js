@@ -8,6 +8,24 @@ const crypto = require("node:crypto");
 admin.initializeApp();
 setGlobalOptions({ region: "us-central1", maxInstances: 2, timeoutSeconds: 30, memory: "256MiB" });
 
+const BETA_DELETION_PROJECT_ID = "hearme2nite1205";
+
+function currentProjectId() {
+  return String(admin.app().options.projectId || process.env.GCLOUD_PROJECT || process.env.GCP_PROJECT || "");
+}
+
+function requireMatchingProject(request, { deletionExecution = false } = {}) {
+  const actualProjectId = currentProjectId();
+  const expectedProjectId = String(request.data?.expectedProjectId || "").trim();
+  if (!actualProjectId || !expectedProjectId || actualProjectId !== expectedProjectId) {
+    throw new HttpsError("failed-precondition", "요청 환경과 Functions 프로젝트가 일치하지 않습니다.");
+  }
+  if (deletionExecution && actualProjectId !== BETA_DELETION_PROJECT_ID) {
+    throw new HttpsError("failed-precondition", "실제 영구 삭제는 검증된 테스트 프로젝트에서만 실행할 수 있습니다.");
+  }
+  return actualProjectId;
+}
+
 function isActiveAdminValue(value) {
   if (value === true) return true;
   if (!value || typeof value !== 'object') return false;
@@ -389,6 +407,7 @@ exports.registerExternalBackupEvidence = onCall(async (request) => {
 // STEP A13.1: builds a server-side deletion preflight. It never deletes data.
 exports.prepareDeletionAction = onCall(async (request) => {
   const caller = await requireAdminCaller(request);
+  const projectId = requireMatchingProject(request);
   const targetUid = String(request.data?.targetUid || "").trim();
   const requestId = String(request.data?.requestId || "").trim();
   if (!targetUid || !requestId) throw new HttpsError("invalid-argument", "대상 UID와 요청 ID가 필요합니다.");
@@ -429,7 +448,7 @@ exports.prepareDeletionAction = onCall(async (request) => {
   const now = Date.now();
   const readyForSecondApproval = backupVerified && preflight.partnerConsentConfirmed;
   const action = {
-    requestId, requestType: item.requestType, targetUid, roomCode,
+    requestId, requestType: item.requestType, targetUid, roomCode, projectId,
     status: readyForSecondApproval ? "awaiting_second_approval" : "awaiting_backup", executionEnabled: false,
     preflight, blockers,
     firstApproval: { uid: caller.uid, email: caller.email, approvedAt: now },
@@ -438,7 +457,7 @@ exports.prepareDeletionAction = onCall(async (request) => {
   await db.ref(`deletionActionQueue/${requestId}`).set(action);
   await db.ref(`adminAuditLogs/${now}_${requestId}_preflight`).set({
     action: "deletion_preflight_created", requestId, targetUid,
-    requestType: item.requestType, adminUid: caller.uid, createdAt: now,
+    requestType: item.requestType, adminUid: caller.uid, projectId, createdAt: now,
     backupVerified, executionEnabled: false
   });
   return { ok: true, action };
@@ -447,6 +466,7 @@ exports.prepareDeletionAction = onCall(async (request) => {
 // Records an independent second approval only after backup verification.
 exports.approveDeletionAction = onCall(async (request) => {
   const caller = await requireAdminCaller(request);
+  const projectId = requireMatchingProject(request);
   const requestId = String(request.data?.requestId || "").trim();
   if (!requestId) throw new HttpsError("invalid-argument", "요청 ID가 필요합니다.");
   const db = admin.database();
@@ -454,6 +474,7 @@ exports.approveDeletionAction = onCall(async (request) => {
   const actionSnap = await actionRef.get();
   if (!actionSnap.exists()) throw new HttpsError("not-found", "승인 대기 작업을 찾을 수 없습니다.");
   const action = actionSnap.val() || {};
+  if (action.projectId !== projectId) throw new HttpsError("failed-precondition", "사전점검 환경이 현재 프로젝트와 일치하지 않습니다. 사전점검을 다시 실행해 주세요.");
   if (action.status !== "awaiting_second_approval" || action.preflight?.partnerConsentConfirmed !== true) {
     throw new HttpsError("failed-precondition", "백업과 상대방 동의 확인을 포함한 사전점검을 먼저 통과해야 합니다.");
   }
@@ -472,7 +493,7 @@ exports.approveDeletionAction = onCall(async (request) => {
   });
   await db.ref(`adminAuditLogs/${now}_${requestId}_second_approval`).set({
     action: "deletion_second_approval_recorded", requestId,
-    targetUid: action.targetUid || "", adminUid: caller.uid,
+    targetUid: action.targetUid || "", adminUid: caller.uid, projectId,
     createdAt: now, executionEnabled: true
   });
   return { ok: true, status: "ready_for_execution", executionEnabled: true };
@@ -481,6 +502,7 @@ exports.approveDeletionAction = onCall(async (request) => {
 // STEP A17.1: executes a backed-up, independently approved deletion request.
 exports.executeDeletionAction = onCall({ timeoutSeconds: 120, memory: "512MiB" }, async (request) => {
   const caller = await requireAdminCaller(request);
+  const projectId = requireMatchingProject(request, { deletionExecution: true });
   const requestId = String(request.data?.requestId || "").trim();
   const confirmation = String(request.data?.confirmation || "").trim();
   if (!requestId || confirmation !== `DELETE ${requestId}`) {
@@ -497,6 +519,9 @@ exports.executeDeletionAction = onCall({ timeoutSeconds: 120, memory: "512MiB" }
   const backup = backupSnap.val() || {};
   const stored = snapshotSnap.val() || {};
   if (action.status === "completed") return { ok: true, alreadyCompleted: true, requestId };
+  if (action.projectId !== projectId) {
+    throw new HttpsError("failed-precondition", "삭제 대기열의 프로젝트 정보가 현재 실행 환경과 일치하지 않습니다.");
+  }
   if (action.status !== "ready_for_execution" || action.executionEnabled !== true || !action.secondApproval?.uid) {
     throw new HttpsError("failed-precondition", "백업 및 2차 승인이 완료된 작업만 실행할 수 있습니다.");
   }
@@ -574,12 +599,12 @@ exports.executeDeletionAction = onCall({ timeoutSeconds: 120, memory: "512MiB" }
     updates[`deletionActionQueue/${requestId}/updatedAt`] = now;
     updates[`dataDeletionLogs/${requestId}`] = {
       requestId, requestType: action.requestType, targetUid, roomCode,
-      status: "completed", processedByUid: caller.uid, completedAt: now,
+      status: "completed", processedByUid: caller.uid, projectId, completedAt: now,
       backupChecksum: checksum, deletedPaths
     };
     updates[`adminAuditLogs/${now}_${requestId}_executed`] = {
       action: "permanent_deletion_executed", requestId, requestType: action.requestType,
-      targetUid, roomCode, adminUid: caller.uid, backupChecksum: checksum,
+      targetUid, roomCode, adminUid: caller.uid, projectId, backupChecksum: checksum,
       deletedPathCount: deletedPaths.length, createdAt: now
     };
     await db.ref().update(updates);

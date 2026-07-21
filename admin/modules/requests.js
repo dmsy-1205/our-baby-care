@@ -1,4 +1,4 @@
-import { getAdminDatabase, getAdminFunctions } from '../admin-api.js?v=admin-2-0-a14-2-4-recovery-safety-suite-20260719';
+import { getAdminDatabase, getAdminFunctions, getAdminFirebaseEnvironment } from '../admin-api.js?v=admin-2-0-a18-2-beta-safety-deletion-validation-20260721';
 import { getState } from '../admin-state.js';
 import { asObject, compactId, escapeHtml, formatDateTime, latestNumber } from '../admin-utils.js?v=admin-2-0-a11-1-clean-baseline-20260719';
 import { renderEmptyState } from '../components/empty-state.js?v=admin-2-0-a11-1-clean-baseline-20260719';
@@ -301,7 +301,9 @@ function renderDeletionPreflight(row, queue) {
   const blockerLabels = {
     backup_not_verified: '검증된 백업 없음', partner_consent_missing: '상대방 동의 확인 필요'
   };
+  const environment = getAdminFirebaseEnvironment();
   const executionReady = queue.status === 'ready_for_execution' && queue.executionEnabled === true && queue.secondApproval?.uid;
+  const executionAllowed = executionReady && environment.permanentDeletionAllowed;
   return `<div class="admin-impact-preview">
     <div class="admin-impact-head"><div><strong>A13 서버 사전점검</strong><p>상태 ${escapeHtml(queue.status || '대기')} · 마지막 확인 ${escapeHtml(formatDateTime(queue.updatedAt))}</p></div><span class="admin-impact-risk ${preflight.backupVerified ? 'ok' : 'danger'}">${preflight.backupVerified ? '백업 확인' : '실행 차단'}</span></div>
     <div class="admin-impact-grid">
@@ -311,23 +313,26 @@ function renderDeletionPreflight(row, queue) {
       <div><span>Room 멤버</span><strong>${Number(preflight.targetRoomMemberCount || 0)}명</strong></div>
     </div>
     <div class="admin-warning-box"><strong>차단 사유</strong><p>${blockers.map((code) => escapeHtml(blockerLabels[code] || code)).join(' · ') || '없음'}</p></div>
-    <div class="admin-action-row">${row.requestType === 'delete_room' && row.partnerConsentConfirmed !== true ? `<button class="admin-button" type="button" data-confirm-partner-consent="${escapeHtml(requestKey(row))}">상대방 동의 확인 기록</button>` : ''}<button class="admin-button" type="button" data-prepare-deletion="${escapeHtml(requestKey(row))}">서버에서 다시 점검</button><button class="admin-button" type="button" data-second-approval="${escapeHtml(row.id)}" ${preflight.backupVerified && preflight.partnerConsentConfirmed && !executionReady ? '' : 'disabled'}>다른 관리자 2차 승인</button>${executionReady ? `<button class="admin-button danger" type="button" data-execute-deletion="${escapeHtml(row.id)}">실제 영구 삭제 실행</button><span class="admin-status-pill danger">실행 준비 완료</span>` : '<span class="admin-status-pill warn">실행 잠금</span>'}</div>
+    <div class="admin-action-row">${row.requestType === 'delete_room' && row.partnerConsentConfirmed !== true ? `<button class="admin-button" type="button" data-confirm-partner-consent="${escapeHtml(requestKey(row))}">상대방 동의 확인 기록</button>` : ''}<button class="admin-button" type="button" data-prepare-deletion="${escapeHtml(requestKey(row))}">서버에서 다시 점검</button><button class="admin-button" type="button" data-second-approval="${escapeHtml(row.id)}" ${preflight.backupVerified && preflight.partnerConsentConfirmed && !executionReady ? '' : 'disabled'}>다른 관리자 2차 승인</button>${executionAllowed ? `<button class="admin-button danger" type="button" data-execute-deletion="${escapeHtml(row.id)}">TEST 실제 영구 삭제 실행</button><span class="admin-status-pill danger">TEST 실행 준비 완료</span>` : executionReady ? `<button class="admin-button danger" type="button" disabled>운영 환경 삭제 잠금</button><span class="admin-status-pill warn">${escapeHtml(environment.projectId)} 실행 차단</span>` : '<span class="admin-status-pill warn">실행 잠금</span>'}</div>
   </div>`;
 }
 
 async function callDeletionPreflight(row) {
+  const environment = getAdminFirebaseEnvironment();
   const callable = getAdminFunctions().httpsCallable('prepareDeletionAction');
-  return callable({ targetUid: row.ownerUid, requestId: row.id });
+  return callable({ targetUid: row.ownerUid, requestId: row.id, expectedProjectId: environment.projectId });
 }
 
 async function callSecondApproval(requestId) {
+  const environment = getAdminFirebaseEnvironment();
   const callable = getAdminFunctions().httpsCallable('approveDeletionAction');
-  return callable({ requestId });
+  return callable({ requestId, expectedProjectId: environment.projectId });
 }
 
 async function callDeletionExecution(requestId, confirmation) {
+  const environment = getAdminFirebaseEnvironment();
   const callable = getAdminFunctions().httpsCallable('executeDeletionAction');
-  return callable({ requestId, confirmation });
+  return callable({ requestId, confirmation, expectedProjectId: environment.projectId });
 }
 
 function findRow(key) {

@@ -1,7 +1,7 @@
 import { setState } from './admin-state.js';
-import { renderTopbar } from './components/topbar.js?v=admin-2-0-a17-3-dual-firebase-environment-20260721';
-import { renderLoadingState } from './components/loading-state.js?v=admin-2-0-a17-3-dual-firebase-environment-20260721';
-import { ADMIN_RELEASE } from './admin-release.js?v=admin-2-0-a17-3-dual-firebase-environment-20260721';
+import { renderTopbar } from './components/topbar.js?v=admin-2-0-a18-2-beta-safety-deletion-validation-20260721';
+import { renderLoadingState } from './components/loading-state.js?v=admin-2-0-a18-2-beta-safety-deletion-validation-20260721';
+import { ADMIN_RELEASE } from './admin-release.js?v=admin-2-0-a18-2-beta-safety-deletion-validation-20260721';
 
 const routes = new Set(['dashboard', 'users', 'rooms', 'lifecycle', 'requests', 'support', 'backups', 'recovery', 'audit', 'releases', 'system']);
 const ADMIN_MODULE_VERSION = ADMIN_RELEASE.cacheKey;

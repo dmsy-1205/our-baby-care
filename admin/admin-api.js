@@ -46,6 +46,16 @@ export function getAdminFunctions() {
   return firebase.app(getFirebaseApp().name).functions('us-central1');
 }
 
+export function getAdminFirebaseEnvironment() {
+  const app = getFirebaseApp();
+  const projectId = String(app?.options?.projectId || window.HM_FIREBASE_ENV?.projectId || '');
+  return Object.freeze({
+    projectId,
+    mode: projectId === 'hearme2nite1205' ? 'test' : 'production',
+    permanentDeletionAllowed: projectId === 'hearme2nite1205'
+  });
+}
+
 export function waitForAuthenticatedUser() {
   return withTimeout(new Promise((resolve) => {
     const auth = getAdminAuth();

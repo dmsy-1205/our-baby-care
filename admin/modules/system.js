@@ -1,7 +1,7 @@
-import { getAdminDatabase } from '../admin-api.js?v=admin-2-0-a17-3-dual-firebase-environment-20260721';
+import { getAdminDatabase, getAdminFirebaseEnvironment } from '../admin-api.js?v=admin-2-0-a18-2-beta-safety-deletion-validation-20260721';
 import { getState } from '../admin-state.js';
-import { escapeHtml } from '../admin-utils.js?v=admin-2-0-a17-3-dual-firebase-environment-20260721';
-import { ADMIN_RELEASE } from '../admin-release.js?v=admin-2-0-a17-3-dual-firebase-environment-20260721';
+import { escapeHtml } from '../admin-utils.js?v=admin-2-0-a18-2-beta-safety-deletion-validation-20260721';
+import { ADMIN_RELEASE } from '../admin-release.js?v=admin-2-0-a18-2-beta-safety-deletion-validation-20260721';
 
 const ADMIN_STEP = ADMIN_RELEASE.step;
 const ADMIN_LABEL = ADMIN_RELEASE.label;
@@ -168,6 +168,7 @@ function renderCountList(title, items) {
 
 export async function render() {
   const state = getState();
+  const firebaseEnvironment = getAdminFirebaseEnvironment();
   const status = await loadSystemStatus();
   const release = window.HM_RELEASE || {};
   const failed = status.reads.filter((item) => !item.ok).length;
@@ -179,13 +180,13 @@ export async function render() {
     <section class="module-view" aria-labelledby="systemHeading">
       <section class="admin-hero-card"><div class="admin-hero-icon">⚙️</div><div><h2 id="systemHeading">시스템 · 운영 상태 점검</h2><p>관리자 앱의 연결, 인증, 주요 데이터 읽기 상태를 확인합니다. 이 화면은 읽기 전용입니다.</p></div></section>
       <section class="admin-grid admin-grid-4">
-        <article class="admin-card admin-metric"><span>Firebase 앱</span><strong>babyApp</strong><small>연결 확인</small></article>
+        <article class="admin-card admin-metric"><span>Firebase 환경</span><strong>${escapeHtml(firebaseEnvironment.mode === 'test' ? 'TEST' : 'PRODUCTION')}</strong><small>${escapeHtml(firebaseEnvironment.projectId || '확인 실패')}</small></article>
         <article class="admin-card admin-metric"><span>관리자 인증</span><strong>${escapeHtml(state.user?.email || '-')}</strong><small>현재 로그인 관리자</small></article>
         <article class="admin-card admin-metric"><span>읽기 점검</span><strong>${status.reads.length - failed}/${status.reads.length}</strong><small>주요 경로 읽기 가능</small></article>
         <article class="admin-card admin-metric"><span>관리자 스텝</span><strong>${ADMIN_STEP}</strong><small>${ADMIN_LABEL}</small></article>
       </section>
       <section class="admin-card admin-panel">
-        <div class="admin-panel-head"><div><h2>운영 연결 상태</h2><p>관리자 화면이 정상적으로 데이터를 읽을 수 있는지 확인합니다.</p></div><span class="admin-status-pill muted">Read Only</span></div>
+        <div class="admin-panel-head"><div><h2>운영 연결 상태</h2><p>관리자 화면이 정상적으로 데이터를 읽을 수 있는지 확인합니다.</p></div><span class="admin-status-pill ${firebaseEnvironment.permanentDeletionAllowed ? 'danger' : 'ok'}">${firebaseEnvironment.permanentDeletionAllowed ? 'TEST 삭제 검증 허용' : '운영 삭제 잠금'}</span></div>
         <div class="admin-grid admin-grid-2">
           <article class="admin-soft-card"><h3>앱 기준</h3><div class="admin-key-value"><span>메인 앱 버전</span><strong>${escapeHtml(release.step || 'STEP6.2.13.4')}</strong></div><div class="admin-key-value"><span>관리자 스텝</span><strong>${ADMIN_STEP}</strong></div><div class="admin-key-value"><span>캐시 키</span><strong>${ADMIN_CACHE_KEY}</strong></div></article>
           <article class="admin-soft-card"><h3>안전 기준</h3><ul><li>관리자 인증을 통과한 계정만 접근</li><li>승인 대기열은 서버 함수만 기록</li><li>검증된 백업 전 2차 승인 차단</li><li>영구 삭제 실행 모드 ${ADMIN_RELEASE.deletionMode}</li></ul></article>
