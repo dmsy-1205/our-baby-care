@@ -5,20 +5,71 @@
 (function () {
     const release = Object.freeze({
         product: 'HearMe2nite',
-        version: 'v1.0 STEP6.2.13.6',
-        appVersion: 'HearMe2nite v1.0 STEP6.2.13.6',
-        step: 'STEP6.2.13.6',
-        build: '20260720',
-        releaseDate: '2026.07.20',
+        version: 'v1.0 STEP6.2.14.9',
+        appVersion: 'HearMe2nite v1.0 STEP6.2.14.9',
+        step: 'STEP6.2.14.9',
+        build: '20260721',
+        releaseDate: '2026.07.21',
         stage: 'Beta',
-        title: 'Security Hardening',
-        description: '호스팅 보안 헤더, 기록실 동적 값 보호, 프로필 파일 접근 제한을 강화했습니다.',
+        title: '전체화면 사용성·테마 보정',
+        description: '달력에 현재 테마를 적용하고 돌아가기·사진 저장 문구와 기록·설정 화면의 정보 구성을 다듬었습니다.',
+        userChanges: Object.freeze([
+            '나와 상대의 닉네임·접속 상태를 홈 상단에서 바로 확인할 수 있습니다.',
+            '날짜와 알림은 작게 유지하고 우리의 대화는 더 선명하게 강조했습니다.',
+            '커스텀 미션·컨디션·기록·피드백·우리의 기록·설정 여섯 카테고리로 빠르게 이동합니다.',
+            '모바일, Fold, 태블릿, PC에서 같은 기능 그룹을 화면 크기에 맞게 배치합니다.'
+            ,'PC 홈을 넓은 앱 화면으로 조정해 공중에 떠 있는 듯한 여백을 줄였습니다.'
+            ,'Fold·태블릿·PC 세부 메뉴를 모바일과 같은 한 줄 목록으로 통일했습니다.'
+            ,'오늘 기록 완성을 결과 확인·복사 팝업에 직접 연결했습니다.'
+            ,'컨디션·오늘의 기록·관리와 피드백을 전체화면에서 연속 작성할 수 있습니다.'
+            ,'상단 돌아가기와 기기 뒤로가기로 홈에 복귀할 수 있습니다.'
+            ,'전체화면의 각 공유 기록에서 코멘트를 바로 확인하고 작성할 수 있습니다.'
+            ,'오늘의 요약을 홈 상단으로 옮기고 날짜 카드를 테마형으로 다듬었습니다.'
+            ,'날짜 선택 달력이 라이트·다크와 현재 색상 테마를 따릅니다.'
+            ,'전체화면 뒤로가기에 홈 문구를 표시하고 사진 저장 동작을 명확히 안내합니다.'
+            ,'우리의 기록과 설정 화면에 현재 날짜·테마·공간 정보를 표시합니다.'
+        ]),
         changes: Object.freeze([
-            'Added Firebase Hosting security response headers',
-            'Moved the early theme initializer to an external script',
-            'Escaped all dynamic history date values used by inline handlers',
-            'Limited profile Storage reads to the owning user',
-            '기존 기록·채팅·문의·관리자 데이터 구조 변경 없음'
+            'Adds the same subtle dashed empty-state border below Promise and My Routine',
+            'Matches the My Routine empty message typography to the Promise helper card',
+            'Prevents the comment dialog title from collapsing into a vertical column on mobile',
+            'Keeps the title and close button in a stable two-column header',
+            'Keeps record modals unchanged by opening comments in a separate dialog',
+            'Shows only a compact optional comment trigger inside eligible cards',
+            'Automatically opens the comment dialog when entering from a comment notification',
+            'Hides only the comment panel on Promise, My Routine, Diary, and Management cards',
+            'Preserves existing badges, notifications, read state, and History conversation data',
+            'Keeps the conversation area at a stable height with internal scrolling',
+            'Automatically shows the newest comment while older comments move upward',
+            'Improves Dom and Sub comment contrast in dark mode',
+            'Fixed valid invitation codes being reported as expired when claim permission was rejected',
+            'Uses the Firebase server timestamp when an invitation is accepted',
+            'Explains that invite creators must test acceptance with a different account',
+            'Added shared Sub and Dom conversations to every record card',
+            'Shows role-separated comments, unread card badges, and comment notifications',
+            'Displays card conversations in History without changing statistics',
+            'Keeps original record editing permissions separate from shared visibility',
+            'Deploys only explicitly approved web assets through the generated public directory',
+            'Excludes Firebase rules, Functions, documentation, scripts, and repository metadata from Hosting',
+            'Validates required app and admin assets before every Hosting deployment',
+            'Stages selected photos locally until Save and Close is pressed',
+            'Discards unsaved photo selections when closing the modal',
+            'Prevents duplicate photo cards from realtime listener races',
+            'Added the multi-photo Daily Moments gallery',
+            'Uses Firebase Storage on hearme2nite1205 and compressed database storage on our-baby-care',
+            'Preserves and displays existing single-photo records',
+            'Added per-photo preview, full view, and owner deletion',
+            'Keeps unread card notifications in a card-specific pending queue',
+            'Marks only the selected notification as read',
+            'Prevents a shared daily record update from clearing sibling notifications',
+            'Added protected dormant-account reactivation on login',
+            'Preserves Room and user data during dormancy',
+            'Automatic account and Room deletion remains disabled',
+            'Added readonly Admin Data Requests module',
+            'Shows request type, status, requester, Room code, reason, admin message, and internal memo',
+            'Added open/all/completed/closed filters and request search',
+            'Refreshed admin and PWA cache keys for STEP6.2.13.4',
+            '기존 기록/채팅 저장 구조 변경 없음'
         ])
     });
 
@@ -50,12 +101,12 @@
 
         const list = document.getElementById('helpLatestChanges');
         if (list) {
-            list.innerHTML = release.changes.map((item) => `<li>${escapeReleaseHtml(item)}</li>`).join('');
+            list.innerHTML = release.userChanges.map((item) => `<li>${escapeReleaseHtml(item)}</li>`).join('');
         }
 
         const updateCard = document.getElementById('helpLatestUpdateCard');
         if (updateCard) {
-            updateCard.dataset.helpKeywords = `업데이트 최신 버전 ${release.version} ${release.title} ${release.changes.join(' ')}`;
+            updateCard.dataset.helpKeywords = `업데이트 최신 버전 ${release.version} ${release.title} ${release.userChanges.join(' ')}`;
         }
     }
 

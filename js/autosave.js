@@ -109,7 +109,8 @@
         const mealLunch = valueOrEmpty(record?.mealLunch);
         const mealDinner = valueOrEmpty(record?.mealDinner);
         const goingOut = valueOrEmpty(record?.goingOut);
-        const hasPhotoText = record?.photo ? '📷 사진 첨부 완료' : '사진 없음';
+        const recordPhotoCount = typeof hmRecordMomentCount === 'function' ? hmRecordMomentCount(record) : (record?.photo ? 1 : 0);
+        const hasPhotoText = recordPhotoCount ? `📷 사진 ${recordPhotoCount}장` : '사진 없음';
         const sleepTime = valueOrEmpty(record?.sleepTime);
         const diary = valueOrEmpty(record?.diary);
         const feedbackTypeLabel = (typeof getFeedbackTypeLabel === 'function' ? getFeedbackTypeLabel(record?.feedbackType || '') : '') || '선택 없음';
@@ -279,13 +280,8 @@
                 updateDailyCards();
                 if (typeof hmRefreshNotificationBar === 'function') setTimeout(hmRefreshNotificationBar, 0);
 
-                if (record.photo) {
-                    uploadedPhotoBase64 = record.photo;
-                    document.getElementById('photoPreview').src = record.photo;
-                    document.getElementById('previewBox').style.display = 'block';
-                } else {
-                    removePhotoUI();
-                }
+                if (typeof hmSetDailyMoments === 'function') hmSetDailyMoments(record.moments || {}, record.photo || '');
+                else if (record.photo) uploadedPhotoBase64 = record.photo;
             } else {
                 clearFormFieldsExceptSync();
                 if (typeof hmSetCustomRoutineValues === 'function') hmSetCustomRoutineValues({});
@@ -482,7 +478,8 @@
         const dailyChoice = selectedDailyChoice || '';
         const dailyChoiceLabel = getDailyChoiceLabel(dailyChoice);
         const rewardNote = (document.getElementById('rewardNote').value || '').slice(0, 1000);
-        const hasPhotoText = uploadedPhotoBase64 ? '📷 사진 첨부 완료' : '사진 없음';
+        const currentPhotoCount = Array.isArray(hmDailyMoments) ? hmDailyMoments.length : (uploadedPhotoBase64 ? 1 : 0);
+        const hasPhotoText = currentPhotoCount ? `📷 사진 ${currentPhotoCount}장` : '사진 없음';
         const customRoutineReport = (typeof hmBuildCustomRoutineReportText === 'function') ? hmBuildCustomRoutineReportText() : '';
         const customCardValues = (typeof hmCollectCustomRoutineValues === 'function') ? hmCollectCustomRoutineValues() : {};
         const subRoutineSnapshot = (typeof hmCurrentSubRoutineSnapshot === 'function') ? hmCurrentSubRoutineSnapshot() : [];

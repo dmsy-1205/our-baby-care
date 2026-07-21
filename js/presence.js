@@ -104,6 +104,18 @@
         const myPresence = (myMember && myMember.presence) || {};
         const selfOnline = myPresence.online === true || !!selfRef;
         const partnerRows = allRows.filter(([uid]) => uid !== user.uid);
+        const firstPartner = partnerRows.length ? (partnerRows[0][1] || {}) : null;
+        const firstPartnerPresence = (firstPartner && firstPartner.presence) || {};
+        const partnerEmail = String((firstPartner && firstPartner.email) || firstPartnerPresence.email || '').trim();
+        window.hmAdaptivePartnerDisplayName = String(
+            (firstPartner && (firstPartner.nickname || firstPartner.displayName || firstPartner.name)) ||
+            firstPartnerPresence.nickname ||
+            (partnerEmail ? partnerEmail.split('@')[0] : '') ||
+            '상대'
+        ).trim();
+        window.hmAdaptivePartnerAvatar = String(
+            (firstPartner && firstPartner.avatar) || firstPartnerPresence.avatar || ''
+        ).trim();
         const partnerOnline = partnerRows.some(([, member]) => member && member.presence && member.presence.online === true);
         const partnerLastSeen = partnerRows.reduce((latest, [, member]) => {
             const presence = (member && member.presence) || {};
@@ -162,7 +174,8 @@
                 lastSeen: firebase.database.ServerValue.TIMESTAMP,
                 updatedAt: firebase.database.ServerValue.TIMESTAMP,
                 email: emailOf(user),
-                relationshipRole: getRole()
+                relationshipRole: getRole(),
+                avatar: String(window.hmCurrentAvatar || '')
             }).catch(err => console.warn('[Presence] heartbeat skipped:', err && err.message ? err.message : err));
         } catch(e) {}
     }

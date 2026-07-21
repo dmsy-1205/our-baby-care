@@ -5,6 +5,8 @@
 // =========================================================
 
 let hmCurrentNickname = '';
+let hmCurrentAvatar = '';
+window.hmCurrentAvatar = '';
 
 function hmNicknameFallback(user) {
     const email = user && user.email ? String(user.email) : '';
@@ -43,13 +45,14 @@ function hmApplyNicknameToUI() {
     if (chatSender) chatSender.value = displayName;
     if (currentName) currentName.textContent = hmCurrentNickname || '닉네임 미설정';
     if (preview) preview.textContent = displayName;
-    if (avatar) avatar.textContent = displayName.slice(0, 1).toUpperCase() || '♡';
+    const avatarText = hmCurrentAvatar || displayName.slice(0, 1).toUpperCase() || '♡';
+    if (avatar) avatar.textContent = avatarText;
     if (userBarNickname) userBarNickname.textContent = currentUser ? displayName : '로그인 필요';
     if (userBarEmail) userBarEmail.textContent = currentUser?.email || '-';
-    if (userBarAvatar) userBarAvatar.textContent = displayName.slice(0, 1).toUpperCase() || '♡';
+    if (userBarAvatar) userBarAvatar.textContent = avatarText;
     if (accountMenuNickname) accountMenuNickname.textContent = currentUser ? displayName : '로그인 필요';
     if (accountMenuEmail) accountMenuEmail.textContent = currentUser?.email || '-';
-    if (accountMenuAvatar) accountMenuAvatar.textContent = displayName.slice(0, 1).toUpperCase() || '♡';
+    if (accountMenuAvatar) accountMenuAvatar.textContent = avatarText;
     if (userInfo) userInfo.setAttribute('data-ready', currentUser ? 'true' : 'false');
 }
 
@@ -60,9 +63,12 @@ async function loadUserProfile() {
         return;
     }
     try {
-        const snap = await db.ref(`users/${currentUser.uid}/profile/nickname`).once('value');
-        const nickname = hmNormalizeNickname(snap.val());
+        const snap = await db.ref(`users/${currentUser.uid}/profile`).once('value');
+        const profile = snap.val() || {};
+        const nickname = hmNormalizeNickname(profile.nickname);
         hmCurrentNickname = hmIsValidNickname(nickname) ? nickname : '';
+        hmCurrentAvatar = String(localStorage.getItem(`hmProfileAvatar:${currentUser.uid}`) || '').slice(0, 8);
+        window.hmCurrentAvatar = hmCurrentAvatar;
     } catch (err) {
         hmReportError('loadUserProfile', err, hmIsFirebasePermissionError(err) ? '프로필 읽기 권한을 확인해 주세요.' : '프로필을 불러오지 못했습니다.');
     }
@@ -80,6 +86,7 @@ function openProfileModal() {
     if (email) email.textContent = currentUser.email || '';
     if (status) { status.textContent = ''; status.className = 'hm-profile-status'; }
     hmApplyNicknameToUI();
+    selectProfileAvatar(hmCurrentAvatar);
     if (typeof openModalOverlayById === 'function') openModalOverlayById('profileOverlay');
     else {
         overlay.removeAttribute('inert');
@@ -108,6 +115,17 @@ function updateProfileNicknamePreview() {
     preview.textContent = hmNormalizeNickname(input.value) || hmNicknameFallback(currentUser);
 }
 
+function selectProfileAvatar(value) {
+    hmCurrentAvatar = String(value || '').slice(0, 8);
+    window.hmCurrentAvatar = hmCurrentAvatar;
+    document.querySelectorAll('[data-profile-avatar]').forEach((button) => {
+        const selected = button.dataset.profileAvatar === hmCurrentAvatar;
+        button.classList.toggle('is-selected', selected);
+        button.setAttribute('aria-pressed', selected ? 'true' : 'false');
+    });
+    hmApplyNicknameToUI();
+}
+
 async function saveProfileNickname() {
     if (!currentUser) { alert('로그인이 필요합니다.'); return; }
     const input = document.getElementById('profileNicknameInput');
@@ -125,6 +143,13 @@ async function saveProfileNickname() {
             nickname,
             updatedAt: firebase.database.ServerValue.TIMESTAMP
         });
+        localStorage.setItem(`hmProfileAvatar:${currentUser.uid}`, hmCurrentAvatar);
+        try {
+            const roomCode = typeof getRoomCodeForData === 'function' ? getRoomCodeForData() : '';
+            if (roomCode) await db.ref(`roomMembers/${roomCode}/${currentUser.uid}/presence`).update({ avatar: hmCurrentAvatar });
+        } catch (avatarError) {
+            console.warn('[Profile] avatar presence sync skipped', avatarError);
+        }
         hmCurrentNickname = nickname;
         hmApplyNicknameToUI();
         updateChatAlignment();
@@ -192,3 +217,4 @@ function openAccountChildModal(type) {
 window.openAccountMenuModal = openAccountMenuModal;
 window.closeAccountMenuModal = closeAccountMenuModal;
 window.openAccountChildModal = openAccountChildModal;
+window.selectProfileAvatar = selectProfileAvatar;

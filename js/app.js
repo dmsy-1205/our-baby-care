@@ -140,15 +140,9 @@
                 }
 
                 hideEmailVerificationPanel();
-                if (typeof hmHandleLifecycleOnLogin === 'function') {
-                    const lifecycleReady = await hmHandleLifecycleOnLogin(user);
-                    if (!lifecycleReady) {
-                        hmFinishBooting();
-                        return;
-                    }
-                }
                 document.getElementById('authBox').classList.add('is-hidden');
                 document.getElementById('authBox').style.display = 'none';
+                if (typeof hmReactivateLifecycleOnLogin === 'function') await hmReactivateLifecycleOnLogin(user);
                 if (typeof loadUserTheme === 'function') await loadUserTheme();
                 if (typeof loadUserProfile === 'function') await loadUserProfile();
                 if (typeof hmRefreshDataAdminAccess === 'function') await hmRefreshDataAdminAccess();
@@ -247,6 +241,8 @@
 // STEP6.2.12.3: 앱 안 알림 바를 실제 기록/피드백 상태와 연결한다.
 (function hmInAppNotificationBar() {
   const READ_STORAGE_PREFIX = 'hm_notification_read_v1';
+  const PENDING_STORAGE_PREFIX = 'hm_notification_pending_v3';
+  const MIGRATION_STORAGE_PREFIX = 'hm_notification_migrated_v3';
   let hmCurrentNotificationItems = [];
   let hmOpeningFromNotification = false;
 
@@ -267,6 +263,16 @@
     const room = getSafeRoomCode() || 'no-room';
     return `${READ_STORAGE_PREFIX}:${uid}:${room}`;
   }
+  function getPendingStorageKey() {
+    const uid = currentUser?.uid || 'guest';
+    const room = getSafeRoomCode() || 'no-room';
+    return `${PENDING_STORAGE_PREFIX}:${uid}:${room}`;
+  }
+  function getMigrationStorageKey() {
+    const uid = currentUser?.uid || 'guest';
+    const room = getSafeRoomCode() || 'no-room';
+    return `${MIGRATION_STORAGE_PREFIX}:${uid}:${room}`;
+  }
   function readMap() {
     try { return JSON.parse(localStorage.getItem(getReadStorageKey()) || '{}') || {}; } catch (e) { return {}; }
   }
@@ -276,16 +282,75 @@
       const map = readMap();
       map[signature] = Date.now();
       localStorage.setItem(getReadStorageKey(), JSON.stringify(map));
+      const pending = readPendingMap();
+      Object.keys(pending).forEach((identity) => {
+        if (pending[identity]?.signature === signature) delete pending[identity];
+      });
+      writePendingMap(pending);
+    } catch (e) {}
+  }
+  function readPendingMap() {
+    try { return JSON.parse(localStorage.getItem(getPendingStorageKey()) || '{}') || {}; } catch (e) { return {}; }
+  }
+  function writePendingMap(map) {
+    try { localStorage.setItem(getPendingStorageKey(), JSON.stringify(map || {})); } catch (e) {}
+  }
+  function notificationIdentity(item) {
+    return `${item?.date || ''}|${item?.key || ''}|${item?.type || ''}`;
+  }
+  function syncPendingItems(liveItems) {
+    const read = readMap();
+    const pending = readPendingMap();
+    const now = Date.now();
+    const maxAge = 30 * 24 * 60 * 60 * 1000;
+
+    Object.keys(pending).forEach((identity) => {
+      const item = pending[identity];
+      if (!item?.signature || read[item.signature] || now - Number(item.queuedAt || now) > maxAge) {
+        delete pending[identity];
+      }
+    });
+
+    liveItems.forEach((item) => {
+      if (!item?.signature || read[item.signature]) return;
+      const identity = notificationIdentity(item);
+      const previous = pending[identity];
+      pending[identity] = { ...item, queuedAt: Number(previous?.queuedAt || now) };
+    });
+
+    const trimmed = Object.entries(pending)
+      .sort((a, b) => Number(b[1]?.queuedAt || 0) - Number(a[1]?.queuedAt || 0))
+      .slice(0, 60);
+    const result = Object.fromEntries(trimmed);
+    writePendingMap(result);
+    return result;
+  }
+  function migrateLegacyNotifications(liveItems) {
+    try {
+      const key = getMigrationStorageKey();
+      if (localStorage.getItem(key) === 'done') return;
+      const read = readMap();
+      liveItems.forEach((item) => {
+        if (item?.type !== 'conversation' && item?.signature) read[item.signature] = Date.now();
+      });
+      localStorage.setItem(getReadStorageKey(), JSON.stringify(read));
+      localStorage.removeItem(getPendingStorageKey().replace('pending_v3', 'pending_v2'));
+      localStorage.setItem(key, 'done');
     } catch (e) {}
   }
   function markItemsReadByKey(key) {
     if (!key) return;
     try {
       const map = readMap();
-      buildItems().forEach((item) => {
+      hmCurrentNotificationItems.forEach((item) => {
         if (item.key === key && item.signature) map[item.signature] = Date.now();
       });
       localStorage.setItem(getReadStorageKey(), JSON.stringify(map));
+      const pending = readPendingMap();
+      Object.keys(pending).forEach((identity) => {
+        if (map[pending[identity]?.signature]) delete pending[identity];
+      });
+      writePendingMap(pending);
     } catch (e) {}
     renderNotificationBar();
   }
@@ -321,7 +386,7 @@
     if (key === 'water') return hasWaterRecord(record);
     if (key === 'wake') return isMeaningful(record.wakeTime);
     if (key === 'meal') return isMeaningful(record.mealBreakfast) || isMeaningful(record.mealLunch) || isMeaningful(record.mealDinner);
-    if (key === 'outing') return isMeaningful(record.goingOut) || !!record.photo;
+    if (key === 'outing') return isMeaningful(record.goingOut) || (typeof hmRecordHasMoments === 'function' ? hmRecordHasMoments(record) : !!record.photo);
     if (key === 'sleep') return isMeaningful(record.sleepTime);
     if (key === 'diary') return isMeaningful(record.diary);
     if (key === 'feedback') return isMeaningful(record.replyMessage) || isMeaningful(record.feedbackType) || record.feedbackConfirmed === true;
@@ -329,10 +394,28 @@
     return false;
   }
   function makeSignature(type, date, record, fallbackText) {
-    const stamp = record?.updatedAt || record?.createdAt || '';
     const author = record?.updatedBy || '';
     const body = text(fallbackText).slice(0, 140);
-    return [type, date, stamp, author, body].join('|');
+    const momentRows = Array.isArray(record?.moments) ? record.moments : (Array.isArray(record?.dailyMoments) ? record.dailyMoments : []);
+    const momentFingerprint = momentRows.map((item, index) => [item?.id || item?.key || index, item?.createdAt || item?.uploadedAt || '']).slice(0, 10);
+    const valueByCard = {
+      promise: record?.customCardValues || {},
+      subRoutine: record?.subRoutineSnapshot || [],
+      mood: [record?.moodLabel, record?.mood, record?.moodNote],
+      weight: record?.weight,
+      exercise: record?.exercise,
+      water: record?.water,
+      wake: record?.wakeTime,
+      meal: [record?.mealBreakfast, record?.mealLunch, record?.mealDinner],
+      outing: [record?.goingOut, momentFingerprint, record?.photo ? 'legacy-photo' : ''],
+      sleep: record?.sleepTime,
+      diary: record?.diary,
+      feedback: [record?.replyMessage, record?.feedbackType, record?.feedbackConfirmed],
+      reward: [record?.dailyChoiceLabel, record?.dailyChoice, record?.rewardNote]
+    };
+    let fingerprint = '';
+    try { fingerprint = JSON.stringify(valueByCard[type] ?? body); } catch (e) { fingerprint = body; }
+    return [type, date, author, fingerprint].join('|');
   }
   function pushCardNotification(items, source, card) {
     items.push({
@@ -342,6 +425,7 @@
       title: `${source}가 ${card.label} 카드 작성`,
       sub: `${shortDate(card.date)} · ${card.label} 카드를 확인해 보세요`,
       action: '확인',
+      date: card.date,
       signature: makeSignature(card.key, card.date, card.record, `${source}:${card.label}`)
     });
   }
@@ -365,7 +449,7 @@
         { key:'water', icon:'💧', label:'오늘의 수분', open:'record' },
         { key:'wake', icon:'☀️', label:'기상 시간', open:'record' },
         { key:'meal', icon:'🥗', label:'식사 기록', open:'record' },
-        { key:'outing', icon:'🚶‍♀️', label:'외출 기록', open:'record' },
+        { key:'outing', icon:'📷', label:'오늘의 순간', open:'record' },
         { key:'sleep', icon:'🌙', label:'취침 예정', open:'record' },
         { key:'diary', icon:'📝', label:'오늘의 하루', open:'record' }
       ].forEach((card) => {
@@ -382,6 +466,9 @@
       });
     }
 
+    if (typeof hmGetConversationNotificationItems === 'function') {
+      items.push(...hmGetConversationNotificationItems(date));
+    }
     return items;
   }
   function renderNotificationBar() {
@@ -392,8 +479,14 @@
     const sub = $('hmNotificationSub');
     const action = $('hmNotificationAction');
     const read = readMap();
-    const allItems = buildItems();
-    const unreadItems = allItems.filter((item) => !read[item.signature]);
+    const liveItems = buildItems();
+    migrateLegacyNotifications(liveItems);
+    const refreshedRead = readMap();
+    const pending = syncPendingItems(liveItems);
+    const selectedDate = getSelectedDate();
+    const unreadItems = Object.values(pending)
+      .filter((item) => item?.date === selectedDate && !refreshedRead[item.signature])
+      .sort((a, b) => Number(a.queuedAt || 0) - Number(b.queuedAt || 0));
     hmCurrentNotificationItems = unreadItems;
     const item = unreadItems[0];
 
@@ -504,6 +597,7 @@
     try {
       if (item.type === 'feedback' && typeof openDailyModal === 'function') return openDailyModal('feedback');
       if (item.type === 'reward' && typeof openDailyModal === 'function') return openDailyModal('reward');
+      if (item.type === 'conversation' && typeof hmOpenConversationFromNotification === 'function') return hmOpenConversationFromNotification(item.key);
       if (item.type === 'record') return openRecordCard(item);
     } finally {
       setTimeout(() => {

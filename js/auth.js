@@ -213,6 +213,27 @@
         return tokenResult && tokenResult.claims && tokenResult.claims.email_verified === true;
     }
 
+    // STEP6.2.13.5 / ADMIN A18.3: 휴면 데이터는 삭제하지 않고 로그인 시 서버에서 정상 상태로 되돌린다.
+    async function hmReactivateLifecycleOnLogin(user = babyAuth.currentUser) {
+        if (!user) return { reactivated: false };
+        try {
+            const app = typeof babyApp !== 'undefined' ? babyApp : firebase.app();
+            const projectId = String(app?.options?.projectId || window.HM_FIREBASE_ENV?.projectId || '');
+            const callable = firebase.app(app.name).functions('us-central1').httpsCallable('reactivateDormantAccount');
+            const response = await callable({ expectedProjectId: projectId });
+            const result = response?.data || {};
+            if (result.reactivated) {
+                showSaveStatus('🌱 휴면 계정이 정상 상태로 복원되었습니다.');
+                console.info('[HearMe2nite] dormant lifecycle reactivated', { projectId, restoredAt: result.restoredAt });
+            }
+            return result;
+        } catch (error) {
+            // 재활성화 Functions가 아직 배포되지 않은 환경에서도 기존 로그인과 데이터 읽기는 계속한다.
+            console.warn('[HearMe2nite] lifecycle reactivation deferred', error?.code || error?.message || error);
+            return { reactivated: false, deferred: true };
+        }
+    }
+
     async function hmSendVerificationEmail(user, force = false) {
         if (!user || user.emailVerified) return;
         const now = Date.now();
@@ -508,4 +529,3 @@
             }
         }
     }
-

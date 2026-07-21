@@ -113,6 +113,10 @@
             .sort((a, b) => Number(b.dataset.hmOpenedAt || 0) - Number(a.dataset.hmOpenedAt || 0));
         const top = visibleOverlays[0];
         if (!top) return false;
+        if (top.id === 'outingModalOverlay' && typeof cancelDailyMomentsAndClose === 'function') {
+            cancelDailyMomentsAndClose();
+            return true;
+        }
         closeModalOverlayById(top.id);
         return true;
     }
@@ -201,6 +205,7 @@
 
         const restricted = !canManageRelationshipCards();
         modal.classList.toggle('hm-sub-manager-readonly', restricted);
+        modal.setAttribute('data-manager-view', restricted ? 'sub-readonly' : 'dom-editor');
 
         let readonlyCard = modal.querySelector('.hm-manager-readonly-card');
         if (!readonlyCard) {
@@ -217,10 +222,13 @@
         if (restricted) hmRenderManagerReadonlyContent(name, readonlyCard);
     }
 
+    window.hmApplyManagerOnlyModalView = hmApplyManagerOnlyModalView;
+
     function openDailyModal(name) {
         if (typeof hmMarkNotificationCardRead === 'function') hmMarkNotificationCardRead(name);
         hmApplyManagerOnlyModalView(name);
         openModalOverlayById(`${name}ModalOverlay`);
+        if (typeof hmOpenCardConversation === 'function') hmOpenCardConversation(name, `${name}ModalOverlay`);
         updateManagedFieldAccessControls();
         updateDailyCards();
     }
@@ -260,5 +268,3 @@
 
 
     // =========================================================
-
-
