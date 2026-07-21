@@ -290,7 +290,7 @@
     try { localStorage.setItem(getPendingStorageKey(), JSON.stringify(map || {})); } catch (e) {}
   }
   function notificationIdentity(item) {
-    return `${item?.date || ''}|${item?.key || item?.type || ''}`;
+    return `${item?.date || ''}|${item?.key || ''}|${item?.type || ''}`;
   }
   function syncPendingItems(liveItems) {
     const read = readMap();
@@ -429,6 +429,9 @@
       });
     }
 
+    if (typeof hmGetConversationNotificationItems === 'function') {
+      items.push(...hmGetConversationNotificationItems(date));
+    }
     return items;
   }
   function renderNotificationBar() {
@@ -555,6 +558,7 @@
     try {
       if (item.type === 'feedback' && typeof openDailyModal === 'function') return openDailyModal('feedback');
       if (item.type === 'reward' && typeof openDailyModal === 'function') return openDailyModal('reward');
+      if (item.type === 'conversation' && typeof hmOpenConversationFromNotification === 'function') return hmOpenConversationFromNotification(item.key);
       if (item.type === 'record') return openRecordCard(item);
     } finally {
       setTimeout(() => {

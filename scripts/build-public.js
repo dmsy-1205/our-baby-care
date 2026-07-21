@@ -62,7 +62,7 @@ trees.forEach(copyTree);
 
 const requiredOutputs = [
   'index.html', 'admin.html', 'service-worker.js', 'manifest.webmanifest',
-  'js/config.js', 'js/moments.js', 'css/style.css', 'admin/admin-bootstrap.js'
+  'js/config.js', 'js/moments.js', 'js/card-conversations.js', 'css/style.css', 'admin/admin-bootstrap.js'
 ];
 requiredOutputs.forEach((relativePath) => {
   if (!fs.existsSync(path.join(output, relativePath))) {
@@ -81,4 +81,3 @@ const collect = (directory) => {
 collect(output);
 
 console.log(`[HearMe2nite] public whitelist build complete: ${files.length} files`);
-

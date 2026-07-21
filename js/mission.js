@@ -51,6 +51,7 @@
     // 현재 역할 권한을 반영한 뒤 미션 라이브러리를 로드한다.
     function openMissionModal() {
         openModalOverlayById('missionModalOverlay');
+        if (typeof hmOpenCardConversation === 'function') hmOpenCardConversation('mission', 'missionModalOverlay');
         updateMissionCompactUI();
         updateOwnerOnlySections();
         loadMissionLibrary();

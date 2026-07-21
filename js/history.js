@@ -935,6 +935,7 @@ async function openHistoryDetailModal(date) {
             <button type="button" class="history-detail-copy" onclick="copyDirectText(event, '${date}')">📋 이 기록 복사하기</button>
             <button type="button" class="history-detail-delete" onclick="deleteRecord(event, '${date}')">삭제</button>
         </div>`;
+    if (typeof hmRenderHistoryConversations === 'function') hmRenderHistoryConversations(date, content);
     openModalOverlayById('historyDetailOverlay');
 }
 

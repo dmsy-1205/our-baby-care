@@ -225,6 +225,7 @@
         if (typeof hmMarkNotificationCardRead === 'function') hmMarkNotificationCardRead(name);
         hmApplyManagerOnlyModalView(name);
         openModalOverlayById(`${name}ModalOverlay`);
+        if (typeof hmOpenCardConversation === 'function') hmOpenCardConversation(name, `${name}ModalOverlay`);
         updateManagedFieldAccessControls();
         updateDailyCards();
     }
@@ -264,4 +265,3 @@
 
 
     // =========================================================
-

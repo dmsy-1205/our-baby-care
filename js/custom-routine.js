@@ -318,6 +318,7 @@ function openCustomRoutineHub() {
     if (typeof hmMarkNotificationCardRead === 'function') hmMarkNotificationCardRead('promise');
     renderCustomRoutineHub();
     openModalOverlayById('customRoutineHubOverlay');
+    if (typeof hmOpenCardConversation === 'function') hmOpenCardConversation('promise', 'customRoutineHubOverlay');
 }
 
 function closeCustomRoutineHub() {
