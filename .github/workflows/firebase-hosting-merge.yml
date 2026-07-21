@@ -1,0 +1,31 @@
+# HearMe2nite / our-baby-care
+# main 브랜치에 Push되면 Firebase Hosting 라이브 채널로 자동 배포합니다.
+name: Deploy HearMe2nite to Firebase Hosting
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: firebase-hosting-live
+  cancel-in-progress: true
+
+jobs:
+  deploy_live_website:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Deploy to Firebase Hosting live channel
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_OUR_BABY_CARE }}
+          projectId: our-baby-care
+          channelId: live

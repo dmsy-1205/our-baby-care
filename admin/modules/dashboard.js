@@ -1,0 +1,110 @@
+import { getAdminDatabase } from '../admin-api.js?v=admin-2-0-a11-1-clean-baseline-20260719';
+import { asObject, countObject } from '../admin-utils.js?v=admin-2-0-a11-1-clean-baseline-20260719';
+import { ADMIN_RELEASE } from '../admin-release.js?v=admin-2-0-a18-3-lifecycle-reactivation-20260721';
+
+let dashboardData = null;
+let dashboardRefreshInFlight = false;
+
+async function loadDashboardData() {
+  const database = getAdminDatabase();
+  const [usersSnap, roomsSnap, roomMembersSnap, requestsSnap, auditSnap] = await Promise.all([
+    database.ref('users').once('value'),
+    database.ref('rooms').once('value'),
+    database.ref('roomMembers').once('value'),
+    database.ref('dataDeleteRequests').once('value'),
+    database.ref('adminAuditLogs').once('value').catch(() => ({ val: () => null }))
+  ]);
+
+  const users = asObject(usersSnap.val());
+  const rooms = asObject(roomsSnap.val());
+  const roomMembers = asObject(roomMembersSnap.val());
+  const requestsRoot = asObject(requestsSnap.val());
+  const auditLogs = asObject(auditSnap.val());
+  const requests = Object.values(requestsRoot).flatMap((group) => Object.values(asObject(group)));
+  const openRequests = requests.filter((item) => !['completed', 'rejected', 'canceled', 'cancelled'].includes(item?.status || 'pending')).length;
+
+  return {
+    users: countObject(users),
+    rooms: countObject(rooms),
+    roomMembers: Object.values(roomMembers).reduce((sum, members) => sum + countObject(members), 0),
+    requests: requests.length,
+    openRequests,
+    auditLogs: countObject(auditLogs)
+  };
+}
+
+function renderShell(data) {
+  return `
+    <section class="module-view" aria-labelledby="dashboardHeading">
+      <section class="admin-hero-card">
+        <div class="admin-hero-icon">◉</div>
+        <div>
+          <h2 id="dashboardHeading">승인형 데이터 운영 모드</h2>
+          <p>관리자 인증을 통과한 계정만 접근할 수 있습니다. 실제 삭제는 검증 백업, 서버 사전점검, 독립된 2차 승인과 최종 확인을 모두 통과해야 합니다.</p>
+        </div>
+      </section>
+
+      <section class="admin-grid admin-grid-4">
+        <article class="admin-card admin-metric"><span>사용자</span><strong>${data.users}</strong><small>users 기준</small></article>
+        <article class="admin-card admin-metric"><span>Room</span><strong>${data.rooms}</strong><small>rooms 기준</small></article>
+        <article class="admin-card admin-metric"><span>Room 멤버</span><strong>${data.roomMembers}</strong><small>roomMembers 기준</small></article>
+        <article class="admin-card admin-metric"><span>처리 필요</span><strong>${data.openRequests}</strong><small>열린 데이터 요청</small></article>
+      </section>
+
+      <section class="admin-card admin-panel">
+        <div class="admin-panel-head">
+          <div>
+            <h2>${ADMIN_RELEASE.step} 적용 범위</h2>
+            <p>승인된 계정·Room 삭제 요청의 백업 상태, 대상 경로, 공동 데이터 권리를 서버에서 다시 점검합니다.</p>
+          </div>
+          <span class="admin-status-pill danger">Deletion Locked</span>
+        </div>
+        <div class="admin-grid admin-grid-4">
+          <div class="admin-soft-card">✓ 서버 백업 등록부</div>
+          <div class="admin-soft-card">✓ SHA-256 무결성</div>
+          <div class="admin-soft-card">✓ 안내 예정일</div>
+          <div class="admin-soft-card">✓ 휴면 유예 종료일</div>
+          <div class="admin-soft-card">✓ 영향 경로 표시</div>
+          <div class="admin-soft-card">✓ 보호·제외 검토</div>
+          <div class="admin-soft-card">✓ 서버 사전점검</div>
+          <div class="admin-soft-card">✓ 보호된 베타 삭제 실행</div>
+        </div>
+      </section>
+
+      <section class="admin-card admin-panel">
+        <h2>운영 요약</h2>
+        <p>데이터 요청 ${data.requests}건, 감사 로그 ${data.auditLogs}건을 확인할 수 있습니다. 데이터 요청 메뉴에서 승인된 요청의 서버 사전점검을 시작할 수 있습니다.</p>
+      </section>
+    </section>
+  `;
+}
+
+async function refreshDashboard(root) {
+  if (dashboardRefreshInFlight || !root?.isConnected) return;
+  dashboardRefreshInFlight = true;
+
+  try {
+    dashboardData = await loadDashboardData();
+    if (root.isConnected) root.innerHTML = renderShell(dashboardData);
+  } finally {
+    dashboardRefreshInFlight = false;
+  }
+}
+
+export async function render() {
+  dashboardData = await loadDashboardData();
+  return renderShell(dashboardData);
+}
+
+export function afterRender(root) {
+  const refreshTimer = window.setInterval(() => {
+    if (!root.isConnected) {
+      window.clearInterval(refreshTimer);
+      return;
+    }
+
+    refreshDashboard(root).catch((error) => {
+      console.error('[Admin 2.0] dashboard auto refresh failed', error);
+    });
+  }, 30000);
+}

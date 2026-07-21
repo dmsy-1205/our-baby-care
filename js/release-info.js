@@ -5,15 +5,18 @@
 (function () {
     const release = Object.freeze({
         product: 'HearMe2nite',
-        version: 'v1.0 STEP6.2.13.8.1',
-        appVersion: 'HearMe2nite v1.0 STEP6.2.13.8.1',
-        step: 'STEP6.2.13.8.1',
+        version: 'v1.0 STEP6.2.13.8.2',
+        appVersion: 'HearMe2nite v1.0 STEP6.2.13.8.2',
+        step: 'STEP6.2.13.8.2',
         build: '20260721',
         releaseDate: '2026.07.21',
         stage: 'Beta',
-        title: 'Invite Acceptance Hotfix',
+        title: 'Conversation Viewport Polish',
         description: '관리자가 휴면 처리한 계정의 데이터를 보존하고 사용자가 다시 로그인하면 정상 상태로 자동 복원합니다.',
         changes: Object.freeze([
+            'Keeps the conversation area at a stable height with internal scrolling',
+            'Automatically shows the newest comment while older comments move upward',
+            'Improves Dom and Sub comment contrast in dark mode',
             'Fixed valid invitation codes being reported as expired when claim permission was rejected',
             'Uses the Firebase server timestamp when an invitation is accepted',
             'Explains that invite creators must test acceptance with a different account',

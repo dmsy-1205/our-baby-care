@@ -138,6 +138,14 @@
                 <label><span>${roleLabel(roleValue())}로 코멘트</span><textarea maxlength="500" rows="2" placeholder="이 기록에 마음을 남겨보세요."></textarea></label>
                 <button type="submit">남기기</button>
             </form>`;
+        // 대화 영역의 높이는 유지하고 최신 코멘트가 아래에 보이도록 한다.
+        // 새 코멘트가 추가되면 이전 코멘트는 위로 밀리고 목록 안에서만 스크롤된다.
+        const conversationList = panel.querySelector('.card-conversation-list');
+        if (conversationList) {
+            requestAnimationFrame(() => {
+                conversationList.scrollTop = conversationList.scrollHeight;
+            });
+        }
     }
 
     function openCardConversation(cardKey, overlayId) {
