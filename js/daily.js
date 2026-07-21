@@ -254,7 +254,10 @@
         ];
         const completed = checks.filter(([,done]) => done).length;
         list.innerHTML = checks.map(([label, done]) => `<div class="feedback-review-item ${done ? 'is-done' : ''}"><span>${done ? '✓' : '–'}</span><strong>${label}</strong><small>${done ? '작성됨' : '기록 없음'}</small></div>`).join('');
-        if (summary) summary.textContent = `${completed}/${checks.length} 항목 작성`;
+        if (summary) {
+            const selectedDate = document.getElementById('recordDate')?.value || '선택 날짜';
+            summary.textContent = `${selectedDate} · ${completed}/${checks.length} 작성`;
+        }
     }
 
         // MODULE: DAILY CHOICE / REWARD CHECK
@@ -520,5 +523,4 @@
     // Split-ready target: showToast
     // =========================================================
     // RC2 v2.8.0 STEP1: showToast moved to js/utils.js
-
 

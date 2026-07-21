@@ -5,14 +5,14 @@
 (function () {
     const release = Object.freeze({
         product: 'HearMe2nite',
-        version: 'v1.0 STEP6.2.14.11',
-        appVersion: 'HearMe2nite v1.0 STEP6.2.14.11',
-        step: 'STEP6.2.14.11',
+        version: 'v1.0 STEP6.2.14.13',
+        appVersion: 'HearMe2nite v1.0 STEP6.2.14.13',
+        step: 'STEP6.2.14.13',
         build: '20260722',
         releaseDate: '2026.07.22',
         stage: 'Beta',
-        title: '저장·알림·역할 신뢰성 보강',
-        description: '알림과 코멘트 읽음 상태를 계정에 동기화하고 미션·날짜 기록 연결과 자동 저장 확인 상태를 보강했습니다.',
+        title: '역할별 화면 문맥 정리',
+        description: 'Dom의 기록 확인 문구를 선택 날짜 기준으로 명확히 하고 Sub의 피드백 화면을 읽기 전용으로 정확히 안내합니다.',
         userChanges: Object.freeze([
             '나와 상대의 닉네임·접속 상태를 홈 상단에서 바로 확인할 수 있습니다.',
             '날짜와 알림은 작게 유지하고 우리의 대화는 더 선명하게 강조했습니다.',
@@ -33,6 +33,7 @@
             ,'추가한 오늘의 약속과 나의 루틴을 현재 화면에 바로 반영합니다.'
             ,'현재 보고 있는 날짜 카드는 정확한 날짜 기록을 직접 엽니다.'
             ,'자동 저장의 대기·저장 중·완료·실패 상태를 명확히 구분합니다.'
+            ,'Dom은 선택 날짜의 작성 현황을 확인하고 Sub는 피드백·선물 화면이 읽기 전용임을 바로 알 수 있습니다.'
         ]),
         changes: Object.freeze([
             'Adds the same subtle dashed empty-state border below Promise and My Routine',

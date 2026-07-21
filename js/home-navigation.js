@@ -192,6 +192,9 @@
             list.appendChild(modal);
         });
         body.appendChild(list);
+        if (routeKey === 'feedback' && typeof window.renderFeedbackReviewStatus === 'function') {
+            window.renderFeedbackReviewStatus();
+        }
         if (typeof window.hmRefreshConversationBadges === 'function') window.hmRefreshConversationBadges();
         if (routeKey === 'daily') {
             const finish = document.createElement('button');
@@ -289,7 +292,7 @@
         const isSubFeedback = category.key === 'feedback' && !isManager;
         $('hmAdaptiveRouteTitle').textContent = `${category.icon} ${isSubFeedback ? '주인의 메시지' : category.title}`;
         $('hmAdaptiveRouteSubtitle').textContent = isSubFeedback ? '주인의 피드백 · 오늘의 선물' : category.subtitle;
-        $('hmAdaptiveRouteSaveState').textContent = EDITOR_ROUTES[category.key] ? '☁ 자동 저장' : '둘만의 공간';
+        $('hmAdaptiveRouteSaveState').textContent = isSubFeedback ? '읽기 전용' : (EDITOR_ROUTES[category.key] ? '☁ 자동 저장' : '둘만의 공간');
         if (EDITOR_ROUTES[category.key]) mountRouteEditors(category.key, body);
         else renderRouteActions(category, body);
         document.querySelector('#appContent > .container')?.classList.add('hm-adaptive-route-home-hidden');
