@@ -44,7 +44,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
     <script src="/__/firebase/init.js"></script>
 
-    <link rel="stylesheet" href="css/style.css?v=step6-2-13-7-daily-moments-gallery-20260721">
+    <link rel="stylesheet" href="css/style.css?v=step6-2-13-7-1-daily-moments-save-gate-20260721">
 </head>
 <body class="hm-booting">
 
@@ -995,9 +995,9 @@
     </div>
 </div>
 
-<div class="daily-modal-overlay" id="outingModalOverlay" onclick="if(event.target.id==='outingModalOverlay') closeDailyModal('outing')">
+<div class="daily-modal-overlay" id="outingModalOverlay" onclick="if(event.target.id==='outingModalOverlay') cancelDailyMomentsAndClose()">
     <div class="daily-modal" role="dialog" aria-modal="true" aria-labelledby="outingModalTitle">
-        <div class="daily-modal-head"><h2 id="outingModalTitle">📷 오늘의 순간</h2><button type="button" class="modal-close-btn" onclick="closeDailyModal('outing')">닫기</button></div>
+        <div class="daily-modal-head"><h2 id="outingModalTitle">📷 오늘의 순간</h2><button type="button" class="modal-close-btn" onclick="cancelDailyMomentsAndClose()">닫기</button></div>
         <div class="input-group">
             <input type="text" id="goingOut" placeholder="산책 30분" oninput="handleDailyFieldChanged()">
             <label for="goingOutPhoto" class="file-label">📷 일상 사진 추가하기</label>
@@ -1007,7 +1007,7 @@
                 <div id="momentsPreviewGrid" class="moments-preview-grid"></div>
             </div>
         </div>
-        <button type="button" class="daily-modal-save" onclick="closeDailyModal('outing')">저장하고 닫기</button>
+        <button type="button" class="daily-modal-save" id="dailyMomentsSaveButton" onclick="saveDailyMomentsAndClose()">저장하고 닫기</button>
     </div>
 </div>
 
@@ -1297,15 +1297,15 @@
 </div>
 
 <div class="toast" id="toast">기록이 복사되었습니다! 💕</div>
-    <script src="js/release-info.js?v=step6-2-13-7-daily-moments-gallery-20260721"></script>
+    <script src="js/release-info.js?v=step6-2-13-7-1-daily-moments-save-gate-20260721"></script>
     <script src="js/config.js?v=step6-2-13-7-daily-moments-gallery-20260721"></script>
     <script src="js/utils.js?v=step6-2-12-7-notification-toast-message-fix-20260718"></script>
-    <script src="js/popup.js?v=step6-2-1-manager-readonly-20260716"></script>
+    <script src="js/popup.js?v=step6-2-13-7-1-daily-moments-save-gate-20260721"></script>
     <script src="js/auth.js?v=step6-2-13-5-lifecycle-reactivation-20260721"></script>
     <script src="js/room.js?v=step6-2-5-new-user-room-token-refresh-20260717"></script>
     <script src="js/presence.js?v=step5-10-13-history-month-server-reconciliation-20260716"></script>
     <script src="js/daily.js?v=step6-2-13-7-daily-moments-gallery-20260721"></script>
-    <script src="js/moments.js?v=step6-2-13-7-daily-moments-gallery-20260721"></script>
+    <script src="js/moments.js?v=step6-2-13-7-1-daily-moments-save-gate-20260721"></script>
     <script src="js/mission.js?v=step5-10-13-history-month-server-reconciliation-20260716"></script>
     <script src="js/custom-routine.js?v=step6-2-12-6-notification-read-sync-20260718"></script>
     <script src="js/sub-routine.js?v=step6-2-12-6-notification-read-sync-20260718"></script>
@@ -1321,6 +1321,6 @@
     <script src="js/help-center.js?v=step6-2-13-4-support-bridge-20260721"></script>
     <script src="js/data-management.js?v=step6-2-13-4-request-cancel-type-message-20260718"></script>
     <script src="js/app.js?v=step6-2-13-7-daily-moments-gallery-20260721"></script>
-    <script src="js/pwa.js?v=step6-2-13-7-daily-moments-gallery-20260721"></script>
+    <script src="js/pwa.js?v=step6-2-13-7-1-daily-moments-save-gate-20260721"></script>
 </body>
 </html>

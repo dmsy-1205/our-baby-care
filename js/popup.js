@@ -113,6 +113,10 @@
             .sort((a, b) => Number(b.dataset.hmOpenedAt || 0) - Number(a.dataset.hmOpenedAt || 0));
         const top = visibleOverlays[0];
         if (!top) return false;
+        if (top.id === 'outingModalOverlay' && typeof cancelDailyMomentsAndClose === 'function') {
+            cancelDailyMomentsAndClose();
+            return true;
+        }
         closeModalOverlayById(top.id);
         return true;
     }
@@ -260,5 +264,4 @@
 
 
     // =========================================================
-
 

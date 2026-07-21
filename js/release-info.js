@@ -5,15 +5,18 @@
 (function () {
     const release = Object.freeze({
         product: 'HearMe2nite',
-        version: 'v1.0 STEP6.2.13.7',
-        appVersion: 'HearMe2nite v1.0 STEP6.2.13.7',
-        step: 'STEP6.2.13.7',
+        version: 'v1.0 STEP6.2.13.7.1',
+        appVersion: 'HearMe2nite v1.0 STEP6.2.13.7.1',
+        step: 'STEP6.2.13.7.1',
         build: '20260721',
         releaseDate: '2026.07.21',
         stage: 'Beta',
-        title: 'Daily Moments Gallery',
+        title: 'Daily Moments Save Gate',
         description: '관리자가 휴면 처리한 계정의 데이터를 보존하고 사용자가 다시 로그인하면 정상 상태로 자동 복원합니다.',
         changes: Object.freeze([
+            'Stages selected photos locally until Save and Close is pressed',
+            'Discards unsaved photo selections when closing the modal',
+            'Prevents duplicate photo cards from realtime listener races',
             'Added the multi-photo Daily Moments gallery',
             'Uses Firebase Storage on hearme2nite1205 and compressed database storage on our-baby-care',
             'Preserves and displays existing single-photo records',
