@@ -240,11 +240,14 @@
 
 // STEP6.2.12.3: 앱 안 알림 바를 실제 기록/피드백 상태와 연결한다.
 (function hmInAppNotificationBar() {
-  const READ_STORAGE_PREFIX = 'hm_notification_read_v1';
-  const PENDING_STORAGE_PREFIX = 'hm_notification_pending_v3';
-  const MIGRATION_STORAGE_PREFIX = 'hm_notification_migrated_v3';
+  const READ_STORAGE_PREFIX = 'hm_notification_read_v4';
+  const PENDING_STORAGE_PREFIX = 'hm_notification_pending_v4';
+  const MIGRATION_STORAGE_PREFIX = 'hm_notification_migrated_v4';
   let hmCurrentNotificationItems = [];
   let hmOpeningFromNotification = false;
+  let hmNotificationReadRef = null;
+  let hmNotificationReadPath = '';
+  let hmRemoteNotificationReads = {};
 
   function $(id) { return document.getElementById(id); }
   function text(value) { return String(value == null ? '' : value).trim(); }
@@ -273,6 +276,42 @@
     const room = getSafeRoomCode() || 'no-room';
     return `${MIGRATION_STORAGE_PREFIX}:${uid}:${room}`;
   }
+  function signatureKey(signature) {
+    let hash = 2166136261;
+    const value = String(signature || '');
+    for (let i = 0; i < value.length; i += 1) {
+      hash ^= value.charCodeAt(i);
+      hash = Math.imul(hash, 16777619);
+    }
+    return `n_${(hash >>> 0).toString(36)}`;
+  }
+  function isSignatureRead(signature, localMap = readMap()) {
+    return !!(signature && (localMap[signature] || hmRemoteNotificationReads[signatureKey(signature)]));
+  }
+  function bindRemoteReadState() {
+    const uid = currentUser?.uid || '';
+    const room = getSafeRoomCode();
+    const nextPath = uid && room ? `users/${uid}/notificationReads/${room}` : '';
+    if (nextPath === hmNotificationReadPath) return;
+    if (hmNotificationReadRef) hmNotificationReadRef.off();
+    hmNotificationReadRef = null;
+    hmNotificationReadPath = nextPath;
+    hmRemoteNotificationReads = {};
+    if (!nextPath || typeof db === 'undefined') return;
+    hmNotificationReadRef = db.ref(nextPath);
+    hmNotificationReadRef.on('value', (snapshot) => {
+      hmRemoteNotificationReads = snapshot.val() || {};
+      renderNotificationBar();
+    }, (error) => console.warn('[HearMe2nite] 알림 읽음 동기화는 이 기기 저장으로 대체됩니다.', error));
+  }
+  function writeRemoteReads(signatures) {
+    bindRemoteReadState();
+    if (!hmNotificationReadRef || !Array.isArray(signatures) || !signatures.length) return;
+    const now = Date.now();
+    const updates = {};
+    signatures.filter(Boolean).forEach((signature) => { updates[signatureKey(signature)] = now; });
+    hmNotificationReadRef.update(updates).catch((error) => console.warn('[HearMe2nite] 알림 읽음 서버 저장 실패', error));
+  }
   function readMap() {
     try { return JSON.parse(localStorage.getItem(getReadStorageKey()) || '{}') || {}; } catch (e) { return {}; }
   }
@@ -288,6 +327,7 @@
       });
       writePendingMap(pending);
     } catch (e) {}
+    writeRemoteReads([signature]);
   }
   function readPendingMap() {
     try { return JSON.parse(localStorage.getItem(getPendingStorageKey()) || '{}') || {}; } catch (e) { return {}; }
@@ -306,13 +346,13 @@
 
     Object.keys(pending).forEach((identity) => {
       const item = pending[identity];
-      if (!item?.signature || read[item.signature] || now - Number(item.queuedAt || now) > maxAge) {
+      if (!item?.signature || isSignatureRead(item.signature, read) || now - Number(item.queuedAt || now) > maxAge) {
         delete pending[identity];
       }
     });
 
     liveItems.forEach((item) => {
-      if (!item?.signature || read[item.signature]) return;
+      if (!item?.signature || isSignatureRead(item.signature, read)) return;
       const identity = notificationIdentity(item);
       const previous = pending[identity];
       pending[identity] = { ...item, queuedAt: Number(previous?.queuedAt || now) };
@@ -342,8 +382,10 @@
     if (!key) return;
     try {
       const map = readMap();
+      const signatures = [];
       hmCurrentNotificationItems.forEach((item) => {
         if (item.key === key && item.signature) map[item.signature] = Date.now();
+        if (item.key === key && item.signature) signatures.push(item.signature);
       });
       localStorage.setItem(getReadStorageKey(), JSON.stringify(map));
       const pending = readPendingMap();
@@ -351,6 +393,7 @@
         if (map[pending[identity]?.signature]) delete pending[identity];
       });
       writePendingMap(pending);
+      writeRemoteReads(signatures);
     } catch (e) {}
     renderNotificationBar();
   }
@@ -394,7 +437,6 @@
     return false;
   }
   function makeSignature(type, date, record, fallbackText) {
-    const author = record?.updatedBy || '';
     const body = text(fallbackText).slice(0, 140);
     const momentRows = Array.isArray(record?.moments) ? record.moments : (Array.isArray(record?.dailyMoments) ? record.dailyMoments : []);
     const momentFingerprint = momentRows.map((item, index) => [item?.id || item?.key || index, item?.createdAt || item?.uploadedAt || '']).slice(0, 10);
@@ -415,7 +457,8 @@
     };
     let fingerprint = '';
     try { fingerprint = JSON.stringify(valueByCard[type] ?? body); } catch (e) { fingerprint = body; }
-    return [type, date, author, fingerprint].join('|');
+    // 작성자가 Dom/Sub 사이에서 바뀌어도 내용이 같으면 같은 알림으로 유지한다.
+    return [type, date, fingerprint].join('|');
   }
   function pushCardNotification(items, source, card) {
     items.push({
@@ -478,6 +521,7 @@
     const title = $('hmNotificationTitle');
     const sub = $('hmNotificationSub');
     const action = $('hmNotificationAction');
+    bindRemoteReadState();
     const read = readMap();
     const liveItems = buildItems();
     migrateLegacyNotifications(liveItems);
@@ -485,7 +529,7 @@
     const pending = syncPendingItems(liveItems);
     const selectedDate = getSelectedDate();
     const unreadItems = Object.values(pending)
-      .filter((item) => item?.date === selectedDate && !refreshedRead[item.signature])
+      .filter((item) => item?.date === selectedDate && !isSignatureRead(item.signature, refreshedRead))
       .sort((a, b) => Number(a.queuedAt || 0) - Number(b.queuedAt || 0));
     hmCurrentNotificationItems = unreadItems;
     const item = unreadItems[0];

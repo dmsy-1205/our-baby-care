@@ -230,6 +230,9 @@
         copyInteractiveList('#customRoutineList', '[data-live-list="promise"]', '아직 등록된 오늘의 약속이 없습니다.');
         copyInteractiveList('#subRoutineHomeList', '[data-live-list="routine"]', '선택한 날짜에 표시할 나의 루틴이 없습니다.');
     }
+    window.hmRefreshAdaptiveMissionLists = function hmRefreshAdaptiveMissionLists() {
+        document.querySelectorAll('.hm-adaptive-mission-live').forEach((section) => refreshMissionLists(section));
+    };
 
     function renderRouteActions(category, body) {
         const grid = document.createElement('div');
@@ -250,14 +253,15 @@
         const panel = document.createElement('aside');
         panel.className = 'hm-adaptive-route-context';
         if (routeKey === 'records') {
-            const date = safeText($('hmRecordDateDisplayValue')?.textContent) || safeText($('recordDate')?.value) || '선택한 날짜';
+            const recordDate = safeText($('recordDate')?.value);
+            const date = recordDate || safeText($('hmRecordDateDisplayValue')?.textContent) || '선택한 날짜';
             panel.classList.add('is-clickable');
             panel.setAttribute('role', 'button');
             panel.setAttribute('tabindex', '0');
             panel.setAttribute('aria-label', `${date} 기록 보기`);
             panel.innerHTML = `<span class="hm-adaptive-route-context-icon">📅</span><div><small>현재 보고 있는 날짜</small><strong>${date}</strong><p>눌러서 이 날짜의 기록을 확인하세요.</p></div><em aria-hidden="true">›</em>`;
             const openRecord = () => {
-                if (typeof window.openHistoryDetailModal === 'function') window.openHistoryDetailModal(date);
+                if (typeof window.openHistoryDetailModal === 'function' && /^\d{4}-\d{2}-\d{2}$/.test(recordDate)) window.openHistoryDetailModal(recordDate);
                 else document.querySelector('.history-launch-card')?.click();
             };
             panel.addEventListener('click', openRecord);

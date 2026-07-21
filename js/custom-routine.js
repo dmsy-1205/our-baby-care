@@ -252,6 +252,7 @@ function renderCustomRoutineCards() {
         list.innerHTML = cards.length ? cards.join('') : '<div class="custom-routine-home-empty">선택한 날짜에 해당하는 약속이 없습니다.</div>';
     }
     renderCustomRoutineHub();
+    if (typeof window.hmRefreshAdaptiveMissionLists === 'function') setTimeout(window.hmRefreshAdaptiveMissionLists, 0);
 }
 
 function renderCustomRoutineHub() {
@@ -582,6 +583,9 @@ async function deleteCustomRoutineCard(cardId) {
             updatedBy: currentUser?.uid || '',
             updatedAt: firebase.database.ServerValue.TIMESTAMP
         });
+        hmCustomCards[cardId] = { ...(hmCustomCards?.[cardId] || {}), active: false, deleted: true };
+        renderCustomRoutineCards();
+        renderCustomRoutineManager();
         if (hmCustomEditingCardId === cardId) resetCustomRoutineEditor();
         showSaveStatus('💜 오늘의 약속 삭제 완료');
     } catch (err) {

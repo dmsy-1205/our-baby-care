@@ -11,10 +11,10 @@
         water:'💧', wake:'⏰', meal:'🍽️', outing:'📷', sleep:'🌙', diary:'📝',
         feedback:'💬', reward:'🎁', ownerNote:'📌'
     });
-    const READ_PREFIX = 'hm_card_conversation_read_v1';
+    const READ_PREFIX = 'hm_card_conversation_read_v2';
     // 이 카드는 코멘트 입력/목록 창만 표시하지 않는다.
     // 기존 배지, 알림, 읽음 처리, 기록 대화 데이터는 그대로 유지한다.
-    const PANEL_DISABLED_KEYS = new Set(['promise', 'subRoutine', 'mission', 'diary', 'feedback', 'reward', 'ownerNote']);
+    const PANEL_DISABLED_KEYS = new Set(Object.keys(CARD_LABELS));
     let boundPath = '';
     let boundRef = null;
     let cache = {};
@@ -22,6 +22,9 @@
     let activeOverlayId = '';
     let notificationOpenCardKey = '';
     let conversationDialogOpen = false;
+    let remoteReadRef = null;
+    let remoteReadPath = '';
+    let remoteReadMap = {};
 
     function roomCode() {
         try { return typeof getRoomCodeForData === 'function' ? getRoomCodeForData() : activeRoomCode; } catch (e) { return ''; }
@@ -49,12 +52,33 @@
     function readMap() {
         try { return JSON.parse(localStorage.getItem(readKey()) || '{}') || {}; } catch (e) { return {}; }
     }
+    function bindRemoteReads() {
+        const room = roomCode();
+        const date = dateValue();
+        const uid = currentUser?.uid || '';
+        const nextPath = uid && room && date ? `users/${uid}/conversationReads/${room}/${date}` : '';
+        if (nextPath === remoteReadPath) return;
+        if (remoteReadRef) remoteReadRef.off();
+        remoteReadRef = null;
+        remoteReadPath = nextPath;
+        remoteReadMap = {};
+        if (!nextPath || typeof db === 'undefined') return;
+        remoteReadRef = db.ref(nextPath);
+        remoteReadRef.on('value', (snapshot) => {
+            remoteReadMap = snapshot.val() || {};
+            renderBadges();
+            if (typeof hmRefreshNotificationBar === 'function') hmRefreshNotificationBar();
+        }, (error) => console.warn('[HearMe2nite] 코멘트 읽음 동기화는 이 기기 저장으로 대체됩니다.', error));
+    }
     function writeRead(cardKey, at) {
+        const readAt = Number(at || Date.now());
         try {
             const map = readMap();
-            map[`${dateValue()}|${cardKey}`] = Number(at || Date.now());
+            map[`${dateValue()}|${cardKey}`] = readAt;
             localStorage.setItem(readKey(), JSON.stringify(map));
         } catch (e) {}
+        bindRemoteReads();
+        if (remoteReadRef && cardKey) remoteReadRef.child(cardKey).set(readAt).catch((error) => console.warn('[HearMe2nite] 코멘트 읽음 서버 저장 실패', error));
     }
     function commentsFor(cardKey, date = dateValue()) {
         if (date !== dateValue()) return [];
@@ -64,7 +88,7 @@
             .sort((a,b) => Number(a.createdAt || 0) - Number(b.createdAt || 0));
     }
     function unreadFor(cardKey) {
-        const readAt = Number(readMap()[`${dateValue()}|${cardKey}`] || 0);
+        const readAt = Math.max(Number(readMap()[`${dateValue()}|${cardKey}`] || 0), Number(remoteReadMap?.[cardKey] || 0));
         return commentsFor(cardKey).filter((item) => item.authorUid !== currentUser?.uid && Number(item.createdAt || 0) > readAt);
     }
 
@@ -72,6 +96,7 @@
         const room = roomCode();
         const date = dateValue();
         const nextPath = currentUser && room && date ? `rooms/${room}/cardComments/${date}` : '';
+        bindRemoteReads();
         if (nextPath === boundPath) return;
         if (boundRef) boundRef.off();
         boundRef = null;
@@ -102,16 +127,7 @@
             let badge = card.querySelector(`[data-card-conversation-badge="${cardKey}"]`);
             const comments = commentsFor(cardKey);
             const unread = unreadFor(cardKey);
-            if (!badge) {
-                badge = document.createElement('span');
-                badge.className = 'card-conversation-badge';
-                badge.dataset.cardConversationBadge = cardKey;
-                const arrow = card.querySelector('.daily-card-arrow');
-                if (arrow) arrow.before(badge); else card.appendChild(badge);
-            }
-            badge.hidden = comments.length === 0;
-            badge.classList.toggle('has-unread', unread.length > 0);
-            badge.textContent = unread.length ? `새 코멘트 ${unread.length}` : `함께 남긴 말 ${comments.length}`;
+            if (badge) badge.remove();
             document.querySelectorAll(`[data-hm-route-comment-count="${cardKey}"]`).forEach((count) => {
                 count.textContent = comments.length ? String(comments.length) : '›';
                 count.classList.toggle('has-unread', unread.length > 0);

@@ -5,14 +5,14 @@
 (function () {
     const release = Object.freeze({
         product: 'HearMe2nite',
-        version: 'v1.0 STEP6.2.14.9',
-        appVersion: 'HearMe2nite v1.0 STEP6.2.14.9',
-        step: 'STEP6.2.14.9',
-        build: '20260721',
-        releaseDate: '2026.07.21',
+        version: 'v1.0 STEP6.2.14.11',
+        appVersion: 'HearMe2nite v1.0 STEP6.2.14.11',
+        step: 'STEP6.2.14.11',
+        build: '20260722',
+        releaseDate: '2026.07.22',
         stage: 'Beta',
-        title: '전체화면 사용성·테마 보정',
-        description: '달력에 현재 테마를 적용하고 돌아가기·사진 저장 문구와 기록·설정 화면의 정보 구성을 다듬었습니다.',
+        title: '저장·알림·역할 신뢰성 보강',
+        description: '알림과 코멘트 읽음 상태를 계정에 동기화하고 미션·날짜 기록 연결과 자동 저장 확인 상태를 보강했습니다.',
         userChanges: Object.freeze([
             '나와 상대의 닉네임·접속 상태를 홈 상단에서 바로 확인할 수 있습니다.',
             '날짜와 알림은 작게 유지하고 우리의 대화는 더 선명하게 강조했습니다.',
@@ -28,6 +28,11 @@
             ,'날짜 선택 달력이 라이트·다크와 현재 색상 테마를 따릅니다.'
             ,'전체화면 뒤로가기에 홈 문구를 표시하고 사진 저장 동작을 명확히 안내합니다.'
             ,'우리의 기록과 설정 화면에 현재 날짜·테마·공간 정보를 표시합니다.'
+            ,'확인한 알림과 코멘트 읽음 상태를 계정 기준으로 동기화합니다.'
+            ,'코멘트는 하나의 버튼과 숫자로 표시해 중복 영역을 제거했습니다.'
+            ,'추가한 오늘의 약속과 나의 루틴을 현재 화면에 바로 반영합니다.'
+            ,'현재 보고 있는 날짜 카드는 정확한 날짜 기록을 직접 엽니다.'
+            ,'자동 저장의 대기·저장 중·완료·실패 상태를 명확히 구분합니다.'
         ]),
         changes: Object.freeze([
             'Adds the same subtle dashed empty-state border below Promise and My Routine',

@@ -19,6 +19,7 @@
     // 날짜별 기록 listener 연결/해제, 입력값 복원, AutoSave 저장을 담당한다.
     // records/{roomCode}/days/{date} 구조는 변경 금지.
     // =========================================================
+    let hmLastAutoSaveHealth = { state: 'idle', roomCode: '', date: '', reason: '', savedAt: 0, error: '' };
     function disconnectAllListeners() {
         if (currentRoomRef) currentRoomRef.off();
         if (entireRoomRef) entireRoomRef.off();
@@ -358,6 +359,7 @@
     // 입력 이벤트가 몰려도 Firebase write가 과도하게 발생하지 않도록 지연 저장한다.
     function triggerAutoSave(reason = 'input') {
         hmPendingAutoSaveReason = reason;
+        hmLastAutoSaveHealth = { ...hmLastAutoSaveHealth, state: 'pending', reason, error: '' };
         if (!currentUser) { showSaveStatus('🔒 로그인 후 저장됩니다.'); return; }
         const roomCode = getRoomCodeForData();
         if (!roomCode || !hmIsSafeRoomCode(roomCode)) {
@@ -454,6 +456,7 @@
         if (!hmCanAttemptAutoSave(roomCode, date)) return;
         if (!(await hmRequireRoomAccess('저장', roomCode))) return;
         hmIsAutoSaving = true;
+        hmLastAutoSaveHealth = { state: 'saving', roomCode, date, reason: hmPendingAutoSaveReason || 'input', savedAt: 0, error: '' };
 
         const wakeTime = document.getElementById('wakeTime').value || '기록 없음';
         const weight = document.getElementById('weight').value || '기록 없음';
@@ -539,9 +542,11 @@
         if (typeof hmRefreshNotificationBar === 'function') setTimeout(hmRefreshNotificationBar, 0);
         hmLastAutoSaveSignature = signature;
         hmAutoSaveQueued = false;
+        hmLastAutoSaveHealth = { state: 'saved', roomCode, date, reason: hmPendingAutoSaveReason || 'input', savedAt: Date.now(), error: '' };
         showSaveStatus('☁️ 서버 자동저장 완료');
         } catch (err) {
             hmAutoSaveQueued = true;
+            hmLastAutoSaveHealth = { ...hmLastAutoSaveHealth, state: 'error', error: String(err?.message || err || '저장 실패') };
             hmReportError('executeAutoSave', err, hmIsFirebasePermissionError(err) ? '❌ 저장 권한 없음' : '❌ 저장 실패 - 잠시 후 다시 시도합니다.');
             if (!hmIsFirebasePermissionError(err)) hmQueueAutoSaveRetry();
         } finally {
@@ -563,7 +568,16 @@
 
     function showSaveStatus(msg) {
         const el = document.getElementById('saveStatus');
-        if (el) el.innerText = msg;
+        if (el) {
+            el.innerText = msg;
+            const value = String(msg || '');
+            el.dataset.saveState = /실패|권한 없음/.test(value) ? 'error'
+                : /오프라인|대기|연결 중/.test(value) ? 'waiting'
+                : /입력 중|저장 중/.test(value) ? 'saving'
+                : /완료|저장됨|동기화 완료/.test(value) ? 'saved' : 'idle';
+            el.setAttribute('aria-label', `자동 저장 상태: ${value.replace(/^\S+\s*/, '') || value}`);
+        }
     }
+    window.hmGetAutoSaveHealth = function hmGetAutoSaveHealth() { return { ...hmLastAutoSaveHealth }; };
 
     // =========================================================
