@@ -13921,12 +13921,22 @@ body.dark-mode .hm-notification-row small {
   padding:16px;
   box-sizing:border-box;
 }
-.card-conversation-dialog-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
-.card-conversation-dialog-head>div{display:grid;gap:3px}
-.card-conversation-dialog-head strong{font-size:1rem}
+.card-conversation-dialog-head{
+  display:grid !important;
+  grid-template-columns:minmax(0,1fr) auto !important;
+  align-items:center !important;
+  gap:12px !important;
+  width:100% !important;
+  min-width:0 !important;
+}
+.card-conversation-dialog-head>div{display:grid;gap:3px;min-width:0;width:auto !important}
+.card-conversation-dialog-head strong{display:block;font-size:1rem;white-space:normal;word-break:keep-all}
 .card-conversation-dialog-head small{color:var(--hm-muted,#746c7c);font-size:.72rem}
 .card-conversation-dialog-head>button{
   flex:0 0 auto;
+  width:auto !important;
+  min-width:58px !important;
+  max-width:76px !important;
   min-height:38px;
   padding:0 12px;
   border:1px solid rgba(122,91,166,.24);
@@ -13972,4 +13982,8 @@ body.dark-mode .hm-notification-row small {
   .card-conversation-dialog{width:100%;max-height:72dvh;border-radius:20px 20px 14px 14px}
   .card-conversation-dialog-content{max-height:72dvh;padding:14px}
   .card-conversation-dialog .card-conversation-list{height:auto;min-height:0;max-height:none}
+  .card-conversation-dialog-head{grid-template-columns:minmax(0,1fr) 64px !important}
+  .card-conversation-dialog-head>button{width:64px !important;min-width:64px !important;max-width:64px !important}
+  .card-conversation-dialog .card-conversation-form{grid-template-columns:minmax(0,1fr) !important;width:100% !important}
+  .card-conversation-dialog .card-conversation-form button{width:100% !important}
 }

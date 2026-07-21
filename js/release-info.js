@@ -5,15 +5,17 @@
 (function () {
     const release = Object.freeze({
         product: 'HearMe2nite',
-        version: 'v1.0 STEP6.2.13.8.4',
-        appVersion: 'HearMe2nite v1.0 STEP6.2.13.8.4',
-        step: 'STEP6.2.13.8.4',
+        version: 'v1.0 STEP6.2.13.8.5',
+        appVersion: 'HearMe2nite v1.0 STEP6.2.13.8.5',
+        step: 'STEP6.2.13.8.5',
         build: '20260721',
         releaseDate: '2026.07.21',
         stage: 'Beta',
-        title: 'Optional Comment Dialog',
+        title: 'Comment Dialog Layout Hotfix',
         description: '관리자가 휴면 처리한 계정의 데이터를 보존하고 사용자가 다시 로그인하면 정상 상태로 자동 복원합니다.',
         changes: Object.freeze([
+            'Prevents the comment dialog title from collapsing into a vertical column on mobile',
+            'Keeps the title and close button in a stable two-column header',
             'Keeps record modals unchanged by opening comments in a separate dialog',
             'Shows only a compact optional comment trigger inside eligible cards',
             'Automatically opens the comment dialog when entering from a comment notification',
