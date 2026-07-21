@@ -13865,3 +13865,111 @@ body.dark-mode .hm-notification-row small {
   .card-conversation-list{height:190px;min-height:190px;max-height:190px}
   .card-conversation-form textarea{resize:none}
 }
+
+/* STEP6.2.13.8.4 - comments open in an independent dialog, never inside the record modal */
+.card-conversation-panel{
+  display:block;
+  margin:10px 0 4px;
+  padding:0;
+  border:0;
+  background:transparent;
+}
+.card-conversation-panel .card-conversation-head{
+  width:100%;
+  min-height:48px;
+  box-sizing:border-box;
+  align-items:center;
+  padding:9px 11px;
+  border:1px solid rgba(122,91,166,.2);
+  border-radius:12px;
+  background:rgba(123,96,163,.07);
+  color:inherit;
+  text-align:left;
+  cursor:pointer;
+}
+.card-conversation-panel .card-conversation-head small{display:block}
+.card-conversation-panel .card-conversation-head b{font-size:.68rem;color:var(--hm-muted,#746c7c)}
+
+.card-conversation-dialog-overlay{
+  position:fixed;
+  inset:0;
+  z-index:16000;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:18px;
+  box-sizing:border-box;
+  background:rgba(9,8,18,.68);
+  backdrop-filter:blur(8px);
+}
+.card-conversation-dialog-overlay.is-open{display:flex}
+.card-conversation-dialog{
+  width:min(520px,100%);
+  max-height:min(76dvh,620px);
+  overflow:hidden;
+  border:1px solid rgba(132,101,177,.3);
+  border-radius:20px;
+  background:#fff;
+  color:#282230;
+  box-shadow:0 24px 70px rgba(0,0,0,.35);
+}
+.card-conversation-dialog-content{
+  display:grid;
+  grid-template-rows:auto minmax(0,1fr) auto;
+  gap:12px;
+  max-height:min(76dvh,620px);
+  padding:16px;
+  box-sizing:border-box;
+}
+.card-conversation-dialog-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.card-conversation-dialog-head>div{display:grid;gap:3px}
+.card-conversation-dialog-head strong{font-size:1rem}
+.card-conversation-dialog-head small{color:var(--hm-muted,#746c7c);font-size:.72rem}
+.card-conversation-dialog-head>button{
+  flex:0 0 auto;
+  min-height:38px;
+  padding:0 12px;
+  border:1px solid rgba(122,91,166,.24);
+  border-radius:11px;
+  background:rgba(122,91,166,.1);
+  color:inherit;
+  font-weight:900;
+  cursor:pointer;
+}
+.card-conversation-dialog .card-conversation-list{
+  height:auto;
+  min-height:0;
+  max-height:none;
+  overflow-y:auto;
+  padding-right:5px;
+}
+.card-conversation-dialog .card-conversation-empty{min-height:92px;display:grid;place-items:center}
+.card-conversation-dialog .card-conversation-form{margin:0}
+
+:root[data-hm-theme][data-hm-display="dark"] .card-conversation-panel{
+  background:transparent !important;
+  border:0 !important;
+}
+:root[data-hm-theme][data-hm-display="dark"] .card-conversation-panel .card-conversation-head{
+  background:rgba(126,98,166,.13) !important;
+  border-color:rgba(183,151,232,.22) !important;
+  color:#f7f3ff !important;
+}
+:root[data-hm-theme][data-hm-display="dark"] .card-conversation-dialog{
+  background:linear-gradient(145deg,#202136,#171827) !important;
+  border-color:rgba(183,151,232,.28) !important;
+  color:#f7f3ff !important;
+}
+:root[data-hm-theme][data-hm-display="dark"] .card-conversation-dialog-head small{color:#c9c1d8 !important}
+:root[data-hm-theme][data-hm-display="dark"] .card-conversation-dialog-head>button{
+  background:rgba(164,126,211,.18) !important;
+  border-color:rgba(190,153,233,.28) !important;
+  color:#fff !important;
+}
+
+@media(max-width:560px){
+  .card-conversation-dialog-overlay{align-items:flex-end;padding:12px}
+  .card-conversation-dialog{width:100%;max-height:72dvh;border-radius:20px 20px 14px 14px}
+  .card-conversation-dialog-content{max-height:72dvh;padding:14px}
+  .card-conversation-dialog .card-conversation-list{height:auto;min-height:0;max-height:none}
+}

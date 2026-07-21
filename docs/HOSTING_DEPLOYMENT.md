@@ -1,6 +1,6 @@
 # HearMe2nite Hosting 배포
 
-현재 메인 앱 빌드: `v1.0 STEP6.2.13.8.2 · Conversation Viewport Polish`
+현재 메인 앱 빌드: `v1.0 STEP6.2.13.8.4 · Optional Comment Dialog`
 
 ## 연결 환경
 

@@ -12,11 +12,16 @@
         feedback:'💬', reward:'🎁', ownerNote:'📌'
     });
     const READ_PREFIX = 'hm_card_conversation_read_v1';
+    // 이 카드는 코멘트 입력/목록 창만 표시하지 않는다.
+    // 기존 배지, 알림, 읽음 처리, 기록 대화 데이터는 그대로 유지한다.
+    const PANEL_DISABLED_KEYS = new Set(['promise', 'subRoutine', 'mission', 'diary', 'feedback', 'reward', 'ownerNote']);
     let boundPath = '';
     let boundRef = null;
     let cache = {};
     let activeCardKey = '';
     let activeOverlayId = '';
+    let notificationOpenCardKey = '';
+    let conversationDialogOpen = false;
 
     function roomCode() {
         try { return typeof getRoomCodeForData === 'function' ? getRoomCodeForData() : activeRoomCode; } catch (e) { return ''; }
@@ -78,6 +83,7 @@
             cache = snapshot.val() || {};
             renderBadges();
             if (activeCardKey) renderPanel(activeCardKey, activeOverlayId);
+            if (conversationDialogOpen && activeCardKey) renderConversationDialog(activeCardKey);
             if (typeof hmRefreshNotificationBar === 'function') hmRefreshNotificationBar();
         }, (error) => {
             if (typeof hmReportError === 'function') hmReportError('cardComments.read', error, '❌ 함께 남긴 말을 불러오지 못했습니다.');
@@ -111,6 +117,10 @@
 
     function ensurePanel(cardKey, overlayId) {
         const overlay = document.getElementById(overlayId);
+        if (PANEL_DISABLED_KEYS.has(cardKey)) {
+            overlay?.querySelector('.card-conversation-panel')?.remove();
+            return null;
+        }
         const modal = overlay?.querySelector('.daily-modal, .custom-routine-hub, .sub-routine-hub, [role="dialog"]') || overlay?.firstElementChild;
         if (!modal) return null;
         let panel = modal.querySelector('.card-conversation-panel');
@@ -128,19 +138,41 @@
         if (!panel) return;
         const rows = commentsFor(cardKey);
         panel.innerHTML = `
-            <div class="card-conversation-head"><div><strong>💞 함께 남긴 말</strong><small>${escapeHtml(CARD_LABELS[cardKey] || cardKey)} · Sub와 Dom이 함께 보는 대화</small></div><span>${rows.length}</span></div>
-            <div class="card-conversation-list">${rows.length ? rows.map((item) => `
+            <button type="button" class="card-conversation-head" data-card-conversation-open="${escapeHtml(cardKey)}">
+                <div><strong>💞 ${rows.length ? '함께 남긴 말' : '코멘트 남기기'}</strong><small>${rows.length ? `${rows.length}개의 대화 보기` : '필요할 때만 열기'}</small></div>
+                <span>${rows.length ? rows.length : '+'}</span><b aria-hidden="true">열기</b>
+            </button>`;
+    }
+
+    function ensureConversationDialog() {
+        let overlay = document.getElementById('cardConversationDialogOverlay');
+        if (overlay) return overlay;
+        overlay = document.createElement('div');
+        overlay.id = 'cardConversationDialogOverlay';
+        overlay.className = 'card-conversation-dialog-overlay';
+        overlay.setAttribute('aria-hidden', 'true');
+        overlay.innerHTML = '<section class="card-conversation-dialog" role="dialog" aria-modal="true"><div class="card-conversation-dialog-content"></div></section>';
+        document.body.appendChild(overlay);
+        return overlay;
+    }
+
+    function renderConversationDialog(cardKey) {
+        const overlay = ensureConversationDialog();
+        const content = overlay.querySelector('.card-conversation-dialog-content');
+        if (!content) return;
+        const rows = commentsFor(cardKey);
+        content.innerHTML = `
+            <header class="card-conversation-dialog-head"><div><strong>💞 함께 남긴 말</strong><small>${escapeHtml(CARD_LABELS[cardKey] || cardKey)} · Sub와 Dom의 코멘트</small></div><button type="button" data-card-conversation-close>닫기</button></header>
+            ${rows.length ? `<div class="card-conversation-list">${rows.map((item) => `
                 <article class="card-conversation-message role-${item.authorRole === 'dom' ? 'dom' : 'sub'}">
                     <div><strong>${roleLabel(item.authorRole)}</strong><small>${escapeHtml(item.authorName || '')} · ${escapeHtml(formatTime(item.createdAt))}</small>${item.authorUid === currentUser?.uid ? `<button type="button" data-card-comment-delete="${escapeHtml(item.id)}">삭제</button>` : ''}</div>
                     <p>${escapeHtml(item.text).replace(/\n/g,'<br>')}</p>
-                </article>`).join('') : '<div class="card-conversation-empty">아직 함께 남긴 말이 없습니다.</div>'}</div>
+                </article>`).join('')}</div>` : '<div class="card-conversation-empty">아직 함께 남긴 말이 없습니다.</div>'}
             <form class="card-conversation-form" data-card-comment-form="${escapeHtml(cardKey)}">
                 <label><span>${roleLabel(roleValue())}로 코멘트</span><textarea maxlength="500" rows="2" placeholder="이 기록에 마음을 남겨보세요."></textarea></label>
                 <button type="submit">남기기</button>
             </form>`;
-        // 대화 영역의 높이는 유지하고 최신 코멘트가 아래에 보이도록 한다.
-        // 새 코멘트가 추가되면 이전 코멘트는 위로 밀리고 목록 안에서만 스크롤된다.
-        const conversationList = panel.querySelector('.card-conversation-list');
+        const conversationList = content.querySelector('.card-conversation-list');
         if (conversationList) {
             requestAnimationFrame(() => {
                 conversationList.scrollTop = conversationList.scrollHeight;
@@ -148,15 +180,39 @@
         }
     }
 
+    function openConversationDialog(cardKey) {
+        if (!CARD_LABELS[cardKey]) return;
+        activeCardKey = cardKey;
+        conversationDialogOpen = true;
+        const overlay = ensureConversationDialog();
+        renderConversationDialog(cardKey);
+        overlay.classList.add('is-open');
+        overlay.setAttribute('aria-hidden', 'false');
+        const latest = commentsFor(cardKey).reduce((max,item) => Math.max(max, Number(item.createdAt || 0)), Date.now());
+        writeRead(cardKey, latest);
+        renderBadges();
+    }
+
+    function closeConversationDialog() {
+        const overlay = document.getElementById('cardConversationDialogOverlay');
+        conversationDialogOpen = false;
+        overlay?.classList.remove('is-open');
+        overlay?.setAttribute('aria-hidden', 'true');
+    }
+
     function openCardConversation(cardKey, overlayId) {
+        if (!CARD_LABELS[cardKey]) return;
         bind();
         activeCardKey = cardKey;
         activeOverlayId = overlayId;
+        const shouldOpenFromNotification = notificationOpenCardKey === cardKey;
+        notificationOpenCardKey = '';
         const latest = commentsFor(cardKey).reduce((max,item) => Math.max(max, Number(item.createdAt || 0)), Date.now());
         writeRead(cardKey, latest);
         renderPanel(cardKey, overlayId);
         renderBadges();
         if (typeof hmMarkNotificationCardRead === 'function') hmMarkNotificationCardRead(cardKey);
+        if (shouldOpenFromNotification) openConversationDialog(cardKey);
     }
 
     async function submitComment(cardKey, value, button) {
@@ -204,6 +260,7 @@
         });
     }
     function openFromNotification(cardKey) {
+        notificationOpenCardKey = cardKey;
         if (cardKey === 'promise' && typeof openCustomRoutineHub === 'function') return openCustomRoutineHub();
         if (cardKey === 'subRoutine' && typeof openSubRoutineHub === 'function') return openSubRoutineHub();
         if (cardKey === 'mission' && typeof openMissionModal === 'function') return openMissionModal();
@@ -248,6 +305,10 @@
         submitComment(form.dataset.cardCommentForm, textarea.value, button).then(() => { textarea.value = ''; });
     });
     document.addEventListener('click', (event) => {
+        const openButton = event.target.closest('[data-card-conversation-open]');
+        if (openButton) { openConversationDialog(openButton.dataset.cardConversationOpen); return; }
+        if (event.target.closest('[data-card-conversation-close]')) { closeConversationDialog(); return; }
+        if (event.target.classList?.contains('card-conversation-dialog-overlay')) { closeConversationDialog(); return; }
         const button = event.target.closest('[data-card-comment-delete]');
         if (button) deleteComment(button.dataset.cardCommentDelete);
     });
