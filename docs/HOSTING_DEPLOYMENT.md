@@ -1,6 +1,6 @@
 # HearMe2nite Hosting 배포
 
-현재 메인 앱 빌드: `v1.0 STEP6.2.13.8.5 · Comment Dialog Layout Hotfix`
+현재 메인 앱 빌드: `v1.0 STEP6.2.13.8.7 · Routine Empty State Consistency`
 
 ## 연결 환경
 

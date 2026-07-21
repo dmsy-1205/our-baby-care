@@ -13866,6 +13866,56 @@ body.dark-mode .hm-notification-row small {
   .card-conversation-form textarea{resize:none}
 }
 
+/* STEP6.2.13.8.6 - My Routine empty state matches the surrounding helper text */
+.sub-routine-home-empty{
+  box-sizing:border-box;
+  width:100%;
+  margin:8px 0 2px;
+  padding:10px 12px;
+  border:1px dashed rgba(140,113,157,.36);
+  border-radius:12px;
+  background:rgba(250,247,251,.72);
+  color:#8d8290;
+  font-family:inherit;
+  font-size:13px;
+  font-weight:400;
+  line-height:1.45;
+  letter-spacing:0;
+  text-align:center;
+}
+
+/* Promise and My Routine use the same empty-state visual language. */
+.custom-routine-home-empty{
+  box-sizing:border-box;
+  width:100%;
+  margin:8px 0 2px;
+  padding:10px 12px;
+  border:1px dashed rgba(140,113,157,.36);
+  border-radius:12px;
+  background:rgba(250,247,251,.72);
+  color:#8d8290;
+  font-family:inherit;
+  font-size:13px;
+  font-weight:400;
+  line-height:1.45;
+  text-align:center;
+}
+:root[data-hm-theme][data-hm-display="dark"] .custom-routine-home-empty{
+  background:rgba(50,46,70,.46) !important;
+  color:#c8c1d2 !important;
+  border:1px dashed rgba(183,151,232,.35) !important;
+}
+:root[data-hm-theme][data-hm-display="dark"] .sub-routine-home-empty{
+  background:rgba(50,46,70,.46) !important;
+  color:#c8c1d2 !important;
+  border:1px dashed rgba(183,151,232,.35) !important;
+  font-family:inherit !important;
+  font-size:13px !important;
+  font-weight:400 !important;
+  line-height:1.45 !important;
+  text-align:center !important;
+}
+
 /* STEP6.2.13.8.4 - comments open in an independent dialog, never inside the record modal */
 .card-conversation-panel{
   display:block;
