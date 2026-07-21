@@ -5,14 +5,20 @@
 (function () {
     const release = Object.freeze({
         product: 'HearMe2nite',
-        version: 'v1.0 STEP6.2.13.8.7',
-        appVersion: 'HearMe2nite v1.0 STEP6.2.13.8.7',
-        step: 'STEP6.2.13.8.7',
+        version: 'v1.0 STEP6.2.13.8.8',
+        appVersion: 'HearMe2nite v1.0 STEP6.2.13.8.8',
+        step: 'STEP6.2.13.8.8',
         build: '20260721',
         releaseDate: '2026.07.21',
         stage: 'Beta',
-        title: 'Routine Empty State Consistency',
-        description: '관리자가 휴면 처리한 계정의 데이터를 보존하고 사용자가 다시 로그인하면 정상 상태로 자동 복원합니다.',
+        title: '더 쉬운 도움말과 문의 안내',
+        description: '도움말을 더 쉽게 찾고, 베타테스트 중 불편한 점이나 필요한 기능을 바로 문의할 수 있도록 개선했습니다.',
+        userChanges: Object.freeze([
+            '상단의 물음표 버튼을 알아보기 쉬운 도움말 버튼으로 변경했습니다.',
+            '사용 가이드 첫 화면에서 베타테스트 의견과 문의를 바로 보낼 수 있습니다.',
+            '코멘트 알림과 대화 화면을 모바일에서도 편하게 확인할 수 있습니다.',
+            '오늘의 약속과 나의 루틴 안내 화면을 같은 형태로 정리했습니다.'
+        ]),
         changes: Object.freeze([
             'Adds the same subtle dashed empty-state border below Promise and My Routine',
             'Matches the My Routine empty message typography to the Promise helper card',
@@ -85,12 +91,12 @@
 
         const list = document.getElementById('helpLatestChanges');
         if (list) {
-            list.innerHTML = release.changes.map((item) => `<li>${escapeReleaseHtml(item)}</li>`).join('');
+            list.innerHTML = release.userChanges.map((item) => `<li>${escapeReleaseHtml(item)}</li>`).join('');
         }
 
         const updateCard = document.getElementById('helpLatestUpdateCard');
         if (updateCard) {
-            updateCard.dataset.helpKeywords = `업데이트 최신 버전 ${release.version} ${release.title} ${release.changes.join(' ')}`;
+            updateCard.dataset.helpKeywords = `업데이트 최신 버전 ${release.version} ${release.title} ${release.userChanges.join(' ')}`;
         }
     }
 

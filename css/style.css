@@ -14037,3 +14037,22 @@ body.dark-mode .hm-notification-row small {
   .card-conversation-dialog .card-conversation-form{grid-template-columns:minmax(0,1fr) !important;width:100% !important}
   .card-conversation-dialog .card-conversation-form button{width:100% !important}
 }
+
+/* STEP6.2.13.8.8: discoverable Help and beta feedback entry */
+.guide-btn.guide-btn-labeled{
+  width:auto !important;min-width:58px !important;padding:0 10px !important;
+  font-size:.72rem !important;font-weight:900 !important;letter-spacing:-.02em !important;white-space:nowrap;
+}
+.help-beta-support-link{
+  width:100%;min-height:0 !important;margin-top:9px;padding:10px 12px;
+  display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:9px;text-align:left;
+  color:var(--hm-premium-text,#2d2a35);background:rgba(255,255,255,.68);
+  border:1px solid var(--hm-premium-border,#e8ddf2);border-radius:13px !important;box-shadow:none !important;
+}
+.help-beta-support-link b,.help-beta-support-link small{display:block}
+.help-beta-support-link b{font-size:.78rem;line-height:1.4}
+.help-beta-support-link small{margin-top:2px;color:var(--hm-premium-sub,#7d7694);font-size:.68rem;line-height:1.4}
+:root[data-hm-display="dark"] .help-beta-support-link{
+  color:#f5f0fb;background:rgba(48,44,69,.82);border-color:rgba(196,148,221,.28);
+}
+:root[data-hm-display="dark"] .help-beta-support-link small{color:#c9bfd7}

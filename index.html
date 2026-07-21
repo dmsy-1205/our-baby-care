@@ -44,7 +44,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
     <script src="/__/firebase/init.js"></script>
 
-    <link rel="stylesheet" href="css/style.css?v=step6-2-13-8-7-routine-empty-consistency-20260721">
+    <link rel="stylesheet" href="css/style.css?v=step6-2-13-8-8-help-support-guide-20260721">
 </head>
 <body class="hm-booting">
 
@@ -119,7 +119,7 @@
 <div class="container">
     <div class="autosave-status" id="saveStatus">☁️ 실시간 대기 중</div>
     <div class="app-title-row">
-        <button type="button" class="guide-btn" onclick="openGuideModal()" aria-label="도움말 센터 열기" title="도움말 센터">❓</button>
+        <button type="button" class="guide-btn guide-btn-labeled" onclick="openGuideModal()" aria-label="사용 가이드와 문의 센터 열기" title="사용 가이드와 문의">도움말</button>
         <h1><span class="hm-title-mark" aria-hidden="true">❤☾</span> HearMe2nite</h1>
         <div></div>
     </div>
@@ -769,6 +769,11 @@
         <div class="help-hero help-hero-compact">
             <strong>👋 무엇을 도와드릴까요?</strong>
             <span>검색하거나 아래 메뉴를 선택하세요.</span>
+            <button type="button" class="help-beta-support-link" onclick="selectHelpTab('support')">
+                <span aria-hidden="true">📨</span>
+                <span><b>베타테스트 중 불편하거나 필요한 기능이 있나요?</b><small>문의하기에서 의견을 보내주시면 확인 후 답변해 드립니다.</small></span>
+                <span aria-hidden="true">›</span>
+            </button>
         </div>
 
         <div class="help-search-wrap">
@@ -1297,7 +1302,7 @@
 </div>
 
 <div class="toast" id="toast">기록이 복사되었습니다! 💕</div>
-    <script src="js/release-info.js?v=step6-2-13-8-7-routine-empty-consistency-20260721"></script>
+    <script src="js/release-info.js?v=step6-2-13-8-8-help-support-guide-20260721"></script>
     <script src="js/config.js?v=step6-2-13-7-daily-moments-gallery-20260721"></script>
     <script src="js/utils.js?v=step6-2-12-7-notification-toast-message-fix-20260718"></script>
     <script src="js/popup.js?v=step6-2-13-8-shared-card-conversations-20260721"></script>
@@ -1322,6 +1327,6 @@
     <script src="js/help-center.js?v=step6-2-13-4-support-bridge-20260721"></script>
     <script src="js/data-management.js?v=step6-2-13-4-request-cancel-type-message-20260718"></script>
     <script src="js/app.js?v=step6-2-13-8-shared-card-conversations-20260721"></script>
-    <script src="js/pwa.js?v=step6-2-13-8-7-routine-empty-consistency-20260721"></script>
+    <script src="js/pwa.js?v=step6-2-13-8-8-help-support-guide-20260721"></script>
 </body>
 </html>
