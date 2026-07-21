@@ -14414,3 +14414,76 @@ button.hm-adaptive-person { width: 100%; padding: 0; border: 0; background: tran
 @media(min-width:700px){body.hm-authenticated #appContent,body.is-authenticated #appContent{width:min(520px,calc(100vw - 48px))!important;max-width:520px!important}body.hm-authenticated #appContent>.container,body.is-authenticated #appContent>.container{max-width:520px!important;padding:28px 30px 34px!important}.hm-adaptive-category-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}.hm-adaptive-category{height:112px!important;min-height:112px!important}}
 @media(min-width:1181px){body.hm-authenticated #appContent,body.is-authenticated #appContent{width:min(540px,calc(100vw - 96px))!important;max-width:540px!important}body.hm-authenticated #appContent>.container,body.is-authenticated #appContent>.container{max-width:540px!important;padding:30px 32px 36px!important}}
 @media(max-width:430px){.hm-profile-avatar-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+
+/* STEP6.2.14.14 - strict light/dark surface separation.
+   Light mode uses a bright theme-tinted veil; dark mode alone uses a dark veil. */
+:root[data-hm-display="light"] :is(
+  .daily-modal-overlay,.mission-modal-overlay,.room-settings-overlay,
+  .history-panel-overlay,.history-detail-overlay,.guide-modal,.onboarding-modal,
+  .anniversary-settings-overlay,.record-deletion-modal-overlay,
+  .hm-record-date-picker-overlay,.card-conversation-dialog-overlay,
+  .hm-profile-overlay,.data-management-overlay,.data-admin-overlay,
+  .hm-chat-overlay,.hm-theme-overlay,.hm-pwa-ios-guide-overlay,.hm-notification-overlay
+){
+  background:color-mix(in srgb,var(--hm-surface-page,#faf6fb) 84%,transparent)!important;
+  -webkit-backdrop-filter:blur(14px) saturate(1.04)!important;
+  backdrop-filter:blur(14px) saturate(1.04)!important;
+}
+:root[data-hm-display="dark"] :is(
+  .daily-modal-overlay,.mission-modal-overlay,.room-settings-overlay,
+  .history-panel-overlay,.history-detail-overlay,.guide-modal,.onboarding-modal,
+  .anniversary-settings-overlay,.record-deletion-modal-overlay,
+  .hm-record-date-picker-overlay,.card-conversation-dialog-overlay,
+  .hm-profile-overlay,.data-management-overlay,.data-admin-overlay,
+  .hm-chat-overlay,.hm-theme-overlay,.hm-pwa-ios-guide-overlay,.hm-notification-overlay
+){
+  background:rgba(8,10,18,.78)!important;
+  -webkit-backdrop-filter:blur(14px) saturate(.9)!important;
+  backdrop-filter:blur(14px) saturate(.9)!important;
+}
+
+:root[data-hm-display="light"] :is(
+  .daily-modal,.mission-modal,.room-settings-modal,.history-panel-modal,.history-detail-modal,
+  .guide-card,.onboarding-card,.anniversary-settings-modal,.record-deletion-modal,
+  .hm-record-date-picker-card,.card-conversation-dialog,.hm-profile-modal,
+  .data-management-modal,.data-admin-modal,.hm-chat-modal,.hm-theme-modal,
+  .hm-pwa-ios-guide-card,.hm-notification-modal
+){
+  background:var(--hm-surface-card,#fff)!important;
+  color:var(--hm-color-body,#332d3d)!important;
+  border-color:var(--hm-line-soft,rgba(120,90,170,.18))!important;
+  color-scheme:light;
+}
+:root[data-hm-display="dark"] :is(
+  .daily-modal,.mission-modal,.room-settings-modal,.history-panel-modal,.history-detail-modal,
+  .guide-card,.onboarding-card,.anniversary-settings-modal,.record-deletion-modal,
+  .hm-record-date-picker-card,.card-conversation-dialog,.hm-profile-modal,
+  .data-management-modal,.data-admin-modal,.hm-chat-modal,.hm-theme-modal,
+  .hm-pwa-ios-guide-card,.hm-notification-modal
+){
+  background:linear-gradient(145deg,var(--hm-dark-shell,#191b2a),var(--hm-dark-card,#242638))!important;
+  color:var(--hm-color-body,#f5f3ff)!important;
+  border-color:var(--hm-dark-line,#454960)!important;
+  color-scheme:dark;
+}
+
+:root[data-hm-display="light"] .hm-record-date-picker-card{
+  background:radial-gradient(circle at 12% 0%,color-mix(in srgb,var(--hm-primary,#8e5cf4) 13%,transparent),transparent 38%),var(--hm-surface-card,#fff)!important;
+  box-shadow:0 24px 70px color-mix(in srgb,var(--hm-primary,#8e5cf4) 14%,transparent)!important;
+}
+:root[data-hm-display="dark"] .hm-record-date-picker-card{
+  background:radial-gradient(circle at 12% 0%,color-mix(in srgb,var(--hm-primary,#8e5cf4) 22%,transparent),transparent 40%),linear-gradient(145deg,var(--hm-dark-shell,#191b2a),var(--hm-dark-card,#242638))!important;
+}
+:root[data-hm-display="dark"] :is(
+  .hm-record-date-picker-head button,.hm-record-date-picker-actions button,
+  .hm-record-date-picker-grid button
+){
+  background:var(--hm-dark-input,#293149)!important;
+  color:var(--hm-color-body,#f5f3ff)!important;
+  border-color:var(--hm-dark-line,#454960)!important;
+}
+:root[data-hm-display="dark"] .hm-record-date-picker-grid button.is-selected,
+:root[data-hm-display="dark"] .hm-record-date-picker-actions button:first-child{
+  background:linear-gradient(135deg,var(--hm-primary,#8e5cf4),var(--hm-accent,#ef5f94))!important;
+  color:#fff!important;
+}

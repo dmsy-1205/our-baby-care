@@ -5,14 +5,14 @@
 (function () {
     const release = Object.freeze({
         product: 'HearMe2nite',
-        version: 'v1.0 STEP6.2.14.13',
-        appVersion: 'HearMe2nite v1.0 STEP6.2.14.13',
-        step: 'STEP6.2.14.13',
+        version: 'v1.0 STEP6.2.14.14',
+        appVersion: 'HearMe2nite v1.0 STEP6.2.14.14',
+        step: 'STEP6.2.14.14',
         build: '20260722',
         releaseDate: '2026.07.22',
         stage: 'Beta',
-        title: '역할별 화면 문맥 정리',
-        description: 'Dom의 기록 확인 문구를 선택 날짜 기준으로 명확히 하고 Sub의 피드백 화면을 읽기 전용으로 정확히 안내합니다.',
+        title: '라이트·다크 화면 분리 보강',
+        description: '달력과 모든 주요 팝업의 배경·카드·입력 표면을 현재 라이트 또는 다크 모드에 맞춰 일관되게 표시합니다.',
         userChanges: Object.freeze([
             '나와 상대의 닉네임·접속 상태를 홈 상단에서 바로 확인할 수 있습니다.',
             '날짜와 알림은 작게 유지하고 우리의 대화는 더 선명하게 강조했습니다.',
@@ -34,6 +34,7 @@
             ,'현재 보고 있는 날짜 카드는 정확한 날짜 기록을 직접 엽니다.'
             ,'자동 저장의 대기·저장 중·완료·실패 상태를 명확히 구분합니다.'
             ,'Dom은 선택 날짜의 작성 현황을 확인하고 Sub는 피드백·선물 화면이 읽기 전용임을 바로 알 수 있습니다.'
+            ,'라이트 모드의 팝업 바깥은 밝은 테마 베일로, 다크 모드는 어두운 베일과 표면으로 명확히 분리됩니다.'
         ]),
         changes: Object.freeze([
             'Adds the same subtle dashed empty-state border below Promise and My Routine',
