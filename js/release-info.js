@@ -5,15 +5,18 @@
 (function () {
     const release = Object.freeze({
         product: 'HearMe2nite',
-        version: 'v1.0 STEP6.2.13.7.1',
-        appVersion: 'HearMe2nite v1.0 STEP6.2.13.7.1',
-        step: 'STEP6.2.13.7.1',
+        version: 'v1.0 STEP6.2.13.7.2',
+        appVersion: 'HearMe2nite v1.0 STEP6.2.13.7.2',
+        step: 'STEP6.2.13.7.2',
         build: '20260721',
         releaseDate: '2026.07.21',
         stage: 'Beta',
-        title: 'Daily Moments Save Gate',
+        title: 'Public Whitelist Hosting',
         description: '관리자가 휴면 처리한 계정의 데이터를 보존하고 사용자가 다시 로그인하면 정상 상태로 자동 복원합니다.',
         changes: Object.freeze([
+            'Deploys only explicitly approved web assets through the generated public directory',
+            'Excludes Firebase rules, Functions, documentation, scripts, and repository metadata from Hosting',
+            'Validates required app and admin assets before every Hosting deployment',
             'Stages selected photos locally until Save and Close is pressed',
             'Discards unsaved photo selections when closing the modal',
             'Prevents duplicate photo cards from realtime listener races',

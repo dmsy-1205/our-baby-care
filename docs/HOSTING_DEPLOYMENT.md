@@ -1,6 +1,6 @@
 # HearMe2nite Hosting 배포
 
-현재 메인 앱 빌드: `v1.0 STEP6.2.13.7 · Daily Moments Gallery`
+현재 메인 앱 빌드: `v1.0 STEP6.2.13.7.2 · Public Whitelist Hosting`
 
 ## 연결 환경
 
@@ -12,6 +12,8 @@
 각 Hosting은 `/__/firebase/init.js`에서 자신이 배포된 Firebase 프로젝트 설정을 자동으로 가져옵니다. 따라서 같은 소스 파일을 배포해도 테스트와 메인의 인증 및 데이터베이스는 서로 섞이지 않습니다.
 
 ## 배포 명령
+
+Firebase Hosting 배포 직전에 `scripts/build-public.js`가 실행되어 앱에 필요한 파일만 `public/`에 복사합니다. 프로젝트 소스 전체를 Hosting에 공개하지 않습니다.
 
 테스트와 메인에 함께 배포합니다. 안전을 위해 테스트를 먼저 배포하고, 성공한 경우에만 메인 배포를 진행합니다.
 

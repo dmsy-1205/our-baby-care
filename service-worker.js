@@ -1,4 +1,4 @@
-const HM_PWA_VERSION = 'v1.0-step6-2-13-7-1';
+const HM_PWA_VERSION = 'v1.0-step6-2-13-7-2';
 const HM_STATIC_CACHE = `hearme2nite-static-${HM_PWA_VERSION}`;
 const HM_RUNTIME_CACHE = `hearme2nite-runtime-${HM_PWA_VERSION}`;
 const HM_OFFLINE_URL = '/offline.html';
