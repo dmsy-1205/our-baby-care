@@ -1,7 +1,9 @@
 {
   "projects": {
     "default": "our-baby-care",
-    "staging": "hearme2nite-36f3f"
+    "prod": "our-baby-care",
+    "test": "hearme2nite1205",
+    "staging": "hearme2nite1205"
   },
   "targets": {},
   "etags": {}

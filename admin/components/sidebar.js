@@ -1,8 +1,9 @@
 import { escapeHtml } from '../admin-utils.js?v=admin-2-0-a11-1-clean-baseline-20260719';
-import { ADMIN_RELEASE } from '../admin-release.js?v=admin-2-0-a17-2-1-duplicate-reply-guard-20260721';
+import { ADMIN_RELEASE } from '../admin-release.js?v=admin-2-0-a17-3-dual-firebase-environment-20260721';
 
 const ADMIN_CONSOLE_STEP = ADMIN_RELEASE.step;
 const ADMIN_CONSOLE_STEP_LABEL = ADMIN_RELEASE.label;
+const FIREBASE_ENVIRONMENT = window.HM_FIREBASE_ENV || { mode: 'production', projectId: 'our-baby-care' };
 
 const items = [
   ['dashboard', '대시보드', '▦'],
@@ -27,6 +28,7 @@ export function renderSidebar({ route, userEmail }) {
           <strong>HearMe2nite</strong>
           <small>Admin Console 2.0</small>
           <em class="admin-step-badge">${ADMIN_CONSOLE_STEP} · ${ADMIN_CONSOLE_STEP_LABEL}</em>
+          ${FIREBASE_ENVIRONMENT.mode === 'test' ? `<em class="admin-step-badge">TEST · ${escapeHtml(FIREBASE_ENVIRONMENT.projectId)}</em>` : ''}
         </span>
       </div>
       <nav class="sidebar-nav">

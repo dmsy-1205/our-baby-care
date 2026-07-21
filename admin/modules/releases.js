@@ -1,4 +1,4 @@
-import { ADMIN_RELEASE } from '../admin-release.js?v=admin-2-0-a17-2-1-duplicate-reply-guard-20260721';
+import { ADMIN_RELEASE } from '../admin-release.js?v=admin-2-0-a17-3-dual-firebase-environment-20260721';
 
 function styles() {
   return `

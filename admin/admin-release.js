@@ -1,11 +1,13 @@
 export const ADMIN_RELEASE = Object.freeze({
-  step: 'STEP A17.2.1',
-  label: 'Duplicate Reply Guard',
-  cacheKey: 'admin-2-0-a17-2-1-duplicate-reply-guard-20260721',
+  step: 'STEP A17.3',
+  label: 'Dual Firebase Environment',
+  cacheKey: 'admin-2-0-a17-3-dual-firebase-environment-20260721',
   releaseDate: '2026.07.21',
   stage: 'Beta',
   deletionMode: 'GUARDED_BETA',
   changes: Object.freeze([
+    '운영·테스트 Firebase Hosting 자동 환경 선택',
+    '테스트 환경 식별 배지 및 배포 별칭 분리',
     '문의 화면 재진입 시 누적되던 저장 이벤트 제거',
     '문의별 중복 저장 잠금 추가',
     '사용자 앱 문의 작성·관리자 공개 답변 경로 재연결',

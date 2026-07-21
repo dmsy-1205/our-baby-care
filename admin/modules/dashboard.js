@@ -1,6 +1,6 @@
 import { getAdminDatabase } from '../admin-api.js?v=admin-2-0-a11-1-clean-baseline-20260719';
 import { asObject, countObject } from '../admin-utils.js?v=admin-2-0-a11-1-clean-baseline-20260719';
-import { ADMIN_RELEASE } from '../admin-release.js?v=admin-2-0-a17-2-1-duplicate-reply-guard-20260721';
+import { ADMIN_RELEASE } from '../admin-release.js?v=admin-2-0-a17-3-dual-firebase-environment-20260721';
 
 let dashboardData = null;
 let dashboardRefreshInFlight = false;

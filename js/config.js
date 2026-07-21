@@ -12,7 +12,7 @@
     // DB 구조와 key 이름은 절대 변경하지 않는다.
     // =========================================================
 
-    const babyFirebaseConfig = {
+    const HM_PRODUCTION_FIREBASE_CONFIG = {
         apiKey: "AIzaSyDMVl65SWhqPcxrMY7h_ir7OgPbk7P1LAs",
         authDomain: "our-baby-care.firebaseapp.com",
         databaseURL: "https://our-baby-care-default-rtdb.firebaseio.com",
@@ -22,7 +22,30 @@
         appId: "1:564751165:web:12012e95e1240e87e27354"
     };
 
-    const babyApp = firebase.apps.find(app => app.name === 'babyApp') || firebase.initializeApp(babyFirebaseConfig, 'babyApp');
+    // Firebase Hosting의 /__/firebase/init.js가 현재 배포 프로젝트를 기본 앱으로 초기화합니다.
+    // Hosting 자동 설정을 사용할 수 없는 환경에서는 운영 설정으로 안전하게 대체합니다.
+    const hmHostingFirebaseApp = firebase.apps.find(app => app.name === '[DEFAULT]') || null;
+    const babyFirebaseConfig = hmHostingFirebaseApp
+        ? { ...hmHostingFirebaseApp.options }
+        : { ...HM_PRODUCTION_FIREBASE_CONFIG };
+    const babyApp = firebase.apps.find(app => app.name === 'babyApp')
+        || hmHostingFirebaseApp
+        || firebase.initializeApp(babyFirebaseConfig, 'babyApp');
+
+    window.HM_FIREBASE_ENV = Object.freeze({
+        projectId: babyFirebaseConfig.projectId || '',
+        mode: babyFirebaseConfig.projectId === 'hearme2nite1205' ? 'test' : 'production',
+        autoConfigured: Boolean(hmHostingFirebaseApp)
+    });
+
+    if (window.HM_FIREBASE_ENV.mode === 'test' && document.body) {
+        document.documentElement.dataset.hmFirebaseEnv = 'test';
+        const environmentBadge = document.createElement('div');
+        environmentBadge.className = 'hm-test-environment-badge';
+        environmentBadge.setAttribute('role', 'status');
+        environmentBadge.textContent = 'TEST · hearme2nite1205';
+        document.body.appendChild(environmentBadge);
+    }
 
     const babyAuth = firebase.auth(babyApp);
     const db = firebase.database(babyApp);

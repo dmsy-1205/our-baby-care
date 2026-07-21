@@ -1,7 +1,7 @@
-import { getAdminDatabase } from '../admin-api.js?v=admin-2-0-a17-2-1-duplicate-reply-guard-20260721';
+import { getAdminDatabase } from '../admin-api.js?v=admin-2-0-a17-3-dual-firebase-environment-20260721';
 import { getState } from '../admin-state.js';
-import { asObject, escapeHtml, formatDateTime, compactId } from '../admin-utils.js?v=admin-2-0-a17-2-1-duplicate-reply-guard-20260721';
-import { renderEmptyState } from '../components/empty-state.js?v=admin-2-0-a17-2-1-duplicate-reply-guard-20260721';
+import { asObject, escapeHtml, formatDateTime, compactId } from '../admin-utils.js?v=admin-2-0-a17-3-dual-firebase-environment-20260721';
+import { renderEmptyState } from '../components/empty-state.js?v=admin-2-0-a17-3-dual-firebase-environment-20260721';
 
 const STATUS_LABELS = { received: '접수됨', reviewing: '확인 중', waiting_user: '추가 정보 필요', resolved: '답변 완료', closed: '종료' };
 const CATEGORY_LABELS = { usage: '앱 사용 문의', data_error: '데이터 오류', account_room: '계정·Room 문의', report: '신고·안전', suggestion: '기능 제안' };

@@ -101,9 +101,10 @@
             projectId: typeof babyFirebaseConfig !== 'undefined' ? babyFirebaseConfig.projectId : '',
             databaseURL: typeof babyFirebaseConfig !== 'undefined' ? babyFirebaseConfig.databaseURL : ''
         };
+        const allowedFirebaseProjects = ['our-baby-care', 'hearme2nite1205'];
         const firebaseHealthy = firebaseChecks.sdkLoaded && firebaseChecks.authReady && firebaseChecks.databaseReady
-            && firebaseChecks.projectId === 'our-baby-care'
-            && /our-baby-care-default-rtdb/.test(firebaseChecks.databaseURL || '');
+            && allowedFirebaseProjects.includes(firebaseChecks.projectId)
+            && /^https:\/\//.test(firebaseChecks.databaseURL || '');
         hmQaLog(firebaseHealthy ? 'info' : 'error', 'FIREBASE', firebaseHealthy ? 'Firebase 기본 연결 설정 OK' : 'Firebase 기본 연결 설정 확인 필요', firebaseChecks);
 
         const authPolicyHealthy = typeof hmGetEmailVerificationPolicy === 'function'
