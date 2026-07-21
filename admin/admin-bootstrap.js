@@ -1,9 +1,9 @@
-import { waitForAuthenticatedUser, readAdminProfile, isActiveAdmin, signOutAdmin, getAdminFirebaseEnvironment } from './admin-api.js?v=admin-2-0-a18-2-beta-safety-deletion-validation-20260721';
+import { waitForAuthenticatedUser, readAdminProfile, isActiveAdmin, signOutAdmin, getAdminFirebaseEnvironment } from './admin-api.js?v=admin-2-0-a18-3-lifecycle-reactivation-20260721';
 import { setState } from './admin-state.js';
-import { setDocumentBusy } from './admin-utils.js?v=admin-2-0-a18-2-beta-safety-deletion-validation-20260721';
-import { renderSidebar } from './components/sidebar.js?v=admin-2-0-a18-2-beta-safety-deletion-validation-20260721';
-import { startRouter, navigate } from './admin-router.js?v=admin-2-0-a18-2-beta-safety-deletion-validation-20260721';
-import { ADMIN_RELEASE } from './admin-release.js?v=admin-2-0-a18-2-beta-safety-deletion-validation-20260721';
+import { setDocumentBusy } from './admin-utils.js?v=admin-2-0-a18-3-lifecycle-reactivation-20260721';
+import { renderSidebar } from './components/sidebar.js?v=admin-2-0-a18-3-lifecycle-reactivation-20260721';
+import { startRouter, navigate } from './admin-router.js?v=admin-2-0-a18-3-lifecycle-reactivation-20260721';
+import { ADMIN_RELEASE } from './admin-release.js?v=admin-2-0-a18-3-lifecycle-reactivation-20260721';
 
 const boot = document.getElementById('adminBoot');
 const root = document.getElementById('adminRoot');

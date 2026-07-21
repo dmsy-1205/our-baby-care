@@ -83,6 +83,7 @@
       "MASTEROS_REALTIME_DATABASE_RULES_v0.10.17.json",
       "README.md",
       "docs/**",
+      "scripts/**",
       "functions/**",
       "**/*.bak",
       "**/*.zip",

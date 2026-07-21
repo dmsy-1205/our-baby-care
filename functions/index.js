@@ -26,6 +26,21 @@ function requireMatchingProject(request, { deletionExecution = false } = {}) {
   return actualProjectId;
 }
 
+function isSafeFirebaseKey(value) {
+  return Boolean(value) && value.length <= 128 && !/[.#$\[\]/]/.test(value);
+}
+
+function latestUserActivity(user) {
+  const profile = user && typeof user.profile === "object" ? user.profile : {};
+  const lifecycle = user && typeof user.lifecycle === "object" ? user.lifecycle : {};
+  return Math.max(
+    Number(user?.lastLogin || 0), Number(user?.lastSeen || 0), Number(user?.updatedAt || 0),
+    Number(profile.lastLogin || 0), Number(profile.lastSeen || 0), Number(profile.updatedAt || 0),
+    Number(lifecycle.lastLoginAt || 0), Number(lifecycle.restoredAt || 0),
+    Number(user?.createdAt || 0), Number(profile.createdAt || 0)
+  );
+}
+
 function isActiveAdminValue(value) {
   if (value === true) return true;
   if (!value || typeof value !== 'object') return false;
@@ -111,6 +126,129 @@ async function requireAdminCaller(request) {
   if (!snapshot.exists() || !isActiveAdminValue(snapshot.val())) throw new HttpsError("permission-denied", "활성 관리자 권한이 없습니다.");
   return { uid: callerUid, email: String(request.auth?.token?.email || "") };
 }
+
+// STEP A18.3: persists lifecycle review decisions. It never deletes user or Room data.
+exports.setLifecycleReview = onCall(async (request) => {
+  const caller = await requireAdminCaller(request);
+  const projectId = requireMatchingProject(request);
+  const targetType = String(request.data?.targetType || "").trim();
+  const targetId = String(request.data?.targetId || "").trim();
+  const status = String(request.data?.status || "").trim();
+  const reason = String(request.data?.reason || "").trim().slice(0, 80);
+  if (!["user", "room"].includes(targetType) || !isSafeFirebaseKey(targetId)) {
+    throw new HttpsError("invalid-argument", "수명주기 검토 대상을 확인해 주세요.");
+  }
+  if (!["observe", "scheduled", "protected", "excluded"].includes(status)) {
+    throw new HttpsError("invalid-argument", "지원하지 않는 검토 상태입니다.");
+  }
+  const db = admin.database();
+  const targetPath = targetType === "user" ? `users/${targetId}` : `rooms/${targetId}`;
+  const targetSnap = await db.ref(targetPath).get();
+  if (!targetSnap.exists() && targetType === "room") {
+    const membersSnap = await db.ref(`roomMembers/${targetId}`).get();
+    if (!membersSnap.exists()) throw new HttpsError("not-found", "Room을 찾을 수 없습니다.");
+  } else if (!targetSnap.exists()) {
+    throw new HttpsError("not-found", "사용자를 찾을 수 없습니다.");
+  }
+  if (targetType === "user") {
+    const adminSnap = await db.ref(`admins/${targetId}`).get();
+    if (adminSnap.exists()) throw new HttpsError("failed-precondition", "관리자 계정은 수명주기 후보로 변경할 수 없습니다.");
+  }
+  const now = Date.now();
+  const record = {
+    targetType, targetId, status, reason, projectId,
+    reviewedByUid: caller.uid, reviewedByEmail: caller.email,
+    reviewedAt: now, updatedAt: now, automatic: false
+  };
+  const auditKey = `${now}_${targetType}_${targetId}_lifecycle_review`;
+  await db.ref().update({
+    [`lifecycleReviews/${targetType}/${targetId}`]: record,
+    [`adminAuditLogs/${auditKey}`]: {
+      action: "lifecycle_review_saved", targetType, targetId, status, reason,
+      projectId, adminUid: caller.uid, adminEmail: caller.email, createdAt: now, automatic: false
+    }
+  });
+  return { ok: true, review: record };
+});
+
+// STEP A18.3: moves an eligible, explicitly scheduled unused account to dormancy.
+exports.applyUserDormancy = onCall(async (request) => {
+  const caller = await requireAdminCaller(request);
+  const projectId = requireMatchingProject(request);
+  const targetUid = String(request.data?.targetUid || "").trim();
+  const reason = String(request.data?.reason || "").trim();
+  if (!isSafeFirebaseKey(targetUid) || !["browse_account", "unused_account"].includes(reason)) {
+    throw new HttpsError("invalid-argument", "휴면 대상 또는 사유가 올바르지 않습니다.");
+  }
+  const db = admin.database();
+  const [userSnap, linksSnap, adminSnap, reviewSnap] = await Promise.all([
+    db.ref(`users/${targetUid}`).get(), db.ref(`userRooms/${targetUid}`).get(),
+    db.ref(`admins/${targetUid}`).get(), db.ref(`lifecycleReviews/user/${targetUid}`).get()
+  ]);
+  if (!userSnap.exists()) throw new HttpsError("not-found", "사용자를 찾을 수 없습니다.");
+  if (adminSnap.exists()) throw new HttpsError("failed-precondition", "관리자 계정은 휴면 처리할 수 없습니다.");
+  if (linksSnap.exists() && linksSnap.numChildren() > 0) throw new HttpsError("failed-precondition", "연결된 Room이 있는 계정은 휴면 처리할 수 없습니다.");
+  const review = reviewSnap.val() || {};
+  if (review.status !== "scheduled" || review.projectId !== projectId) {
+    throw new HttpsError("failed-precondition", "현재 프로젝트에서 휴면 예정 검토를 먼저 저장해 주세요.");
+  }
+  const user = userSnap.val() || {};
+  const lastActivityAt = latestUserActivity(user);
+  const requiredDays = 7;
+  if (!lastActivityAt || Date.now() - lastActivityAt < requiredDays * 24 * 60 * 60 * 1000) {
+    throw new HttpsError("failed-precondition", `최근 활동 후 ${requiredDays}일이 지나지 않았습니다.`);
+  }
+  const now = Date.now();
+  const auditKey = `${now}_${targetUid}_dormant`;
+  await db.ref().update({
+    [`users/${targetUid}/lifecycle/status`]: "dormant",
+    [`users/${targetUid}/lifecycle/dormantAt`]: now,
+    [`users/${targetUid}/lifecycle/updatedAt`]: now,
+    [`users/${targetUid}/lifecycle/reason`]: reason,
+    [`lifecycleReviews/user/${targetUid}/status`]: "dormant",
+    [`lifecycleReviews/user/${targetUid}/updatedAt`]: now,
+    [`adminAuditLogs/${auditKey}`]: {
+      action: "user_dormant_applied", targetType: "user", targetId: targetUid,
+      reason, projectId, adminUid: caller.uid, adminEmail: caller.email,
+      createdAt: now, automatic: false, dataDeleted: false
+    }
+  });
+  return { ok: true, status: "dormant", targetUid, dormantAt: now, dataDeleted: false };
+});
+
+// STEP A18.3: an authenticated user restores their own dormant lifecycle on login.
+exports.reactivateDormantAccount = onCall(async (request) => {
+  const callerUid = request.auth?.uid;
+  if (!callerUid) throw new HttpsError("unauthenticated", "로그인이 필요합니다.");
+  const projectId = requireMatchingProject(request);
+  const db = admin.database();
+  const userRef = db.ref(`users/${callerUid}`);
+  const userSnap = await userRef.get();
+  if (!userSnap.exists()) throw new HttpsError("not-found", "사용자 정보를 찾을 수 없습니다.");
+  const lifecycle = userSnap.child("lifecycle").val() || {};
+  const now = Date.now();
+  const wasDormant = lifecycle.status === "dormant";
+  const updates = {
+    [`users/${callerUid}/lifecycle/status`]: "active",
+    [`users/${callerUid}/lifecycle/lastLoginAt`]: now,
+    [`users/${callerUid}/lifecycle/updatedAt`]: now
+  };
+  if (wasDormant) {
+    updates[`users/${callerUid}/lifecycle/restoredAt`] = now;
+    updates[`users/${callerUid}/lifecycle/dormantAt`] = null;
+    updates[`users/${callerUid}/lifecycle/reason`] = null;
+    updates[`users/${callerUid}/lifecycle/archivedRoomCodes`] = null;
+    updates[`lifecycleReviews/user/${callerUid}/status`] = "reactivated";
+    updates[`lifecycleReviews/user/${callerUid}/reactivatedAt`] = now;
+    updates[`lifecycleReviews/user/${callerUid}/updatedAt`] = now;
+    updates[`adminAuditLogs/${now}_${callerUid}_reactivated`] = {
+      action: "user_reactivated_on_login", targetType: "user", targetId: callerUid,
+      projectId, createdAt: now, automatic: true, dataRestored: false, dataWasPreserved: true
+    };
+  }
+  await db.ref().update(updates);
+  return { ok: true, status: "active", reactivated: wasDormant, restoredAt: wasDormant ? now : null };
+});
 
 function countChildren(snapshot) {
   return snapshot.exists() ? snapshot.numChildren() : 0;

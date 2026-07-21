@@ -142,6 +142,7 @@
                 hideEmailVerificationPanel();
                 document.getElementById('authBox').classList.add('is-hidden');
                 document.getElementById('authBox').style.display = 'none';
+                if (typeof hmReactivateLifecycleOnLogin === 'function') await hmReactivateLifecycleOnLogin(user);
                 if (typeof loadUserTheme === 'function') await loadUserTheme();
                 if (typeof loadUserProfile === 'function') await loadUserProfile();
                 if (typeof hmRefreshDataAdminAccess === 'function') await hmRefreshDataAdminAccess();
@@ -240,6 +241,7 @@
 // STEP6.2.12.3: 앱 안 알림 바를 실제 기록/피드백 상태와 연결한다.
 (function hmInAppNotificationBar() {
   const READ_STORAGE_PREFIX = 'hm_notification_read_v1';
+  const PENDING_STORAGE_PREFIX = 'hm_notification_pending_v2';
   let hmCurrentNotificationItems = [];
   let hmOpeningFromNotification = false;
 
@@ -260,6 +262,11 @@
     const room = getSafeRoomCode() || 'no-room';
     return `${READ_STORAGE_PREFIX}:${uid}:${room}`;
   }
+  function getPendingStorageKey() {
+    const uid = currentUser?.uid || 'guest';
+    const room = getSafeRoomCode() || 'no-room';
+    return `${PENDING_STORAGE_PREFIX}:${uid}:${room}`;
+  }
   function readMap() {
     try { return JSON.parse(localStorage.getItem(getReadStorageKey()) || '{}') || {}; } catch (e) { return {}; }
   }
@@ -269,16 +276,62 @@
       const map = readMap();
       map[signature] = Date.now();
       localStorage.setItem(getReadStorageKey(), JSON.stringify(map));
+      const pending = readPendingMap();
+      Object.keys(pending).forEach((identity) => {
+        if (pending[identity]?.signature === signature) delete pending[identity];
+      });
+      writePendingMap(pending);
     } catch (e) {}
+  }
+  function readPendingMap() {
+    try { return JSON.parse(localStorage.getItem(getPendingStorageKey()) || '{}') || {}; } catch (e) { return {}; }
+  }
+  function writePendingMap(map) {
+    try { localStorage.setItem(getPendingStorageKey(), JSON.stringify(map || {})); } catch (e) {}
+  }
+  function notificationIdentity(item) {
+    return `${item?.date || ''}|${item?.key || item?.type || ''}`;
+  }
+  function syncPendingItems(liveItems) {
+    const read = readMap();
+    const pending = readPendingMap();
+    const now = Date.now();
+    const maxAge = 30 * 24 * 60 * 60 * 1000;
+
+    Object.keys(pending).forEach((identity) => {
+      const item = pending[identity];
+      if (!item?.signature || read[item.signature] || now - Number(item.queuedAt || now) > maxAge) {
+        delete pending[identity];
+      }
+    });
+
+    liveItems.forEach((item) => {
+      if (!item?.signature || read[item.signature]) return;
+      const identity = notificationIdentity(item);
+      const previous = pending[identity];
+      pending[identity] = { ...item, queuedAt: Number(previous?.queuedAt || now) };
+    });
+
+    const trimmed = Object.entries(pending)
+      .sort((a, b) => Number(b[1]?.queuedAt || 0) - Number(a[1]?.queuedAt || 0))
+      .slice(0, 60);
+    const result = Object.fromEntries(trimmed);
+    writePendingMap(result);
+    return result;
   }
   function markItemsReadByKey(key) {
     if (!key) return;
     try {
       const map = readMap();
-      buildItems().forEach((item) => {
+      hmCurrentNotificationItems.forEach((item) => {
         if (item.key === key && item.signature) map[item.signature] = Date.now();
       });
       localStorage.setItem(getReadStorageKey(), JSON.stringify(map));
+      const pending = readPendingMap();
+      Object.keys(pending).forEach((identity) => {
+        if (map[pending[identity]?.signature]) delete pending[identity];
+      });
+      writePendingMap(pending);
     } catch (e) {}
     renderNotificationBar();
   }
@@ -335,6 +388,7 @@
       title: `${source}가 ${card.label} 카드 작성`,
       sub: `${shortDate(card.date)} · ${card.label} 카드를 확인해 보세요`,
       action: '확인',
+      date: card.date,
       signature: makeSignature(card.key, card.date, card.record, `${source}:${card.label}`)
     });
   }
@@ -385,8 +439,12 @@
     const sub = $('hmNotificationSub');
     const action = $('hmNotificationAction');
     const read = readMap();
-    const allItems = buildItems();
-    const unreadItems = allItems.filter((item) => !read[item.signature]);
+    const liveItems = buildItems();
+    const pending = syncPendingItems(liveItems);
+    const selectedDate = getSelectedDate();
+    const unreadItems = Object.values(pending)
+      .filter((item) => item?.date === selectedDate && !read[item.signature])
+      .sort((a, b) => Number(a.queuedAt || 0) - Number(b.queuedAt || 0));
     hmCurrentNotificationItems = unreadItems;
     const item = unreadItems[0];
 

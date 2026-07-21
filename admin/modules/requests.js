@@ -1,4 +1,4 @@
-import { getAdminDatabase, getAdminFunctions, getAdminFirebaseEnvironment } from '../admin-api.js?v=admin-2-0-a18-2-beta-safety-deletion-validation-20260721';
+import { getAdminDatabase, getAdminFunctions, getAdminFirebaseEnvironment } from '../admin-api.js?v=admin-2-0-a18-3-lifecycle-reactivation-20260721';
 import { getState } from '../admin-state.js';
 import { asObject, compactId, escapeHtml, formatDateTime, latestNumber } from '../admin-utils.js?v=admin-2-0-a11-1-clean-baseline-20260719';
 import { renderEmptyState } from '../components/empty-state.js?v=admin-2-0-a11-1-clean-baseline-20260719';

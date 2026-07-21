@@ -1,11 +1,11 @@
 import { escapeHtml } from '../admin-utils.js?v=admin-2-0-a11-1-clean-baseline-20260719';
-import { ADMIN_RELEASE } from '../admin-release.js?v=admin-2-0-a18-2-beta-safety-deletion-validation-20260721';
+import { ADMIN_RELEASE } from '../admin-release.js?v=admin-2-0-a18-3-lifecycle-reactivation-20260721';
 
 const titles = {
   dashboard: ['운영 대시보드', '서비스 상태와 주요 운영 항목을 확인합니다.'],
   users: ['사용자', '사용자의 연결 상태를 읽기 전용으로 확인합니다.'],
   rooms: ['Room', 'Room 구성과 관계 무결성을 확인합니다.'],
-  lifecycle: ['데이터 수명주기', '빈 계정과 Room의 정리 후보를 읽기 전용으로 관찰합니다.'],
+  lifecycle: ['데이터 수명주기', '관찰·휴면 예정·보호 상태를 관리하고 재로그인 복원을 확인합니다.'],
   requests: ['데이터 요청', '삭제 요청의 상태, 서버 사전점검과 승인 잠금을 확인합니다.'],
   support: ['문의 센터', '사용자 문의에 답변하고 내부 운영 메모를 관리합니다.'],
   backups: ['백업 센터', '삭제 전 운영 스냅샷과 체크섬 무결성을 확인합니다.'],

@@ -1,5 +1,5 @@
-import { getAdminDatabase } from '../admin-api.js?v=admin-2-0-a14-2-4-recovery-safety-suite-20260719';
-import { asObject, escapeHtml, formatDateTime, latestNumber, compactId } from '../admin-utils.js?v=admin-2-0-a14-2-4-recovery-safety-suite-20260719';
+import { getAdminDatabase, getAdminFunctions, getAdminFirebaseEnvironment } from '../admin-api.js?v=admin-2-0-a18-3-lifecycle-reactivation-20260721';
+import { asObject, escapeHtml, formatDateTime, latestNumber, compactId } from '../admin-utils.js?v=admin-2-0-a18-3-lifecycle-reactivation-20260721';
 
 const DAY = 24 * 60 * 60 * 1000;
 const MEANINGFUL_ROOM_KEYS = new Set([
@@ -11,10 +11,10 @@ const MEANINGFUL_ROOM_KEYS = new Set([
 let analysis = null;
 let activeFilter = 'all';
 let policy = {
-  browseAccountDays: 3,
+  browseAccountDays: 7,
   unusedAccountDays: 7,
   emptyRoomDays: 3,
-  dormantRoomDays: 7,
+  dormantRoomDays: 2,
   noticeDays: 7,
   dormantGraceDays: 30,
   excessiveRoomCount: 3
@@ -71,16 +71,23 @@ function candidate(kind, targetType, targetId, title, reason, details, severity 
 
 async function loadAnalysis() {
   const database = getAdminDatabase();
-  const [usersSnap, roomsSnap, membersSnap, userRoomsSnap] = await Promise.all([
+  const [usersSnap, roomsSnap, membersSnap, userRoomsSnap, adminsSnap, reviewsSnap] = await Promise.all([
     database.ref('users').once('value'),
     database.ref('rooms').once('value'),
     database.ref('roomMembers').once('value'),
-    database.ref('userRooms').once('value')
+    database.ref('userRooms').once('value'),
+    database.ref('admins').once('value'),
+    database.ref('lifecycleReviews').once('value')
   ]);
   const users = asObject(usersSnap.val());
   const rooms = asObject(roomsSnap.val());
   const roomMembers = asObject(membersSnap.val());
   const userRooms = asObject(userRoomsSnap.val());
+  const admins = asObject(adminsSnap.val());
+  const persistedReviews = asObject(reviewsSnap.val());
+  reviewStates.clear();
+  Object.entries(asObject(persistedReviews.user)).forEach(([id, value]) => reviewStates.set(`user:${id}`, asObject(value).status || 'observe'));
+  Object.entries(asObject(persistedReviews.room)).forEach(([id, value]) => reviewStates.set(`room:${id}`, asObject(value).status || 'observe'));
   const roomCodes = new Set([...Object.keys(rooms), ...Object.keys(roomMembers)]);
   const userRoomMap = {};
 
@@ -129,6 +136,7 @@ async function loadAnalysis() {
   });
 
   Object.entries(users).forEach(([uid, raw]) => {
+    if (admins[uid]) return;
     const profile = userProfile(raw);
     const linkedRooms = [...(userRoomMap[uid] || new Set())];
     const memberActivity = roomRows.flatMap((room) => room.members.filter((member) => member.uid === uid).map((member) => member.lastActivityAt));
@@ -143,7 +151,9 @@ async function loadAnalysis() {
       return member.role === 'owner' || member.relationshipRole === 'dom';
     });
 
-    if (!linkedRooms.length && !verified && createdAge != null && createdAge >= policy.browseAccountDays) {
+    if (accountStatus === 'dormant') {
+      candidates.push(candidate('dormant_account', 'user', uid, '현재 휴면 계정', '관리자 확인으로 휴면 전환되었으며 데이터는 보존 중입니다.', [profile.email || '이메일 정보 없음', `휴면 전환 ${formatDateTime(profile.lifecycle?.dormantAt)}`, '로그인하면 자동으로 정상 상태 복원'], 'watch', lastActivityAt, linkedRooms, accountStatus));
+    } else if (!linkedRooms.length && !verified && createdAge != null && createdAge >= policy.browseAccountDays) {
       candidates.push(candidate('browse_account', 'user', uid, '둘러보기 계정', `${createdAge}일 전에 가입했지만 인증과 Room 연결이 없습니다.`, [profile.email || '이메일 정보 없음', 'Room 0개', `최근 활동 ${inactiveDays ?? '-'}일 전`], createdAge >= policy.browseAccountDays + policy.noticeDays ? 'review' : 'watch', lastActivityAt, linkedRooms, accountStatus));
     } else if (!linkedRooms.length && inactiveDays != null && inactiveDays >= policy.unusedAccountDays) {
       candidates.push(candidate('unused_account', 'user', uid, '미사용 계정 후보', `${inactiveDays}일 동안 Room 연결과 의미 있는 활동이 없습니다.`, [profile.email || '이메일 정보 없음', 'Room 0개', verified ? '이메일 확인됨' : '이메일 미확인'], 'review', lastActivityAt, linkedRooms, accountStatus));
@@ -164,6 +174,7 @@ async function loadAnalysis() {
       empty_room: candidates.filter((item) => item.kind === 'empty_room').length,
       dormant_room: candidates.filter((item) => item.kind === 'dormant_room').length,
       excessive_creation: candidates.filter((item) => item.kind === 'excessive_creation').length
+      , dormant_account: candidates.filter((item) => item.kind === 'dormant_account').length
     }
   };
 }
@@ -182,6 +193,7 @@ function visibleCandidates() {
 }
 
 function stateFor(item) {
+  if (item.accountStatus === 'dormant') return 'dormant';
   return reviewStates.get(`${item.targetType}:${item.targetId}`) || 'observe';
 }
 
@@ -213,7 +225,7 @@ function renderCandidate(item) {
     <article class="admin-lifecycle-card${reviewState !== 'observe' ? ` is-${reviewState}` : ''}">
       <div class="admin-lifecycle-head">
         <div><strong>${escapeHtml(item.title)}</strong><p>${escapeHtml(item.reason)}</p></div>
-        <span class="admin-status-pill ${statusClass}">${reviewState === 'protected' ? '보호' : reviewState === 'excluded' ? '제외' : item.severity === 'review' ? '검토 우선' : '계속 관찰'}</span>
+        <span class="admin-status-pill ${statusClass}">${reviewState === 'dormant' ? '현재 휴면' : reviewState === 'scheduled' ? '휴면 예정' : reviewState === 'protected' ? '보호' : reviewState === 'excluded' ? '제외' : item.severity === 'review' ? '검토 우선' : '계속 관찰'}</span>
       </div>
       <div class="admin-lifecycle-target"><span>${item.targetType === 'user' ? '사용자' : 'Room'}</span><code title="${escapeHtml(item.targetId)}">${escapeHtml(compactId(item.targetId, 12, 8))}</code></div>
       <ul>${item.details.map((detail) => `<li>${escapeHtml(detail)}</li>`).join('')}</ul>
@@ -221,11 +233,12 @@ function renderCandidate(item) {
       <details class="admin-lifecycle-paths"><summary>영향 경로 ${item.paths.length}개</summary>${item.paths.map((path) => `<code>${escapeHtml(path)}</code>`).join('')}</details>
       <div class="admin-lifecycle-actions" data-review-target="${escapeHtml(`${item.targetType}:${item.targetId}`)}">
         <button type="button" data-review-state="observe"${reviewState === 'observe' ? ' class="is-active"' : ''}>계속 관찰</button>
+        ${item.targetType === 'user' && ['browse_account', 'unused_account'].includes(item.kind) ? `<button type="button" data-review-state="scheduled"${reviewState === 'scheduled' ? ' class="is-active"' : ''}>휴면 예정</button>` : ''}
         <button type="button" data-review-state="protected"${reviewState === 'protected' ? ' class="is-active"' : ''}>보호</button>
         <button type="button" data-review-state="excluded"${reviewState === 'excluded' ? ' class="is-active"' : ''}>제외</button>
-        ${item.targetType === 'user' && item.accountStatus === 'dormant' ? '<span class="admin-status-pill ok">현재 휴면 · 로그인 복원 가능</span>' : item.targetType === 'user' && reviewState === 'observe' ? `<button type="button" class="danger" data-dormant-uid="${escapeHtml(item.targetId)}">휴면 전환</button>` : ''}
+        ${item.targetType === 'user' && item.accountStatus === 'dormant' ? '<span class="admin-status-pill ok">로그인 자동 복원 대기</span>' : item.targetType === 'user' && reviewState === 'scheduled' && ['browse_account', 'unused_account'].includes(item.kind) ? `<button type="button" class="danger" data-dormant-uid="${escapeHtml(item.targetId)}">휴면 전환 확정</button>` : ''}
       </div>
-      <p class="admin-lifecycle-readonly">검토 상태는 임시 · 휴면 전환만 관리자 확인 후 저장 · 자동 삭제 없음</p>
+      <p class="admin-lifecycle-readonly">검토 상태 서버 보존 · 휴면 예정 후 관리자 확정 · 자동 삭제 없음</p>
     </article>`;
 }
 
@@ -246,7 +259,7 @@ function renderShell() {
       <section class="admin-card admin-panel">
         <div class="admin-panel-head">
           <div><h2>정책 설정 · 미리보기</h2><p>기간을 바꾸면 후보와 예정일만 다시 계산합니다. 설정은 새로고침하면 초기화되며 데이터베이스에는 저장하지 않습니다.</p></div>
-          <span class="admin-status-pill muted">A12.3 · 정책 Dry Run</span>
+          <span class="admin-status-pill muted">A18.3 · Lifecycle Policy</span>
         </div>
         <form class="admin-lifecycle-policy-form" data-lifecycle-policy>
           ${renderPolicyField('browseAccountDays', '미인증·미연결 계정')}
@@ -264,6 +277,7 @@ function renderShell() {
           <div><strong>빈 Room</strong><span>${analysis.counts.empty_room}</span></div>
           <div><strong>휴면 Room</strong><span>${analysis.counts.dormant_room}</span></div>
           <div><strong>생성 점검</strong><span>${analysis.counts.excessive_creation}</span></div>
+          <div><strong>현재 휴면</strong><span>${analysis.counts.dormant_account}</span></div>
         </div>
       </section>
       <section class="admin-card admin-panel">
@@ -271,7 +285,7 @@ function renderShell() {
         <div class="admin-segment-row">${FILTERS.map(([id, label]) => `<button class="admin-chip${activeFilter === id ? ' is-active' : ''}" type="button" data-lifecycle-filter="${id}">${label}</button>`).join('')}</div>
         <div class="admin-lifecycle-list">${items.length ? items.map(renderCandidate).join('') : '<div class="state-card"><strong>현재 조건에 맞는 후보가 없습니다.</strong><p>다른 분류를 선택하거나 다음 분석 시점에 다시 확인하세요.</p></div>'}</div>
       </section>
-      <section class="admin-warning-box">보호·제외·계속 관찰 선택은 현재 브라우저에서만 유지됩니다. 휴면은 관리자 수동 확인으로만 적용되며 자동 휴면과 자동 삭제는 꺼져 있습니다.</section>
+      <section class="admin-warning-box">검토 상태는 서버에 보존됩니다. 휴면은 관리자가 ‘휴면 예정’을 저장한 뒤 다시 확정해야 하며 자동 휴면과 자동 삭제는 꺼져 있습니다.</section>
     </section>`;
 }
 
@@ -291,33 +305,41 @@ export function afterRender(root) {
     const reviewButton = event.target.closest('[data-review-state]');
     const actionRow = reviewButton?.closest('[data-review-target]');
     if (reviewButton && actionRow) {
-      reviewStates.set(actionRow.dataset.reviewTarget, reviewButton.dataset.reviewState || 'observe');
-      root.innerHTML = renderShell();
+      const [targetType, targetId] = String(actionRow.dataset.reviewTarget || '').split(':');
+      const status = reviewButton.dataset.reviewState || 'observe';
+      const item = analysis.candidates.find((candidateItem) => candidateItem.targetType === targetType && candidateItem.targetId === targetId);
+      if (!item) return;
+      reviewButton.disabled = true;
+      try {
+        const environment = getAdminFirebaseEnvironment();
+        const callable = getAdminFunctions().httpsCallable('setLifecycleReview');
+        await callable({ targetType, targetId, status, reason: item.kind, expectedProjectId: environment.projectId });
+        reviewStates.set(`${targetType}:${targetId}`, status);
+        root.innerHTML = renderShell();
+      } catch (error) {
+        console.error('[A18.3] lifecycle review failed', error);
+        window.alert(`검토 상태 저장에 실패했습니다. ${error?.message || error}`);
+        reviewButton.disabled = false;
+      }
       return;
     }
     const dormantButton = event.target.closest('[data-dormant-uid]');
     if (!dormantButton) return;
     const uid = dormantButton.dataset.dormantUid;
     const item = analysis.candidates.find((candidateItem) => candidateItem.targetType === 'user' && candidateItem.targetId === uid);
-    if (!item || !window.confirm('이 사용자를 휴면 상태로 전환할까요? Room과 기록은 삭제되지 않으며 사용자가 로그인하면 직접 복원할 수 있습니다.')) return;
+    if (!item || !['browse_account', 'unused_account'].includes(item.kind) || stateFor(item) !== 'scheduled') return;
+    if (!window.confirm('휴면 예정 상태를 확인했습니다. 이 사용자를 휴면 상태로 전환할까요? Room과 기록은 삭제되지 않으며 다음 로그인 때 자동으로 정상 상태가 됩니다.')) return;
     dormantButton.disabled = true;
     dormantButton.textContent = '전환 중…';
     try {
-      const database = getAdminDatabase();
-      const now = Date.now();
-      await database.ref(`users/${uid}/lifecycle`).update({
-        status: 'dormant', dormantAt: now, updatedAt: now,
-        reason: item.kind, archivedRoomCodes: item.linkedRooms.reduce((result, roomCode) => ({ ...result, [roomCode]: true }), {})
-      });
-      await database.ref('adminAuditLogs').push({
-        action: 'user_dormant_applied', targetType: 'user', targetId: uid,
-        source: 'lifecycle_a12_3', createdAt: now, automatic: false
-      });
-      reviewStates.set(`user:${uid}`, 'protected');
+      const environment = getAdminFirebaseEnvironment();
+      const callable = getAdminFunctions().httpsCallable('applyUserDormancy');
+      await callable({ targetUid: uid, reason: item.kind, expectedProjectId: environment.projectId });
       window.alert('휴면 상태로 전환했습니다. 데이터와 Room은 그대로 보존됩니다.');
+      analysis = await loadAnalysis();
       root.innerHTML = renderShell();
     } catch (error) {
-      console.error('[A12.3] dormant transition failed', error);
+      console.error('[A18.3] dormant transition failed', error);
       window.alert(`휴면 전환에 실패했습니다. ${error?.message || error}`);
       dormantButton.disabled = false;
       dormantButton.textContent = '휴면 전환';
