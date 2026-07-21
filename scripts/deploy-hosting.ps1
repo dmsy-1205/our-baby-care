@@ -34,14 +34,13 @@ function Invoke-HostingDeploy {
 Push-Location $workspacePath
 try {
     if ($Target -in @('All', 'Test')) {
-        Invoke-HostingDeploy -Alias 'test' -Label 'TEST · hearme2nite1205'
+        Invoke-HostingDeploy -Alias 'test' -Label 'FUTURE PRODUCTION - hearme2nite1205'
     }
 
     if ($Target -in @('All', 'Production')) {
-        Invoke-HostingDeploy -Alias 'prod' -Label 'MAIN · our-baby-care'
+        Invoke-HostingDeploy -Alias 'prod' -Label 'LEGACY BETA - our-baby-care'
     }
 }
 finally {
     Pop-Location
 }
-

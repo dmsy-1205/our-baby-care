@@ -273,7 +273,7 @@ function openHistoryPanelModal() {
         if (mood === 'normal') return '😐';
         if (mood === 'hard') return '😞';
         if (mood === 'veryHard') return '😭';
-        return record?.photo ? '🖼️' : '📝';
+        return (typeof hmRecordHasMoments === 'function' ? hmRecordHasMoments(record) : !!record?.photo) ? '🖼️' : '📝';
     }
 
     function getHistoryMissionText(record) {
@@ -477,7 +477,7 @@ function openHistoryPanelModal() {
         const sub = document.getElementById('historyLaunchSub');
         if (!sub) return;
         const dates = Object.keys(daysData || {});
-        const photos = Object.values(daysData || {}).filter(record => record && record.photo).length;
+        const photos = Object.values(daysData || {}).reduce((sum, record) => sum + (typeof hmRecordMomentCount === 'function' ? hmRecordMomentCount(record) : (record?.photo ? 1 : 0)), 0);
         sub.textContent = dates.length ? `총 ${dates.length}일 기록 · 사진 ${photos}장 · 날짜를 눌러 확인` : '캘린더에서 날짜를 선택하면 해당 기록만 보여요.';
     }
 
@@ -519,7 +519,7 @@ function openHistoryPanelModal() {
     function getHistoryOverviewStats(daysData) {
         const dates = Object.keys(daysData || {}).sort();
         const records = dates.map(date => daysData[date] || {});
-        const photos = records.filter(record => record.photo).length;
+        const photos = records.reduce((sum, record) => sum + (typeof hmRecordMomentCount === 'function' ? hmRecordMomentCount(record) : (record?.photo ? 1 : 0)), 0);
         const missionDays = records.filter(record => getHistoryMissionText(record)).length;
         const latest = dates.length ? formatHistoryDateLabel(dates[dates.length - 1]) : '-';
         return { total: dates.length, photos, missionDays, latest };
@@ -563,7 +563,7 @@ function openHistoryPanelModal() {
         for (let day = 1; day <= last.getDate(); day++) {
             const ymd = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
             const rec = (daysData || {})[ymd];
-            const icons = rec ? `${rec.photo ? '📷' : ''}${getHistoryMissionText(rec) ? '🎯' : ''}${rec.mood === 'hard' || rec.mood === 'veryHard' ? '☁️' : ''}` : '';
+            const icons = rec ? `${(typeof hmRecordHasMoments === 'function' ? hmRecordHasMoments(rec) : !!rec.photo) ? '📷' : ''}${getHistoryMissionText(rec) ? '🎯' : ''}${rec.mood === 'hard' || rec.mood === 'veryHard' ? '☁️' : ''}` : '';
             html += `<div class="calendar-day ${rec ? 'has-record' : ''} ${ymd === todayYmd ? 'today' : ''} ${ymd === selectedHistoryDate ? 'selected-record' : ''}" ${rec ? `onclick="selectHistoryDate('${ymd}')"` : ''}>${day}<span class="calendar-icons">${icons}</span></div>`;
         }
         html += '</div>';
@@ -571,16 +571,28 @@ function openHistoryPanelModal() {
     }
 
     function hmHistoryPhotoCountText(record) {
-        return record && record.photo ? '사진 1장' : '사진 없음';
+        const count = typeof hmRecordMomentCount === 'function' ? hmRecordMomentCount(record) : (record?.photo ? 1 : 0);
+        return count ? `사진 ${count}장` : '사진 없음';
     }
 
     let hmHistoryGalleryDates = [];
     let hmHistoryGalleryVisibleCount = 9;
 
-    function hmGetHistoryPhotoDates(daysData) {
+    function hmGetHistoryPhotoItems(daysData) {
         return Object.keys(daysData || {})
             .sort((a, b) => new Date(b) - new Date(a))
-            .filter(date => daysData[date]?.photo);
+            .flatMap(date => {
+                const record = daysData[date] || {};
+                const moments = typeof hmGetRecordMoments === 'function'
+                    ? hmGetRecordMoments(record)
+                    : (record.photo ? [{ id:'legacy-photo', dataUrl:record.photo }] : []);
+                return moments.slice().reverse().map(moment => ({
+                    date,
+                    id: moment.id,
+                    src: moment.url || moment.dataUrl || ''
+                }));
+            })
+            .filter(item => item.src);
     }
 
     function ensureHistoryPhotoGalleryModal() {
@@ -616,11 +628,10 @@ function openHistoryPanelModal() {
         const visibleDates = hmHistoryGalleryDates.slice(0, hmHistoryGalleryVisibleCount);
         if (count) count.textContent = `전체 ${hmHistoryGalleryDates.length}장 · 최신순`;
         if (grid) {
-            grid.innerHTML = visibleDates.map(date => {
-                const record = (window.cachedDaysData || cachedDaysData || {})[date] || {};
-                return `<button type="button" class="history-photo-modal-item" onclick="closeHistoryPhotoGallery(); openHistoryDetailModal('${date}')" aria-label="${escapeHtml(formatHistoryDateLabel(date))} 사진 기록 열기">
-                    <img src="${record.photo}" alt="${escapeHtml(formatHistoryDateLabel(date))} 사진" loading="lazy">
-                    <span>${escapeHtml(formatHistoryDateLabel(date))}</span>
+            grid.innerHTML = visibleDates.map(item => {
+                return `<button type="button" class="history-photo-modal-item" onclick="closeHistoryPhotoGallery(); openHistoryDetailModal('${item.date}')" aria-label="${escapeHtml(formatHistoryDateLabel(item.date))} 사진 기록 열기">
+                    <img src="${escapeHtml(item.src)}" alt="${escapeHtml(formatHistoryDateLabel(item.date))} 사진" loading="lazy">
+                    <span>${escapeHtml(formatHistoryDateLabel(item.date))}</span>
                 </button>`;
             }).join('');
         }
@@ -632,7 +643,7 @@ function openHistoryPanelModal() {
     }
 
     function openHistoryPhotoGallery() {
-        hmHistoryGalleryDates = hmGetHistoryPhotoDates(window.cachedDaysData || cachedDaysData || {});
+        hmHistoryGalleryDates = hmGetHistoryPhotoItems(window.cachedDaysData || cachedDaysData || {});
         hmHistoryGalleryVisibleCount = 9;
         renderHistoryPhotoGalleryModal();
         if (typeof openModalOverlayById === 'function') openModalOverlayById('historyPhotoGalleryOverlay');
@@ -665,7 +676,7 @@ function openHistoryPanelModal() {
     function renderPhotoThumbs(daysData) {
         const box = document.getElementById('photoThumbs');
         if (!box) return;
-        const photos = hmGetHistoryPhotoDates(daysData);
+        const photos = hmGetHistoryPhotoItems(daysData);
         if (!photos.length) {
             box.innerHTML = `
                 <button type="button" class="history-gallery-card history-gallery-card-empty" onclick="openHistoryPhotoGallery()" aria-label="사진 모아보기 열기">
@@ -676,10 +687,10 @@ function openHistoryPanelModal() {
             return;
         }
         const previewDates = photos.slice(0, 3);
-        const previewHtml = previewDates.map((date, index) => {
-            const src = daysData[date]?.photo || '';
+        const previewHtml = previewDates.map((item, index) => {
+            const src = item.src || '';
             const extra = index === 2 && photos.length > 3 ? `<span class="history-gallery-more">+${photos.length - 2}</span>` : '';
-            return `<span class="history-gallery-mini-thumb">${src ? `<img src="${src}" alt="${date} 사진 미리보기">` : '📷'}${extra}</span>`;
+            return `<span class="history-gallery-mini-thumb">${src ? `<img src="${escapeHtml(src)}" alt="${item.date} 사진 미리보기">` : '📷'}${extra}</span>`;
         }).join('');
         box.innerHTML = `
             <button type="button" class="history-gallery-card" onclick="openHistoryPhotoGallery()" aria-label="사진 ${photos.length}장 모아보기 열기">
@@ -740,7 +751,7 @@ function openHistoryPanelModal() {
         const chips = hmHistorySummaryChips(record);
         return `<button type="button" class="history-story-row ${isSelected ? 'is-selected' : ''}" onclick="selectHistoryDate('${date}')">
             <span class="history-story-date"><strong>${String(new Date(date + 'T00:00:00').getDate()).padStart(2,'0')}</strong><small>${formatHistoryDateLabel(date).replace(/^\d+년\s*/, '')}</small></span>
-            <span class="history-story-body"><strong>${getHistoryMoodIcon(record)} ${record.photo ? '사진과 함께한 기록' : '하루 기록'}</strong><small>${escapeHtml(preview)}${preview.length >= 78 ? '...' : ''}</small><em>${chips || '저장된 기록'}</em></span>
+            <span class="history-story-body"><strong>${getHistoryMoodIcon(record)} ${(typeof hmRecordHasMoments === 'function' ? hmRecordHasMoments(record) : !!record.photo) ? '사진과 함께한 기록' : '하루 기록'}</strong><small>${escapeHtml(preview)}${preview.length >= 78 ? '...' : ''}</small><em>${chips || '저장된 기록'}</em></span>
             <span class="history-story-arrow">›</span>
         </button>`;
     }).join('');
@@ -898,14 +909,15 @@ async function openHistoryDetailModal(date) {
     if (summaryItems.length < 3 && record.dailyChoiceLabel && record.dailyChoiceLabel !== '기록 없음') {
         summaryItems.push(record.dailyChoiceLabel);
     }
-    if (summaryItems.length < 3 && record.photo) summaryItems.push('📷 사진');
+    const detailMoments = typeof hmGetRecordMoments === 'function' ? hmGetRecordMoments(record) : (record.photo ? [{ dataUrl:record.photo }] : []);
+    if (summaryItems.length < 3 && detailMoments.length) summaryItems.push(`📷 사진 ${detailMoments.length}장`);
     const summaryChips = summaryItems.slice(0, 3).map(makeHistoryChip).join('');
     content.innerHTML = `
         <div class="history-detail-summary-card">
             <div class="history-detail-summary-icon">${getHistoryMoodIcon(record)}</div>
             <div><strong>하루 한눈에 보기</strong><span>${summaryChips || '저장된 세부 내용을 확인해 주세요.'}</span></div>
         </div>
-        ${record.photo ? `<img src="${record.photo}" class="history-detail-photo" alt="${date} 사진">` : ''}
+        ${detailMoments.length ? `<div class="history-detail-moments">${detailMoments.map((item, index) => `<img src="${escapeHtml(item.url || item.dataUrl || '')}" class="history-detail-photo" alt="${date} 사진 ${index + 1}">`).join('')}</div>` : ''}
         ${historyDetailBlock('💜 오늘의 약속', customRoutineText)}
         ${historyDetailBlock('🌱 나의 루틴', subRoutineText)}
         ${historyDetailBlock('😊 오늘의 기분', [record.moodLabel, record.moodNote].filter(Boolean).join('\n'))}
@@ -960,7 +972,7 @@ function hmHistoryMatchesFilter(date, record) {
     if (query && !hmHistoryRecordText(record).includes(query) && !String(date || '').includes(query)) return false;
     if (hmHistoryTypeFilter === 'routine') return hmHistoryRecordHasRoutine(record);
     if (hmHistoryTypeFilter === 'mission') return !!getHistoryMissionText(record);
-    if (hmHistoryTypeFilter === 'photo') return !!record?.photo;
+    if (hmHistoryTypeFilter === 'photo') return typeof hmRecordHasMoments === 'function' ? hmRecordHasMoments(record) : !!record?.photo;
     if (hmHistoryTypeFilter === 'mood') return !!(record?.moodLabel && record.moodLabel !== '기록 없음');
     return true;
 }
@@ -998,7 +1010,7 @@ function hmHistorySummaryChips(record) {
         record?.weight ? `⚖️ ${record.weight}` : '',
         missionText ? `🎯 ${missionText}` : '',
         hmHistoryRecordHasRoutine(record) ? '💜 오늘의 약속' : '',
-        record?.photo ? '📷 사진' : '',
+        (typeof hmRecordHasMoments === 'function' ? hmRecordHasMoments(record) : !!record?.photo) ? '📷 사진' : '',
         record?.dailyChoiceLabel && record.dailyChoiceLabel !== '기록 없음' ? record.dailyChoiceLabel : ''
     ].filter(Boolean).map(makeHistoryChip).join('');
 }
@@ -1053,7 +1065,7 @@ function renderCalendar(daysData) {
         const ymd = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
         const rec = (daysData || {})[ymd];
         const visible = rec && visibleSet.has(ymd);
-        const icons = visible ? `${rec.photo ? '📷' : ''}${getHistoryMissionText(rec) ? '🎯' : ''}${hmHistoryRecordHasRoutine(rec) ? '🧩' : ''}${rec.mood === 'hard' || rec.mood === 'veryHard' ? '☁️' : ''}` : '';
+        const icons = visible ? `${(typeof hmRecordHasMoments === 'function' ? hmRecordHasMoments(rec) : !!rec.photo) ? '📷' : ''}${getHistoryMissionText(rec) ? '🎯' : ''}${hmHistoryRecordHasRoutine(rec) ? '🧩' : ''}${rec.mood === 'hard' || rec.mood === 'veryHard' ? '☁️' : ''}` : '';
         const clickable = visible ? `onclick="selectHistoryDate('${ymd}')"` : '';
         html += `<div class="calendar-day ${visible ? 'has-record' : ''} ${ymd === todayYmd ? 'today' : ''} ${ymd === selectedHistoryDate ? 'selected-record' : ''}" ${clickable}>${day}<span class="calendar-icons">${icons}</span></div>`;
     }

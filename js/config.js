@@ -58,6 +58,7 @@
     let pendingRelationshipRole = "";
     let currentWater = 0;
     let uploadedPhotoBase64 = "";
+    let hmDailyMoments = [];
     let autoSaveTimeout = null;
     let currentRoomRef = null;
     let entireRoomRef = null;

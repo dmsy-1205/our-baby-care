@@ -5,15 +5,19 @@
 (function () {
     const release = Object.freeze({
         product: 'HearMe2nite',
-        version: 'v1.0 STEP6.2.13.6',
-        appVersion: 'HearMe2nite v1.0 STEP6.2.13.6',
-        step: 'STEP6.2.13.6',
+        version: 'v1.0 STEP6.2.13.7',
+        appVersion: 'HearMe2nite v1.0 STEP6.2.13.7',
+        step: 'STEP6.2.13.7',
         build: '20260721',
         releaseDate: '2026.07.21',
         stage: 'Beta',
-        title: 'Notification Isolation Fix',
+        title: 'Daily Moments Gallery',
         description: '관리자가 휴면 처리한 계정의 데이터를 보존하고 사용자가 다시 로그인하면 정상 상태로 자동 복원합니다.',
         changes: Object.freeze([
+            'Added the multi-photo Daily Moments gallery',
+            'Uses Firebase Storage on hearme2nite1205 and compressed database storage on our-baby-care',
+            'Preserves and displays existing single-photo records',
+            'Added per-photo preview, full view, and owner deletion',
             'Keeps unread card notifications in a card-specific pending queue',
             'Marks only the selected notification as read',
             'Prevents a shared daily record update from clearing sibling notifications',

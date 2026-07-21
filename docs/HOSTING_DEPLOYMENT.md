@@ -1,6 +1,6 @@
 # HearMe2nite Hosting 배포
 
-현재 메인 앱 빌드: `v1.0 STEP6.2.13.6 · Notification Isolation Fix`
+현재 메인 앱 빌드: `v1.0 STEP6.2.13.7 · Daily Moments Gallery`
 
 ## 연결 환경
 
@@ -33,10 +33,17 @@
 
 이 스크립트는 Hosting만 배포합니다. Functions, Realtime Database 규칙, Storage 규칙은 변경하지 않습니다.
 
+다중 사진 기능을 처음 배포할 때는 보안 규칙을 먼저 반영합니다. 테스트 프로젝트에는 Database와 Storage 규칙을, 현재 메인에는 Database 규칙만 반영합니다.
+
+```powershell
+.\scripts\deploy-moments-rules.ps1
+```
+
+그 다음 테스트 Hosting을 배포해 검수하고, 이상이 없을 때 메인 Hosting을 배포합니다.
+
 ## GitHub 배포 이름
 
-- 브랜치: `codex/main-6-2-13-6-notification-isolation`
-- 커밋: `fix(notifications): preserve unread card alerts individually`
-- 태그: `hearme2nite-main-v1.0-step6.2.13.6`
-- 릴리스 제목: `HearMe2nite MAIN v1.0 STEP6.2.13.6 — Notification Isolation Fix`
-
+- 브랜치: `codex/main-6-2-13-7-daily-moments-gallery`
+- 커밋: `feat(moments): add dual-storage daily photo gallery`
+- 태그: `hearme2nite-main-v1.0-step6.2.13.7`
+- 릴리스 제목: `HearMe2nite MAIN v1.0 STEP6.2.13.7 — Daily Moments Gallery`

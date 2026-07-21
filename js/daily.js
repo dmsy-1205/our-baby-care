@@ -98,8 +98,8 @@
         const outingSub = document.getElementById('outingCardSub');
         if (outingSub) {
             const text = getTrimmedValue('goingOut');
-            const hasPhoto = !!uploadedPhotoBase64;
-            outingSub.innerText = text ? `${text}${hasPhoto ? ' · 사진 있음' : ''}` : (hasPhoto ? '사진이 첨부되었습니다.' : '외출 내용과 사진을 남겨보세요.');
+            const photoCount = Array.isArray(hmDailyMoments) ? hmDailyMoments.length : (uploadedPhotoBase64 ? 1 : 0);
+            outingSub.innerText = text ? `${text}${photoCount ? ` · 사진 ${photoCount}장` : ''}` : (photoCount ? `오늘의 순간 ${photoCount}장` : '외출 기록과 일상 사진을 남겨보세요.');
         }
 
         const sleepSub = document.getElementById('sleepCardSub');
@@ -249,7 +249,7 @@
             ['기상 시간', !!getTrimmedValue('wakeTime')],
             ['오늘의 컨디션', !!(selectedMood || getTrimmedValue('moodNote') || getTrimmedValue('exercise') || getTrimmedValue('weight') || currentWater > 0)],
             ['식사 기록', ['mealBreakfast','mealLunch','mealDinner'].some(id => !!getTrimmedValue(id))],
-            ['외출 기록', !!(getTrimmedValue('goingOut') || uploadedPhotoBase64)],
+            ['오늘의 순간', !!(getTrimmedValue('goingOut') || uploadedPhotoBase64 || (Array.isArray(hmDailyMoments) && hmDailyMoments.length))],
             ['오늘의 하루', !!getTrimmedValue('diary')]
         ];
         const completed = checks.filter(([,done]) => done).length;
@@ -395,6 +395,7 @@
         const preview = document.getElementById('previewBox');
         if (input) input.value = "";
         if (preview) preview.style.display = 'none';
+        if (typeof hmSetDailyMoments === 'function') hmSetDailyMoments({}, '');
     }
 
     // =========================================================
@@ -519,6 +520,5 @@
     // Split-ready target: showToast
     // =========================================================
     // RC2 v2.8.0 STEP1: showToast moved to js/utils.js
-
 
 

@@ -112,7 +112,7 @@
         { key:'water', icon:'💧', label:'오늘의 수분', mode:'sum' },
         { key:'wake', icon:'☀️', label:'기상 시간', mode:'time' },
         { key:'meal', icon:'🥗', label:'식사 기록', mode:'meal' },
-        { key:'outing', icon:'🚶‍♀️', label:'외출 기록', mode:'check' },
+        { key:'outing', icon:'📷', label:'오늘의 순간', mode:'check' },
         { key:'sleep', icon:'🌙', label:'취침 예정', mode:'time' },
         { key:'diary', icon:'📝', label:'오늘의 하루', mode:'check' }
     ];
@@ -202,7 +202,7 @@
             const done = meals.filter(Boolean).length;
             return { hit:done > 0, total:3, done, value:done, meals, label:done ? `${done}/3` : '-' };
         }
-        if (item.key === 'outing') return { hit:hmHomeStatIsFilled(rec.goingOut) || !!rec.photo, value:(hmHomeStatIsFilled(rec.goingOut) || !!rec.photo) ? 1 : 0, label:(hmHomeStatIsFilled(rec.goingOut) || !!rec.photo) ? '기록' : '-' };
+        if (item.key === 'outing') { const hasMoment = typeof hmRecordHasMoments === 'function' ? hmRecordHasMoments(rec) : !!rec.photo; return { hit:hmHomeStatIsFilled(rec.goingOut) || hasMoment, value:(hmHomeStatIsFilled(rec.goingOut) || hasMoment) ? 1 : 0, label:(hmHomeStatIsFilled(rec.goingOut) || hasMoment) ? '기록' : '-' }; }
         if (item.key === 'sleep') return { hit:hmHomeStatIsFilled(rec.sleepTime), value:1, label:rec.sleepTime || '-' };
         if (item.key === 'diary') return { hit:hmHomeStatIsFilled(rec.diary), value:hmHomeStatIsFilled(rec.diary) ? 1 : 0, label:hmHomeStatIsFilled(rec.diary) ? '작성' : '-' };
         return { hit:false, value:0, label:'-' };
@@ -694,7 +694,7 @@
         const target=$('hmProductHistoryStats'); if(!target) return;
         const current=$('recordDate')?.value || dayKeys().slice(-1)[0] || ''; const ym=current ? current.slice(0,7) : '';
         const monthKeys=dayKeys().filter(k=>k.startsWith(ym)); let missions=0, done=0, photos=0; const moods={};
-        monthKeys.forEach(k=>{ const r=days()[k]||{}; if(r.photo) photos++; if(r.moodLabel) moods[r.moodLabel]=(moods[r.moodLabel]||0)+1; (Array.isArray(r.missions)?r.missions:[]).forEach(m=>{missions++; if(m.done) done++;}); });
+        monthKeys.forEach(k=>{ const r=days()[k]||{}; photos += typeof hmRecordMomentCount === 'function' ? hmRecordMomentCount(r) : (r.photo ? 1 : 0); if(r.moodLabel) moods[r.moodLabel]=(moods[r.moodLabel]||0)+1; (Array.isArray(r.missions)?r.missions:[]).forEach(m=>{missions++; if(m.done) done++;}); });
         const topMood=Object.keys(moods).sort((a,b)=>moods[b]-moods[a])[0] || '기록 없음'; const pct=missions?Math.round(done/missions*100):0;
         target.innerHTML=`<div class="hm-beta-history-title"><strong>📊 ${ym || '이번 달'} 통계</strong><span>읽기 전용</span></div><div class="hm-beta-history-grid"><div><strong>${monthKeys.length}</strong><small>기록일</small></div><div><strong>${pct}%</strong><small>미션 완료</small></div><div><strong>${photos}</strong><small>사진</small></div><div><strong>${safe(topMood)}</strong><small>주요 기분</small></div></div>`;
     }

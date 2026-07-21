@@ -367,7 +367,7 @@
     if (key === 'water') return hasWaterRecord(record);
     if (key === 'wake') return isMeaningful(record.wakeTime);
     if (key === 'meal') return isMeaningful(record.mealBreakfast) || isMeaningful(record.mealLunch) || isMeaningful(record.mealDinner);
-    if (key === 'outing') return isMeaningful(record.goingOut) || !!record.photo;
+    if (key === 'outing') return isMeaningful(record.goingOut) || (typeof hmRecordHasMoments === 'function' ? hmRecordHasMoments(record) : !!record.photo);
     if (key === 'sleep') return isMeaningful(record.sleepTime);
     if (key === 'diary') return isMeaningful(record.diary);
     if (key === 'feedback') return isMeaningful(record.replyMessage) || isMeaningful(record.feedbackType) || record.feedbackConfirmed === true;
@@ -412,7 +412,7 @@
         { key:'water', icon:'💧', label:'오늘의 수분', open:'record' },
         { key:'wake', icon:'☀️', label:'기상 시간', open:'record' },
         { key:'meal', icon:'🥗', label:'식사 기록', open:'record' },
-        { key:'outing', icon:'🚶‍♀️', label:'외출 기록', open:'record' },
+        { key:'outing', icon:'📷', label:'오늘의 순간', open:'record' },
         { key:'sleep', icon:'🌙', label:'취침 예정', open:'record' },
         { key:'diary', icon:'📝', label:'오늘의 하루', open:'record' }
       ].forEach((card) => {
