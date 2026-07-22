@@ -1,0 +1,15 @@
+/* STEP6.2.14.23 - override the display-mode overlay tint at equal specificity. */
+:root:is([data-hm-display="light"],[data-hm-display="dark"]) body.hm-authenticated :is(
+  .daily-modal-overlay,.mission-modal-overlay,.room-settings-overlay,
+  .history-panel-overlay,.history-detail-overlay,.guide-modal,.onboarding-modal,
+  .anniversary-settings-overlay,.record-deletion-modal-overlay,
+  .hm-record-date-picker-overlay,.card-conversation-dialog-overlay,
+  .hm-profile-overlay,.data-management-overlay,.data-admin-overlay,
+  .hm-chat-overlay,.hm-theme-overlay,.hm-pwa-ios-guide-overlay,
+  .hm-notification-overlay,.hm-adaptive-completion-overlay
+){
+  background:transparent!important;
+  -webkit-backdrop-filter:none!important;
+  backdrop-filter:none!important;
+}
+

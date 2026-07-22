@@ -455,7 +455,7 @@ function hmRenderAnniversaryModal() {
     const modal = document.getElementById('anniversarySettingsModal');
     if (!modal) return;
     const list = hmSortAnniversariesByUpcoming(hmGetAnniversaryList());
-    const typeChips = HM_ANNIVERSARY_TYPES.map((item, index) => `<button type="button" class="anniversary-type-chip${index === 0 ? ' is-selected' : ''}" data-type="${escapeHtml(item.value)}" onclick="hmSetCustomAnniversaryType('${escapeHtml(item.value)}')" aria-label="${escapeHtml(item.label)} 선택"><span>${item.icon}</span><small>${escapeHtml(item.label)}</small></button>`).join('');
+    const typeChips = HM_ANNIVERSARY_TYPES.map((item, index) => `<button type="button" class="anniversary-type-chip${index === 0 ? ' is-selected' : ''}" data-type="${escapeHtml(item.value)}" data-hm-action="set-anniversary-type" data-hm-value="${escapeHtml(item.value)}" aria-label="${escapeHtml(item.label)} 선택"><span>${item.icon}</span><small>${escapeHtml(item.label)}</small></button>`).join('');
     const listHtml = list.length ? list.map(item => {
         const meta = hmGetAnniversaryTypeMeta(item.type);
         const upcoming = hmGetUpcomingDayInfo(item.date);
@@ -467,8 +467,8 @@ function hmRenderAnniversaryModal() {
                 <div class="anniversary-custom-date">${hmFormatKoreanDate(item.date)} · ${escapeHtml(meta.label)} · ${escapeHtml(upcoming.label)}</div>
             </div>
             <div class="anniversary-custom-actions">
-                <button type="button" class="anniversary-main-btn" onclick="hmSetFirstMetFromAnniversary('${escapeHtml(item.id)}')">대표</button>
-                <button type="button" class="anniversary-delete-btn" onclick="hmDeleteCustomAnniversary('${escapeHtml(item.id)}')">삭제</button>
+                <button type="button" class="anniversary-main-btn" data-hm-action="set-main-anniversary" data-hm-value="${escapeHtml(item.id)}">대표</button>
+                <button type="button" class="anniversary-delete-btn" data-hm-action="delete-anniversary" data-hm-value="${escapeHtml(item.id)}">삭제</button>
             </div>
         </div>`;
     }).join('') : '<div class="anniversary-empty-note">아직 등록한 기념일이 없습니다. 생일, 여행, 데이트, 휴가처럼 캘린더에 표시할 날짜를 추가해 보세요.</div>';
@@ -490,7 +490,7 @@ function hmRenderAnniversaryModal() {
             <div class="anniversary-add-grid">
                 <label class="anniversary-field"><span>날짜</span><input type="date" id="customAnniversaryDate" aria-label="기념일 날짜"></label>
                 <label class="anniversary-field anniversary-field-title"><span>이름</span><input type="text" id="customAnniversaryTitle" placeholder="예: 생일, 첫 여행, 데이트, 휴가" aria-label="기념일 이름"></label>
-                <button type="button" class="anniversary-primary-btn anniversary-add-btn" onclick="hmAddCustomAnniversary()">추가</button>
+                <button type="button" class="anniversary-primary-btn anniversary-add-btn" data-hm-action="add-anniversary">추가</button>
             </div>
             <label class="anniversary-main-date-check"><input type="checkbox" id="customAnniversaryMainDate"> 이 날짜를 함께한 날 계산 기준으로 사용</label>
         </div>
@@ -537,7 +537,7 @@ function hmRenderAnniversaryPanel() {
                 </div>
                 <div class="anniversary-panel-dday">${escapeHtml(relative)}</div>
             </div>`;
-        }).join('')}${hiddenCount ? `<button type="button" class="anniversary-more-btn" onclick="hmOpenAnniversarySettings()">+ ${hiddenCount}개의 기념일 더 보기</button>` : ''}</div>`
+        }).join('')}${hiddenCount ? `<button type="button" class="anniversary-more-btn" data-hm-action="open-anniversary-settings">+ ${hiddenCount}개의 기념일 더 보기</button>` : ''}</div>`
         : `<div class="anniversary-empty-panel">
             <div class="anniversary-panel-icon">📌</div>
             <div>
@@ -552,8 +552,8 @@ function hmRenderAnniversaryPanel() {
                 <div class="anniversary-sub">${isOpen ? '다가오는 순서로 최대 3개만 보여주고, 캘린더에도 함께 표시됩니다.' : nearestSummary}</div>
             </div>
             <div class="anniversary-panel-actions">
-                <button type="button" class="anniversary-toggle-btn anniversary-fold-btn" onclick="hmToggleAnniversaryPanel()" aria-expanded="${isOpen ? 'true' : 'false'}">${isOpen ? '접기' : '펼치기'}</button>
-                <button type="button" class="anniversary-toggle-btn" onclick="hmOpenAnniversarySettings()">관리</button>
+                <button type="button" class="anniversary-toggle-btn anniversary-fold-btn" data-hm-action="toggle-anniversary-panel" aria-expanded="${isOpen ? 'true' : 'false'}">${isOpen ? '접기' : '펼치기'}</button>
+                <button type="button" class="anniversary-toggle-btn" data-hm-action="open-anniversary-settings">관리</button>
             </div>
         </div>
         <div class="anniversary-panel-collapsible" ${isOpen ? '' : 'hidden'}>${listHtml}</div>

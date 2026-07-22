@@ -1,6 +1,6 @@
 param(
     [ValidateSet('All', 'Production', 'Test')]
-    [string]$Target = 'All'
+    [string]$Target = 'Test'
 )
 
 $ErrorActionPreference = 'Stop'
@@ -15,6 +15,14 @@ if ($firebaseAliases.projects.test -ne 'hearme2nite1205') {
     throw 'Test alias mismatch: test must point to hearme2nite1205.'
 }
 
+$firebaseCommand = Get-Command firebase.cmd -ErrorAction SilentlyContinue | Select-Object -First 1 -ExpandProperty Source
+if (-not $firebaseCommand) {
+    $firebaseCommand = Join-Path ([Environment]::GetFolderPath('ApplicationData')) 'npm\firebase.cmd'
+}
+if (-not (Test-Path -LiteralPath $firebaseCommand)) {
+    throw 'Firebase CLI was not found. Install firebase-tools before deployment.'
+}
+
 function Invoke-HostingDeploy {
     param(
         [Parameter(Mandatory = $true)]
@@ -24,7 +32,7 @@ function Invoke-HostingDeploy {
     )
 
     Write-Host "[$Label] Firebase Hosting deployment started ($Alias)."
-    & firebase deploy --only hosting --project $Alias
+    & $firebaseCommand deploy --only hosting --project $Alias
     if ($LASTEXITCODE -ne 0) {
         throw "$Label Hosting deployment failed with exit code $LASTEXITCODE."
     }

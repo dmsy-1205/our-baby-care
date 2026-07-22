@@ -1,0 +1,591 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "admins": {
+      "$uid": {
+        ".read": "auth != null && (auth.uid === $uid || root.child('admins').child(auth.uid).val() === true)",
+        ".write": "auth != null && root.child('admins').child(auth.uid).val() === true"
+      }
+    },
+    "users": {
+      "$uid": {
+        ".read": "auth != null && (auth.uid === $uid || root.child('admins').child(auth.uid).val() === true)",
+        ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (auth.uid === $uid && ((!data.exists() && (auth.token.email_verified === true || newData.child('emailVerificationRequired').val() === true)) || (data.exists() && (!data.child('emailVerificationRequired').exists() || (newData.child('emailVerificationRequired').exists() && newData.child('emailVerificationRequired').val() === data.child('emailVerificationRequired').val()))))))",
+        "profile": {
+          "nickname": {
+            ".validate": "!newData.exists() || (newData.isString() && newData.val().length >= 2 && newData.val().length <= 20)"
+          },
+          "updatedAt": {
+            ".validate": "!newData.exists() || newData.isNumber()"
+          },
+          "$other": {
+            ".validate": false
+          }
+        },
+        "lifecycle": {
+          "status": {
+            ".validate": "newData.isString() && (newData.val() === 'active' || newData.val() === 'dormant')"
+          },
+          "dormantAt": {
+            ".validate": "!newData.exists() || newData.isNumber()"
+          },
+          "restoredAt": {
+            ".validate": "!newData.exists() || newData.isNumber()"
+          },
+          "lastLoginAt": {
+            ".validate": "!newData.exists() || newData.isNumber()"
+          },
+          "updatedAt": {
+            ".validate": "newData.isNumber()"
+          },
+          "reason": {
+            ".validate": "!newData.exists() || (newData.isString() && (newData.val() === 'browse_account' || newData.val() === 'unused_account' || newData.val() === 'excessive_creation'))"
+          },
+          "archivedRoomCodes": {
+            "$roomCode": {
+              ".validate": "newData.val() === true"
+            }
+          },
+          "$other": {
+            ".validate": false
+          }
+        },
+        "preferences": {
+          "theme": {
+            ".validate": "!newData.exists() || (newData.isString() && (newData.val() === 'lavender' || newData.val() === 'blossom' || newData.val() === 'ocean' || newData.val() === 'forest' || newData.val() === 'cream'))"
+          },
+          "updatedAt": {
+            ".validate": "!newData.exists() || newData.isNumber()"
+          },
+          "$other": {
+            ".validate": false
+          },
+          "displayMode": {
+            ".validate": "!newData.exists() || (newData.isString() && (newData.val() === 'light' || newData.val() === 'dark' || newData.val() === 'system'))"
+          }
+        }
+      },
+      ".read": "auth != null && root.child('admins').child(auth.uid).val() === true"
+    },
+    "userRooms": {
+      "$uid": {
+        ".read": "auth != null && (auth.uid === $uid || root.child('admins').child(auth.uid).val() === true)",
+        ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (auth.uid === $uid && (!root.child('users').child(auth.uid).child('emailVerificationRequired').exists() || auth.token.email_verified === true)))",
+        "$roomCode": {
+          ".validate": "newData.val() === true || !newData.exists()"
+        }
+      },
+      ".read": "auth != null && root.child('admins').child(auth.uid).val() === true"
+    },
+    "roomMembers": {
+      "$roomCode": {
+        ".read": "auth != null && (root.child('admins').child(auth.uid).val() === true || root.child('roomMembers').child($roomCode).child(auth.uid).exists())",
+        "$uid": {
+          ".read": "auth != null && (auth.uid === $uid || root.child('admins').child(auth.uid).val() === true || root.child('roomMembers').child($roomCode).child(auth.uid).exists())",
+          ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (auth.uid === $uid && (!root.child('users').child(auth.uid).child('emailVerificationRequired').exists() || auth.token.email_verified === true) && ((!data.exists() && newData.child('role').val() === 'owner' && !root.child('roomMembers').child($roomCode).exists()) || (!data.exists() && newData.child('role').val() === 'partner' && newData.child('inviteCode').isString() && root.child('invites').child(newData.child('inviteCode').val()).child('roomCode').val() === $roomCode && root.child('invites').child(newData.child('inviteCode').val()).child('used').val() === true && root.child('invites').child(newData.child('inviteCode').val()).child('usedByUid').val() === auth.uid && root.child('invites').child(newData.child('inviteCode').val()).child('ownerUid').val() === root.child('rooms').child($roomCode).child('meta').child('ownerUid').val() && root.child('invites').child(newData.child('inviteCode').val()).child('usedAt').isNumber() && (!root.child('invites').child(newData.child('inviteCode').val()).child('expiresAt').exists() || root.child('invites').child(newData.child('inviteCode').val()).child('usedAt').val() <= root.child('invites').child(newData.child('inviteCode').val()).child('expiresAt').val()) && (!root.child('rooms').child($roomCode).child('meta').child('partnerUid').exists() || root.child('rooms').child($roomCode).child('meta').child('partnerUid').val() === auth.uid)) || (data.exists() && newData.exists() && newData.child('role').val() === data.child('role').val() && newData.child('email').val() === data.child('email').val() && newData.child('joinedAt').val() === data.child('joinedAt').val() && newData.child('inviteCode').val() === data.child('inviteCode').val() && (!data.child('relationshipRole').exists() || newData.child('relationshipRole').val() === data.child('relationshipRole').val())))))",
+          ".validate": "!newData.exists() || (newData.child('email').isString() && (newData.child('role').val() === 'owner' || newData.child('role').val() === 'partner' || newData.child('role').val() === 'member') && newData.child('joinedAt').exists() && (!newData.child('relationshipRole').exists() || newData.child('relationshipRole').val() === 'dom' || newData.child('relationshipRole').val() === 'sub'))"
+        }
+      },
+      ".read": "auth != null && root.child('admins').child(auth.uid).val() === true"
+    },
+    "rooms": {
+      "$roomCode": {
+        ".read": "auth != null && (root.child('admins').child(auth.uid).val() === true || root.child('roomMembers').child($roomCode).child(auth.uid).exists())",
+        "messages": {
+          "$messageId": {
+            ".validate": "!data.exists() && newData.exists() && newData.child('senderUid').val() === auth.uid && newData.child('sender').isString() && newData.child('sender').val().length >= 1 && newData.child('sender').val().length <= 80 && newData.child('senderEmail').isString() && newData.child('senderEmail').val() === auth.token.email && newData.child('senderEmail').val().length <= 254 && newData.child('text').isString() && newData.child('text').val().length >= 1 && newData.child('text').val().length <= 2000 && newData.child('timestamp').isNumber()",
+            ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (root.child('roomMembers').child($roomCode).child(auth.uid).exists() && (!root.child('users').child(auth.uid).child('emailVerificationRequired').exists() || auth.token.email_verified === true)))"
+          }
+        },
+        "chatReadStatus": {
+          "$uid": {
+            ".validate": "newData.exists() && (auth.uid === $uid || root.child('admins').child(auth.uid).val() === true)",
+            "lastReadAt": {
+              ".validate": "newData.isNumber() && newData.val() >= 0"
+            },
+            "updatedAt": {
+              ".validate": "newData.isNumber() && newData.val() >= 0"
+            },
+            "$other": {
+              ".validate": false
+            },
+            ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (auth.uid === $uid && root.child('roomMembers').child($roomCode).child(auth.uid).exists() && (!root.child('users').child(auth.uid).child('emailVerificationRequired').exists() || auth.token.email_verified === true)))"
+          }
+        },
+        "days": {
+          "$date": {
+            ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (root.child('roomMembers').child($roomCode).child(auth.uid).exists() && (root.child('roomMembers').child($roomCode).child(auth.uid).child('role').val() === 'owner' || root.child('roomMembers').child($roomCode).child(auth.uid).child('relationshipRole').val() === 'dom') && (!root.child('users').child(auth.uid).child('emailVerificationRequired').exists() || auth.token.email_verified === true))) && (!newData.exists() || (!data.exists() && root.child('rooms').child($roomCode).child('deletedRecords').child($date).child('restoreInProgressBy').val() === auth.uid && root.child('rooms').child($roomCode).child('deletedRecords').child($date).child('restored').val() === false))",
+            "date": {
+              ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (root.child('roomMembers').child($roomCode).child(auth.uid).exists() && (!root.child('users').child(auth.uid).child('emailVerificationRequired').exists() || auth.token.email_verified === true)))",
+              ".validate": "newData.isString() && newData.val() === $date"
+            },
+            "wakeTime": {
+              ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (root.child('roomMembers').child($roomCode).child(auth.uid).exists() && (!root.child('users').child(auth.uid).child('emailVerificationRequired').exists() || auth.token.email_verified === true)))"
+            },
+            "water": {
+              ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (root.child('roomMembers').child($roomCode).child(auth.uid).exists() && (!root.child('users').child(auth.uid).child('emailVerificationRequired').exists() || auth.token.email_verified === true)))"
+            },
+            "weight": {
+              ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (root.child('roomMembers').child($roomCode).child(auth.uid).exists() && (!root.child('users').child(auth.uid).child('emailVerificationRequired').exists() || auth.token.email_verified === true)))"
+            },
+            "exercise": {
+              ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (root.child('roomMembers').child($roomCode).child(auth.uid).exists() && (!root.child('users').child(auth.uid).child('emailVerificationRequired').exists() || auth.token.email_verified === true)))"
+            },
+            "mealBreakfast": {
+              ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (root.child('roomMembers').child($roomCode).child(auth.uid).exists() && (!root.child('users').child(auth.uid).child('emailVerificationRequired').exists() || auth.token.email_verified === true)))"
+            },
+            "mealLunch": {
+              ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (root.child('roomMembers').child($roomCode).child(auth.uid).exists() && (!root.child('users').child(auth.uid).child('emailVerificationRequired').exists() || auth.token.email_verified === true)))"
+            },
+            "mealDinner": {
+              ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (root.child('roomMembers').child($roomCode).child(auth.uid).exists() && (!root.child('users').child(auth.uid).child('emailVerificationRequired').exists() || auth.token.email_verified === true)))"
+            },
+            "goingOut": {
+              ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (root.child('roomMembers').child($roomCode).child(auth.uid).exists() && (!root.child('users').child(auth.uid).child('emailVerificationRequired').exists() || auth.token.email_verified === true)))"
+            },
+            "sleepTime": {
+              ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (root.child('roomMembers').child($roomCode).child(auth.uid).exists() && (!root.child('users').child(auth.uid).child('emailVerificationRequired').exists() || auth.token.email_verified === true)))"
+            },
+            "diary": {
+              ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (root.child('roomMembers').child($roomCode).child(auth.uid).exists() && (!root.child('users').child(auth.uid).child('emailVerificationRequired').exists() || auth.token.email_verified === true)))",
+              ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 5000)"
+            },
+            "missions": {
+              ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (root.child('roomMembers').child($roomCode).child(auth.uid).exists() && (!root.child('users').child(auth.uid).child('emailVerificationRequired').exists() || auth.token.email_verified === true)))"
+            },
+            "mood": {
+              ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (root.child('roomMembers').child($roomCode).child(auth.uid).exists() && (!root.child('users').child(auth.uid).child('emailVerificationRequired').exists() || auth.token.email_verified === true)))"
+            },
+            "moodLabel": {
+              ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (root.child('roomMembers').child($roomCode).child(auth.uid).exists() && (!root.child('users').child(auth.uid).child('emailVerificationRequired').exists() || auth.token.email_verified === true)))"
+            },
+            "moodNote": {
+              ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (root.child('roomMembers').child($roomCode).child(auth.uid).exists() && (!root.child('users').child(auth.uid).child('emailVerificationRequired').exists() || auth.token.email_verified === true)))",
+              ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 1000)"
+            },
+            "missionSummary": {
+              ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (root.child('roomMembers').child($roomCode).child(auth.uid).exists() && (!root.child('users').child(auth.uid).child('emailVerificationRequired').exists() || auth.token.email_verified === true)))"
+            },
+            "customCardValues": {
+              ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (root.child('roomMembers').child($roomCode).child(auth.uid).exists() && (!root.child('users').child(auth.uid).child('emailVerificationRequired').exists() || auth.token.email_verified === true)))"
+            },
+            "photo": {
+              ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (root.child('roomMembers').child($roomCode).child(auth.uid).exists() && (!root.child('users').child(auth.uid).child('emailVerificationRequired').exists() || auth.token.email_verified === true)))",
+              ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 7000000)"
+            },
+            "fullText": {
+              ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (root.child('roomMembers').child($roomCode).child(auth.uid).exists() && (!root.child('users').child(auth.uid).child('emailVerificationRequired').exists() || auth.token.email_verified === true)))",
+              ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 20000)"
+            },
+            "fullTextPublic": {
+              ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (root.child('roomMembers').child($roomCode).child(auth.uid).exists() && (!root.child('users').child(auth.uid).child('emailVerificationRequired').exists() || auth.token.email_verified === true)))",
+              ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 20000)"
+            },
+            "updatedBy": {
+              ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (root.child('roomMembers').child($roomCode).child(auth.uid).exists() && (!root.child('users').child(auth.uid).child('emailVerificationRequired').exists() || auth.token.email_verified === true)))",
+              ".validate": "newData.isString() && newData.val() === auth.uid"
+            },
+            "updatedByEmail": {
+              ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (root.child('roomMembers').child($roomCode).child(auth.uid).exists() && (!root.child('users').child(auth.uid).child('emailVerificationRequired').exists() || auth.token.email_verified === true)))",
+              ".validate": "newData.isString() && newData.val() === auth.token.email"
+            },
+            "updatedAt": {
+              ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (root.child('roomMembers').child($roomCode).child(auth.uid).exists() && (!root.child('users').child(auth.uid).child('emailVerificationRequired').exists() || auth.token.email_verified === true)))",
+              ".validate": "newData.isNumber()"
+            },
+            "replyMessage": {
+              ".write": false
+            },
+            "feedbackType": {
+              ".write": false
+            },
+            "feedbackConfirmed": {
+              ".write": false
+            },
+            "dailyChoice": {
+              ".write": false
+            },
+            "dailyChoiceLabel": {
+              ".write": false
+            },
+            "rewardNote": {
+              ".write": false
+            },
+            "$other": {
+              ".write": false
+            },
+            "subRoutineSnapshot": {
+              ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (root.child('roomMembers').child($roomCode).child(auth.uid).exists() && (!root.child('users').child(auth.uid).child('emailVerificationRequired').exists() || auth.token.email_verified === true)))",
+              ".validate": "!newData.exists() || newData.hasChildren() || newData.val() === null"
+            }
+          }
+        },
+        "themeSettings": {
+          ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (root.child('roomMembers').child($roomCode).child(auth.uid).exists() && (root.child('roomMembers').child($roomCode).child(auth.uid).child('role').val() === 'owner' || root.child('roomMembers').child($roomCode).child(auth.uid).child('relationshipRole').val() === 'dom') && (!root.child('users').child(auth.uid).child('emailVerificationRequired').exists() || auth.token.email_verified === true)))",
+          "enabled": {
+            ".validate": "newData.isBoolean()"
+          },
+          "theme": {
+            ".validate": "newData.isString() && (newData.val() === 'lavender' || newData.val() === 'blossom' || newData.val() === 'ocean' || newData.val() === 'forest' || newData.val() === 'cream')"
+          },
+          "updatedByUid": {
+            ".validate": "newData.isString() && newData.val() === auth.uid"
+          },
+          "updatedAt": {
+            ".validate": "newData.isNumber()"
+          },
+          "$other": {
+            ".validate": false
+          }
+        },
+        "meta": {
+          ".write": "auth != null && !data.exists() && (root.child('admins').child(auth.uid).val() === true || (root.child('roomMembers').child($roomCode).child(auth.uid).child('role').val() === 'owner' && newData.child('ownerUid').val() === auth.uid && newData.child('ownerEmail').val() === auth.token.email && newData.child('createdAt').isNumber() && newData.child('app').val() === 'hearme2nite' && newData.hasChildren(['ownerUid', 'ownerEmail', 'createdAt', 'app'])))",
+          "ownerUid": {
+            ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (!data.exists() && root.child('roomMembers').child($roomCode).child(auth.uid).child('role').val() === 'owner' && newData.val() === auth.uid))",
+            ".validate": "newData.isString() && newData.val().length > 0 && (newData.val() === data.val() || !data.exists())"
+          },
+          "ownerEmail": {
+            ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (!data.exists() && root.child('roomMembers').child($roomCode).child(auth.uid).child('role').val() === 'owner' && newData.val() === auth.token.email))",
+            ".validate": "newData.isString() && newData.val().length <= 254 && (newData.val() === data.val() || !data.exists())"
+          },
+          "createdAt": {
+            ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (!data.exists() && root.child('roomMembers').child($roomCode).child(auth.uid).child('role').val() === 'owner'))",
+            ".validate": "newData.isNumber() && (newData.val() === data.val() || !data.exists())"
+          },
+          "app": {
+            ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (!data.exists() && root.child('roomMembers').child($roomCode).child(auth.uid).child('role').val() === 'owner' && newData.val() === 'hearme2nite'))",
+            ".validate": "newData.isString() && newData.val() === 'hearme2nite' && (newData.val() === data.val() || !data.exists())"
+          },
+          "partnerUid": {
+            ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (newData.val() === auth.uid && root.child('roomMembers').child($roomCode).child(auth.uid).child('role').val() === 'partner' && root.child('roomMembers').child($roomCode).child(auth.uid).child('inviteCode').isString() && root.child('invites').child(root.child('roomMembers').child($roomCode).child(auth.uid).child('inviteCode').val()).child('used').val() === true && root.child('invites').child(root.child('roomMembers').child($roomCode).child(auth.uid).child('inviteCode').val()).child('usedByUid').val() === auth.uid && root.child('invites').child(root.child('roomMembers').child($roomCode).child(auth.uid).child('inviteCode').val()).child('roomCode').val() === $roomCode && (!data.exists() || data.val() === auth.uid)))",
+            ".validate": "newData.isString() && newData.val().length > 0"
+          },
+          "partnerEmail": {
+            ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (root.child('rooms').child($roomCode).child('meta').child('partnerUid').val() === auth.uid && root.child('roomMembers').child($roomCode).child(auth.uid).child('role').val() === 'partner' && (!data.exists() || data.isString())))",
+            ".validate": "newData.isString() && newData.val().length <= 254"
+          },
+          "firstMetDate": {
+            ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (root.child('roomMembers').child($roomCode).child(auth.uid).exists() && (!root.child('users').child(auth.uid).child('emailVerificationRequired').exists() || auth.token.email_verified === true)))",
+            ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 10)"
+          },
+          "anniversaries": {
+            "$anniversaryId": {
+              ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (root.child('roomMembers').child($roomCode).child(auth.uid).exists() && (!root.child('users').child(auth.uid).child('emailVerificationRequired').exists() || auth.token.email_verified === true)))"
+            }
+          },
+          "$other": {
+            ".write": false,
+            ".validate": false
+          }
+        },
+        "customCards": {
+          ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (root.child('roomMembers').child($roomCode).child(auth.uid).exists() && (root.child('roomMembers').child($roomCode).child(auth.uid).child('role').val() === 'owner' || root.child('roomMembers').child($roomCode).child(auth.uid).child('relationshipRole').val() === 'dom') && (!root.child('users').child(auth.uid).child('emailVerificationRequired').exists() || auth.token.email_verified === true)))"
+        },
+        "missionLibrary": {
+          ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (root.child('roomMembers').child($roomCode).child(auth.uid).exists() && (root.child('roomMembers').child($roomCode).child(auth.uid).child('role').val() === 'owner' || root.child('roomMembers').child($roomCode).child(auth.uid).child('relationshipRole').val() === 'dom') && (!root.child('users').child(auth.uid).child('emailVerificationRequired').exists() || auth.token.email_verified === true)))"
+        },
+        "$other": {
+          ".write": false
+        },
+        "dayAdmin": {
+          ".read": "auth != null && (root.child('admins').child(auth.uid).val() === true || (root.child('roomMembers').child($roomCode).child(auth.uid).exists() && (!root.child('users').child(auth.uid).child('emailVerificationRequired').exists() || auth.token.email_verified === true)))",
+          "$date": {
+            ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (root.child('roomMembers').child($roomCode).child(auth.uid).exists() && (root.child('roomMembers').child($roomCode).child(auth.uid).child('role').val() === 'owner' || root.child('roomMembers').child($roomCode).child(auth.uid).child('relationshipRole').val() === 'dom') && (!root.child('users').child(auth.uid).child('emailVerificationRequired').exists() || auth.token.email_verified === true)))",
+            "replyMessage": {
+              ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 1000)"
+            },
+            "feedbackType": {
+              ".validate": "!newData.exists() || (newData.isString() && (newData.val() === '' || newData.val() === 'praise' || newData.val() === 'support' || newData.val() === 'talk' || newData.val() === 'together'))"
+            },
+            "feedbackConfirmed": {
+              ".validate": "!newData.exists() || newData.isBoolean()"
+            },
+            "dailyChoice": {
+              ".validate": "!newData.exists() || (newData.isString() && (newData.val() === '' || newData.val() === 'reward' || newData.val() === 'rest'))"
+            },
+            "dailyChoiceLabel": {
+              ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 80)"
+            },
+            "rewardNote": {
+              ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 1000)"
+            },
+            "updatedBy": {
+              ".validate": "newData.isString() && newData.val() === auth.uid"
+            },
+            "updatedByEmail": {
+              ".validate": "newData.isString() && newData.val() === auth.token.email"
+            },
+            "updatedAt": {
+              ".validate": "newData.isNumber()"
+            },
+            "$other": {
+              ".validate": false
+            }
+          }
+        },
+        "subRoutines": {
+          ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (root.child('roomMembers').child($roomCode).child(auth.uid).exists() && (root.child('roomMembers').child($roomCode).child(auth.uid).child('relationshipRole').val() === 'sub' || root.child('roomMembers').child($roomCode).child(auth.uid).child('role').val() === 'partner') && (!root.child('users').child(auth.uid).child('emailVerificationRequired').exists() || auth.token.email_verified === true)))",
+          "$routineId": {
+            ".validate": "!newData.exists() || (newData.child('title').isString() && newData.child('title').val().length >= 2 && newData.child('title').val().length <= 30 && newData.child('description').isString() && newData.child('description').val().length <= 100 && newData.child('createdByUid').val() === auth.uid && newData.child('createdAt').isNumber() && newData.child('updatedAt').isNumber() && newData.child('deleted').isBoolean() && (!newData.child('scheduleType').exists() || (newData.child('scheduleType').isString() && (newData.child('scheduleType').val() === 'daily' || newData.child('scheduleType').val() === 'weekdays' || newData.child('scheduleType').val() === 'once'))) && (!newData.child('activeDate').exists() || newData.child('activeDate').isString()) && (!newData.child('paused').exists() || newData.child('paused').isBoolean()))"
+          }
+        },
+        "subRoutineDays": {
+          "$date": {
+            "$routineId": {
+              ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (root.child('roomMembers').child($roomCode).child(auth.uid).exists() && (root.child('roomMembers').child($roomCode).child(auth.uid).child('relationshipRole').val() === 'sub' || root.child('roomMembers').child($roomCode).child(auth.uid).child('role').val() === 'partner') && (!root.child('users').child(auth.uid).child('emailVerificationRequired').exists() || auth.token.email_verified === true)))",
+              ".validate": "!newData.exists() || (newData.child('done').isBoolean() && newData.child('title').isString() && newData.child('title').val().length <= 30 && newData.child('updatedByUid').val() === auth.uid && newData.child('updatedAt').isNumber() && (!newData.child('description').exists() || (newData.child('description').isString() && newData.child('description').val().length <= 100)) && (!newData.child('scheduleLabel').exists() || (newData.child('scheduleLabel').isString() && newData.child('scheduleLabel').val().length <= 40)) && (!newData.child('order').exists() || newData.child('order').isNumber()) && (!newData.child('snapshotAt').exists() || newData.child('snapshotAt').isNumber()))"
+            }
+          }
+        },
+        "deletedRecords": {
+          ".read": "auth != null && (root.child('admins').child(auth.uid).val() === true || (root.child('roomMembers').child($roomCode).child(auth.uid).exists() && (!root.child('users').child(auth.uid).child('emailVerificationRequired').exists() || auth.token.email_verified === true)))",
+          "$date": {
+            ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (root.child('roomMembers').child($roomCode).child(auth.uid).exists() && (root.child('roomMembers').child($roomCode).child(auth.uid).child('role').val() === 'owner' || root.child('roomMembers').child($roomCode).child(auth.uid).child('relationshipRole').val() === 'dom') && (!root.child('users').child(auth.uid).child('emailVerificationRequired').exists() || auth.token.email_verified === true)))",
+            ".validate": "!newData.exists() || (newData.child('recordDate').val() === $date && newData.child('action').val() === 'record_deleted' && newData.child('reason').val() === 'manual_delete' && newData.child('deletedAt').isNumber() && newData.child('deletedAtClient').isNumber() && newData.child('expiresAt').isNumber() && newData.child('deletedByUid').isString() && (newData.child('deletedByUid').val() === auth.uid || (data.exists() && newData.child('deletedByUid').val() === data.child('deletedByUid').val())) && newData.child('deletedByEmail').isString() && newData.child('deletedByRole').val() === 'dom' && newData.child('appVersion').isString() && newData.child('restored').isBoolean())",
+            "seenBy": {
+              "$uid": {
+                ".write": "auth != null && auth.uid === $uid && root.child('roomMembers').child($roomCode).child(auth.uid).exists()",
+                ".validate": "newData.isNumber()"
+              }
+            }
+          }
+        }
+      },
+      ".read": "auth != null && root.child('admins').child(auth.uid).val() === true"
+    },
+    "ownerNotes": {
+      "$roomCode": {
+        ".read": "auth != null && (root.child('admins').child(auth.uid).val() === true || (root.child('roomMembers').child($roomCode).child(auth.uid).exists() && (root.child('roomMembers').child($roomCode).child(auth.uid).child('role').val() === 'owner' || root.child('roomMembers').child($roomCode).child(auth.uid).child('relationshipRole').val() === 'dom')))",
+        ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (root.child('roomMembers').child($roomCode).child(auth.uid).exists() && (root.child('roomMembers').child($roomCode).child(auth.uid).child('role').val() === 'owner' || root.child('roomMembers').child($roomCode).child(auth.uid).child('relationshipRole').val() === 'dom') && (!root.child('users').child(auth.uid).child('emailVerificationRequired').exists() || auth.token.email_verified === true)))",
+        "$date": {
+          "note": {
+            ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 1000)"
+          },
+          "updatedBy": {
+            ".validate": "!newData.exists() || (newData.isString() && newData.val() === auth.uid)"
+          },
+          "updatedByEmail": {
+            ".validate": "!newData.exists() || (newData.isString() && newData.val() === auth.token.email && newData.val().length <= 254)"
+          },
+          "updatedAt": {
+            ".validate": "!newData.exists() || newData.isNumber()"
+          },
+          "$other": {
+            ".validate": false
+          }
+        }
+      }
+    },
+    "invites": {
+      "$code": {
+        ".read": "auth != null",
+        ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (!data.exists() && newData.exists() && newData.child('ownerUid').val() === auth.uid && newData.child('used').val() === false && newData.child('roomCode').isString() && root.child('roomMembers').child(newData.child('roomCode').val()).child(auth.uid).child('role').val() === 'owner' && root.child('rooms').child(newData.child('roomCode').val()).child('meta').child('ownerUid').val() === auth.uid && !root.child('rooms').child(newData.child('roomCode').val()).child('meta').child('partnerUid').exists()) || (data.exists() && data.child('used').val() === false && newData.child('used').val() === true && newData.child('usedByUid').val() === auth.uid && newData.child('usedAt').isNumber() && newData.child('ownerUid').val() === data.child('ownerUid').val() && newData.child('ownerEmail').val() === data.child('ownerEmail').val() && newData.child('roomCode').val() === data.child('roomCode').val() && newData.child('createdAt').val() === data.child('createdAt').val() && newData.child('expiresAt').val() === data.child('expiresAt').val() && root.child('rooms').child(data.child('roomCode').val()).child('meta').child('ownerUid').val() === data.child('ownerUid').val() && !root.child('rooms').child(data.child('roomCode').val()).child('meta').child('partnerUid').exists() && data.child('expiresAt').val() >= now))",
+        ".validate": "!newData.exists() || (newData.hasChildren(['roomCode', 'ownerUid', 'ownerEmail', 'createdAt', 'expiresAt', 'used']) && newData.child('roomCode').isString() && newData.child('roomCode').val().length >= 3 && newData.child('roomCode').val().length <= 60 && newData.child('ownerUid').isString() && newData.child('ownerUid').val().length > 0 && newData.child('ownerEmail').isString() && newData.child('ownerEmail').val().length <= 254 && newData.child('createdAt').isNumber() && newData.child('expiresAt').isNumber() && newData.child('expiresAt').val() > newData.child('createdAt').val() && newData.child('used').isBoolean() && ((newData.child('used').val() === false && !newData.child('usedByUid').exists() && !newData.child('usedByEmail').exists() && !newData.child('usedAt').exists()) || (newData.child('used').val() === true && newData.child('usedByUid').isString() && newData.child('usedByUid').val().length > 0 && newData.child('usedByEmail').isString() && newData.child('usedByEmail').val().length <= 254 && newData.child('usedAt').isNumber())))",
+        "roomCode": {
+          ".validate": "newData.isString() && newData.val().length >= 3 && newData.val().length <= 60 && (!data.exists() || newData.val() === data.val())"
+        },
+        "ownerUid": {
+          ".validate": "newData.isString() && newData.val().length > 0 && ((!data.exists() && newData.val() === auth.uid) || (data.exists() && newData.val() === data.val()))"
+        },
+        "ownerEmail": {
+          ".validate": "newData.isString() && newData.val().length <= 254 && (!data.exists() || newData.val() === data.val())"
+        },
+        "createdAt": {
+          ".validate": "newData.isNumber() && (!data.exists() || newData.val() === data.val())"
+        },
+        "expiresAt": {
+          ".validate": "newData.isNumber() && (!data.exists() || newData.val() === data.val())"
+        },
+        "used": {
+          ".validate": "newData.isBoolean() && ((!data.exists() && newData.val() === false) || (data.exists() && data.val() === false && newData.val() === true) || (data.exists() && data.val() === true && newData.val() === true))"
+        },
+        "usedByUid": {
+          ".validate": "!newData.exists() || (newData.isString() && newData.val() === auth.uid)"
+        },
+        "usedByEmail": {
+          ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 254)"
+        },
+        "usedAt": {
+          ".validate": "!newData.exists() || newData.isNumber()"
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    },
+    "userAppAccess": {
+      "$uid": {
+        ".read": "auth != null && (auth.uid === $uid || root.child('admins').child(auth.uid).val() === true)",
+        ".write": "auth != null && root.child('admins').child(auth.uid).val() === true"
+      }
+    },
+    "appAccessRequests": {
+      "$appId": {
+        "$uid": {
+          ".read": "auth != null && (auth.uid === $uid || root.child('admins').child(auth.uid).val() === true)",
+          ".write": "auth != null && root.child('admins').child(auth.uid).val() === true"
+        }
+      }
+    },
+    "apps": {
+      ".read": "auth != null && root.child('admins').child(auth.uid).val() === true",
+      "$appId": {
+        ".write": "auth != null && root.child('admins').child(auth.uid).val() === true"
+      }
+    },
+    "applications": {
+      ".read": "auth != null && root.child('admins').child(auth.uid).val() === true",
+      "$appId": {
+        ".write": "auth != null && root.child('admins').child(auth.uid).val() === true"
+      }
+    },
+    "appRunLogs": {
+      "$uid": {
+        ".read": "auth != null && (auth.uid === $uid || root.child('admins').child(auth.uid).val() === true)",
+        ".write": "auth != null && auth.uid === $uid"
+      }
+    },
+    "applicationHistory": {
+      "$historyId": {
+        ".read": "auth != null && root.child('admins').child(auth.uid).val() === true",
+        ".write": "auth != null && root.child('admins').child(auth.uid).val() === true"
+      }
+    },
+    "executionLogs": {
+      "$logId": {
+        ".read": "auth != null && root.child('admins').child(auth.uid).val() === true",
+        ".write": "auth != null && root.child('admins').child(auth.uid).val() === true"
+      }
+    },
+    "launchTokens": {
+      "$token": {
+        ".read": "auth != null && root.child('admins').child(auth.uid).val() === true",
+        ".write": "auth != null && root.child('admins').child(auth.uid).val() === true"
+      }
+    },
+    "feedbackBoard": {
+      "$postId": {
+        ".read": "auth != null && root.child('admins').child(auth.uid).val() === true",
+        ".write": "auth != null && root.child('admins').child(auth.uid).val() === true"
+      }
+    },
+    "userFavorites": {
+      "$uid": {
+        ".read": "auth != null && (auth.uid === $uid || root.child('admins').child(auth.uid).val() === true)",
+        ".write": "auth != null && auth.uid === $uid"
+      }
+    },
+    "dataDeleteRequests": {
+      ".read": "auth != null && root.child('admins').child(auth.uid).val() === true",
+      "$uid": {
+        ".read": "auth != null && (auth.uid === $uid || root.child('admins').child(auth.uid).val() === true)",
+        "$requestId": {
+          ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (auth.uid === $uid && ((!data.exists() && newData.child('requestedByUid').val() === auth.uid && newData.child('status').val() === 'pending') || (data.exists() && newData.child('requestedByUid').val() === auth.uid && newData.child('status').val() === 'canceled' && (data.child('status').val() === 'pending' || data.child('status').val() === 'reviewing' || data.child('status').val() === 'hold') && newData.child('adminMessage').val() === '사용자가 요청을 취소했습니다.'))))",
+          ".validate": "!newData.exists() || ((newData.child('status').val() === 'canceled' && newData.child('requestedByUid').val() === $uid && newData.child('requestId').isString() && newData.child('updatedAt').exists() && newData.child('adminMessage').isString()) || (newData.child('requestId').isString() && newData.child('requestedByUid').val() === $uid && newData.child('requestedByEmail').isString() && newData.child('roomCode').isString() && (newData.child('requestType').val() === 'account' || newData.child('requestType').val() === 'leave_room' || newData.child('requestType').val() === 'delete_room') && newData.child('reason').isString() && newData.child('reason').val().length >= 10 && (newData.child('status').val() === 'pending' || newData.child('status').val() === 'reviewing' || newData.child('status').val() === 'approved' || newData.child('status').val() === 'hold' || newData.child('status').val() === 'rejected' || newData.child('status').val() === 'canceled' || newData.child('status').val() === 'scheduled' || newData.child('status').val() === 'processing' || newData.child('status').val() === 'completed' || newData.child('status').val() === 'failed') && newData.child('requestedAt').exists() && newData.child('updatedAt').exists()))"
+        }
+      }
+    },
+    "dataDeleteRequestAdminNotes": {
+      ".read": "auth != null && root.child('admins').child(auth.uid).val() === true",
+      ".write": "auth != null && root.child('admins').child(auth.uid).val() === true"
+    },
+    "deletionActionQueue": {
+      ".read": "auth != null && root.child('admins').child(auth.uid).val() === true",
+      ".write": false
+    },
+    "dataBackups": {
+      ".read": "auth != null && root.child('admins').child(auth.uid).val() === true",
+      ".write": false
+    },
+    "dataBackupSnapshots": {
+      ".read": false,
+      ".write": false
+    },
+    "restorePlans": {
+      ".read": "auth != null && root.child('admins').child(auth.uid).val() === true",
+      ".write": false
+    },
+    "externalBackupRegistry": {
+      ".read": "auth != null && root.child('admins').child(auth.uid).val() === true",
+      ".write": false
+    },
+    "supportTickets": {
+      ".read": "auth != null && root.child('admins').child(auth.uid).val() === true",
+      "$uid": {
+        ".read": "auth != null && (auth.uid === $uid || root.child('admins').child(auth.uid).val() === true)",
+        "$ticketId": {
+          ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (auth.uid === $uid && !data.exists() && newData.child('ownerUid').val() === auth.uid && newData.child('status').val() === 'received'))",
+          ".validate": "!newData.exists() || (newData.child('ticketId').val() === $ticketId && newData.child('ownerUid').val() === $uid && newData.child('ownerEmail').isString() && newData.child('category').isString() && newData.child('title').isString() && newData.child('title').val().length >= 2 && newData.child('title').val().length <= 80 && newData.child('message').isString() && newData.child('message').val().length >= 10 && newData.child('message').val().length <= 2000 && (newData.child('status').val() === 'received' || newData.child('status').val() === 'reviewing' || newData.child('status').val() === 'waiting_user' || newData.child('status').val() === 'resolved' || newData.child('status').val() === 'closed') && newData.child('createdAt').exists() && newData.child('updatedAt').exists())"
+        }
+      }
+    },
+    "supportReplies": {
+      ".read": "auth != null && root.child('admins').child(auth.uid).val() === true",
+      "$uid": {
+        ".read": "auth != null && (auth.uid === $uid || root.child('admins').child(auth.uid).val() === true)",
+        "$ticketId": {
+          "$replyId": {
+            ".write": "auth != null && root.child('admins').child(auth.uid).val() === true",
+            ".validate": "!newData.exists() || (newData.child('replyId').val() === $replyId && newData.child('ticketId').val() === $ticketId && newData.child('message').isString() && newData.child('message').val().length >= 1 && newData.child('message').val().length <= 2000 && newData.child('createdAt').exists())"
+          }
+        }
+      }
+    },
+    "supportUserMessages": {
+      ".read": "auth != null && root.child('admins').child(auth.uid).val() === true",
+      "$uid": {
+        ".read": "auth != null && (auth.uid === $uid || root.child('admins').child(auth.uid).val() === true)",
+        "$ticketId": {
+          "$messageId": {
+            ".write": "auth != null && auth.uid === $uid && !data.exists() && root.child('supportTickets').child($uid).child($ticketId).exists() && root.child('supportTickets').child($uid).child($ticketId).child('status').val() != 'closed'",
+            ".validate": "newData.child('messageId').val() === $messageId && newData.child('ticketId').val() === $ticketId && newData.child('ownerUid').val() === $uid && newData.child('message').isString() && newData.child('message').val().length >= 2 && newData.child('message').val().length <= 1000 && newData.child('createdAt').exists()"
+          }
+        }
+      }
+    },
+    "supportRatings": {
+      ".read": "auth != null && root.child('admins').child(auth.uid).val() === true",
+      "$uid": {
+        ".read": "auth != null && (auth.uid === $uid || root.child('admins').child(auth.uid).val() === true)",
+        "$ticketId": {
+          ".write": "auth != null && auth.uid === $uid && !data.exists() && (root.child('supportTickets').child($uid).child($ticketId).child('status').val() === 'resolved' || root.child('supportTickets').child($uid).child($ticketId).child('status').val() === 'closed')",
+          ".validate": "newData.child('ticketId').val() === $ticketId && newData.child('ownerUid').val() === $uid && newData.child('score').isNumber() && newData.child('score').val() >= 1 && newData.child('score').val() <= 5 && newData.child('comment').isString() && newData.child('comment').val().length <= 300 && newData.child('createdAt').exists()"
+        }
+      }
+    },
+    "supportInternalNotes": {
+      ".read": "auth != null && root.child('admins').child(auth.uid).val() === true",
+      ".write": "auth != null && root.child('admins').child(auth.uid).val() === true"
+    },
+    "supportNotifications": {
+      ".read": "auth != null && root.child('admins').child(auth.uid).val() === true",
+      "$uid": {
+        ".read": "auth != null && (auth.uid === $uid || root.child('admins').child(auth.uid).val() === true)",
+        "$notificationId": {
+          ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (auth.uid === $uid && data.exists() && newData.child('notificationId').val() === data.child('notificationId').val() && newData.child('ticketId').val() === data.child('ticketId').val() && newData.child('type').val() === data.child('type').val() && newData.child('title').val() === data.child('title').val() && newData.child('createdAt').val() === data.child('createdAt').val() && newData.child('readAt').isNumber() && newData.child('readAt').val() > 0))",
+          ".validate": "!newData.exists() || (newData.child('notificationId').val() === $notificationId && newData.child('ticketId').isString() && newData.child('type').val() === 'support_reply' && newData.child('title').isString() && newData.child('title').val().length <= 80 && newData.child('createdAt').exists() && newData.child('readAt').isNumber())"
+        }
+      }
+    },
+    "supportIncidents": {
+      ".read": "auth != null && root.child('admins').child(auth.uid).val() === true",
+      ".write": "auth != null && root.child('admins').child(auth.uid).val() === true"
+    },
+    "supportIncidentEvents": {
+      ".read": "auth != null && root.child('admins').child(auth.uid).val() === true",
+      ".write": "auth != null && root.child('admins').child(auth.uid).val() === true"
+    },
+    "operationRiskReviews": {
+      ".read": "auth != null && root.child('admins').child(auth.uid).val() === true",
+      ".write": "auth != null && root.child('admins').child(auth.uid).val() === true",
+      "$riskId": {
+        ".validate": "!newData.exists() || (newData.child('riskId').val() === $riskId && newData.child('path').isString() && (newData.child('status').val() === 'open' || newData.child('status').val() === 'acknowledged' || newData.child('status').val() === 'resolved' || newData.child('status').val() === 'accepted') && newData.child('note').isString() && newData.child('note').val().length <= 500 && newData.child('adminUid').val() === auth.uid && newData.child('updatedAt').isNumber())"
+      }
+    },
+    "adminAuditLogs": {
+      ".read": "auth != null && root.child('admins').child(auth.uid).val() === true",
+      ".write": "auth != null && root.child('admins').child(auth.uid).val() === true"
+    }
+  }
+}

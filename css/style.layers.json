@@ -1,0 +1,177 @@
+{
+  "algorithm": "sha256",
+  "sourceHash": "c1ab01e78af8a1aad8d8b238b2549f178d3e57597ef554135c020839b632a906",
+  "sourceBytes": 593123,
+  "layers": [
+    {
+      "name": "tokens.css",
+      "bytes": 505,
+      "lines": 17
+    },
+    {
+      "name": "legacy/base.css",
+      "bytes": 124202,
+      "lines": 3771
+    },
+    {
+      "name": "legacy/feature-foundation.css",
+      "bytes": 39893,
+      "lines": 1010
+    },
+    {
+      "name": "components/card-foundation.css",
+      "bytes": 1836,
+      "lines": 53
+    },
+    {
+      "name": "components/modal-foundation.css",
+      "bytes": 1649,
+      "lines": 54
+    },
+    {
+      "name": "components/input.css",
+      "bytes": 1299,
+      "lines": 32
+    },
+    {
+      "name": "components/button.css",
+      "bytes": 1484,
+      "lines": 34
+    },
+    {
+      "name": "legacy/feature-continuation.css",
+      "bytes": 61778,
+      "lines": 1926
+    },
+    {
+      "name": "legacy/brand-foundation.css",
+      "bytes": 50930,
+      "lines": 1817
+    },
+    {
+      "name": "screens/settings-data.css",
+      "bytes": 4190,
+      "lines": 212
+    },
+    {
+      "name": "screens/settings-account.css",
+      "bytes": 18504,
+      "lines": 500
+    },
+    {
+      "name": "screens/settings-data-requests.css",
+      "bytes": 7405,
+      "lines": 168
+    },
+    {
+      "name": "screens/records-gallery.css",
+      "bytes": 3163,
+      "lines": 39
+    },
+    {
+      "name": "legacy/brand-continuation.css",
+      "bytes": 15860,
+      "lines": 381
+    },
+    {
+      "name": "legacy/theme-foundation.css",
+      "bytes": 63517,
+      "lines": 981
+    },
+    {
+      "name": "screens/relationship.css",
+      "bytes": 1375,
+      "lines": 26
+    },
+    {
+      "name": "legacy/theme-continuation.css",
+      "bytes": 75677,
+      "lines": 1494
+    },
+    {
+      "name": "legacy/release-foundation.css",
+      "bytes": 56379,
+      "lines": 1621
+    },
+    {
+      "name": "screens/home-layout.css",
+      "bytes": 4017,
+      "lines": 91
+    },
+    {
+      "name": "screens/home-categories.css",
+      "bytes": 10331,
+      "lines": 86
+    },
+    {
+      "name": "screens/category-routes.css",
+      "bytes": 9643,
+      "lines": 98
+    },
+    {
+      "name": "screens/missions.css",
+      "bytes": 5124,
+      "lines": 51
+    },
+    {
+      "name": "components/app-shell-responsive.css",
+      "bytes": 3199,
+      "lines": 19
+    },
+    {
+      "name": "components/modal-surfaces.css",
+      "bytes": 3915,
+      "lines": 74
+    },
+    {
+      "name": "screens/records-theme.css",
+      "bytes": 1202,
+      "lines": 23
+    },
+    {
+      "name": "screens/daily.css",
+      "bytes": 2001,
+      "lines": 55
+    },
+    {
+      "name": "components/app-shell.css",
+      "bytes": 278,
+      "lines": 10
+    },
+    {
+      "name": "screens/records.css",
+      "bytes": 6573,
+      "lines": 81
+    },
+    {
+      "name": "components/app-shell-layout.css",
+      "bytes": 2796,
+      "lines": 60
+    },
+    {
+      "name": "components/modal.css",
+      "bytes": 2598,
+      "lines": 48
+    },
+    {
+      "name": "components/card.css",
+      "bytes": 1864,
+      "lines": 37
+    },
+    {
+      "name": "components/modal-theme.css",
+      "bytes": 763,
+      "lines": 16
+    },
+    {
+      "name": "components/top-bar.css",
+      "bytes": 791,
+      "lines": 12
+    },
+    {
+      "name": "screens/home.css",
+      "bytes": 8382,
+      "lines": 129
+    }
+  ]
+}

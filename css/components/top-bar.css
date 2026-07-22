@@ -1,0 +1,11 @@
+/* STEP6.2.14.24 - themed mission/water controls and compact app header. */
+body.hm-authenticated .container > .app-title-row{
+  display:flex!important;
+  justify-content:center!important;
+  grid-template-columns:none!important;
+  margin:0 0 2px!important;
+}
+body.hm-authenticated .container > .app-title-row h1{font-size:clamp(1.55rem,4vw,1.85rem)!important}
+body.hm-authenticated .container > .app-subtitle{margin:4px auto 10px!important}
+body.hm-authenticated .container > .app-meta-row{display:none!important}
+body.hm-authenticated .container > .autosave-status{position:static!important;display:flex!important;width:max-content;max-width:100%;min-height:18px;align-items:center;justify-content:flex-end;margin:0 0 5px auto!important;text-align:right;white-space:normal;line-height:1.3}

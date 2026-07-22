@@ -1,0 +1,16 @@
+﻿/* HearMe2nite RC2 v2.8.0 STEP1 - CSS 분리본
+   - 기존 UI CSS를 index.html에서 추출
+   - 기능/JS/Firebase/DB 구조 변경 없음
+*/
+
+:root {
+            --primary-color: #ff7675;
+            --accent-purple: #8e5cf4;
+            --soft-purple: #f3ecff;
+            --soft-pink: #fff3f7;
+            --bg-color: #fbf7ff;
+            --card-color: #ffffff;
+            --text-color: #2d3436;
+            --border-color: #eadcff;
+            --water-color: #0984e3;
+        }

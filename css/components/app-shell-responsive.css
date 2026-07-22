@@ -1,0 +1,18 @@
+/* STEP6.2.14.8 - compact desktop shell and storage-free avatars */
+#homePresenceIndicator{display:none!important}
+.hm-profile-avatar-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;margin:0 0 14px}
+.hm-profile-avatar-grid button{min-width:0;aspect-ratio:1;border:1px solid var(--hm-line-soft,var(--border-color));border-radius:14px;background:var(--hm-surface-card-soft,var(--card-color));font-size:1.65rem;cursor:pointer}
+.hm-profile-avatar-grid button.is-selected,.hm-profile-avatar-grid button[aria-pressed="true"]{border-color:var(--hm-primary,var(--accent-purple));background:var(--hm-primary-soft,var(--soft-purple));box-shadow:0 0 0 3px color-mix(in srgb,var(--hm-primary,var(--accent-purple)) 18%,transparent)}
+.hm-adaptive-avatar,.hm-account-avatar,.hm-account-menu-avatar,.hm-profile-avatar{font-family:"Apple Color Emoji","Segoe UI Emoji",sans-serif}
+@media(min-width:700px){body.hm-authenticated #appContent,body.is-authenticated #appContent{width:min(520px,calc(100vw - 48px))!important;max-width:520px!important}body.hm-authenticated #appContent>.container,body.is-authenticated #appContent>.container{max-width:520px!important;padding:28px 30px 34px!important}.hm-adaptive-category-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}.hm-adaptive-category{height:112px!important;min-height:112px!important}}
+@media(min-width:1181px){body.hm-authenticated #appContent,body.is-authenticated #appContent{width:min(540px,calc(100vw - 96px))!important;max-width:540px!important}body.hm-authenticated #appContent>.container,body.is-authenticated #appContent>.container{max-width:540px!important;padding:30px 32px 36px!important}}
+@media(max-width:430px){.hm-profile-avatar-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+
+/* STEP6.2.14.46 - preserve the mobile card layout while connecting the app frame to wide screens. */
+@media(min-width:700px){
+  body.hm-authenticated #appContent,body.is-authenticated #appContent{position:relative;isolation:isolate;padding:22px 0}
+  body.hm-authenticated #appContent::before,body.is-authenticated #appContent::before{content:"";position:absolute;z-index:-1;inset:0 -24px;border:1px solid color-mix(in srgb,var(--hm-line-soft,var(--border-color)) 78%,transparent);border-radius:40px;background:color-mix(in srgb,var(--hm-surface-card,var(--card-color)) 38%,transparent);box-shadow:0 28px 90px color-mix(in srgb,var(--hm-color-body,var(--text-color)) 13%,transparent);pointer-events:none}
+  body.hm-authenticated #appContent>.container,body.is-authenticated #appContent>.container{border-color:color-mix(in srgb,var(--hm-line-strong,var(--border-color)) 82%,transparent)!important;box-shadow:0 20px 58px color-mix(in srgb,var(--hm-color-body,var(--text-color)) 18%,transparent)!important}
+}
+@media(min-width:1181px){body.hm-authenticated #appContent::before,body.is-authenticated #appContent::before{inset:0 -34px;border-radius:46px}}
+@media(min-width:700px) and (max-height:600px){body.hm-authenticated #appContent,body.is-authenticated #appContent{padding:8px 0}body.hm-authenticated #appContent>.container,body.is-authenticated #appContent>.container{padding-top:18px!important;padding-bottom:24px!important}}

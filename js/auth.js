@@ -401,6 +401,7 @@
     async function logoutUser() {
         window.hmIsLoggingOut = true;
         try {
+            try { if (typeof window.hmDiscardPendingMedia === 'function') window.hmDiscardPendingMedia(); } catch(e) { console.warn(e); }
             try { if (typeof window.hmStopSubRoutines === 'function') window.hmStopSubRoutines(); } catch(e) { console.warn(e); }
             try { if (window.hmPresenceStop) window.hmPresenceStop(); } catch(e) { console.warn(e); }
             disconnectAllListeners();

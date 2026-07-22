@@ -1,18 +1,19 @@
 // =========================================================
-// HearMe2nite v1.0 STEP6.2.13.8.9
+// HearMe2nite PWA registration follows the central release metadata.
 // PWA install foundation: manifest + service worker registration
 // - FCM/push notification is intentionally separated into the next step.
 // =========================================================
 (function () {
-    const HM_PWA_APP_VERSION = 'v1.0-step6-2-13-8-9';
-    const HM_PWA_SW_URL = '/service-worker.js?v=step6-2-13-8-9-help-theme-contrast-20260721';
+    const HM_PWA_RELEASE_STEP = String(window.HM_RELEASE?.step || '').trim();
+    const HM_PWA_APP_VERSION = `v1.0-${HM_PWA_RELEASE_STEP.replace(/^STEP/i, '').replace(/\./g, '-')}`;
+    const HM_PWA_SW_URL = `/service-worker.js?v=${encodeURIComponent(HM_PWA_APP_VERSION)}`;
     const HM_PWA_VERSION_KEY = 'hm_pwa_app_version';
     const HM_PWA_DISMISS_KEY = 'hm_pwa_install_dismiss_until';
     const HM_DAY_MS = 24 * 60 * 60 * 1000;
     let deferredInstallPrompt = null;
     let installBanner = null;
     let iosGuideOverlay = null;
-    let refreshingForServiceWorker = false;
+    let serviceWorkerUpdateAnnounced = false;
 
     function isStandaloneMode() {
         return window.matchMedia?.('(display-mode: standalone)').matches || window.navigator.standalone === true;
@@ -193,9 +194,12 @@
 
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.addEventListener('controllerchange', () => {
-            if (refreshingForServiceWorker) return;
-            refreshingForServiceWorker = true;
-            window.location.reload();
+            if (serviceWorkerUpdateAnnounced) return;
+            serviceWorkerUpdateAnnounced = true;
+            document.documentElement.dataset.hmPwaUpdateReady = 'true';
+            if (typeof showToast === 'function') {
+                showToast('새 버전이 준비되었습니다. 작성 중인 내용을 마친 뒤 앱을 다시 열어 주세요.');
+            }
         });
     }
 

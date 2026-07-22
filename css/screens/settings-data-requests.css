@@ -1,0 +1,167 @@
+/* =========================================================
+   STEP5.6.1.5 — Data management request scope and status
+   ========================================================= */
+.data-current-request {
+    border: 1px solid rgba(109, 76, 255, 0.2);
+    background: linear-gradient(135deg, rgba(246, 243, 255, 0.98), rgba(255, 248, 251, 0.98));
+    border-radius: 18px;
+    padding: 14px;
+    margin-bottom: 12px;
+}
+.data-current-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: center;
+}
+.data-current-head strong { color: #574969; }
+.data-current-head span { font-size: .82rem; font-weight: 800; color: #d94f68; }
+.data-current-request p { margin: 8px 0 2px; font-weight: 800; color: #4b3b42; }
+.data-current-request small { color: #887681; }
+.data-current-link {
+    display: block;
+    margin-top: 10px;
+    border: 0;
+    background: transparent;
+    color: #7657d5;
+    font-weight: 800;
+    padding: 0;
+    cursor: pointer;
+}
+.data-request-scope {
+    border: 0;
+    padding: 0;
+    margin: 14px 0 0;
+}
+.data-request-scope legend {
+    width: 100%;
+    font-weight: 900;
+    color: #4b3b42;
+    font-size: .92rem;
+    margin-bottom: 8px;
+}
+.data-scope-option {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    border: 1px solid rgba(255, 118, 136, .18);
+    background: #fff;
+    border-radius: 16px;
+    padding: 12px;
+    margin-bottom: 8px;
+    cursor: pointer;
+}
+.data-scope-option:has(input:checked) {
+    border-color: rgba(255, 96, 124, .62);
+    box-shadow: 0 8px 20px rgba(255, 117, 140, .12);
+    background: #fff9fb;
+}
+.data-scope-option input { margin-top: 3px; accent-color: #ff7189; }
+.data-scope-option span { min-width: 0; }
+.data-scope-option strong { display: block; color: #5b454d; font-size: .9rem; }
+.data-scope-option small { display: block; margin-top: 4px; color: #87737a; line-height: 1.45; font-size: .78rem; }
+.data-scope-danger:has(input:checked) { background: #fff4f5; border-color: rgba(221, 67, 86, .55); }
+.data-scope-notice {
+    border-radius: 14px;
+    background: rgba(109, 76, 255, .07);
+    color: #66547a;
+    padding: 10px 12px;
+    font-size: .8rem;
+    line-height: 1.45;
+    margin-bottom: 4px;
+}
+.data-scope-notice.danger { background: rgba(217, 79, 104, .09); color: #a63f53; }
+.data-request-type {
+    display: inline-block;
+    border-radius: 999px;
+    background: rgba(109, 76, 255, .09);
+    color: #6950b3;
+    font-size: .78rem;
+    font-weight: 800;
+    padding: 6px 10px;
+    margin-bottom: 4px;
+}
+.data-shared-notice {
+    margin: 8px 0;
+    padding: 9px 10px;
+    border-radius: 12px;
+    background: rgba(217, 79, 104, .08);
+    color: #a84356;
+    font-size: .78rem;
+    line-height: 1.4;
+    font-weight: 700;
+}
+#deleteRequestSubmitBtn:disabled { opacity: .45; cursor: not-allowed; transform: none; }
+@media (max-width: 520px) {
+    .data-management-tabs { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+    .data-tab { padding: 9px 5px; font-size: .78rem; }
+    .data-scope-option { padding: 11px; }
+}
+
+/* =========================================================
+   STEP5.6.1.6 - HearMe2nite Data Admin Review UI
+   ========================================================= */
+.hm-admin-only[hidden] { display: none !important; }
+.data-admin-overlay { display: none; }
+.data-admin-overlay.show { display: flex; }
+.data-admin-modal { max-height: min(92vh, 900px); overflow-y: auto; }
+.data-admin-summary { display:flex; justify-content:space-between; gap:10px; align-items:center; margin:0 0 12px; padding:12px 14px; border:1px solid #ffd1da; border-radius:16px; background:#fff7f9; color:#6f4e57; }
+.data-admin-summary span { font-size:.82rem; color:#e45572; font-weight:700; }
+.data-admin-filters { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:12px; }
+.data-admin-filter { border:1px solid #ffd1da; background:#fff; color:#7d5a63; border-radius:14px; padding:10px; font-weight:700; }
+.data-admin-filter.active { background:#ff7f96; color:#fff; border-color:#ff7f96; }
+.data-admin-list { display:grid; gap:12px; }
+.data-admin-card { border:1px solid #ffd1da; border-radius:18px; padding:14px; background:#fff; box-shadow:0 8px 24px rgba(120,76,88,.06); }
+.data-admin-card h3 { margin:8px 0 10px; color:#3d3034; font-size:1rem; }
+.data-admin-card dl { display:grid; gap:6px; margin:0 0 10px; }
+.data-admin-card dl div { display:grid; grid-template-columns:72px 1fr; gap:8px; font-size:.83rem; }
+.data-admin-card dt { color:#8d747b; font-weight:700; }
+.data-admin-card dd { margin:0; color:#4f4246; word-break:break-all; }
+.data-admin-reason { margin:10px 0; padding:10px 12px; border-radius:12px; background:#fff8fa; }
+.data-admin-reason p { margin:5px 0 0; white-space:pre-wrap; line-height:1.5; }
+.data-admin-card label { display:block; margin-top:10px; color:#6b535a; font-size:.82rem; font-weight:700; }
+.data-admin-card textarea { width:100%; margin-top:6px; border:1px solid #eadde1; border-radius:12px; padding:10px; resize:vertical; font:inherit; box-sizing:border-box; background:#fff; color:#3f3437; }
+.data-admin-actions { display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:6px; margin-top:12px; }
+.data-admin-actions button { border:0; border-radius:11px; padding:9px 5px; background:#f2ecee; color:#6b555b; font-size:.76rem; font-weight:800; }
+.data-admin-actions button.is-selected { color:#fff; box-shadow:0 8px 18px rgba(112,72,84,.16); transform:translateY(-1px); }
+.data-admin-actions button.status-reviewing { background:#7b6df2; }
+.data-admin-actions button.status-hold { background:#e2a63b; }
+.data-admin-actions button.status-approved { background:#43b77a; }
+.data-admin-actions button.status-rejected { background:#eb6c86; }
+.data-admin-memo-save { width:100%; margin-top:8px; border:1px solid #d8cef9; border-radius:12px; padding:10px 12px; background:#f7f4ff; color:#6f5ac8; font-size:.8rem; font-weight:800; }
+.data-admin-memo-save:active { transform:translateY(1px); }
+@media (max-width: 480px) {
+  .data-admin-actions { grid-template-columns:1fr 1fr; }
+  .data-admin-card dl div { grid-template-columns:58px 1fr; }
+}
+.user-bar-actions.hm-account-actions:has(#dataAdminButton:not([hidden])) {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+@media (max-width: 420px) {
+    .user-bar-actions.hm-account-actions:has(#dataAdminButton:not([hidden])) {
+        gap: 5px !important;
+    }
+    .user-bar-actions.hm-account-actions:has(#dataAdminButton:not([hidden])) .btn-small {
+        padding-left: 3px !important;
+        padding-right: 3px !important;
+        font-size: .72rem !important;
+    }
+}
+
+
+/* STEP5.6.1.9 - approved Room disconnect execution */
+.data-admin-execution {
+    margin-top: 14px;
+    padding: 12px;
+    border: 1px solid rgba(201, 71, 91, .28);
+    border-radius: 14px;
+    background: #fff7f8;
+}
+.data-admin-execution strong { display:block; color:#9f3e50; font-size:.88rem; }
+.data-admin-execution p { margin:6px 0 10px; color:#7d6269; font-size:.78rem; line-height:1.45; }
+.data-admin-execute {
+    width:100%; border:0; border-radius:12px; padding:11px 12px;
+    background:#bd4058; color:#fff; font-weight:900; font-size:.82rem;
+}
+.data-admin-execute:disabled { opacity:.5; cursor:wait; }
+

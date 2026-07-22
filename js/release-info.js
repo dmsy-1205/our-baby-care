@@ -5,14 +5,14 @@
 (function () {
     const release = Object.freeze({
         product: 'HearMe2nite',
-        version: 'v1.0 STEP6.2.14.14',
-        appVersion: 'HearMe2nite v1.0 STEP6.2.14.14',
-        step: 'STEP6.2.14.14',
-        build: '20260722',
-        releaseDate: '2026.07.22',
+        version: 'v1.0 STEP6.2.14.45',
+        appVersion: 'HearMe2nite v1.0 STEP6.2.14.45',
+        step: 'STEP6.2.14.45',
+        build: '20260723',
+        releaseDate: '2026.07.23',
         stage: 'Beta',
-        title: '라이트·다크 화면 분리 보강',
-        description: '달력과 모든 주요 팝업의 배경·카드·입력 표면을 현재 라이트 또는 다크 모드에 맞춰 일관되게 표시합니다.',
+        title: '달력 색상 테마 동기화',
+        description: '달력의 바깥 베일·날짜 버튼·선택 강조색이 라벤더·블라썸·오션·포레스트·크림 테마를 정확히 따릅니다.',
         userChanges: Object.freeze([
             '나와 상대의 닉네임·접속 상태를 홈 상단에서 바로 확인할 수 있습니다.',
             '날짜와 알림은 작게 유지하고 우리의 대화는 더 선명하게 강조했습니다.',
@@ -35,8 +35,11 @@
             ,'자동 저장의 대기·저장 중·완료·실패 상태를 명확히 구분합니다.'
             ,'Dom은 선택 날짜의 작성 현황을 확인하고 Sub는 피드백·선물 화면이 읽기 전용임을 바로 알 수 있습니다.'
             ,'라이트 모드의 팝업 바깥은 밝은 테마 베일로, 다크 모드는 어두운 베일과 표면으로 명확히 분리됩니다.'
+            ,'날짜 달력의 밝은 배경도 현재 선택한 색상 테마와 함께 바뀝니다.'
         ]),
         changes: Object.freeze([
+            'Strengthens secondary text contrast throughout light-mode category and settings routes',
+            'Unifies home and route action symbols with one consistent container treatment',
             'Adds the same subtle dashed empty-state border below Promise and My Routine',
             'Matches the My Routine empty message typography to the Promise helper card',
             'Prevents the comment dialog title from collapsing into a vertical column on mobile',

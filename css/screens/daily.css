@@ -1,0 +1,54 @@
+/* STEP6.2.14.17 - harmonized mood editor and persistent category header. */
+:root[data-hm-theme] .hm-adaptive-route .mood-box{
+  background:color-mix(in srgb,var(--hm-soft) 46%,var(--hm-surface-card))!important;
+  border-color:color-mix(in srgb,var(--hm-primary) 28%,var(--hm-line-soft))!important;
+  color:var(--hm-color-body)!important;
+}
+:root[data-hm-theme] .hm-adaptive-route .mood-helper{
+  color:var(--hm-color-muted)!important;
+}
+:root[data-hm-theme] .hm-adaptive-route .mood-box textarea{
+  background:var(--hm-surface-card)!important;
+  color:var(--hm-color-body)!important;
+  border-color:var(--hm-line-soft)!important;
+}
+:root[data-hm-theme][data-hm-display="dark"] .hm-adaptive-route .mood-box{
+  background:color-mix(in srgb,var(--hm-primary) 12%,var(--hm-dark-card-soft))!important;
+  border-color:var(--hm-dark-line)!important;
+}
+:root[data-hm-theme][data-hm-display="dark"] .hm-adaptive-route .mood-box textarea{
+  background:var(--hm-dark-input)!important;
+  color:var(--hm-color-body)!important;
+  border-color:var(--hm-dark-line)!important;
+}
+body.hm-adaptive-route-open .hm-adaptive-route{
+  height:calc(100dvh - 40px);
+  overflow-x:hidden!important;
+  overflow-y:auto!important;
+  overscroll-behavior:contain;
+  -webkit-overflow-scrolling:touch;
+}
+body.hm-adaptive-route-open .hm-adaptive-route-head{
+  position:sticky!important;
+  top:0!important;
+  left:auto!important;
+  width:100%;
+  box-sizing:border-box;
+  transform:none;
+  z-index:130!important;
+  border-radius:29px 29px 0 0;
+  box-shadow:0 8px 22px color-mix(in srgb,var(--hm-shadow,rgba(60,45,80,.14)) 55%,transparent);
+}
+body.hm-adaptive-route-open .hm-adaptive-route-body{
+  padding-top:22px;
+}
+@media(max-width:699px){
+  body.hm-adaptive-route-open{overflow:hidden!important;}
+  body.hm-adaptive-route-open .hm-adaptive-route{height:100dvh;}
+  body.hm-adaptive-route-open .hm-adaptive-route-head{
+    width:100%;
+    border-radius:0;
+  }
+  body.hm-adaptive-route-open .hm-adaptive-route-body{padding-top:16px;}
+}
+

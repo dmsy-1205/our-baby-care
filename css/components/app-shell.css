@@ -1,0 +1,9 @@
+/* STEP6.2.14.20 - app-frame modal width contract.
+   Only the horizontal boundary is shared; every modal keeps its own content height. */
+:root{
+  --hm-app-frame-width:min(450px,100vw);
+}
+@media(min-width:700px){
+  :root{--hm-app-frame-width:min(520px,calc(100vw - 48px));}
+}
+

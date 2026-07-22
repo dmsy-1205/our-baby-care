@@ -1,0 +1,380 @@
+/* =========================================================
+   STEP5.6.3.0 - Chat card + unread modal
+   ========================================================= */
+.hm-chat-card {
+    width: 100%;
+    max-width: 500px;
+    margin: 14px auto 18px;
+    padding: 14px 15px;
+    border: 1px solid rgba(220, 194, 213, .75);
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: 0 4px 14px rgba(91, 62, 82, .07);
+    display: grid;
+    grid-template-columns: 42px minmax(0, 1fr) 18px;
+    gap: 11px;
+    align-items: center;
+    text-align: left;
+    cursor: pointer;
+}
+.hm-chat-card:hover { transform: translateY(-1px); box-shadow: 0 7px 18px rgba(91, 62, 82, .1); }
+.hm-chat-card-icon { width: 42px; height: 42px; border-radius: 14px; background: #fff2f7; display: grid; place-items: center; font-size: 1.25rem; }
+.hm-chat-card-content { min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.hm-chat-card-title-row { display: flex; align-items: center; gap: 8px; color: #5f4558; }
+.hm-chat-unread-badge { min-width: 20px; height: 20px; padding: 0 6px; border-radius: 999px; background: #ef5b83; color: #fff; font-size: .72rem; line-height: 20px; text-align: center; font-weight: 800; }
+.hm-chat-card-preview { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; color: #7d6a78; font-size: .86rem; }
+.hm-chat-card-meta { display: flex; align-items: center; gap: 5px; color: #a08f9b; font-size: .74rem; min-width: 0; }
+#chatCardTime { margin-left: auto; white-space: nowrap; }
+.hm-chat-presence-dot { width: 8px; height: 8px; border-radius: 50%; background: #b8b0b6; flex: 0 0 auto; }
+.hm-chat-presence-dot.is-online { background: #38b879; box-shadow: 0 0 0 3px rgba(56,184,121,.12); }
+.hm-chat-card-arrow { color: #b59aaa; font-size: 1.4rem; }
+
+.hm-chat-overlay { z-index: 10040; }
+.hm-chat-modal { width: min(94vw, 520px); max-height: min(82vh, 720px); display: flex; flex-direction: column; }
+.hm-chat-modal-head { align-items: flex-start; }
+.hm-chat-modal-head h2 { margin-bottom: 3px; }
+.hm-chat-modal-presence { font-size: .75rem; color: #8e7b88; font-weight: 600; }
+.hm-chat-section { display: flex; flex-direction: column; min-height: 0; flex: 1; }
+.hm-chat-messages { height: 320px !important; max-height: 46vh !important; min-height: 220px; overflow-y: auto; border: 1px solid #f0e7ed; padding: 12px; border-radius: 13px; margin-bottom: 9px; background: #fcfafb; display: flex; flex-direction: column; gap: 8px; }
+.hm-chat-empty { text-align: center; color: #aaa; font-size: .85rem; margin: auto 0; padding: 45px 12px; }
+.hm-chat-offline-note { margin: 0 0 8px; padding: 8px 10px; border-radius: 10px; background: #f7f3f5; color: #83717d; font-size: .74rem; line-height: 1.4; }
+.hm-chat-input-row { display: grid; grid-template-columns: 82px minmax(0, 1fr) auto; gap: 6px; }
+.hm-chat-input-row #chatSender,
+.hm-chat-input-row #chatInput { min-width: 0; height: 42px; padding: 0 10px; border: 1px solid #e5dce2; border-radius: 10px; font-size: .86rem; }
+.hm-chat-input-row #chatSender { text-align: center; background: #f8f4f7; color: #6f5968; cursor: default; }
+.hm-chat-input-row .chat-send-btn { height: 42px; padding: 0 14px; border-radius: 10px; }
+
+@media (max-width: 520px) {
+    .hm-chat-card { margin-top: 12px; padding: 12px 13px; grid-template-columns: 38px minmax(0,1fr) 16px; }
+    .hm-chat-card-icon { width: 38px; height: 38px; }
+    .hm-chat-modal { width: calc(100vw - 22px); max-height: calc(100dvh - 34px); }
+    .hm-chat-messages { height: min(48vh, 360px) !important; max-height: min(48vh, 360px) !important; }
+    .hm-chat-input-row { grid-template-columns: 1fr auto; }
+    .hm-chat-input-row #chatSender { display: none; }
+}
+/* STEP5.6.3.0 final legacy chat override */
+.hm-chat-modal #chatSection {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    overflow: visible !important;
+}
+.hm-chat-modal #chatMessages {
+    height: 320px !important;
+    max-height: 46vh !important;
+    min-height: 220px !important;
+    border-radius: 16px !important;
+    margin-bottom: 9px !important;
+}
+@media (max-width: 520px) {
+    .hm-chat-modal #chatMessages {
+        height: min(48vh, 360px) !important;
+        max-height: min(48vh, 360px) !important;
+        min-height: 210px !important;
+    }
+    .hm-chat-modal #chatSection > div:last-child {
+        grid-template-columns: minmax(0, 1fr) 64px !important;
+    }
+}
+
+/* =========================================================
+   STEP5.6.3.2 - Today's Gift UI
+   Existing reward/rest data model is preserved.
+   ========================================================= */
+#rewardDailyCard .daily-card-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 15px;
+    background: linear-gradient(145deg, #fff1dc, #fff8ef);
+    box-shadow: inset 0 0 0 1px rgba(224, 160, 91, 0.16);
+}
+
+#rewardModalOverlay .trust-card {
+    background: linear-gradient(160deg, #fffaf4 0%, #fff7f7 100%);
+    border-color: rgba(230, 171, 133, 0.34);
+    padding: 14px;
+}
+
+.todays-gift-intro {
+    display: grid;
+    gap: 4px;
+    margin-bottom: 13px;
+}
+
+.todays-gift-intro strong {
+    color: #4d3c3c;
+    font-size: 0.94rem;
+}
+
+.todays-gift-intro span {
+    color: #7b6a6a;
+    font-size: 0.79rem;
+    line-height: 1.45;
+}
+
+.todays-gift-grid {
+    gap: 10px;
+    margin-bottom: 13px;
+}
+
+.gift-choice-btn {
+    min-height: 104px;
+    padding: 13px 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+    gap: 8px;
+    text-align: left;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.88);
+    border: 1px solid rgba(222, 178, 151, 0.34);
+    box-shadow: 0 7px 18px rgba(122, 85, 70, 0.06);
+    transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+
+.gift-choice-btn:not(:disabled):active {
+    transform: scale(0.985);
+}
+
+.gift-choice-icon {
+    font-size: 1.34rem;
+    line-height: 1;
+}
+
+.gift-choice-copy {
+    display: grid;
+    gap: 4px;
+}
+
+.gift-choice-copy strong {
+    color: #574545;
+    font-size: 0.9rem;
+}
+
+.gift-choice-copy small {
+    color: #8a7777;
+    font-size: 0.72rem;
+    line-height: 1.35;
+    font-weight: 600;
+}
+
+.gift-choice-btn.active {
+    background: linear-gradient(145deg, #ff8d86, #ff716f);
+    border-color: transparent;
+    box-shadow: 0 10px 22px rgba(255, 113, 111, 0.22);
+}
+
+.gift-choice-btn.active .gift-choice-copy strong,
+.gift-choice-btn.active .gift-choice-copy small {
+    color: #fff;
+}
+
+.todays-gift-label {
+    display: block;
+    margin: 2px 0 7px;
+    color: #625151;
+    font-size: 0.8rem;
+    font-weight: 800;
+}
+
+@media (max-width: 420px) {
+    .gift-choice-btn {
+        min-height: 98px;
+        padding: 12px 9px;
+    }
+    .gift-choice-copy small {
+        font-size: 0.68rem;
+    }
+}
+
+/* STEP5.6.3.2 Weekly routine management + home promise cards */
+.custom-routine-schedule-box {
+    margin: 12px 0;
+    padding: 12px;
+    border: 1px solid rgba(255, 118, 117, .18);
+    border-radius: 14px;
+    background: rgba(255, 248, 248, .78);
+}
+.custom-routine-kind-row { display:flex; gap:10px; flex-wrap:wrap; margin-top:8px; }
+.custom-routine-kind-row label {
+    display:flex; align-items:center; gap:6px; padding:8px 11px;
+    border:1px solid rgba(255,118,117,.22); border-radius:999px; background:#fff;
+}
+.custom-routine-kind-row input { width:18px; height:18px; accent-color:#ff7675; }
+.custom-routine-weekday-box { margin-top:12px; }
+.custom-routine-weekday-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+.custom-routine-weekday-head button { border:0; border-radius:999px; padding:6px 10px; background:#ffe8e8; color:#9b4b4b; font-weight:700; }
+.custom-routine-weekday-row { display:grid; grid-template-columns:repeat(7, minmax(0,1fr)); gap:6px; }
+.custom-routine-weekday-row label { display:flex; flex-direction:column; align-items:center; gap:4px; padding:7px 2px; border-radius:10px; background:#fff; font-size:12px; }
+.custom-routine-weekday-row input { width:18px; height:18px; accent-color:#ff7675; }
+.custom-routine-list { display:flex; flex-direction:column; gap:8px; margin:8px 0 12px; }
+.custom-routine-home-item {
+    width:100%; display:grid; grid-template-columns:42px minmax(0,1fr) 28px; align-items:center; gap:10px;
+    padding:11px 12px; border:1px solid rgba(159, 103, 171, .16); border-radius:14px;
+    background:rgba(255,255,255,.92); text-align:left; cursor:pointer;
+}
+.custom-routine-home-item.is-complete { background:rgba(244, 255, 248, .95); }
+.custom-routine-home-icon { width:42px; height:42px; display:grid; place-items:center; border-radius:13px; background:#f7effa; font-size:20px; }
+.custom-routine-home-text { min-width:0; display:flex; flex-direction:column; gap:3px; }
+.custom-routine-home-text strong { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.custom-routine-home-text small { color:#8a7a8d; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.custom-routine-home-check { justify-self:end; font-size:20px; font-weight:800; color:#a66ab2; }
+.custom-routine-home-empty { padding:10px 12px; border-radius:12px; background:rgba(250,247,251,.9); color:#8d8290; font-size:13px; text-align:center; }
+@media (max-width:480px) {
+    .custom-routine-weekday-row { gap:4px; }
+    .custom-routine-weekday-row label { font-size:11px; padding:6px 1px; }
+}
+
+
+/* STEP5.6.3.3 관리와 피드백 정리 */
+.feedback-review-card{margin:12px 0;padding:14px;border:1px solid #eee3f3;border-radius:18px;background:linear-gradient(180deg,#fff,#fcf9fd)}
+.feedback-review-head{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:10px}.feedback-review-head span{font-size:12px;color:#8b7d91}
+.feedback-review-list{display:grid;gap:7px}.feedback-review-item{display:grid;grid-template-columns:22px 1fr auto;align-items:center;gap:8px;padding:9px 10px;border-radius:12px;background:#f8f5fa;color:#8b7d91}.feedback-review-item.is-done{background:#f1fbf6;color:#426e59}.feedback-review-item small{font-size:11px}
+.feedback-type-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:12px 0}.feedback-type-btn{min-height:58px;border:1px solid #eadcf0;border-radius:15px;background:#fff;display:flex;align-items:center;justify-content:center;gap:7px;font-weight:700;color:#4d4053}.feedback-type-btn.active{border-color:#a96ad6;background:#f7effd;box-shadow:0 0 0 2px rgba(169,106,214,.12)}.feedback-type-btn:disabled{opacity:.6}
+.feedback-confirm-row{display:flex;align-items:center;gap:9px;margin:12px 0;padding:11px 12px;border-radius:13px;background:#faf7fb;font-weight:700}.feedback-confirm-row input{width:18px;height:18px}
+@media(max-width:420px){.feedback-type-grid{grid-template-columns:1fr 1fr}.feedback-review-item{grid-template-columns:20px 1fr auto}}
+
+
+/* =========================================================
+   STEP5.7.1 오늘의 약속 관리 목록형 UI
+   - 홈에 이미 표시되는 입력 카드를 팝업에서 반복하지 않습니다.
+   - 관리(Dom)는 등록 항목을 간결한 한 줄 목록으로만 확인합니다.
+   - 기록(Sub)은 홈 카드에서 바로 입력하도록 안내합니다.
+   ========================================================= */
+.custom-routine-hub-list {
+    gap: 0;
+    border-top: 1px solid rgba(126, 120, 146, 0.14);
+}
+.custom-routine-hub-list-row {
+    width: 100%;
+    border: 0;
+    border-bottom: 1px solid rgba(126, 120, 146, 0.14);
+    background: transparent;
+    padding: 13px 4px;
+    display: grid;
+    grid-template-columns: 34px minmax(0, 1fr) auto;
+    gap: 10px;
+    align-items: center;
+    text-align: left;
+    box-shadow: none;
+    border-radius: 0;
+}
+.custom-routine-hub-list-row:hover,
+.custom-routine-hub-list-row:focus-visible {
+    background: rgba(181, 135, 255, 0.06);
+}
+.custom-routine-hub-list-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 11px;
+    display: grid;
+    place-items: center;
+    background: #fff6ff;
+    font-size: 1rem;
+}
+.custom-routine-hub-list-text {
+    min-width: 0;
+}
+.custom-routine-hub-list-text strong {
+    display: block;
+    color: #2d2740;
+    font-size: 0.92rem;
+    line-height: 1.3;
+}
+.custom-routine-hub-list-text small {
+    display: block;
+    margin-top: 3px;
+    color: #7e7892;
+    font-size: 0.76rem;
+    line-height: 1.4;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.custom-routine-hub-list-action {
+    color: #a48acb;
+    font-size: 0.76rem;
+    font-weight: 800;
+    white-space: nowrap;
+}
+.custom-routine-hub-guide {
+    padding: 18px 14px;
+    border-radius: 14px;
+    background: rgba(181, 135, 255, 0.07);
+    text-align: center;
+}
+.custom-routine-hub-guide strong,
+.custom-routine-hub-guide span {
+    display: block;
+}
+.custom-routine-hub-guide strong {
+    color: #403653;
+    font-size: 0.94rem;
+}
+.custom-routine-hub-guide span {
+    margin-top: 6px;
+    color: #7e7892;
+    font-size: 0.8rem;
+    line-height: 1.5;
+}
+@media (max-width: 640px) {
+    .custom-routine-hub-list-row {
+        grid-template-columns: 32px minmax(0, 1fr) auto;
+        padding: 12px 2px;
+        gap: 9px;
+    }
+    .custom-routine-hub-list-icon {
+        width: 32px;
+        height: 32px;
+    }
+}
+
+/* =========================================================
+   STEP5.8.5 개인 테마
+   기존 레이아웃과 기능은 유지하고 핵심 색상만 CSS 변수로 전환한다.
+   ========================================================= */
+:root,
+:root[data-hm-theme="lavender"] {
+    --hm-bg-1:#fff7fb; --hm-bg-2:#f4ecff; --hm-bg-3:#fffaf2;
+    --hm-primary:#ff7f96; --hm-primary-strong:#ef657f; --hm-accent:#8e5cf4;
+    --hm-soft:#f7f0ff; --hm-soft-2:#fff3f7; --hm-card:#ffffff;
+    --hm-text:#2d3436; --hm-muted:#7c6f78; --hm-border:#eadcff;
+    --hm-shadow:rgba(142,92,244,.11); --hm-input:#fffafd;
+}
+:root[data-hm-theme="blossom"] {
+    --hm-bg-1:#fff5f7; --hm-bg-2:#ffe8ef; --hm-bg-3:#fff9f2;
+    --hm-primary:#f06f98; --hm-primary-strong:#db557f; --hm-accent:#c65b91;
+    --hm-soft:#fff0f5; --hm-soft-2:#fff7fa; --hm-card:#fffefe;
+    --hm-text:#3b2931; --hm-muted:#846a74; --hm-border:#f2cad8;
+    --hm-shadow:rgba(198,91,145,.12); --hm-input:#fff9fb;
+}
+:root[data-hm-theme="ocean"] {
+    --hm-bg-1:#effaff; --hm-bg-2:#e5f4ff; --hm-bg-3:#f2fffc;
+    --hm-primary:#3d9ed8; --hm-primary-strong:#247fb7; --hm-accent:#287fbd;
+    --hm-soft:#edf8ff; --hm-soft-2:#effcfb; --hm-card:#ffffff;
+    --hm-text:#233642; --hm-muted:#637b89; --hm-border:#cde8f6;
+    --hm-shadow:rgba(40,127,189,.12); --hm-input:#f8fdff;
+}
+:root[data-hm-theme="forest"] {
+    --hm-bg-1:#f3fbf5; --hm-bg-2:#e8f5ea; --hm-bg-3:#fffaf0;
+    --hm-primary:#54a878; --hm-primary-strong:#39845d; --hm-accent:#477d63;
+    --hm-soft:#edf8f0; --hm-soft-2:#f8f4e9; --hm-card:#fffefb;
+    --hm-text:#28372e; --hm-muted:#6b7d71; --hm-border:#cfe5d5;
+    --hm-shadow:rgba(71,125,99,.13); --hm-input:#f9fcf9;
+}
+:root[data-hm-theme="cream"] {
+    --hm-bg-1:#fffaf0; --hm-bg-2:#f8eedb; --hm-bg-3:#fffdf8;
+    --hm-primary:#d89052; --hm-primary-strong:#bb7337; --hm-accent:#a8784d;
+    --hm-soft:#fff6e7; --hm-soft-2:#faf3e8; --hm-card:#fffdf8;
+    --hm-text:#40362d; --hm-muted:#837467; --hm-border:#ead9bd;
+    --hm-shadow:rgba(168,120,77,.13); --hm-input:#fffcf6;
+}

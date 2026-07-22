@@ -109,7 +109,7 @@
         results.innerHTML = matched.map((card) => {
             const title = card.querySelector('h3, .faq-question, strong')?.textContent?.replace('⌄', '').trim() || '사용 가이드';
             const text = (card.querySelector('p, .faq-answer, .help-tip')?.textContent || card.textContent || '').replace(/\s+/g, ' ').trim();
-            return `<button type="button" class="help-result-card" onclick="openHelpSearchMatch('${card.closest('[data-help-panel]')?.dataset.helpPanel || 'home'}')"><strong>${escapeHtml(title)}</strong><span>${escapeHtml(text.slice(0, 80))}</span></button>`;
+            return `<button type="button" class="help-result-card" data-hm-action="open-help-search-match" data-hm-value="${card.closest('[data-help-panel]')?.dataset.helpPanel || 'home'}"><strong>${escapeHtml(title)}</strong><span>${escapeHtml(text.slice(0, 80))}</span></button>`;
         }).join('');
         results.hidden = false;
     }
@@ -168,9 +168,9 @@
             <p>${escapeHtml(ticket.message || '')}</p>
             ${replies.length ? `<div class="help-support-replies">${replies.map(renderSupportReply).join('')}</div>` : '<small class="help-support-waiting">답변을 준비하고 있습니다.</small>'}
             ${userMessages.length ? `<div class="help-support-user-messages">${userMessages.map(renderSupportUserMessage).join('')}</div>` : ''}
-            ${canFollowUp ? `<form class="help-support-followup" onsubmit="submitSupportFollowUp(event,'${escapeHtml(ticket.id)}')"><textarea maxlength="1000" rows="3" placeholder="추가로 전달할 내용을 적어주세요" required></textarea><button type="submit">추가 답변 보내기</button></form>` : ''}
+            ${canFollowUp ? `<form class="help-support-followup" data-hm-submit="support-followup" data-hm-value="${escapeHtml(ticket.id)}"><textarea maxlength="1000" rows="3" placeholder="추가로 전달할 내용을 적어주세요" required></textarea><button type="submit">추가 답변 보내기</button></form>` : ''}
             ${rating ? `<div class="help-support-rating-done"><strong>만족도 ${Number(rating.score || 0)}점</strong><span>${escapeHtml(rating.comment || '평가해 주셔서 감사합니다.')}</span></div>` : ''}
-            ${canRate ? `<form class="help-support-rating" onsubmit="submitSupportRating(event,'${escapeHtml(ticket.id)}')"><strong>이번 답변은 도움이 되었나요?</strong><select required><option value="">점수 선택</option><option value="5">5점 · 매우 만족</option><option value="4">4점 · 만족</option><option value="3">3점 · 보통</option><option value="2">2점 · 아쉬움</option><option value="1">1점 · 불만족</option></select><input maxlength="300" placeholder="선택 사항: 의견을 남겨주세요"><button type="submit">평가 보내기</button></form>` : ''}
+            ${canRate ? `<form class="help-support-rating" data-hm-submit="support-rating" data-hm-value="${escapeHtml(ticket.id)}"><strong>이번 답변은 도움이 되었나요?</strong><select required><option value="">점수 선택</option><option value="5">5점 · 매우 만족</option><option value="4">4점 · 만족</option><option value="3">3점 · 보통</option><option value="2">2점 · 아쉬움</option><option value="1">1점 · 불만족</option></select><input maxlength="300" placeholder="선택 사항: 의견을 남겨주세요"><button type="submit">평가 보내기</button></form>` : ''}
         </article>`;
     }
 

@@ -1,0 +1,50 @@
+/* STEP6.2.14.5 - live mission lists, role-correct feedback, and readable completion */
+.hm-adaptive-mission-live{display:grid;gap:18px;margin-top:18px}
+.hm-adaptive-live-group{padding:16px;border:1px solid var(--hm-line-soft,var(--border-color));border-radius:20px;background:var(--hm-surface-card,var(--card-color))}
+.hm-adaptive-live-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
+.hm-adaptive-live-head strong{font-size:.92rem}.hm-adaptive-live-head small{color:var(--hm-color-muted,#776f80);font-size:.68rem}
+.hm-adaptive-live-list{display:grid;gap:9px}.hm-adaptive-live-empty{padding:16px;border:1px dashed var(--hm-line-soft,var(--border-color));border-radius:14px;color:var(--hm-color-muted,#776f80);font-size:.75rem;text-align:center}
+.hm-adaptive-live-list .custom-routine-home-item,.hm-adaptive-live-list .sub-routine-home-card{width:100%;margin:0}
+.hm-adaptive-route-context.is-clickable{grid-template-columns:44px minmax(0,1fr) auto;cursor:pointer}
+.hm-adaptive-route-context.is-clickable em{align-self:center;color:var(--hm-primary,var(--accent-purple));font-size:1.4rem;font-style:normal}
+.hm-adaptive-route-context p span,.hm-adaptive-route-context p b{display:inline-block;margin:2px 6px 2px 0}
+.hm-adaptive-route-context p b{margin-right:14px;color:var(--hm-color-body,var(--text-color))}
+
+.hm-route-embedded-editor.hm-sub-manager-readonly > :not(.daily-modal-head):not(.hm-manager-readonly-card){display:none!important}
+.hm-route-embedded-editor.hm-sub-manager-readonly .daily-modal-head{border-bottom:0!important;margin-bottom:8px!important;padding-bottom:0!important}
+.hm-route-embedded-editor.hm-sub-manager-readonly .daily-modal-head p,
+.hm-route-embedded-editor.hm-sub-manager-readonly .manager-lock-note,
+.hm-route-embedded-editor.hm-sub-manager-readonly .feedback-review-card,
+.hm-route-embedded-editor.hm-sub-manager-readonly .feedback-type-grid,
+.hm-route-embedded-editor.hm-sub-manager-readonly .feedback-confirm-row{display:none!important}
+.hm-route-embedded-editor.hm-sub-manager-readonly .hm-manager-readonly-card{display:block!important;margin:0!important}
+
+.hm-adaptive-completion-overlay{padding:18px}
+.hm-adaptive-completion-modal{width:min(760px,calc(100vw - 36px))!important;max-width:760px!important;max-height:min(88dvh,820px)!important;padding:22px!important;background:linear-gradient(145deg,color-mix(in srgb,#e8fff2 78%,var(--hm-surface-card,var(--card-color))),var(--hm-surface-card,var(--card-color)))!important}
+.hm-adaptive-completion-modal textarea{width:100%;min-height:clamp(340px,58dvh,590px)!important;max-height:60dvh;padding:18px!important;box-sizing:border-box;border:1px solid color-mix(in srgb,#39a96b 35%,var(--hm-line-soft,var(--border-color)))!important;border-radius:16px!important;background:color-mix(in srgb,#f2fff7 86%,var(--hm-surface-card,var(--card-color)))!important;color:var(--hm-color-body,var(--text-color))!important;font-family:inherit!important;font-size:.88rem!important;line-height:1.7!important;resize:none!important}
+:root[data-hm-display="dark"] .hm-adaptive-completion-modal{background:linear-gradient(145deg,#17352b,var(--hm-surface-card,#242330))!important}
+:root[data-hm-display="dark"] .hm-adaptive-completion-modal textarea{background:#142b24!important;color:#f4fff8!important;border-color:#477b65!important}
+@media(max-width:560px){.hm-adaptive-completion-overlay{padding:0}.hm-adaptive-completion-modal{width:100%!important;max-width:none!important;max-height:100dvh!important;min-height:100dvh;border-radius:0!important;padding:16px 14px calc(16px + env(safe-area-inset-bottom))!important}.hm-adaptive-completion-modal textarea{min-height:calc(100dvh - 210px)!important;max-height:calc(100dvh - 210px)!important}}
+@media (min-width: 700px) {
+    body.hm-authenticated #appContent,
+    body.is-authenticated #appContent { width: min(920px, calc(100vw - 48px)) !important; max-width: 920px !important; }
+    body.hm-authenticated #appContent > .container,
+    body.is-authenticated #appContent > .container { width: 100% !important; max-width: 920px !important; padding: 30px 34px 34px !important; }
+    .hm-adaptive-category-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+    .hm-adaptive-category { height: 104px; min-height: 104px !important; }
+    .hm-adaptive-category-modal { width: min(720px, calc(100vw - 40px)); }
+}
+@media (min-width: 1181px) {
+    body.hm-authenticated #appContent,
+    body.is-authenticated #appContent { width: min(1040px, calc(100vw - 96px)) !important; max-width: 1040px !important; }
+    body.hm-authenticated #appContent > .container,
+    body.is-authenticated #appContent > .container { max-width: 1040px !important; padding: 34px 42px 40px !important; }
+    .hm-adaptive-category-grid { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 14px; }
+    .hm-adaptive-category { height: 106px; min-height: 106px !important; }
+    .hm-adaptive-category-section { margin-top: 8px; }
+}
+@media (max-width: 560px) {
+    .hm-adaptive-action-grid { grid-template-columns: 1fr; }
+    .hm-adaptive-category-modal { max-height: calc(100dvh - 24px); }
+}
+

@@ -1,0 +1,25 @@
+:root[data-hm-theme][data-hm-display="dark"] :is(
+  .room-settings-modal .sync-box,.relationship-role-box,.relationship-role-note,
+  .room-list-box,.room-empty-state,#inviteResult
+){
+  background:linear-gradient(145deg,var(--hm-dark-card),var(--hm-dark-card-soft)) !important;
+  color:var(--hm-color-body) !important;
+  border-color:var(--hm-dark-line) !important;
+}
+:root[data-hm-theme][data-hm-display="dark"] #currentRoomInfo,
+:root[data-hm-theme][data-hm-display="dark"] .room-settings-modal details,
+:root[data-hm-theme][data-hm-display="dark"] .room-settings-modal details > div,
+:root[data-hm-theme][data-hm-display="dark"] .relationship-role-note,
+:root[data-hm-theme][data-hm-display="dark"] .relationship-role-help{
+  color:var(--hm-color-muted) !important;
+}
+:root[data-hm-theme][data-hm-display="dark"] .relationship-role-btn{
+  background:var(--hm-dark-input) !important;color:var(--hm-color-body) !important;border-color:var(--hm-dark-line) !important;
+}
+:root[data-hm-theme][data-hm-display="dark"] .relationship-role-btn.active{
+  background:color-mix(in srgb,var(--hm-primary) 34%,var(--hm-dark-card-soft)) !important;
+  color:#fff !important;border-color:var(--hm-primary) !important;
+}
+:root[data-hm-theme][data-hm-display="dark"] .room-settings-modal summary{color:color-mix(in srgb,var(--hm-primary) 62%,#fff 38%) !important;}
+
+

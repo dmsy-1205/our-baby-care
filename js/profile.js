@@ -106,6 +106,7 @@ function closeProfileModal() {
         overlay.setAttribute('inert', '');
         overlay.setAttribute('aria-hidden', 'true');
     }
+    window.hmReturnToAccountMenu?.('profile');
 }
 
 function updateProfileNicknamePreview() {
@@ -194,6 +195,7 @@ function closeAccountMenuModal() {
 }
 
 function openAccountChildModal(type) {
+    if (['profile', 'theme', 'data'].includes(type)) window.hmAccountChildReturnType = type;
     closeAccountMenuModal();
     window.setTimeout(() => {
         if (type === 'profile' && typeof openProfileModal === 'function') openProfileModal();
@@ -214,7 +216,14 @@ function openAccountChildModal(type) {
     }, 80);
 }
 
+function hmReturnToAccountMenu(type) {
+    if (window.hmAccountChildReturnType !== type) return;
+    window.hmAccountChildReturnType = '';
+    window.setTimeout(openAccountMenuModal, 60);
+}
+
 window.openAccountMenuModal = openAccountMenuModal;
 window.closeAccountMenuModal = closeAccountMenuModal;
 window.openAccountChildModal = openAccountChildModal;
+window.hmReturnToAccountMenu = hmReturnToAccountMenu;
 window.selectProfileAvatar = selectProfileAvatar;

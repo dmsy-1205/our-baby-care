@@ -1,0 +1,80 @@
+/* STEP6.2.14.28 - theme-aware selected-date record status. */
+:root[data-hm-theme] .feedback-review-card{
+  background:linear-gradient(145deg,
+    color-mix(in srgb,var(--hm-surface-card,var(--card-color)) 94%,var(--hm-primary) 6%),
+    color-mix(in srgb,var(--hm-surface-card,var(--card-color)) 90%,var(--hm-accent) 10%))!important;
+  color:var(--hm-color-body,var(--text-color))!important;
+  border-color:color-mix(in srgb,var(--hm-primary) 30%,var(--hm-line-soft,var(--border-color)))!important;
+}
+:root[data-hm-theme] .feedback-review-head strong{color:var(--hm-color-title,var(--text-color))!important}
+:root[data-hm-theme] .feedback-review-head span{color:var(--hm-color-muted,var(--muted-color))!important}
+:root[data-hm-theme] .feedback-review-item{
+  background:color-mix(in srgb,var(--hm-surface-card,var(--card-color)) 88%,var(--hm-primary-soft,var(--soft-purple)) 12%)!important;
+  color:var(--hm-color-muted,var(--muted-color))!important;
+  border:1px solid color-mix(in srgb,var(--hm-primary) 16%,transparent);
+}
+:root[data-hm-theme] .feedback-review-item.is-done{
+  background:color-mix(in srgb,var(--hm-surface-card,var(--card-color)) 78%,var(--hm-accent,var(--hm-primary)) 22%)!important;
+  color:var(--hm-color-body,var(--text-color))!important;
+  border-color:color-mix(in srgb,var(--hm-accent,var(--hm-primary)) 38%,transparent);
+}
+:root[data-hm-theme] .feedback-review-item > span{
+  color:var(--hm-color-muted,var(--muted-color));
+  font-weight:900;
+}
+:root[data-hm-theme] .feedback-review-item.is-done > span,
+:root[data-hm-theme] .feedback-review-item.is-done > small{
+  color:var(--hm-accent,var(--hm-primary))!important;
+}
+:root[data-hm-theme][data-hm-display="dark"] .feedback-review-item{
+  background:color-mix(in srgb,var(--hm-dark-card-soft,var(--hm-surface-card)) 88%,var(--hm-primary) 12%)!important;
+  color:var(--hm-color-muted)!important;
+  border-color:var(--hm-dark-line)!important;
+}
+:root[data-hm-theme][data-hm-display="dark"] .feedback-review-item.is-done{
+  background:color-mix(in srgb,var(--hm-dark-card-soft,var(--hm-surface-card)) 76%,var(--hm-accent) 24%)!important;
+  color:var(--hm-color-title)!important;
+  border-color:color-mix(in srgb,var(--hm-accent) 46%,var(--hm-dark-line))!important;
+}
+
+/* STEP6.2.14.30 - meal photo upload and 1/2/3 thumbnail layout. */
+.meal-row{gap:8px}
+.meal-row input[type="text"]{min-width:0}
+.meal-photo-input{display:none!important}
+.meal-photo-button{
+  width:42px;height:42px;flex:0 0 42px;display:inline-flex;align-items:center;justify-content:center;
+  padding:0;border:1px solid color-mix(in srgb,var(--hm-accent,var(--hm-primary)) 38%,transparent);
+  border-radius:13px;background:color-mix(in srgb,var(--hm-surface-card,var(--card-color)) 82%,var(--hm-accent,var(--hm-primary)) 18%);
+  box-sizing:border-box;overflow:hidden;color:var(--hm-accent,var(--hm-primary));font-size:1.22rem;font-weight:900;line-height:1;text-align:center;cursor:pointer;
+}
+.meal-photo-button>span{display:flex;width:100%;height:100%;align-items:center;justify-content:center;line-height:1;transform:translateY(-1px)}
+.meal-photo-button.has-photo{padding:0;background:var(--hm-surface-card,var(--card-color));pointer-events:none}
+.meal-photo-button.has-photo img{display:block;width:100%;height:100%;object-fit:cover}
+.meal-photo-button:active{transform:scale(.96)}
+.meal-photo-gallery{
+  display:grid;gap:9px;width:100%;margin-top:12px;padding-top:12px;
+  border-top:1px solid color-mix(in srgb,var(--hm-primary) 24%,transparent);
+}
+.meal-photo-gallery[hidden]{display:none!important}
+.meal-photo-gallery[data-count="1"]{grid-template-columns:minmax(0,132px);justify-content:center}
+.meal-photo-gallery[data-count="2"]{grid-template-columns:repeat(2,minmax(0,132px));justify-content:center}
+.meal-photo-gallery[data-count="3"]{grid-template-columns:repeat(3,minmax(0,1fr))}
+.meal-photo-thumb{position:relative;min-width:0;margin:0;aspect-ratio:1.16/1;border-radius:14px;overflow:hidden;background:var(--hm-surface-card,var(--card-color));border:1px solid color-mix(in srgb,var(--hm-primary) 24%,transparent)}
+.meal-photo-open{display:block;width:100%;height:100%;padding:0;border:0;background:transparent;cursor:zoom-in}
+.meal-photo-open img{display:block;width:100%;height:100%;object-fit:cover}
+.meal-photo-open span{position:absolute;left:6px;bottom:6px;padding:3px 7px;border-radius:999px;background:rgba(20,16,28,.72);color:#fff;font-size:.64rem;font-weight:900}
+.meal-photo-remove{position:absolute;top:5px;right:5px;width:26px;height:26px;padding:0;border:1px solid rgba(255,255,255,.72);border-radius:50%;background:rgba(28,22,35,.76);color:#fff;font-size:17px;line-height:23px;cursor:pointer}
+.meal-photo-pending-badge{position:absolute;left:6px;top:6px;padding:3px 7px;border-radius:999px;background:color-mix(in srgb,var(--hm-accent,var(--primary-color)) 88%,#22182d);color:#fff;font-size:.62rem;font-weight:900;pointer-events:none}
+.meal-photo-save-button{width:100%;margin-top:12px}.meal-photo-save-button:disabled{opacity:.48;cursor:not-allowed}
+:root[data-hm-display="dark"] .meal-photo-button{background:color-mix(in srgb,var(--hm-dark-card-soft,var(--hm-surface-card)) 78%,var(--hm-accent) 22%);color:var(--hm-color-title);border-color:color-mix(in srgb,var(--hm-accent) 48%,var(--hm-dark-line))}
+@media(max-width:360px){.meal-photo-button{width:38px;height:38px;flex-basis:38px}.meal-photo-gallery{gap:6px}}
+
+/* STEP6.2.14.32 - keep meal photos inside their record context. */
+.history-meal-list{display:grid;gap:9px;margin-top:8px}
+.history-meal-row{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:12px;padding:10px 11px;border:1px solid color-mix(in srgb,var(--hm-primary) 20%,transparent);border-radius:14px;background:color-mix(in srgb,var(--hm-surface-card,var(--card-color)) 90%,var(--hm-primary-soft,var(--soft-purple)) 10%)}
+.history-meal-copy{min-width:0;display:grid;gap:3px}
+.history-meal-copy strong{color:var(--hm-color-title,var(--text-color));font-size:.78rem}
+.history-meal-copy span{overflow-wrap:anywhere;color:var(--hm-color-muted,var(--muted-color));font-size:.75rem;line-height:1.4}
+.history-meal-row img{width:72px;height:58px;border-radius:11px;object-fit:cover;border:1px solid color-mix(in srgb,var(--hm-primary) 22%,transparent)}
+:root[data-hm-display="dark"] .history-meal-row{background:color-mix(in srgb,var(--hm-dark-card-soft,var(--hm-surface-card)) 88%,var(--hm-primary) 12%);border-color:var(--hm-dark-line,var(--hm-line-soft))}
+@media(max-width:360px){.history-meal-row{gap:8px}.history-meal-row img{width:62px;height:52px}}

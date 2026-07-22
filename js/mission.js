@@ -188,12 +188,12 @@
             const cleanText = sanitizeMissionText(item.text);
             const safeText = escapeHtml(cleanText);
             const deleteBtn = canManageRelationshipCards()
-                ? `<button type="button" class="mission-mini-btn delete" onclick="deleteMissionFromLibrary('${item.id}')">삭제</button>`
+                ? `<button type="button" class="mission-mini-btn delete" data-hm-action="delete-mission-library" data-hm-value="${escapeHtml(item.id)}">삭제</button>`
                 : '';
             return `
                 <div class="mission-library-item">
                     <div class="mission-library-text">⭐ ${safeText}</div>
-                    <button type="button" class="mission-mini-btn" onclick='addMissionTemplate(${jsStringLiteral(cleanText)})'>추가</button>
+                    <button type="button" class="mission-mini-btn" data-hm-action="add-mission-template" data-hm-value="${escapeHtml(cleanText)}">추가</button>
                     ${deleteBtn}
                 </div>
             `;

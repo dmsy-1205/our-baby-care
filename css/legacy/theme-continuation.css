@@ -1,0 +1,1493 @@
+/* =========================================================
+   STEP5.10.8 - Sub routine structured inputs + History polish
+   ========================================================= */
+.sub-routine-add-top{margin:0 0 12px!important;width:100%}
+.sub-routine-manager-compact{margin-top:0!important}
+.sub-routine-manager-card{display:grid;grid-template-columns:42px minmax(0,1fr) auto;gap:10px;align-items:center;padding:11px 12px;border:1px solid var(--theme-border,rgba(124,92,255,.22));border-radius:16px;background:var(--theme-card,#fff);box-shadow:none}
+.sub-routine-manager-card-icon{width:40px;height:40px;border-radius:13px;display:grid;place-items:center;background:color-mix(in srgb,var(--theme-accent,#7c5cff) 16%,var(--theme-card,#fff))}
+.sub-routine-manager-card>div:nth-child(2){min-width:0;display:grid;gap:3px}.sub-routine-manager-card strong{color:var(--theme-text,#2f2940);font-size:.9rem}.sub-routine-manager-card small{color:var(--theme-text-muted,#837b99);font-size:.72rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sub-routine-manager-actions{display:flex;gap:5px}.sub-routine-manager-actions button{border:0;border-radius:10px;padding:8px 9px;background:color-mix(in srgb,var(--theme-accent,#7c5cff) 12%,var(--theme-card,#fff));color:var(--theme-accent,#7c5cff);font-size:.72rem;font-weight:900}.sub-routine-manager-actions .danger{background:rgba(232,77,115,.11);color:#e84d73}
+.sub-routine-item-editor-head{display:flex;align-items:center;justify-content:space-between;margin-top:4px}.sub-routine-item-editor-head strong{font-size:.84rem;color:var(--theme-text,#2f2940)}.sub-routine-item-editor-head button{border:1px solid var(--theme-border,rgba(124,92,255,.22));border-radius:12px;padding:8px 11px;background:var(--theme-card,#fff);color:var(--theme-accent,#7c5cff);font-weight:900}
+.sub-routine-draft-items{display:grid;gap:8px}.sub-routine-draft-row{display:grid;grid-template-columns:26px minmax(105px,1fr) 92px minmax(110px,1fr) auto auto;gap:6px;align-items:center;padding:8px;border-radius:14px;background:var(--theme-card-soft,rgba(255,255,255,.58));border:1px solid var(--theme-border,rgba(124,92,255,.18))}.sub-routine-draft-row>span{font-weight:900;color:var(--theme-accent,#7c5cff);text-align:center}.sub-routine-draft-row input,.sub-routine-draft-row select{min-width:0;width:100%;padding:9px;border-radius:10px;border:1px solid var(--theme-border,rgba(124,92,255,.2));background:var(--theme-input,#fff);color:var(--theme-text,#2f2940)}.sub-routine-draft-row label{display:flex;align-items:center;gap:4px;font-size:.7rem;white-space:nowrap}.sub-routine-draft-row label input{width:auto}.sub-routine-draft-row button{border:0;border-radius:10px;padding:9px;background:rgba(232,77,115,.11);color:#e84d73;font-weight:900}
+.sub-routine-input-body{display:grid;gap:10px;margin:8px 0 14px}.sub-routine-input-field{display:grid;gap:6px}.sub-routine-input-field>span{font-size:.82rem;font-weight:900;color:var(--theme-text,#2f2940)}.sub-routine-input-field input{width:100%;box-sizing:border-box;padding:13px 14px;border-radius:15px;border:1px solid var(--theme-border,rgba(124,92,255,.24));background:var(--theme-input,#fff);color:var(--theme-text,#2f2940);font:inherit}.sub-routine-input-check{display:flex;align-items:center;gap:11px;padding:12px;border:1px solid var(--theme-border,rgba(124,92,255,.22));border-radius:15px;background:var(--theme-card-soft,rgba(255,255,255,.58))}.sub-routine-input-check input{width:22px;height:22px;accent-color:var(--theme-accent,#7c5cff)}.sub-routine-input-check span{display:grid;gap:2px}.sub-routine-input-check strong{color:var(--theme-text,#2f2940)}.sub-routine-input-check small{color:var(--theme-text-muted,#837b99);font-size:.72rem}
+:root[data-hm-theme][data-hm-display="dark"] :is(.sub-routine-manager-card,.sub-routine-draft-row,.sub-routine-input-check){background:var(--hm-color-surface-2)!important;border-color:var(--hm-color-border)!important}:root[data-hm-theme][data-hm-display="dark"] :is(.sub-routine-manager-card strong,.sub-routine-item-editor-head strong,.sub-routine-input-field>span,.sub-routine-input-check strong){color:var(--hm-color-text)!important}:root[data-hm-theme][data-hm-display="dark"] :is(.sub-routine-draft-row input,.sub-routine-draft-row select,.sub-routine-input-field input){background:var(--hm-color-input)!important;color:var(--hm-color-text)!important;border-color:var(--hm-color-border)!important}
+
+/* History panel top now reads as one coherent dark header instead of white strips. */
+:root[data-hm-theme][data-hm-display="dark"] .history-panel-modal{background:var(--hm-color-bg-elevated)!important}
+:root[data-hm-theme][data-hm-display="dark"] .history-panel-head{background:linear-gradient(135deg,color-mix(in srgb,var(--hm-color-surface-2) 86%,var(--hm-color-accent) 14%),var(--hm-color-surface-2))!important;border:1px solid var(--hm-color-border)!important;border-radius:20px!important;margin:0 0 12px!important;padding:16px!important}
+:root[data-hm-theme][data-hm-display="dark"] .history-panel-head:before,:root[data-hm-theme][data-hm-display="dark"] .history-panel-head:after{display:none!important}
+:root[data-hm-theme][data-hm-display="dark"] .history-detail-kicker{background:transparent!important;color:var(--hm-color-accent)!important;padding:0!important}
+:root[data-hm-theme][data-hm-display="dark"] .history-panel-head h2{color:var(--hm-color-text)!important}.history-panel-head h2 span{vertical-align:middle}
+:root[data-hm-theme][data-hm-display="dark"] .history-intro-note{background:var(--hm-color-surface-2)!important;color:var(--hm-color-muted)!important;border-color:var(--hm-color-border)!important}
+#photoThumbs.history-thumb-row{padding:0!important;margin:14px 0!important;overflow:visible!important}
+.history-gallery-card{width:100%!important;box-sizing:border-box!important;margin:0!important;transform:none!important;position:relative!important;top:auto!important;bottom:auto!important;box-shadow:var(--theme-shadow,0 8px 22px rgba(80,55,120,.08))!important}
+:root[data-hm-theme][data-hm-display="dark"] .history-gallery-card{background:var(--hm-color-surface-2)!important;border:1px solid var(--hm-color-border)!important;color:var(--hm-color-text)!important;box-shadow:none!important}:root[data-hm-theme][data-hm-display="dark"] .history-gallery-card-copy strong{color:var(--hm-color-text)!important}:root[data-hm-theme][data-hm-display="dark"] .history-gallery-card-copy small{color:var(--hm-color-muted)!important}
+@media(max-width:760px){.sub-routine-draft-row{grid-template-columns:24px 1fr 90px}.sub-routine-draft-row [data-field="placeholder"]{grid-column:2/4}.sub-routine-draft-row label{grid-column:2}.sub-routine-draft-row button{grid-column:3}.sub-routine-manager-card{grid-template-columns:40px minmax(0,1fr)}.sub-routine-manager-actions,.sub-routine-readonly{grid-column:2;justify-self:start}.history-panel-head{align-items:flex-start!important}}
+
+
+/* STEP5.10.9 User Guide 2.0 / release information */
+.hm-release-meta { display:flex; align-items:center; justify-content:space-between; gap:10px; margin:10px 0; font-size:12px; color:var(--hm-text-muted, #756d88); }
+.hm-release-meta span:last-child { padding:4px 9px; border-radius:999px; background:var(--hm-accent-soft, #f2eaff); color:var(--hm-accent, #7b5cff); font-weight:800; }
+.hm-release-change-list { margin:12px 0 0; padding-left:20px; display:grid; gap:7px; line-height:1.5; }
+.hm-release-card code { font-size:.9em; }
+html[data-hm-display="dark"] .hm-release-meta { color:var(--hm-text-muted, #b9b2c8); }
+
+
+/* STEP5.10.10 record deletion safety */
+.record-deletion-home{margin:12px 0 0}.record-deletion-home-button{width:100%;display:flex;align-items:center;gap:12px;border:1px solid rgba(180,95,120,.25);border-radius:16px;padding:13px 15px;background:var(--card-bg,#fff);color:inherit;text-align:left;box-shadow:0 8px 24px rgba(70,40,60,.07)}.record-deletion-home-button>span:first-child{font-size:1.35rem}.record-deletion-home-button>span:nth-child(2){display:flex;flex:1;flex-direction:column;gap:3px}.record-deletion-home-button small,.record-deletion-panel small{display:block;opacity:.72;line-height:1.45}.record-deletion-panel{margin:12px 0 16px;padding:14px;border:1px solid rgba(180,95,120,.25);border-radius:18px;background:var(--card-bg,#fff)}.record-deletion-head{display:flex;justify-content:space-between;gap:12px;margin-bottom:10px}.record-deletion-list{display:grid;gap:8px}.record-deletion-item{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 12px;border-radius:13px;background:rgba(160,120,140,.08)}.record-deletion-item.is-unseen{outline:2px solid rgba(215,104,145,.25)}.record-deletion-item.is-restored{opacity:.72}.record-deletion-actions{display:flex;gap:7px;flex-shrink:0}.record-deletion-actions button{border:0;border-radius:10px;padding:8px 11px;cursor:pointer}.record-deletion-actions .restore{font-weight:700}.dark-mode .record-deletion-home-button,.dark-mode .record-deletion-panel{background:var(--card-bg,#25232b);border-color:rgba(255,180,210,.2)}.dark-mode .record-deletion-item{background:rgba(255,255,255,.06)}@media(max-width:520px){.record-deletion-item{align-items:flex-start;flex-direction:column}.record-deletion-actions{width:100%}.record-deletion-actions button{flex:1}}
+
+
+/* STEP5.10.11 deleted record audit management */
+.record-deletion-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:12px 0}.record-deletion-summary span{display:flex;flex-direction:column;align-items:center;gap:2px;padding:10px 6px;border-radius:14px;background:var(--surface-soft,#f5f2fb);border:1px solid var(--border-soft,rgba(90,70,120,.12))}.record-deletion-summary strong{font-size:1.05rem}.record-deletion-summary small{font-size:.72rem;opacity:.72}.record-deletion-filters{display:flex;gap:7px;overflow:auto;padding:2px 0 10px}.record-deletion-filters button{white-space:nowrap;border:1px solid var(--border-soft,rgba(90,70,120,.18));background:var(--surface,#fff);border-radius:999px;padding:7px 10px;font:inherit;font-size:.78rem}.record-deletion-filters button.active{background:var(--accent-soft,#ede4ff);font-weight:700}.record-deletion-main{min-width:0;display:flex;flex-direction:column;gap:3px}.record-deletion-title{display:flex;align-items:center;gap:7px;flex-wrap:wrap}.record-deletion-status{font-size:.7rem;padding:3px 7px;border-radius:999px;background:rgba(126,91,190,.12)}.record-deletion-status.restored{background:rgba(42,157,95,.14)}.record-deletion-status.expired{background:rgba(120,120,120,.13)}.record-deletion-item.is-expired{opacity:.76}.record-deletion-empty{padding:18px;text-align:center;opacity:.7}.dark-mode .record-deletion-summary span,.dark-mode .record-deletion-filters button{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.12)}@media(max-width:560px){.record-deletion-summary{grid-template-columns:repeat(2,minmax(0,1fr))}.record-deletion-item{align-items:flex-start}.record-deletion-actions{width:100%;justify-content:flex-end}}
+
+/* STEP5.10.11.1: prominent Sub deletion notice below account card */
+.record-deletion-home-prominent{margin:10px 0 14px}.record-deletion-home-prominent .record-deletion-home-button{border-width:2px;box-shadow:0 10px 28px rgba(180,95,120,.13)}
+
+
+/* =========================================================
+   STEP5.10.11.2 Manager-only view guard / dark-mode full audit
+   ========================================================= */
+.hm-manager-restricted-message{
+  display:grid;justify-items:center;gap:8px;margin:18px 0 8px;padding:28px 20px;
+  border:1px solid var(--hm-line-soft,rgba(120,90,170,.18));border-radius:22px;
+  background:var(--hm-surface-card-soft,rgba(248,245,252,.92));text-align:center;
+}
+.hm-manager-restricted-message[hidden]{display:none!important}
+.hm-manager-restricted-message>span{font-size:2rem}
+.hm-manager-restricted-message strong{color:var(--hm-color-title,#2f2a3d);font-size:1rem;font-weight:900}
+.hm-manager-restricted-message small{max-width:360px;color:var(--hm-color-muted,#81798d);font-size:.82rem;line-height:1.55}
+.daily-modal.hm-sub-manager-restricted>:not(.daily-modal-head):not(.hm-manager-restricted-message){display:none!important}
+.daily-modal.hm-sub-manager-restricted{min-height:250px}
+
+:root[data-hm-theme][data-hm-display="dark"] :is(
+  .help-center-card,.help-center-header,.help-hero,.help-search-wrap,.help-center-panels,.help-panel,
+  .help-menu-card,.help-mini-card,.help-result-card,.help-empty-result,.faq-question,.faq-answer,
+  .help-tip-list div,.help-random-tip,.hm-release-card,.guide-faq .faq-item,
+  .manager-lock-note,.feedback-hint,.feedback-review-card,.trust-card,.todays-gift-intro,
+  .data-policy-card,.data-admin-summary,.record-deletion-home-button,.record-deletion-panel,
+  .record-deletion-summary span,.record-deletion-filters button,.record-deletion-item,
+  .hm-manager-restricted-message
+){
+  background:linear-gradient(145deg,var(--hm-dark-card),color-mix(in srgb,var(--hm-dark-card-soft) 82%,var(--hm-dark-card) 18%))!important;
+  color:var(--hm-color-body)!important;
+  border-color:var(--hm-dark-line)!important;
+  box-shadow:none!important;
+}
+:root[data-hm-theme][data-hm-display="dark"] :is(
+  .help-search-input,.help-center-card input,.help-center-card textarea,.help-center-card select,
+  .daily-modal input,.daily-modal textarea,.daily-modal select
+){
+  background:var(--hm-dark-input)!important;color:var(--hm-color-body)!important;
+  border-color:var(--hm-dark-line)!important;box-shadow:none!important;
+}
+:root[data-hm-theme][data-hm-display="dark"] :is(
+  .help-center-kicker,.help-hero p,.help-hero span,.help-search-label,.help-menu-card small,
+  .help-mini-card p,.help-result-card span,.help-empty-result,.faq-answer,.help-tip-list div,
+  .hm-release-meta,.manager-lock-note,.feedback-hint,.todays-gift-intro span,
+  .hm-manager-restricted-message small
+){color:var(--hm-color-muted)!important}
+:root[data-hm-theme][data-hm-display="dark"] :is(
+  .help-hero strong,.help-menu-card strong,.help-mini-card h3,.help-result-card strong,
+  .faq-question,.help-random-tip p,.guide-faq .faq-item strong,.hm-manager-restricted-message strong,
+  .feedback-review-head strong,.todays-gift-intro strong
+){color:var(--hm-color-title)!important}
+:root[data-hm-theme][data-hm-display="dark"] :is(.help-tab,.help-small-btn,.guide-primary,.guide-close){
+  background:color-mix(in srgb,var(--hm-dark-card-soft) 82%,var(--hm-primary) 18%)!important;
+  color:var(--hm-color-body)!important;border-color:var(--hm-dark-line)!important;
+}
+:root[data-hm-theme][data-hm-display="dark"] .help-tab.active{
+  background:linear-gradient(135deg,color-mix(in srgb,var(--hm-primary) 28%,var(--hm-dark-card-soft)),color-mix(in srgb,var(--hm-accent) 22%,var(--hm-dark-card)))!important;
+  color:#fff!important;
+}
+:root[data-hm-theme][data-hm-display="dark"] .help-tip{
+  background:color-mix(in srgb,#8a6940 20%,var(--hm-dark-card))!important;
+  color:#f1d7ac!important;border:1px solid color-mix(in srgb,#c89a59 32%,var(--hm-dark-line))!important;
+}
+:root[data-hm-theme][data-hm-display="dark"] :is(.help-center-header,.daily-modal-head){
+  background:transparent!important;color:var(--hm-color-title)!important;
+}
+:root[data-hm-theme][data-hm-display="dark"] .help-center-card::-webkit-scrollbar-track{background:var(--hm-dark-shell)}
+:root[data-hm-theme][data-hm-display="dark"] .help-center-card::-webkit-scrollbar-thumb{background:var(--hm-dark-line)}
+
+
+/* =========================================================
+   STEP5.10.12 History Center UI Renewal
+   ========================================================= */
+#historyPanelOverlay .history-panel-modal{background:var(--hm-surface-card,#fff);color:var(--hm-color-body,#332d3d)}
+#calendarBox.history-calendar-premium{background:var(--hm-surface-card-soft,#f7f3fb)!important;border:1px solid var(--hm-line-soft,rgba(120,90,170,.18))!important;border-radius:24px!important;padding:14px!important;box-shadow:none!important}
+.history-calendar-title-row{background:transparent!important;color:var(--hm-color-title,#30293c)!important;border-color:var(--hm-line-soft,rgba(120,90,170,.18))!important}
+.history-calendar-current-month span,.history-month-count{color:var(--hm-color-muted,#81798d)!important}
+.history-calendar-grid{background:transparent!important;gap:8px!important}
+.calendar-head{color:var(--hm-color-muted,#81798d)!important;font-weight:800!important}
+.calendar-day{min-height:58px!important;border-radius:17px!important;background:var(--hm-surface-card,#fff)!important;color:var(--hm-color-title,#30293c)!important;border:1px solid var(--hm-line-soft,rgba(120,90,170,.18))!important;box-shadow:none!important}
+.calendar-day.empty-day{background:transparent!important;border-color:transparent!important}
+.calendar-day.has-record{background:color-mix(in srgb,var(--hm-primary,#8e5cf4) 12%,var(--hm-surface-card,#fff))!important;border-color:color-mix(in srgb,var(--hm-primary,#8e5cf4) 42%,transparent)!important}
+.calendar-day.today{outline:2px solid var(--hm-primary,#ef5f94)!important;outline-offset:1px}
+.calendar-day.selected-record{background:color-mix(in srgb,var(--hm-primary,#8e5cf4) 24%,var(--hm-surface-card,#fff))!important;box-shadow:0 0 0 2px color-mix(in srgb,var(--hm-primary,#8e5cf4) 28%,transparent)!important}
+.calendar-icons{font-size:.7rem!important;letter-spacing:1px!important;white-space:nowrap;overflow:hidden}
+#photoThumbs.history-thumb-row{display:block!important;overflow:visible!important;margin:14px 0!important;padding:0!important}
+.history-gallery-card{width:100%!important;min-height:92px!important;display:grid!important;grid-template-columns:auto 1fr auto!important;align-items:center!important;gap:12px!important;padding:12px!important;border-radius:20px!important;background:var(--hm-surface-card-soft,#f7f3fb)!important;border:1px solid var(--hm-line-soft,rgba(120,90,170,.18))!important;color:inherit!important;text-align:left!important}
+.history-gallery-mini-previews{display:flex;gap:6px;min-width:0}
+.history-gallery-mini-thumb{position:relative;width:48px;height:48px;border-radius:13px;overflow:hidden;display:grid;place-items:center;background:var(--hm-surface-card,#fff);border:1px solid var(--hm-line-soft,rgba(120,90,170,.18));flex:0 0 auto}
+.history-gallery-mini-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.history-gallery-more{position:absolute;inset:0;display:grid;place-items:center;background:rgba(20,15,28,.58);color:#fff;font-weight:900;font-size:.85rem}
+.history-gallery-empty-icon{width:48px;height:48px;display:grid;place-items:center;border-radius:13px;background:var(--hm-surface-card,#fff);border:1px solid var(--hm-line-soft,rgba(120,90,170,.18))}
+.history-gallery-card-copy{min-width:0}.history-gallery-card-copy strong,.history-gallery-card-copy small{display:block}.history-gallery-card-copy small{color:var(--hm-color-muted,#81798d);margin-top:4px}
+.history-gallery-card-count{white-space:nowrap;font-weight:900;color:var(--hm-primary,#8e5cf4)}
+.record-deletion-compact-card{width:100%;display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:12px;margin:12px 0;padding:13px 14px;border-radius:18px;background:var(--hm-surface-card-soft,#f7f3fb);border:1px solid var(--hm-line-soft,rgba(120,90,170,.18));color:inherit;text-align:left}
+.record-deletion-compact-card.has-unseen{border-color:var(--hm-primary,#ef5f94);box-shadow:0 0 0 2px color-mix(in srgb,var(--hm-primary,#ef5f94) 18%,transparent)}
+.record-deletion-compact-icon{font-size:1.4rem}.record-deletion-compact-copy strong,.record-deletion-compact-copy small{display:block}.record-deletion-compact-copy small{margin-top:3px;color:var(--hm-color-muted,#81798d)}.record-deletion-compact-arrow{font-size:1.5rem}
+.record-deletion-modal-overlay{position:fixed;inset:0;z-index:10040;display:none;align-items:center;justify-content:center;padding:16px;background:rgba(20,15,28,.68);backdrop-filter:blur(8px)}
+.record-deletion-modal-overlay[hidden]{display:none!important}.record-deletion-modal{width:min(680px,100%);max-height:min(86vh,820px);overflow:auto;border-radius:26px;padding:18px;background:var(--hm-surface-card,#fff);color:var(--hm-color-body,#332d3d);border:1px solid var(--hm-line-soft,rgba(120,90,170,.18));box-shadow:0 26px 80px rgba(0,0,0,.28)}
+.record-deletion-panel-modal{margin:0!important}
+:root[data-hm-theme][data-hm-display="dark"] #historyPanelOverlay .history-panel-modal,
+:root[data-hm-theme][data-hm-display="dark"] #calendarBox.history-calendar-premium,
+:root[data-hm-theme][data-hm-display="dark"] .calendar-day,
+:root[data-hm-theme][data-hm-display="dark"] .history-gallery-card,
+:root[data-hm-theme][data-hm-display="dark"] .history-gallery-mini-thumb,
+:root[data-hm-theme][data-hm-display="dark"] .history-gallery-empty-icon,
+:root[data-hm-theme][data-hm-display="dark"] .record-deletion-compact-card,
+:root[data-hm-theme][data-hm-display="dark"] .record-deletion-modal{background:var(--hm-dark-card)!important;color:var(--hm-color-body)!important;border-color:var(--hm-dark-line)!important}
+:root[data-hm-theme][data-hm-display="dark"] .calendar-day.has-record{background:color-mix(in srgb,var(--hm-primary) 18%,var(--hm-dark-card-soft))!important}
+:root[data-hm-theme][data-hm-display="dark"] .calendar-day.selected-record{background:color-mix(in srgb,var(--hm-primary) 30%,var(--hm-dark-card-soft))!important}
+:root[data-hm-theme][data-hm-display="dark"] .calendar-day.empty-day{background:transparent!important;border-color:transparent!important}
+@media(max-width:560px){#calendarBox.history-calendar-premium{padding:10px!important}.history-calendar-grid{gap:6px!important}.calendar-day{min-height:52px!important;border-radius:15px!important}.history-gallery-card{grid-template-columns:auto 1fr auto!important}.history-gallery-mini-thumb{width:42px;height:42px}.history-gallery-card-copy small{display:none}.record-deletion-modal{padding:14px;border-radius:22px}}
+
+/* =========================================================
+   STEP5.10.12.3 Final dark-mode audit
+   Screens reviewed: Room, Today Summary, Chat, Promise,
+   Feedback, History / Photo Gallery
+   ========================================================= */
+:root[data-hm-theme][data-hm-display="dark"] :is(
+  .room-presence-box,.presence-user-card,.presence-empty,
+  .hm-summary-modal-row,.hm-summary-modal-icon,
+  .hm-chat-messages,.hm-chat-offline-note,.hm-chat-input-row,
+  .custom-routine-check-line,.custom-routine-editor-box,.custom-routine-draft-row,.custom-routine-manager-item,
+  .feedback-confirm-row,.manager-lock-note,.feedback-review-card,.feedback-hint,
+  .history-gallery-card,.history-gallery-mini-thumb,.history-gallery-empty-icon,
+  #photoThumbs.history-thumb-row
+){
+  background:linear-gradient(145deg,var(--hm-dark-card),var(--hm-dark-card-soft)) !important;
+  color:var(--hm-color-body) !important;
+  border-color:var(--hm-dark-line) !important;
+  box-shadow:none !important;
+}
+
+/* Room / presence */
+:root[data-hm-theme][data-hm-display="dark"] :is(
+  .room-presence-title,.presence-user-title,.relationship-role-title,
+  .relationship-role-btn strong,.sync-box>label
+){color:var(--hm-color-title) !important;}
+:root[data-hm-theme][data-hm-display="dark"] :is(
+  .presence-user-email,.presence-user-status,.presence-empty,
+  .relationship-role-note,.relationship-role-help,#currentRoomInfo
+){color:var(--hm-color-muted) !important;}
+:root[data-hm-theme][data-hm-display="dark"] .presence-user-status{border-top-color:var(--hm-dark-line) !important;}
+
+/* Today summary */
+:root[data-hm-theme][data-hm-display="dark"] .hm-summary-modal-row strong,
+:root[data-hm-theme][data-hm-display="dark"] .hm-summary-modal-updated strong{color:var(--hm-color-title) !important;}
+:root[data-hm-theme][data-hm-display="dark"] .hm-summary-modal-row small,
+:root[data-hm-theme][data-hm-display="dark"] .hm-summary-modal-updated{color:var(--hm-color-muted) !important;}
+:root[data-hm-theme][data-hm-display="dark"] .hm-summary-modal-row b{color:color-mix(in srgb,var(--hm-primary) 72%,#fff 28%) !important;}
+
+/* Chat */
+:root[data-hm-theme][data-hm-display="dark"] .hm-chat-messages{background:var(--hm-dark-card) !important;}
+:root[data-hm-theme][data-hm-display="dark"] .hm-chat-empty{color:var(--hm-color-muted) !important;}
+:root[data-hm-theme][data-hm-display="dark"] .hm-chat-offline-note{
+  background:color-mix(in srgb,var(--hm-dark-card-soft) 86%,var(--hm-primary) 14%) !important;
+  color:var(--hm-color-muted) !important;
+}
+:root[data-hm-theme][data-hm-display="dark"] .hm-chat-input-row{
+  padding:8px;border:1px solid var(--hm-dark-line) !important;border-radius:16px;
+}
+:root[data-hm-theme][data-hm-display="dark"] :is(.hm-chat-input-row #chatSender,.hm-chat-input-row #chatInput){
+  background:var(--hm-dark-input) !important;color:var(--hm-color-body) !important;border-color:var(--hm-dark-line) !important;
+}
+
+/* Promise / routine input */
+:root[data-hm-theme][data-hm-display="dark"] .custom-routine-check-line{
+  background:var(--hm-dark-input) !important;color:var(--hm-color-body) !important;
+}
+:root[data-hm-theme][data-hm-display="dark"] :is(
+  .custom-routine-editor-box input,.custom-routine-editor-box select,.custom-routine-input-line input,
+  .custom-routine-input-line textarea,.custom-routine-input-line select
+){background:var(--hm-dark-input) !important;color:var(--hm-color-body) !important;border-color:var(--hm-dark-line) !important;}
+:root[data-hm-theme][data-hm-display="dark"] :is(
+  .custom-routine-editor-box label,.custom-routine-input-line span,
+  .custom-routine-manager-item strong,.custom-routine-manager-item small
+){color:inherit !important;}
+
+/* Feedback / confirmation */
+:root[data-hm-theme][data-hm-display="dark"] .feedback-confirm-row{
+  background:var(--hm-dark-input) !important;color:var(--hm-color-body) !important;
+}
+:root[data-hm-theme][data-hm-display="dark"] :is(.feedback-type-btn,.choice-btn,.gift-choice-btn){
+  background:var(--hm-dark-card-soft) !important;color:var(--hm-color-body) !important;border-color:var(--hm-dark-line) !important;
+}
+:root[data-hm-theme][data-hm-display="dark"] :is(.feedback-type-btn.active,.choice-btn.active,.gift-choice-btn.active){
+  background:color-mix(in srgb,var(--hm-primary) 30%,var(--hm-dark-card-soft)) !important;
+  border-color:var(--hm-primary) !important;color:#fff !important;
+}
+
+/* History / photo gallery alignment */
+:root[data-hm-theme][data-hm-display="dark"] #photoThumbs.history-thumb-row{
+  background:transparent !important;border:0 !important;box-shadow:none !important;
+}
+:root[data-hm-theme][data-hm-display="dark"] .history-gallery-card{
+  background:linear-gradient(145deg,var(--hm-dark-card),var(--hm-dark-card-soft)) !important;
+  color:var(--hm-color-body) !important;border:1px solid var(--hm-dark-line) !important;
+  box-shadow:none !important;outline:0 !important;
+}
+:root[data-hm-theme][data-hm-display="dark"] .history-gallery-card::before,
+:root[data-hm-theme][data-hm-display="dark"] .history-gallery-card::after{display:none !important;}
+:root[data-hm-theme][data-hm-display="dark"] :is(.history-gallery-mini-thumb,.history-gallery-empty-icon){
+  background:var(--hm-dark-input) !important;border-color:var(--hm-dark-line) !important;
+}
+:root[data-hm-theme][data-hm-display="dark"] .history-gallery-card-copy strong{color:var(--hm-color-title) !important;}
+:root[data-hm-theme][data-hm-display="dark"] .history-gallery-card-copy small{color:var(--hm-color-muted) !important;}
+:root[data-hm-theme][data-hm-display="dark"] .history-gallery-card-count{color:color-mix(in srgb,var(--hm-primary) 72%,#fff 28%) !important;}
+
+/* Remove remaining light inline surfaces inside reviewed modals */
+:root[data-hm-theme][data-hm-display="dark"] :is(
+  #roomSettingsOverlay,#homeSummaryModalOverlay,#chatModalOverlay,#customRoutineInputOverlay,
+  #feedbackModalOverlay,#rewardModalOverlay,#historyPanelOverlay
+) :is([style*="background:white"],[style*="background: white"],[style*="background:#fff"],[style*="background: #fff"]){
+  background:var(--hm-dark-card-soft) !important;
+  color:var(--hm-color-body) !important;
+  border-color:var(--hm-dark-line) !important;
+}
+
+/* =========================================================
+   HearMe2nite v1.0 STEP6.1.3
+   Anniversary mobile scroll + dark mode hotfix
+   Scope: CSS only. Firebase / anniversary data / History logic unchanged.
+   ========================================================= */
+body.modal-open {
+  overflow: hidden !important;
+  touch-action: auto !important;
+}
+body > .anniversary-settings-overlay {
+  overflow: hidden !important;
+  touch-action: pan-y !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+body > .anniversary-settings-overlay .anniversary-settings-modal {
+  min-height: 0 !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  touch-action: pan-y !important;
+  overscroll-behavior-y: contain !important;
+  -webkit-overflow-scrolling: touch !important;
+  scrollbar-gutter: stable;
+}
+body > .anniversary-settings-overlay .anniversary-custom-list {
+  min-height: 0;
+  touch-action: pan-y !important;
+}
+@media (max-width: 640px) {
+  body > .anniversary-settings-overlay {
+    align-items: stretch !important;
+  }
+  body > .anniversary-settings-overlay .anniversary-settings-modal {
+    height: calc(100dvh - max(16px, env(safe-area-inset-top)) - max(16px, env(safe-area-inset-bottom))) !important;
+    max-height: none !important;
+    margin: 0 auto !important;
+  }
+}
+
+:root[data-hm-theme][data-hm-display="dark"] body > .anniversary-settings-overlay {
+  background: rgba(8, 10, 18, .74) !important;
+}
+:root[data-hm-theme][data-hm-display="dark"] body > .anniversary-settings-overlay .anniversary-settings-modal {
+  background: linear-gradient(180deg, var(--hm-dark-shell), var(--hm-dark-card)) !important;
+  border-color: var(--hm-dark-line) !important;
+  color: var(--hm-color-body) !important;
+  box-shadow: 0 28px 80px rgba(0,0,0,.52) !important;
+}
+:root[data-hm-theme][data-hm-display="dark"] body > .anniversary-settings-overlay .anniversary-settings-modal::before {
+  background: radial-gradient(circle at 18% 20%, rgba(255,119,169,.12), transparent 36%), radial-gradient(circle at 82% 12%, color-mix(in srgb,var(--hm-primary) 22%,transparent), transparent 34%) !important;
+}
+:root[data-hm-theme][data-hm-display="dark"] :is(
+  .anniversary-settings-hero,
+  .anniversary-settings-section,
+  .anniversary-custom-item,
+  .anniversary-empty-note
+) {
+  background: linear-gradient(145deg, var(--hm-dark-card), var(--hm-dark-card-soft)) !important;
+  border-color: var(--hm-dark-line) !important;
+  color: var(--hm-color-body) !important;
+  box-shadow: none !important;
+}
+:root[data-hm-theme][data-hm-display="dark"] .anniversary-settings-hero {
+  background: color-mix(in srgb,var(--hm-dark-shell) 92%,transparent) !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+}
+:root[data-hm-theme][data-hm-display="dark"] :is(
+  .anniversary-settings-hero h2,
+  .anniversary-settings-title,
+  .anniversary-section-label strong,
+  .anniversary-custom-title,
+  .anniversary-field > span
+) {
+  color: #fff !important;
+  -webkit-text-fill-color: #fff !important;
+}
+:root[data-hm-theme][data-hm-display="dark"] :is(
+  .anniversary-settings-kicker,
+  .anniversary-settings-hero p,
+  .anniversary-settings-help,
+  .anniversary-custom-date,
+  .anniversary-empty-note,
+  .anniversary-main-date-check
+) {
+  color: var(--hm-color-muted) !important;
+  -webkit-text-fill-color: var(--hm-color-muted) !important;
+}
+:root[data-hm-theme][data-hm-display="dark"] :is(
+  .anniversary-settings-modal input[type="date"],
+  .anniversary-settings-modal input[type="text"],
+  .anniversary-settings-modal select
+) {
+  background: var(--hm-dark-input) !important;
+  color: var(--hm-color-body) !important;
+  border-color: var(--hm-dark-line) !important;
+  color-scheme: dark;
+}
+:root[data-hm-theme][data-hm-display="dark"] .anniversary-type-chip {
+  background: var(--hm-dark-input) !important;
+  color: var(--hm-color-body) !important;
+  border-color: var(--hm-dark-line) !important;
+}
+:root[data-hm-theme][data-hm-display="dark"] .anniversary-type-chip.is-selected {
+  background: color-mix(in srgb,var(--hm-primary) 28%,var(--hm-dark-card)) !important;
+  color: #fff !important;
+  border-color: var(--hm-primary) !important;
+}
+:root[data-hm-theme][data-hm-display="dark"] :is(.anniversary-custom-icon,.anniversary-modal-close) {
+  background: color-mix(in srgb,var(--hm-primary) 18%,var(--hm-dark-input)) !important;
+  color: #f7f4ff !important;
+  border-color: var(--hm-dark-line) !important;
+}
+:root[data-hm-theme][data-hm-display="dark"] .anniversary-main-btn {
+  background: color-mix(in srgb,var(--hm-primary) 20%,var(--hm-dark-input)) !important;
+  color: #d9ccff !important;
+  border-color: color-mix(in srgb,var(--hm-primary) 42%,var(--hm-dark-line)) !important;
+}
+:root[data-hm-theme][data-hm-display="dark"] .anniversary-delete-btn {
+  background: rgba(232,77,115,.14) !important;
+  color: #ff9caf !important;
+  border-color: rgba(232,77,115,.36) !important;
+}
+
+
+/* =========================================================
+   HearMe2nite v1.0 STEP6.1.5
+   Anniversary real mobile scroll + dark contrast hotfix
+   - Mobile scroll owner: top-level overlay (avoids nested modal scroll lock)
+   - Desktop/tablet: modal remains the scroll owner
+   - Firebase/data behavior unchanged
+   ========================================================= */
+body.anniversary-modal-open {
+  position: fixed !important;
+  left: 0 !important;
+  right: 0 !important;
+  width: 100% !important;
+  overflow: hidden !important;
+  touch-action: none !important;
+}
+body > .anniversary-settings-overlay.is-open {
+  display: flex !important;
+}
+.anniversary-main-date-check {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  min-height: 58px !important;
+  margin-top: 14px !important;
+  padding: 12px 14px !important;
+  border: 1px solid rgba(109,76,255,.16) !important;
+  border-radius: 16px !important;
+  background: rgba(255,255,255,.82) !important;
+  color: #514b64 !important;
+  font-size: .82rem !important;
+  font-weight: 800 !important;
+  line-height: 1.4 !important;
+  cursor: pointer !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+.anniversary-main-date-check input[type="checkbox"] {
+  width: 22px !important;
+  min-width: 22px !important;
+  height: 22px !important;
+  min-height: 22px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  accent-color: var(--hm-primary, #7c5cff) !important;
+}
+:root[data-hm-theme][data-hm-display="dark"] .anniversary-main-date-check {
+  background: var(--hm-dark-input) !important;
+  border-color: color-mix(in srgb,var(--hm-primary) 38%,var(--hm-dark-line)) !important;
+  color: #f4f0ff !important;
+  -webkit-text-fill-color: #f4f0ff !important;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.025) !important;
+}
+:root[data-hm-theme][data-hm-display="dark"] .anniversary-main-date-check input[type="checkbox"] {
+  color-scheme: dark !important;
+}
+
+@media (max-width: 640px) {
+  body > .anniversary-settings-overlay,
+  body > .anniversary-settings-overlay.is-open {
+    display: block !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    height: 100dvh !important;
+    min-height: 100dvh !important;
+    padding: max(8px, env(safe-area-inset-top)) 8px max(14px, env(safe-area-inset-bottom)) !important;
+    touch-action: pan-y !important;
+    overscroll-behavior-y: contain !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+  body > .anniversary-settings-overlay .anniversary-settings-modal {
+    width: 100% !important;
+    height: auto !important;
+    min-height: calc(100dvh - max(16px, env(safe-area-inset-top)) - max(22px, env(safe-area-inset-bottom))) !important;
+    max-height: none !important;
+    margin: 0 auto !important;
+    overflow: visible !important;
+    touch-action: pan-y !important;
+  }
+  body > .anniversary-settings-overlay .anniversary-settings-head {
+    position: relative !important;
+    top: auto !important;
+  }
+  body > .anniversary-settings-overlay :is(
+    .anniversary-settings-section,
+    .anniversary-custom-list,
+    .anniversary-custom-item,
+    .anniversary-main-date-check
+  ) {
+    touch-action: pan-y !important;
+  }
+  .anniversary-main-date-check {
+    align-items: flex-start !important;
+  }
+}
+
+
+/* =========================================================
+   HearMe2nite v1.0 STEP6.1.9 - User Guide visible menu grid
+   Guide navigation only. Admin Console and Firebase logic frozen.
+   ========================================================= */
+.help-menu-heading {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    margin: 2px 0 10px;
+    color: var(--hm-premium-text, #2D2A35);
+}
+.help-menu-heading strong {
+    font-size: .9rem;
+    font-weight: 900;
+}
+.help-menu-heading span {
+    color: var(--hm-premium-sub, #7D7694);
+    font-size: .76rem;
+    line-height: 1.45;
+}
+.help-center-tabs.help-menu-grid {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 9px;
+    overflow: visible;
+    padding: 0;
+    margin: 0 0 16px;
+    scrollbar-width: none;
+}
+.help-center-tabs.help-menu-grid::-webkit-scrollbar { display: none; }
+.help-menu-grid .help-tab {
+    min-width: 0;
+    min-height: 72px;
+    padding: 9px 6px;
+    border-radius: 18px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    line-height: 1.2;
+    text-align: center;
+    white-space: normal;
+    word-break: keep-all;
+    box-shadow: 0 7px 18px rgba(80, 72, 120, .07);
+}
+.help-menu-grid .help-tab-icon {
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 11px;
+    background: rgba(246, 240, 255, .9);
+    font-size: 1.05rem;
+    line-height: 1;
+}
+.help-menu-grid .help-tab.active {
+    transform: translateY(-1px);
+    box-shadow: 0 9px 24px rgba(112, 76, 190, .15);
+}
+.help-menu-grid .help-tab.active .help-tab-icon {
+    background: rgba(255,255,255,.82);
+}
+[data-theme-mode="dark"] .help-menu-heading,
+body.dark-mode .help-menu-heading { color: #F6F1FF; }
+[data-theme-mode="dark"] .help-menu-heading span,
+body.dark-mode .help-menu-heading span { color: #C9BEDA; }
+[data-theme-mode="dark"] .help-menu-grid .help-tab,
+body.dark-mode .help-menu-grid .help-tab {
+    background: rgba(63, 55, 82, .9);
+    border-color: rgba(190, 166, 223, .42);
+    color: #E8DFF4;
+}
+[data-theme-mode="dark"] .help-menu-grid .help-tab-icon,
+body.dark-mode .help-menu-grid .help-tab-icon {
+    background: rgba(119, 91, 144, .38);
+}
+[data-theme-mode="dark"] .help-menu-grid .help-tab.active,
+body.dark-mode .help-menu-grid .help-tab.active {
+    background: linear-gradient(135deg, rgba(118, 72, 110, .96), rgba(70, 62, 105, .96));
+    color: #FFFFFF;
+    border-color: rgba(255, 174, 200, .72);
+}
+@media (max-width: 900px) {
+    .help-center-tabs.help-menu-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+@media (max-width: 560px) {
+    .help-center-tabs.help-menu-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 8px;
+    }
+    .help-menu-grid .help-tab {
+        min-height: 68px;
+        padding: 8px 4px;
+        font-size: .72rem;
+        border-radius: 16px;
+    }
+    .help-menu-grid .help-tab-icon {
+        width: 28px;
+        height: 28px;
+        font-size: 1rem;
+    }
+}
+\n\n/* =========================================================\n   HearMe2nite v1.0 STEP6.2.0 - Compact User Guide\n   Smaller touch targets, tighter spacing, user-facing updates only.\n   ========================================================= */\n.help-center-card {\n    gap: 10px;\n}\n.help-center-header {\n    padding-bottom: 8px;\n}\n.help-center-kicker {\n    margin-bottom: 2px;\n}\n.help-hero.help-hero-compact {\n    padding: 14px 16px;\n    gap: 3px;\n    min-height: 0;\n}\n.help-hero.help-hero-compact strong {\n    font-size: 1.05rem;\n}\n.help-hero.help-hero-compact span {\n    font-size: .78rem;\n}\n.help-search-wrap {\n    gap: 5px;\n}\n.help-search-label {\n    font-size: .78rem;\n}\n.help-search-input {\n    min-height: 44px;\n    padding: 10px 14px;\n}\n.help-menu-heading {\n    margin: 0 0 6px;\n}\n.help-center-tabs.help-menu-grid {\n    grid-template-columns: repeat(6, minmax(0, 1fr));\n    gap: 7px;\n    margin-bottom: 10px;\n}\n.help-menu-grid .help-tab {\n    min-height: 56px;\n    padding: 7px 5px;\n    border-radius: 14px;\n    gap: 4px;\n    font-size: .75rem;\n    box-shadow: 0 4px 12px rgba(80, 72, 120, .06);\n}\n.help-menu-grid .help-tab-icon {\n    width: 26px;\n    height: 26px;\n    border-radius: 9px;\n    font-size: .94rem;\n}\n.help-center-panels {\n    margin-top: 2px;\n}\n.hm-release-change-list {\n    display: grid;\n    gap: 7px;\n    margin-top: 10px;\n}\n.hm-release-change-list li {\n    line-height: 1.45;\n}\n.help-release-note-link {\n    padding-top: 12px;\n    padding-bottom: 12px;\n}\n@media (max-width: 900px) {\n    .help-center-tabs.help-menu-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }\n}\n@media (max-width: 560px) {\n    .guide-card.help-center-card {\n        padding-left: 14px;\n        padding-right: 14px;\n    }\n    .help-center-tabs.help-menu-grid {\n        grid-template-columns: repeat(3, minmax(0, 1fr));\n        gap: 6px;\n    }\n    .help-menu-grid .help-tab {\n        min-height: 52px;\n        padding: 6px 3px;\n        border-radius: 13px;\n        font-size: .68rem;\n    }\n    .help-menu-grid .help-tab-icon {\n        width: 24px;\n        height: 24px;\n        font-size: .88rem;\n    }\n    .help-hero.help-hero-compact {\n        padding: 12px 14px;\n    }\n}\n@media (max-width: 380px) {\n    .help-center-tabs.help-menu-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }\n    .help-menu-grid .help-tab { min-height: 50px; }\n}\n
+/* =========================================================
+   HearMe2nite v1.0 STEP6.2.1 - Dom editor / Sub read-only view
+   Sub users can read saved feedback and gifts without seeing editor controls.
+   ========================================================= */
+.hm-manager-readonly-card{
+    display:grid;
+    gap:12px;
+    margin:16px 18px 20px;
+    padding:22px 20px;
+    border:1px solid var(--hm-color-border,rgba(120,104,145,.34));
+    border-radius:22px;
+    background:var(--hm-color-card-soft,rgba(255,255,255,.58));
+    text-align:left;
+}
+.hm-manager-readonly-card[hidden]{display:none!important}
+.hm-readonly-eyebrow{font-size:.78rem;font-weight:800;color:var(--hm-color-muted,#81798d)}
+.hm-readonly-badge{justify-self:start;padding:7px 11px;border-radius:999px;background:var(--hm-color-accent-soft,rgba(137,96,169,.14));font-size:.84rem;font-weight:900}
+.hm-readonly-message{margin:0;white-space:normal;word-break:break-word;font-size:1rem;font-weight:700;line-height:1.75;color:var(--hm-color-title,#2f2a3d)}
+.hm-readonly-confirmed{padding-top:10px;border-top:1px solid var(--hm-color-border,rgba(120,104,145,.22));font-size:.82rem;font-weight:800;color:var(--hm-color-muted,#81798d)}
+.hm-readonly-empty{margin:0;color:var(--hm-color-muted,#81798d);font-size:.9rem}
+.hm-readonly-empty-state{display:grid;justify-items:center;gap:7px;padding:12px 4px;text-align:center}
+.hm-readonly-empty-state>span{font-size:2rem}
+.hm-readonly-empty-state strong{font-size:1rem;color:var(--hm-color-title,#2f2a3d)}
+.hm-readonly-empty-state small{max-width:330px;font-size:.82rem;line-height:1.55;color:var(--hm-color-muted,#81798d)}
+.daily-modal.hm-sub-manager-readonly>:not(.daily-modal-head):not(.hm-manager-readonly-card){display:none!important}
+.daily-modal.hm-sub-manager-readonly{min-height:0}
+@media (max-width:560px){
+    .hm-manager-readonly-card{margin:14px 12px 16px;padding:19px 16px;border-radius:18px}
+    .hm-readonly-message{font-size:.95rem}
+}
+
+
+/* STEP6.2.2: Anniversary modal mobile close reliability */
+body > .anniversary-settings-overlay .anniversary-modal-close {
+    position: relative !important;
+    z-index: 6 !important;
+    pointer-events: auto !important;
+    touch-action: manipulation !important;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+
+/* STEP6.2.4 EMERGENCY: Anniversary modal visibility state
+   Root cause: the STEP6.1.5 mobile rule forced the overlay to display:block
+   even after JavaScript attempted to close it. hidden is now authoritative. */
+body > .anniversary-settings-overlay[hidden] {
+  display: none !important;
+}
+@media (max-width: 640px) {
+  body > .anniversary-settings-overlay:not(.is-open) {
+    display: none !important;
+  }
+  body > .anniversary-settings-overlay.is-open {
+    display: block !important;
+  }
+}
+
+/* =========================================================
+   HearMe2nite v1.0 STEP6.2.6 - New user dark-mode coverage
+   Scope: Promise manager, promise empty state, History badge,
+   onboarding modal. UI only; no Firebase or behavior changes.
+   ========================================================= */
+
+/* Promise manager: surfaces, empty states and schedule controls */
+:root[data-hm-theme][data-hm-display="dark"] :is(
+  #customRoutineHubOverlay .custom-routine-note,
+  #customRoutineManagerOverlay .custom-routine-note,
+  #customRoutineHubOverlay .custom-routine-empty,
+  #customRoutineManagerOverlay .custom-routine-empty,
+  #customRoutineManagerOverlay .custom-routine-editor-box,
+  #customRoutineManagerOverlay .custom-routine-schedule-box,
+  #customRoutineManagerOverlay .custom-routine-draft-row,
+  #customRoutineManagerOverlay .custom-routine-manager-item
+),
+html[data-display-mode="dark"] :is(
+  #customRoutineHubOverlay .custom-routine-note,
+  #customRoutineManagerOverlay .custom-routine-note,
+  #customRoutineHubOverlay .custom-routine-empty,
+  #customRoutineManagerOverlay .custom-routine-empty,
+  #customRoutineManagerOverlay .custom-routine-editor-box,
+  #customRoutineManagerOverlay .custom-routine-schedule-box,
+  #customRoutineManagerOverlay .custom-routine-draft-row,
+  #customRoutineManagerOverlay .custom-routine-manager-item
+),
+html.hm-dark :is(
+  #customRoutineHubOverlay .custom-routine-note,
+  #customRoutineManagerOverlay .custom-routine-note,
+  #customRoutineHubOverlay .custom-routine-empty,
+  #customRoutineManagerOverlay .custom-routine-empty,
+  #customRoutineManagerOverlay .custom-routine-editor-box,
+  #customRoutineManagerOverlay .custom-routine-schedule-box,
+  #customRoutineManagerOverlay .custom-routine-draft-row,
+  #customRoutineManagerOverlay .custom-routine-manager-item
+) {
+  background: linear-gradient(145deg, var(--hm-dark-card), var(--hm-dark-card-soft)) !important;
+  color: var(--hm-color-body, #f4efff) !important;
+  border-color: var(--hm-dark-line, rgba(210,190,235,.22)) !important;
+  box-shadow: none !important;
+}
+
+:root[data-hm-theme][data-hm-display="dark"] :is(
+  #customRoutineHubOverlay .custom-routine-note,
+  #customRoutineManagerOverlay .custom-routine-note,
+  #customRoutineHubOverlay .custom-routine-empty,
+  #customRoutineManagerOverlay .custom-routine-empty,
+  #customRoutineManagerOverlay .custom-routine-manager-item small
+),
+html[data-display-mode="dark"] :is(
+  #customRoutineHubOverlay .custom-routine-note,
+  #customRoutineManagerOverlay .custom-routine-note,
+  #customRoutineHubOverlay .custom-routine-empty,
+  #customRoutineManagerOverlay .custom-routine-empty,
+  #customRoutineManagerOverlay .custom-routine-manager-item small
+),
+html.hm-dark :is(
+  #customRoutineHubOverlay .custom-routine-note,
+  #customRoutineManagerOverlay .custom-routine-note,
+  #customRoutineHubOverlay .custom-routine-empty,
+  #customRoutineManagerOverlay .custom-routine-empty,
+  #customRoutineManagerOverlay .custom-routine-manager-item small
+) {
+  color: var(--hm-color-muted, #c8bfd7) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+:root[data-hm-theme][data-hm-display="dark"] #customRoutineManagerOverlay :is(
+  .custom-routine-template-row button,
+  .custom-routine-item-editor-head button,
+  .custom-routine-manager-actions button,
+  .custom-routine-weekday-head button
+),
+html[data-display-mode="dark"] #customRoutineManagerOverlay :is(
+  .custom-routine-template-row button,
+  .custom-routine-item-editor-head button,
+  .custom-routine-manager-actions button,
+  .custom-routine-weekday-head button
+),
+html.hm-dark #customRoutineManagerOverlay :is(
+  .custom-routine-template-row button,
+  .custom-routine-item-editor-head button,
+  .custom-routine-manager-actions button,
+  .custom-routine-weekday-head button
+) {
+  background: color-mix(in srgb, var(--hm-primary) 20%, var(--hm-dark-input)) !important;
+  color: #f7f2ff !important;
+  border: 1px solid color-mix(in srgb, var(--hm-primary) 38%, var(--hm-dark-line)) !important;
+  box-shadow: none !important;
+}
+
+:root[data-hm-theme][data-hm-display="dark"] #customRoutineManagerOverlay :is(
+  .custom-routine-kind-row label,
+  .custom-routine-weekday-row label
+),
+html[data-display-mode="dark"] #customRoutineManagerOverlay :is(
+  .custom-routine-kind-row label,
+  .custom-routine-weekday-row label
+),
+html.hm-dark #customRoutineManagerOverlay :is(
+  .custom-routine-kind-row label,
+  .custom-routine-weekday-row label
+) {
+  background: var(--hm-dark-input) !important;
+  color: var(--hm-color-body, #f4efff) !important;
+  border-color: var(--hm-dark-line, rgba(210,190,235,.22)) !important;
+}
+
+:root[data-hm-theme][data-hm-display="dark"] #customRoutineManagerOverlay :is(
+  .custom-routine-editor-box label,
+  .custom-routine-schedule-box strong,
+  .custom-routine-item-editor-head strong,
+  .custom-routine-manager-item strong,
+  .custom-routine-required
+),
+html[data-display-mode="dark"] #customRoutineManagerOverlay :is(
+  .custom-routine-editor-box label,
+  .custom-routine-schedule-box strong,
+  .custom-routine-item-editor-head strong,
+  .custom-routine-manager-item strong,
+  .custom-routine-required
+),
+html.hm-dark #customRoutineManagerOverlay :is(
+  .custom-routine-editor-box label,
+  .custom-routine-schedule-box strong,
+  .custom-routine-item-editor-head strong,
+  .custom-routine-manager-item strong,
+  .custom-routine-required
+) {
+  color: var(--hm-color-title, #fff) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+:root[data-hm-theme][data-hm-display="dark"] #customRoutineManagerOverlay .custom-routine-limit-line,
+html[data-display-mode="dark"] #customRoutineManagerOverlay .custom-routine-limit-line,
+html.hm-dark #customRoutineManagerOverlay .custom-routine-limit-line {
+  background: color-mix(in srgb, var(--hm-primary) 18%, var(--hm-dark-card-soft)) !important;
+  color: color-mix(in srgb, var(--hm-primary) 58%, #fff 42%) !important;
+  border: 1px solid color-mix(in srgb, var(--hm-primary) 35%, var(--hm-dark-line)) !important;
+}
+
+/* History header version badge */
+:root[data-hm-theme][data-hm-display="dark"] #historyPanelTitle span,
+html[data-display-mode="dark"] #historyPanelTitle span,
+html.hm-dark #historyPanelTitle span {
+  display: inline-flex !important;
+  align-items: center !important;
+  min-height: 24px !important;
+  padding: 3px 9px !important;
+  border-radius: 999px !important;
+  background: color-mix(in srgb, var(--hm-primary) 18%, var(--hm-dark-input)) !important;
+  color: #eee6ff !important;
+  -webkit-text-fill-color: #eee6ff !important;
+  border: 1px solid color-mix(in srgb, var(--hm-primary) 36%, var(--hm-dark-line)) !important;
+  box-shadow: none !important;
+}
+
+/* New-user onboarding */
+:root[data-hm-theme][data-hm-display="dark"] #onboardingModal .onboarding-card,
+html[data-display-mode="dark"] #onboardingModal .onboarding-card,
+html.hm-dark #onboardingModal .onboarding-card {
+  background: var(--hm-dark-shell, #181824) !important;
+  color: var(--hm-color-body, #f4efff) !important;
+  border-color: var(--hm-dark-line, rgba(210,190,235,.22)) !important;
+  box-shadow: 0 28px 80px rgba(0,0,0,.5) !important;
+}
+
+:root[data-hm-theme][data-hm-display="dark"] #onboardingModal :is(.guide-header,.guide-intro),
+html[data-display-mode="dark"] #onboardingModal :is(.guide-header,.guide-intro),
+html.hm-dark #onboardingModal :is(.guide-header,.guide-intro) {
+  background: linear-gradient(145deg, var(--hm-dark-card), var(--hm-dark-card-soft)) !important;
+  color: var(--hm-color-body, #f4efff) !important;
+  border-color: var(--hm-dark-line, rgba(210,190,235,.22)) !important;
+}
+
+:root[data-hm-theme][data-hm-display="dark"] #onboardingModal #onboardingTitle,
+html[data-display-mode="dark"] #onboardingModal #onboardingTitle,
+html.hm-dark #onboardingModal #onboardingTitle {
+  color: #fff !important;
+  -webkit-text-fill-color: #fff !important;
+  text-shadow: none !important;
+}
+
+:root[data-hm-theme][data-hm-display="dark"] #onboardingModal .onboarding-choice-card,
+html[data-display-mode="dark"] #onboardingModal .onboarding-choice-card,
+html.hm-dark #onboardingModal .onboarding-choice-card {
+  background: linear-gradient(145deg, var(--hm-dark-card), var(--hm-dark-card-soft)) !important;
+  color: var(--hm-color-body, #f4efff) !important;
+  border-color: var(--hm-dark-line, rgba(210,190,235,.22)) !important;
+  box-shadow: none !important;
+}
+
+:root[data-hm-theme][data-hm-display="dark"] #onboardingModal .onboarding-choice-card strong,
+html[data-display-mode="dark"] #onboardingModal .onboarding-choice-card strong,
+html.hm-dark #onboardingModal .onboarding-choice-card strong {
+  color: var(--hm-color-title, #fff) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+:root[data-hm-theme][data-hm-display="dark"] #onboardingModal :is(.onboarding-choice-card small,.onboarding-check),
+html[data-display-mode="dark"] #onboardingModal :is(.onboarding-choice-card small,.onboarding-check),
+html.hm-dark #onboardingModal :is(.onboarding-choice-card small,.onboarding-check) {
+  color: var(--hm-color-muted, #c8bfd7) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+:root[data-hm-theme][data-hm-display="dark"] #onboardingModal .onboarding-choice-icon,
+html[data-display-mode="dark"] #onboardingModal .onboarding-choice-icon,
+html.hm-dark #onboardingModal .onboarding-choice-icon {
+  background: color-mix(in srgb, var(--hm-primary) 18%, var(--hm-dark-input)) !important;
+  border: 1px solid var(--hm-dark-line, rgba(210,190,235,.22)) !important;
+}
+
+:root[data-hm-theme][data-hm-display="dark"] #onboardingModal .guide-close,
+html[data-display-mode="dark"] #onboardingModal .guide-close,
+html.hm-dark #onboardingModal .guide-close {
+  background: color-mix(in srgb, var(--hm-primary) 18%, var(--hm-dark-input)) !important;
+  color: #fff !important;
+  border-color: var(--hm-dark-line, rgba(210,190,235,.22)) !important;
+}
+
+@media (max-width: 560px) {
+  #onboardingModal .onboarding-card {
+    padding: 14px !important;
+  }
+  #onboardingModal .guide-intro {
+    line-height: 1.55 !important;
+    word-break: keep-all !important;
+    overflow-wrap: anywhere !important;
+  }
+  #onboardingModal .onboarding-choice-card {
+    grid-template-columns: 46px minmax(0,1fr) !important;
+    gap: 12px !important;
+    padding: 14px !important;
+  }
+  #onboardingModal .onboarding-choice-card small {
+    white-space: normal !important;
+    word-break: keep-all !important;
+    overflow-wrap: anywhere !important;
+    line-height: 1.55 !important;
+  }
+  #onboardingModal .onboarding-check {
+    align-items: flex-start !important;
+    line-height: 1.45 !important;
+  }
+}
+
+/* =========================================================
+   HearMe2nite v1.0 STEP6.2.8 - History detail compact header
+   Keep the existing summary-card footprint while improving
+   dark-mode contrast and mobile chip alignment.
+   ========================================================= */
+.history-detail-summary-card > div:not(.history-detail-summary-icon) {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.history-detail-summary-card > div:not(.history-detail-summary-icon) > strong {
+  color: var(--hm-color-title, #2f2a3d) !important;
+  -webkit-text-fill-color: currentColor !important;
+  line-height: 1.25;
+}
+.history-detail-summary-card > div:not(.history-detail-summary-icon) > span {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: center;
+  gap: 5px !important;
+  min-width: 0;
+}
+.history-detail-summary-card .history-chip {
+  display: inline-flex !important;
+  flex: 0 0 auto;
+  align-items: center;
+  max-width: 100%;
+  white-space: nowrap;
+}
+:root[data-hm-theme][data-hm-display="dark"] .history-detail-summary-card > div:not(.history-detail-summary-icon) > strong,
+[data-theme-mode="dark"] .history-detail-summary-card > div:not(.history-detail-summary-icon) > strong,
+body.dark-mode .history-detail-summary-card > div:not(.history-detail-summary-icon) > strong {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+@media (max-width: 640px) {
+  /* The outer card width, padding, margins and overall footprint stay unchanged. */
+  .history-detail-summary-card {
+    gap: 10px !important;
+  }
+  .history-detail-summary-icon {
+    width: 42px !important;
+    height: 42px !important;
+    min-width: 42px !important;
+    flex-basis: 42px !important;
+    border-radius: 14px !important;
+    font-size: 22px !important;
+  }
+  .history-detail-summary-card > div:not(.history-detail-summary-icon) > strong {
+    margin-bottom: 5px !important;
+    font-size: .9rem !important;
+  }
+  .history-detail-summary-card > div:not(.history-detail-summary-icon) > span {
+    gap: 4px !important;
+  }
+  .history-detail-summary-card .history-chip {
+    min-height: 22px !important;
+    height: 22px !important;
+    padding: 0 6px !important;
+    font-size: .64rem !important;
+    line-height: 1 !important;
+  }
+}
+
+/* =========================================================
+   HearMe2nite v1.0 STEP6.2.10 - Home Statistics Center
+   기록 날짜와 오늘의 요약 사이에 표시되는 읽기 전용 통계 카드.
+   ========================================================= */
+.hm-home-stats-card {
+  width: 100%;
+  margin: 12px 0 14px;
+  padding: 15px;
+  border: 1px solid color-mix(in srgb, var(--theme-accent, #7c5cff) 22%, transparent);
+  border-radius: 22px;
+  background: linear-gradient(145deg, color-mix(in srgb, var(--theme-accent, #7c5cff) 8%, var(--theme-card, #fff)), var(--theme-card, #fff));
+  box-shadow: var(--theme-shadow, 0 10px 26px rgba(80,55,120,.08));
+}
+.hm-home-stats-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.hm-home-stats-head strong {
+  display: block;
+  color: var(--theme-text, #2f2940);
+  font-size: 1rem;
+}
+.hm-home-stats-head small {
+  display: block;
+  margin-top: 3px;
+  color: var(--theme-text-muted, #837b99);
+  font-size: .76rem;
+}
+.hm-home-stats-head > span {
+  flex: 0 0 auto;
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--theme-accent, #7c5cff) 12%, var(--theme-card, #fff));
+  color: var(--theme-accent, #7c5cff);
+  font-size: .66rem;
+  font-weight: 900;
+}
+.hm-home-stats-menu {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+.hm-home-stats-menu button {
+  min-width: 0;
+  min-height: 82px;
+  border: 1px solid var(--theme-border, rgba(124,92,255,.16));
+  border-radius: 17px;
+  padding: 9px 6px;
+  background: var(--theme-card, #fff);
+  color: var(--theme-text, #2f2940);
+  cursor: pointer;
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 4px;
+}
+.hm-home-stats-menu b {
+  font-size: 1.22rem;
+  line-height: 1;
+}
+.hm-home-stats-menu span {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: .72rem;
+  font-weight: 900;
+}
+.hm-home-stats-menu small {
+  color: var(--theme-accent, #7c5cff);
+  font-size: .68rem;
+  font-weight: 900;
+}
+.hm-home-stats-modal {
+  max-width: 620px;
+  max-height: min(86vh, 760px);
+  overflow-y: auto;
+}
+.hm-home-stats-period {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin: 4px 0 12px;
+}
+.hm-home-stats-period button {
+  border: 1px solid var(--theme-border, rgba(124,92,255,.18));
+  border-radius: 999px;
+  padding: 10px 12px;
+  background: var(--theme-card, #fff);
+  color: var(--theme-text-muted, #837b99);
+  font-weight: 900;
+  cursor: pointer;
+}
+.hm-home-stats-period button.active {
+  background: var(--theme-accent, #7c5cff);
+  color: #fff;
+  border-color: var(--theme-accent, #7c5cff);
+}
+.hm-home-stats-modal-body {
+  display: grid;
+  gap: 12px;
+}
+.hm-home-stats-hero,
+.hm-home-stats-metrics > div,
+.hm-home-stats-calendar,
+.hm-home-stats-day {
+  border: 1px solid var(--theme-border, rgba(124,92,255,.16));
+  background: var(--theme-card, #fff);
+}
+.hm-home-stats-hero {
+  display: grid;
+  grid-template-columns: 54px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  border-radius: 20px;
+}
+.hm-home-stats-hero-icon {
+  width: 52px;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--theme-accent, #7c5cff) 14%, var(--theme-card, #fff));
+  font-size: 1.45rem;
+}
+.hm-home-stats-hero strong,
+.hm-home-stats-metrics strong {
+  display: block;
+  color: var(--theme-text, #2f2940);
+}
+.hm-home-stats-hero span,
+.hm-home-stats-metrics small,
+.hm-home-stats-note {
+  color: var(--theme-text-muted, #837b99);
+  font-size: .74rem;
+}
+.hm-home-stats-hero em {
+  font-style: normal;
+  color: var(--theme-accent, #7c5cff);
+  font-size: 1.2rem;
+  font-weight: 950;
+}
+.hm-home-stats-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+.hm-home-stats-metrics > div {
+  border-radius: 17px;
+  padding: 12px 10px;
+  text-align: center;
+}
+.hm-home-stats-calendar {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 6px;
+  padding: 10px;
+  border-radius: 18px;
+}
+.hm-home-stats-day {
+  min-width: 0;
+  min-height: 64px;
+  border-radius: 14px;
+  padding: 6px 4px;
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 2px;
+  opacity: .58;
+}
+.hm-home-stats-day.has-stat {
+  opacity: 1;
+  border-color: color-mix(in srgb, var(--theme-accent, #7c5cff) 42%, transparent);
+  background: color-mix(in srgb, var(--theme-accent, #7c5cff) 10%, var(--theme-card, #fff));
+}
+.hm-home-stats-day span {
+  color: var(--theme-text-muted, #837b99);
+  font-size: .68rem;
+  font-weight: 900;
+}
+.hm-home-stats-day b {
+  font-size: 1rem;
+  line-height: 1;
+}
+.hm-home-stats-day small {
+  max-width: 100%;
+  color: var(--theme-text-muted, #837b99);
+  font-size: .58rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.hm-home-stats-note {
+  margin: 0;
+  text-align: center;
+  line-height: 1.45;
+}
+:root[data-hm-theme][data-hm-display="dark"] :is(.hm-home-stats-card,.hm-home-stats-menu button,.hm-home-stats-period button,.hm-home-stats-hero,.hm-home-stats-metrics > div,.hm-home-stats-calendar,.hm-home-stats-day) {
+  background: var(--hm-color-surface-2, #25283c) !important;
+  border-color: var(--hm-color-border, rgba(255,255,255,.12)) !important;
+  color: var(--hm-color-body, #f5f3ff) !important;
+  box-shadow: none !important;
+}
+:root[data-hm-theme][data-hm-display="dark"] :is(.hm-home-stats-head strong,.hm-home-stats-menu span,.hm-home-stats-hero strong,.hm-home-stats-metrics strong) {
+  color: var(--hm-color-text, #fff) !important;
+}
+:root[data-hm-theme][data-hm-display="dark"] :is(.hm-home-stats-head small,.hm-home-stats-hero span,.hm-home-stats-metrics small,.hm-home-stats-note,.hm-home-stats-day span,.hm-home-stats-day small) {
+  color: var(--hm-color-muted, #b8b1cc) !important;
+}
+@media (max-width: 640px) {
+  .hm-home-stats-card {
+    padding: 13px;
+    border-radius: 19px;
+  }
+  .hm-home-stats-menu {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 7px;
+  }
+  .hm-home-stats-menu button {
+    min-height: 74px;
+  }
+  .hm-home-stats-hero {
+    grid-template-columns: 48px minmax(0, 1fr);
+  }
+  .hm-home-stats-hero em {
+    grid-column: 2;
+    justify-self: start;
+  }
+  .hm-home-stats-metrics {
+    grid-template-columns: 1fr;
+  }
+  .hm-home-stats-calendar {
+    gap: 4px;
+    padding: 8px;
+  }
+  .hm-home-stats-day {
+    min-height: 56px;
+  }
+}
+@media (max-width: 380px) {
+  .hm-home-stats-menu {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* STEP6.2.10.1 - 홈 통계는 기본 홈 카드와 같은 크기로 표시 */
+.hm-home-stats-card {
+  width: 100% !important;
+  margin: 0 0 15px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+.hm-home-stats-launch-card {
+  width: 100% !important;
+}
+.hm-home-stats-launch-card .daily-card-icon {
+  background: color-mix(in srgb, var(--theme-accent, #7c5cff) 14%, var(--theme-card, #fff));
+}
+.hm-home-stats-modal .hm-home-stats-menu {
+  margin: 0 0 12px;
+}
+.hm-home-stats-modal .hm-home-stats-menu button.active {
+  border-color: color-mix(in srgb, var(--theme-accent, #7c5cff) 62%, transparent);
+  background: color-mix(in srgb, var(--theme-accent, #7c5cff) 14%, var(--theme-card, #fff));
+}
+:root[data-hm-theme][data-hm-display="dark"] .hm-home-stats-card {
+  background: transparent !important;
+  border: 0 !important;
+}
+:root[data-hm-theme][data-hm-display="dark"] .hm-home-stats-launch-card .daily-card-icon {
+  background: color-mix(in srgb, var(--hm-primary, #7c5cff) 22%, var(--hm-dark-card-soft, #202438)) !important;
+}
+
+/* STEP6.2.10.4.2 - 기록 통계/오늘의 요약 카드 계열 정렬 및 메뉴 칩 복구 */
+#hmProductDashboard.hm-beta-dashboard,
+#hmHomeStatsCard.hm-beta-dashboard {
+  margin: 10px 0 12px !important;
+  padding: 10px 12px !important;
+  border-radius: 18px !important;
+  border: 1px solid rgba(124, 92, 255, .18) !important;
+  background:
+    radial-gradient(circle at 12% 0%, rgba(124, 92, 255, .10), transparent 34%),
+    linear-gradient(135deg, rgba(247, 245, 255, .95), rgba(242, 244, 255, .90)) !important;
+  box-shadow: 0 10px 24px rgba(93, 69, 180, .07) !important;
+}
+#hmHomeStatsCard.hm-beta-dashboard {
+  border-color: rgba(124, 92, 255, .24) !important;
+  background:
+    radial-gradient(circle at 12% 0%, rgba(124, 92, 255, .18), transparent 34%),
+    linear-gradient(135deg, rgba(241, 244, 255, .96), rgba(246, 242, 255, .92)) !important;
+  cursor: pointer;
+  user-select: none;
+}
+#hmHomeStatsCard.hm-beta-dashboard:active {
+  transform: scale(.995);
+}
+#hmHomeStatsCard .hm-summary-strip-head {
+  display: flex !important;
+}
+#hmProductDashboard .hm-summary-strip-head strong,
+#hmHomeStatsCard .hm-summary-strip-head strong {
+  color: #374168 !important;
+}
+#hmProductDashboard .hm-summary-strip-head small,
+#hmHomeStatsCard .hm-summary-strip-head small {
+  color: #7f88aa !important;
+}
+#hmHomeStatsCard .hm-summary-strip {
+  display: grid !important;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 6px !important;
+  overflow: visible !important;
+  padding: 0 !important;
+}
+#hmProductDashboard .hm-summary-dot,
+#hmHomeStatsCard .hm-summary-dot {
+  min-width: 0 !important;
+  border-color: rgba(104, 139, 255, .16) !important;
+  background: rgba(255,255,255,.70) !important;
+}
+#hmProductDashboard .hm-summary-dot span,
+#hmHomeStatsCard .hm-summary-dot span {
+  color: #56607f !important;
+}
+:root[data-hm-theme][data-hm-display="dark"] #hmProductDashboard.hm-beta-dashboard,
+:root[data-hm-theme][data-hm-display="dark"] #hmHomeStatsCard.hm-beta-dashboard {
+  background:
+    radial-gradient(circle at 12% 0%, rgba(124,92,255,.24), transparent 34%),
+    linear-gradient(135deg, #22293f, #25253a) !important;
+  border-color: rgba(150, 167, 255, .22) !important;
+  box-shadow: none !important;
+}
+:root[data-hm-theme][data-hm-display="dark"] #hmProductDashboard .hm-summary-strip-head strong,
+:root[data-hm-theme][data-hm-display="dark"] #hmHomeStatsCard .hm-summary-strip-head strong {
+  color: #f4f2ff !important;
+}
+:root[data-hm-theme][data-hm-display="dark"] #hmProductDashboard .hm-summary-strip-head small,
+:root[data-hm-theme][data-hm-display="dark"] #hmProductDashboard .hm-summary-dot span,
+:root[data-hm-theme][data-hm-display="dark"] #hmHomeStatsCard .hm-summary-strip-head small,
+:root[data-hm-theme][data-hm-display="dark"] #hmHomeStatsCard .hm-summary-dot span {
+  color: #c6c7dc !important;
+}
+:root[data-hm-theme][data-hm-display="dark"] #hmProductDashboard .hm-summary-dot,
+:root[data-hm-theme][data-hm-display="dark"] #hmHomeStatsCard .hm-summary-dot {
+  border-color: rgba(255,255,255,.10) !important;
+  background: rgba(255,255,255,.06) !important;
+}
+@media (max-width: 640px) {
+  #hmHomeStatsCard.hm-beta-dashboard {
+    margin: 8px 0 10px !important;
+    padding: 9px 10px !important;
+    border-radius: 16px !important;
+  }
+  #hmHomeStatsCard .hm-summary-strip {
+    gap: 5px !important;
+  }
+}
+@media (max-width: 380px) {
+  #hmHomeStatsCard.hm-beta-dashboard {
+    padding: 8px 8px !important;
+  }
+}
+
+.hm-home-stats-modal .hm-home-stats-menu {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  width: 100% !important;
+  max-width: 100% !important;
+}
+.hm-home-stats-modal .hm-home-stats-menu button,
+.hm-home-stats-modal .hm-home-stats-menu button.active {
+  width: auto !important;
+  max-width: none !important;
+  flex: 0 0 auto !important;
+  white-space: nowrap !important;
+}
+
+/* STEP6.2.10.2 - 통계 기간 전환 상태를 명확하게 표시 */
+.hm-home-stats-period button {
+  transition: background .16s ease, color .16s ease, border-color .16s ease, transform .16s ease;
+}
+.hm-home-stats-period button.active,
+.hm-home-stats-period button[aria-pressed="true"] {
+  background: linear-gradient(135deg, #8c6cff, #6d4cff) !important;
+  border-color: #8c6cff !important;
+  color: #ffffff !important;
+  box-shadow: 0 8px 18px rgba(109,76,255,.22) !important;
+}
+.hm-home-stats-calendar.is-week {
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+.hm-home-stats-calendar.is-month {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+.hm-home-stats-calendar.is-month .hm-home-stats-day {
+  min-height: 52px;
+}
+:root[data-hm-theme][data-hm-display="dark"] .hm-home-stats-period button.active,
+:root[data-hm-theme][data-hm-display="dark"] .hm-home-stats-period button[aria-pressed="true"] {
+  background: linear-gradient(135deg, var(--hm-primary, #8c6cff), #5f43ff) !important;
+  border-color: var(--hm-primary, #8c6cff) !important;
+  color: #ffffff !important;
+}
+@media (max-width: 420px) {
+  .hm-home-stats-calendar.is-month {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 4px;
+  }
+  .hm-home-stats-calendar.is-month .hm-home-stats-day {
+    min-height: 48px;
+    padding: 5px 2px;
+  }
+}
+
+/* STEP6.2.10.3 - 모바일 통계 메뉴 축소 및 캘린더 접힘 */
+.hm-home-stats-modal .hm-home-stats-menu {
+  display: flex !important;
+  grid-template-columns: none !important;
+  gap: 7px !important;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0 2px 10px;
+  margin: 0 0 10px !important;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.hm-home-stats-modal .hm-home-stats-menu::-webkit-scrollbar {
+  display: none;
+}
+.hm-home-stats-modal .hm-home-stats-menu button {
+  flex: 0 0 auto;
+  min-width: auto !important;
+  min-height: 38px !important;
+  display: inline-flex !important;
+  flex-direction: row !important;
+  align-items: center;
+  justify-content: center;
+  gap: 5px !important;
+  padding: 8px 10px !important;
+  border-radius: 999px !important;
+}
+.hm-home-stats-modal .hm-home-stats-menu b {
+  font-size: .96rem !important;
+}
+.hm-home-stats-modal .hm-home-stats-menu span {
+  font-size: .72rem !important;
+  line-height: 1 !important;
+}
+.hm-home-stats-modal .hm-home-stats-menu small {
+  display: none !important;
+}
+.hm-home-stats-calendar-toggle,
+.hm-home-stats-graph-toggle {
+  width: 100%;
+  border: 1px solid var(--theme-border, rgba(124,92,255,.18));
+  border-radius: 15px;
+  padding: 11px 12px;
+  background: color-mix(in srgb, var(--theme-accent, #7c5cff) 8%, var(--theme-card, #fff));
+  color: var(--theme-accent, #7c5cff);
+  font-weight: 900;
+  cursor: pointer;
+}
+.hm-home-stats-calendar[hidden] {
+  display: none !important;
+}
+:root[data-hm-theme][data-hm-display="dark"] .hm-home-stats-calendar-toggle,
+:root[data-hm-theme][data-hm-display="dark"] .hm-home-stats-graph-toggle {
+  background: var(--hm-color-surface-2, #25283c) !important;
+  border-color: var(--hm-color-border, rgba(255,255,255,.12)) !important;
+  color: var(--hm-primary, #9f86ff) !important;
+}
+@media (max-width: 520px) {
+  .hm-home-stats-modal {
+    max-height: min(86vh, 720px);
+  }
+  .hm-home-stats-modal .hm-home-stats-menu {
+    margin-top: -2px !important;
+  }
+  .hm-home-stats-modal .hm-home-stats-menu button {
+    min-height: 36px !important;
+    padding: 7px 9px !important;
+  }
+}
+
+/* STEP6.2.10.4.3 - desktop menu scroll, equal stat chips, selected week/month period */
+.hm-home-stats-modal .hm-home-stats-menu {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 8px !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow-x: scroll !important;
+  overflow-y: hidden !important;
+  padding: 0 4px 12px !important;
+  margin: 0 0 10px !important;
+  scrollbar-width: thin !important;
+  scrollbar-color: rgba(140,108,255,.55) rgba(255,255,255,.08) !important;
+  -webkit-overflow-scrolling: touch;
+}
+.hm-home-stats-modal .hm-home-stats-menu::-webkit-scrollbar {
+  display: block !important;
+  height: 7px;
+}
+.hm-home-stats-modal .hm-home-stats-menu::-webkit-scrollbar-track {
+  background: rgba(255,255,255,.08);
+  border-radius: 999px;
+}
+.hm-home-stats-modal .hm-home-stats-menu::-webkit-scrollbar-thumb {
+  background: rgba(140,108,255,.55);
+  border-radius: 999px;
+}
+.hm-home-stats-modal .hm-home-stats-menu button,
+.hm-home-stats-modal .hm-home-stats-menu button.active {
+  flex: 0 0 132px !important;
+  width: 132px !important;
+  min-width: 132px !important;
+  max-width: 132px !important;
+  min-height: 40px !important;
+  height: 40px !important;
+  display: inline-flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  padding: 8px 10px !important;
+  border-radius: 999px !important;
+  white-space: nowrap !important;
+}

@@ -1,0 +1,52 @@
+/* =========================================================
+   HearMe2nite v0.9.12 Beta - Card System
+   Scope: UI CSS only. Firebase / Room / AutoSave / History JS untouched.
+   ========================================================= */
+:root {
+  --h2n-card-radius: 24px;
+  --h2n-card-pad-x: 18px;
+  --h2n-card-pad-y: 16px;
+  --h2n-card-min: 92px;
+  --h2n-card-icon: 48px;
+  --h2n-card-gap: 16px;
+  --h2n-card-border: 1px solid rgba(225, 215, 255, 0.92);
+  --h2n-card-shadow: 0 12px 34px rgba(109, 76, 255, 0.08);
+}
+.daily-card,
+.room-settings-card,
+.history-launch-card {
+  min-height: var(--h2n-card-min) !important;
+  padding: var(--h2n-card-pad-y) var(--h2n-card-pad-x) !important;
+  border-radius: var(--h2n-card-radius) !important;
+  gap: var(--h2n-card-gap) !important;
+  align-items: center !important;
+}
+.daily-card-icon,
+.room-settings-icon,
+.history-launch-icon {
+  width: var(--h2n-card-icon) !important;
+  height: var(--h2n-card-icon) !important;
+  min-width: var(--h2n-card-icon) !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+.daily-card-sub,
+.room-settings-sub,
+.history-launch-sub {
+  overflow: hidden !important;
+  display: -webkit-box !important;
+  -webkit-box-orient: vertical !important;
+  -webkit-line-clamp: 1 !important;
+}
+.row .daily-card.metric-daily-card {
+  min-height: var(--h2n-card-min) !important;
+  height: 100% !important;
+}
+@media (max-width: 560px) {
+  :root { --h2n-card-pad-x: 16px; --h2n-card-pad-y: 15px; --h2n-card-gap: 14px; }
+  .daily-card-title,.room-settings-title,.history-launch-title { font-size: clamp(1.02rem, 4.3vw, 1.22rem) !important; }
+  .daily-card-sub,.room-settings-sub,.history-launch-sub { font-size: clamp(.88rem, 3.65vw, 1rem) !important; }
+}
+
+

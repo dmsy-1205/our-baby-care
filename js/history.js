@@ -345,7 +345,7 @@ function openHistoryPanelModal() {
             ${historyDetailBlock('📝 오늘의 하루', record.diary)}
             ${historyDetailBlock('💌 주인의 피드백', record.replyMessage)}
             ${historyDetailBlock('🎁 오늘의 선물', [record.dailyChoiceLabel, record.rewardNote].filter(Boolean).join('\n'))}
-            <button type="button" class="history-detail-copy" onclick="copyDirectText(event, '${date}')">📋 이 기록 복사하기</button>
+            <button type="button" class="history-detail-copy" data-hm-action="copy-history-record" data-hm-value="${date}">📋 이 기록 복사하기</button>
         `;
         openModalOverlayById('historyDetailOverlay');
     }
@@ -564,7 +564,7 @@ function openHistoryPanelModal() {
             const ymd = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
             const rec = (daysData || {})[ymd];
             const icons = rec ? `${(typeof hmRecordHasMoments === 'function' ? hmRecordHasMoments(rec) : !!rec.photo) ? '📷' : ''}${getHistoryMissionText(rec) ? '🎯' : ''}${rec.mood === 'hard' || rec.mood === 'veryHard' ? '☁️' : ''}` : '';
-            html += `<div class="calendar-day ${rec ? 'has-record' : ''} ${ymd === todayYmd ? 'today' : ''} ${ymd === selectedHistoryDate ? 'selected-record' : ''}" ${rec ? `onclick="selectHistoryDate('${ymd}')"` : ''}>${day}<span class="calendar-icons">${icons}</span></div>`;
+            html += `<div class="calendar-day ${rec ? 'has-record' : ''} ${ymd === todayYmd ? 'today' : ''} ${ymd === selectedHistoryDate ? 'selected-record' : ''}" ${rec ? `data-hm-action="select-history-date" data-hm-value="${ymd}"` : ''}>${day}<span class="calendar-icons">${icons}</span></div>`;
         }
         html += '</div>';
         box.innerHTML = html;
@@ -608,10 +608,10 @@ function openHistoryPanelModal() {
             <div class="daily-modal history-photo-gallery-modal" role="dialog" aria-modal="true" aria-labelledby="historyPhotoGalleryTitle">
                 <div class="daily-modal-head">
                     <div><h2 id="historyPhotoGalleryTitle">📷 사진 모아보기</h2><small id="historyPhotoGalleryCount"></small></div>
-                    <button type="button" class="modal-close-btn" onclick="closeHistoryPhotoGallery()">닫기</button>
+                    <button type="button" class="modal-close-btn" data-hm-action="close-history-photo-gallery">닫기</button>
                 </div>
                 <div id="historyPhotoGalleryGrid" class="history-photo-modal-grid"></div>
-                <button type="button" id="historyPhotoGalleryMore" class="history-photo-more-btn" onclick="loadMoreHistoryPhotos()">사진 9장 더 보기</button>
+                <button type="button" id="historyPhotoGalleryMore" class="history-photo-more-btn" data-hm-action="load-more-history-photos">사진 9장 더 보기</button>
             </div>`;
         document.body.appendChild(overlay);
         overlay.addEventListener('click', event => {
@@ -629,7 +629,7 @@ function openHistoryPanelModal() {
         if (count) count.textContent = `전체 ${hmHistoryGalleryDates.length}장 · 최신순`;
         if (grid) {
             grid.innerHTML = visibleDates.map(item => {
-                return `<button type="button" class="history-photo-modal-item" onclick="closeHistoryPhotoGallery(); openHistoryDetailModal('${item.date}')" aria-label="${escapeHtml(formatHistoryDateLabel(item.date))} 사진 기록 열기">
+                return `<button type="button" class="history-photo-modal-item" data-hm-action="open-history-photo-detail" data-hm-value="${item.date}" aria-label="${escapeHtml(formatHistoryDateLabel(item.date))} 사진 기록 열기">
                     <img src="${escapeHtml(item.src)}" alt="${escapeHtml(formatHistoryDateLabel(item.date))} 사진" loading="lazy">
                     <span>${escapeHtml(formatHistoryDateLabel(item.date))}</span>
                 </button>`;
@@ -679,7 +679,7 @@ function openHistoryPanelModal() {
         const photos = hmGetHistoryPhotoItems(daysData);
         if (!photos.length) {
             box.innerHTML = `
-                <button type="button" class="history-gallery-card history-gallery-card-empty" onclick="openHistoryPhotoGallery()" aria-label="사진 모아보기 열기">
+                <button type="button" class="history-gallery-card history-gallery-card-empty" data-hm-action="open-history-photo-gallery" aria-label="사진 모아보기 열기">
                     <span class="history-gallery-mini-previews"><span class="history-gallery-empty-icon">📷</span></span>
                     <span class="history-gallery-card-copy"><strong>사진 모아보기</strong><small>저장된 사진 기록이 아직 없습니다.</small></span>
                     <span class="history-gallery-card-count">0장 <b>›</b></span>
@@ -693,7 +693,7 @@ function openHistoryPanelModal() {
             return `<span class="history-gallery-mini-thumb">${src ? `<img src="${escapeHtml(src)}" alt="${item.date} 사진 미리보기">` : '📷'}${extra}</span>`;
         }).join('');
         box.innerHTML = `
-            <button type="button" class="history-gallery-card" onclick="openHistoryPhotoGallery()" aria-label="사진 ${photos.length}장 모아보기 열기">
+            <button type="button" class="history-gallery-card" data-hm-action="open-history-photo-gallery" aria-label="사진 ${photos.length}장 모아보기 열기">
                 <span class="history-gallery-mini-previews">${previewHtml}</span>
                 <span class="history-gallery-card-copy"><strong>📷 사진 모아보기</strong><small>최근 사진 3장을 미리 보고 전체 사진을 열어요.</small></span>
                 <span class="history-gallery-card-count">${photos.length}장 <b>›</b></span>
@@ -730,7 +730,7 @@ function openHistoryPanelModal() {
         const missionText = getHistoryMissionText(selectedRecord);
         const diaryPreview = hmHistoryTimelinePreview(selectedRecord);
         const chips = hmHistorySummaryChips(selectedRecord);
-        return `<button type="button" class="history-day-card history-premium-selected history-selected-record-card" onclick="openHistoryDetailModal('${selectedHistoryDate}')">
+        return `<button type="button" class="history-day-card history-premium-selected history-selected-record-card" data-hm-action="open-history-detail" data-hm-value="${selectedHistoryDate}">
             <span class="history-day-icon">${getHistoryMoodIcon(selectedRecord)}</span>
             <span class="history-day-main">
                 <span class="history-day-title">${formatHistoryDateLabel(selectedHistoryDate)}의 기록</span>
@@ -739,7 +739,7 @@ function openHistoryPanelModal() {
             </span>
             <span class="history-day-actions">
                 <span class="history-card-arrow">›</span>
-                <span class="btn-delete" onclick="deleteRecord(event, '${selectedHistoryDate}')">삭제</span>
+                <span class="btn-delete" data-hm-action="delete-history-record" data-hm-value="${selectedHistoryDate}">삭제</span>
             </span>
         </button>`;
     })() : '<div class="history-selected-hint"><strong>기록이 없습니다</strong>선택한 날짜에는 저장된 기록이 없습니다. 📅</div>';
@@ -749,7 +749,7 @@ function openHistoryPanelModal() {
         const isSelected = date === selectedHistoryDate;
         const preview = hmHistoryTimelinePreview(record);
         const chips = hmHistorySummaryChips(record);
-        return `<button type="button" class="history-story-row ${isSelected ? 'is-selected' : ''}" onclick="selectHistoryDate('${date}')">
+        return `<button type="button" class="history-story-row ${isSelected ? 'is-selected' : ''}" data-hm-action="select-history-date" data-hm-value="${date}">
             <span class="history-story-date"><strong>${String(new Date(date + 'T00:00:00').getDate()).padStart(2,'0')}</strong><small>${formatHistoryDateLabel(date).replace(/^\d+년\s*/, '')}</small></span>
             <span class="history-story-body"><strong>${getHistoryMoodIcon(record)} ${(typeof hmRecordHasMoments === 'function' ? hmRecordHasMoments(record) : !!record.photo) ? '사진과 함께한 기록' : '하루 기록'}</strong><small>${escapeHtml(preview)}${preview.length >= 78 ? '...' : ''}</small><em>${chips || '저장된 기록'}</em></span>
             <span class="history-story-arrow">›</span>
@@ -843,6 +843,26 @@ function historyDetailBlock(title, body) {
     if (!body || body === '기록 없음') return '';
     return `<section class="history-detail-block history-detail-polished-block"><div class="history-detail-block-title">${title}</div><div class="history-detail-block-body">${escapeHtml(String(body))}</div></section>`;
 }
+function historyMealDetailBlock(record, mealMoments) {
+    const labels = { breakfast: '아침', lunch: '점심', dinner: '저녁' };
+    const values = {
+        breakfast: record?.mealBreakfast,
+        lunch: record?.mealLunch,
+        dinner: record?.mealDinner
+    };
+    const rows = Object.keys(labels).map((mealType) => {
+        const photo = mealMoments.find((item) => item.mealType === mealType);
+        const text = values[mealType] && values[mealType] !== '기록 없음' ? String(values[mealType]) : '';
+        if (!photo && !text) return '';
+        const src = photo ? escapeHtml(photo.url || photo.dataUrl || '') : '';
+        return `<div class="history-meal-row${photo ? ' has-photo' : ''}">
+            <div class="history-meal-copy"><strong>${labels[mealType]}</strong><span>${escapeHtml(text || '내용 기록 없음')}</span></div>
+            ${photo ? `<img src="${src}" alt="${labels[mealType]} 식사 사진" loading="lazy">` : ''}
+        </div>`;
+    }).filter(Boolean).join('');
+    if (!rows) return '';
+    return `<section class="history-detail-block history-detail-polished-block history-meal-block"><div class="history-detail-block-title">🥗 식사 기록</div><div class="history-meal-list">${rows}</div></section>`;
+}
 async function openHistoryDetailModal(date) {
     const mergedCache = hmHistoryGetMergedData();
     let record = mergedCache && mergedCache[date] ? mergedCache[date] : null;
@@ -910,14 +930,17 @@ async function openHistoryDetailModal(date) {
         summaryItems.push(record.dailyChoiceLabel);
     }
     const detailMoments = typeof hmGetRecordMoments === 'function' ? hmGetRecordMoments(record) : (record.photo ? [{ dataUrl:record.photo }] : []);
-    if (summaryItems.length < 3 && detailMoments.length) summaryItems.push(`📷 사진 ${detailMoments.length}장`);
+    const mealMoments = detailMoments.filter((item) => item.mealType);
+    const ordinaryMoments = detailMoments.filter((item) => !item.mealType);
+    if (summaryItems.length < 3 && ordinaryMoments.length) summaryItems.push(`📷 사진 ${ordinaryMoments.length}장`);
+    else if (summaryItems.length < 3 && mealMoments.length) summaryItems.push(`🥗 식사 사진 ${mealMoments.length}장`);
     const summaryChips = summaryItems.slice(0, 3).map(makeHistoryChip).join('');
     content.innerHTML = `
         <div class="history-detail-summary-card">
             <div class="history-detail-summary-icon">${getHistoryMoodIcon(record)}</div>
             <div><strong>하루 한눈에 보기</strong><span>${summaryChips || '저장된 세부 내용을 확인해 주세요.'}</span></div>
         </div>
-        ${detailMoments.length ? `<div class="history-detail-moments">${detailMoments.map((item, index) => `<img src="${escapeHtml(item.url || item.dataUrl || '')}" class="history-detail-photo" alt="${date} 사진 ${index + 1}">`).join('')}</div>` : ''}
+        ${ordinaryMoments.length ? `<div class="history-detail-moments">${ordinaryMoments.map((item, index) => `<img src="${escapeHtml(item.url || item.dataUrl || '')}" class="history-detail-photo" alt="${date} 일상 사진 ${index + 1}">`).join('')}</div>` : ''}
         ${historyDetailBlock('💜 오늘의 약속', customRoutineText)}
         ${historyDetailBlock('🌱 나의 루틴', subRoutineText)}
         ${historyDetailBlock('😊 오늘의 기분', [record.moodLabel, record.moodNote].filter(Boolean).join('\n'))}
@@ -925,15 +948,15 @@ async function openHistoryDetailModal(date) {
         ${historyDetailBlock('🏃 오늘의 운동', record.exercise)}
         ${historyDetailBlock('💧 오늘의 수분', record.water)}
         ${historyDetailBlock('☀️ 기상 시간', record.wakeTime)}
-        ${historyDetailBlock('🥗 식사 기록', meals)}
+        ${historyMealDetailBlock(record, mealMoments) || historyDetailBlock('🥗 식사 기록', meals)}
         ${historyDetailBlock('🚶 외출 기록', record.goingOut)}
         ${historyDetailBlock('🌙 취침 예정', record.sleepTime)}
         ${historyDetailBlock('📝 오늘의 하루', record.diary)}
         ${historyDetailBlock('💌 주인의 피드백', record.replyMessage)}
         ${historyDetailBlock('🎁 오늘의 선물', [record.dailyChoiceLabel, record.rewardNote].filter(Boolean).join('\n'))}
         <div class="history-detail-actions">
-            <button type="button" class="history-detail-copy" onclick="copyDirectText(event, '${date}')">📋 이 기록 복사하기</button>
-            <button type="button" class="history-detail-delete" onclick="deleteRecord(event, '${date}')">삭제</button>
+            <button type="button" class="history-detail-copy" data-hm-action="copy-history-record" data-hm-value="${date}">📋 이 기록 복사하기</button>
+            <button type="button" class="history-detail-delete" data-hm-action="delete-history-record" data-hm-value="${date}">삭제</button>
         </div>`;
     if (typeof hmRenderHistoryConversations === 'function') hmRenderHistoryConversations(date, content);
     openModalOverlayById('historyDetailOverlay');
@@ -1048,7 +1071,7 @@ function renderCalendar(daysData) {
     const monthPrefix = `${year}-${String(month+1).padStart(2,'0')}-`;
     const monthRecords = filtered.filter(date => date.startsWith(monthPrefix)).length;
     let html = `<div class="history-calendar-title-row history-calendar-nav-row">
-        <button type="button" class="history-month-nav-btn" onclick="hmHistoryChangeMonth(-1)" aria-label="이전 달">‹</button>
+        <button type="button" class="history-month-nav-btn" data-hm-action="change-history-month" data-hm-value="-1" aria-label="이전 달">‹</button>
         <div class="history-calendar-current-month">
             <div class="history-calendar-month-line">
                 <strong>📅 ${year}년 ${String(month+1).padStart(2,'0')}월</strong>
@@ -1056,8 +1079,8 @@ function renderCalendar(daysData) {
             </div>
             <span>달을 넘기며 기록과 기념일을 확인하세요.</span>
         </div>
-        <button type="button" class="history-month-nav-btn" onclick="hmHistoryChangeMonth(1)" aria-label="다음 달">›</button>
-        <button type="button" class="history-today-btn" onclick="hmHistoryGoToday()">오늘</button>
+        <button type="button" class="history-month-nav-btn" data-hm-action="change-history-month" data-hm-value="1" aria-label="다음 달">›</button>
+        <button type="button" class="history-today-btn" data-hm-action="history-go-today">오늘</button>
         <span class="history-month-count">${monthRecords}일 기록</span>
     </div><div class="calendar-grid history-calendar-grid">`;
     html += week.map(w => `<div class="calendar-head">${w}</div>`).join('');
@@ -1067,7 +1090,7 @@ function renderCalendar(daysData) {
         const rec = (daysData || {})[ymd];
         const visible = rec && visibleSet.has(ymd);
         const icons = visible ? `${(typeof hmRecordHasMoments === 'function' ? hmRecordHasMoments(rec) : !!rec.photo) ? '📷' : ''}${getHistoryMissionText(rec) ? '🎯' : ''}${hmHistoryRecordHasRoutine(rec) ? '🧩' : ''}${rec.mood === 'hard' || rec.mood === 'veryHard' ? '☁️' : ''}` : '';
-        const clickable = visible ? `onclick="selectHistoryDate('${ymd}')"` : '';
+        const clickable = visible ? `data-hm-action="select-history-date" data-hm-value="${ymd}"` : '';
         html += `<div class="calendar-day ${visible ? 'has-record' : ''} ${ymd === todayYmd ? 'today' : ''} ${ymd === selectedHistoryDate ? 'selected-record' : ''}" ${clickable}>${day}<span class="calendar-icons">${icons}</span></div>`;
     }
     html += '</div>';
@@ -1164,7 +1187,7 @@ function displayHistory(daysData) {
             if (!active.length || !unseenCount) home.hidden = true;
             else {
                 home.hidden = false;
-                home.innerHTML = `<button type="button" class="record-deletion-home-button" onclick="openHistoryPanelModal()"><span>🗑️</span><span><strong>삭제된 기록 ${unseenCount}건을 확인해 주세요</strong><small>삭제 날짜·삭제자·시간을 기록실에서 확인할 수 있습니다.</small></span><span>›</span></button>`;
+                home.innerHTML = `<button type="button" class="record-deletion-home-button" data-hm-action="open-history-panel"><span>🗑️</span><span><strong>삭제된 기록 ${unseenCount}건을 확인해 주세요</strong><small>삭제 날짜·삭제자·시간을 기록실에서 확인할 수 있습니다.</small></span><span>›</span></button>`;
             }
         }
         if (!panel) return;
@@ -1177,7 +1200,7 @@ function displayHistory(daysData) {
         };
         const items = deletionFilter === 'all' ? allItems : allItems.filter((item) => itemStatus(item) === deletionFilter);
         panel.hidden = false;
-        panel.innerHTML = `<button type="button" class="record-deletion-compact-card ${unseenCount ? 'has-unseen' : ''}" onclick="openDeletedRecordsModal()">
+        panel.innerHTML = `<button type="button" class="record-deletion-compact-card ${unseenCount ? 'has-unseen' : ''}" data-hm-action="open-deleted-records">
             <span class="record-deletion-compact-icon">🗑️</span>
             <span class="record-deletion-compact-copy"><strong>삭제된 기록 ${counts.all}건</strong><small>${counts.active}건 복구 가능${unseenCount ? ` · ${unseenCount}건 미확인` : ''}</small></span>
             <span class="record-deletion-compact-arrow">›</span>
@@ -1192,7 +1215,7 @@ function displayHistory(daysData) {
                 <span><strong>${unseenCount}</strong><small>미확인</small></span>
             </div>
             <div class="record-deletion-filters" role="tablist" aria-label="삭제 기록 상태 필터">
-                ${[['all','전체',counts.all],['active','복구 가능',counts.active],['restored','복구 완료',counts.restored],['expired','기간 만료',counts.expired]].map(([key,label,count]) => `<button type="button" class="${deletionFilter===key?'active':''}" onclick="hmSetDeletedRecordFilter('${key}')">${label} ${count}</button>`).join('')}
+                ${[['all','전체',counts.all],['active','복구 가능',counts.active],['restored','복구 완료',counts.restored],['expired','기간 만료',counts.expired]].map(([key,label,count]) => `<button type="button" class="${deletionFilter===key?'active':''}" data-hm-action="set-deleted-record-filter" data-hm-value="${key}">${label} ${count}</button>`).join('')}
             </div>
             <div class="record-deletion-list">${items.length ? items.map((item) => {
                 const status = itemStatus(item);
@@ -1208,7 +1231,7 @@ function displayHistory(daysData) {
                     <small>사유: 수동 삭제 · 버전 ${esc(item.appVersion || '확인 불가')}</small>
                     ${isRestored?`<small>복구: ${fmt(item.restoredAtClient || item.restoredAt)} · ${esc(item.restoredByEmail || item.restoredByUid || 'Dom')}</small>`:''}
                     <small>Room 확인 기록: ${seenCount}명</small></div>
-                    <div class="record-deletion-actions">${unseen(item)?`<button type="button" onclick="hmAcknowledgeDeletedRecord('${esc(item.recordDate)}')">확인</button>`:''}${showRestore?`<button type="button" class="restore" onclick="hmRestoreDeletedRecord('${esc(item.recordDate)}')">복구</button>`:''}</div>
+                    <div class="record-deletion-actions">${unseen(item)?`<button type="button" data-hm-action="acknowledge-deleted-record" data-hm-value="${esc(item.recordDate)}">확인</button>`:''}${showRestore?`<button type="button" class="restore" data-hm-action="restore-deleted-record" data-hm-value="${esc(item.recordDate)}">복구</button>`:''}</div>
                 </article>`;
             }).join('') : '<div class="record-deletion-empty">선택한 상태의 삭제 기록이 없습니다.</div>'}</div>
         </section>`;

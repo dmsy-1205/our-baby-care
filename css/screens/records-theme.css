@@ -1,0 +1,22 @@
+/* STEP6.2.14.16 - calendar today states follow the active theme.
+   Keep "today" visually distinct from the currently selected date. */
+.hm-record-date-picker-grid button.is-today:not(.is-selected){
+  background:color-mix(in srgb,var(--hm-primary) 18%,var(--hm-surface-card))!important;
+  color:var(--hm-primary-strong)!important;
+  box-shadow:inset 0 0 0 2px color-mix(in srgb,var(--hm-primary) 62%,transparent)!important;
+}
+.hm-record-date-picker-grid button.is-today.is-selected{
+  background:linear-gradient(135deg,var(--hm-primary),var(--hm-accent))!important;
+  color:var(--hm-theme-button-text,#fff)!important;
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--hm-primary) 20%,transparent)!important;
+}
+.hm-record-date-picker-actions button:first-child{
+  background:var(--hm-primary)!important;
+  color:var(--hm-theme-button-text,#fff)!important;
+  box-shadow:0 8px 20px color-mix(in srgb,var(--hm-primary) 24%,transparent)!important;
+}
+:root[data-hm-display="dark"] .hm-record-date-picker-grid button.is-today:not(.is-selected){
+  background:color-mix(in srgb,var(--hm-primary) 24%,var(--hm-dark-input,#293149))!important;
+  color:color-mix(in srgb,var(--hm-primary) 58%,#fff 42%)!important;
+}
+

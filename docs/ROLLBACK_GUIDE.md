@@ -4,7 +4,9 @@
 
 배포 직전 GitHub Desktop에서 모든 변경 파일을 하나의 커밋으로 저장합니다. 이 커밋 이름과 앱의 STEP 버전이 같아야 합니다.
 
-- 현재 기준 버전: `v1.0 STEP6.2.13.8.9`
+- 기능·화면 기준 버전: `v1.0 STEP6.2.14.43`
+- 내부 정리 검수 버전: `v1.0 STEP6.2.14.44`
+- 사용자 백업본: `F:\GitHubour-baby-care\Hearme2nite_테스트앱_백업본_20260722`
 - 권장 태그: `hearme2nite-main-v1.0-step6.2.13.8.9`
 - 공개 배포 파일은 `node scripts/build-public.js`로 다시 생성합니다.
 

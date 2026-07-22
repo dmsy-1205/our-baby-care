@@ -8,6 +8,12 @@
     let uploadInProgress = false;
     let pendingMomentUploads = [];
     let pendingMomentDate = '';
+    let pendingMomentContext = null;
+    let mealUploadInProgress = false;
+    let pendingMealUploads = [];
+    let pendingMealDate = '';
+    let pendingMealContext = null;
+    const MEAL_LABELS = Object.freeze({ breakfast: '아침', lunch: '점심', dinner: '저녁' });
 
     function environment() {
         const projectId = String(window.HM_FIREBASE_ENV?.projectId || babyApp?.options?.projectId || '');
@@ -26,6 +32,18 @@
         return document.getElementById('recordDate')?.value || '';
     }
 
+    function mediaContext() {
+        return { uid: currentUser?.uid || '', roomCode: roomCode(), date: selectedDate() };
+    }
+
+    function isMediaContextCurrent(context) {
+        const current = mediaContext();
+        return !!context && !!context.uid && !!context.roomCode && !!context.date
+            && context.uid === current.uid
+            && context.roomCode === current.roomCode
+            && context.date === current.date;
+    }
+
     function normalizeMoment(value, id) {
         if (!value || typeof value !== 'object') return null;
         const src = String(value.url || value.dataUrl || '').trim();
@@ -37,6 +55,7 @@
             dataUrl: String(value.dataUrl || ''),
             storagePath: String(value.storagePath || ''),
             caption: String(value.caption || '').slice(0, 120),
+            mealType: MEAL_LABELS[value.mealType] ? String(value.mealType) : '',
             uploadedBy: String(value.uploadedBy || ''),
             uploadedAt: Number(value.uploadedAt || 0),
             legacy: value.legacy === true
@@ -94,7 +113,7 @@
             uniqueMoments.push(item);
         });
         if (uniqueMoments.length !== hmDailyMoments.length) hmDailyMoments = uniqueMoments;
-        const visibleMoments = hmDailyMoments.concat(pendingMomentUploads);
+        const visibleMoments = hmDailyMoments.filter((item) => !item.mealType).concat(pendingMomentUploads);
         const count = visibleMoments.length;
         if (guide) {
             const pendingText = pendingMomentUploads.length ? ` · 저장 대기 ${pendingMomentUploads.length}장` : '';
@@ -115,10 +134,43 @@
                 </button>${item.pending ? '<span class="moment-pending-badge">저장 대기</span>' : ''}${deleteButton}
             </figure>`;
         }).join('');
+        renderMealPhotos();
+    }
+
+    function renderMealPhotos() {
+        const gallery = document.getElementById('mealPhotoGallery');
+        if (!gallery) return;
+        const rows = hmDailyMoments.filter((item) => MEAL_LABELS[item.mealType]).concat(pendingMealUploads).slice(0, 3);
+        Object.keys(MEAL_LABELS).forEach((mealType) => {
+            const button = document.querySelector(`[data-meal-photo-button="${mealType}"]`);
+            if (!button) return;
+            const item = rows.find((row) => row.mealType === mealType);
+            button.classList.toggle('has-photo', !!item);
+            button.setAttribute('aria-label', `${MEAL_LABELS[mealType]} 식사 사진 ${item ? '등록됨' : '추가'}`);
+            button.innerHTML = item
+                ? `<img src="${escapeHtml(momentSource(item))}" alt="${MEAL_LABELS[mealType]} 식사 사진 썸네일">`
+                : '<span aria-hidden="true">📷</span>';
+        });
+        gallery.hidden = rows.length === 0;
+        gallery.dataset.count = String(rows.length);
+        gallery.innerHTML = rows.map((item) => `<figure class="meal-photo-thumb${item.pending ? ' is-pending' : ''}">
+            <button type="button" class="meal-photo-open" data-moment-open="${escapeHtml(item.id)}" aria-label="${MEAL_LABELS[item.mealType]} 식사 사진 크게 보기">
+                <img src="${escapeHtml(momentSource(item))}" alt="${MEAL_LABELS[item.mealType]} 식사 사진" loading="lazy">
+                <span>${MEAL_LABELS[item.mealType]}</span>
+            </button>
+            ${item.pending ? '<span class="meal-photo-pending-badge">저장 대기</span>' : ''}
+            ${canDelete(item) ? `<button type="button" class="meal-photo-remove" data-moment-delete="${escapeHtml(item.id)}" aria-label="${MEAL_LABELS[item.mealType]} 식사 사진 삭제">×</button>` : ''}
+        </figure>`).join('');
+        const saveButton = document.getElementById('mealPhotoSaveButton');
+        if (saveButton) {
+            saveButton.disabled = mealUploadInProgress || pendingMealUploads.length === 0;
+            saveButton.textContent = pendingMealUploads.length ? `식사 사진 ${pendingMealUploads.length}장 저장` : '식사 사진 저장';
+        }
     }
 
     function setDailyMoments(rawMoments, legacyPhoto) {
         if (pendingMomentDate && pendingMomentDate !== selectedDate()) discardPendingUploads();
+        if (pendingMealDate && pendingMealDate !== selectedDate()) discardPendingMealUploads();
         hmDailyMoments = getRecordMoments({ moments: rawMoments || {}, photo: legacyPhoto || '' });
         uploadedPhotoBase64 = legacyPhoto || '';
         render();
@@ -183,25 +235,32 @@
         return { blob: null, dataUrl };
     }
 
-    async function persistMoment(file) {
+    async function persistMoment(file, mealType = '', requestContext = mediaContext()) {
         const env = environment();
-        const room = roomCode();
-        const date = selectedDate();
+        const room = requestContext.roomCode;
+        const date = requestContext.date;
+        if (!isMediaContextCurrent(requestContext)) throw new Error('media/context-changed');
         if (!currentUser || !room || !date) throw new Error('Room과 날짜를 먼저 확인해 주세요.');
         const id = db.ref(`rooms/${room}/days/${date}/moments`).push().key;
         const compressed = await compress(file, env.usesStorage);
+        if (!isMediaContextCurrent(requestContext)) throw new Error('media/context-changed');
         const payload = {
             storageType: env.usesStorage ? 'storage' : 'base64',
             caption: '',
-            uploadedBy: currentUser.uid,
+            uploadedBy: requestContext.uid,
             uploadedAt: firebase.database.ServerValue.TIMESTAMP
         };
+        if (MEAL_LABELS[mealType]) payload.mealType = mealType;
 
         let storageRef = null;
         if (env.usesStorage) {
-            const path = `rooms/${room}/moments/${date}/${currentUser.uid}/${id}.jpg`;
+            const path = `rooms/${room}/moments/${date}/${requestContext.uid}/${id}.jpg`;
             storageRef = firebase.storage(babyApp).ref(path);
             const snapshot = await storageRef.put(compressed.blob, { contentType: 'image/jpeg' });
+            if (!isMediaContextCurrent(requestContext)) {
+                await storageRef.delete().catch(() => {});
+                throw new Error('media/context-changed');
+            }
             payload.url = await snapshot.ref.getDownloadURL();
             payload.storagePath = path;
         } else {
@@ -209,15 +268,95 @@
         }
 
         try {
+            if (!isMediaContextCurrent(requestContext)) throw new Error('media/context-changed');
             await db.ref(`rooms/${room}/days/${date}/moments/${id}`).set(payload);
         } catch (error) {
             if (storageRef) storageRef.delete().catch(() => {});
             throw error;
         }
+        if (!isMediaContextCurrent(requestContext)) return false;
         const savedMoment = normalizeMoment({ ...payload, uploadedAt: Date.now() }, id);
         const existingIndex = hmDailyMoments.findIndex((item) => item.id === id);
         if (existingIndex >= 0) hmDailyMoments[existingIndex] = savedMoment;
         else hmDailyMoments.push(savedMoment);
+        return true;
+    }
+
+    async function handleMealPhotoUpload(input, mealType) {
+        const file = input?.files?.[0];
+        input.value = '';
+        if (!file || !MEAL_LABELS[mealType] || mealUploadInProgress) return;
+        if (!file.type?.startsWith('image/') || file.size > MAX_SOURCE_BYTES) {
+            alert('이미지 파일만 선택할 수 있으며 원본 파일은 12MB 이하여야 합니다.');
+            return;
+        }
+        if (hmDailyMoments.concat(pendingMealUploads).some((item) => item.mealType === mealType)) {
+            alert(`${MEAL_LABELS[mealType]} 사진은 한 장만 등록할 수 있습니다. 기존 사진을 삭제한 뒤 다시 추가해 주세요.`);
+            return;
+        }
+        if (hmDailyMoments.concat(pendingMealUploads).filter((item) => MEAL_LABELS[item.mealType]).length >= 3) {
+            alert('식사 사진은 아침·점심·저녁 각 한 장씩 최대 3장까지 등록할 수 있습니다.');
+            return;
+        }
+        pendingMealDate = selectedDate();
+        pendingMealContext = mediaContext();
+        pendingMealUploads.push({
+            id: `pending-meal-${Date.now()}-${mealType}`,
+            file,
+            mealType,
+            previewUrl: URL.createObjectURL(file),
+            pending: true,
+            uploadedBy: currentUser?.uid || ''
+        });
+        renderMealPhotos();
+        if (typeof updateDailyCards === 'function') updateDailyCards();
+        if (typeof showSaveStatus === 'function') showSaveStatus(`📷 ${MEAL_LABELS[mealType]} 식사 사진 저장 대기`);
+    }
+
+    function discardPendingMealUploads() {
+        pendingMealUploads.forEach((item) => { if (item.previewUrl) URL.revokeObjectURL(item.previewUrl); });
+        pendingMealUploads = [];
+        pendingMealDate = '';
+        pendingMealContext = null;
+        renderMealPhotos();
+    }
+
+    async function saveMealPhotos() {
+        if (mealUploadInProgress || !pendingMealUploads.length) return;
+        if (pendingMealDate !== selectedDate() || !isMediaContextCurrent(pendingMealContext)) {
+            alert('날짜가 변경되었습니다. 식사 사진을 다시 선택해 주세요.');
+            discardPendingMealUploads();
+            return;
+        }
+        mealUploadInProgress = true;
+        document.querySelectorAll('.meal-photo-input').forEach((item) => { item.disabled = true; });
+        renderMealPhotos();
+        try {
+            let savedCount = 0;
+            while (pendingMealUploads.length) {
+                const pending = pendingMealUploads[0];
+                const applied = await persistMoment(pending.file, pending.mealType, pendingMealContext);
+                if (pending.previewUrl) URL.revokeObjectURL(pending.previewUrl);
+                pendingMealUploads.shift();
+                if (!applied) {
+                    discardPendingMealUploads();
+                    return;
+                }
+                savedCount += 1;
+                renderMealPhotos();
+            }
+            pendingMealDate = '';
+            pendingMealContext = null;
+            if (typeof triggerAutoSave === 'function') triggerAutoSave('meal-photo-upload');
+            if (typeof showSaveStatus === 'function') showSaveStatus(`📷 식사 사진 ${savedCount}장 저장 완료`);
+        } catch (error) {
+            if (typeof hmReportError === 'function') hmReportError('meal.photo.upload', error, '❌ 식사 사진 저장 실패');
+            else alert(error.message || '식사 사진 저장에 실패했습니다.');
+        } finally {
+            mealUploadInProgress = false;
+            document.querySelectorAll('.meal-photo-input').forEach((item) => { item.disabled = false; });
+            renderMealPhotos();
+        }
     }
 
     async function handleUpload(input) {
@@ -225,7 +364,8 @@
         const files = Array.from(input?.files || []);
         if (!files.length) return;
         const env = environment();
-        const available = Math.max(0, env.limit - hmDailyMoments.length - pendingMomentUploads.length);
+        const ordinaryMomentCount = hmDailyMoments.filter((item) => !item.mealType).length;
+        const available = Math.max(0, env.limit - ordinaryMomentCount - pendingMomentUploads.length);
         if (!available) {
             alert(`오늘의 순간은 이 환경에서 하루 최대 ${env.limit}장까지 저장할 수 있습니다.`);
             input.value = '';
@@ -241,6 +381,7 @@
         }
 
         pendingMomentDate = selectedDate();
+        pendingMomentContext = mediaContext();
         selected.forEach((file, index) => {
             pendingMomentUploads.push({
                 id: `pending-${Date.now()}-${index}-${Math.random().toString(36).slice(2, 8)}`,
@@ -262,6 +403,7 @@
         });
         pendingMomentUploads = [];
         pendingMomentDate = '';
+        pendingMomentContext = null;
         render();
     }
 
@@ -271,7 +413,7 @@
             closeDailyModal('outing');
             return;
         }
-        if (pendingMomentDate !== selectedDate()) {
+        if (pendingMomentDate !== selectedDate() || !isMediaContextCurrent(pendingMomentContext)) {
             alert('날짜가 변경되었습니다. 사진을 다시 선택해 주세요.');
             discardPendingUploads();
             return;
@@ -285,13 +427,18 @@
             let savedCount = 0;
             while (pendingMomentUploads.length) {
                 const pending = pendingMomentUploads[0];
-                await persistMoment(pending.file);
+                const applied = await persistMoment(pending.file, '', pendingMomentContext);
                 if (pending.previewUrl) URL.revokeObjectURL(pending.previewUrl);
                 pendingMomentUploads.shift();
+                if (!applied) {
+                    discardPendingUploads();
+                    return;
+                }
                 savedCount += 1;
                 render();
             }
             pendingMomentDate = '';
+            pendingMomentContext = null;
             if (typeof triggerAutoSave === 'function') triggerAutoSave('daily-moments-upload');
             if (typeof showSaveStatus === 'function') showSaveStatus(`📷 오늘의 순간 ${savedCount}장 저장 완료`);
             closeDailyModal('outing');
@@ -313,6 +460,15 @@
     }
 
     async function deleteMoment(id) {
+        const pendingMealIndex = pendingMealUploads.findIndex((row) => row.id === id);
+        if (pendingMealIndex >= 0) {
+            const pending = pendingMealUploads[pendingMealIndex];
+            if (pending.previewUrl) URL.revokeObjectURL(pending.previewUrl);
+            pendingMealUploads.splice(pendingMealIndex, 1);
+            if (!pendingMealUploads.length) pendingMealDate = '';
+            renderMealPhotos();
+            return;
+        }
         const pendingIndex = pendingMomentUploads.findIndex((row) => row.id === id);
         if (pendingIndex >= 0) {
             const pending = pendingMomentUploads[pendingIndex];
@@ -338,6 +494,7 @@
             }
             hmDailyMoments = hmDailyMoments.filter((row) => row.id !== id);
             render();
+            renderMealPhotos();
             if (typeof updateDailyCards === 'function') updateDailyCards();
             if (typeof showSaveStatus === 'function') showSaveStatus('📷 사진 삭제 완료');
         } catch (error) {
@@ -346,7 +503,7 @@
     }
 
     function openMoment(id) {
-        const item = hmDailyMoments.concat(pendingMomentUploads).find((row) => row.id === id);
+        const item = hmDailyMoments.concat(pendingMomentUploads, pendingMealUploads).find((row) => row.id === id);
         const src = momentSource(item);
         if (src) window.open(src, '_blank', 'noopener,noreferrer');
     }
@@ -369,8 +526,24 @@
     window.hmSetDailyMoments = setDailyMoments;
     window.hmRenderDailyMoments = render;
     window.handlePhotoUpload = handleUpload;
+    window.handleMealPhotoUpload = handleMealPhotoUpload;
+    window.saveMealPhotos = saveMealPhotos;
+    window.hmRenderMealPhotos = renderMealPhotos;
     window.saveDailyMomentsAndClose = saveDailyMomentsAndClose;
     window.cancelDailyMomentsAndClose = cancelDailyMomentsAndClose;
+    window.hmDiscardPendingMedia = function hmDiscardPendingMedia() {
+        discardPendingUploads();
+        discardPendingMealUploads();
+        render();
+    };
+    window.hmGetPendingMediaState = function hmGetPendingMediaState() {
+        return {
+            date: pendingMomentDate || pendingMealDate || '',
+            moments: pendingMomentUploads.length,
+            meals: pendingMealUploads.length,
+            uploading: uploadInProgress || mealUploadInProgress
+        };
+    };
 
     document.addEventListener('DOMContentLoaded', render);
 })();

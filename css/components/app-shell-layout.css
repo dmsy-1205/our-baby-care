@@ -1,0 +1,59 @@
+@media(min-width:1181px){
+  :root{--hm-app-frame-width:min(540px,calc(100vw - 96px));}
+}
+body.hm-authenticated :is(
+  .daily-modal-overlay,.mission-modal-overlay,.room-settings-overlay,
+  .history-panel-overlay,.history-detail-overlay,.guide-modal,.onboarding-modal,
+  .anniversary-settings-overlay,.record-deletion-modal-overlay,
+  .hm-record-date-picker-overlay,.card-conversation-dialog-overlay,
+  .hm-profile-overlay,.data-management-overlay,.data-admin-overlay,
+  .hm-chat-overlay,.hm-theme-overlay,.hm-pwa-ios-guide-overlay,
+  .hm-notification-overlay,.hm-adaptive-completion-overlay
+){
+  left:50%!important;
+  right:auto!important;
+  width:var(--hm-app-frame-width)!important;
+  max-width:var(--hm-app-frame-width)!important;
+  transform:translateX(-50%);
+  box-sizing:border-box;
+}
+body.hm-authenticated :is(
+  .daily-modal-overlay,.mission-modal-overlay,.room-settings-overlay,
+  .history-panel-overlay,.history-detail-overlay,.guide-modal,.onboarding-modal,
+  .anniversary-settings-overlay,.record-deletion-modal-overlay,
+  .hm-record-date-picker-overlay,.card-conversation-dialog-overlay,
+  .hm-profile-overlay,.data-management-overlay,.data-admin-overlay,
+  .hm-chat-overlay,.hm-theme-overlay,.hm-pwa-ios-guide-overlay,
+  .hm-notification-overlay,.hm-adaptive-completion-overlay
+) > :is(
+  .daily-modal,.mission-modal,.room-settings-modal,.history-panel-modal,
+  .history-detail-modal,.guide-card,.onboarding-card,.anniversary-settings-modal,
+  .record-deletion-modal,.hm-record-date-picker-card,.card-conversation-dialog,
+  .hm-profile-modal,.data-management-modal,.data-admin-modal,.hm-chat-modal,
+  .hm-theme-modal,.hm-pwa-ios-guide-card,.hm-notification-modal,
+  .hm-adaptive-completion-modal
+){
+  max-width:calc(100% - 24px)!important;
+  box-sizing:border-box;
+}
+@media(max-width:520px){
+  body.hm-authenticated :is(
+    .daily-modal-overlay,.mission-modal-overlay,.room-settings-overlay,
+    .history-panel-overlay,.history-detail-overlay,.guide-modal,.onboarding-modal,
+    .anniversary-settings-overlay,.record-deletion-modal-overlay,
+    .hm-record-date-picker-overlay,.card-conversation-dialog-overlay,
+    .hm-profile-overlay,.data-management-overlay,.data-admin-overlay,
+    .hm-chat-overlay,.hm-theme-overlay,.hm-pwa-ios-guide-overlay,
+    .hm-notification-overlay,.hm-adaptive-completion-overlay
+  ) > :is(
+    .daily-modal,.mission-modal,.room-settings-modal,.history-panel-modal,
+    .history-detail-modal,.guide-card,.onboarding-card,.anniversary-settings-modal,
+    .record-deletion-modal,.hm-record-date-picker-card,.card-conversation-dialog,
+    .hm-profile-modal,.data-management-modal,.data-admin-modal,.hm-chat-modal,
+    .hm-theme-modal,.hm-pwa-ios-guide-card,.hm-notification-modal,
+    .hm-adaptive-completion-modal
+  ){
+    max-width:100%!important;
+  }
+}
+

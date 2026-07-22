@@ -24,7 +24,9 @@
     }
 
     function canManageRelationshipCards() {
-        return activeRelationshipRole === 'dom';
+        return window.HM_ACCESS_POLICY
+            ? window.HM_ACCESS_POLICY.can('manageRelationshipCards', activeRelationshipRole)
+            : activeRelationshipRole === 'dom';
     }
 
     async function getCurrentUserRelationshipRole(roomCode) {
@@ -454,7 +456,7 @@
                     <div class="room-list-item">
                         <div class="room-list-title">💕 ${escapeHtml(item.roomCode)}</div>
                         <div class="room-list-meta">${roleLabel}${activeLabel}<br>생성/참여일: ${formatTimestamp(item.createdAt || item.joinedAt)}</div>
-                        <button type="button" class="room-open-btn" ${disabled} onclick="openPreviousRoom('${escapeHtml(item.roomCode)}')">${btnText}</button>
+                        <button type="button" class="room-open-btn" ${disabled} data-hm-action="open-previous-room" data-hm-value="${escapeHtml(item.roomCode)}">${btnText}</button>
                     </div>
                 `;
             }).join('');
@@ -837,7 +839,7 @@
                 <strong>만료 예정:</strong> ${escapeHtml(expiresLabel)}<br>
                 <strong>초대링크:</strong><br>${escapeHtml(inviteLink)}<br>
                 <div style="margin-top:7px; color:#636e72; font-size:0.8rem;">※ 코드가 만료되면 새 초대코드를 만들어 주세요.</div>
-                <button type="button" class="btn-copy" style="padding:8px; font-size:0.85rem; margin-top:8px;" onclick="copyInviteText('${code}', '${inviteLink}', ${expiresAt})">📋 초대문구 복사하기</button>
+                <button type="button" class="btn-copy" style="padding:8px; font-size:0.85rem; margin-top:8px;" data-hm-action="copy-invite-text" data-hm-value="${escapeHtml(code)}" data-hm-extra="${escapeHtml(inviteLink)}" data-hm-number="${expiresAt}">📋 초대문구 복사하기</button>
             `;
             showSaveStatus('🎟️ 초대코드 생성 완료');
         } catch (err) {

@@ -306,6 +306,7 @@ function closeThemeModal() {
     }
     if (typeof closeModalOverlayById === 'function') closeModalOverlayById('themeOverlay');
     else { if (overlay.contains(document.activeElement)) document.activeElement.blur(); overlay.style.display = 'none'; overlay.setAttribute('inert', ''); overlay.setAttribute('aria-hidden', 'true'); }
+    window.hmReturnToAccountMenu?.('theme');
 }
 function previewPersonalTheme(theme) {
     if (hmThemeModePreview === 'shared' && !hmCanManageSharedTheme()) return;

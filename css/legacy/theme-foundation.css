@@ -1,0 +1,980 @@
+
+
+:root[data-hm-theme] {
+    --primary-color:var(--hm-primary);
+    --accent-purple:var(--hm-accent);
+    --soft-purple:var(--hm-soft);
+    --soft-pink:var(--hm-soft-2);
+    --bg-color:var(--hm-bg-2);
+    --card-color:var(--hm-card);
+    --text-color:var(--hm-text);
+    --border-color:var(--hm-border);
+}
+:root[data-hm-theme] body {
+    background:radial-gradient(circle at top left,var(--hm-bg-1) 0,transparent 32%),linear-gradient(135deg,var(--hm-bg-1) 0%,var(--hm-bg-2) 52%,var(--hm-bg-3) 100%);
+    color:var(--hm-text);
+}
+:root[data-hm-theme] .container,
+:root[data-hm-theme] .daily-modal,
+:root[data-hm-theme] .room-settings-modal,
+:root[data-hm-theme] .guide-modal,
+:root[data-hm-theme] .mission-modal {
+    background:var(--hm-card);
+    color:var(--hm-text);
+    border-color:var(--hm-border);
+    box-shadow:0 16px 40px var(--hm-shadow);
+}
+:root[data-hm-theme] .user-bar,
+:root[data-hm-theme] .room-settings-card,
+:root[data-hm-theme] .summary-card,
+:root[data-hm-theme] .dashboard-card,
+:root[data-hm-theme] .history-card,
+:root[data-hm-theme] .trust-card,
+:root[data-hm-theme] .hm-profile-summary,
+:root[data-hm-theme] .hm-profile-preview {
+    border-color:var(--hm-border);
+    background:linear-gradient(135deg,var(--hm-soft-2),var(--hm-soft));
+    color:var(--hm-text);
+}
+:root[data-hm-theme] h1,
+:root[data-hm-theme] .daily-modal-head h2,
+:root[data-hm-theme] .room-settings-title,
+:root[data-hm-theme] .hm-account-value,
+:root[data-hm-theme] .hm-profile-summary strong { color:var(--hm-text); }
+:root[data-hm-theme] .app-subtitle,
+:root[data-hm-theme] .hm-account-label,
+:root[data-hm-theme] .room-settings-sub,
+:root[data-hm-theme] .hm-profile-help,
+:root[data-hm-theme] .hm-profile-summary span { color:var(--hm-muted); }
+:root[data-hm-theme] input,
+:root[data-hm-theme] textarea,
+:root[data-hm-theme] select {
+    background:var(--hm-input);
+    color:var(--hm-text);
+    border-color:var(--hm-border);
+}
+:root[data-hm-theme] .btn-primary,
+:root[data-hm-theme] .daily-modal-save {
+    background:linear-gradient(135deg,var(--hm-primary),var(--hm-primary-strong));
+    color:#fff;
+}
+:root[data-hm-theme] .btn-secondary,
+:root[data-hm-theme] .modal-close-btn,
+:root[data-hm-theme] .app-version-badge {
+    background:var(--hm-soft-2);
+    color:var(--hm-primary-strong);
+    border-color:var(--hm-border);
+}
+
+.hm-theme-overlay { display:none; z-index:10060; }
+.hm-theme-modal { max-width:470px; }
+.hm-theme-intro { margin:-2px 2px 16px; font-size:.86rem; line-height:1.55; color:var(--hm-muted); }
+.hm-theme-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:11px; }
+.hm-theme-option { min-width:0; padding:14px 12px; border:1px solid var(--hm-border); border-radius:16px; background:var(--hm-card); color:var(--hm-text); text-align:left; cursor:pointer; transition:transform .16s ease,border-color .16s ease,box-shadow .16s ease; }
+.hm-theme-option:active { transform:scale(.98); }
+.hm-theme-option.is-selected { border:2px solid var(--hm-accent); padding:13px 11px; box-shadow:0 0 0 3px color-mix(in srgb,var(--hm-accent) 14%,transparent); }
+.hm-theme-option strong,.hm-theme-option small { display:block; }
+.hm-theme-option strong { margin-top:9px; font-size:.96rem; }
+.hm-theme-option small { margin-top:4px; color:var(--hm-muted); font-size:.75rem; line-height:1.3; }
+.hm-theme-swatches { display:flex; height:24px; overflow:hidden; border-radius:999px; border:1px solid rgba(0,0,0,.06); }
+.hm-theme-swatches i { flex:1; }
+.hm-theme-option[data-theme="lavender"] .hm-theme-swatches i:nth-child(1){background:#ff8da1}.hm-theme-option[data-theme="lavender"] .hm-theme-swatches i:nth-child(2){background:#8e5cf4}.hm-theme-option[data-theme="lavender"] .hm-theme-swatches i:nth-child(3){background:#f4ecff}
+.hm-theme-option[data-theme="blossom"] .hm-theme-swatches i:nth-child(1){background:#f06f98}.hm-theme-option[data-theme="blossom"] .hm-theme-swatches i:nth-child(2){background:#c65b91}.hm-theme-option[data-theme="blossom"] .hm-theme-swatches i:nth-child(3){background:#ffe8ef}
+.hm-theme-option[data-theme="ocean"] .hm-theme-swatches i:nth-child(1){background:#3d9ed8}.hm-theme-option[data-theme="ocean"] .hm-theme-swatches i:nth-child(2){background:#287fbd}.hm-theme-option[data-theme="ocean"] .hm-theme-swatches i:nth-child(3){background:#e5f4ff}
+.hm-theme-option[data-theme="forest"] .hm-theme-swatches i:nth-child(1){background:#54a878}.hm-theme-option[data-theme="forest"] .hm-theme-swatches i:nth-child(2){background:#477d63}.hm-theme-option[data-theme="forest"] .hm-theme-swatches i:nth-child(3){background:#e8f5ea}
+.hm-theme-option[data-theme="cream"] .hm-theme-swatches i:nth-child(1){background:#d89052}.hm-theme-option[data-theme="cream"] .hm-theme-swatches i:nth-child(2){background:#a8784d}.hm-theme-option[data-theme="cream"] .hm-theme-swatches i:nth-child(3){background:#f8eedb}
+.hm-theme-status { min-height:22px; margin:13px 2px 8px; color:var(--hm-muted); font-size:.82rem; line-height:1.45; }
+.hm-theme-status.success { color:#2e9a68; }
+.hm-theme-status.error { color:#d34f61; }
+@media (max-width:360px){.hm-theme-grid{grid-template-columns:1fr}.hm-theme-option{padding:12px}.hm-theme-option.is-selected{padding:11px}}
+/* STEP5.8.5: 일반 사용자는 프로필/테마/데이터/로그아웃을 2×2로 간결하게 표시 */
+.user-bar-actions.hm-account-actions { grid-template-columns:repeat(2,minmax(0,1fr)); }
+.user-bar-actions.hm-account-actions:has(#dataAdminButton:not([hidden])) { grid-template-columns:repeat(3,minmax(0,1fr)); }
+
+
+/* STEP5.8.5 개인/공용 테마 적용 방식 */
+.hm-theme-mode-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:0 0 8px}
+.hm-theme-mode-option{padding:12px;border:1px solid var(--hm-border);border-radius:15px;background:var(--hm-card);color:var(--hm-text);text-align:left;cursor:pointer}
+.hm-theme-mode-option strong,.hm-theme-mode-option small{display:block}.hm-theme-mode-option small{margin-top:4px;color:var(--hm-muted);font-size:.75rem}
+.hm-theme-mode-option.is-selected{border:2px solid var(--hm-accent);padding:11px;background:var(--hm-soft);box-shadow:0 0 0 3px color-mix(in srgb,var(--hm-accent) 12%,transparent)}
+.hm-theme-mode-option:disabled{opacity:.48;cursor:not-allowed}
+.hm-theme-mode-notice{min-height:38px;margin:7px 2px 13px;padding:9px 11px;border-radius:12px;background:var(--hm-soft-2);color:var(--hm-muted);font-size:.76rem;line-height:1.4}
+.hm-theme-option:disabled{opacity:.55;cursor:not-allowed}
+@media(max-width:360px){.hm-theme-mode-grid{grid-template-columns:1fr}}
+
+
+/* =========================================================
+   STEP5.8.5 테마 엔진 기반 재설계
+   - 개별 색상 변경이 아니라 앱 전체 구성요소가 같은 디자인 토큰을 사용한다.
+   - 레이아웃/기능/데이터 구조는 변경하지 않는다.
+   - STEP5.8.5에서 각 분위기별 팔레트를 본격 조정할 수 있는 기반이다.
+   ========================================================= */
+:root[data-hm-theme] {
+    /* Surface hierarchy */
+    --hm-surface-page: var(--hm-bg-2);
+    --hm-surface-shell: color-mix(in srgb, var(--hm-card) 94%, var(--hm-soft) 6%);
+    --hm-surface-card: var(--hm-card);
+    --hm-surface-card-soft: color-mix(in srgb, var(--hm-card) 70%, var(--hm-soft) 30%);
+    --hm-surface-card-tint: color-mix(in srgb, var(--hm-card) 58%, var(--hm-soft-2) 42%);
+    --hm-surface-input: var(--hm-input);
+    --hm-surface-overlay: color-mix(in srgb, var(--hm-text) 30%, transparent);
+
+    /* Typography */
+    --hm-color-title: var(--hm-text);
+    --hm-color-body: color-mix(in srgb, var(--hm-text) 88%, var(--hm-muted) 12%);
+    --hm-color-muted: var(--hm-muted);
+    --hm-color-on-accent: #fff;
+
+    /* Interactive */
+    --hm-action-primary: var(--hm-primary);
+    --hm-action-primary-strong: var(--hm-primary-strong);
+    --hm-action-accent: var(--hm-accent);
+    --hm-action-soft: color-mix(in srgb, var(--hm-soft) 78%, var(--hm-card) 22%);
+    --hm-focus-ring: color-mix(in srgb, var(--hm-accent) 26%, transparent);
+
+    /* Lines, shadows and glow */
+    --hm-line-soft: color-mix(in srgb, var(--hm-border) 74%, transparent);
+    --hm-line-strong: var(--hm-border);
+    --hm-shadow-card: 0 12px 30px var(--hm-shadow);
+    --hm-shadow-modal: 0 22px 58px color-mix(in srgb, var(--hm-shadow) 88%, rgba(0,0,0,.12) 12%);
+    --hm-brand-glow: 0 0 34px color-mix(in srgb, var(--hm-accent) 23%, transparent);
+
+    /* Compatibility mapping for legacy components */
+    --hm-brand-bg: var(--hm-surface-page);
+    --hm-brand-bg-warm: var(--hm-bg-1);
+    --hm-brand-card: var(--hm-surface-shell);
+    --hm-brand-text: var(--hm-color-title);
+    --hm-brand-subtext: var(--hm-color-muted);
+    --hm-brand-primary: var(--hm-action-primary);
+    --hm-brand-primary-2: color-mix(in srgb, var(--hm-action-primary) 62%, white 38%);
+    --hm-brand-lavender: var(--hm-action-accent);
+    --hm-brand-border: var(--hm-line-strong);
+    --hm-brand-shadow: var(--hm-shadow-modal);
+    --hm-brand-shadow-soft: var(--hm-shadow-card);
+}
+
+/* App shell and brand */
+:root[data-hm-theme] body {
+    background:
+        radial-gradient(circle at 12% 1%, color-mix(in srgb,var(--hm-primary) 16%,transparent), transparent 30%),
+        radial-gradient(circle at 92% 8%, color-mix(in srgb,var(--hm-accent) 18%,transparent), transparent 28%),
+        linear-gradient(145deg,var(--hm-bg-1) 0%,var(--hm-bg-2) 55%,var(--hm-bg-3) 100%);
+    color: var(--hm-color-body);
+}
+:root[data-hm-theme] .container {
+    background: var(--hm-surface-shell);
+    border-color: var(--hm-line-strong);
+    box-shadow: var(--hm-shadow-modal);
+}
+:root[data-hm-theme] .container::before { background: color-mix(in srgb,var(--hm-accent) 32%,transparent); }
+:root[data-hm-theme] .hm-title-mark {
+    background: linear-gradient(135deg,var(--hm-action-primary),var(--hm-action-accent));
+    box-shadow: var(--hm-brand-glow);
+}
+:root[data-hm-theme] .app-title-row h1 { text-shadow: 0 0 22px color-mix(in srgb,var(--hm-accent) 10%,transparent); }
+:root[data-hm-theme] .app-version-badge,
+:root[data-hm-theme] .history-launch-version {
+    background: linear-gradient(135deg,var(--hm-surface-card-tint),var(--hm-action-soft)) !important;
+    color: var(--hm-action-primary-strong) !important;
+    border-color: var(--hm-line-strong) !important;
+}
+
+/* Shared card system */
+:root[data-hm-theme] :is(
+    .user-bar,.room-settings-card,.summary-card,.dashboard-card,.history-card,.trust-card,
+    .daily-card,.managed-card,.mission-compact-card,.custom-routine-hub-card,
+    .hm-chat-card,.history-launch-card,.help-menu-card,.help-mini-card,.help-center-card,
+    .data-policy-card,.feedback-review-card,.onboarding-card,.onboarding-choice-card,
+    .hm-profile-summary,.hm-profile-preview,.data-admin-summary,.hm-account-panel
+) {
+    background: var(--hm-surface-card);
+    color: var(--hm-color-body);
+    border-color: var(--hm-line-soft);
+    box-shadow: var(--hm-shadow-card);
+}
+:root[data-hm-theme] :is(.summary-card,.hm-chat-card,.history-launch-card,.mission-compact-card,.custom-routine-hub-card) {
+    background: linear-gradient(135deg,var(--hm-surface-card),var(--hm-surface-card-tint));
+}
+:root[data-hm-theme] :is(.daily-card-icon,.hm-chat-card-icon,.custom-routine-hub-list-icon,.mission-compact-icon) {
+    background: linear-gradient(145deg,var(--hm-surface-card-tint),var(--hm-action-soft));
+    border-color: var(--hm-line-soft);
+}
+
+/* Modal system */
+:root[data-hm-theme] :is(
+    .daily-modal,.room-settings-modal,.guide-modal,.mission-modal,.custom-routine-modal,
+    .custom-routine-hub-modal,.hm-profile-modal,.hm-theme-modal,.hm-chat-modal,
+    .history-detail-modal,.history-panel-modal,.data-management-modal,.data-admin-modal,
+    .onboarding-modal
+) {
+    background: var(--hm-surface-shell);
+    color: var(--hm-color-body);
+    border-color: var(--hm-line-strong);
+    box-shadow: var(--hm-shadow-modal);
+}
+:root[data-hm-theme] :is(
+    .daily-modal-overlay,.room-settings-overlay,.mission-modal-overlay,.hm-profile-overlay,
+    .hm-theme-overlay,.hm-chat-overlay,.history-detail-overlay,.history-panel-overlay,
+    .data-management-overlay,.data-admin-overlay
+) { background: var(--hm-surface-overlay); }
+
+/* Inputs and controls */
+:root[data-hm-theme] :is(input,textarea,select,.hm-profile-input,.help-search-input) {
+    background: var(--hm-surface-input);
+    color: var(--hm-color-body);
+    border-color: var(--hm-line-strong);
+    box-shadow: inset 0 1px 0 color-mix(in srgb,var(--hm-card) 60%,transparent);
+}
+:root[data-hm-theme] :is(input,textarea,select,.hm-profile-input,.help-search-input):focus {
+    border-color: var(--hm-action-accent);
+    box-shadow: 0 0 0 4px var(--hm-focus-ring);
+    outline: none;
+}
+:root[data-hm-theme] :is(
+    .btn-main,.btn-primary,.daily-modal-save,.btn-connect,.chat-send-btn,
+    .custom-routine-manage-btn
+) {
+    background: linear-gradient(135deg,var(--hm-action-primary),var(--hm-action-primary-strong));
+    color: var(--hm-color-on-accent);
+    border-color: transparent;
+    box-shadow: 0 9px 22px color-mix(in srgb,var(--hm-primary) 23%,transparent);
+}
+:root[data-hm-theme] :is(
+    .btn-secondary,.btn-small,.btn-copy,.modal-close-btn,.guide-btn,
+    .choice-btn,.mood-btn,.feedback-type-btn,.gift-choice-btn,.relationship-role-btn
+) {
+    background: var(--hm-action-soft);
+    color: var(--hm-color-body);
+    border-color: var(--hm-line-strong);
+}
+:root[data-hm-theme] :is(
+    .btn-secondary,.btn-small,.btn-copy,.modal-close-btn,.guide-btn,
+    .choice-btn,.mood-btn,.feedback-type-btn,.gift-choice-btn,.relationship-role-btn
+):is(:hover,:focus-visible,.active,.selected) {
+    border-color: var(--hm-action-accent);
+    box-shadow: 0 0 0 3px var(--hm-focus-ring);
+}
+
+/* Text hierarchy and decorative details */
+:root[data-hm-theme] :is(
+    h1,h2,h3,.home-section-title,.condition-title,.record-title,
+    .daily-card-title,.hm-chat-card-title-row,.room-settings-title,.daily-modal-head h2,
+    .hm-account-value,.custom-routine-hub-list-title
+) { color: var(--hm-color-title); }
+:root[data-hm-theme] :is(
+    .app-subtitle,.daily-card-sub,.hm-chat-card-meta,.hm-chat-card-preview,
+    .hm-account-label,.room-settings-sub,.hm-profile-help,.custom-routine-hub-list-meta,
+    .feedback-hint,.trust-card-help
+) { color: var(--hm-color-muted); }
+:root[data-hm-theme] :is(.daily-card-arrow,.hm-chat-card-arrow,.mission-open-btn) { color: var(--hm-action-accent); }
+:root[data-hm-theme] :is(.hm-theme-option,.hm-theme-mode-option) {
+    background: var(--hm-surface-card);
+    color: var(--hm-color-body);
+    border-color: var(--hm-line-strong);
+}
+:root[data-hm-theme] :is(.hm-theme-option,.hm-theme-mode-option).is-selected {
+    background: var(--hm-surface-card-tint);
+    border-color: var(--hm-action-accent);
+    box-shadow: 0 0 0 3px var(--hm-focus-ring);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    :root[data-hm-theme] body,
+    :root[data-hm-theme] .container,
+    :root[data-hm-theme] :is(.daily-card,.summary-card,.hm-chat-card,.history-launch-card,.btn-main,.btn-primary) {
+        transition: background-color .22s ease,border-color .22s ease,color .22s ease,box-shadow .22s ease;
+    }
+}
+
+
+/* =========================================================
+   STEP5.8.5 테마 분위기 완성
+   - 각 테마가 배경만이 아니라 카드/버튼/입력/강조/그림자까지
+     하나의 분위기로 느껴지도록 팔레트 차이를 강화한다.
+   - 레이아웃과 기능은 변경하지 않는다.
+   ========================================================= */
+:root[data-hm-theme="lavender"] {
+    --hm-bg-1:#fff4fb; --hm-bg-2:#eee6ff; --hm-bg-3:#fff7ed;
+    --hm-primary:#ff6f91; --hm-primary-strong:#e94f77; --hm-accent:#8157e8;
+    --hm-soft:#eee5ff; --hm-soft-2:#ffe8f0; --hm-card:#fffafd;
+    --hm-text:#29233b; --hm-muted:#756b89; --hm-border:#d9c8fa;
+    --hm-shadow:rgba(102,70,180,.18); --hm-input:#f8f3ff;
+    --hm-theme-card-feature:#f4efff; --hm-theme-card-alt:#fff0f5;
+    --hm-theme-button-text:#ffffff; --hm-theme-glow:rgba(129,87,232,.28);
+}
+:root[data-hm-theme="blossom"] {
+    --hm-bg-1:#fff0f4; --hm-bg-2:#ffdce7; --hm-bg-3:#fff6ec;
+    --hm-primary:#ef5e8d; --hm-primary-strong:#d63f72; --hm-accent:#b94f87;
+    --hm-soft:#ffe0ea; --hm-soft-2:#fff0dc; --hm-card:#fff9fb;
+    --hm-text:#3c2030; --hm-muted:#846071; --hm-border:#efb8cb;
+    --hm-shadow:rgba(190,66,116,.18); --hm-input:#fff0f5;
+    --hm-theme-card-feature:#ffeaf1; --hm-theme-card-alt:#fff1df;
+    --hm-theme-button-text:#ffffff; --hm-theme-glow:rgba(239,94,141,.30);
+}
+:root[data-hm-theme="ocean"] {
+    --hm-bg-1:#e8faff; --hm-bg-2:#cfeeff; --hm-bg-3:#e9fff7;
+    --hm-primary:#159acb; --hm-primary-strong:#0878aa; --hm-accent:#0b7db8;
+    --hm-soft:#d9f3ff; --hm-soft-2:#dffaf3; --hm-card:#f8fdff;
+    --hm-text:#123346; --hm-muted:#547586; --hm-border:#a9d9ed;
+    --hm-shadow:rgba(18,125,177,.18); --hm-input:#eefdff;
+    --hm-theme-card-feature:#e2f6ff; --hm-theme-card-alt:#e4fbf4;
+    --hm-theme-button-text:#ffffff; --hm-theme-glow:rgba(21,154,203,.30);
+}
+:root[data-hm-theme="forest"] {
+    --hm-bg-1:#edf8ed; --hm-bg-2:#d9edd8; --hm-bg-3:#fff4dd;
+    --hm-primary:#398b5a; --hm-primary-strong:#246d43; --hm-accent:#3f6f57;
+    --hm-soft:#dcefdc; --hm-soft-2:#f6ead0; --hm-card:#fbfdf7;
+    --hm-text:#21372a; --hm-muted:#607666; --hm-border:#b8d5bb;
+    --hm-shadow:rgba(54,112,72,.18); --hm-input:#f0f8ee;
+    --hm-theme-card-feature:#e4f3e2; --hm-theme-card-alt:#fff0d6;
+    --hm-theme-button-text:#ffffff; --hm-theme-glow:rgba(57,139,90,.28);
+}
+:root[data-hm-theme="cream"] {
+    --hm-bg-1:#fff5df; --hm-bg-2:#f6e4bf; --hm-bg-3:#fffaf0;
+    --hm-primary:#c87836; --hm-primary-strong:#a85b23; --hm-accent:#8d6748;
+    --hm-soft:#f8e5c2; --hm-soft-2:#f2ddcb; --hm-card:#fffaf0;
+    --hm-text:#443224; --hm-muted:#7f6b5b; --hm-border:#dfc49c;
+    --hm-shadow:rgba(145,96,46,.18); --hm-input:#fff2dc;
+    --hm-theme-card-feature:#fae9c8; --hm-theme-card-alt:#f4ddd0;
+    --hm-theme-button-text:#ffffff; --hm-theme-glow:rgba(200,120,54,.28);
+}
+
+
+:root[data-hm-theme] {
+    --hm-surface-shell:color-mix(in srgb,var(--hm-card) 88%,var(--hm-soft) 12%);
+    --hm-surface-card:var(--hm-card);
+    --hm-surface-card-soft:var(--hm-theme-card-feature);
+    --hm-surface-card-tint:var(--hm-theme-card-alt);
+    --hm-brand-glow:0 0 38px var(--hm-theme-glow);
+    --hm-shadow-card:0 12px 28px var(--hm-shadow);
+}
+
+/* 앱 바깥과 메인 패널의 분위기를 더 분명하게 구분 */
+:root[data-hm-theme] body {
+    background:
+      radial-gradient(circle at 8% 2%,color-mix(in srgb,var(--hm-primary) 30%,transparent),transparent 33%),
+      radial-gradient(circle at 96% 16%,color-mix(in srgb,var(--hm-accent) 25%,transparent),transparent 31%),
+      linear-gradient(145deg,var(--hm-bg-1),var(--hm-bg-2) 52%,var(--hm-bg-3));
+}
+:root[data-hm-theme] .container {
+    background:linear-gradient(180deg,color-mix(in srgb,var(--hm-card) 96%,var(--hm-soft) 4%),color-mix(in srgb,var(--hm-card) 84%,var(--hm-soft) 16%));
+}
+
+/* 핵심 영역마다 서로 다른 카드 표면을 사용해 테마의 면적감을 강화 */
+:root[data-hm-theme] :is(.user-bar,.room-settings-card,.hm-account-panel) {
+    background:linear-gradient(135deg,var(--hm-theme-card-alt),var(--hm-card));
+}
+:root[data-hm-theme] :is(.summary-card,.history-launch-card,.hm-chat-card) {
+    background:linear-gradient(135deg,var(--hm-theme-card-feature),var(--hm-card));
+}
+:root[data-hm-theme] :is(.daily-card,.mission-compact-card,.custom-routine-hub-card,.managed-card) {
+    background:linear-gradient(145deg,var(--hm-card),color-mix(in srgb,var(--hm-theme-card-feature) 72%,var(--hm-card) 28%));
+}
+:root[data-hm-theme] :is(.daily-card-icon,.hm-chat-card-icon,.mission-compact-icon,.custom-routine-hub-list-icon) {
+    background:linear-gradient(145deg,var(--hm-theme-card-alt),var(--hm-theme-card-feature));
+    box-shadow:inset 0 1px 0 color-mix(in srgb,#fff 65%,transparent),0 8px 18px color-mix(in srgb,var(--hm-accent) 13%,transparent);
+}
+
+/* 상단 브랜드와 주요 버튼은 테마 포인트색을 확실하게 노출 */
+:root[data-hm-theme] .hm-title-mark {
+    background:linear-gradient(135deg,var(--hm-primary),var(--hm-accent));
+    box-shadow:0 0 36px var(--hm-theme-glow);
+}
+:root[data-hm-theme] :is(.btn-main,.btn-primary,.daily-modal-save,.btn-connect,.chat-send-btn,.custom-routine-manage-btn) {
+    background:linear-gradient(135deg,var(--hm-primary),var(--hm-primary-strong));
+    color:var(--hm-theme-button-text);
+    box-shadow:0 10px 24px color-mix(in srgb,var(--hm-primary) 34%,transparent);
+}
+:root[data-hm-theme] :is(.user-bar-actions button,.hm-account-action-btn) {
+    background:linear-gradient(145deg,var(--hm-theme-card-alt),var(--hm-theme-card-feature));
+    color:var(--hm-primary-strong);
+    border-color:color-mix(in srgb,var(--hm-primary) 24%,var(--hm-border));
+}
+
+/* 입력창/선택창도 테마에 포함 */
+:root[data-hm-theme] :is(input,textarea,select,.hm-profile-input,.help-search-input) {
+    background:linear-gradient(180deg,var(--hm-input),color-mix(in srgb,var(--hm-input) 78%,var(--hm-card) 22%));
+}
+
+/* 테마 선택 화면 미리보기 자체도 실제 분위기와 일치 */
+.hm-theme-option[data-theme="lavender"]{background:linear-gradient(145deg,#fff0f6,#eee6ff)}
+.hm-theme-option[data-theme="blossom"]{background:linear-gradient(145deg,#ffe7ef,#fff0dc)}
+.hm-theme-option[data-theme="ocean"]{background:linear-gradient(145deg,#dff5ff,#ddfaf2)}
+.hm-theme-option[data-theme="forest"]{background:linear-gradient(145deg,#e3f3e1,#fff0d4)}
+.hm-theme-option[data-theme="cream"]{background:linear-gradient(145deg,#fae7c4,#f3ddd0)}
+
+/* 테마별 작은 시그니처 차이 */
+:root[data-hm-theme="blossom"] .container::before{background:#f4a1bd}
+:root[data-hm-theme="ocean"] .container::before{background:#70cceb}
+:root[data-hm-theme="forest"] .container::before{background:#78ad81}
+:root[data-hm-theme="cream"] .container::before{background:#d8aa6c}
+
+
+
+
+
+/* =========================================================
+   STEP5.8.5 화면 표시 방식 분리
+   - 색상 테마와 라이트/다크/시스템 표시를 독립적으로 관리한다.
+   - 다크 모드는 모든 테마의 포인트 색상을 유지하면서 표면과 글자 대비만 바꾼다.
+   ========================================================= */
+.hm-display-section{margin-top:18px;padding-top:16px;border-top:1px solid var(--hm-line-soft)}
+.hm-display-section-head strong,.hm-display-section-head small{display:block}
+.hm-display-section-head strong{color:var(--hm-color-title);font-size:.92rem}
+.hm-display-section-head small{margin-top:4px;color:var(--hm-color-muted);font-size:.75rem;line-height:1.35}
+.hm-display-mode-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin-top:11px}
+.hm-display-mode-option{min-width:0;padding:11px 7px;border:1px solid var(--hm-line-strong);border-radius:14px;background:var(--hm-surface-card);color:var(--hm-color-body);text-align:center;cursor:pointer}
+.hm-display-mode-option span,.hm-display-mode-option strong,.hm-display-mode-option small{display:block}
+.hm-display-mode-option span{font-size:1.05rem}.hm-display-mode-option strong{margin-top:5px;font-size:.82rem}.hm-display-mode-option small{margin-top:3px;color:var(--hm-color-muted);font-size:.67rem;line-height:1.25}
+.hm-display-mode-option.is-selected{background:var(--hm-surface-card-tint);border:2px solid var(--hm-action-accent);padding:10px 6px;box-shadow:0 0 0 3px var(--hm-focus-ring)}
+@media(max-width:360px){.hm-display-mode-grid{grid-template-columns:1fr}.hm-display-mode-option{text-align:left;display:grid;grid-template-columns:26px 1fr;column-gap:8px}.hm-display-mode-option span{grid-row:1/3;align-self:center}.hm-display-mode-option strong,.hm-display-mode-option small{margin:0}}
+
+:root[data-hm-display="light"]{color-scheme:light}
+:root[data-hm-display="dark"]{
+    color-scheme:dark;
+    --hm-bg-1:#111521;
+    --hm-bg-2:#171c2b;
+    --hm-bg-3:#101722;
+    --hm-card:#202638;
+    --hm-soft:#293149;
+    --hm-soft-2:#262c40;
+    --hm-input:#2a3248;
+    --hm-text:#f5f2fa;
+    --hm-muted:#b9b4c5;
+    --hm-border:#454e69;
+    --hm-shadow:rgba(0,0,0,.42);
+    --hm-theme-card-feature:#283149;
+    --hm-theme-card-alt:#2b2a42;
+    --hm-color-on-accent:#fff;
+    --hm-surface-overlay:rgba(5,8,15,.72);
+    --hm-line-soft:rgba(137,148,181,.28);
+    --hm-line-strong:#48516c;
+    --hm-shadow-card:0 10px 24px rgba(0,0,0,.28);
+    --hm-shadow-modal:0 22px 56px rgba(0,0,0,.48);
+}
+:root[data-hm-display="dark"] body{
+    background:radial-gradient(circle at 8% 2%,color-mix(in srgb,var(--hm-primary) 18%,transparent),transparent 34%),radial-gradient(circle at 96% 14%,color-mix(in srgb,var(--hm-accent) 16%,transparent),transparent 31%),linear-gradient(145deg,var(--hm-bg-1),var(--hm-bg-2) 52%,var(--hm-bg-3));
+}
+:root[data-hm-display="dark"] .container{background:linear-gradient(180deg,#1e2434,#181e2d);border-color:#3d4660}
+:root[data-hm-display="dark"] :is(
+ .user-bar,.room-settings-card,.summary-card,.dashboard-card,.history-card,.trust-card,
+ .daily-card,.managed-card,.mission-compact-card,.custom-routine-hub-card,.hm-chat-card,
+ .history-launch-card,.help-menu-card,.help-mini-card,.help-center-card,.data-policy-card,
+ .feedback-review-card,.onboarding-card,.onboarding-choice-card,.hm-profile-summary,
+ .hm-profile-preview,.data-admin-summary,.hm-account-panel
+){color:var(--hm-text);border-color:var(--hm-line-soft)}
+:root[data-hm-display="dark"] :is(
+ .daily-modal,.room-settings-modal,.guide-modal,.mission-modal,.custom-routine-modal,
+ .custom-routine-hub-modal,.hm-profile-modal,.hm-theme-modal,.hm-chat-modal,
+ .history-detail-modal,.history-panel-modal,.data-management-modal,.data-admin-modal,.onboarding-modal
+){background:#1d2435;color:var(--hm-text);border-color:#46506b}
+:root[data-hm-display="dark"] :is(
+ h1,h2,h3,.home-section-title,.condition-title,.record-title,.daily-card-title,
+ .hm-chat-card-title-row,.room-settings-title,.daily-modal-head h2,.hm-account-value,
+ .custom-routine-hub-list-title,.custom-routine-hub-list-text strong,.custom-routine-hub-guide strong
+){color:var(--hm-text)!important}
+:root[data-hm-display="dark"] :is(
+ .app-subtitle,.daily-card-sub,.hm-chat-card-meta,.hm-chat-card-preview,.hm-account-label,
+ .room-settings-sub,.hm-profile-help,.custom-routine-hub-list-meta,.custom-routine-hub-list-text small,
+ .custom-routine-hub-guide span,.feedback-hint,.trust-card-help
+){color:var(--hm-muted)!important}
+:root[data-hm-display="dark"] :is(input,textarea,select,.hm-profile-input,.help-search-input){background:#293149;color:var(--hm-text);border-color:#4a5570;box-shadow:inset 0 1px 0 rgba(255,255,255,.04)}
+:root[data-hm-display="dark"] :is(input,textarea)::placeholder{color:#8f97aa}
+:root[data-hm-display="dark"] :is(.btn-secondary,.btn-small,.btn-copy,.modal-close-btn,.guide-btn,.choice-btn,.mood-btn,.feedback-type-btn,.gift-choice-btn,.relationship-role-btn,.user-bar-actions button,.hm-account-action-btn){background:#293149;color:#eeeaf8;border-color:#4a5570}
+:root[data-hm-display="dark"] :is(.app-version-badge,.history-launch-version){background:#302d48!important;color:#f3b0c2!important;border-color:#5b5575!important}
+:root[data-hm-display="dark"] .hm-theme-option:not(.is-selected),
+:root[data-hm-display="dark"] .hm-theme-mode-option:not(.is-selected),
+:root[data-hm-display="dark"] .hm-display-mode-option:not(.is-selected){background:#242b3e;color:var(--hm-text)}
+:root[data-hm-display="dark"] .hm-theme-mode-notice{background:#282f44;color:var(--hm-muted)}
+:root[data-hm-display="dark"] .summary-card{background:linear-gradient(135deg,#2b3248,#242a3d)}
+:root[data-hm-display="dark"] .hm-chat-card{background:linear-gradient(135deg,#2a3044,#23293b)}
+:root[data-hm-display="dark"] .daily-card{background:linear-gradient(145deg,#232a3d,#293149)}
+:root[data-hm-display="dark"] .daily-card-icon,
+:root[data-hm-display="dark"] .hm-chat-card-icon{background:linear-gradient(145deg,#312e49,#29354b);box-shadow:inset 0 1px 0 rgba(255,255,255,.06)}
+
+
+/* =========================================================
+   STEP5.8.5 테마 동기화 마무리
+   - 테마 전환은 짧고 부드럽게, 멀미 방지 설정에서는 즉시 적용한다.
+   - 현재 개인/공용 상태를 설정 화면에서 한눈에 확인할 수 있다.
+   ========================================================= */
+.hm-theme-live-state{display:flex;align-items:center;gap:10px;margin:0 0 13px;padding:10px 12px;border:1px solid var(--hm-line-soft);border-radius:14px;background:var(--hm-surface-card-soft);color:var(--hm-color-body)}
+.hm-theme-live-state>span{display:grid;place-items:center;width:34px;height:34px;border-radius:12px;background:var(--hm-surface-card);font-size:1rem;box-shadow:0 6px 14px var(--hm-shadow)}
+.hm-theme-live-state div{min-width:0}.hm-theme-live-state strong,.hm-theme-live-state small{display:block}.hm-theme-live-state strong{font-size:.82rem}.hm-theme-live-state small{margin-top:3px;color:var(--hm-color-muted);font-size:.73rem}
+.hm-theme-live-state.is-shared{border-color:color-mix(in srgb,var(--hm-action-accent) 38%,var(--hm-line-soft));background:color-mix(in srgb,var(--hm-surface-card-tint) 78%,var(--hm-surface-card) 22%)}
+:root.hm-theme-changing body,:root.hm-theme-changing .container,:root.hm-theme-changing :is(.user-bar,.summary-card,.daily-card,.hm-chat-card,.history-launch-card,.daily-modal,.room-settings-modal,input,textarea,select,button){transition:background-color .32s ease,background .32s ease,color .24s ease,border-color .24s ease,box-shadow .32s ease}
+@media(prefers-reduced-motion:reduce){:root.hm-theme-changing *{transition:none!important;animation:none!important}}
+:root[data-hm-display="dark"] .hm-theme-live-state{background:#283149;border-color:#46516c}
+
+
+/* =========================================================
+   STEP5.9.0 다크 화면 대비 및 테마 반응 보정
+   - 다크 화면에서도 선택한 색상 테마의 포인트가 즉시 반영된다.
+   - 흰 카드 잔존과 저대비 글자를 제거한다.
+   ========================================================= */
+:root[data-hm-theme][data-hm-display="dark"] {
+    --hm-dark-shell:color-mix(in srgb,#151a28 91%,var(--hm-primary) 9%);
+    --hm-dark-card:color-mix(in srgb,#22293b 90%,var(--hm-primary) 10%);
+    --hm-dark-card-soft:color-mix(in srgb,#293248 86%,var(--hm-accent) 14%);
+    --hm-dark-card-tint:color-mix(in srgb,#2d3145 84%,var(--hm-primary) 16%);
+    --hm-dark-input:color-mix(in srgb,#2b344a 90%,var(--hm-primary) 10%);
+    --hm-dark-line:color-mix(in srgb,#56617d 78%,var(--hm-primary) 22%);
+    --hm-card:var(--hm-dark-card);
+    --hm-soft:var(--hm-dark-card-soft);
+    --hm-soft-2:var(--hm-dark-card-tint);
+    --hm-input:var(--hm-dark-input);
+    --hm-surface-shell:var(--hm-dark-shell);
+    --hm-surface-card:var(--hm-dark-card);
+    --hm-surface-card-soft:var(--hm-dark-card-soft);
+    --hm-surface-card-tint:var(--hm-dark-card-tint);
+    --hm-theme-card-feature:var(--hm-dark-card-soft);
+    --hm-theme-card-alt:var(--hm-dark-card-tint);
+    --hm-text:#f7f4fb;
+    --hm-muted:#c1bbcb;
+    --hm-border:var(--hm-dark-line);
+    --hm-color-title:#ffffff;
+    --hm-color-body:#f1edf7;
+    --hm-color-muted:#c1bbcb;
+    --hm-line-soft:color-mix(in srgb,var(--hm-dark-line) 58%,transparent);
+    --hm-line-strong:var(--hm-dark-line);
+}
+
+:root[data-hm-theme][data-hm-display="dark"] body {
+    background:
+      radial-gradient(circle at 7% 2%,color-mix(in srgb,var(--hm-primary) 26%,transparent),transparent 34%),
+      radial-gradient(circle at 96% 14%,color-mix(in srgb,var(--hm-accent) 22%,transparent),transparent 31%),
+      linear-gradient(145deg,#0f131e,var(--hm-dark-shell) 54%,#101521) !important;
+}
+:root[data-hm-theme][data-hm-display="dark"] .container {
+    background:linear-gradient(180deg,color-mix(in srgb,var(--hm-dark-shell) 94%,var(--hm-primary) 6%),#171d2b) !important;
+    border-color:var(--hm-dark-line) !important;
+}
+
+:root[data-hm-theme][data-hm-display="dark"] :is(
+ .user-bar,.hm-account-panel,.room-settings-card,.summary-card,.dashboard-card,.history-card,.trust-card,
+ .daily-card,.managed-card,.mission-compact-card,.custom-routine-hub-card,.hm-chat-card,
+ .history-launch-card,.help-menu-card,.help-mini-card,.help-center-card,.data-policy-card,
+ .feedback-review-card,.onboarding-card,.onboarding-choice-card,.hm-profile-summary,
+ .hm-profile-preview,.data-admin-summary,.input-group input,.input-group select
+) {
+    background:linear-gradient(145deg,var(--hm-dark-card),color-mix(in srgb,var(--hm-dark-card-soft) 78%,var(--hm-dark-card) 22%)) !important;
+    color:var(--hm-color-body) !important;
+    border-color:var(--hm-line-soft) !important;
+    box-shadow:0 10px 24px rgba(0,0,0,.24) !important;
+}
+
+:root[data-hm-theme][data-hm-display="dark"] :is(
+ .hm-chat-card,.summary-card,.history-launch-card
+) {
+    background:linear-gradient(135deg,var(--hm-dark-card-soft),var(--hm-dark-card)) !important;
+}
+
+:root[data-hm-theme][data-hm-display="dark"] :is(
+ .daily-modal,.room-settings-modal,.guide-modal,.mission-modal,.custom-routine-modal,
+ .custom-routine-hub-modal,.hm-profile-modal,.hm-theme-modal,.hm-chat-modal,
+ .history-detail-modal,.history-panel-modal,.data-management-modal,.data-admin-modal,.onboarding-modal
+) {
+    background:linear-gradient(180deg,var(--hm-dark-shell),#171d2b) !important;
+    color:var(--hm-color-body) !important;
+    border-color:var(--hm-dark-line) !important;
+}
+
+:root[data-hm-theme][data-hm-display="dark"] :is(
+ input,textarea,select,.hm-profile-input,.help-search-input,#recordDate
+) {
+    background:var(--hm-dark-input) !important;
+    color:#f8f5fb !important;
+    border-color:var(--hm-dark-line) !important;
+    color-scheme:dark;
+}
+
+:root[data-hm-theme][data-hm-display="dark"] :is(
+ .hm-account-label,.hm-account-value,.hm-account-email,.room-settings-title,.room-settings-sub,
+ .daily-card-title,.daily-card-sub,.hm-chat-card-title-row,.hm-chat-card-preview,.hm-chat-card-meta,
+ .home-section-title,.home-section-title span,.home-section-title small,.input-group>label,
+ .custom-routine-title,.condition-title,.record-title,.manage-title
+) { text-shadow:none !important; }
+
+:root[data-hm-theme][data-hm-display="dark"] :is(
+ .hm-account-value,.room-settings-title,.daily-card-title,.hm-chat-card-title-row strong,
+ .home-section-title,.home-section-title span,.input-group>label
+) { color:#ffffff !important; }
+
+:root[data-hm-theme][data-hm-display="dark"] :is(
+ .hm-account-label,.room-settings-sub,.daily-card-sub,.hm-chat-card-preview,.hm-chat-card-meta,
+ .home-section-title small
+) { color:#c1bbcb !important; }
+
+:root[data-hm-theme][data-hm-display="dark"] :is(
+ .user-bar-actions button,.hm-account-action-btn,.btn-secondary,.btn-small,.modal-close-btn
+) {
+    background:color-mix(in srgb,var(--hm-dark-card-soft) 84%,var(--hm-primary) 16%) !important;
+    color:#f7f2fb !important;
+    border-color:var(--hm-dark-line) !important;
+}
+
+:root[data-hm-theme][data-hm-display="dark"] :is(
+ .daily-card-icon,.hm-chat-card-icon,.room-settings-icon,.mission-compact-icon,.custom-routine-hub-list-icon
+) {
+    background:linear-gradient(145deg,color-mix(in srgb,var(--hm-primary) 22%,var(--hm-dark-card-soft)),color-mix(in srgb,var(--hm-accent) 18%,var(--hm-dark-card))) !important;
+    border-color:color-mix(in srgb,var(--hm-primary) 34%,var(--hm-dark-line)) !important;
+}
+
+:root[data-hm-theme][data-hm-display="dark"] :is(
+ .daily-card-arrow,.hm-chat-card-arrow,.room-settings-arrow,.mission-open-btn
+) { color:color-mix(in srgb,var(--hm-primary) 72%,#ffffff 28%) !important; }
+
+:root[data-hm-theme][data-hm-display="dark"] .summary-card :is(.summary-item,.summary-tile) {
+    background:color-mix(in srgb,var(--hm-dark-card) 88%,var(--hm-primary) 12%) !important;
+    color:#f7f4fb !important;
+    border-color:var(--hm-line-soft) !important;
+}
+
+:root[data-hm-theme][data-hm-display="dark"] .hm-theme-option,
+:root[data-hm-theme][data-hm-display="dark"] .hm-theme-mode-option,
+:root[data-hm-theme][data-hm-display="dark"] .hm-display-mode-option {
+    color:#f7f4fb !important;
+    border-color:var(--hm-dark-line) !important;
+}
+
+
+/* =========================================================
+   STEP5.9.0 Home Header UX Renewal
+   - 계정 정보는 작고 부드러운 실행 카드로 표시
+   - 프로필/테마/데이터/관리/로그아웃은 중앙 팝업에서 제공
+   - 다크모드 오늘의 약속 하위 카드까지 완전 대응
+   ========================================================= */
+.hm-account-launcher{
+    width:100%; min-height:76px; display:grid !important;
+    grid-template-columns:48px minmax(0,1fr) 14px 18px; align-items:center; gap:12px;
+    padding:13px 15px !important; margin:14px 0 16px; text-align:left; cursor:pointer;
+    appearance:none; -webkit-appearance:none;
+}
+.hm-account-launcher:hover{ transform:translateY(-1px); }
+.hm-account-launcher:focus-visible{ outline:3px solid color-mix(in srgb,var(--hm-primary) 32%,transparent); outline-offset:2px; }
+.hm-account-avatar,.hm-account-menu-avatar{
+    display:grid; place-items:center; flex:0 0 auto; border-radius:17px;
+    background:linear-gradient(145deg,color-mix(in srgb,var(--hm-primary) 18%,#fff),color-mix(in srgb,var(--hm-accent) 13%,#fff));
+    border:1px solid color-mix(in srgb,var(--hm-primary) 22%,transparent); color:var(--hm-primary); font-weight:900;
+}
+.hm-account-avatar{ width:48px; height:48px; font-size:1.12rem; }
+.hm-account-compact-text{ min-width:0; display:flex; flex-direction:column; gap:4px; }
+.hm-account-compact-text .hm-account-value{ font-size:1rem; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
+.hm-account-compact-text .hm-account-email{ color:var(--hm-color-muted,#81798d); font-size:.78rem; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
+.hm-account-theme-dot{ width:12px; height:12px; border-radius:50%; background:var(--hm-primary); box-shadow:0 0 0 5px color-mix(in srgb,var(--hm-primary) 15%,transparent); }
+.hm-account-chevron{ color:var(--hm-primary); font-size:1.7rem; line-height:1; font-weight:800; }
+.hm-account-menu-modal{ max-width:440px; }
+.hm-account-menu-profile{ display:flex; align-items:center; gap:13px; padding:14px; border-radius:20px; background:var(--hm-card-bg,rgba(255,255,255,.82)); border:1px solid var(--hm-line-soft,rgba(120,90,170,.14)); }
+.hm-account-menu-avatar{ width:54px; height:54px; font-size:1.18rem; }
+.hm-account-menu-profile>span:last-child{ min-width:0; display:flex; flex-direction:column; gap:4px; }
+.hm-account-menu-profile strong{ font-size:1.05rem; color:var(--hm-color-title,#2f2a3d); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.hm-account-menu-profile small{ color:var(--hm-color-muted,#81798d); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.hm-account-menu-context{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin:10px 2px 12px; padding:9px 11px; border-radius:13px; background:color-mix(in srgb,var(--hm-primary) 7%,transparent); }
+.hm-account-menu-context span{ font-size:.74rem; color:var(--hm-color-muted,#81798d); }
+.hm-account-menu-context strong{ min-width:0; font-size:.78rem; color:var(--hm-color-body,#4c4555); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-align:right; }
+.hm-account-menu-grid{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:9px; }
+.hm-account-menu-grid button{ min-height:82px; padding:11px; border-radius:17px; border:1px solid var(--hm-line-soft,rgba(120,90,170,.14)); background:var(--hm-card-bg,rgba(255,255,255,.84)); color:var(--hm-color-body,#4c4555); display:grid; grid-template-columns:30px 1fr; grid-template-rows:auto auto; column-gap:8px; text-align:left; align-items:center; }
+.hm-account-menu-grid button>span{ grid-row:1/3; font-size:1.25rem; }
+.hm-account-menu-grid button strong{ font-size:.91rem; color:var(--hm-color-title,#2f2a3d); }
+.hm-account-menu-grid button small{ font-size:.7rem; color:var(--hm-color-muted,#81798d); }
+.hm-account-logout-btn{ width:100%; margin-top:10px; min-height:46px; border-radius:15px; border:1px solid color-mix(in srgb,#e35b71 28%,transparent); background:color-mix(in srgb,#e35b71 8%,#fff); color:#c84259; font-weight:900; }
+@media(max-width:420px){
+    .hm-account-launcher{ min-height:70px; grid-template-columns:44px minmax(0,1fr) 12px 15px; gap:10px; padding:11px 13px !important; }
+    .hm-account-avatar{ width:44px; height:44px; border-radius:15px; }
+    .hm-account-menu-grid button{ min-height:76px; }
+}
+
+:root[data-hm-theme][data-hm-display="dark"] .hm-account-launcher,
+:root[data-hm-theme][data-hm-display="dark"] .hm-account-menu-profile,
+:root[data-hm-theme][data-hm-display="dark"] .hm-account-menu-grid button{
+    background:linear-gradient(145deg,var(--hm-dark-card),var(--hm-dark-card-soft)) !important;
+    border-color:var(--hm-dark-line) !important; color:var(--hm-color-body) !important;
+}
+:root[data-hm-theme][data-hm-display="dark"] .hm-account-menu-context{ background:color-mix(in srgb,var(--hm-primary) 12%,var(--hm-dark-card)); }
+:root[data-hm-theme][data-hm-display="dark"] .hm-account-menu-grid button :is(strong,small),
+:root[data-hm-theme][data-hm-display="dark"] .hm-account-menu-profile :is(strong,small),
+:root[data-hm-theme][data-hm-display="dark"] .hm-account-menu-context :is(span,strong){ color:inherit !important; }
+:root[data-hm-theme][data-hm-display="dark"] .hm-account-logout-btn{ background:rgba(227,91,113,.12); color:#ff9daf; border-color:rgba(255,157,175,.35); }
+
+/* 오늘의 약속 아래 동적 미션/주간 운동 카드가 다크 표면을 벗어나지 않도록 보정 */
+:root[data-hm-theme][data-hm-display="dark"] .custom-routine-list .custom-routine-home-item{
+    background:linear-gradient(145deg,var(--hm-dark-card),color-mix(in srgb,var(--hm-dark-card-soft) 82%,var(--hm-primary) 18%)) !important;
+    border-color:color-mix(in srgb,var(--hm-primary) 28%,var(--hm-dark-line)) !important;
+    color:var(--hm-color-body) !important;
+    box-shadow:0 9px 22px rgba(0,0,0,.24) !important;
+}
+:root[data-hm-theme][data-hm-display="dark"] .custom-routine-list .custom-routine-home-item.is-complete{
+    background:linear-gradient(145deg,color-mix(in srgb,var(--hm-dark-card) 82%,#2f9b70 18%),var(--hm-dark-card-soft)) !important;
+}
+:root[data-hm-theme][data-hm-display="dark"] .custom-routine-home-icon{
+    background:linear-gradient(145deg,color-mix(in srgb,var(--hm-primary) 24%,var(--hm-dark-card-soft)),color-mix(in srgb,var(--hm-accent) 17%,var(--hm-dark-card))) !important;
+    border:1px solid color-mix(in srgb,var(--hm-primary) 34%,var(--hm-dark-line));
+}
+:root[data-hm-theme][data-hm-display="dark"] .custom-routine-home-text strong{ color:#fff !important; }
+:root[data-hm-theme][data-hm-display="dark"] .custom-routine-home-text small{ color:#c8c1d2 !important; }
+:root[data-hm-theme][data-hm-display="dark"] .custom-routine-home-check{ color:color-mix(in srgb,var(--hm-primary) 72%,#fff 28%) !important; }
+:root[data-hm-theme][data-hm-display="dark"] .custom-routine-home-empty{ background:var(--hm-dark-card) !important; color:#c8c1d2 !important; border:1px dashed var(--hm-dark-line); }
+
+
+/* =========================================================
+   STEP5.10.8 Account Card Compact Fix
+   - 아래 '우리의 공간' 카드와 같은 크기와 가로 정렬 유지
+   - 과거 user-bar 규칙과의 충돌 방지
+   ========================================================= */
+.hm-account-panel.hm-account-launcher{
+    width:100% !important;
+    min-height:88px !important;
+    height:auto !important;
+    margin:10px 0 14px !important;
+    padding:17px 18px !important;
+    display:flex !important;
+    flex-direction:row !important;
+    align-items:center !important;
+    justify-content:flex-start !important;
+    gap:14px !important;
+    border-radius:var(--hm-brand-radius-card,26px) !important;
+    text-align:left !important;
+}
+.hm-account-panel.hm-account-launcher .hm-account-avatar{
+    width:50px !important;
+    height:50px !important;
+    min-width:50px !important;
+    flex:0 0 50px !important;
+    border-radius:19px !important;
+}
+.hm-account-panel.hm-account-launcher .hm-account-compact-text{
+    flex:1 1 auto !important;
+    min-width:0 !important;
+    display:flex !important;
+    flex-direction:column !important;
+    justify-content:center !important;
+    gap:4px !important;
+}
+.hm-account-panel.hm-account-launcher .hm-account-theme-dot{
+    flex:0 0 12px !important;
+    margin-left:auto !important;
+}
+.hm-account-panel.hm-account-launcher .hm-account-chevron{
+    flex:0 0 auto !important;
+    margin-left:2px !important;
+}
+@media(max-width:520px){
+    .hm-account-panel.hm-account-launcher{
+        min-height:88px !important;
+        padding:17px 18px !important;
+        gap:14px !important;
+    }
+    .hm-account-panel.hm-account-launcher .hm-account-avatar{
+        width:50px !important;
+        height:50px !important;
+        min-width:50px !important;
+    }
+}
+
+
+/* =========================================================
+   STEP5.10.8 Dark Central Modal Header Fix
+   - 중앙 팝업 상단 제목 영역이 라이트 배경으로 남는 문제 수정
+   - 채팅/오늘의 약속/일일 입력/관리 팝업 제목 가독성 통일
+   ========================================================= */
+:root[data-hm-theme][data-hm-display="dark"] :is(
+  .daily-modal-head,
+  .mission-modal-head,
+  .room-settings-head,
+  .history-detail-head,
+  .anniversary-modal-head,
+  .anniversary-settings-head,
+  .hm-chat-modal-head
+){
+  background:linear-gradient(180deg,var(--hm-dark-shell),color-mix(in srgb,var(--hm-dark-shell) 90%,transparent)) !important;
+  color:#ffffff !important;
+  border-color:var(--hm-dark-line) !important;
+}
+:root[data-hm-theme][data-hm-display="dark"] :is(
+  .daily-modal-head h2,
+  .mission-modal-head h2,
+  .room-settings-head h2,
+  .history-detail-head h2,
+  .anniversary-modal-head h2,
+  .anniversary-settings-head h2,
+  .hm-chat-modal-head h2
+){
+  color:#ffffff !important;
+  -webkit-text-fill-color:#ffffff !important;
+  text-shadow:none !important;
+  opacity:1 !important;
+}
+:root[data-hm-theme][data-hm-display="dark"] .hm-chat-modal-presence,
+:root[data-hm-theme][data-hm-display="dark"] .daily-modal-head small,
+:root[data-hm-theme][data-hm-display="dark"] .mission-modal-head small{
+  color:#c9c3d3 !important;
+  -webkit-text-fill-color:#c9c3d3 !important;
+  opacity:1 !important;
+}
+:root[data-hm-theme][data-hm-display="dark"] :is(.daily-modal,.mission-modal,.hm-chat-modal,.custom-routine-modal,.custom-routine-hub-modal) > :is(.daily-modal-head,.mission-modal-head,.hm-chat-modal-head){
+  margin-left:-20px !important;
+  margin-right:-20px !important;
+  margin-top:-20px !important;
+  padding:16px 20px 13px !important;
+  border-bottom:1px solid var(--hm-line-soft) !important;
+  border-radius:24px 24px 0 0 !important;
+}
+
+
+/* =========================================================
+   STEP5.10.8 기록(Sub) 자기주도 나의 루틴 1단계
+   - 기존 테마/다크모드/중앙 모달 디자인 시스템을 그대로 사용
+   ========================================================= */
+.sub-routine-section{margin:0 0 14px}
+.sub-routine-title{margin-top:14px!important;margin-bottom:8px!important}
+.sub-routine-home-wrap{margin-top:0!important}
+.sub-routine-hub-card{min-height:78px!important;padding:16px 18px!important;border-color:color-mix(in srgb,var(--theme-accent,#7c5cff) 28%,transparent)!important;background:linear-gradient(135deg,color-mix(in srgb,var(--theme-card,#fff) 92%,#dff8ea 8%),var(--theme-card,#fff))!important}
+.sub-routine-icon{background:linear-gradient(135deg,#e8fff0,#f7fff9)!important}
+.sub-routine-note{margin:0 0 12px;color:var(--theme-text-muted,#7f7896);font-size:.86rem;line-height:1.55}
+.sub-routine-list{display:grid;gap:10px;margin:8px 0 14px}
+.sub-routine-empty{padding:24px 14px;text-align:center;border:1px dashed var(--theme-border,rgba(124,92,255,.25));border-radius:18px;color:var(--theme-text-muted,#837b99);background:var(--theme-card-soft,rgba(255,255,255,.58));line-height:1.6}
+.sub-routine-row{display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:10px;align-items:center;padding:12px;border:1px solid var(--theme-border,rgba(124,92,255,.2));border-radius:18px;background:var(--theme-card,#fff);box-shadow:var(--theme-shadow,0 8px 22px rgba(80,55,120,.08))}
+.sub-routine-row.is-done{opacity:.78;background:color-mix(in srgb,var(--theme-card,#fff) 82%,#dff8ea 18%)}
+.sub-routine-check{width:42px;height:42px;border-radius:14px;border:1px solid color-mix(in srgb,var(--theme-accent,#7c5cff) 45%,transparent);background:color-mix(in srgb,var(--theme-accent,#7c5cff) 12%,var(--theme-card,#fff));color:var(--theme-accent,#7c5cff);font-size:1.25rem;font-weight:900}
+.sub-routine-check:disabled{cursor:default;opacity:.75}
+.sub-routine-row-text{min-width:0;display:grid;gap:4px}.sub-routine-row-text strong{color:var(--theme-text,#2f2940);font-size:.95rem}.sub-routine-row-text small{color:var(--theme-text-muted,#837b99);font-size:.76rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sub-routine-row.is-done .sub-routine-row-text strong{text-decoration:line-through}
+.sub-routine-row-actions{display:flex;gap:5px}.sub-routine-row-actions button,.sub-routine-readonly{border:0;border-radius:10px;padding:8px 9px;background:color-mix(in srgb,var(--theme-accent,#7c5cff) 10%,var(--theme-card,#fff));color:var(--theme-accent,#7c5cff);font-size:.72rem;font-weight:800}.sub-routine-row-actions .danger{color:#e84d73;background:rgba(232,77,115,.1)}
+.sub-routine-editor-form{display:grid;gap:9px}.sub-routine-editor-form label{font-weight:900;color:var(--theme-text,#2f2940);font-size:.82rem}.sub-routine-editor-form input,.sub-routine-editor-form textarea{width:100%;box-sizing:border-box;border:1px solid var(--theme-border,rgba(124,92,255,.24));border-radius:15px;padding:12px 13px;background:var(--theme-input,#fff);color:var(--theme-text,#2f2940);font:inherit;resize:vertical}.sub-routine-editor-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:8px}
+html[data-display-mode="dark"] .sub-routine-hub-card,html.hm-dark .sub-routine-hub-card{background:linear-gradient(135deg,color-mix(in srgb,var(--theme-card,#25283c) 90%,var(--theme-accent,#7c5cff) 10%),var(--theme-card,#25283c))!important}
+html[data-display-mode="dark"] .sub-routine-icon,html.hm-dark .sub-routine-icon{background:color-mix(in srgb,var(--theme-accent,#7c5cff) 18%,var(--theme-card,#25283c))!important}
+html[data-display-mode="dark"] .sub-routine-row,html.hm-dark .sub-routine-row,html[data-display-mode="dark"] .sub-routine-empty,html.hm-dark .sub-routine-empty{background:var(--theme-card,#25283c)!important;color:var(--theme-text,#f5f3ff)!important}
+@media(max-width:640px){.sub-routine-hub-card{min-height:74px!important;padding:14px 16px!important}.sub-routine-row{grid-template-columns:42px minmax(0,1fr);}.sub-routine-row-actions,.sub-routine-readonly{grid-column:2;justify-self:start}}
+
+/* STEP5.10.8: 나의 루틴 홈 카드 / 관리 화면 분리 */
+.sub-routine-home-list{display:grid;gap:10px;margin:10px 0 0}
+.sub-routine-home-card{width:100%;display:grid;grid-template-columns:48px minmax(0,1fr) 34px;gap:12px;align-items:center;text-align:left;padding:14px 16px;border:1px solid color-mix(in srgb,var(--theme-accent,#7c5cff) 28%,transparent);border-radius:20px;background:var(--theme-card,#fff);box-shadow:var(--theme-shadow,0 8px 22px rgba(80,55,120,.08));color:var(--theme-text,#2f2940);cursor:pointer}
+.sub-routine-home-card.is-done{background:color-mix(in srgb,var(--theme-card,#fff) 82%,#dff8ea 18%);opacity:.84}
+.sub-routine-home-icon{width:46px;height:46px;border-radius:16px;display:grid;place-items:center;background:color-mix(in srgb,var(--theme-accent,#7c5cff) 14%,var(--theme-card,#fff));font-size:1.25rem}
+.sub-routine-home-text{min-width:0;display:grid;gap:4px}.sub-routine-home-text strong{font-size:.98rem;color:var(--theme-text,#2f2940)}.sub-routine-home-text small{font-size:.78rem;color:var(--theme-text-muted,#837b99);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sub-routine-home-card.is-done .sub-routine-home-text strong{text-decoration:line-through}
+.sub-routine-home-check{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;border:1px solid color-mix(in srgb,var(--theme-accent,#7c5cff) 60%,transparent);color:var(--theme-accent,#7c5cff);font-weight:900}
+.sub-routine-check.is-status{display:grid;place-items:center;cursor:default}
+html[data-display-mode="dark"] .sub-routine-home-card,html.hm-dark .sub-routine-home-card{background:var(--theme-card,#25283c)!important;border-color:color-mix(in srgb,var(--theme-accent,#7c5cff) 38%,transparent)!important}
+html[data-display-mode="dark"] .sub-routine-home-card.is-done,html.hm-dark .sub-routine-home-card.is-done{background:color-mix(in srgb,var(--theme-card,#25283c) 78%,var(--theme-accent,#7c5cff) 22%)!important}
+html[data-display-mode="dark"] .sub-routine-home-icon,html.hm-dark .sub-routine-home-icon{background:color-mix(in srgb,var(--theme-accent,#7c5cff) 22%,var(--theme-card,#25283c))!important}
+@media(max-width:640px){.sub-routine-home-card{grid-template-columns:46px minmax(0,1fr) 30px;padding:13px 14px}}
+
+
+
+/* =========================================================
+   STEP5.10.8 나의 루틴 2단계: 반복 요일 / 오늘만 / 일시 중지
+   ========================================================= */
+.sub-routine-schedule-fieldset{margin:4px 0 0;padding:12px;border:1px solid var(--theme-border,rgba(124,92,255,.24));border-radius:16px;background:var(--theme-card-soft,rgba(255,255,255,.55));display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.sub-routine-schedule-fieldset legend{padding:0 6px;font-weight:900;color:var(--theme-text,#2f2940);font-size:.82rem}
+.sub-routine-schedule-option{display:flex;align-items:center;justify-content:center;gap:6px;min-height:40px;padding:7px 8px;border:1px solid var(--theme-border,rgba(124,92,255,.22));border-radius:12px;background:var(--theme-card,#fff);color:var(--theme-text,#2f2940);font-size:.78rem;font-weight:800;cursor:pointer}
+.sub-routine-schedule-option input{width:auto!important;margin:0;accent-color:var(--theme-accent,#7c5cff)}
+.sub-routine-weekdays{display:grid;gap:8px;padding:10px 0 0}.sub-routine-weekdays>span{font-weight:900;color:var(--theme-text,#2f2940);font-size:.82rem}
+.sub-routine-weekday-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}.sub-routine-weekday-grid label{display:grid;place-items:center;min-height:38px;border:1px solid var(--theme-border,rgba(124,92,255,.22));border-radius:11px;background:var(--theme-card,#fff);color:var(--theme-text-muted,#837b99);font-size:.75rem;font-weight:900;cursor:pointer;position:relative}.sub-routine-weekday-grid input{position:absolute;opacity:0;pointer-events:none}.sub-routine-weekday-grid label:has(input:checked){background:color-mix(in srgb,var(--theme-accent,#7c5cff) 18%,var(--theme-card,#fff));border-color:var(--theme-accent,#7c5cff);color:var(--theme-accent,#7c5cff)}
+.sub-routine-pause-option{display:flex;align-items:center;gap:10px;padding:11px 12px;border:1px solid var(--theme-border,rgba(124,92,255,.22));border-radius:14px;background:var(--theme-card-soft,rgba(255,255,255,.55));cursor:pointer}.sub-routine-pause-option input{width:20px!important;height:20px;margin:0;accent-color:var(--theme-accent,#7c5cff)}.sub-routine-pause-option span{display:grid;gap:2px}.sub-routine-pause-option strong{color:var(--theme-text,#2f2940);font-size:.82rem}.sub-routine-pause-option small{color:var(--theme-text-muted,#837b99);font-size:.7rem}
+.sub-routine-row-text em{font-style:normal;font-size:.68rem;font-weight:800;color:var(--theme-accent,#7c5cff)}
+.sub-routine-row.is-paused{opacity:.62;border-style:dashed}.sub-routine-row.is-paused .sub-routine-row-text strong{text-decoration:none}
+html[data-display-mode="dark"] .sub-routine-schedule-fieldset,html.hm-dark .sub-routine-schedule-fieldset,html[data-display-mode="dark"] .sub-routine-pause-option,html.hm-dark .sub-routine-pause-option{background:var(--theme-card-soft,#202438)!important}
+html[data-display-mode="dark"] .sub-routine-schedule-option,html.hm-dark .sub-routine-schedule-option,html[data-display-mode="dark"] .sub-routine-weekday-grid label,html.hm-dark .sub-routine-weekday-grid label{background:var(--theme-card,#25283c)!important;color:var(--theme-text,#f5f3ff)!important}
+@media(max-width:480px){.sub-routine-schedule-fieldset{grid-template-columns:1fr}.sub-routine-weekday-grid{gap:4px}.sub-routine-weekday-grid label{min-height:34px;font-size:.7rem}}
+
+/* =========================================================
+   STEP5.10.8 다크모드 미적용 영역 통합 보정
+   - 기록실/캘린더/기념일
+   - 일일 입력 팝업(기분/외출 등)
+   - 나의 루틴 홈·관리 카드
+   - 우리의 공간 내부 패널
+   ========================================================= */
+:root[data-hm-theme][data-hm-display="dark"] :is(
+  .history-panel-head,
+  .history-intro-note,
+  .history-calendar-title-row,
+  .history-calendar-nav-row,
+  .history-selected-record-section,
+  .history-story-section,
+  .anniversary-card,
+  .anniversary-empty-panel,
+  .anniversary-panel-item,
+  .history-selected-hint,
+  .history-day-card,
+  .history-story-row,
+  .history-detail-summary-card,
+  .history-detail-block,
+  .history-gallery-card
+){
+  background:linear-gradient(145deg,var(--hm-dark-card),var(--hm-dark-card-soft)) !important;
+  color:var(--hm-color-body) !important;
+  border-color:var(--hm-dark-line) !important;
+  box-shadow:0 10px 24px rgba(0,0,0,.22) !important;
+}
+:root[data-hm-theme][data-hm-display="dark"] .history-panel-head{
+  background:linear-gradient(180deg,var(--hm-dark-shell),color-mix(in srgb,var(--hm-dark-shell) 88%,var(--hm-primary) 12%)) !important;
+}
+:root[data-hm-theme][data-hm-display="dark"] :is(
+  .history-panel-head h2,.history-calendar-title-row strong,.history-calendar-current-month strong,
+  .anniversary-title,.anniversary-panel-title,.history-section-headline strong,
+  .history-day-title,.history-story-body strong,.history-detail-block-title
+){color:#fff !important;-webkit-text-fill-color:#fff !important;}
+:root[data-hm-theme][data-hm-display="dark"] :is(
+  .history-intro-note,.history-calendar-title-row span,.history-calendar-current-month small,
+  .anniversary-sub,.anniversary-panel-date,.history-day-sub,.history-story-body small,
+  .history-detail-block-body,.history-month-count
+){color:var(--hm-color-muted) !important;-webkit-text-fill-color:var(--hm-color-muted) !important;}
+:root[data-hm-theme][data-hm-display="dark"] :is(.history-month-nav-btn,.history-today-btn,.history-open-again,.anniversary-toggle-btn){
+  background:var(--hm-dark-input) !important;color:#f7f4fb !important;border-color:var(--hm-dark-line) !important;
+}
+:root[data-hm-theme][data-hm-display="dark"] :is(.calendar-grid .calendar-day,.history-calendar-grid .calendar-day,.history-calendar-grid button,.calendar-grid button){
+  background:var(--hm-dark-card) !important;color:var(--hm-color-body) !important;border-color:var(--hm-line-soft) !important;
+}
+:root[data-hm-theme][data-hm-display="dark"] :is(.calendar-grid .calendar-day.today,.history-calendar-grid .calendar-day.today,.history-calendar-grid button.today){
+  background:color-mix(in srgb,var(--hm-primary) 28%,var(--hm-dark-card)) !important;
+  color:#fff !important;border-color:color-mix(in srgb,var(--hm-primary) 62%,#fff 10%) !important;
+}
+:root[data-hm-theme][data-hm-display="dark"] :is(.calendar-grid .calendar-day.has-record,.history-calendar-grid .calendar-day.has-record,.history-calendar-grid button.has-record){
+  background:color-mix(in srgb,var(--hm-accent) 18%,var(--hm-dark-card)) !important;
+}
+
+/* 일일 입력 팝업 내부 표면 */
+:root[data-hm-theme][data-hm-display="dark"] :is(
+  .mood-box,.mission-box,.water-counter-box,.meal-container,.feedback-hint,.mood-helper,
+  .preview-box,.file-label
+){
+  background:var(--hm-dark-card-soft) !important;
+  color:var(--hm-color-body) !important;
+  border-color:var(--hm-dark-line) !important;
+}
+:root[data-hm-theme][data-hm-display="dark"] .file-label{
+  background:var(--hm-dark-input) !important;color:#f2eef8 !important;border-color:var(--hm-dark-line) !important;
+}
+:root[data-hm-theme][data-hm-display="dark"] :is(.mood-btn,.choice-btn,.feedback-type-btn,.gift-choice-btn){
+  background:var(--hm-dark-input) !important;color:#f7f4fb !important;border-color:var(--hm-dark-line) !important;
+}
+:root[data-hm-theme][data-hm-display="dark"] :is(.mood-btn.selected,.mood-btn.active,.choice-btn.selected,.choice-btn.active){
+  background:color-mix(in srgb,var(--hm-primary) 34%,var(--hm-dark-card-soft)) !important;
+  border-color:var(--hm-primary) !important;color:#fff !important;
+}
+
+/* 나의 루틴: 기존 잘못된 data-display-mode 선택자를 실제 속성으로 보정 */
+:root[data-hm-theme][data-hm-display="dark"] :is(
+  .sub-routine-hub-card,.sub-routine-home-card,.sub-routine-row,.sub-routine-empty,
+  .sub-routine-home-empty,.sub-routine-schedule-fieldset,.sub-routine-pause-option
+){
+  background:linear-gradient(145deg,var(--hm-dark-card),var(--hm-dark-card-soft)) !important;
+  color:var(--hm-color-body) !important;
+  border-color:var(--hm-dark-line) !important;
+}
+:root[data-hm-theme][data-hm-display="dark"] .sub-routine-home-card.is-done,
+:root[data-hm-theme][data-hm-display="dark"] .sub-routine-row.is-done{
+  background:linear-gradient(145deg,color-mix(in srgb,var(--hm-dark-card) 76%,#2f9b70 24%),var(--hm-dark-card-soft)) !important;
+}
+:root[data-hm-theme][data-hm-display="dark"] :is(.sub-routine-icon,.sub-routine-home-icon,.sub-routine-row-check){
+  background:color-mix(in srgb,var(--hm-primary) 22%,var(--hm-dark-card-soft)) !important;
+  border-color:color-mix(in srgb,var(--hm-primary) 52%,var(--hm-dark-line)) !important;
+}
+:root[data-hm-theme][data-hm-display="dark"] :is(.sub-routine-home-text strong,.sub-routine-row-text strong){color:#fff !important;}
+:root[data-hm-theme][data-hm-display="dark"] :is(.sub-routine-home-text small,.sub-routine-row-text small,.sub-routine-note){color:var(--hm-color-muted) !important;}
+:root[data-hm-theme][data-hm-display="dark"] :is(.sub-routine-row-actions button,.sub-routine-readonly,.sub-routine-schedule-option,.sub-routine-weekday-grid label){
+  background:var(--hm-dark-input) !important;color:var(--hm-color-body) !important;border-color:var(--hm-dark-line) !important;
+}
+
+/* 우리의 공간 팝업 내부의 흰 패널 제거 */

@@ -443,6 +443,10 @@
         autoSaveTimeout = setTimeout(executeAutoSave, HM_AUTOSAVE_RETRY_DELAY_MS);
     }
 
+    function hmIsAutoSaveContextCurrent(context) {
+        return !!context && currentUser?.uid === context.uid && getRoomCodeForData() === context.roomCode && activeRoomCode === context.roomCode && (document.getElementById('recordDate')?.value || '') === context.date;
+    }
+
     // =========================================================
     async function executeAutoSave() {
         if (hmIsAutoSaving) {
@@ -453,8 +457,10 @@
         try {
         const roomCode = getRoomCodeForData();
         const date = document.getElementById('recordDate')?.value || '';
+        const saveContext = { uid: currentUser?.uid || '', roomCode, date };
         if (!hmCanAttemptAutoSave(roomCode, date)) return;
         if (!(await hmRequireRoomAccess('저장', roomCode))) return;
+        if (!hmIsAutoSaveContextCurrent(saveContext)) { hmAutoSaveQueued = true; return; }
         hmIsAutoSaving = true;
         hmLastAutoSaveHealth = { state: 'saving', roomCode, date, reason: hmPendingAutoSaveReason || 'input', savedAt: 0, error: '' };
 
@@ -481,7 +487,7 @@
         const dailyChoice = selectedDailyChoice || '';
         const dailyChoiceLabel = getDailyChoiceLabel(dailyChoice);
         const rewardNote = (document.getElementById('rewardNote').value || '').slice(0, 1000);
-        const currentPhotoCount = Array.isArray(hmDailyMoments) ? hmDailyMoments.length : (uploadedPhotoBase64 ? 1 : 0);
+        const currentPhotoCount = Array.isArray(hmDailyMoments) ? hmDailyMoments.filter((item) => !item?.mealType).length : (uploadedPhotoBase64 ? 1 : 0);
         const hasPhotoText = currentPhotoCount ? `📷 사진 ${currentPhotoCount}장` : '사진 없음';
         const customRoutineReport = (typeof hmBuildCustomRoutineReportText === 'function') ? hmBuildCustomRoutineReportText() : '';
         const customCardValues = (typeof hmCollectCustomRoutineValues === 'function') ? hmCollectCustomRoutineValues() : {};
@@ -539,6 +545,7 @@
         if (canManageRelationshipCards()) {
             await db.ref('rooms/' + roomCode + '/dayAdmin/' + date).set(adminRecord);
         }
+        if (!hmIsAutoSaveContextCurrent(saveContext)) return;
         if (typeof hmRefreshNotificationBar === 'function') setTimeout(hmRefreshNotificationBar, 0);
         hmLastAutoSaveSignature = signature;
         hmAutoSaveQueued = false;
@@ -567,16 +574,9 @@
     // =========================================================
 
     function showSaveStatus(msg) {
+        if (window.HM_SAVE_STATE) return window.HM_SAVE_STATE.set('', msg);
         const el = document.getElementById('saveStatus');
-        if (el) {
-            el.innerText = msg;
-            const value = String(msg || '');
-            el.dataset.saveState = /실패|권한 없음/.test(value) ? 'error'
-                : /오프라인|대기|연결 중/.test(value) ? 'waiting'
-                : /입력 중|저장 중/.test(value) ? 'saving'
-                : /완료|저장됨|동기화 완료/.test(value) ? 'saved' : 'idle';
-            el.setAttribute('aria-label', `자동 저장 상태: ${value.replace(/^\S+\s*/, '') || value}`);
-        }
+        if (el) el.innerText = String(msg || '');
     }
     window.hmGetAutoSaveHealth = function hmGetAutoSaveHealth() { return { ...hmLastAutoSaveHealth }; };
 

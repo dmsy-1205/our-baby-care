@@ -1,4 +1,4 @@
-const HM_PWA_VERSION = 'v1.0-step6-2-14-14';
+const HM_PWA_VERSION = 'v1.0-step6-2-14-45';
 const HM_STATIC_CACHE = `hearme2nite-static-${HM_PWA_VERSION}`;
 const HM_RUNTIME_CACHE = `hearme2nite-runtime-${HM_PWA_VERSION}`;
 const HM_OFFLINE_URL = '/offline.html';
@@ -82,7 +82,7 @@ async function networkFirstAsset(request) {
     return fresh;
   } catch (error) {
     const cached = await caches.match(request);
-    return cached || caches.match(HM_OFFLINE_URL);
+    return cached || Response.error();
   }
 }
 
@@ -102,6 +102,6 @@ async function staleWhileRevalidate(request) {
     if (fresh && fresh.ok) cache.put(request, fresh.clone());
     return fresh;
   } catch (error) {
-    return caches.match(HM_OFFLINE_URL);
+    return Response.error();
   }
 }

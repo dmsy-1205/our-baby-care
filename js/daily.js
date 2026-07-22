@@ -56,6 +56,77 @@
         triggerAutoSave();
     }
 
+    function hmStructuredTimeConfig(kind) {
+        return kind === 'sleep'
+            ? { legacy:'sleepTime', period:'sleepPeriod', clock:'sleepClock', note:'sleepTimeNote', preview:'sleepTimePreview', defaultPeriod:'오후' }
+            : { legacy:'wakeTime', period:'wakePeriod', clock:'wakeClock', note:'wakeTimeNote', preview:'wakeTimePreview', defaultPeriod:'오전' };
+    }
+    function hmSyncTimeEntryControlsFromLegacy(kind) {
+        const cfg = hmStructuredTimeConfig(kind);
+        const legacy = document.getElementById(cfg.legacy);
+        const period = document.getElementById(cfg.period);
+        const clock = document.getElementById(cfg.clock);
+        const note = document.getElementById(cfg.note);
+        const preview = document.getElementById(cfg.preview);
+        if (!legacy || !period || !clock || !note) return;
+        const source = String(legacy.value || '').trim();
+        if (legacy.dataset.hmStructuredSource === source) return;
+        legacy.dataset.hmStructuredSource = source;
+        period.value = cfg.defaultPeriod;
+        clock.value = '';
+        note.value = '';
+        if (!source || source === '기록 없음') { if(preview) preview.textContent=`기록 시간: ${period.value} --:--`; return; }
+        const periodMatch = source.match(/(오전|오후|새벽|아침|밤)/);
+        const timeMatch = source.match(/(\d{1,2})\s*(?::|시|\.)\s*(\d{1,2})?/);
+        if (!timeMatch) { note.value = source; return; }
+        let hour = Number(timeMatch[1] || 0);
+        const minute = Math.max(0,Math.min(59,Number(timeMatch[2] || 0)));
+        let parsedPeriod = periodMatch ? ((periodMatch[1] === '오후' || periodMatch[1] === '밤') ? '오후' : '오전') : '';
+        if (hour > 12) { parsedPeriod = '오후'; hour -= 12; }
+        if (hour === 0) hour = 12;
+        if (!parsedPeriod) parsedPeriod = kind === 'sleep' && hour >= 7 && hour <= 11 ? '오후' : '오전';
+        period.value = parsedPeriod;
+        clock.value = `${String(hour).padStart(2,'0')}:${String(minute).padStart(2,'0')}`;
+        const trailing = source.slice((timeMatch.index || 0) + timeMatch[0].length).replace(/^[\s·,-]+/,'').trim();
+        note.value = trailing;
+        if (preview) preview.textContent = `기록 시간: ${period.value} ${clock.value}`;
+    }
+    function hmHandleStructuredTimeChanged(kind, finalize) {
+        const cfg = hmStructuredTimeConfig(kind);
+        const legacy = document.getElementById(cfg.legacy);
+        const period = document.getElementById(cfg.period);
+        const clock = document.getElementById(cfg.clock);
+        const note = document.getElementById(cfg.note);
+        const preview = document.getElementById(cfg.preview);
+        if (!legacy || !period || !clock || !note) return;
+        const digits = String(clock.value || '').replace(/\D/g,'').slice(0,4);
+        let time = digits.length > 2 ? `${digits.slice(0,-2)}:${digits.slice(-2)}` : digits;
+        clock.value = time;
+        const match = time.match(/^(\d{1,2}):(\d{2})$/);
+        let validTime = '';
+        if (match) {
+            let hour = Number(match[1]);
+            const minute = Number(match[2]);
+            if (hour <= 23 && minute <= 59) {
+                if (hour > 12) { period.value = '오후'; hour -= 12; }
+                if (hour === 0) { period.value = '오전'; hour = 12; }
+                validTime = `${String(hour).padStart(2,'0')}:${String(minute).padStart(2,'0')}`;
+                if (finalize) clock.value = validTime;
+            }
+        }
+        if (time && !validTime) {
+            if (preview) preview.textContent = `기록 시간: ${period.value} --:--`;
+            return;
+        }
+        const memo = String(note.value || '').trim();
+        const value = validTime ? `${period.value} ${validTime}${memo ? ` · ${memo}` : ''}` : memo;
+        legacy.value = value;
+        legacy.dataset.hmStructuredSource = value;
+        if (preview) preview.textContent = `기록 시간: ${period.value} ${validTime || '--:--'}`;
+        handleDailyFieldChanged();
+    }
+    window.hmHandleStructuredTimeChanged = hmHandleStructuredTimeChanged;
+
     function handleOwnerNoteFieldChanged() {
         updateDailyCards();
         triggerOwnerNoteSave();
@@ -74,6 +145,8 @@
     // Daily 카드 요약 갱신
     // 실제 입력값은 그대로 두고 카드 subtitle/완료 상태만 최신화한다.
     function updateDailyCards() {
+        hmSyncTimeEntryControlsFromLegacy('wake');
+        hmSyncTimeEntryControlsFromLegacy('sleep');
         const wakeSub = document.getElementById('wakeCardSub');
         if (wakeSub) {
             const text = getTrimmedValue('wakeTime');
@@ -98,7 +171,7 @@
         const outingSub = document.getElementById('outingCardSub');
         if (outingSub) {
             const text = getTrimmedValue('goingOut');
-            const photoCount = Array.isArray(hmDailyMoments) ? hmDailyMoments.length : (uploadedPhotoBase64 ? 1 : 0);
+            const photoCount = Array.isArray(hmDailyMoments) ? hmDailyMoments.filter((item) => !item?.mealType).length : (uploadedPhotoBase64 ? 1 : 0);
             outingSub.innerText = text ? `${text}${photoCount ? ` · 사진 ${photoCount}장` : ''}` : (photoCount ? `오늘의 순간 ${photoCount}장` : '외출 기록과 일상 사진을 남겨보세요.');
         }
 
@@ -185,7 +258,13 @@
 
     function updateOwnerOnlySections() {
         const sections = document.querySelectorAll('.owner-only-section');
-        sections.forEach((el) => { el.style.display = canManageRelationshipCards() ? '' : 'none'; });
+        const canManage = canManageRelationshipCards();
+        sections.forEach((el) => {
+            el.hidden = !canManage;
+            el.style.display = canManage ? '' : 'none';
+            el.setAttribute('aria-hidden', canManage ? 'false' : 'true');
+            el.toggleAttribute('inert', !canManage);
+        });
         updateManagedFieldAccessControls();
         if (typeof renderCustomRoutineCards === 'function') renderCustomRoutineCards();
     }
@@ -249,7 +328,7 @@
             ['기상 시간', !!getTrimmedValue('wakeTime')],
             ['오늘의 컨디션', !!(selectedMood || getTrimmedValue('moodNote') || getTrimmedValue('exercise') || getTrimmedValue('weight') || currentWater > 0)],
             ['식사 기록', ['mealBreakfast','mealLunch','mealDinner'].some(id => !!getTrimmedValue(id))],
-            ['오늘의 순간', !!(getTrimmedValue('goingOut') || uploadedPhotoBase64 || (Array.isArray(hmDailyMoments) && hmDailyMoments.length))],
+            ['오늘의 순간', !!(getTrimmedValue('goingOut') || uploadedPhotoBase64 || (Array.isArray(hmDailyMoments) && hmDailyMoments.some((item) => !item?.mealType)))],
             ['오늘의 하루', !!getTrimmedValue('diary')]
         ];
         const completed = checks.filter(([,done]) => done).length;
@@ -523,4 +602,3 @@
     // Split-ready target: showToast
     // =========================================================
     // RC2 v2.8.0 STEP1: showToast moved to js/utils.js
-

@@ -44,7 +44,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
     <script src="/__/firebase/init.js"></script>
 
-    <link rel="stylesheet" href="css/style.css?v=step6-2-14-14-mode-separation-20260722">
+    <link rel="stylesheet" href="css/style.css?v=step6-2-14-45-light-icon-polish-20260723">
 </head>
 <body class="hm-booting">
 
@@ -71,8 +71,8 @@
         </div>
 
         <div class="hm-auth-mode-tabs" role="tablist" aria-label="로그인 또는 회원가입 선택">
-            <button type="button" class="hm-auth-mode-tab active" id="authLoginTab" role="tab" aria-selected="true" onclick="setAuthMode('login')">로그인</button>
-            <button type="button" class="hm-auth-mode-tab" id="authSignupTab" role="tab" aria-selected="false" onclick="setAuthMode('signup')">회원가입</button>
+            <button type="button" class="hm-auth-mode-tab active" id="authLoginTab" role="tab" aria-selected="true" data-hm-action="set-auth-mode" data-hm-value="login">로그인</button>
+            <button type="button" class="hm-auth-mode-tab" id="authSignupTab" role="tab" aria-selected="false" data-hm-action="set-auth-mode" data-hm-value="signup">회원가입</button>
         </div>
 
         <div class="hm-login-trust">
@@ -86,15 +86,15 @@
         </div>
         <div class="input-group hm-login-field">
             <label for="authPassword">비밀번호</label>
-            <input type="password" id="authPassword" placeholder="6자리 이상" autocomplete="current-password" onkeypress="if(event.key === 'Enter') handleAuthSubmit()">
+            <input type="password" id="authPassword" placeholder="6자리 이상" autocomplete="current-password" data-hm-keypress="auth-submit-enter">
         </div>
         <div class="input-group hm-login-field hm-signup-only" id="authPasswordConfirmGroup" hidden>
             <label for="authPasswordConfirm">비밀번호 확인</label>
-            <input type="password" id="authPasswordConfirm" placeholder="비밀번호를 다시 입력" autocomplete="new-password" onkeypress="if(event.key === 'Enter') handleAuthSubmit()">
+            <input type="password" id="authPasswordConfirm" placeholder="비밀번호를 다시 입력" autocomplete="new-password" data-hm-keypress="auth-submit-enter">
         </div>
 
         <div id="authEntryPanel">
-            <button type="button" class="btn-main hm-login-button" id="authSubmitBtn" onclick="handleAuthSubmit()">로그인하기</button>
+            <button type="button" class="btn-main hm-login-button" id="authSubmitBtn" data-hm-action="auth-submit">로그인하기</button>
             <p class="hm-login-small" id="authModeHelp">방을 만들거나 초대코드로 참여하면 연결된 사용자에게만 기록이 표시됩니다.</p>
         </div>
 
@@ -108,31 +108,28 @@
                 <span>받은편지함에 없으면 스팸함 또는 정크메일함을 확인해 주세요.</span>
             </div>
             <p class="hm-verification-status" id="verificationStatus" aria-live="polite"></p>
-            <button type="button" class="btn-main hm-login-button" id="checkVerificationBtn" onclick="checkEmailVerificationStatus()">인증 완료 확인</button>
-            <button type="button" class="btn-secondary hm-verification-secondary" id="resendVerificationBtn" onclick="resendEmailVerification()">인증 메일 다시 보내기</button>
-            <button type="button" class="hm-verification-logout" onclick="logoutUser()">다른 계정으로 로그인</button>
+            <button type="button" class="btn-main hm-login-button" id="checkVerificationBtn" data-hm-action="check-email-verification">인증 완료 확인</button>
+            <button type="button" class="btn-secondary hm-verification-secondary" id="resendVerificationBtn" data-hm-action="resend-email-verification">인증 메일 다시 보내기</button>
+            <button type="button" class="hm-verification-logout" data-hm-action="logout-user">다른 계정으로 로그인</button>
         </div>
     </section>
 </main>
 
 <div id="appContent" style="display:none; width:100%; flex-direction:column; align-items:center;">
 <div class="container">
-    <div class="autosave-status" id="saveStatus">☁️ 실시간 대기 중</div>
+    <div class="autosave-status" id="saveStatus" role="status" aria-live="polite" aria-atomic="true">☁️ 실시간 대기 중</div>
     <div class="app-title-row">
-        <button type="button" class="guide-btn guide-btn-labeled" onclick="openGuideModal()" aria-label="사용 가이드와 문의 센터 열기" title="사용 가이드와 문의">도움말</button>
         <h1><span class="hm-title-mark" aria-hidden="true">❤☾</span> HearMe2nite</h1>
-        <div></div>
     </div>
     <div class="app-subtitle">우리의 하루를, 함께 기록합니다.</div>
-    <div class="app-meta-row">
-        <div class="app-version-badge" id="appVersionBadge" data-hm-release-version>Version v1.0 STEP5.10.9</div>
+    <div class="app-meta-row" aria-hidden="true">
+        <div class="app-version-badge" id="appVersionBadge" data-hm-release-version>Version v1.0</div>
         <div class="home-presence-indicator" id="homePresenceIndicator" title="접속 상태 확인 중">
             <span class="home-presence-dot self offline" id="homePresenceSelfDot" aria-label="나 오프라인"></span>
             <span class="home-presence-dot partner offline" id="homePresencePartnerDot" aria-label="상대 오프라인"></span>
         </div>
     </div>
-
-    <button type="button" class="hm-account-panel hm-account-launcher" id="userInfoText" onclick="openAccountMenuModal()" aria-label="내 계정 설정 열기" aria-haspopup="dialog">
+    <button type="button" class="hm-account-panel hm-account-launcher" id="userInfoText" data-hm-action="open-account-menu" aria-label="내 계정 설정 열기" aria-haspopup="dialog">
         <span class="hm-account-avatar" id="userBarAvatar" aria-hidden="true">♡</span>
         <span class="hm-account-compact-text">
             <strong class="hm-account-value" id="userBarNickname">확인 중...</strong>
@@ -144,11 +141,11 @@
 
     <div id="recordDeletionNoticeHome" class="record-deletion-home record-deletion-home-prominent" hidden></div>
 
-    <div class="daily-modal-overlay hm-account-menu-overlay" id="accountMenuOverlay" onclick="if(event.target.id==='accountMenuOverlay') closeAccountMenuModal()" aria-hidden="true" inert>
+    <div class="daily-modal-overlay hm-account-menu-overlay" id="accountMenuOverlay" data-hm-action="close-account-menu-overlay" aria-hidden="true" inert>
         <div class="daily-modal hm-account-menu-modal" role="dialog" aria-modal="true" aria-labelledby="accountMenuTitle">
             <div class="daily-modal-head">
                 <h2 id="accountMenuTitle">내 계정</h2>
-                <button type="button" class="modal-close-btn" onclick="closeAccountMenuModal()">닫기</button>
+                <button type="button" class="modal-close-btn" data-hm-action="close-account-menu">닫기</button>
             </div>
             <div class="hm-account-menu-profile">
                 <span class="hm-account-menu-avatar" id="accountMenuAvatar" aria-hidden="true">♡</span>
@@ -162,17 +159,17 @@
                 <strong id="accountMenuRoom">연결 상태 확인 중...</strong>
             </div>
             <div class="hm-account-menu-grid">
-                <button type="button" onclick="openAccountChildModal('profile')"><span>👤</span><strong>프로필</strong><small>닉네임 설정</small></button>
-                <button type="button" onclick="openAccountChildModal('theme')"><span>🎨</span><strong>테마</strong><small>화면 분위기 설정</small></button>
-                <button type="button" onclick="openAccountChildModal('data')"><span>🗂️</span><strong>데이터</strong><small>내 데이터 관리</small></button>
-                <button type="button" class="hm-admin-only" id="dataAdminButton" onclick="openAccountChildModal('admin')" hidden><span>🛡️</span><strong>요청 관리</strong><small>삭제 요청 검토</small></button>
-                <button type="button" class="hm-admin-only" id="adminConsoleButton" onclick="openAccountChildModal('console')" hidden><span>⚙️</span><strong>운영 콘솔</strong><small>서비스 현황 보기</small></button>
+                <button type="button" data-hm-action="open-account-child" data-hm-value="profile"><span>👤</span><strong>프로필</strong><small>닉네임 설정</small></button>
+                <button type="button" data-hm-action="open-account-child" data-hm-value="theme"><span>🎨</span><strong>테마</strong><small>화면 분위기 설정</small></button>
+                <button type="button" data-hm-action="open-account-child" data-hm-value="data"><span>🗂️</span><strong>데이터</strong><small>내 데이터 관리</small></button>
+                <button type="button" class="hm-admin-only" id="dataAdminButton" data-hm-action="open-account-child" data-hm-value="admin" hidden><span>🛡️</span><strong>요청 관리</strong><small>삭제 요청 검토</small></button>
+                <button type="button" class="hm-admin-only" id="adminConsoleButton" data-hm-action="open-account-child" data-hm-value="console" hidden><span>⚙️</span><strong>운영 콘솔</strong><small>서비스 현황 보기</small></button>
             </div>
-            <button type="button" class="hm-account-logout-btn" onclick="closeAccountMenuModal(); logoutUser()">로그아웃</button>
+            <button type="button" class="hm-account-logout-btn" data-hm-action="logout-account">로그아웃</button>
         </div>
     </div>
     
-    <button type="button" class="room-settings-card" onclick="openRoomSettingsModal()">
+    <button type="button" class="room-settings-card" data-hm-action="open-room-settings">
         <span class="room-settings-icon">🏠</span>
         <span>
             <span class="room-settings-title">우리의 공간</span>
@@ -181,11 +178,11 @@
         <span class="room-settings-arrow">›</span>
     </button>
 
-    <div class="room-settings-overlay" id="roomSettingsOverlay" onclick="if(event.target.id==='roomSettingsOverlay') closeRoomSettingsModal()">
+    <div class="room-settings-overlay" id="roomSettingsOverlay" data-hm-action="close-room-settings-overlay">
         <div class="room-settings-modal" role="dialog" aria-modal="true" aria-labelledby="roomSettingsTitle">
             <div class="room-settings-head">
                 <h2 id="roomSettingsTitle">🏡 우리의 공간</h2>
-                <button type="button" class="modal-close-btn" onclick="closeRoomSettingsModal()">닫기</button>
+                <button type="button" class="modal-close-btn" data-hm-action="close-room-settings">닫기</button>
             </div>
 
             <div class="sync-box">
@@ -201,20 +198,20 @@
                         이 설정은 앱 설치 순서나 방 생성 순서가 아니라, 두 사람의 관계 역할을 의미합니다. 최초 1회 선택 후 일반 화면에서는 변경할 수 없습니다.
                     </div>
                     <div class="relationship-role-grid">
-                        <button type="button" class="relationship-role-btn" id="relationshipDomBtn" onclick="setRelationshipRole('dom')">👑 관리(Dom)<br><small>피드백 / 오늘의 선물 작성</small></button>
-                        <button type="button" class="relationship-role-btn" id="relationshipSubBtn" onclick="setRelationshipRole('sub')">📝 기록(Sub)<br><small>하루 기록 작성 / 피드백 확인</small></button>
+                        <button type="button" class="relationship-role-btn" id="relationshipDomBtn" data-hm-action="set-relationship-role" data-hm-value="dom">👑 관리(Dom)<br><small>피드백 / 오늘의 선물 작성</small></button>
+                        <button type="button" class="relationship-role-btn" id="relationshipSubBtn" data-hm-action="set-relationship-role" data-hm-value="sub">📝 기록(Sub)<br><small>하루 기록 작성 / 피드백 확인</small></button>
                     </div>
                     <div class="relationship-role-help" id="relationshipRoleHelp">처음 공간을 만들거나 초대코드로 참여하기 전에 역할을 선택해 주세요.</div>
                 </div>
 
-                <button type="button" class="btn-connect" id="createRoomBtn" onclick="createMyRoom()">🌱 새로운 공간 시작하기</button>
+                <button type="button" class="btn-connect" id="createRoomBtn" data-hm-action="create-room">🌱 새로운 공간 시작하기</button>
 
                 <details id="invitePanel" style="margin-top:12px; font-size:0.8rem; color:#636e72;">
                     <summary style="cursor:pointer; font-weight:bold; color:var(--primary-color);">💌 상대방 초대하기</summary>
                     <div style="margin-top:8px; line-height:1.45;">
                         내 방을 만든 뒤 초대코드를 생성하세요. 코드는 24시간 동안 유효하며 문자, 카톡, 이메일로 보낼 수 있습니다.
                     </div>
-                    <button type="button" class="btn-connect" onclick="createInviteCode()">🎟️ 초대코드 만들기</button>
+                    <button type="button" class="btn-connect" data-hm-action="create-invite">🎟️ 초대코드 만들기</button>
                     <div id="inviteResult" style="display:none; margin-top:10px; background:white; border:1px solid #fab1a0; border-radius:10px; padding:10px; font-size:0.85rem; line-height:1.45; word-break:break-all;"></div>
                 </details>
 
@@ -222,7 +219,7 @@
                     <summary style="cursor:pointer; font-weight:bold; color:#636e72;">🎟️ 받은 초대코드 입력</summary>
                     <div style="margin-top:8px; line-height:1.45;">상대방에게 받은 초대코드를 입력하면 같은 공간에 참여하거나 새 공간으로 이동할 수 있습니다.</div>
                     <input type="text" id="inviteCodeInput" placeholder="예: A7KD92" style="text-transform:uppercase; margin-top:8px;">
-                    <button type="button" class="btn-connect" onclick="acceptInviteFromInput()">🤝 초대코드로 참여하기</button>
+                    <button type="button" class="btn-connect" data-hm-action="accept-invite">🤝 초대코드로 참여하기</button>
                 </details>
 
                 <details id="legacyRoomPanel" style="margin-top:12px; font-size:0.8rem; color:#636e72;" ontoggle="if(this.open) loadMyRoomList()">
@@ -234,7 +231,7 @@
                     <details style="margin-top:10px;">
                         <summary style="cursor:pointer; color:#b26a6a; font-weight:bold;">직접 방코드 입력이 필요한 경우</summary>
                         <input type="text" id="roomCode" placeholder="기존 공유코드 예: dmsy" style="margin-top:8px;">
-                        <button type="button" class="btn-connect" onclick="joinExistingRoomByCode()">🔗 기존 공유코드 연결하기</button>
+                        <button type="button" class="btn-connect" data-hm-action="join-existing-room">🔗 기존 공유코드 연결하기</button>
                     </details>
                 </details>
             </div>
@@ -246,12 +243,12 @@
         <div class="room-empty-title">아직 공간이 없습니다</div>
         <div class="room-empty-text">HearMe2nite는 공간을 만든 후 사용할 수 있어요.<br>혼자 사용도 가능하고, 상대는 나중에 초대해도 됩니다.</div>
         <div class="room-empty-actions">
-            <button type="button" class="guide-primary" onclick="openRoomSettingsModal()">혼자 공간 만들기</button>
-            <button type="button" class="btn-secondary" onclick="openGuideModal()">사용설명서 보기</button>
+            <button type="button" class="guide-primary" data-hm-action="open-room-settings">혼자 공간 만들기</button>
+            <button type="button" class="btn-secondary" data-hm-action="open-guide">사용설명서 보기</button>
         </div>
     </div>
 
-    <button type="button" class="hm-chat-card" id="chatLaunchCard" onclick="openChatModal()" aria-label="우리의 대화 열기">
+    <button type="button" class="hm-chat-card" id="chatLaunchCard" data-hm-action="open-chat" aria-label="우리의 대화 열기">
         <span class="hm-chat-card-icon">💬</span>
         <span class="hm-chat-card-content">
             <span class="hm-chat-card-title-row">
@@ -266,10 +263,10 @@
 
     <div class="input-group">
         <label>📅 기록 날짜</label>
-        <input type="date" id="recordDate" onchange="connectAndListenFirebase()">
+        <input type="date" id="recordDate" data-hm-change="record-date-change">
     </div>
 
-    <button type="button" class="hm-notification-bar" id="hmNotificationBar" onclick="hmOpenNotificationCenter()" aria-label="앱 안 알림 보기">
+    <button type="button" class="hm-notification-bar" id="hmNotificationBar" data-hm-action="open-notifications" aria-label="앱 안 알림 보기">
         <span class="hm-notification-icon" aria-hidden="true">🔕</span>
         <span class="hm-notification-body">
             <strong id="hmNotificationTitle">새 알림 없음</strong>
@@ -286,7 +283,7 @@
                 <div class="mission-compact-sub" id="missionCompactSub">주인이 정한 오늘의 약속을 필요한 만큼만 열어 확인하세요.</div>
                 <div class="mission-progress-mini"><span id="missionProgressBar"></span></div>
             </div>
-            <button type="button" class="mission-open-btn" onclick="openMissionModal()">미션 보기</button>
+            <button type="button" class="mission-open-btn" data-hm-action="open-mission">미션 보기</button>
         </div>
     </div>
 
@@ -296,7 +293,7 @@
     </div>
 
     <div class="input-group">
-        <button type="button" class="daily-card" onclick="openDailyModal('mood')">
+        <button type="button" class="daily-card" data-hm-action="open-daily" data-hm-value="mood">
             <span class="daily-card-icon">😊</span>
             <span>
                 <span class="daily-card-title">오늘의 기분</span>
@@ -307,7 +304,7 @@
     </div>
 
     <div class="input-group">
-        <button type="button" class="daily-card" onclick="openDailyModal('weight')">
+        <button type="button" class="daily-card" data-hm-action="open-daily" data-hm-value="weight">
             <span class="daily-card-icon">⚖️</span>
             <span>
                 <span class="daily-card-title">체중</span>
@@ -318,7 +315,7 @@
     </div>
 
     <div class="input-group">
-        <button type="button" class="daily-card" onclick="openDailyModal('exercise')">
+        <button type="button" class="daily-card" data-hm-action="open-daily" data-hm-value="exercise">
             <span class="daily-card-icon">🏃</span>
             <span>
                 <span class="daily-card-title">오늘의 운동</span>
@@ -329,7 +326,7 @@
     </div>
 
     <div class="input-group">
-        <button type="button" class="daily-card" onclick="openDailyModal('water')">
+        <button type="button" class="daily-card" data-hm-action="open-daily" data-hm-value="water">
             <span class="daily-card-icon">💧</span>
             <span>
                 <span class="daily-card-title">오늘의 수분</span>
@@ -345,7 +342,7 @@
     </div>
 
     <div class="input-group">
-        <button type="button" class="daily-card" onclick="openDailyModal('wake')">
+        <button type="button" class="daily-card" data-hm-action="open-daily" data-hm-value="wake">
             <span class="daily-card-icon">☀️</span>
             <span>
                 <span class="daily-card-title">기상 시간</span>
@@ -356,7 +353,7 @@
     </div>
 
     <div class="input-group">
-        <button type="button" class="daily-card" onclick="openDailyModal('meal')">
+        <button type="button" class="daily-card" data-hm-action="open-daily" data-hm-value="meal">
             <span class="daily-card-icon">🥗</span>
             <span>
                 <span class="daily-card-title">식사 기록</span>
@@ -367,7 +364,7 @@
     </div>
 
     <div class="input-group">
-        <button type="button" class="daily-card" onclick="openDailyModal('outing')">
+        <button type="button" class="daily-card" data-hm-action="open-daily" data-hm-value="outing">
             <span class="daily-card-icon">🚶‍♀️</span>
             <span>
                 <span class="daily-card-title">오늘의 순간</span>
@@ -378,7 +375,7 @@
     </div>
 
     <div class="input-group">
-        <button type="button" class="daily-card" onclick="openDailyModal('sleep')">
+        <button type="button" class="daily-card" data-hm-action="open-daily" data-hm-value="sleep">
             <span class="daily-card-icon">🌙</span>
             <span>
                 <span class="daily-card-title">취침 예정</span>
@@ -389,7 +386,7 @@
     </div>
 
     <div class="input-group">
-        <button type="button" class="daily-card" onclick="openDailyModal('diary')">
+        <button type="button" class="daily-card" data-hm-action="open-daily" data-hm-value="diary">
             <span class="daily-card-icon">📝</span>
             <span>
                 <span class="daily-card-title">오늘의 하루</span>
@@ -405,7 +402,7 @@
     </div>
 
     <div class="input-group">
-        <button type="button" class="daily-card managed-card" id="feedbackDailyCard" onclick="openDailyModal('feedback')">
+        <button type="button" class="daily-card managed-card" id="feedbackDailyCard" data-hm-action="open-daily" data-hm-value="feedback">
             <span class="daily-card-icon">💌</span>
             <span>
                 <span class="daily-card-title">주인의 피드백</span>
@@ -416,7 +413,7 @@
     </div>
 
     <div class="input-group">
-        <button type="button" class="daily-card managed-card" id="rewardDailyCard" onclick="openDailyModal('reward')">
+        <button type="button" class="daily-card managed-card" id="rewardDailyCard" data-hm-action="open-daily" data-hm-value="reward">
             <span class="daily-card-icon">🎁</span>
             <span>
                 <span class="daily-card-title">오늘의 선물</span>
@@ -427,7 +424,7 @@
     </div>
 
     <div class="input-group owner-only-section" id="ownerNoteSection">
-        <button type="button" class="daily-card" onclick="openDailyModal('ownerNote')">
+        <button type="button" class="daily-card" data-hm-action="open-daily" data-hm-value="ownerNote">
             <span class="daily-card-icon">👑</span>
             <span>
                 <span class="daily-card-title">주인 비공개 메모</span>
@@ -444,7 +441,7 @@
     </div>
 
     <div class="input-group custom-routine-home-wrap">
-        <button type="button" class="daily-card custom-routine-hub-card" id="customRoutineHubCard" onclick="openCustomRoutineHub()">
+        <button type="button" class="daily-card custom-routine-hub-card" id="customRoutineHubCard" data-hm-action="open-custom-routine-hub">
             <span class="daily-card-icon">💜</span>
             <span>
                 <span class="daily-card-title">오늘의 약속</span>
@@ -457,7 +454,7 @@
     <div class="custom-routine-list" id="customRoutineList" hidden aria-hidden="true"></div>
 
     <div class="custom-routine-toolbar compact" id="customRoutineToolbar">
-        <button type="button" class="custom-routine-manage-btn" id="customRoutineManageBtn" onclick="openCustomRoutineManager()">⚙ 오늘의 약속 관리</button>
+        <button type="button" class="custom-routine-manage-btn" id="customRoutineManageBtn" data-hm-action="open-custom-routine-manager">⚙ 오늘의 약속 관리</button>
         <span class="custom-routine-help">미션과 주간 루틴은 오늘의 약속 바로 아래에 표시됩니다.</span>
     </div>
 
@@ -467,7 +464,7 @@
             <small id="subRoutineCountText">기록(Sub)가 직접 관리</small>
         </div>
         <div class="input-group sub-routine-home-wrap">
-            <button type="button" class="daily-card sub-routine-hub-card" id="subRoutineHubCard" onclick="openSubRoutineHub()">
+            <button type="button" class="daily-card sub-routine-hub-card" id="subRoutineHubCard" data-hm-action="open-sub-routine-hub">
                 <span class="daily-card-icon sub-routine-icon">🌱</span>
                 <span>
                     <span class="daily-card-title">나의 루틴</span>
@@ -480,23 +477,23 @@
     </section>
 
 
-    <div class="daily-modal-overlay" id="subRoutineHubOverlay" onclick="if(event.target.id==='subRoutineHubOverlay') closeSubRoutineHub()" aria-hidden="true" inert>
+    <div class="daily-modal-overlay" id="subRoutineHubOverlay" data-hm-action="close-sub-routine-hub-overlay" aria-hidden="true" inert>
         <div class="daily-modal sub-routine-modal" role="dialog" aria-modal="true" aria-labelledby="subRoutineHubTitle">
             <div class="daily-modal-head">
                 <h2 id="subRoutineHubTitle">🌱 나의 루틴</h2>
-                <button type="button" class="modal-close-btn" onclick="closeSubRoutineHub()">닫기</button>
+                <button type="button" class="modal-close-btn" data-hm-action="close-sub-routine-hub">닫기</button>
             </div>
             <p class="sub-routine-note" id="subRoutineRoleNote">기록(Sub)가 스스로 정하고 입력하는 개인 루틴입니다.</p>
-            <button type="button" class="daily-modal-save sub-routine-add-btn sub-routine-add-top" id="subRoutineAddBtn" onclick="openSubRoutineEditor()">+ 새 루틴 만들기</button>
+            <button type="button" class="daily-modal-save sub-routine-add-btn sub-routine-add-top" id="subRoutineAddBtn" data-hm-action="open-sub-routine-editor">+ 새 루틴 만들기</button>
             <div id="subRoutineManagerList" class="sub-routine-list sub-routine-manager-compact"></div>
         </div>
     </div>
 
-    <div class="daily-modal-overlay" id="subRoutineEditorOverlay" onclick="if(event.target.id==='subRoutineEditorOverlay') closeSubRoutineEditor()" aria-hidden="true" inert>
+    <div class="daily-modal-overlay" id="subRoutineEditorOverlay" data-hm-action="close-sub-routine-editor-overlay" aria-hidden="true" inert>
         <div class="daily-modal sub-routine-editor-modal" role="dialog" aria-modal="true" aria-labelledby="subRoutineEditorTitle">
             <div class="daily-modal-head">
                 <h2 id="subRoutineEditorTitle">🌱 나의 루틴 만들기</h2>
-                <button type="button" class="modal-close-btn" onclick="closeSubRoutineEditor()">닫기</button>
+                <button type="button" class="modal-close-btn" data-hm-action="close-sub-routine-editor">닫기</button>
             </div>
             <div class="sub-routine-editor-form">
                 <label for="subRoutineTitleInput">루틴 이름</label>
@@ -519,7 +516,7 @@
 
                 <div class="sub-routine-item-editor-head">
                     <strong>루틴 안 항목</strong>
-                    <button type="button" onclick="addSubRoutineDraftItem()">+ 항목 추가</button>
+                    <button type="button" data-hm-action="add-sub-routine-item">+ 항목 추가</button>
                 </div>
                 <div id="subRoutineDraftItems" class="sub-routine-draft-items"></div>
 
@@ -528,33 +525,33 @@
                     <span><strong>일시 중지</strong><small>삭제하지 않고 홈에서 잠시 숨깁니다.</small></span>
                 </label>
                 <div class="sub-routine-editor-actions">
-                    <button type="button" class="btn-secondary" onclick="closeSubRoutineEditor()">취소</button>
-                    <button type="button" class="daily-modal-save" onclick="saveSubRoutine()">저장</button>
+                    <button type="button" class="btn-secondary" data-hm-action="close-sub-routine-editor">취소</button>
+                    <button type="button" class="daily-modal-save" data-hm-action="save-sub-routine">저장</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="daily-modal-overlay" id="subRoutineInputOverlay" onclick="if(event.target.id==='subRoutineInputOverlay') closeSubRoutineInput()" aria-hidden="true" inert>
+    <div class="daily-modal-overlay" id="subRoutineInputOverlay" data-hm-action="close-sub-routine-input-overlay" aria-hidden="true" inert>
         <div class="daily-modal sub-routine-input-modal" role="dialog" aria-modal="true" aria-labelledby="subRoutineInputTitle">
             <div class="daily-modal-head">
                 <h2 id="subRoutineInputTitle">🌱 나의 루틴 입력</h2>
-                <button type="button" class="modal-close-btn" onclick="closeSubRoutineInput()">닫기</button>
+                <button type="button" class="modal-close-btn" data-hm-action="close-sub-routine-input">닫기</button>
             </div>
             <p class="sub-routine-note" id="subRoutineInputDesc"></p>
             <div id="subRoutineInputBody" class="sub-routine-input-body"></div>
-            <button type="button" class="daily-modal-save" id="subRoutineInputSaveBtn" onclick="saveSubRoutineInput()">저장하고 닫기</button>
+            <button type="button" class="daily-modal-save" id="subRoutineInputSaveBtn" data-hm-action="save-sub-routine-input">저장하고 닫기</button>
         </div>
     </div>
 
-    <div class="daily-modal-overlay hm-chat-overlay" id="chatModalOverlay" onclick="if(event.target.id==='chatModalOverlay') closeChatModal()" aria-hidden="true" inert>
+    <div class="daily-modal-overlay hm-chat-overlay" id="chatModalOverlay" data-hm-action="close-chat-overlay" aria-hidden="true" inert>
         <div class="daily-modal hm-chat-modal" role="dialog" aria-modal="true" aria-labelledby="chatModalTitle">
             <div class="daily-modal-head hm-chat-modal-head">
                 <div>
                     <h2 id="chatModalTitle">💬 우리의 대화</h2>
                     <div class="hm-chat-modal-presence" id="chatModalPresence">상대방 상태 확인 중</div>
                 </div>
-                <button type="button" class="modal-close-btn" onclick="closeChatModal()">닫기</button>
+                <button type="button" class="modal-close-btn" data-hm-action="close-chat">닫기</button>
             </div>
             <div id="chatSection" class="hm-chat-section">
                 <div id="chatMessages" class="hm-chat-messages">
@@ -563,23 +560,23 @@
                 <div class="hm-chat-offline-note" id="chatOfflineNote" hidden>상대방이 오프라인입니다. 메시지는 저장되며 다음 접속 때 확인할 수 있어요.</div>
                 <div class="hm-chat-input-row">
                     <input type="text" id="chatSender" placeholder="닉네임" readonly aria-label="채팅 닉네임" title="내 프로필에서 변경할 수 있습니다.">
-                    <input type="text" id="chatInput" maxlength="2000" placeholder="메시지를 입력하세요..." aria-label="채팅 메시지" onkeypress="if(event.key === 'Enter') sendChatMessage()">
-                    <button type="button" class="chat-send-btn" onclick="sendChatMessage()">전송</button>
+                    <input type="text" id="chatInput" maxlength="2000" placeholder="메시지를 입력하세요..." aria-label="채팅 메시지" data-hm-keypress="chat-send-enter">
+                    <button type="button" class="chat-send-btn" data-hm-action="send-chat">전송</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <button class="btn-main" onclick="finalizeAndGenerateReport()">✨ 오늘 하루 기록 최종 완성 및 복사</button>
+    <button class="btn-main" data-hm-action="finalize-report">✨ 오늘 하루 기록 최종 완성 및 복사</button>
 
     <div class="result-container" id="resultContainer">
         <div class="result-title">✨ 깔끔하게 정리된 결과</div>
         <textarea id="resultBox" readonly></textarea>
-        <button class="btn-copy" onclick="copyToClipboard()">📋 결과 복사하기</button>
+        <button class="btn-copy" data-hm-action="copy-result">📋 결과 복사하기</button>
     </div>
 </div>
 
-<button type="button" class="history-launch-card" onclick="openHistoryPanelModal()" aria-label="지난 기록실 열기">
+<button type="button" class="history-launch-card" data-hm-action="open-history-panel" aria-label="지난 기록실 열기">
     <span class="history-launch-icon">💗</span>
     <span>
         <span class="history-launch-title">우리의 이야기</span>
@@ -591,15 +588,15 @@
 </div>
 
 
-<div class="daily-modal-overlay" id="customRoutineHubOverlay" onclick="if(event.target.id==='customRoutineHubOverlay') closeCustomRoutineHub()">
+<div class="daily-modal-overlay" id="customRoutineHubOverlay" data-hm-action="close-custom-routine-hub-overlay">
     <div class="daily-modal custom-routine-modal custom-routine-hub-modal" role="dialog" aria-modal="true" aria-labelledby="customRoutineHubTitle">
         <div class="daily-modal-head">
             <h2 id="customRoutineHubTitle">💜 오늘의 약속</h2>
-            <button type="button" class="modal-close-btn" onclick="closeCustomRoutineHub()">닫기</button>
+            <button type="button" class="modal-close-btn" data-hm-action="close-custom-routine-hub">닫기</button>
         </div>
         <p class="custom-routine-note" id="customRoutineHubNote">등록된 약속은 간단한 관리 목록으로 확인합니다. 실제 입력은 홈 화면에서 진행합니다.</p>
         <div class="custom-routine-hub-actions" id="customRoutineHubActions">
-            <button type="button" class="custom-routine-manage-btn" onclick="openCustomRoutineManager()">⚙ 관리 화면 열기</button>
+            <button type="button" class="custom-routine-manage-btn" data-hm-action="open-custom-routine-manager">⚙ 관리 화면 열기</button>
         </div>
         <div id="customRoutineHubList" class="custom-routine-hub-list">
             <div class="custom-routine-empty">오늘의 약속을 불러오는 중입니다.</div>
@@ -607,21 +604,21 @@
     </div>
 </div>
 
-<div class="daily-modal-overlay" id="customRoutineManagerOverlay" onclick="if(event.target.id==='customRoutineManagerOverlay') closeCustomRoutineManager()">
+<div class="daily-modal-overlay" id="customRoutineManagerOverlay" data-hm-action="close-custom-routine-manager-overlay">
     <div class="daily-modal custom-routine-modal" role="dialog" aria-modal="true" aria-labelledby="customRoutineManagerTitle">
         <div class="daily-modal-head">
             <h2 id="customRoutineManagerTitle">💜 오늘의 약속 관리</h2>
-            <button type="button" class="modal-close-btn" onclick="closeCustomRoutineManager()">닫기</button>
+            <button type="button" class="modal-close-btn" data-hm-action="close-custom-routine-manager">닫기</button>
         </div>
         <p class="custom-routine-note">관리(Dom)가 오늘 지킬 약속과 일과를 카드로 만들 수 있어요. 최대 카드 5개, 카드당 항목 7개까지 가능합니다.</p>
         <div class="custom-routine-limit-line" id="customRoutineManagerLimit">카드 0/5</div>
 
         <div class="custom-routine-editor-box">
             <div class="custom-routine-template-row">
-                <button type="button" onclick="fillCustomRoutineTemplate('blank')">빈 카드</button>
-                <button type="button" onclick="fillCustomRoutineTemplate('mission')">미션 카드</button>
-                <button type="button" onclick="fillCustomRoutineTemplate('routine')">생활 루틴</button>
-                <button type="button" onclick="fillCustomRoutineTemplate('free')">자유형</button>
+                <button type="button" data-hm-action="fill-custom-routine-template" data-hm-value="blank">빈 카드</button>
+                <button type="button" data-hm-action="fill-custom-routine-template" data-hm-value="mission">미션 카드</button>
+                <button type="button" data-hm-action="fill-custom-routine-template" data-hm-value="routine">생활 루틴</button>
+                <button type="button" data-hm-action="fill-custom-routine-template" data-hm-value="free">자유형</button>
             </div>
             <label for="customCardTitleInput">카드 이름</label>
             <input type="text" id="customCardTitleInput" maxlength="20" placeholder="예: 오늘 보고">
@@ -630,11 +627,11 @@
             <div class="custom-routine-schedule-box">
                 <strong>약속 유형</strong>
                 <div class="custom-routine-kind-row">
-                    <label><input type="radio" name="customRoutineKind" value="mission" checked onchange="updateCustomRoutineScheduleUi()"> 오늘의 미션</label>
-                    <label><input type="radio" name="customRoutineKind" value="weekly" onchange="updateCustomRoutineScheduleUi()"> 주간 루틴</label>
+                    <label><input type="radio" name="customRoutineKind" value="mission" checked data-hm-change="custom-routine-schedule"> 오늘의 미션</label>
+                    <label><input type="radio" name="customRoutineKind" value="weekly" data-hm-change="custom-routine-schedule"> 주간 루틴</label>
                 </div>
                 <div id="customRoutineWeekdayBox" class="custom-routine-weekday-box" hidden>
-                    <div class="custom-routine-weekday-head"><span>반복 요일</span><button type="button" onclick="selectAllCustomRoutineDays()">매일</button></div>
+                    <div class="custom-routine-weekday-head"><span>반복 요일</span><button type="button" data-hm-action="select-all-custom-routine-days">매일</button></div>
                     <div class="custom-routine-weekday-row">
                         <label><input type="checkbox" value="0" data-custom-weekday>일</label>
                         <label><input type="checkbox" value="1" data-custom-weekday>월</label>
@@ -648,12 +645,12 @@
             </div>
             <div class="custom-routine-item-editor-head">
                 <strong>카드 안 항목</strong>
-                <button type="button" onclick="addCustomRoutineDraftItem()">+ 항목 추가</button>
+                <button type="button" data-hm-action="add-custom-routine-item">+ 항목 추가</button>
             </div>
             <div id="customRoutineDraftItems" class="custom-routine-draft-items"></div>
             <div class="custom-routine-editor-actions">
-                <button type="button" class="btn-secondary" onclick="resetCustomRoutineEditor()">초기화</button>
-                <button type="button" class="daily-modal-save" onclick="saveCustomRoutineCard()">저장</button>
+                <button type="button" class="btn-secondary" data-hm-action="reset-custom-routine-editor">초기화</button>
+                <button type="button" class="daily-modal-save" data-hm-action="save-custom-routine-card">저장</button>
             </div>
         </div>
 
@@ -661,40 +658,40 @@
     </div>
 </div>
 
-<div class="daily-modal-overlay" id="customRoutineInputOverlay" onclick="if(event.target.id==='customRoutineInputOverlay') closeCustomRoutineInput()">
+<div class="daily-modal-overlay" id="customRoutineInputOverlay" data-hm-action="close-custom-routine-input-overlay">
     <div class="daily-modal custom-routine-modal" role="dialog" aria-modal="true" aria-labelledby="customRoutineInputTitle">
         <div class="daily-modal-head">
             <h2 id="customRoutineInputTitle">💜 오늘의 약속</h2>
-            <button type="button" class="modal-close-btn" onclick="closeCustomRoutineInput()">닫기</button>
+            <button type="button" class="modal-close-btn" data-hm-action="close-custom-routine-input">닫기</button>
         </div>
         <p class="custom-routine-note" id="customRoutineInputDesc"></p>
         <div id="customRoutineInputBody" class="custom-routine-input-body"></div>
-        <button type="button" class="daily-modal-save" onclick="saveCustomRoutineInput()">저장</button>
+        <button type="button" class="daily-modal-save" data-hm-action="save-custom-routine-input">저장</button>
     </div>
 </div>
 
 
-<div class="history-panel-overlay" id="historyPanelOverlay" onclick="if(event.target.id==='historyPanelOverlay') closeHistoryPanelModal()">
+<div class="history-panel-overlay" id="historyPanelOverlay" data-hm-action="close-history-panel-overlay">
     <div class="history-panel-modal" role="dialog" aria-modal="true" aria-labelledby="historyPanelTitle">
         <div class="history-panel-head">
             <div>
                 <div class="history-detail-kicker">History Center</div>
                 <h2 id="historyPanelTitle">📖 우리의 이야기 <span>v1.0 RC</span></h2>
             </div>
-            <button type="button" class="modal-close-btn" onclick="closeHistoryPanelModal()">닫기</button>
+            <button type="button" class="modal-close-btn" data-hm-action="close-history-panel">닫기</button>
         </div>
         <div class="history-intro-note">달을 넘기며 기록과 기념일을 확인하고, 날짜를 누르면 하루 기록이 열립니다.</div>
         <div id="recordDeletionNoticeHistory" hidden></div>
         <div class="history-v2-toolbar history-v2-toolbar-below" aria-label="History 2.0 controls">
-            <input type="search" id="historySearchInput" placeholder="기록 검색: 미션, 메모, 루틴, 식사" oninput="hmHistoryApplySearch()">
-            <select id="historyTypeFilter" onchange="hmHistoryApplySearch()" aria-label="기록 필터">
+            <input type="search" id="historySearchInput" placeholder="기록 검색: 미션, 메모, 루틴, 식사" data-hm-input="history-search">
+            <select id="historyTypeFilter" data-hm-change="history-search" aria-label="기록 필터">
                 <option value="all">전체 기록</option>
                 <option value="routine">오늘의 약속</option>
                 <option value="mission">미션</option>
                 <option value="photo">사진</option>
                 <option value="mood">기분</option>
             </select>
-            <button type="button" onclick="hmHistoryClearSearch()">초기화</button>
+            <button type="button" data-hm-action="clear-history-search">초기화</button>
         </div>
         <div id="calendarBox"></div>
         <div id="anniversaryPanel" class="anniversary-panel"></div>
@@ -705,71 +702,71 @@
     </div>
 </div>
 
-<div class="record-deletion-modal-overlay" id="recordDeletionModalOverlay" hidden onclick="if(event.target.id==='recordDeletionModalOverlay') closeDeletedRecordsModal()">
+<div class="record-deletion-modal-overlay" id="recordDeletionModalOverlay" hidden data-hm-action="close-deleted-records-overlay">
   <div class="record-deletion-modal" role="dialog" aria-modal="true" aria-labelledby="recordDeletionModalTitle">
     <div class="history-detail-head">
       <div><div class="history-detail-kicker">Deletion History</div><h2 id="recordDeletionModalTitle">🗑️ 삭제된 기록</h2></div>
-      <button type="button" class="modal-close-btn" onclick="closeDeletedRecordsModal()">닫기</button>
+      <button type="button" class="modal-close-btn" data-hm-action="close-deleted-records">닫기</button>
     </div>
     <div id="recordDeletionModalContent"></div>
   </div>
 </div>
 
-<div class="history-detail-overlay" id="historyDetailOverlay" onclick="if(event.target.id==='historyDetailOverlay') closeHistoryDetailModal()">
+<div class="history-detail-overlay" id="historyDetailOverlay" data-hm-action="close-history-detail-overlay">
     <div class="history-detail-modal" role="dialog" aria-modal="true" aria-labelledby="historyDetailTitle">
         <div class="history-detail-head">
             <div>
                 <div class="history-detail-kicker">지난 기록 상세</div>
                 <h2 id="historyDetailTitle">📅 기록</h2>
             </div>
-            <button type="button" class="modal-close-btn" onclick="closeHistoryDetailModal()">닫기</button>
+            <button type="button" class="modal-close-btn" data-hm-action="close-history-detail">닫기</button>
         </div>
         <div id="historyDetailContent" class="history-detail-content"></div>
     </div>
 </div>
 
 
-<div class="onboarding-modal" id="onboardingModal" onclick="if(event.target.id==='onboardingModal') closeOnboardingModal(false)">
+<div class="onboarding-modal" id="onboardingModal" data-hm-action="close-onboarding-overlay">
     <div class="onboarding-card" role="dialog" aria-modal="true" aria-labelledby="onboardingTitle">
         <div class="guide-header">
             <h2 id="onboardingTitle">💕 처음 오셨나요?</h2>
-            <button type="button" class="guide-close" onclick="closeOnboardingModal(false)">×</button>
+            <button type="button" class="guide-close" data-hm-action="close-onboarding">×</button>
         </div>
         <div class="guide-intro">
             HearMe2nite는 <strong>혼자 기록</strong>할 수도 있고, <strong>두 사람이 함께</strong> 사용할 수도 있어요.<br>
             먼저 공간을 만들어야 오늘 기록 카드들이 나타납니다.
         </div>
         <div class="onboarding-choice-grid">
-            <button type="button" class="onboarding-choice-card" onclick="startSoloOnboarding()">
+            <button type="button" class="onboarding-choice-card" data-hm-action="start-solo-onboarding">
                 <span class="onboarding-choice-icon">👤</span>
                 <strong>혼자 시작하기</strong>
                 <small>상대 초대 없이 나만의 공간을 만들고 바로 기록합니다.</small>
             </button>
-            <button type="button" class="onboarding-choice-card" onclick="startTogetherOnboarding()">
+            <button type="button" class="onboarding-choice-card" data-hm-action="start-together-onboarding">
                 <span class="onboarding-choice-icon">💌</span>
                 <strong>함께 시작하기</strong>
                 <small>공간을 만든 뒤 초대코드를 보내 같은 공간을 사용합니다.</small>
             </button>
         </div>
         <label class="onboarding-check"><input type="checkbox" id="dontShowOnboardingAgain"> 다음 로그인부터 자동으로 보지 않기</label>
-        <button type="button" class="guide-primary" onclick="openGuideModal()">자세한 사용설명서 보기</button>
+        <button type="button" class="guide-primary" data-hm-action="open-guide">자세한 사용설명서 보기</button>
     </div>
 </div>
 
-<div class="guide-modal" id="guideModal" onclick="if(event.target.id==='guideModal') closeGuideModal(true)">
+<div class="guide-modal" id="guideModal" data-hm-action="close-guide-overlay">
     <div class="guide-card help-center-card" role="dialog" aria-modal="true" aria-labelledby="guideTitle">
         <div class="guide-header help-center-header">
             <div>
                 <p class="help-center-kicker">30초 사용 가이드</p>
                 <h2 id="guideTitle">✨ HearMe2nite 사용 가이드</h2>
             </div>
-            <button type="button" class="guide-close" onclick="closeGuideModal(true)" aria-label="사용 가이드 닫기">×</button>
+            <button type="button" class="guide-close" data-hm-action="close-guide" aria-label="사용 가이드 닫기">×</button>
         </div>
 
         <div class="help-hero help-hero-compact">
             <strong>👋 무엇을 도와드릴까요?</strong>
             <span>검색하거나 아래 메뉴를 선택하세요.</span>
-            <button type="button" class="help-beta-support-link" onclick="selectHelpTab('support')">
+            <button type="button" class="help-beta-support-link" data-hm-action="select-help-tab" data-hm-value="support">
                 <span aria-hidden="true">📨</span>
                 <span><b>베타테스트 중 불편하거나 필요한 기능이 있나요?</b><small>문의하기에서 의견을 보내주시면 확인 후 답변해 드립니다.</small></span>
                 <span aria-hidden="true">›</span>
@@ -778,7 +775,7 @@
 
         <div class="help-search-wrap">
             <label class="help-search-label" for="helpSearchInput">🔍 궁금한 기능 검색</label>
-            <input id="helpSearchInput" class="help-search-input" type="search" placeholder="예: 오늘의 약속, 초대코드, 운동, 기록실" oninput="searchHelpCenter(this.value)">
+            <input id="helpSearchInput" class="help-search-input" type="search" placeholder="예: 오늘의 약속, 초대코드, 운동, 기록실" data-hm-input="help-search">
         </div>
 
         <div class="help-menu-heading">
@@ -786,18 +783,18 @@
         </div>
 
         <div class="help-center-tabs help-menu-grid" role="tablist" aria-label="사용 가이드 메뉴">
-            <button type="button" class="help-tab active" data-help-tab="home" onclick="selectHelpTab('home')" aria-selected="true"><span class="help-tab-icon" aria-hidden="true">🏠</span><span>홈</span></button>
-            <button type="button" class="help-tab" data-help-tab="start" onclick="selectHelpTab('start')" aria-selected="false"><span class="help-tab-icon" aria-hidden="true">✨</span><span>시작하기</span></button>
-            <button type="button" class="help-tab" data-help-tab="room" onclick="selectHelpTab('room')" aria-selected="false"><span class="help-tab-icon" aria-hidden="true">🏡</span><span>우리의 공간</span></button>
-            <button type="button" class="help-tab help-tab-promise" data-help-tab="promise" onclick="selectHelpTab('promise')" aria-selected="false"><span class="help-tab-icon" aria-hidden="true">💜</span><span>오늘의 약속</span></button>
-            <button type="button" class="help-tab" data-help-tab="routine" onclick="selectHelpTab('routine')" aria-selected="false"><span class="help-tab-icon" aria-hidden="true">🌱</span><span>나의 루틴</span></button>
-            <button type="button" class="help-tab" data-help-tab="daily" onclick="selectHelpTab('daily')" aria-selected="false"><span class="help-tab-icon" aria-hidden="true">📝</span><span>오늘의 기록</span></button>
-            <button type="button" class="help-tab" data-help-tab="history" onclick="selectHelpTab('history')" aria-selected="false"><span class="help-tab-icon" aria-hidden="true">📅</span><span>기록실·기념일</span></button>
-            <button type="button" class="help-tab" data-help-tab="theme" onclick="selectHelpTab('theme')" aria-selected="false"><span class="help-tab-icon" aria-hidden="true">🎨</span><span>테마</span></button>
-            <button type="button" class="help-tab" data-help-tab="data" onclick="selectHelpTab('data')" aria-selected="false"><span class="help-tab-icon" aria-hidden="true">🗂️</span><span>데이터·계정</span></button>
-            <button type="button" class="help-tab" data-help-tab="faq" onclick="selectHelpTab('faq')" aria-selected="false"><span class="help-tab-icon" aria-hidden="true">💬</span><span>Q&amp;A</span></button>
-            <button type="button" class="help-tab" data-help-tab="support" onclick="selectHelpTab('support')" aria-selected="false"><span class="help-tab-icon" aria-hidden="true">📨</span><span>문의하기 <b id="supportUnreadBadge" class="help-support-badge" hidden>0</b></span></button>
-            <button type="button" class="help-tab" data-help-tab="updates" onclick="selectHelpTab('updates')" aria-selected="false"><span class="help-tab-icon" aria-hidden="true">🔔</span><span>업데이트</span></button>
+            <button type="button" class="help-tab active" data-help-tab="home" data-hm-action="select-help-tab" aria-selected="true"><span class="help-tab-icon" aria-hidden="true">🏠</span><span>홈</span></button>
+            <button type="button" class="help-tab" data-help-tab="start" data-hm-action="select-help-tab" aria-selected="false"><span class="help-tab-icon" aria-hidden="true">✨</span><span>시작하기</span></button>
+            <button type="button" class="help-tab" data-help-tab="room" data-hm-action="select-help-tab" aria-selected="false"><span class="help-tab-icon" aria-hidden="true">🏡</span><span>우리의 공간</span></button>
+            <button type="button" class="help-tab help-tab-promise" data-help-tab="promise" data-hm-action="select-help-tab" aria-selected="false"><span class="help-tab-icon" aria-hidden="true">💜</span><span>오늘의 약속</span></button>
+            <button type="button" class="help-tab" data-help-tab="routine" data-hm-action="select-help-tab" aria-selected="false"><span class="help-tab-icon" aria-hidden="true">🌱</span><span>나의 루틴</span></button>
+            <button type="button" class="help-tab" data-help-tab="daily" data-hm-action="select-help-tab" aria-selected="false"><span class="help-tab-icon" aria-hidden="true">📝</span><span>오늘의 기록</span></button>
+            <button type="button" class="help-tab" data-help-tab="history" data-hm-action="select-help-tab" aria-selected="false"><span class="help-tab-icon" aria-hidden="true">📅</span><span>기록실·기념일</span></button>
+            <button type="button" class="help-tab" data-help-tab="theme" data-hm-action="select-help-tab" aria-selected="false"><span class="help-tab-icon" aria-hidden="true">🎨</span><span>테마</span></button>
+            <button type="button" class="help-tab" data-help-tab="data" data-hm-action="select-help-tab" aria-selected="false"><span class="help-tab-icon" aria-hidden="true">🗂️</span><span>데이터·계정</span></button>
+            <button type="button" class="help-tab" data-help-tab="faq" data-hm-action="select-help-tab" aria-selected="false"><span class="help-tab-icon" aria-hidden="true">💬</span><span>Q&amp;A</span></button>
+            <button type="button" class="help-tab" data-help-tab="support" data-hm-action="select-help-tab" aria-selected="false"><span class="help-tab-icon" aria-hidden="true">📨</span><span>문의하기 <b id="supportUnreadBadge" class="help-support-badge" hidden>0</b></span></button>
+            <button type="button" class="help-tab" data-help-tab="updates" data-hm-action="select-help-tab" aria-selected="false"><span class="help-tab-icon" aria-hidden="true">🔔</span><span>업데이트</span></button>
         </div>
 
         <div id="helpSearchResults" class="help-search-results" hidden></div>
@@ -861,12 +858,12 @@
 
             <section class="help-panel guide-faq" data-help-panel="faq">
                 <div class="faq-accordion" data-help-keywords="질문 답변 Q&A FAQ">
-                    <button type="button" class="faq-question" onclick="toggleHelpFaq(this)">상대방이 안 보여요.<span>⌄</span></button><div class="faq-answer">두 사용자가 같은 공간에 연결되어 있는지 확인하세요. 초대코드가 다르면 서로의 기록이 보이지 않습니다.</div>
-                    <button type="button" class="faq-question" onclick="toggleHelpFaq(this)">오늘의 약속과 나의 루틴은 무엇이 다른가요?<span>⌄</span></button><div class="faq-answer">오늘의 약속은 관리(Dom)가 만들고 기록(Sub)이 수행합니다. 나의 루틴은 기록(Sub)이 스스로 만들고 관리합니다.</div>
-                    <button type="button" class="faq-question" onclick="toggleHelpFaq(this)">공용 테마를 끄면 어떻게 되나요?<span>⌄</span></button><div class="faq-answer">각 사용자가 이전에 저장한 개인 테마로 즉시 돌아갑니다.</div>
-                    <button type="button" class="faq-question" onclick="toggleHelpFaq(this)">오늘 작성한 기록은 어디서 다시 보나요?<span>⌄</span></button><div class="faq-answer">기록실에서 날짜를 선택하면 그날의 약속, 루틴, 컨디션, 기록과 사진을 다시 볼 수 있습니다.</div>
-                    <button type="button" class="faq-question" onclick="toggleHelpFaq(this)">초대코드가 만료되었다고 나와요.<span>⌄</span></button><div class="faq-answer">초대코드는 24시간 동안만 유효합니다. 관리(Dom)에게 새 코드를 요청하세요.</div>
-                    <button type="button" class="faq-question" onclick="toggleHelpFaq(this)">다른 공간으로 돌아갈 수 있나요?<span>⌄</span></button><div class="faq-answer">우리의 공간 메뉴에서 이전 공간 목록을 열고 원하는 공간으로 전환할 수 있습니다.</div>
+                    <button type="button" class="faq-question" data-hm-action="toggle-help-faq">상대방이 안 보여요.<span>⌄</span></button><div class="faq-answer">두 사용자가 같은 공간에 연결되어 있는지 확인하세요. 초대코드가 다르면 서로의 기록이 보이지 않습니다.</div>
+                    <button type="button" class="faq-question" data-hm-action="toggle-help-faq">오늘의 약속과 나의 루틴은 무엇이 다른가요?<span>⌄</span></button><div class="faq-answer">오늘의 약속은 관리(Dom)가 만들고 기록(Sub)이 수행합니다. 나의 루틴은 기록(Sub)이 스스로 만들고 관리합니다.</div>
+                    <button type="button" class="faq-question" data-hm-action="toggle-help-faq">공용 테마를 끄면 어떻게 되나요?<span>⌄</span></button><div class="faq-answer">각 사용자가 이전에 저장한 개인 테마로 즉시 돌아갑니다.</div>
+                    <button type="button" class="faq-question" data-hm-action="toggle-help-faq">오늘 작성한 기록은 어디서 다시 보나요?<span>⌄</span></button><div class="faq-answer">기록실에서 날짜를 선택하면 그날의 약속, 루틴, 컨디션, 기록과 사진을 다시 볼 수 있습니다.</div>
+                    <button type="button" class="faq-question" data-hm-action="toggle-help-faq">초대코드가 만료되었다고 나와요.<span>⌄</span></button><div class="faq-answer">초대코드는 24시간 동안만 유효합니다. 관리(Dom)에게 새 코드를 요청하세요.</div>
+                    <button type="button" class="faq-question" data-hm-action="toggle-help-faq">다른 공간으로 돌아갈 수 있나요?<span>⌄</span></button><div class="faq-answer">우리의 공간 메뉴에서 이전 공간 목록을 열고 원하는 공간으로 전환할 수 있습니다.</div>
                 </div>
             </section>
 
@@ -875,7 +872,7 @@
                     <h3>📨 문의·고객센터</h3>
                     <p>앱 사용 중 불편한 점이나 데이터 오류를 보내면 관리자가 확인한 뒤 이 화면으로 답변합니다.</p>
                     <div class="help-support-notice">비밀번호, 인증번호, 주민등록번호, 금융정보 등 민감한 개인정보는 적지 마세요.</div>
-                    <form id="supportTicketForm" class="help-support-form" onsubmit="submitSupportTicket(event)">
+                    <form id="supportTicketForm" class="help-support-form" data-hm-submit="support-ticket">
                         <label><span>문의 유형</span><select id="supportCategory" required><option value="usage">앱 사용 문의</option><option value="data_error">데이터 오류</option><option value="account_room">계정·Room 문의</option><option value="report">신고·안전</option><option value="suggestion">기능 제안</option></select></label>
                         <label><span>제목</span><input id="supportTitle" type="text" maxlength="80" placeholder="문의 내용을 한 줄로 적어주세요" required></label>
                         <label><span>문의 내용</span><textarea id="supportMessage" maxlength="2000" rows="5" placeholder="문제가 발생한 화면과 상황을 자세히 적어주세요" required></textarea></label>
@@ -883,7 +880,7 @@
                     </form>
                 </article>
                 <article class="help-mini-card help-support-list-card">
-                    <div class="help-support-list-head"><h3>내 문의</h3><button type="button" onclick="loadSupportTickets(true)">새로고침</button></div>
+                    <div class="help-support-list-head"><h3>내 문의</h3><button type="button" data-hm-action="refresh-support-tickets">새로고침</button></div>
                     <div id="supportTicketList" class="help-support-list"><p class="help-support-empty">문의 내역을 불러오려면 로그인해 주세요.</p></div>
                 </article>
             </section>
@@ -905,26 +902,26 @@
         </div>
 
         <div class="guide-footer help-center-footer">처음에는 오늘의 약속부터 확인해 보세요. 필요한 설명만 짧게 읽고 바로 사용할 수 있어요.</div>
-        <button type="button" class="guide-primary" onclick="closeGuideModal(true)">확인했어요</button>
+        <button type="button" class="guide-primary" data-hm-action="close-guide">확인했어요</button>
     </div>
 </div>
 
-<div class="mission-modal-overlay" id="missionModalOverlay" onclick="if(event.target.id==='missionModalOverlay') closeMissionModal()">
+<div class="mission-modal-overlay" id="missionModalOverlay" data-hm-action="close-mission-overlay">
     <div class="mission-modal">
         <div class="mission-modal-head">
             <h2>🎯 오늘의 미션</h2>
-            <button type="button" class="modal-close-btn" onclick="closeMissionModal()">닫기</button>
+            <button type="button" class="modal-close-btn" data-hm-action="close-mission">닫기</button>
         </div>
 
         <div class="mission-template-box">
             <div class="mission-template-title">💕 추천 미션</div>
             <div class="mission-chip-grid">
-                <button type="button" class="mission-chip" onclick="addMissionTemplate('오늘의 마음을 주인에게 솔직하게 보고하기')">마음 보고</button>
-                <button type="button" class="mission-chip" onclick="addMissionTemplate('오늘의 셀카 한 장 남기기')">오늘 셀카</button>
-                <button type="button" class="mission-chip" onclick="addMissionTemplate('지정된 호칭으로 하루 보고하기')">호칭 보고</button>
-                <button type="button" class="mission-chip" onclick="addMissionTemplate('오늘의 복장 인증 남기기')">복장 인증</button>
-                <button type="button" class="mission-chip" onclick="addMissionTemplate('주인이 정한 시간에 짧게 체크인하기')">정시 체크인</button>
-                <button type="button" class="mission-chip" onclick="addMissionTemplate('프라이빗한 해피타임 갖고 느낀 점 한 줄 남기기')">해피타임</button>
+                <button type="button" class="mission-chip" data-hm-action="add-mission-template" data-hm-value="오늘의 마음을 주인에게 솔직하게 보고하기">마음 보고</button>
+                <button type="button" class="mission-chip" data-hm-action="add-mission-template" data-hm-value="오늘의 셀카 한 장 남기기">오늘 셀카</button>
+                <button type="button" class="mission-chip" data-hm-action="add-mission-template" data-hm-value="지정된 호칭으로 하루 보고하기">호칭 보고</button>
+                <button type="button" class="mission-chip" data-hm-action="add-mission-template" data-hm-value="오늘의 복장 인증 남기기">복장 인증</button>
+                <button type="button" class="mission-chip" data-hm-action="add-mission-template" data-hm-value="주인이 정한 시간에 짧게 체크인하기">정시 체크인</button>
+                <button type="button" class="mission-chip" data-hm-action="add-mission-template" data-hm-value="프라이빗한 해피타임 갖고 느낀 점 한 줄 남기기">해피타임</button>
             </div>
         </div>
 
@@ -932,15 +929,15 @@
             <div class="mission-template-title">👑 주인의 미션함</div>
             <div class="mission-helper">자주 쓰는 미션을 저장해두고 오늘의 미션에 빠르게 추가하세요. 관리(Dom)만 저장/삭제할 수 있습니다. 각 미션 오른쪽 × 버튼으로 모바일에서도 쉽게 비울 수 있어요.</div>
             <div class="mission-chip-grid" id="defaultMissionChips">
-                <button type="button" class="mission-chip" onclick="addMissionTemplate('아침 보고 남기기')">🌅 아침 보고</button>
-                <button type="button" class="mission-chip" onclick="addMissionTemplate('저녁 보고 남기기')">🌙 저녁 보고</button>
-                <button type="button" class="mission-chip" onclick="addMissionTemplate('오늘 주인에게 감사한 점 하나 적기')">🤍 감사 한 줄</button>
-                <button type="button" class="mission-chip" onclick="addMissionTemplate('오늘의 약속 하나 지키고 체크하기')">🎯 오늘의 약속</button>
-                <button type="button" class="mission-chip primary" onclick="addRandomMission()">🎲 추천 미션</button>
+                <button type="button" class="mission-chip" data-hm-action="add-mission-template" data-hm-value="아침 보고 남기기">🌅 아침 보고</button>
+                <button type="button" class="mission-chip" data-hm-action="add-mission-template" data-hm-value="저녁 보고 남기기">🌙 저녁 보고</button>
+                <button type="button" class="mission-chip" data-hm-action="add-mission-template" data-hm-value="오늘 주인에게 감사한 점 하나 적기">🤍 감사 한 줄</button>
+                <button type="button" class="mission-chip" data-hm-action="add-mission-template" data-hm-value="오늘의 약속 하나 지키고 체크하기">🎯 오늘의 약속</button>
+                <button type="button" class="mission-chip primary" data-hm-action="add-random-mission">🎲 추천 미션</button>
             </div>
             <div class="mission-library-add owner-only-section">
                 <input type="text" id="missionLibraryInput" placeholder="예: 오늘의 복장 인증 / 정해진 시간 보고">
-                <button type="button" onclick="saveMissionToLibrary()">저장</button>
+                <button type="button" data-hm-action="save-mission-library">저장</button>
             </div>
             <div class="mission-library-list" id="missionLibraryList">
                 <div class="empty-message">저장된 미션을 불러오는 중입니다...</div>
@@ -950,133 +947,145 @@
         <div class="mission-box">
             <div class="mission-role-note" id="missionRoleNote">관리(Dom)는 미션을 작성하고, 기록(Sub)은 완료 체크만 할 수 있어요.</div>
             <div class="mission-helper">관계 안에서 합의된 미션만 적어주세요. 완료하면 체크하고, 필요 없는 칸은 비워두면 됩니다.</div>
-            <div class="mission-row"><input type="checkbox" id="missionDone1" onchange="handleMissionChanged(true)"><input type="text" id="missionText1" placeholder="직접 미션을 적어주세요" oninput="handleMissionChanged(false)"><button type="button" class="mission-clear-btn" id="missionClear1" onclick="clearMissionRow(1)" aria-label="1번 미션 삭제">×</button></div>
-            <div class="mission-row"><input type="checkbox" id="missionDone2" onchange="handleMissionChanged(true)"><input type="text" id="missionText2" placeholder="예: 오늘의 마음 보고" oninput="handleMissionChanged(false)"><button type="button" class="mission-clear-btn" id="missionClear2" onclick="clearMissionRow(2)" aria-label="2번 미션 삭제">×</button></div>
-            <div class="mission-row"><input type="checkbox" id="missionDone3" onchange="handleMissionChanged(true)"><input type="text" id="missionText3" placeholder="예: 복장 인증" oninput="handleMissionChanged(false)"><button type="button" class="mission-clear-btn" id="missionClear3" onclick="clearMissionRow(3)" aria-label="3번 미션 삭제">×</button></div>
-            <div class="mission-row"><input type="checkbox" id="missionDone4" onchange="handleMissionChanged(true)"><input type="text" id="missionText4" placeholder="예: 정시 체크인" oninput="handleMissionChanged(false)"><button type="button" class="mission-clear-btn" id="missionClear4" onclick="clearMissionRow(4)" aria-label="4번 미션 삭제">×</button></div>
-            <div class="mission-row"><input type="checkbox" id="missionDone5" onchange="handleMissionChanged(true)"><input type="text" id="missionText5" placeholder="예: 해피타임 후 한 줄 기록" oninput="handleMissionChanged(false)"><button type="button" class="mission-clear-btn" id="missionClear5" onclick="clearMissionRow(5)" aria-label="5번 미션 삭제">×</button></div>
+            <div class="mission-row"><input type="checkbox" id="missionDone1" data-hm-change="mission-completion-change"><input type="text" id="missionText1" placeholder="직접 미션을 적어주세요" data-hm-input="mission-text-change"><button type="button" class="mission-clear-btn" id="missionClear1" data-hm-action="clear-mission-row" data-hm-value="1" aria-label="1번 미션 삭제">×</button></div>
+            <div class="mission-row"><input type="checkbox" id="missionDone2" data-hm-change="mission-completion-change"><input type="text" id="missionText2" placeholder="예: 오늘의 마음 보고" data-hm-input="mission-text-change"><button type="button" class="mission-clear-btn" id="missionClear2" data-hm-action="clear-mission-row" data-hm-value="2" aria-label="2번 미션 삭제">×</button></div>
+            <div class="mission-row"><input type="checkbox" id="missionDone3" data-hm-change="mission-completion-change"><input type="text" id="missionText3" placeholder="예: 복장 인증" data-hm-input="mission-text-change"><button type="button" class="mission-clear-btn" id="missionClear3" data-hm-action="clear-mission-row" data-hm-value="3" aria-label="3번 미션 삭제">×</button></div>
+            <div class="mission-row"><input type="checkbox" id="missionDone4" data-hm-change="mission-completion-change"><input type="text" id="missionText4" placeholder="예: 정시 체크인" data-hm-input="mission-text-change"><button type="button" class="mission-clear-btn" id="missionClear4" data-hm-action="clear-mission-row" data-hm-value="4" aria-label="4번 미션 삭제">×</button></div>
+            <div class="mission-row"><input type="checkbox" id="missionDone5" data-hm-change="mission-completion-change"><input type="text" id="missionText5" placeholder="예: 해피타임 후 한 줄 기록" data-hm-input="mission-text-change"><button type="button" class="mission-clear-btn" id="missionClear5" data-hm-action="clear-mission-row" data-hm-value="5" aria-label="5번 미션 삭제">×</button></div>
         </div>
     </div>
 </div>
 
 
-<div class="daily-modal-overlay" id="wakeModalOverlay" onclick="if(event.target.id==='wakeModalOverlay') closeDailyModal('wake')">
+<div class="daily-modal-overlay" id="wakeModalOverlay" data-hm-action="close-daily-overlay" data-hm-value="wake">
     <div class="daily-modal" role="dialog" aria-modal="true" aria-labelledby="wakeModalTitle">
-        <div class="daily-modal-head"><h2 id="wakeModalTitle">☀️ 기상 시간</h2><button type="button" class="modal-close-btn" onclick="closeDailyModal('wake')">닫기</button></div>
-        <div class="input-group"><input type="text" id="wakeTime" placeholder="오전 7시" oninput="handleDailyFieldChanged()"></div>
-        <button type="button" class="daily-modal-save" onclick="closeDailyModal('wake')">저장하고 닫기</button>
+        <div class="daily-modal-head"><h2 id="wakeModalTitle">☀️ 기상 시간</h2><button type="button" class="modal-close-btn" data-hm-action="close-daily" data-hm-value="wake">닫기</button></div>
+        <div class="input-group hm-structured-time-entry">
+            <input type="hidden" id="wakeTime">
+            <div class="hm-time-row"><select id="wakePeriod" aria-label="기상 오전 오후" data-hm-change="structured-time-change" data-hm-value="wake" data-hm-commit="true"><option value="오전">오전</option><option value="오후">오후</option></select><input type="text" id="wakeClock" aria-label="기상 시각" inputmode="numeric" maxlength="5" placeholder="--:--" data-hm-input="structured-time-change" data-hm-blur="structured-time-change" data-hm-value="wake" data-hm-commit="false" data-hm-blur-commit="true"></div>
+            <div class="hm-time-preview" id="wakeTimePreview" aria-live="polite">기록 시간: 오전 --:--</div>
+            <input type="text" id="wakeTimeNote" placeholder="기상 메모를 함께 남길 수 있어요" data-hm-input="structured-time-change" data-hm-value="wake">
+        </div>
+        <button type="button" class="daily-modal-save" data-hm-action="close-daily" data-hm-value="wake">저장하고 닫기</button>
     </div>
 </div>
 
-<div class="daily-modal-overlay" id="weightModalOverlay" onclick="if(event.target.id==='weightModalOverlay') closeDailyModal('weight')">
+<div class="daily-modal-overlay" id="weightModalOverlay" data-hm-action="close-daily-overlay" data-hm-value="weight">
     <div class="daily-modal" role="dialog" aria-modal="true" aria-labelledby="weightModalTitle">
-        <div class="daily-modal-head"><h2 id="weightModalTitle">⚖️ 체중</h2><button type="button" class="modal-close-btn" onclick="closeDailyModal('weight')">닫기</button></div>
-        <div class="input-group"><input type="text" id="weight" placeholder="50 kg" oninput="handleDailyFieldChanged()"></div>
-        <button type="button" class="daily-modal-save" onclick="closeDailyModal('weight')">저장하고 닫기</button>
+        <div class="daily-modal-head"><h2 id="weightModalTitle">⚖️ 체중</h2><button type="button" class="modal-close-btn" data-hm-action="close-daily" data-hm-value="weight">닫기</button></div>
+        <div class="input-group"><input type="text" id="weight" placeholder="50 kg" data-hm-input="daily-field-change"></div>
+        <button type="button" class="daily-modal-save" data-hm-action="close-daily" data-hm-value="weight">저장하고 닫기</button>
     </div>
 </div>
 
-<div class="daily-modal-overlay" id="exerciseModalOverlay" onclick="if(event.target.id==='exerciseModalOverlay') closeDailyModal('exercise')">
+<div class="daily-modal-overlay" id="exerciseModalOverlay" data-hm-action="close-daily-overlay" data-hm-value="exercise">
     <div class="daily-modal" role="dialog" aria-modal="true" aria-labelledby="exerciseModalTitle">
-        <div class="daily-modal-head"><h2 id="exerciseModalTitle">🏃 오늘의 운동</h2><button type="button" class="modal-close-btn" onclick="closeDailyModal('exercise')">닫기</button></div>
-        <div class="input-group"><input type="text" id="exercise" placeholder="예: 걷기 30분 / 헬스 1시간" oninput="handleDailyFieldChanged()"></div>
+        <div class="daily-modal-head"><h2 id="exerciseModalTitle">🏃 오늘의 운동</h2><button type="button" class="modal-close-btn" data-hm-action="close-daily" data-hm-value="exercise">닫기</button></div>
+        <div class="input-group"><input type="text" id="exercise" placeholder="예: 걷기 30분 / 헬스 1시간" data-hm-input="daily-field-change"></div>
         <div class="mood-helper">운동 종류와 시간을 간단히 적어주세요.</div>
-        <button type="button" class="daily-modal-save" onclick="closeDailyModal('exercise')">저장하고 닫기</button>
+        <button type="button" class="daily-modal-save" data-hm-action="close-daily" data-hm-value="exercise">저장하고 닫기</button>
     </div>
 </div>
 
-<div class="daily-modal-overlay" id="waterModalOverlay" onclick="if(event.target.id==='waterModalOverlay') closeDailyModal('water')">
+<div class="daily-modal-overlay" id="waterModalOverlay" data-hm-action="close-daily-overlay" data-hm-value="water">
     <div class="daily-modal" role="dialog" aria-modal="true" aria-labelledby="waterModalTitle">
-        <div class="daily-modal-head"><h2 id="waterModalTitle">💧 오늘의 수분</h2><button type="button" class="modal-close-btn" onclick="closeDailyModal('water')">닫기</button></div>
+        <div class="daily-modal-head"><h2 id="waterModalTitle">💧 오늘의 수분</h2><button type="button" class="modal-close-btn" data-hm-action="close-daily" data-hm-value="water">닫기</button></div>
         <div class="water-counter-box">
             <div class="water-display"><span id="waterDisplay">0</span> ML</div>
             <div class="water-btns">
-                <button type="button" class="btn-water" onclick="addWater(250)">+250ML</button>
-                <button type="button" class="btn-water" onclick="addWater(500)">+500ML</button>
-                <button type="button" class="btn-water reset" onclick="resetWater()">초기화 🔄</button>
+                <button type="button" class="btn-water" data-hm-action="add-water" data-hm-value="250">+250ML</button>
+                <button type="button" class="btn-water" data-hm-action="add-water" data-hm-value="500">+500ML</button>
+                <button type="button" class="btn-water reset" data-hm-action="reset-water">초기화 🔄</button>
             </div>
         </div>
-        <button type="button" class="daily-modal-save" onclick="closeDailyModal('water')">저장하고 닫기</button>
+        <button type="button" class="daily-modal-save" data-hm-action="close-daily" data-hm-value="water">저장하고 닫기</button>
     </div>
 </div>
 
-<div class="daily-modal-overlay" id="outingModalOverlay" onclick="if(event.target.id==='outingModalOverlay') cancelDailyMomentsAndClose()">
+<div class="daily-modal-overlay" id="outingModalOverlay" data-hm-action="cancel-daily-moments-overlay">
     <div class="daily-modal" role="dialog" aria-modal="true" aria-labelledby="outingModalTitle">
-        <div class="daily-modal-head"><h2 id="outingModalTitle">📷 오늘의 순간</h2><button type="button" class="modal-close-btn" onclick="cancelDailyMomentsAndClose()">닫기</button></div>
+        <div class="daily-modal-head"><h2 id="outingModalTitle">📷 오늘의 순간</h2><button type="button" class="modal-close-btn" data-hm-action="cancel-daily-moments">닫기</button></div>
         <div class="input-group">
-            <input type="text" id="goingOut" placeholder="산책 30분" oninput="handleDailyFieldChanged()">
+            <input type="text" id="goingOut" placeholder="산책 30분" data-hm-input="daily-field-change">
             <label for="goingOutPhoto" class="file-label">📷 일상 사진 추가하기</label>
-            <input type="file" id="goingOutPhoto" accept="image/*" multiple style="display:none;" onchange="handlePhotoUpload(this)">
+            <input type="file" id="goingOutPhoto" accept="image/*" multiple style="display:none;" data-hm-change="daily-photo-upload">
             <p class="moments-upload-guide" id="momentsUploadGuide">사진 저장 방식을 확인하는 중입니다.</p>
             <div class="preview-box moments-preview-box" id="previewBox">
                 <div id="momentsPreviewGrid" class="moments-preview-grid"></div>
             </div>
         </div>
-        <button type="button" class="daily-modal-save" id="dailyMomentsSaveButton" onclick="saveDailyMomentsAndClose()">저장하고 닫기</button>
+        <button type="button" class="daily-modal-save" id="dailyMomentsSaveButton" data-hm-action="save-daily-moments">저장하고 닫기</button>
     </div>
 </div>
 
-<div class="daily-modal-overlay" id="sleepModalOverlay" onclick="if(event.target.id==='sleepModalOverlay') closeDailyModal('sleep')">
+<div class="daily-modal-overlay" id="sleepModalOverlay" data-hm-action="close-daily-overlay" data-hm-value="sleep">
     <div class="daily-modal" role="dialog" aria-modal="true" aria-labelledby="sleepModalTitle">
-        <div class="daily-modal-head"><h2 id="sleepModalTitle">🌙 취침 예정</h2><button type="button" class="modal-close-btn" onclick="closeDailyModal('sleep')">닫기</button></div>
-        <div class="input-group"><input type="text" id="sleepTime" placeholder="밤 11시" oninput="handleDailyFieldChanged()"></div>
-        <button type="button" class="daily-modal-save" onclick="closeDailyModal('sleep')">저장하고 닫기</button>
+        <div class="daily-modal-head"><h2 id="sleepModalTitle">🌙 취침 예정</h2><button type="button" class="modal-close-btn" data-hm-action="close-daily" data-hm-value="sleep">닫기</button></div>
+        <div class="input-group hm-structured-time-entry">
+            <input type="hidden" id="sleepTime">
+            <div class="hm-time-row"><select id="sleepPeriod" aria-label="취침 오전 오후" data-hm-change="structured-time-change" data-hm-value="sleep" data-hm-commit="true"><option value="오후">오후</option><option value="오전">오전</option></select><input type="text" id="sleepClock" aria-label="취침 시각" inputmode="numeric" maxlength="5" placeholder="--:--" data-hm-input="structured-time-change" data-hm-blur="structured-time-change" data-hm-value="sleep" data-hm-commit="false" data-hm-blur-commit="true"></div>
+            <div class="hm-time-preview" id="sleepTimePreview" aria-live="polite">기록 시간: 오후 --:--</div>
+            <input type="text" id="sleepTimeNote" placeholder="취침 메모를 함께 남길 수 있어요" data-hm-input="structured-time-change" data-hm-value="sleep">
+        </div>
+        <button type="button" class="daily-modal-save" data-hm-action="close-daily" data-hm-value="sleep">저장하고 닫기</button>
     </div>
 </div>
 
-<div class="daily-modal-overlay" id="moodModalOverlay" onclick="if(event.target.id==='moodModalOverlay') closeDailyModal('mood')">
+<div class="daily-modal-overlay" id="moodModalOverlay" data-hm-action="close-daily-overlay" data-hm-value="mood">
     <div class="daily-modal" role="dialog" aria-modal="true" aria-labelledby="moodModalTitle">
         <div class="daily-modal-head">
             <h2 id="moodModalTitle">😊 오늘의 기분</h2>
-            <button type="button" class="modal-close-btn" onclick="closeDailyModal('mood')">닫기</button>
+            <button type="button" class="modal-close-btn" data-hm-action="close-daily" data-hm-value="mood">닫기</button>
         </div>
         <div class="mood-box">
-            <div class="mood-helper">오늘의 컨디션을 짧게 남겨주세요. 주인이 하루의 흐름을 이해하는 데 도움이 됩니다.</div>
+            <div class="mood-helper">오늘의 컨디션을 짧게 남겨주세요.</div>
             <div class="mood-options">
-                <button type="button" class="mood-btn" data-mood="great" onclick="selectMood('great')">😊<br>좋음</button>
-                <button type="button" class="mood-btn" data-mood="okay" onclick="selectMood('okay')">🙂<br>괜찮음</button>
-                <button type="button" class="mood-btn" data-mood="normal" onclick="selectMood('normal')">😐<br>보통</button>
-                <button type="button" class="mood-btn" data-mood="hard" onclick="selectMood('hard')">😞<br>힘듦</button>
-                <button type="button" class="mood-btn" data-mood="veryHard" onclick="selectMood('veryHard')">😭<br>매우 힘듦</button>
+                <button type="button" class="mood-btn" data-mood="great" data-hm-action="select-mood" data-hm-value="great">😊<br>좋음</button>
+                <button type="button" class="mood-btn" data-mood="okay" data-hm-action="select-mood" data-hm-value="okay">🙂<br>괜찮음</button>
+                <button type="button" class="mood-btn" data-mood="normal" data-hm-action="select-mood" data-hm-value="normal">😐<br>보통</button>
+                <button type="button" class="mood-btn" data-mood="hard" data-hm-action="select-mood" data-hm-value="hard">😞<br>힘듦</button>
+                <button type="button" class="mood-btn" data-mood="veryHard" data-hm-action="select-mood" data-hm-value="veryHard">😭<br>매우 힘듦</button>
             </div>
-            <textarea id="moodNote" rows="3" placeholder="기분에 대해 한 줄 남기고 싶다면 적어주세요." oninput="handleDailyFieldChanged()"></textarea>
+            <textarea id="moodNote" rows="3" placeholder="기분에 대해 한 줄 남기고 싶다면 적어주세요." data-hm-input="daily-field-change"></textarea>
         </div>
-        <button type="button" class="daily-modal-save" onclick="closeDailyModal('mood')">저장하고 닫기</button>
+        <button type="button" class="daily-modal-save" data-hm-action="close-daily" data-hm-value="mood">저장하고 닫기</button>
     </div>
 </div>
 
-<div class="daily-modal-overlay" id="mealModalOverlay" onclick="if(event.target.id==='mealModalOverlay') closeDailyModal('meal')">
+<div class="daily-modal-overlay" id="mealModalOverlay" data-hm-action="close-daily-overlay" data-hm-value="meal">
     <div class="daily-modal" role="dialog" aria-modal="true" aria-labelledby="mealModalTitle">
         <div class="daily-modal-head">
             <h2 id="mealModalTitle">🥗 식사 기록</h2>
-            <button type="button" class="modal-close-btn" onclick="closeDailyModal('meal')">닫기</button>
+            <button type="button" class="modal-close-btn" data-hm-action="close-daily" data-hm-value="meal">닫기</button>
         </div>
         <div class="meal-container">
-            <div class="meal-row"><span>아침</span><input type="text" id="mealBreakfast" placeholder="아침 기록" oninput="handleDailyFieldChanged()"></div>
-            <div class="meal-row"><span>점심</span><input type="text" id="mealLunch" placeholder="점심 기록" oninput="handleDailyFieldChanged()"></div>
-            <div class="meal-row"><span>저녁</span><input type="text" id="mealDinner" placeholder="저녁 기록" oninput="handleDailyFieldChanged()"></div>
+            <div class="meal-row"><span>아침</span><input type="text" id="mealBreakfast" placeholder="아침 기록" data-hm-input="daily-field-change"><label class="meal-photo-button" data-meal-photo-button="breakfast" for="mealBreakfastPhoto" aria-label="아침 식사 사진 추가"><span aria-hidden="true">📷</span></label><input class="meal-photo-input" type="file" id="mealBreakfastPhoto" accept="image/*" data-hm-change="meal-photo-upload" data-hm-value="breakfast"></div>
+            <div class="meal-row"><span>점심</span><input type="text" id="mealLunch" placeholder="점심 기록" data-hm-input="daily-field-change"><label class="meal-photo-button" data-meal-photo-button="lunch" for="mealLunchPhoto" aria-label="점심 식사 사진 추가"><span aria-hidden="true">📷</span></label><input class="meal-photo-input" type="file" id="mealLunchPhoto" accept="image/*" data-hm-change="meal-photo-upload" data-hm-value="lunch"></div>
+            <div class="meal-row"><span>저녁</span><input type="text" id="mealDinner" placeholder="저녁 기록" data-hm-input="daily-field-change"><label class="meal-photo-button" data-meal-photo-button="dinner" for="mealDinnerPhoto" aria-label="저녁 식사 사진 추가"><span aria-hidden="true">📷</span></label><input class="meal-photo-input" type="file" id="mealDinnerPhoto" accept="image/*" data-hm-change="meal-photo-upload" data-hm-value="dinner"></div>
+            <div class="meal-photo-gallery" id="mealPhotoGallery" hidden aria-label="선택한 식사 사진"></div>
+            <button type="button" class="daily-modal-save meal-photo-save-button" id="mealPhotoSaveButton" data-hm-action="save-meal-photos" disabled>식사 사진 저장</button>
         </div>
-        <button type="button" class="daily-modal-save" onclick="closeDailyModal('meal')">저장하고 닫기</button>
+        <button type="button" class="daily-modal-save" data-hm-action="close-daily" data-hm-value="meal">저장하고 닫기</button>
     </div>
 </div>
 
-<div class="daily-modal-overlay" id="diaryModalOverlay" onclick="if(event.target.id==='diaryModalOverlay') closeDailyModal('diary')">
+<div class="daily-modal-overlay" id="diaryModalOverlay" data-hm-action="close-daily-overlay" data-hm-value="diary">
     <div class="daily-modal" role="dialog" aria-modal="true" aria-labelledby="diaryModalTitle">
         <div class="daily-modal-head">
             <h2 id="diaryModalTitle">📝 오늘의 하루</h2>
-            <button type="button" class="modal-close-btn" onclick="closeDailyModal('diary')">닫기</button>
+            <button type="button" class="modal-close-btn" data-hm-action="close-daily" data-hm-value="diary">닫기</button>
         </div>
         <div class="feedback-hint">오늘 하루의 흐름, 마음, 기억하고 싶은 일을 편하게 남겨주세요.</div>
-        <textarea id="diary" rows="5" placeholder="오늘 하루는 어땠나요?" oninput="handleDailyFieldChanged()"></textarea>
-        <button type="button" class="daily-modal-save" onclick="closeDailyModal('diary')">저장하고 닫기</button>
+        <textarea id="diary" rows="5" placeholder="오늘 하루는 어땠나요?" data-hm-input="daily-field-change"></textarea>
+        <button type="button" class="daily-modal-save" data-hm-action="close-daily" data-hm-value="diary">저장하고 닫기</button>
     </div>
 </div>
 
-<div class="daily-modal-overlay" id="feedbackModalOverlay" onclick="if(event.target.id==='feedbackModalOverlay') closeDailyModal('feedback')">
+<div class="daily-modal-overlay" id="feedbackModalOverlay" data-hm-action="close-daily-overlay" data-hm-value="feedback">
     <div class="daily-modal" role="dialog" aria-modal="true" aria-labelledby="feedbackModalTitle">
         <div class="daily-modal-head">
             <h2 id="feedbackModalTitle">💌 주인의 피드백</h2>
-            <button type="button" class="modal-close-btn" onclick="closeDailyModal('feedback')">닫기</button>
+            <button type="button" class="modal-close-btn" data-hm-action="close-daily" data-hm-value="feedback">닫기</button>
         </div>
         <div class="manager-lock-note" id="feedbackLockNote"><strong>관리(Dom)가 작성하는 영역입니다.</strong><br>기록(Sub)은 확인 상태와 피드백을 읽을 수 있어요.</div>
         <section class="feedback-review-card" aria-labelledby="feedbackReviewTitle">
@@ -1085,21 +1094,21 @@
         </section>
         <div class="feedback-hint">마음을 먼저 고르고, 오늘의 기록에 대한 한마디를 남겨주세요.</div>
         <div class="feedback-type-grid" role="group" aria-label="피드백 유형">
-            <button type="button" class="feedback-type-btn" data-feedback-type="praise" onclick="selectFeedbackType('praise')">💜<span>칭찬해요</span></button>
-            <button type="button" class="feedback-type-btn" data-feedback-type="support" onclick="selectFeedbackType('support')">🌱<span>응원해요</span></button>
-            <button type="button" class="feedback-type-btn" data-feedback-type="talk" onclick="selectFeedbackType('talk')">💬<span>이야기해요</span></button>
-            <button type="button" class="feedback-type-btn" data-feedback-type="together" onclick="selectFeedbackType('together')">🤍<span>함께할게요</span></button>
+            <button type="button" class="feedback-type-btn" data-feedback-type="praise" data-hm-action="select-feedback-type" data-hm-value="praise">💜<span>칭찬해요</span></button>
+            <button type="button" class="feedback-type-btn" data-feedback-type="support" data-hm-action="select-feedback-type" data-hm-value="support">🌱<span>응원해요</span></button>
+            <button type="button" class="feedback-type-btn" data-feedback-type="talk" data-hm-action="select-feedback-type" data-hm-value="talk">💬<span>이야기해요</span></button>
+            <button type="button" class="feedback-type-btn" data-feedback-type="together" data-hm-action="select-feedback-type" data-hm-value="together">🤍<span>함께할게요</span></button>
         </div>
         <label class="todays-gift-label" for="replyMessage">한마디</label>
-        <textarea id="replyMessage" rows="5" maxlength="1000" placeholder="오늘의 기록을 읽고 따뜻한 한마디를 남겨주세요." oninput="handleDailyFieldChanged()"></textarea>
-        <label class="feedback-confirm-row"><input type="checkbox" id="feedbackConfirmed" onchange="handleFeedbackConfirmedChanged()"><span>오늘의 기록을 확인했어요</span></label>
-        <button type="button" class="daily-modal-save" onclick="closeDailyModal('feedback')">저장하고 닫기</button>
+        <textarea id="replyMessage" rows="5" maxlength="1000" placeholder="오늘의 기록을 읽고 따뜻한 한마디를 남겨주세요." data-hm-input="daily-field-change"></textarea>
+        <label class="feedback-confirm-row"><input type="checkbox" id="feedbackConfirmed" data-hm-change="feedback-confirmed"><span>오늘의 기록을 확인했어요</span></label>
+        <button type="button" class="daily-modal-save" data-hm-action="close-daily" data-hm-value="feedback">저장하고 닫기</button>
     </div>
 </div>
 
-<div class="daily-modal-overlay" id="rewardModalOverlay" onclick="if(event.target.id==='rewardModalOverlay') closeDailyModal('reward')">
+<div class="daily-modal-overlay" id="rewardModalOverlay" data-hm-action="close-daily-overlay" data-hm-value="reward">
     <div class="daily-modal" role="dialog" aria-modal="true" aria-labelledby="rewardModalTitle">
-        <div class="daily-modal-head"><h2 id="rewardModalTitle">🎁 오늘의 선물</h2><button type="button" class="modal-close-btn" onclick="closeDailyModal('reward')">닫기</button></div>
+        <div class="daily-modal-head"><h2 id="rewardModalTitle">🎁 오늘의 선물</h2><button type="button" class="modal-close-btn" data-hm-action="close-daily" data-hm-value="reward">닫기</button></div>
         <div class="manager-lock-note" id="rewardLockNote"><strong>관리(Dom)가 전하는 오늘의 선물입니다.</strong><br>기록(Sub)은 작은 보상과 편안한 휴식 내용을 확인할 수 있어요.</div>
         <div class="trust-card">
             <div class="todays-gift-intro">
@@ -1107,39 +1116,39 @@
                 <span>수고한 하루에는 작은 기쁨을, 지친 하루에는 편안한 쉼을 선물해요.</span>
             </div>
             <div class="reward-grid todays-gift-grid">
-                <button type="button" class="choice-btn gift-choice-btn" id="rewardBtn" onclick="toggleDailyChoice('reward')">
+                <button type="button" class="choice-btn gift-choice-btn" id="rewardBtn" data-hm-action="toggle-daily-choice" data-hm-value="reward">
                     <span class="gift-choice-icon">🎁</span>
                     <span class="gift-choice-copy"><strong>작은 보상</strong><small>오늘의 수고를 다정하게 칭찬해요</small></span>
                 </button>
-                <button type="button" class="choice-btn gift-choice-btn" id="restBtn" onclick="toggleDailyChoice('rest')">
+                <button type="button" class="choice-btn gift-choice-btn" id="restBtn" data-hm-action="toggle-daily-choice" data-hm-value="rest">
                     <span class="gift-choice-icon">🌙</span>
                     <span class="gift-choice-copy"><strong>편안한 휴식</strong><small>잠시 멈추고 충분히 쉬어가요</small></span>
                 </button>
             </div>
             <label class="todays-gift-label" for="rewardNote">오늘의 메시지</label>
-            <textarea id="rewardNote" rows="3" maxlength="1000" placeholder="예: 오늘 정말 잘했어요. 좋아하는 디저트 먹어요 😊" oninput="handleDailyFieldChanged()"></textarea>
+            <textarea id="rewardNote" rows="3" maxlength="1000" placeholder="예: 오늘 정말 잘했어요. 좋아하는 디저트 먹어요 😊" data-hm-input="daily-field-change"></textarea>
         </div>
-        <button type="button" class="daily-modal-save" onclick="closeDailyModal('reward')">저장하고 닫기</button>
+        <button type="button" class="daily-modal-save" data-hm-action="close-daily" data-hm-value="reward">저장하고 닫기</button>
     </div>
 </div>
 
-<div class="daily-modal-overlay" id="ownerNoteModalOverlay" onclick="if(event.target.id==='ownerNoteModalOverlay') closeDailyModal('ownerNote')">
+<div class="daily-modal-overlay" id="ownerNoteModalOverlay" data-hm-action="close-daily-overlay" data-hm-value="ownerNote">
     <div class="daily-modal" role="dialog" aria-modal="true" aria-labelledby="ownerNoteModalTitle">
-        <div class="daily-modal-head"><h2 id="ownerNoteModalTitle">👑 주인 비공개 메모</h2><button type="button" class="modal-close-btn" onclick="closeDailyModal('ownerNote')">닫기</button></div>
+        <div class="daily-modal-head"><h2 id="ownerNoteModalTitle">👑 주인 비공개 메모</h2><button type="button" class="modal-close-btn" data-hm-action="close-daily" data-hm-value="ownerNote">닫기</button></div>
         <div class="trust-card owner-only-note">
             <div class="trust-card-help">주인만 보는 장기 관찰 메모입니다. 서브의 상태를 이해하고 다음 미션을 조절하기 위한 공간입니다.</div>
-            <textarea id="ownerPrivateNote" rows="4" maxlength="1000" placeholder="예: 이번 주는 피곤해 보임. 내일은 쉬는 미션 권장." oninput="handleOwnerNoteFieldChanged()"></textarea>
+            <textarea id="ownerPrivateNote" rows="4" maxlength="1000" placeholder="예: 이번 주는 피곤해 보임. 내일은 쉬는 미션 권장." data-hm-input="owner-note-change"></textarea>
         </div>
-        <button type="button" class="daily-modal-save" onclick="closeDailyModal('ownerNote')">저장하고 닫기</button>
+        <button type="button" class="daily-modal-save" data-hm-action="close-daily" data-hm-value="ownerNote">저장하고 닫기</button>
     </div>
 </div>
 
 
-<div class="daily-modal-overlay hm-profile-overlay" id="profileOverlay" onclick="if(event.target.id==='profileOverlay') closeProfileModal()" aria-hidden="true">
+<div class="daily-modal-overlay hm-profile-overlay" id="profileOverlay" data-hm-action="close-profile-overlay" aria-hidden="true">
     <div class="daily-modal hm-profile-modal" role="dialog" aria-modal="true" aria-labelledby="profileModalTitle">
         <div class="daily-modal-head">
             <h2 id="profileModalTitle">👤 내 프로필</h2>
-            <button type="button" class="modal-close-btn" onclick="closeProfileModal()">닫기</button>
+            <button type="button" class="modal-close-btn" data-hm-action="close-profile">닫기</button>
         </div>
         <div class="hm-profile-summary">
             <div class="hm-profile-avatar" id="profileAvatar" aria-hidden="true">♡</div>
@@ -1149,50 +1158,50 @@
             </div>
         </div>
         <label class="hm-profile-label" for="profileNicknameInput">채팅 닉네임</label>
-        <input type="text" id="profileNicknameInput" class="hm-profile-input" maxlength="20" autocomplete="nickname" placeholder="2~20자로 입력해 주세요" oninput="updateProfileNicknamePreview()">
+        <input type="text" id="profileNicknameInput" class="hm-profile-input" maxlength="20" autocomplete="nickname" placeholder="2~20자로 입력해 주세요" data-hm-input="profile-nickname-preview">
         <div class="hm-profile-label">내장 아바타</div>
         <div class="hm-profile-avatar-grid" role="group" aria-label="프로필 아바타 선택">
-            <button type="button" data-profile-avatar="👩🏻" onclick="selectProfileAvatar('👩🏻')" aria-pressed="false">👩🏻</button>
-            <button type="button" data-profile-avatar="👩🏽" onclick="selectProfileAvatar('👩🏽')" aria-pressed="false">👩🏽</button>
-            <button type="button" data-profile-avatar="👩🏻‍🦰" onclick="selectProfileAvatar('👩🏻‍🦰')" aria-pressed="false">👩🏻‍🦰</button>
-            <button type="button" data-profile-avatar="👨🏻" onclick="selectProfileAvatar('👨🏻')" aria-pressed="false">👨🏻</button>
-            <button type="button" data-profile-avatar="👨🏽" onclick="selectProfileAvatar('👨🏽')" aria-pressed="false">👨🏽</button>
-            <button type="button" data-profile-avatar="👨🏻‍🦱" onclick="selectProfileAvatar('👨🏻‍🦱')" aria-pressed="false">👨🏻‍🦱</button>
+            <button type="button" data-profile-avatar="👩🏻" data-hm-action="select-profile-avatar" data-hm-value="👩🏻" aria-pressed="false">👩🏻</button>
+            <button type="button" data-profile-avatar="👩🏽" data-hm-action="select-profile-avatar" data-hm-value="👩🏽" aria-pressed="false">👩🏽</button>
+            <button type="button" data-profile-avatar="👩🏻‍🦰" data-hm-action="select-profile-avatar" data-hm-value="👩🏻‍🦰" aria-pressed="false">👩🏻‍🦰</button>
+            <button type="button" data-profile-avatar="👨🏻" data-hm-action="select-profile-avatar" data-hm-value="👨🏻" aria-pressed="false">👨🏻</button>
+            <button type="button" data-profile-avatar="👨🏽" data-hm-action="select-profile-avatar" data-hm-value="👨🏽" aria-pressed="false">👨🏽</button>
+            <button type="button" data-profile-avatar="👨🏻‍🦱" data-hm-action="select-profile-avatar" data-hm-value="👨🏻‍🦱" aria-pressed="false">👨🏻‍🦱</button>
         </div>
         <p class="hm-profile-help">채팅에서는 이 이름이 자동으로 사용되며 직접 바꿀 수 없습니다. 변경한 이름은 새 메시지부터 적용되고 기존 대화 이름은 유지됩니다.</p>
         <div class="hm-profile-preview"><span>채팅 표시</span><strong id="profileNicknamePreview">이메일 이름</strong></div>
         <p class="hm-profile-status" id="profileStatus" aria-live="polite"></p>
-        <button type="button" class="daily-modal-save" id="profileSaveBtn" onclick="saveProfileNickname()">닉네임 저장</button>
+        <button type="button" class="daily-modal-save" id="profileSaveBtn" data-hm-action="save-profile">닉네임 저장</button>
     </div>
 </div>
 
-<div class="daily-modal-overlay hm-theme-overlay" id="themeOverlay" onclick="if(event.target.id==='themeOverlay') closeThemeModal()" aria-hidden="true">
+<div class="daily-modal-overlay hm-theme-overlay" id="themeOverlay" data-hm-action="close-theme-overlay" aria-hidden="true">
     <div class="daily-modal hm-theme-modal" role="dialog" aria-modal="true" aria-labelledby="themeModalTitle">
         <div class="daily-modal-head">
             <h2 id="themeModalTitle">🎨 앱 테마</h2>
-            <button type="button" class="modal-close-btn" onclick="closeThemeModal()">닫기</button>
+            <button type="button" class="modal-close-btn" data-hm-action="close-theme">닫기</button>
         </div>
         <p class="hm-theme-intro">내 화면만 꾸미거나, 현재 공간의 두 사람이 같은 테마를 함께 사용할 수 있습니다.</p>
         <div class="hm-theme-mode-grid" role="radiogroup" aria-label="테마 적용 방식">
-            <button type="button" class="hm-theme-mode-option" data-theme-mode="personal" onclick="selectThemeMode('personal')" role="radio" aria-checked="false"><strong>👤 개인 테마</strong><small>내 화면에만 적용</small></button>
-            <button type="button" class="hm-theme-mode-option" data-theme-mode="shared" onclick="selectThemeMode('shared')" role="radio" aria-checked="false"><strong>💞 우리의 테마</strong><small>현재 공간에서 함께 사용</small></button>
+            <button type="button" class="hm-theme-mode-option" data-theme-mode="personal" data-hm-action="select-theme-mode" data-hm-value="personal" role="radio" aria-checked="false"><strong>👤 개인 테마</strong><small>내 화면에만 적용</small></button>
+            <button type="button" class="hm-theme-mode-option" data-theme-mode="shared" data-hm-action="select-theme-mode" data-hm-value="shared" role="radio" aria-checked="false"><strong>💞 우리의 테마</strong><small>현재 공간에서 함께 사용</small></button>
         </div>
         <p class="hm-theme-mode-notice" id="themeModeNotice"></p>
         <div class="hm-theme-live-state" id="themeLiveState" aria-live="polite"></div>
         <div class="hm-theme-grid" id="themeGrid" role="radiogroup" aria-label="개인 테마 선택">
-            <button type="button" class="hm-theme-option" data-theme="lavender" onclick="previewPersonalTheme('lavender')" role="radio" aria-checked="false">
+            <button type="button" class="hm-theme-option" data-theme="lavender" data-hm-action="preview-personal-theme" data-hm-value="lavender" role="radio" aria-checked="false">
                 <span class="hm-theme-swatches"><i></i><i></i><i></i></span><strong>라벤더</strong><small>현재 기본 테마</small>
             </button>
-            <button type="button" class="hm-theme-option" data-theme="blossom" onclick="previewPersonalTheme('blossom')" role="radio" aria-checked="false">
+            <button type="button" class="hm-theme-option" data-theme="blossom" data-hm-action="preview-personal-theme" data-hm-value="blossom" role="radio" aria-checked="false">
                 <span class="hm-theme-swatches"><i></i><i></i><i></i></span><strong>블라썸</strong><small>부드러운 분홍빛</small>
             </button>
-            <button type="button" class="hm-theme-option" data-theme="ocean" onclick="previewPersonalTheme('ocean')" role="radio" aria-checked="false">
+            <button type="button" class="hm-theme-option" data-theme="ocean" data-hm-action="preview-personal-theme" data-hm-value="ocean" role="radio" aria-checked="false">
                 <span class="hm-theme-swatches"><i></i><i></i><i></i></span><strong>오션</strong><small>시원한 하늘과 바다</small>
             </button>
-            <button type="button" class="hm-theme-option" data-theme="forest" onclick="previewPersonalTheme('forest')" role="radio" aria-checked="false">
+            <button type="button" class="hm-theme-option" data-theme="forest" data-hm-action="preview-personal-theme" data-hm-value="forest" role="radio" aria-checked="false">
                 <span class="hm-theme-swatches"><i></i><i></i><i></i></span><strong>포레스트</strong><small>차분한 숲의 색감</small>
             </button>
-            <button type="button" class="hm-theme-option" data-theme="cream" onclick="previewPersonalTheme('cream')" role="radio" aria-checked="false">
+            <button type="button" class="hm-theme-option" data-theme="cream" data-hm-action="preview-personal-theme" data-hm-value="cream" role="radio" aria-checked="false">
                 <span class="hm-theme-swatches"><i></i><i></i><i></i></span><strong>크림</strong><small>따뜻한 아이보리</small>
             </button>
         </div>
@@ -1202,21 +1211,21 @@
                 <small>테마 색상과 별도로 밝기를 선택합니다.</small>
             </div>
             <div class="hm-display-mode-grid" role="radiogroup" aria-label="화면 표시 방식 선택">
-                <button type="button" class="hm-display-mode-option" data-display-mode="light" onclick="previewDisplayMode('light')" role="radio" aria-checked="false"><span>☀️</span><strong>라이트</strong><small>밝은 화면</small></button>
-                <button type="button" class="hm-display-mode-option" data-display-mode="dark" onclick="previewDisplayMode('dark')" role="radio" aria-checked="false"><span>🌙</span><strong>다크</strong><small>어두운 화면</small></button>
-                <button type="button" class="hm-display-mode-option" data-display-mode="system" onclick="previewDisplayMode('system')" role="radio" aria-checked="false"><span>⚙️</span><strong>시스템</strong><small>기기 설정 사용</small></button>
+                <button type="button" class="hm-display-mode-option" data-display-mode="light" data-hm-action="preview-display-mode" data-hm-value="light" role="radio" aria-checked="false"><span>☀️</span><strong>라이트</strong><small>밝은 화면</small></button>
+                <button type="button" class="hm-display-mode-option" data-display-mode="dark" data-hm-action="preview-display-mode" data-hm-value="dark" role="radio" aria-checked="false"><span>🌙</span><strong>다크</strong><small>어두운 화면</small></button>
+                <button type="button" class="hm-display-mode-option" data-display-mode="system" data-hm-action="preview-display-mode" data-hm-value="system" role="radio" aria-checked="false"><span>⚙️</span><strong>시스템</strong><small>기기 설정 사용</small></button>
             </div>
         </div>
         <p class="hm-theme-status" id="themeStatus" aria-live="polite"></p>
-        <button type="button" class="daily-modal-save" id="themeSaveBtn" onclick="savePersonalTheme()">이 테마 저장</button>
+        <button type="button" class="daily-modal-save" id="themeSaveBtn" data-hm-action="save-personal-theme">이 테마 저장</button>
     </div>
 </div>
 
-<div class="daily-modal-overlay data-management-overlay" id="dataManagementOverlay" onclick="if(event.target.id==='dataManagementOverlay') closeDataManagementModal()">
+<div class="daily-modal-overlay data-management-overlay" id="dataManagementOverlay" data-hm-action="close-data-management-overlay">
     <div class="daily-modal data-management-modal" role="dialog" aria-modal="true" aria-labelledby="dataManagementTitle">
         <div class="daily-modal-head">
             <h2 id="dataManagementTitle">📂 데이터 관리</h2>
-            <button type="button" class="modal-close-btn" onclick="closeDataManagementModal()">닫기</button>
+            <button type="button" class="modal-close-btn" data-hm-action="close-data-management">닫기</button>
         </div>
 
         <div class="data-policy-card">
@@ -1225,9 +1234,9 @@
         </div>
 
         <div class="data-management-tabs" role="tablist" aria-label="데이터 관리 메뉴">
-            <button type="button" class="data-tab active" data-data-tab="request" onclick="selectDataManagementTab('request')">삭제 요청</button>
-            <button type="button" class="data-tab" data-data-tab="history" onclick="selectDataManagementTab('history')">요청 내역</button>
-            <button type="button" class="data-tab" data-data-tab="policy" onclick="selectDataManagementTab('policy')">데이터 정책</button>
+            <button type="button" class="data-tab active" data-data-tab="request" data-hm-action="select-data-tab" data-hm-value="request">삭제 요청</button>
+            <button type="button" class="data-tab" data-data-tab="history" data-hm-action="select-data-tab" data-hm-value="history">요청 내역</button>
+            <button type="button" class="data-tab" data-data-tab="policy" data-hm-action="select-data-tab" data-hm-value="policy">데이터 정책</button>
         </div>
 
         <section class="data-panel active" data-data-panel="request">
@@ -1246,15 +1255,15 @@
             <fieldset class="data-request-scope" aria-describedby="deleteScopeHelp">
                 <legend>어떤 처리를 요청하시나요?</legend>
                 <label class="data-scope-option">
-                    <input type="radio" name="deleteRequestType" value="account" checked onchange="updateDeleteRequestTypeNotice()">
+                    <input type="radio" name="deleteRequestType" value="account" checked data-hm-change="delete-request-type">
                     <span><strong>내 계정 및 개인 정보 삭제</strong><small>로그인 계정과 개인 프로필 삭제를 요청합니다. 공동 Room 기록은 별도로 검토됩니다.</small></span>
                 </label>
                 <label class="data-scope-option">
-                    <input type="radio" name="deleteRequestType" value="leave_room" onchange="updateDeleteRequestTypeNotice()">
+                    <input type="radio" name="deleteRequestType" value="leave_room" data-hm-change="delete-request-type">
                     <span><strong>현재 Room 연결 해제</strong><small>내 계정과 현재 Room의 연결을 해제해 달라고 요청합니다. Room 기록 자체는 보존됩니다.</small></span>
                 </label>
                 <label class="data-scope-option data-scope-danger">
-                    <input type="radio" name="deleteRequestType" value="delete_room" onchange="updateDeleteRequestTypeNotice()">
+                    <input type="radio" name="deleteRequestType" value="delete_room" data-hm-change="delete-request-type">
                     <span><strong>Room 전체 데이터 삭제</strong><small>채팅·기록·사진 등 공동 데이터를 모두 삭제하는 요청입니다. 추가 확인이 필요합니다.</small></span>
                 </label>
             </fieldset>
@@ -1263,7 +1272,7 @@
             <label class="data-field-label" for="deleteRequestReason">삭제 요청 사유</label>
             <textarea id="deleteRequestReason" class="data-request-textarea" rows="5" placeholder="예: 더 이상 서비스를 사용하지 않아 계정과 개인 정보 삭제를 요청합니다."></textarea>
             <label class="data-confirm-line"><input type="checkbox" id="deleteRequestConfirm"> 위 내용을 이해했고, 운영자 검토 후 처리가 진행될 수 있음을 확인합니다.</label>
-            <button type="button" class="daily-modal-save" id="deleteRequestSubmitBtn" onclick="submitDataDeleteRequest()">삭제 요청 보내기</button>
+            <button type="button" class="daily-modal-save" id="deleteRequestSubmitBtn" data-hm-action="submit-data-delete-request">삭제 요청 보내기</button>
             <div class="data-status-message" id="dataRequestStatusMessage"></div>
         </section>
 
@@ -1293,16 +1302,16 @@
 </div>
 
 
-<div class="daily-modal-overlay data-admin-overlay" id="dataAdminOverlay" onclick="if(event.target.id==='dataAdminOverlay') closeDataAdminModal()" aria-hidden="true" inert>
+<div class="daily-modal-overlay data-admin-overlay" id="dataAdminOverlay" data-hm-action="close-data-admin-overlay" aria-hidden="true" inert>
     <div class="daily-modal data-admin-modal" role="dialog" aria-modal="true" aria-labelledby="dataAdminTitle">
         <div class="daily-modal-head">
             <h2 id="dataAdminTitle">🛡️ 삭제 요청 관리</h2>
-            <button type="button" class="modal-close-btn" onclick="closeDataAdminModal()">닫기</button>
+            <button type="button" class="modal-close-btn" data-hm-action="close-data-admin">닫기</button>
         </div>
         <div class="data-admin-summary" id="dataAdminSummary">요청을 불러오는 중입니다.</div>
         <div class="data-admin-filters" role="tablist" aria-label="삭제 요청 상태 필터">
-            <button type="button" class="data-admin-filter active" data-admin-filter="open" onclick="setDataAdminFilter('open')">처리 필요</button>
-            <button type="button" class="data-admin-filter" data-admin-filter="all" onclick="setDataAdminFilter('all')">전체</button>
+            <button type="button" class="data-admin-filter active" data-admin-filter="open" data-hm-action="set-data-admin-filter" data-hm-value="open">처리 필요</button>
+            <button type="button" class="data-admin-filter" data-admin-filter="all" data-hm-action="set-data-admin-filter" data-hm-value="all">전체</button>
         </div>
         <div class="data-admin-list" id="dataAdminRequestList">
             <div class="data-empty-state">요청을 불러오는 중입니다.</div>
@@ -1311,20 +1320,23 @@
 </div>
 
 <div class="toast" id="toast">기록이 복사되었습니다! 💕</div>
-    <script src="js/release-info.js?v=step6-2-14-14-mode-separation-20260722"></script>
+    <script src="js/release-info.js?v=step6-2-14-45-light-icon-polish-20260723"></script>
     <script src="js/config.js?v=step6-2-13-7-daily-moments-gallery-20260721"></script>
+    <script src="js/access-policy.js?v=maintenance-baseline-20260722"></script>
+    <script src="js/save-state.js?v=maintenance-baseline-20260722"></script>
+    <script src="js/ui-events.js?v=maintenance-baseline-20260722"></script>
     <script src="js/utils.js?v=step6-2-12-7-notification-toast-message-fix-20260718"></script>
     <script src="js/popup.js?v=step6-2-14-5-role-mission-polish-20260721"></script>
     <script src="js/auth.js?v=step6-2-13-5-lifecycle-reactivation-20260721"></script>
     <script src="js/room.js?v=step6-2-13-8-1-invite-acceptance-hotfix-20260721"></script>
     <script src="js/presence.js?v=step6-2-14-8-avatar-compact-shell-20260721"></script>
-    <script src="js/daily.js?v=step6-2-14-13-role-context-20260722"></script>
-    <script src="js/moments.js?v=step6-2-13-7-1-daily-moments-save-gate-20260721"></script>
+    <script src="js/daily.js?v=step6-2-14-38-time-input-sync-20260722"></script>
+    <script src="js/moments.js?v=step6-2-14-39-meal-photo-confirm-save-20260722"></script>
     <script src="js/mission.js?v=step6-2-13-8-shared-card-conversations-20260721"></script>
     <script src="js/custom-routine.js?v=step6-2-14-13-role-context-20260722"></script>
     <script src="js/sub-routine.js?v=step6-2-14-13-role-context-20260722"></script>
     <script src="js/card-conversations.js?v=step6-2-14-13-role-context-20260722"></script>
-    <script src="js/history.js?v=step6-2-13-8-shared-card-conversations-20260721"></script>
+    <script src="js/history.js?v=step6-2-14-32-history-meal-context-20260722"></script>
     <script src="js/anniversary.js?v=step6-2-10-11-history-center-layout-cleanup-20260718"></script>
     <script src="js/theme.js?v=step5-10-13-history-month-server-reconciliation-20260716"></script>
     <script src="js/profile.js?v=step6-2-14-8-avatar-compact-shell-20260721"></script>
@@ -1332,11 +1344,11 @@
     <script src="js/autosave.js?v=step6-2-14-13-role-context-20260722"></script>
     <script src="js/qa.js?v=step5-10-13-history-month-server-reconciliation-20260716"></script>
     <script src="js/motion.js?v=step5-10-13-history-month-server-reconciliation-20260716"></script>
-    <script src="js/product.js?v=step6-2-13-7-daily-moments-gallery-20260721"></script>
+    <script src="js/product.js?v=step6-2-14-43-fixed-together-summary-20260722"></script>
     <script src="js/help-center.js?v=step6-2-13-4-support-bridge-20260721"></script>
     <script src="js/data-management.js?v=step6-2-13-4-request-cancel-type-message-20260718"></script>
     <script src="js/app.js?v=step6-2-14-13-role-context-20260722"></script>
-    <script src="js/home-navigation.js?v=step6-2-14-13-role-context-20260722"></script>
-    <script src="js/pwa.js?v=step6-2-13-8-9-help-theme-contrast-20260721"></script>
+    <script src="js/home-navigation.js?v=step6-2-14-32-history-meal-context-20260722"></script>
+    <script src="js/pwa.js?v=step6-2-14-45-light-icon-polish-20260723"></script>
 </body>
 </html>

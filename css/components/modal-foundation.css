@@ -1,0 +1,53 @@
+/* =========================================================
+   HearMe2nite v0.9.13 Beta - Popup System
+   ========================================================= */
+:root {
+  --h2n-popup-radius: 30px;
+  --h2n-popup-max: 620px;
+  --h2n-popup-pad: 24px;
+  --h2n-popup-z: 12000;
+}
+.daily-modal-overlay,
+.mission-modal-overlay,
+.room-settings-overlay,
+.history-panel-overlay,
+.history-detail-overlay,
+.anniversary-settings-overlay,
+.guide-modal {
+  z-index: var(--h2n-popup-z) !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: max(16px, env(safe-area-inset-top)) 16px max(16px, env(safe-area-inset-bottom)) !important;
+}
+.daily-modal,
+.mission-modal,
+.room-settings-modal,
+.history-detail-modal,
+.guide-card,
+.anniversary-settings-modal {
+  width: min(var(--h2n-popup-max), calc(100vw - 28px)) !important;
+  max-height: min(86vh, 760px) !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  border-radius: var(--h2n-popup-radius) !important;
+}
+.history-panel-modal {
+  max-height: min(88vh, 820px) !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+.modal-close-btn,
+.guide-close,
+.anniversary-close-btn {
+  min-width: 44px !important;
+  min-height: 44px !important;
+}
+@media (max-width: 560px) {
+  :root { --h2n-popup-pad: 20px; --h2n-popup-radius: 26px; }
+  .daily-modal,.mission-modal,.room-settings-modal,.history-detail-modal,.guide-card,.anniversary-settings-modal {
+    width: calc(100vw - 22px) !important;
+    max-height: calc(100dvh - 30px) !important;
+  }
+}
+
+

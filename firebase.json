@@ -2,6 +2,7 @@
   "hosting": {
     "public": "public",
     "predeploy": [
+      "node scripts/verify-app-baseline.js",
       "node scripts/build-public.js"
     ],
     "headers": [

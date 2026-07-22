@@ -1,0 +1,47 @@
+/* STEP6.2.14.21 - floating modal depth.
+   Keep the underlying app recognizable instead of making overlays feel like a new page. */
+:root[data-hm-display="light"] body.hm-authenticated :is(
+  .daily-modal-overlay,.mission-modal-overlay,.room-settings-overlay,
+  .history-panel-overlay,.history-detail-overlay,.guide-modal,.onboarding-modal,
+  .anniversary-settings-overlay,.record-deletion-modal-overlay,
+  .hm-record-date-picker-overlay,.card-conversation-dialog-overlay,
+  .hm-profile-overlay,.data-management-overlay,.data-admin-overlay,
+  .hm-chat-overlay,.hm-theme-overlay,.hm-pwa-ios-guide-overlay,
+  .hm-notification-overlay,.hm-adaptive-completion-overlay
+){
+  background:color-mix(in srgb,var(--hm-bg-2,var(--hm-soft,#f4ecff)) 56%,transparent)!important;
+  -webkit-backdrop-filter:blur(7px) saturate(.92)!important;
+  backdrop-filter:blur(7px) saturate(.92)!important;
+}
+:root[data-hm-display="dark"] body.hm-authenticated :is(
+  .daily-modal-overlay,.mission-modal-overlay,.room-settings-overlay,
+  .history-panel-overlay,.history-detail-overlay,.guide-modal,.onboarding-modal,
+  .anniversary-settings-overlay,.record-deletion-modal-overlay,
+  .hm-record-date-picker-overlay,.card-conversation-dialog-overlay,
+  .hm-profile-overlay,.data-management-overlay,.data-admin-overlay,
+  .hm-chat-overlay,.hm-theme-overlay,.hm-pwa-ios-guide-overlay,
+  .hm-notification-overlay,.hm-adaptive-completion-overlay
+){
+  background:rgba(8,10,18,.58)!important;
+  -webkit-backdrop-filter:blur(7px) saturate(.86)!important;
+  backdrop-filter:blur(7px) saturate(.86)!important;
+}
+body.hm-authenticated :is(
+  .daily-modal-overlay,.mission-modal-overlay,.room-settings-overlay,
+  .history-panel-overlay,.history-detail-overlay,.guide-modal,.onboarding-modal,
+  .anniversary-settings-overlay,.record-deletion-modal-overlay,
+  .hm-record-date-picker-overlay,.card-conversation-dialog-overlay,
+  .hm-profile-overlay,.data-management-overlay,.data-admin-overlay,
+  .hm-chat-overlay,.hm-theme-overlay,.hm-pwa-ios-guide-overlay,
+  .hm-notification-overlay,.hm-adaptive-completion-overlay
+) > :is(
+  .daily-modal,.mission-modal,.room-settings-modal,.history-panel-modal,
+  .history-detail-modal,.guide-card,.onboarding-card,.anniversary-settings-modal,
+  .record-deletion-modal,.hm-record-date-picker-card,.card-conversation-dialog,
+  .hm-profile-modal,.data-management-modal,.data-admin-modal,.hm-chat-modal,
+  .hm-theme-modal,.hm-pwa-ios-guide-card,.hm-notification-modal,
+  .hm-adaptive-completion-modal
+){
+  box-shadow:0 22px 64px color-mix(in srgb,var(--hm-color-body,#29233b) 24%,transparent)!important;
+}
+

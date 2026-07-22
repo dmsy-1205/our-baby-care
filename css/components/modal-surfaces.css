@@ -1,0 +1,73 @@
+/* STEP6.2.14.14 - strict light/dark surface separation.
+   Light mode uses a bright theme-tinted veil; dark mode alone uses a dark veil. */
+:root[data-hm-display="light"] :is(
+  .daily-modal-overlay,.mission-modal-overlay,.room-settings-overlay,
+  .history-panel-overlay,.history-detail-overlay,.guide-modal,.onboarding-modal,
+  .anniversary-settings-overlay,.record-deletion-modal-overlay,
+  .hm-record-date-picker-overlay,.card-conversation-dialog-overlay,
+  .hm-profile-overlay,.data-management-overlay,.data-admin-overlay,
+  .hm-chat-overlay,.hm-theme-overlay,.hm-pwa-ios-guide-overlay,.hm-notification-overlay
+){
+  background:color-mix(in srgb,var(--hm-bg-2,var(--hm-soft,#f4ecff)) 84%,transparent)!important;
+  -webkit-backdrop-filter:blur(14px) saturate(1.04)!important;
+  backdrop-filter:blur(14px) saturate(1.04)!important;
+}
+:root[data-hm-display="dark"] :is(
+  .daily-modal-overlay,.mission-modal-overlay,.room-settings-overlay,
+  .history-panel-overlay,.history-detail-overlay,.guide-modal,.onboarding-modal,
+  .anniversary-settings-overlay,.record-deletion-modal-overlay,
+  .hm-record-date-picker-overlay,.card-conversation-dialog-overlay,
+  .hm-profile-overlay,.data-management-overlay,.data-admin-overlay,
+  .hm-chat-overlay,.hm-theme-overlay,.hm-pwa-ios-guide-overlay,.hm-notification-overlay
+){
+  background:rgba(8,10,18,.78)!important;
+  -webkit-backdrop-filter:blur(14px) saturate(.9)!important;
+  backdrop-filter:blur(14px) saturate(.9)!important;
+}
+
+:root[data-hm-display="light"] :is(
+  .daily-modal,.mission-modal,.room-settings-modal,.history-panel-modal,.history-detail-modal,
+  .guide-card,.onboarding-card,.anniversary-settings-modal,.record-deletion-modal,
+  .hm-record-date-picker-card,.card-conversation-dialog,.hm-profile-modal,
+  .data-management-modal,.data-admin-modal,.hm-chat-modal,.hm-theme-modal,
+  .hm-pwa-ios-guide-card,.hm-notification-modal
+){
+  background:var(--hm-surface-card,#fff)!important;
+  color:var(--hm-color-body,#332d3d)!important;
+  border-color:var(--hm-line-soft,rgba(120,90,170,.18))!important;
+  color-scheme:light;
+}
+:root[data-hm-display="dark"] :is(
+  .daily-modal,.mission-modal,.room-settings-modal,.history-panel-modal,.history-detail-modal,
+  .guide-card,.onboarding-card,.anniversary-settings-modal,.record-deletion-modal,
+  .hm-record-date-picker-card,.card-conversation-dialog,.hm-profile-modal,
+  .data-management-modal,.data-admin-modal,.hm-chat-modal,.hm-theme-modal,
+  .hm-pwa-ios-guide-card,.hm-notification-modal
+){
+  background:linear-gradient(145deg,var(--hm-dark-shell,#191b2a),var(--hm-dark-card,#242638))!important;
+  color:var(--hm-color-body,#f5f3ff)!important;
+  border-color:var(--hm-dark-line,#454960)!important;
+  color-scheme:dark;
+}
+
+:root[data-hm-display="light"] .hm-record-date-picker-card{
+  background:radial-gradient(circle at 12% 0%,color-mix(in srgb,var(--hm-primary,#8e5cf4) 13%,transparent),transparent 38%),var(--hm-surface-card,#fff)!important;
+  box-shadow:0 24px 70px color-mix(in srgb,var(--hm-primary,#8e5cf4) 14%,transparent)!important;
+}
+:root[data-hm-display="dark"] .hm-record-date-picker-card{
+  background:radial-gradient(circle at 12% 0%,color-mix(in srgb,var(--hm-primary,#8e5cf4) 22%,transparent),transparent 40%),linear-gradient(145deg,var(--hm-dark-shell,#191b2a),var(--hm-dark-card,#242638))!important;
+}
+:root[data-hm-display="dark"] :is(
+  .hm-record-date-picker-head button,.hm-record-date-picker-actions button,
+  .hm-record-date-picker-grid button
+){
+  background:var(--hm-dark-input,#293149)!important;
+  color:var(--hm-color-body,#f5f3ff)!important;
+  border-color:var(--hm-dark-line,#454960)!important;
+}
+:root[data-hm-display="dark"] .hm-record-date-picker-grid button.is-selected,
+:root[data-hm-display="dark"] .hm-record-date-picker-actions button:first-child{
+  background:linear-gradient(135deg,var(--hm-primary,#8e5cf4),var(--hm-accent,#ef5f94))!important;
+  color:#fff!important;
+}
+

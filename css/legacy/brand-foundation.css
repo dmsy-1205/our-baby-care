@@ -1,0 +1,1816 @@
+.presence-user-status strong {
+    color: #5f3dc4;
+}
+@media (max-width: 420px) {
+    .presence-user-status {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 3px;
+    }
+}
+
+
+/* =========================================================
+   RC2.14 Home UX Refactoring
+   - 기존 오늘의 미션은 삭제하지 않고 홈에서만 숨김 처리합니다.
+   - 오늘의 약속을 오늘의 요약 바로 아래로 이동합니다.
+   - 요약 카드는 모바일에서도 한눈에 보이도록 3열 기준을 유지합니다.
+   ========================================================= */
+.hm-legacy-mission-hidden { display: none !important; }
+.hm-today-promise-section { margin: 0 0 18px; }
+.hm-today-promise-section .custom-routine-title { margin-top: 0; }
+.hm-home-summary-grid { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+.hm-home-summary-grid .hm-beta-tile { min-height: 66px; display: flex; flex-direction: column; justify-content: center; }
+.hm-home-summary-grid .hm-beta-tile strong { font-size: .9rem; }
+@media (max-width: 640px) {
+    .hm-home-summary-grid { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; gap: 8px; }
+    .hm-home-summary-grid .hm-beta-tile { border-radius: 16px; padding: 10px 9px; min-height: 64px; }
+    .hm-home-summary-grid .hm-beta-tile small { font-size: .69rem; margin-bottom: 5px; }
+    .hm-home-summary-grid .hm-beta-tile strong { font-size: .82rem; }
+}
+
+
+/* =========================================================
+   RC2.14.1 Home Summary Compact Hotfix
+   - 오늘의 요약은 입력 카드가 아니라 얇은 상태바로 유지합니다.
+   - 모바일 첫 화면에서 오늘의 약속/입력 카드가 바로 보이도록 높이를 축소합니다.
+   ========================================================= */
+.hm-beta-dashboard{
+    margin: 12px 0 14px !important;
+    padding: 12px 12px 10px !important;
+    border-radius: 20px !important;
+}
+.hm-summary-compact-head{ margin-bottom: 8px !important; }
+.hm-summary-compact-head strong{ font-size: 1rem !important; }
+.hm-summary-compact-list{
+    display: flex !important;
+    grid-template-columns: none !important;
+    gap: 8px !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    padding: 1px 2px 4px !important;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+.hm-summary-compact-list::-webkit-scrollbar{ display:none; }
+.hm-summary-pill{
+    flex: 0 0 auto;
+    min-width: 68px;
+    min-height: 48px !important;
+    padding: 8px 9px !important;
+    border: 1px solid rgba(124,92,255,.12);
+    border-radius: 16px;
+    background: rgba(255,255,255,.92);
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-template-areas: "icon label" "icon value";
+    column-gap: 6px;
+    align-items: center;
+}
+.hm-summary-pill b{ grid-area: icon; font-size: 1rem; line-height: 1; }
+.hm-summary-pill span{ grid-area: label; color:#8c83a8; font-size:.66rem; font-weight:800; line-height:1.05; white-space:nowrap; }
+.hm-summary-pill strong{ grid-area: value; color:#2f2a3d; font-size:.78rem; font-weight:900; line-height:1.1; max-width:82px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.hm-home-summary-grid .hm-beta-tile{ min-height: unset !important; }
+@media (max-width: 640px){
+    .hm-beta-dashboard{ padding: 11px 10px 9px !important; margin-bottom: 12px !important; }
+    .hm-summary-compact-list{ gap: 7px !important; }
+    .hm-summary-pill{ min-width: 62px; min-height: 44px !important; padding: 7px 8px !important; border-radius: 15px; }
+    .hm-summary-pill strong{ font-size:.74rem; max-width:70px; }
+    .hm-summary-pill span{ font-size:.62rem; }
+}
+
+
+/* =========================================================
+   RC2.14.2 Home Summary Ultra Compact Hotfix
+   - 오늘의 요약은 카드 묶음이 아니라 얇은 아이콘 상태바로 표시합니다.
+   - 오늘의 약속은 기존 daily-card 크기를 유지합니다.
+   - 큰 관리 버튼/중첩 카드 느낌을 제거해 PC/Fold/Mobile 첫 화면 높이를 줄입니다.
+   ========================================================= */
+#hmProductDashboard.hm-beta-dashboard{
+    margin: 10px 0 12px !important;
+    padding: 10px 12px !important;
+    border-radius: 18px !important;
+    border: 1px solid rgba(124,92,255,.14) !important;
+    background: rgba(255,255,255,.66) !important;
+    box-shadow: none !important;
+}
+#hmProductDashboard .hm-beta-dashboard-head,
+#hmProductDashboard .hm-summary-compact-head,
+#hmProductDashboard .hm-beta-dashboard-grid,
+#hmProductDashboard .hm-home-summary-grid,
+#hmProductDashboard .hm-summary-compact-list{
+    display: none !important;
+}
+.hm-summary-strip-head{
+    display:flex !important;
+    align-items:center;
+    gap:8px;
+    margin:0 0 7px !important;
+    line-height:1;
+}
+.hm-summary-strip-head span{
+    font-size:.66rem;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    font-weight:900;
+    color:#a69cc2;
+}
+.hm-summary-strip-head strong{
+    font-size:1.03rem;
+    font-weight:900;
+    color:#2f2a3d;
+}
+.hm-summary-strip{
+    display:flex !important;
+    align-items:center;
+    gap:8px;
+    overflow-x:auto;
+    overflow-y:hidden;
+    padding:1px 1px 2px;
+    -webkit-overflow-scrolling:touch;
+    scrollbar-width:none;
+}
+.hm-summary-strip::-webkit-scrollbar{ display:none; }
+.hm-summary-dot{
+    flex:0 0 auto;
+    min-width:54px;
+    height:36px;
+    padding:0 8px;
+    border-radius:14px;
+    border:1px solid rgba(124,92,255,.13);
+    background:rgba(255,255,255,.88);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:5px;
+    box-shadow:none;
+}
+.hm-summary-dot b{
+    font-size:.94rem;
+    line-height:1;
+}
+.hm-summary-dot span{
+    display:block;
+    max-width:66px;
+    overflow:hidden;
+    white-space:nowrap;
+    text-overflow:ellipsis;
+    font-size:.72rem;
+    line-height:1;
+    font-weight:900;
+    color:#3a3348;
+}
+.hm-today-promise-section{
+    margin: 0 0 14px !important;
+}
+.hm-today-promise-section .home-section-title,
+.hm-today-promise-section .custom-routine-title{
+    margin-top: 14px !important;
+    margin-bottom: 8px !important;
+}
+.custom-routine-home-wrap{
+    margin-top: 0 !important;
+}
+.custom-routine-home-wrap .daily-card,
+.custom-routine-hub-card{
+    min-height: 78px !important;
+    padding: 16px 18px !important;
+}
+.custom-routine-toolbar.compact{
+    display:none !important;
+}
+@media (max-width:640px){
+    #hmProductDashboard.hm-beta-dashboard{
+        margin:8px 0 10px !important;
+        padding:9px 10px !important;
+        border-radius:16px !important;
+    }
+    .hm-summary-strip-head{ margin-bottom:6px !important; }
+    .hm-summary-strip-head strong{ font-size:.98rem; }
+    .hm-summary-strip{ gap:6px; }
+    .hm-summary-dot{
+        min-width:48px;
+        height:32px;
+        padding:0 7px;
+        border-radius:13px;
+        gap:4px;
+    }
+    .hm-summary-dot b{ font-size:.88rem; }
+    .hm-summary-dot span{ font-size:.66rem; max-width:56px; }
+    .custom-routine-home-wrap .daily-card,
+    .custom-routine-hub-card{
+        min-height:74px !important;
+        padding:14px 16px !important;
+    }
+}
+@media (min-width:900px){
+    #hmProductDashboard.hm-beta-dashboard{ padding:10px 14px !important; }
+    .hm-summary-strip{ gap:9px; }
+    .hm-summary-dot{ height:36px; }
+}
+
+/* =========================================================
+   RC2.14.3 Home Summary Fixed Width + Readonly Modal
+   - 내용 길이에 따라 요약 아이템이 밀리지 않도록 5칸 균등 폭으로 고정합니다.
+   - 요약 전체 클릭 시 읽기 전용 중앙 모달을 엽니다.
+   ========================================================= */
+#hmProductDashboard.hm-beta-dashboard{
+    cursor:pointer;
+    user-select:none;
+}
+#hmProductDashboard.hm-beta-dashboard:active{
+    transform:scale(.995);
+}
+.hm-summary-strip-head{
+    justify-content:space-between;
+}
+.hm-summary-strip-head small{
+    font-size:.68rem;
+    font-weight:800;
+    color:#b0a6ca;
+    white-space:nowrap;
+}
+.hm-summary-strip{
+    display:grid !important;
+    grid-template-columns:repeat(5, minmax(0, 1fr));
+    gap:6px !important;
+    overflow:visible !important;
+    padding:0 !important;
+    width:100%;
+}
+.hm-summary-dot{
+    min-width:0 !important;
+    width:100% !important;
+    height:34px !important;
+    padding:0 5px !important;
+    gap:3px !important;
+    overflow:hidden;
+}
+.hm-summary-dot b{
+    font-size:1rem !important;
+    flex:0 0 auto;
+}
+.hm-summary-dot span{
+    min-width:0;
+    max-width:none !important;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    text-align:center;
+    font-size:.72rem !important;
+    letter-spacing:-.02em;
+}
+.hm-home-summary-modal{
+    max-width:520px !important;
+}
+.hm-home-summary-modal-body{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+}
+.hm-home-summary-modal-body[hidden]{display:none!important}
+.hm-summary-modal-row{
+    display:grid;
+    grid-template-columns:42px minmax(0, 1fr) auto;
+    align-items:center;
+    gap:12px;
+    padding:13px 14px;
+    border:1px solid rgba(124,92,255,.12);
+    border-radius:18px;
+    background:rgba(255,255,255,.76);
+}
+.hm-summary-modal-icon{
+    width:42px;
+    height:42px;
+    border-radius:15px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:#f7f0ff;
+    font-size:1.25rem;
+}
+.hm-summary-modal-row strong{
+    display:block;
+    color:#2f2a3d;
+    font-size:.95rem;
+    font-weight:900;
+    margin-bottom:3px;
+}
+.hm-summary-modal-row small{
+    display:block;
+    color:#8c83a8;
+    font-size:.76rem;
+    line-height:1.25;
+}
+.hm-summary-modal-row b{
+    color:#6f4cff;
+    font-size:.95rem;
+    font-weight:900;
+    white-space:nowrap;
+}
+.hm-summary-modal-updated{
+    text-align:center;
+    color:#8c83a8;
+    font-size:.8rem;
+    font-weight:800;
+    padding:6px 0 0;
+}
+.hm-summary-modal-updated strong{
+    color:#2f2a3d;
+    margin-left:6px;
+}
+@media (max-width:640px){
+    .hm-summary-strip-head small{ display:none; }
+    .hm-summary-strip{ gap:5px !important; }
+    .hm-summary-dot{
+        height:32px !important;
+        padding:0 4px !important;
+        border-radius:12px !important;
+    }
+    .hm-summary-dot b{ font-size:.96rem !important; }
+    .hm-summary-dot span{ font-size:.68rem !important; }
+    .hm-summary-modal-row{
+        grid-template-columns:38px minmax(0,1fr) auto;
+        padding:12px;
+        gap:10px;
+    }
+    .hm-summary-modal-icon{
+        width:38px;
+        height:38px;
+        border-radius:14px;
+        font-size:1.15rem;
+    }
+}
+@media (max-width:380px){
+    #hmProductDashboard.hm-beta-dashboard{ padding:8px 8px !important; }
+    .hm-summary-strip{ gap:4px !important; }
+    .hm-summary-dot span{ font-size:.64rem !important; }
+    .hm-summary-dot b{ font-size:.9rem !important; }
+}
+
+
+/* =========================================================
+   RC2.14.4 Recovery: Today Promise + Room Presence
+   - 오늘의 약속 제목만 보이고 카드가 사라지는 상태를 방지합니다.
+   - Presence는 별도 js/presence.js에서 안전하게 연결됩니다.
+   ========================================================= */
+#hmTodayPromiseSection .custom-routine-home-wrap,
+.custom-routine-home-wrap{
+    display:block !important;
+    visibility:visible !important;
+}
+#customRoutineHubCard.custom-routine-hub-card,
+.custom-routine-hub-card{
+    display:flex !important;
+    visibility:visible !important;
+    opacity:1 !important;
+}
+#customRoutineToolbar.compact{
+    display:none !important;
+}
+.room-presence-box {
+    margin: 10px 0 12px;
+    padding: 12px;
+    border: 1px solid #dcd2ff;
+    border-radius: 16px;
+    background: linear-gradient(135deg, #ffffff, #f8f4ff);
+    box-shadow: 0 8px 20px rgba(142, 92, 244, 0.08);
+}
+.room-presence-title { font-size: 0.84rem; font-weight: 900; color: #5f3dc4; margin-bottom: 9px; }
+.room-presence-content { display: grid; gap: 8px; }
+.presence-empty { color: #636e72; font-size: 0.78rem; line-height: 1.45; background: #fff; border: 1px dashed #dcd2ff; border-radius: 13px; padding: 10px; }
+.presence-user-card { display: grid; gap: 8px; background: #fff; border: 1px solid #eadcff; border-radius: 14px; padding: 10px; }
+.presence-user-main { display: flex; align-items: center; gap: 9px; }
+.presence-dot { width: 10px; height: 10px; border-radius: 999px; flex: 0 0 auto; background: #b2bec3; box-shadow: 0 0 0 4px rgba(178,190,195,.18); }
+.presence-dot.online { background: #00b894; box-shadow: 0 0 0 4px rgba(0,184,148,.16); }
+.presence-dot.offline { background: #b2bec3; }
+.presence-user-title { font-size: 0.84rem; font-weight: 900; color: #2d3436; }
+.presence-user-email { font-size: 0.72rem; color: #8b86a3; word-break: break-all; }
+.presence-user-status { display: flex; justify-content: space-between; gap: 8px; align-items: center; font-size: 0.75rem; color: #636e72; border-top: 1px solid #f1ecff; padding-top: 8px; }
+.presence-user-status strong { color: #5f3dc4; }
+@media (max-width: 420px) { .presence-user-status { align-items: flex-start; flex-direction: column; gap: 3px; } }
+
+/* =========================================================
+   RC2.14.8 Home Presence Indicator
+   - Two simple dots on the home version row.
+   - First dot: me / second dot: partner.
+   ========================================================= */
+.app-meta-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin: 8px 0 16px;
+}
+.app-meta-row .app-version-badge {
+    margin: 0;
+}
+.home-presence-indicator {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 7px;
+    min-width: 34px;
+    padding: 4px 2px;
+    user-select: none;
+}
+.home-presence-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 999px;
+    display: inline-block;
+    background: #cfcfd5;
+    box-shadow: 0 0 0 4px rgba(207,207,213,.18);
+    transition: background .2s ease, box-shadow .2s ease, transform .2s ease, opacity .2s ease;
+    opacity: .95;
+}
+.home-presence-dot.online {
+    background: #35D07F;
+    box-shadow: 0 0 0 4px rgba(53,208,127,.18);
+}
+.home-presence-dot.offline {
+    background: #cfcfd5;
+    box-shadow: 0 0 0 4px rgba(207,207,213,.18);
+}
+.home-presence-dot.pulse {
+    animation: hmPresenceDotPulse .42s ease-out;
+}
+@keyframes hmPresenceDotPulse {
+    0% { transform: scale(1); }
+    45% { transform: scale(1.35); }
+    100% { transform: scale(1); }
+}
+@media (max-width: 420px) {
+    .app-meta-row { margin-bottom: 14px; }
+    .home-presence-dot { width: 9px; height: 9px; }
+}
+
+/* =========================================================
+   RC2.14.9 Header Presence Layout Hotfix
+   - Keep version badge and home presence dots on one compact line.
+   - Reduce floating gap between header and login/session card.
+   ========================================================= */
+.container > .app-subtitle {
+    margin-bottom: 6px !important;
+}
+.app-meta-row {
+    width: 100% !important;
+    max-width: 420px !important;
+    margin: 4px auto 10px !important;
+    padding: 0 4px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 12px !important;
+    box-sizing: border-box !important;
+}
+.app-meta-row .app-version-badge {
+    display: inline-flex !important;
+    width: auto !important;
+    margin: 0 !important;
+    flex: 0 0 auto !important;
+    padding: 6px 12px !important;
+}
+.app-meta-row .home-presence-indicator {
+    margin-left: auto !important;
+    flex: 0 0 auto !important;
+    padding: 4px 2px !important;
+}
+.user-bar {
+    margin-top: 0 !important;
+}
+@media (max-width: 520px) {
+    .app-meta-row {
+        max-width: 100% !important;
+        margin: 4px auto 8px !important;
+        padding: 0 2px !important;
+    }
+}
+
+/* =========================================================
+   RC2.15 History UX Remodel STEP1
+   - Calendar month navigation
+   - Anniversary custom-only panel
+   - Hide statistics section
+   ========================================================= */
+.history-calendar-nav-row {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto auto auto;
+    align-items: center;
+    gap: 8px;
+}
+.history-calendar-current-month {
+    min-width: 0;
+}
+.history-month-nav-btn,
+.history-today-btn {
+    border: 0;
+    border-radius: 999px;
+    background: rgba(255,255,255,.88);
+    box-shadow: 0 8px 22px rgba(102, 75, 135, .12);
+    color: #72548f;
+    font-weight: 900;
+    cursor: pointer;
+}
+.history-month-nav-btn {
+    width: 34px;
+    height: 34px;
+    font-size: 1.35rem;
+    line-height: 1;
+}
+.history-today-btn {
+    padding: 8px 12px;
+    font-size: .82rem;
+}
+.history-month-count {
+    justify-self: end;
+    white-space: nowrap;
+}
+.calendar-day.empty-day {
+    box-shadow: none !important;
+    background: transparent !important;
+    cursor: default !important;
+}
+#historyHero[hidden],
+.history-hero:empty {
+    display: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+.anniversary-panel {
+    margin-top: 12px;
+}
+.anniversary-card-compact .anniversary-auto-preview span {
+    white-space: normal;
+}
+@media (max-width: 560px) {
+    .history-calendar-nav-row {
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        gap: 6px;
+    }
+    .history-today-btn,
+    .history-month-count {
+        grid-column: span 3;
+        justify-self: center;
+    }
+    .history-month-count {
+        font-size: .78rem;
+    }
+}
+
+/* =========================================================
+   RC2.15 STEP2 History Gallery/List UX
+   - 사진 모아보기와 하루 기록 리스트를 카드형으로 정리
+   - Firebase/History 데이터 구조 변경 없음
+   ========================================================= */
+.history-panel-modal {
+    gap: 12px;
+}
+.history-intro-note {
+    margin-bottom: 2px !important;
+}
+.history-selected-section-title {
+    display: none !important;
+}
+#photoThumbs.history-thumb-row {
+    display: block !important;
+    padding: 0 !important;
+    margin: 14px 0 0 !important;
+    overflow: visible !important;
+}
+.history-section-headline {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+.history-section-headline strong {
+    display: block;
+    font-size: .98rem;
+    color: #3f3156;
+    letter-spacing: -0.02em;
+}
+.history-section-headline span {
+    display: block;
+    margin-top: 2px;
+    font-size: .78rem;
+    color: #8a7b9f;
+    line-height: 1.35;
+}
+.history-gallery-section,
+.history-selected-record-section,
+.history-story-section {
+    border-radius: 24px;
+    background: rgba(255,255,255,.76);
+    border: 1px solid rgba(153, 116, 214, .13);
+    box-shadow: 0 14px 36px rgba(88, 60, 120, .08);
+    padding: 14px;
+}
+.history-gallery-empty-section {
+    background: linear-gradient(135deg, rgba(255,255,255,.82), rgba(250,247,255,.78));
+}
+.history-photo-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+}
+.history-photo-card {
+    border: 0;
+    background: rgba(255,255,255,.86);
+    border-radius: 20px;
+    padding: 8px;
+    text-align: left;
+    cursor: pointer;
+    box-shadow: 0 10px 24px rgba(88,60,120,.08);
+    border: 1px solid rgba(153,116,214,.11);
+    transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease;
+}
+.history-photo-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 16px 32px rgba(88,60,120,.13);
+    border-color: rgba(153,116,214,.22);
+}
+.history-photo-frame {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    border-radius: 16px;
+    overflow: hidden;
+    background: #f7f0ff;
+}
+.history-photo-frame img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+.history-photo-meta {
+    display: block;
+    padding: 8px 4px 2px;
+}
+.history-photo-meta strong {
+    display: block;
+    font-size: .82rem;
+    color: #4a3a62;
+    line-height: 1.25;
+}
+.history-photo-meta small {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 5px;
+    color: #8d7b9f;
+}
+.history-photo-empty {
+    border-radius: 18px;
+    background: rgba(255,255,255,.72);
+    padding: 16px;
+    text-align: center;
+    color: #8a7b9f;
+    font-size: .9rem;
+}
+#historyList.history-list {
+    margin-top: 14px !important;
+    display: grid !important;
+    gap: 14px !important;
+}
+.history-selected-record-card {
+    width: 100%;
+    min-height: 102px !important;
+    border-radius: 22px !important;
+    background: linear-gradient(135deg, rgba(255,255,255,.96), rgba(250,246,255,.94)) !important;
+}
+.history-day-main {
+    min-width: 0;
+}
+.history-story-list {
+    display: grid;
+    gap: 8px;
+}
+.history-story-row {
+    display: grid;
+    grid-template-columns: 58px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    border: 1px solid rgba(153,116,214,.12);
+    border-radius: 20px;
+    background: rgba(255,255,255,.82);
+    padding: 10px;
+    text-align: left;
+    cursor: pointer;
+    box-shadow: 0 8px 20px rgba(88,60,120,.06);
+    transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease;
+}
+.history-story-row:hover,
+.history-story-row.is-selected {
+    transform: translateY(-1px);
+    border-color: rgba(255, 122, 182, .28);
+    box-shadow: 0 14px 28px rgba(88,60,120,.11);
+}
+.history-story-date {
+    display: grid;
+    place-items: center;
+    align-content: center;
+    min-height: 52px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, #fff2f8, #f5efff);
+    color: #7a4d90;
+}
+.history-story-date strong {
+    font-size: 1.1rem;
+    line-height: 1;
+}
+.history-story-date small {
+    margin-top: 4px;
+    font-size: .62rem;
+    color: #9b88ad;
+    white-space: nowrap;
+}
+.history-story-body {
+    min-width: 0;
+}
+.history-story-body strong {
+    display: block;
+    color: #443559;
+    font-size: .9rem;
+    line-height: 1.3;
+}
+.history-story-body small {
+    display: block;
+    margin-top: 3px;
+    color: #7e708f;
+    font-size: .78rem;
+    line-height: 1.35;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.history-story-body em {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 6px;
+    font-style: normal;
+}
+.history-story-arrow {
+    color: #b39bc6;
+    font-size: 1.4rem;
+    font-weight: 800;
+}
+@media (max-width: 720px) {
+    .history-photo-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+@media (max-width: 480px) {
+    .history-gallery-section,
+    .history-selected-record-section,
+    .history-story-section {
+        padding: 12px;
+        border-radius: 21px;
+    }
+    .history-photo-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+    }
+    .history-story-row {
+        grid-template-columns: 48px minmax(0, 1fr) auto;
+        border-radius: 18px;
+        padding: 9px;
+    }
+    .history-story-date {
+        min-height: 48px;
+        border-radius: 14px;
+    }
+    .history-story-body small {
+        white-space: normal;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+    }
+}
+
+/* =========================================================
+   RC2.16.0 Branding STEP1 - Quiet Love UI Polish
+   - 기능/DB/Firebase 구조 변경 없음
+   - Header, Brand tone, card rhythm, modal focus polish
+   ========================================================= */
+:root {
+    --hm-brand-bg: #F8F7FB;
+    --hm-brand-bg-warm: #FFF8FB;
+    --hm-brand-card: rgba(255,255,255,.92);
+    --hm-brand-text: #1E1E2F;
+    --hm-brand-subtext: #747189;
+    --hm-brand-primary: #FF6F86;
+    --hm-brand-primary-2: #FF9EB0;
+    --hm-brand-lavender: #A98BFF;
+    --hm-brand-mint: #39D98A;
+    --hm-brand-border: rgba(232,224,255,.86);
+    --hm-brand-shadow: 0 18px 48px rgba(67, 53, 105, .10);
+    --hm-brand-shadow-soft: 0 10px 28px rgba(67, 53, 105, .075);
+    --hm-brand-radius-xl: 30px;
+    --hm-brand-radius-card: 24px;
+    --hm-brand-radius-btn: 18px;
+
+    --primary-color: var(--hm-brand-primary);
+    --accent-purple: var(--hm-brand-lavender);
+    --bg-color: var(--hm-brand-bg);
+    --card-color: #fff;
+    --text-color: var(--hm-brand-text);
+    --border-color: var(--hm-brand-border);
+}
+
+body {
+    background:
+        radial-gradient(circle at 16% 2%, rgba(255,111,134,.15), transparent 28%),
+        radial-gradient(circle at 88% 8%, rgba(169,139,255,.20), transparent 25%),
+        linear-gradient(150deg, var(--hm-brand-bg-warm) 0%, var(--hm-brand-bg) 58%, #F4F0FF 100%);
+    color: var(--hm-brand-text);
+}
+
+.container {
+    border-radius: var(--hm-brand-radius-xl);
+    border: 1px solid var(--hm-brand-border);
+    background: var(--hm-brand-card);
+    box-shadow: var(--hm-brand-shadow);
+    padding: 24px 22px 22px;
+    overflow: hidden;
+}
+
+.container::before {
+    content: '';
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    width: 40px;
+    height: 4px;
+    transform: translateX(-50%);
+    border-radius: 999px;
+    background: rgba(169,139,255,.26);
+}
+
+.autosave-status {
+    top: 22px;
+    right: 22px;
+    color: var(--hm-brand-mint);
+    font-weight: 800;
+    letter-spacing: -.02em;
+}
+
+.app-title-row {
+    margin-top: 10px;
+    grid-template-columns: 44px 1fr 44px;
+    align-items: center;
+}
+
+.guide-btn {
+    width: 42px;
+    height: 42px;
+    border-radius: 18px !important;
+    background: linear-gradient(145deg, #FFF7FA, #FFFFFF) !important;
+    border: 1px solid rgba(255,111,134,.25) !important;
+    box-shadow: 0 10px 24px rgba(255,111,134,.10);
+}
+
+.app-title-row h1 {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    font-size: 1.72rem;
+    line-height: 1.05;
+    margin: 0;
+    color: var(--hm-brand-text);
+    font-weight: 850;
+    letter-spacing: -.055em;
+}
+
+.hm-title-mark {
+    display: inline-grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 13px;
+    background: linear-gradient(135deg, var(--hm-brand-primary), var(--hm-brand-lavender));
+    color: #fff;
+    font-size: .82rem;
+    letter-spacing: -.08em;
+    box-shadow: 0 10px 22px rgba(255,111,134,.18);
+}
+
+.app-subtitle {
+    margin-top: 10px;
+    margin-bottom: 12px;
+    color: var(--hm-brand-subtext);
+    font-weight: 650;
+    letter-spacing: -.025em;
+}
+
+.app-meta-row {
+    margin: 4px 0 14px;
+    padding: 0 2px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.app-version-badge,
+.history-launch-version {
+    background: linear-gradient(135deg, #FFF1F5, #F3EDFF) !important;
+    color: var(--hm-brand-primary) !important;
+    border: 1px solid rgba(255,111,134,.16) !important;
+    border-radius: 999px !important;
+    padding: 7px 12px !important;
+    font-size: .74rem !important;
+    letter-spacing: -.01em !important;
+    font-weight: 850 !important;
+}
+
+.home-presence-indicator {
+    min-height: 28px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: rgba(255,255,255,.72);
+    border: 1px solid rgba(232,224,255,.86);
+    box-shadow: 0 8px 20px rgba(67,53,105,.055);
+}
+
+.home-presence-dot.online {
+    background: var(--hm-brand-mint) !important;
+    box-shadow: 0 0 0 4px rgba(57,217,138,.13), 0 6px 14px rgba(57,217,138,.26) !important;
+}
+
+.home-presence-dot.offline {
+    background: #DAD8E4 !important;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,.85) !important;
+}
+
+.user-bar,
+.room-settings-card,
+.daily-card,
+.mission-compact-card,
+.history-launch-card,
+.history-day-card,
+.history-section-card,
+.relationship-role-box,
+.sync-box,
+#calendarBox,
+#photoThumbs.history-thumb-row,
+.history-filter-card {
+    border-radius: var(--hm-brand-radius-card) !important;
+    border: 1px solid var(--hm-brand-border) !important;
+    background: linear-gradient(145deg, rgba(255,255,255,.96), rgba(255,250,253,.88)) !important;
+    box-shadow: var(--hm-brand-shadow-soft) !important;
+}
+
+.user-bar {
+    margin: 10px 0 14px;
+    padding: 12px 14px;
+}
+
+.room-settings-card,
+.daily-card,
+.history-launch-card {
+    min-height: 88px;
+    padding: 17px 18px;
+}
+
+.room-settings-card { background: linear-gradient(145deg, #F7F2FF, #FFFFFF) !important; }
+.input-group:nth-of-type(3n) .daily-card { background: linear-gradient(145deg, #FFF4F7, #FFFFFF) !important; }
+.input-group:nth-of-type(3n+1) .daily-card { background: linear-gradient(145deg, #F6F1FF, #FFFFFF) !important; }
+.input-group:nth-of-type(3n+2) .daily-card { background: linear-gradient(145deg, #F1FFF8, #FFFFFF) !important; }
+
+.daily-card-icon,
+.room-settings-icon,
+.history-launch-icon,
+.history-day-icon {
+    width: 50px;
+    height: 50px;
+    min-width: 50px;
+    border-radius: 19px !important;
+    background: linear-gradient(145deg, #FFFFFF, #FFF0F5) !important;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,.98), 0 10px 22px rgba(255,111,134,.12) !important;
+}
+
+.daily-card-title,
+.room-settings-title,
+.history-launch-title,
+.history-day-title,
+.history-section-title,
+.mission-compact-title {
+    color: var(--hm-brand-text) !important;
+    font-weight: 820 !important;
+    letter-spacing: -.035em;
+}
+
+.daily-card-sub,
+.room-settings-sub,
+.history-launch-sub,
+.history-day-sub,
+.history-section-title small,
+.mission-compact-sub {
+    color: var(--hm-brand-subtext) !important;
+}
+
+.daily-card,
+.room-settings-card,
+.mission-compact-card,
+.history-launch-card,
+.history-day-card,
+.guide-btn,
+button {
+    transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease, opacity .16s ease;
+}
+
+.daily-card:hover,
+.room-settings-card:hover,
+.history-launch-card:hover,
+.history-day-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 18px 40px rgba(67,53,105,.12) !important;
+}
+
+.daily-card:active,
+.room-settings-card:active,
+.mission-compact-card:active,
+.history-launch-card:active,
+.history-day-card:active,
+button:active {
+    transform: scale(.975);
+}
+
+.btn-main,
+.btn-connect,
+.mission-open-btn,
+.daily-modal-save,
+.room-open-btn,
+.guide-primary,
+.history-filter-card button {
+    border-radius: var(--hm-brand-radius-btn) !important;
+    background: linear-gradient(135deg, var(--hm-brand-primary), var(--hm-brand-primary-2)) !important;
+    box-shadow: 0 14px 28px rgba(255,111,134,.23) !important;
+}
+
+.btn-secondary,
+.modal-close-btn,
+.guide-close,
+.mission-mini-btn {
+    border-radius: var(--hm-brand-radius-btn) !important;
+    background: #FFF3F7 !important;
+    color: var(--hm-brand-primary) !important;
+    border: 1px solid rgba(255,111,134,.18) !important;
+}
+
+.history-panel-head h2,
+.history-detail-head h2,
+.room-settings-head h2,
+.daily-modal-head h2,
+.mission-modal-head h2 {
+    color: var(--hm-brand-text) !important;
+    font-weight: 850 !important;
+    letter-spacing: -.045em;
+}
+
+.history-panel-head h2 span,
+.history-detail-kicker {
+    background: #FFF2F6 !important;
+    color: var(--hm-brand-primary) !important;
+}
+
+.calendar-day.selected-record,
+.calendar-day.today,
+.relationship-role-btn.active,
+.mood-btn.active,
+.choice-btn.active {
+    background: linear-gradient(135deg, var(--hm-brand-primary), var(--hm-brand-primary-2)) !important;
+    color: #fff !important;
+    border-color: transparent !important;
+    box-shadow: 0 12px 26px rgba(255,111,134,.22) !important;
+}
+
+.calendar-day.has-record {
+    border-color: rgba(255,111,134,.20) !important;
+    background: linear-gradient(145deg, #FFFFFF, #FFF7FA) !important;
+}
+
+.daily-modal,
+.mission-modal,
+.room-settings-modal,
+.guide-card,
+.history-panel-modal,
+.history-detail-modal {
+    border-radius: 32px !important;
+    background: rgba(255,255,255,.97) !important;
+    border: 1px solid rgba(232,224,255,.92) !important;
+    box-shadow: 0 30px 80px rgba(39,31,72,.22) !important;
+}
+
+.hm-login-mark.hm-brand-mark {
+    position: relative;
+    width: 92px;
+    height: 92px;
+    margin: 0 auto 16px;
+    border-radius: 28px;
+    background: linear-gradient(145deg, #FFFFFF, #FFF3F8);
+    box-shadow: 0 22px 50px rgba(67,53,105,.10);
+    display: grid;
+    place-items: center;
+    font-size: 0;
+}
+.hm-login-mark.hm-brand-mark span:first-child {
+    position: absolute;
+    font-size: 3rem;
+    color: var(--hm-brand-primary);
+    transform: translate(-8px,-4px);
+}
+.hm-login-mark.hm-brand-mark span:last-child {
+    position: absolute;
+    font-size: 2.7rem;
+    color: var(--hm-brand-lavender);
+    transform: translate(18px,14px) rotate(-18deg);
+    opacity: .9;
+}
+.hm-login-title {
+    color: var(--hm-brand-text) !important;
+    letter-spacing: -.055em;
+}
+.hm-login-title::first-letter,
+.app-title-row h1 { text-shadow: none; }
+.hm-login-copy {
+    color: var(--hm-brand-subtext) !important;
+    font-weight: 650;
+}
+.hm-login-pill {
+    background: linear-gradient(135deg, #FF6F86, #FF9EB0) !important;
+    color: #fff !important;
+    box-shadow: 0 12px 24px rgba(255,111,134,.22);
+}
+
+@media (max-width: 430px) {
+    body { padding: 8px 6px; }
+    .container { padding: 24px 18px 20px; border-radius: 28px; }
+    .app-title-row h1 { font-size: 1.52rem; }
+    .hm-title-mark { width: 28px; height: 28px; }
+    .room-settings-card,
+    .daily-card,
+    .history-launch-card { min-height: 84px; padding: 15px; }
+    .daily-card-icon,
+    .room-settings-icon,
+    .history-launch-icon,
+    .history-day-icon { width: 46px; height: 46px; min-width: 46px; }
+}
+
+/* =========================================================
+   RC2.17 Pixel Polish
+   Scope: CSS-only spacing polish. No Firebase / Room / Presence / History JS changes.
+   - Keep "우리의 공간" card unchanged.
+   - Slightly reduce chat height and vertical heaviness.
+   - Tighten header/login spacing.
+   - Normalize card gaps without changing layout structure.
+   ========================================================= */
+:root {
+    --hm-rc217-gap-tight: 12px;
+    --hm-rc217-gap-normal: 16px;
+    --hm-rc217-chat-height: 205px;
+}
+
+/* Header: keep current branding, reduce floating vertical space only */
+.container > .app-title-row {
+    margin-bottom: 4px !important;
+}
+.container > .app-subtitle {
+    margin-top: 6px !important;
+    margin-bottom: 4px !important;
+}
+.container > .app-meta-row {
+    margin-top: 3px !important;
+    margin-bottom: 10px !important;
+}
+
+/* Login/session card: slightly slimmer, not redesigned */
+.user-bar {
+    min-height: 54px !important;
+    padding: 10px 13px !important;
+    margin: 8px 0 13px !important;
+}
+.user-bar .btn-small,
+.user-bar .btn-secondary {
+    min-height: 42px !important;
+    padding-top: 9px !important;
+    padding-bottom: 9px !important;
+}
+
+/* Keep room card stable; only protect it from broad polish overrides */
+.room-settings-card {
+    min-height: 88px !important;
+}
+
+/* Overall rhythm: reduce empty vertical gaps but keep one-column emotional layout */
+.container .input-group {
+    margin-bottom: var(--hm-rc217-gap-normal) !important;
+}
+.container > .row,
+.compact-metrics-row {
+    gap: var(--hm-rc217-gap-normal) !important;
+    margin-bottom: var(--hm-rc217-gap-normal) !important;
+}
+.mission-compact-card,
+.history-launch-card,
+.daily-card {
+    box-shadow: 0 10px 26px rgba(67, 53, 105, 0.07) !important;
+}
+
+/* Today promise: subtle emphasis without layout change */
+#todayPromiseCard,
+.mission-compact-card {
+    min-height: 98px !important;
+}
+
+/* Chat: reduce height and input bulk. Keep all chat JS / DOM unchanged. */
+#chatSection {
+    margin-top: 16px !important;
+    margin-bottom: 16px !important;
+    padding: 16px !important;
+}
+#chatMessages {
+    height: var(--hm-rc217-chat-height) !important;
+    max-height: var(--hm-rc217-chat-height) !important;
+    padding: 10px !important;
+    margin-bottom: 9px !important;
+}
+#chatSection > div:last-child {
+    gap: 7px !important;
+}
+#chatSender,
+#chatInput {
+    min-height: 42px !important;
+    padding-top: 9px !important;
+    padding-bottom: 9px !important;
+}
+#chatSection button {
+    min-height: 42px !important;
+    padding-top: 9px !important;
+    padding-bottom: 9px !important;
+}
+
+/* Final copy button: slightly less tall so it does not overpower the page */
+.btn-main {
+    min-height: 48px !important;
+}
+
+@media (min-width: 900px) {
+    body {
+        padding-top: 18px !important;
+    }
+    .container {
+        margin-bottom: 18px !important;
+    }
+    #chatMessages {
+        height: 195px !important;
+        max-height: 195px !important;
+    }
+}
+
+@media (max-width: 430px) {
+    :root {
+        --hm-rc217-chat-height: 210px;
+    }
+    .container > .app-title-row {
+        margin-bottom: 5px !important;
+    }
+    .container > .app-subtitle {
+        margin-bottom: 5px !important;
+    }
+    .user-bar {
+        min-height: 56px !important;
+    }
+    #chatSection {
+        padding: 15px !important;
+        margin-top: 14px !important;
+        margin-bottom: 14px !important;
+    }
+    #chatMessages {
+        height: var(--hm-rc217-chat-height) !important;
+        max-height: var(--hm-rc217-chat-height) !important;
+    }
+}
+
+/* =========================================================
+   RC2.17.1 SAFE: Anniversary Panel List Polish
+   - 안내용 박스를 제거하고 등록된 기념일 목록을 카드 안에 직접 표시
+   - Firebase / History / Calendar 데이터 구조 변경 없음
+   ========================================================= */
+.anniversary-card-compact .anniversary-head {
+    margin-bottom: 12px;
+}
+.anniversary-card-compact .anniversary-sub {
+    color: var(--hm-premium-sub, #7D7694);
+}
+.anniversary-panel-list {
+    display: grid;
+    gap: 8px;
+}
+.anniversary-panel-item,
+.anniversary-empty-panel {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border: 1px solid var(--hm-premium-border, #ECE6FF);
+    border-radius: 18px;
+    padding: 12px 14px;
+    background: linear-gradient(135deg, rgba(255,255,255,.92), rgba(250,247,255,.92));
+    box-shadow: 0 8px 22px rgba(109, 76, 255, 0.055);
+}
+.anniversary-panel-icon {
+    width: 42px;
+    height: 42px;
+    min-width: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 15px;
+    background: #fff;
+    font-size: 1.18rem;
+    box-shadow: inset 0 0 0 1px rgba(236,230,255,.75);
+}
+.anniversary-panel-body {
+    flex: 1;
+    min-width: 0;
+}
+.anniversary-panel-title {
+    font-weight: 850;
+    color: var(--hm-premium-text, #2D2A35);
+    font-size: .92rem;
+    line-height: 1.3;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.anniversary-panel-date {
+    margin-top: 3px;
+    color: var(--hm-premium-sub, #7D7694);
+    font-size: .76rem;
+    line-height: 1.35;
+}
+.anniversary-panel-dday {
+    min-width: 54px;
+    text-align: right;
+    font-size: .8rem;
+    font-weight: 900;
+    color: var(--hm-premium-primary, #6D4CFF);
+}
+.anniversary-empty-panel {
+    align-items: flex-start;
+}
+.anniversary-empty-panel .anniversary-panel-title {
+    white-space: normal;
+    color: var(--hm-premium-primary, #6D4CFF);
+}
+@media (max-width: 430px) {
+    .anniversary-panel-item,
+    .anniversary-empty-panel {
+        padding: 11px 12px;
+    }
+    .anniversary-panel-title {
+        white-space: normal;
+    }
+    .anniversary-panel-dday {
+        min-width: 46px;
+        font-size: .76rem;
+    }
+}
+
+/* =========================================================
+   RC2.17.2 SAFE: Anniversary Upcoming Preview + Together Day
+   - 기념일 카드는 최대 3개 미리보기로 고정
+   - 전체 목록/대표 날짜 지정은 관리 모달에서 처리
+   - 캘린더 헤더에 대표 날짜 기준 함께한 날 표시
+   ========================================================= */
+.history-calendar-month-line {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+.history-together-day-badge {
+    display: inline-flex;
+    align-items: center;
+    min-height: 24px;
+    padding: 5px 10px;
+    border-radius: 999px;
+    background: rgba(255, 122, 138, .12);
+    color: var(--hm-premium-primary, #ff6b81);
+    font-size: .74rem;
+    font-weight: 900;
+    letter-spacing: -0.01em;
+    box-shadow: inset 0 0 0 1px rgba(255, 122, 138, .14);
+}
+.anniversary-panel-preview-list {
+    gap: 7px;
+}
+.anniversary-more-btn {
+    width: 100%;
+    border: 0;
+    border-radius: 16px;
+    padding: 10px 12px;
+    margin-top: 2px;
+    background: rgba(109, 76, 255, .075);
+    color: var(--hm-premium-primary, #6D4CFF);
+    font-weight: 900;
+    cursor: pointer;
+    text-align: center;
+}
+.anniversary-more-btn:active {
+    transform: scale(.985);
+}
+.anniversary-custom-main {
+    flex: 1;
+    min-width: 0;
+}
+.anniversary-custom-actions {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+.anniversary-main-btn {
+    border: 0;
+    border-radius: 999px;
+    padding: 7px 10px;
+    background: rgba(255, 122, 138, .12);
+    color: var(--hm-premium-primary, #ff6b81);
+    font-weight: 900;
+    font-size: .74rem;
+    cursor: pointer;
+}
+.anniversary-main-badge {
+    display: inline-flex;
+    align-items: center;
+    margin-left: 5px;
+    padding: 2px 7px;
+    border-radius: 999px;
+    background: rgba(52, 199, 89, .12);
+    color: #21a95b;
+    font-size: .68rem;
+    font-weight: 900;
+    vertical-align: middle;
+}
+.anniversary-main-date-check {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+    padding: 10px 12px;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, .72);
+    color: var(--hm-premium-sub, #7D7694);
+    font-size: .82rem;
+    font-weight: 800;
+    cursor: pointer;
+}
+.anniversary-main-date-check input {
+    accent-color: var(--hm-premium-primary, #ff6b81);
+}
+@media (max-width: 520px) {
+    .history-calendar-month-line {
+        gap: 7px;
+    }
+    .history-together-day-badge {
+        font-size: .68rem;
+        padding: 4px 8px;
+    }
+    .anniversary-custom-item {
+        align-items: flex-start;
+    }
+    .anniversary-custom-actions {
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 6px;
+    }
+}
+
+/* =========================================================
+   HearMe2nite RC2.18 - Help Center
+   Documentation & Help Center only / existing branding preserved
+   ========================================================= */
+.help-center-card {
+    max-width: 780px;
+}
+
+.help-center-header {
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.help-center-kicker {
+    margin: 0 0 4px;
+    color: var(--hm-premium-sub, #7D7694);
+    font-size: .72rem;
+    font-weight: 800;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+
+.help-center-intro {
+    margin-bottom: 12px;
+}
+
+.help-center-tabs {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 4px 2px 12px;
+    margin: 0 0 10px;
+    scrollbar-width: thin;
+}
+
+.help-tab {
+    flex: 0 0 auto;
+    border: 1px solid var(--hm-premium-border, #ECE6FF);
+    background: rgba(255, 255, 255, .78);
+    color: var(--hm-premium-sub, #7D7694);
+    border-radius: 999px;
+    padding: 9px 12px;
+    font-size: .78rem;
+    font-weight: 800;
+    cursor: pointer;
+    box-shadow: 0 6px 18px rgba(80, 72, 120, .06);
+}
+
+.help-tab.active {
+    background: linear-gradient(135deg, rgba(255, 235, 241, .95), rgba(244, 239, 255, .95));
+    color: var(--hm-premium-text, #2D2A35);
+    border-color: rgba(255, 174, 200, .8);
+}
+
+.help-center-panels {
+    min-height: 240px;
+}
+
+.help-panel {
+    display: none;
+}
+
+.help-panel.active {
+    display: block;
+}
+
+.help-center-footer {
+    margin-top: 14px;
+}
+
+@media (max-width: 640px) {
+    .help-center-card {
+        width: min(94vw, 520px);
+    }
+
+    .help-tab {
+        padding: 8px 11px;
+        font-size: .75rem;
+    }
+
+    .help-center-panels {
+        min-height: 220px;
+    }
+}
+
+/* =========================================================
+   HearMe2nite RC2.18 - Help Center UX Remodel
+   Short readable guide / cards / FAQ / search / tips
+   ========================================================= */
+.help-center-card {
+    max-width: 820px;
+    max-height: min(88vh, 760px);
+    overflow-y: auto;
+}
+.help-hero {
+    margin: 0 0 14px;
+    padding: 16px 18px;
+    border-radius: 22px;
+    background: linear-gradient(135deg, rgba(255, 241, 246, .96), rgba(244, 240, 255, .96));
+    border: 1px solid rgba(255, 214, 226, .9);
+    box-shadow: 0 10px 28px rgba(80, 72, 120, .07);
+}
+.help-hero p,
+.help-hero strong,
+.help-hero span {
+    display: block;
+    margin: 0;
+}
+.help-hero p {
+    color: var(--hm-premium-sub, #7D7694);
+    font-size: .88rem;
+    font-weight: 800;
+}
+.help-hero strong {
+    margin-top: 4px;
+    color: var(--hm-premium-text, #2D2A35);
+    font-size: 1.14rem;
+    font-weight: 900;
+}
+.help-hero span {
+    margin-top: 4px;
+    color: var(--hm-premium-sub, #7D7694);
+    font-size: .86rem;
+    line-height: 1.55;
+}
+.help-search-wrap {
+    margin: 0 0 12px;
+}
+.help-search-label {
+    display: block;
+    margin: 0 0 6px;
+    color: var(--hm-premium-sub, #7D7694);
+    font-size: .78rem;
+    font-weight: 900;
+}
+.help-search-input {
+    width: 100%;
+    border: 1px solid var(--hm-premium-border, #ECE6FF);
+    border-radius: 18px;
+    background: rgba(255, 255, 255, .9);
+    color: var(--hm-premium-text, #2D2A35);
+    padding: 12px 14px;
+    font-size: .9rem;
+    outline: none;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.8), 0 8px 22px rgba(80, 72, 120, .06);
+}
+.help-search-input:focus {
+    border-color: rgba(255, 174, 200, .95);
+}
+.help-search-results {
+    margin: 0 0 12px;
+    display: grid;
+    gap: 8px;
+}
+.help-result-card,
+.help-empty-result {
+    width: 100%;
+    text-align: left;
+    border: 1px solid rgba(255, 214, 226, .9);
+    border-radius: 16px;
+    background: rgba(255, 255, 255, .9);
+    padding: 11px 12px;
+    color: var(--hm-premium-text, #2D2A35);
+    box-shadow: 0 8px 20px rgba(80, 72, 120, .06);
+}
+.help-result-card strong,
+.help-result-card span {
+    display: block;
+}
+.help-result-card strong {
+    font-size: .86rem;
+    font-weight: 900;
+}
+.help-result-card span,
+.help-empty-result {
+    margin-top: 4px;
+    font-size: .78rem;
+    line-height: 1.45;
+    color: var(--hm-premium-sub, #7D7694);
+}
+.help-card-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+.help-menu-card {
+    border: 1px solid var(--hm-premium-border, #ECE6FF);
+    border-radius: 20px;
+    background: rgba(255, 255, 255, .86);
+    padding: 14px;
+    text-align: left;
+    cursor: pointer;
+    box-shadow: 0 10px 24px rgba(80, 72, 120, .07);
+}
+.help-menu-card span,
+.help-menu-card strong,
+.help-menu-card small {
+    display: block;
+}
+.help-menu-card span {
+    font-size: 1.28rem;
+    margin-bottom: 6px;
+}
+.help-menu-card strong {
+    color: var(--hm-premium-text, #2D2A35);
+    font-size: .95rem;
+    font-weight: 900;
+}
+.help-menu-card small {
+    margin-top: 4px;
+    color: var(--hm-premium-sub, #7D7694);
+    font-size: .76rem;
+    line-height: 1.4;
+}
+.help-mini-card {
+    margin: 0 0 10px;
+    padding: 15px 16px;
+    border-radius: 20px;
+    border: 1px solid var(--hm-premium-border, #ECE6FF);
+    background: rgba(255, 255, 255, .88);
+    box-shadow: 0 10px 26px rgba(80, 72, 120, .06);
+}
+.help-mini-card h3 {
+    margin: 0 0 7px;
+    font-size: .98rem;
+    font-weight: 900;
+    color: var(--hm-premium-text, #2D2A35);
+}
+.help-mini-card p {
+    margin: 0;
+    color: var(--hm-premium-sub, #7D7694);
+    font-size: .86rem;
+    line-height: 1.58;
+}
+.help-tip {
+    margin-top: 10px;
+    padding: 9px 11px;
+    border-radius: 14px;
+    background: rgba(255, 246, 232, .9);
+    color: #8a6940;
+    font-size: .8rem;
+    font-weight: 800;
+    line-height: 1.45;
+}
+.faq-accordion {
+    display: grid;
+    gap: 8px;
+}
+.faq-question {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    border: 1px solid var(--hm-premium-border, #ECE6FF);
+    border-radius: 16px;
+    background: rgba(255, 255, 255, .9);
+    color: var(--hm-premium-text, #2D2A35);
+    padding: 12px 13px;
+    font-size: .86rem;
+    font-weight: 900;
+    text-align: left;
+    cursor: pointer;
+}
+.faq-question span {
+    transition: transform .18s ease;
+}
+.faq-question.open span {
+    transform: rotate(180deg);
+}
+.faq-answer {
+    display: none;
+    margin: -4px 0 4px;
+    padding: 0 13px 12px;
+    color: var(--hm-premium-sub, #7D7694);
+    font-size: .82rem;
+    line-height: 1.55;
+}
+.faq-answer.open {
+    display: block;
+}
+.help-random-tip p {
+    font-size: .92rem;
+    font-weight: 800;
+    color: var(--hm-premium-text, #2D2A35);
+}
+.help-small-btn {
+    margin-top: 12px;
+    border: 0;
+    border-radius: 999px;
+    background: linear-gradient(135deg, rgba(255, 214, 226, .95), rgba(226, 218, 255, .95));
+    color: var(--hm-premium-text, #2D2A35);
+    padding: 9px 12px;
+    font-size: .78rem;
+    font-weight: 900;
+    cursor: pointer;
+}
+.help-tip-list {
+    display: grid;
+    gap: 8px;
+}
+.help-tip-list div {
+    padding: 11px 12px;
+    border-radius: 15px;
+    background: rgba(255,255,255,.78);
+    border: 1px solid var(--hm-premium-border, #ECE6FF);
+    color: var(--hm-premium-sub, #7D7694);
+    font-size: .82rem;
+    line-height: 1.45;
+    font-weight: 800;
+}
+@media (max-width: 640px) {
+    .help-card-grid {
+        grid-template-columns: 1fr;
+    }
+    .help-center-card {
+        max-height: 90vh;
+    }
+    .help-hero,
+    .help-mini-card {
+        border-radius: 18px;
+    }
+}
+

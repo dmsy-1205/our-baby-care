@@ -70,7 +70,7 @@
         updateDeleteRequestTypeNotice();
         loadDataDeleteRequests();
     }
-    function closeDataManagementModal() { document.getElementById('dataManagementOverlay')?.classList.remove('show'); }
+    function closeDataManagementModal() { document.getElementById('dataManagementOverlay')?.classList.remove('show'); window.hmReturnToAccountMenu?.('data'); }
     function selectDataManagementTab(tabName) {
         const root = document.getElementById('dataManagementOverlay');
         if (!root) return;
@@ -97,7 +97,7 @@
         if (!active) { summary.hidden = true; summary.innerHTML = ''; if (submitBtn) submitBtn.disabled = false; return; }
         const type = REQUEST_TYPES[active.requestType] || { label: active.requestTypeLabel || '데이터 삭제 요청' };
         summary.hidden = false;
-        summary.innerHTML = `<div class="data-current-head"><strong>현재 진행 중인 요청</strong><span>${escapeHtml(STATUS_LABELS[active.status || 'pending'] || active.status)}</span></div><p>${escapeHtml(type.label)}</p><small>접수: ${escapeHtml(formatDate(active.requestedAt))}</small><button type="button" class="data-current-link" onclick="selectDataManagementTab('history')">요청 상세 보기</button>`;
+        summary.innerHTML = `<div class="data-current-head"><strong>현재 진행 중인 요청</strong><span>${escapeHtml(STATUS_LABELS[active.status || 'pending'] || active.status)}</span></div><p>${escapeHtml(type.label)}</p><small>접수: ${escapeHtml(formatDate(active.requestedAt))}</small><button type="button" class="data-current-link" data-hm-action="select-data-tab" data-hm-value="history">요청 상세 보기</button>`;
         if (submitBtn) submitBtn.disabled = true;
     }
     async function submitDataDeleteRequest() {
@@ -151,7 +151,7 @@
         const status = item.status || 'pending';
         const type = REQUEST_TYPES[item.requestType] || { label: item.requestTypeLabel || '기존 삭제 요청' };
         const partnerNotice = item.requestType === 'delete_room' || item.partnerConsentRequired ? '<div class="data-shared-notice">공동 Room 전체 삭제 요청 · 상대방 확인이 필요할 수 있습니다.</div>' : '';
-        const cancelButton = isCancelableStatus(status) ? `<button type="button" class="data-small-action" onclick="cancelDataDeleteRequest('${escapeJs(item.id)}')" aria-label="${escapeHtml(type.label)} 요청 취소">요청 취소</button>` : '';
+        const cancelButton = isCancelableStatus(status) ? `<button type="button" class="data-small-action" data-hm-action="cancel-data-delete-request" data-hm-value="${escapeHtml(item.id)}" aria-label="${escapeHtml(type.label)} 요청 취소">요청 취소</button>` : '';
         return `<article class="data-request-card"><div class="data-request-head"><strong>${escapeHtml(STATUS_LABELS[status] || status)}</strong><small>${escapeHtml(formatDate(item.requestedAt))}</small></div><div class="data-request-type">${escapeHtml(type.label)}</div>${partnerNotice}<div class="data-request-body"><div><strong>요청 사유</strong><p>${escapeHtml(item.reason || '-')}</p></div><div><strong>운영자 답변</strong><p>${escapeHtml(item.adminMessage || '운영자 답변을 기다리는 중입니다.')}</p></div></div>${cancelButton}</article>`;
     }
     async function cancelDataDeleteRequest(requestId) {
@@ -292,7 +292,7 @@
         return `<section class="data-admin-execution" aria-label="승인된 Room 연결 해제 실행">
             <strong>최종 Room 연결 해제</strong>
             <p>공동 Room 기록은 보존하고, 요청자의 Room 연결 정보만 제거합니다.</p>
-            <button type="button" class="data-admin-execute" onclick="executeApprovedRoomDisconnect('${escapeJs(item.ownerUid)}','${escapeJs(item.id)}')">최종 연결 해제 실행</button>
+            <button type="button" class="data-admin-execute" data-hm-action="execute-room-disconnect" data-hm-value="${escapeHtml(item.ownerUid)}" data-hm-extra="${escapeHtml(item.id)}">최종 연결 해제 실행</button>
         </section>`;
     }
 
@@ -300,8 +300,8 @@
         const type = REQUEST_TYPES[item.requestType] || { label: item.requestTypeLabel || '데이터 요청' };
         const status = item.status || 'pending';
         const note = hmAdminNotes?.[item.ownerUid]?.[item.id]?.memo || '';
-        const actionButton = (value, label) => `<button class="${status === value ? `is-selected status-${value}` : ''}" onclick="processDataAdminRequest('${escapeJs(item.ownerUid)}','${escapeJs(item.id)}','${value}')" aria-pressed="${status === value ? 'true' : 'false'}">${label}</button>`;
-        return `<article class="data-admin-card"><div class="data-request-head"><strong>${escapeHtml(STATUS_LABELS[status] || status)}</strong><small>${escapeHtml(formatDate(item.requestedAt))}</small></div><h3>${escapeHtml(type.label)}</h3><dl><div><dt>사용자</dt><dd>${escapeHtml(item.requestedByEmail || item.requestedByUid || '-')}</dd></div><div><dt>Room</dt><dd>${escapeHtml(item.roomCode || '-')}</dd></div></dl><div class="data-admin-reason"><strong>요청 사유</strong><p>${escapeHtml(item.reason || '-')}</p></div><label>사용자에게 전달할 답변<textarea id="adminMessage_${escapeHtml(item.id)}" rows="3">${escapeHtml(item.adminMessage || '')}</textarea></label><label>관리자 내부 메모<textarea id="adminMemo_${escapeHtml(item.id)}" rows="2" placeholder="사용자에게 보이지 않습니다.">${escapeHtml(note)}</textarea></label><button type="button" class="data-admin-memo-save" onclick="saveDataAdminMemo('${escapeJs(item.ownerUid)}','${escapeJs(item.id)}')">관리자 메모 저장</button><div class="data-admin-actions">${actionButton('reviewing','검토 중')}${actionButton('hold','보류')}${actionButton('approved','승인')}${actionButton('rejected','거절')}</div>${renderDisconnectExecution(item)}</article>`;
+        const actionButton = (value, label) => `<button class="${status === value ? `is-selected status-${value}` : ''}" data-hm-action="process-data-admin-request" data-hm-value="${escapeHtml(item.ownerUid)}" data-hm-extra="${escapeHtml(item.id)}" data-hm-option="${value}" aria-pressed="${status === value ? 'true' : 'false'}">${label}</button>`;
+        return `<article class="data-admin-card"><div class="data-request-head"><strong>${escapeHtml(STATUS_LABELS[status] || status)}</strong><small>${escapeHtml(formatDate(item.requestedAt))}</small></div><h3>${escapeHtml(type.label)}</h3><dl><div><dt>사용자</dt><dd>${escapeHtml(item.requestedByEmail || item.requestedByUid || '-')}</dd></div><div><dt>Room</dt><dd>${escapeHtml(item.roomCode || '-')}</dd></div></dl><div class="data-admin-reason"><strong>요청 사유</strong><p>${escapeHtml(item.reason || '-')}</p></div><label>사용자에게 전달할 답변<textarea id="adminMessage_${escapeHtml(item.id)}" rows="3">${escapeHtml(item.adminMessage || '')}</textarea></label><label>관리자 내부 메모<textarea id="adminMemo_${escapeHtml(item.id)}" rows="2" placeholder="사용자에게 보이지 않습니다.">${escapeHtml(note)}</textarea></label><button type="button" class="data-admin-memo-save" data-hm-action="save-data-admin-memo" data-hm-value="${escapeHtml(item.ownerUid)}" data-hm-extra="${escapeHtml(item.id)}">관리자 메모 저장</button><div class="data-admin-actions">${actionButton('reviewing','검토 중')}${actionButton('hold','보류')}${actionButton('approved','승인')}${actionButton('rejected','거절')}</div>${renderDisconnectExecution(item)}</article>`;
     }
 
     async function saveDataAdminMemo(uid, requestId) {

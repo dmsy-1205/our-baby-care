@@ -1,0 +1,1009 @@
+
+/* RC2 v2.9.0 STEP1: Onboarding */
+.onboarding-modal { position: fixed; inset: 0; background: rgba(45,52,54,0.55); z-index: 1200; display: none; align-items: center; justify-content: center; padding: 18px; }
+.onboarding-card { width: 100%; max-width: 460px; max-height: 88vh; overflow-y: auto; background: #fff; border-radius: 30px; padding: 20px; border: 1px solid var(--hm-premium-border, #ECE6FF); box-shadow: 0 28px 80px rgba(45, 42, 53, 0.24); }
+.onboarding-choice-grid { display: grid; grid-template-columns: 1fr; gap: 10px; margin: 14px 0; }
+.onboarding-choice-card { text-align: left; display: grid; grid-template-columns: 46px 1fr; gap: 10px; align-items: center; background: linear-gradient(145deg, #fff, #FAF8FF); border: 1px solid var(--hm-premium-border, #ECE6FF); border-radius: 22px; padding: 14px; color: var(--hm-premium-text, #2D2A35); box-shadow: 0 10px 26px rgba(109, 76, 255, 0.08); }
+.onboarding-choice-card strong { display:block; font-size: .95rem; margin-bottom: 4px; }
+.onboarding-choice-card small { display:block; color: var(--hm-premium-sub, #7D7694); line-height: 1.45; font-weight: 500; }
+.onboarding-choice-icon { width: 46px; height: 46px; border-radius: 18px; background: linear-gradient(145deg, #F5F0FF, #FFF4FA); display:flex; align-items:center; justify-content:center; font-size: 1.28rem; }
+.onboarding-check { display:flex; align-items:center; gap:8px; color: var(--hm-premium-sub, #7D7694); font-size:.82rem; margin: 8px 0 12px; }
+.onboarding-check input { width: 18px; height: 18px; accent-color: var(--hm-premium-primary, #6D4CFF); }
+
+
+/* RC2 v2.9.0 STEP3: Room Empty State */
+.room-empty-state { display: none; text-align: center; padding: 22px 16px; margin: 10px 0 18px; border-radius: 26px; border: 1px solid var(--hm-premium-border, #ECE6FF); background: linear-gradient(145deg, rgba(255,255,255,.98), rgba(250,248,255,.98)); box-shadow: 0 12px 34px rgba(109, 76, 255, 0.085); }
+.room-empty-icon { width: 58px; height: 58px; border-radius: 22px; margin: 0 auto 12px; display:flex; align-items:center; justify-content:center; background: linear-gradient(145deg, #F5F0FF, #FFF4FA); font-size: 1.55rem; }
+.room-empty-title { color: var(--hm-premium-text, #2D2A35); font-weight: 800; font-size: 1.05rem; margin-bottom: 7px; }
+.room-empty-text { color: var(--hm-premium-sub, #7D7694); font-size: .86rem; line-height: 1.55; margin-bottom: 14px; }
+.room-empty-actions { display:grid; gap:8px; }
+.room-empty-actions .btn-secondary { padding: 13px; border-radius: 16px; }
+
+
+/* RC2 v2.9.0 STEP4: FAQ */
+.guide-faq .faq-item { background: rgba(250,248,255,.86); border: 1px solid var(--hm-premium-border, #ECE6FF); border-radius: 14px; padding: 10px; margin-top: 8px; color: var(--hm-premium-sub, #7D7694); font-size: .82rem; line-height: 1.55; }
+.guide-faq .faq-item strong { color: var(--hm-premium-text, #2D2A35); }
+
+
+/* RC2 v2.9.0 STEP5: Mission Delete UX touch target */
+.mission-clear-btn { min-width: 36px !important; min-height: 36px !important; border-radius: 12px !important; }
+.mission-row { grid-template-columns: 26px 1fr auto !important; }
+
+
+/* =========================================================
+   RC2 v2.9.1 HOTFIX: Mission row delete button visible on mobile
+   - 체크박스 / 입력칸 / 삭제버튼 3칸 구조 고정
+   - 모바일에서도 오른쪽 X 버튼이 줄 밖으로 밀리지 않도록 보호
+   ========================================================= */
+.mission-modal .mission-row,
+.mission-row {
+    display: grid !important;
+    grid-template-columns: 26px minmax(0, 1fr) 40px !important;
+    gap: 8px !important;
+    align-items: center !important;
+}
+.mission-row input[type="text"] {
+    min-width: 0 !important;
+}
+.mission-clear-btn {
+    width: 38px !important;
+    min-width: 38px !important;
+    height: 38px !important;
+    min-height: 38px !important;
+    padding: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 13px !important;
+    border: 1px solid #ffd6d6 !important;
+    background: #fff0f0 !important;
+    color: #d63031 !important;
+    font-size: 1.08rem !important;
+    font-weight: 900 !important;
+    line-height: 1 !important;
+    box-shadow: none !important;
+    white-space: nowrap !important;
+}
+.mission-clear-btn:disabled {
+    opacity: 0.38 !important;
+    filter: grayscale(0.2);
+}
+@media (max-width: 380px) {
+    .mission-modal .mission-row,
+    .mission-row {
+        grid-template-columns: 24px minmax(0, 1fr) 38px !important;
+        gap: 7px !important;
+    }
+    .mission-clear-btn {
+        width: 36px !important;
+        min-width: 36px !important;
+        height: 36px !important;
+        min-height: 36px !important;
+    }
+}
+
+/* =========================================================
+   RC2.10.2 SAFE: History Timeline UX
+   - 기록실 로딩 함수/DB days 구조 변경 없음
+   - 캘린더를 먼저 보여주고 통계는 하단으로 이동
+   - 기념일은 독립 패널로 분리하여 기록 렌더링과 충돌 방지
+   ========================================================= */
+.history-intro-note {
+    background: rgba(255,255,255,0.72);
+    border: 1px solid var(--hm-premium-border, #ECE6FF);
+    border-radius: 18px;
+    padding: 13px 16px;
+    margin: 0 0 14px;
+    color: var(--hm-premium-sub, #7D7694);
+    font-size: 0.84rem;
+    line-height: 1.55;
+    box-shadow: 0 8px 22px rgba(109, 76, 255, 0.055);
+}
+.history-hero-bottom { margin-top: 14px; }
+.anniversary-panel { margin-top: 14px; }
+.anniversary-card {
+    border: 1px solid var(--hm-premium-border, #ECE6FF);
+    background: linear-gradient(145deg, rgba(255,255,255,0.98), rgba(250,248,255,0.98));
+    border-radius: 24px;
+    padding: 16px;
+    box-shadow: 0 12px 34px rgba(109, 76, 255, 0.085);
+}
+.anniversary-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.anniversary-title { font-size: 0.98rem; font-weight: 850; color: var(--hm-premium-text, #2D2A35); margin-bottom: 4px; }
+.anniversary-sub { font-size: 0.78rem; color: var(--hm-premium-sub, #7D7694); line-height: 1.45; }
+.anniversary-toggle-btn, .anniversary-save-btn {
+    width: auto; padding: 9px 12px; border-radius: 14px; font-size: 0.78rem;
+    background: var(--hm-premium-primary-soft, #F1ECFF) !important;
+    color: var(--hm-premium-primary, #6D4CFF) !important;
+    border: 1px solid var(--hm-premium-border, #ECE6FF); box-shadow: none; white-space: nowrap;
+}
+.anniversary-save-btn { background: linear-gradient(135deg, var(--hm-premium-primary, #6D4CFF), var(--hm-premium-primary-2, #8E6CFF)) !important; color: #fff !important; box-shadow: 0 10px 22px rgba(109, 76, 255, 0.2); }
+.anniversary-form { display: none; grid-template-columns: 1fr auto; gap: 8px; margin: 10px 0 12px; }
+.anniversary-form.is-open { display: grid; }
+.anniversary-form input[type="date"] { width: 100%; border: 1px solid var(--hm-premium-border, #ECE6FF); background: #fff; border-radius: 14px; padding: 10px 12px; color: var(--hm-premium-text, #2D2A35); font-size: 0.88rem; }
+.anniversary-today { display: flex; align-items: center; gap: 12px; background: linear-gradient(135deg, #fff7fb, #f6f1ff); border: 1px solid var(--hm-premium-border, #ECE6FF); border-radius: 18px; padding: 12px; margin-bottom: 10px; }
+.anniversary-icon { width: 44px; height: 44px; min-width: 44px; display: flex; align-items: center; justify-content: center; border-radius: 16px; background: #fff; font-size: 1.25rem; }
+.anniversary-main { font-weight: 850; color: var(--hm-premium-primary, #6D4CFF); font-size: 0.98rem; margin-bottom: 3px; }
+.anniversary-caption { font-size: 0.78rem; color: var(--hm-premium-sub, #7D7694); }
+.anniversary-upcoming { display: grid; gap: 8px; }
+.anniversary-pill { display: flex; align-items: center; justify-content: space-between; gap: 8px; border: 1px solid var(--hm-premium-border, #ECE6FF); border-radius: 15px; padding: 10px 12px; background: rgba(255,255,255,0.72); color: var(--hm-premium-sub, #7D7694); font-size: 0.8rem; font-weight: 750; }
+.anniversary-pill strong { color: var(--hm-premium-primary, #6D4CFF); }
+.anniversary-selected-note { border: 1px solid var(--hm-premium-border, #ECE6FF); border-radius: 16px; padding: 10px 12px; margin-bottom: 10px; background: #fff; color: var(--hm-premium-sub, #7D7694); font-size: 0.8rem; line-height: 1.45; }
+@media (max-width: 430px) { .anniversary-form { grid-template-columns: 1fr; } .anniversary-head { flex-direction: column; } .anniversary-toggle-btn { width: 100%; } }
+
+/* =========================================================
+   RC2.10.3 SAFE: Anniversary Settings Popup
+   - 기록실/캘린더 렌더링 구조는 건드리지 않고 기념일 설정만 팝업으로 분리
+   ========================================================= */
+.anniversary-card-compact .anniversary-head { margin-bottom: 10px; }
+.anniversary-today.compact { margin-bottom: 0; }
+.anniversary-settings-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(45, 42, 53, 0.48);
+    z-index: 60;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 18px;
+}
+.anniversary-settings-modal {
+    width: 100%;
+    max-width: 520px;
+    max-height: 88vh;
+    overflow-y: auto;
+    background: #fff;
+    border: 1px solid var(--hm-premium-border, #ECE6FF);
+    border-radius: 30px;
+    padding: 20px;
+    box-shadow: 0 28px 80px rgba(45, 42, 53, 0.24);
+}
+.anniversary-settings-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 14px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--hm-premium-border, #ECE6FF);
+}
+.anniversary-settings-kicker {
+    color: var(--hm-premium-muted, #A49DB8);
+    font-size: 0.68rem;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    margin-bottom: 5px;
+}
+.anniversary-settings-head h2 {
+    margin: 0;
+    color: var(--hm-premium-text, #2D2A35);
+    font-size: 1.15rem;
+    letter-spacing: -0.03em;
+}
+.anniversary-modal-close {
+    width: auto;
+    padding: 9px 12px;
+    border-radius: 14px;
+    font-size: 0.8rem;
+    background: var(--hm-premium-primary-soft, #F1ECFF) !important;
+    color: var(--hm-premium-primary, #6D4CFF) !important;
+    border: 1px solid var(--hm-premium-border, #ECE6FF);
+}
+.anniversary-settings-section {
+    background: linear-gradient(145deg, rgba(255,255,255,0.98), rgba(250,248,255,0.98));
+    border: 1px solid var(--hm-premium-border, #ECE6FF);
+    border-radius: 22px;
+    padding: 14px;
+    margin-bottom: 12px;
+    box-shadow: 0 8px 22px rgba(109, 76, 255, 0.055);
+}
+.anniversary-settings-title {
+    font-size: 0.9rem;
+    font-weight: 850;
+    color: var(--hm-premium-text, #2D2A35);
+    margin-bottom: 5px;
+}
+.anniversary-settings-help {
+    color: var(--hm-premium-sub, #7D7694);
+    font-size: 0.78rem;
+    line-height: 1.45;
+    margin-bottom: 10px;
+}
+.anniversary-settings-row,
+.anniversary-add-grid {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 8px;
+    align-items: center;
+}
+.anniversary-add-grid {
+    grid-template-columns: 150px 1fr 120px auto;
+}
+.anniversary-settings-modal input,
+.anniversary-settings-modal select {
+    width: 100%;
+    border: 1px solid var(--hm-premium-border, #ECE6FF);
+    background: #fff;
+    border-radius: 14px;
+    padding: 11px 12px;
+    color: var(--hm-premium-text, #2D2A35);
+    font-size: 0.86rem;
+    outline: none;
+}
+.anniversary-settings-modal input:focus,
+.anniversary-settings-modal select:focus {
+    border-color: var(--hm-premium-primary, #6D4CFF);
+    box-shadow: 0 0 0 3px rgba(109, 76, 255, 0.10);
+}
+.anniversary-primary-btn {
+    width: auto;
+    padding: 11px 14px;
+    border-radius: 14px;
+    font-size: 0.84rem;
+    background: linear-gradient(135deg, var(--hm-premium-primary, #6D4CFF), var(--hm-premium-primary-2, #8E6CFF)) !important;
+    color: #fff !important;
+    box-shadow: 0 10px 22px rgba(109, 76, 255, 0.2);
+    white-space: nowrap;
+}
+.anniversary-custom-list {
+    display: grid;
+    gap: 8px;
+}
+.anniversary-custom-item {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 10px;
+    align-items: center;
+    background: #fff;
+    border: 1px solid var(--hm-premium-border, #ECE6FF);
+    border-radius: 18px;
+    padding: 10px;
+}
+.anniversary-custom-icon {
+    width: 42px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 15px;
+    background: linear-gradient(145deg, #F5F0FF, #FFF4FA);
+    font-size: 1.18rem;
+}
+.anniversary-custom-title {
+    color: var(--hm-premium-text, #2D2A35);
+    font-weight: 850;
+    font-size: 0.86rem;
+    margin-bottom: 3px;
+}
+.anniversary-custom-date {
+    color: var(--hm-premium-sub, #7D7694);
+    font-size: 0.76rem;
+}
+.anniversary-delete-btn {
+    width: auto;
+    padding: 8px 10px;
+    border-radius: 12px;
+    background: #fff0f4 !important;
+    color: #ff4d6d !important;
+    border: 1px solid #ffd6df;
+    font-size: 0.76rem;
+    box-shadow: none;
+}
+.anniversary-empty-note {
+    color: var(--hm-premium-sub, #7D7694);
+    font-size: 0.8rem;
+    line-height: 1.5;
+    text-align: center;
+    padding: 16px 10px;
+    border: 1px dashed var(--hm-premium-border, #ECE6FF);
+    border-radius: 18px;
+    background: rgba(255,255,255,0.6);
+}
+@media (max-width: 640px) {
+    .anniversary-settings-modal { max-height: 84vh; padding: 18px; border-radius: 26px; }
+    .anniversary-settings-row,
+    .anniversary-add-grid { grid-template-columns: 1fr; }
+    .anniversary-primary-btn,
+    .anniversary-modal-close { width: 100%; }
+    .anniversary-settings-head { flex-direction: column; }
+}
+
+/* =========================================================
+   RC2.10.4 HOTFIX: Anniversary settings popup layer order
+   - 기록실 팝업 위에서 기념일 설정 팝업이 항상 최상단에 표시되도록 보정
+   - History Render / displayHistory() / 저장 구조 변경 없음
+   ========================================================= */
+body > .anniversary-settings-overlay {
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100vw !important;
+    height: 100dvh !important;
+    min-height: 100dvh !important;
+    display: none;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 18px max(12px, env(safe-area-inset-right)) max(18px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left)) !important;
+    overflow: hidden !important;
+    background: rgba(35, 33, 43, 0.50) !important;
+    backdrop-filter: blur(9px) !important;
+    -webkit-backdrop-filter: blur(9px) !important;
+    overscroll-behavior: contain !important;
+    z-index: 10050 !important;
+}
+
+body > .anniversary-settings-overlay[style*="display: flex"] {
+    display: flex !important;
+}
+
+body > .anniversary-settings-overlay .anniversary-settings-modal {
+    position: relative !important;
+    z-index: 10051 !important;
+    margin: auto !important;
+}
+
+@media (max-width: 560px) {
+    body > .anniversary-settings-overlay {
+        align-items: center !important;
+        padding: 12px 10px max(12px, env(safe-area-inset-bottom)) !important;
+    }
+    body > .anniversary-settings-overlay .anniversary-settings-modal {
+        max-height: calc(100dvh - 24px) !important;
+    }
+}
+
+/* =========================================================
+   RC2.10.5 SAFE: Anniversary Settings Popup UX
+   - 기념일 설정 팝업 UI만 개선
+   - History Render / displayHistory() / Firebase 경로 변경 없음
+   ========================================================= */
+body > .anniversary-settings-overlay .anniversary-settings-modal {
+    max-width: 620px !important;
+    padding: 0 !important;
+    border-radius: 32px !important;
+    background: linear-gradient(180deg, #fff, #fbf9ff) !important;
+    overflow: hidden !important;
+}
+body > .anniversary-settings-overlay .anniversary-settings-modal::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 128px;
+    background: radial-gradient(circle at 18% 20%, rgba(255, 119, 169, 0.22), transparent 36%), radial-gradient(circle at 82% 12%, rgba(109, 76, 255, 0.18), transparent 34%);
+    pointer-events: none;
+}
+.anniversary-settings-hero {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    border-bottom: 1px solid rgba(236, 230, 255, 0.9) !important;
+    margin: 0 !important;
+    padding: 22px 22px 16px !important;
+    background: rgba(255,255,255,0.88);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+.anniversary-settings-hero h2 { font-size: 1.28rem !important; }
+.anniversary-settings-hero p {
+    margin: 6px 0 0;
+    color: var(--hm-premium-sub, #7D7694);
+    font-size: 0.82rem;
+    line-height: 1.45;
+}
+.anniversary-modal-close {
+    width: 38px !important;
+    height: 38px !important;
+    min-width: 38px !important;
+    padding: 0 !important;
+    border-radius: 50% !important;
+    font-size: 1.25rem !important;
+    line-height: 1 !important;
+}
+.anniversary-settings-section {
+    margin: 14px 18px !important;
+    padding: 16px !important;
+    border-radius: 24px !important;
+}
+.anniversary-list-card { margin-bottom: 18px !important; }
+.anniversary-section-label {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    color: var(--hm-premium-text, #2D2A35);
+    font-size: 0.96rem;
+    font-weight: 900;
+    margin-bottom: 7px;
+}
+.anniversary-section-label span {
+    width: 34px;
+    height: 34px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 13px;
+    background: #fff;
+    box-shadow: 0 8px 18px rgba(109, 76, 255, 0.08);
+}
+.anniversary-field {
+    display: grid;
+    gap: 6px;
+}
+.anniversary-field > span {
+    color: var(--hm-premium-muted, #A49DB8);
+    font-size: 0.72rem;
+    font-weight: 850;
+    padding-left: 2px;
+}
+.anniversary-type-grid {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 8px;
+    margin: 12px 0;
+}
+.anniversary-type-chip {
+    display: grid;
+    place-items: center;
+    gap: 4px;
+    min-height: 62px;
+    padding: 8px 4px;
+    border-radius: 18px;
+    border: 1px solid var(--hm-premium-border, #ECE6FF);
+    background: rgba(255,255,255,0.82) !important;
+    color: var(--hm-premium-sub, #7D7694) !important;
+    box-shadow: none !important;
+    cursor: pointer;
+}
+.anniversary-type-chip span { font-size: 1.22rem; line-height: 1; }
+.anniversary-type-chip small { font-size: 0.68rem; font-weight: 800; }
+.anniversary-type-chip.is-selected {
+    border-color: rgba(109, 76, 255, 0.42) !important;
+    background: linear-gradient(145deg, #f4efff, #fff5fa) !important;
+    color: var(--hm-premium-primary, #6D4CFF) !important;
+    box-shadow: 0 10px 22px rgba(109, 76, 255, 0.11) !important;
+}
+.anniversary-add-grid {
+    grid-template-columns: 150px 1fr auto !important;
+    align-items: end !important;
+}
+.anniversary-add-btn { min-height: 43px; }
+.anniversary-custom-item {
+    border-radius: 20px !important;
+    padding: 12px !important;
+    box-shadow: 0 8px 18px rgba(109, 76, 255, 0.045);
+}
+.anniversary-delete-btn:hover,
+.anniversary-type-chip:hover,
+.anniversary-primary-btn:hover,
+.anniversary-modal-close:hover {
+    transform: translateY(-1px);
+}
+
+@media (max-width: 640px) {
+    body > .anniversary-settings-overlay .anniversary-settings-modal {
+        border-radius: 28px !important;
+    }
+    .anniversary-settings-hero {
+        padding: 18px 18px 14px !important;
+        flex-direction: row !important;
+        align-items: flex-start !important;
+    }
+    .anniversary-settings-section { margin: 12px !important; padding: 14px !important; }
+    .anniversary-type-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .anniversary-add-grid,
+    .anniversary-settings-row { grid-template-columns: 1fr !important; }
+    .anniversary-primary-btn { width: 100% !important; }
+}
+
+@media (max-width: 380px) {
+    .anniversary-type-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .anniversary-settings-hero h2 { font-size: 1.12rem !important; }
+}
+
+/* =========================================================
+   RC2.10.6 Anniversary D+ Auto Milestones
+   - History Render 미수정
+   - firstMetDate 기준 계산형 UI만 추가
+========================================================= */
+.anniversary-auto-preview {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin-top: 10px;
+}
+.anniversary-auto-preview span {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    border: 1px solid var(--hm-premium-border, #ECE6FF);
+    background: rgba(255,255,255,0.82);
+    border-radius: 999px;
+    padding: 7px 10px;
+    font-size: 0.74rem;
+    color: var(--hm-premium-sub, #7D7694);
+    font-weight: 800;
+}
+.anniversary-auto-preview b {
+    color: var(--hm-premium-primary, #6D4CFF);
+    font-weight: 900;
+}
+.anniversary-auto-card {
+    background: linear-gradient(135deg, rgba(255,255,255,0.96), rgba(246,241,255,0.86)) !important;
+}
+.anniversary-auto-list {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 8px;
+    margin-top: 10px;
+}
+.anniversary-auto-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-height: 82px;
+    border: 1px solid var(--hm-premium-border, #ECE6FF);
+    border-radius: 18px;
+    background: rgba(255,255,255,0.82);
+    text-align: center;
+    padding: 10px 8px;
+}
+.anniversary-auto-icon {
+    width: 34px;
+    height: 34px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 14px;
+    background: #fff;
+    font-size: 1.05rem;
+}
+.anniversary-auto-item strong {
+    display: block;
+    color: var(--hm-premium-primary, #6D4CFF);
+    font-size: 0.84rem;
+    font-weight: 900;
+    line-height: 1.2;
+}
+.anniversary-auto-item small {
+    display: block;
+    margin-top: 2px;
+    color: var(--hm-premium-sub, #7D7694);
+    font-size: 0.68rem;
+    font-weight: 800;
+    line-height: 1.2;
+}
+@media (max-width: 720px) {
+    .anniversary-auto-list { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 430px) {
+    .anniversary-auto-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .anniversary-auto-preview span { width: 100%; justify-content: space-between; }
+}
+
+/* =========================================================
+   RC2.10.7 Anniversary Calendar Icon Markers
+   - History Render 수정 없이 anniversary.js DOM 후처리로 표시
+   ========================================================= */
+.history-calendar-grid .calendar-day.has-anniversary {
+    border-color: rgba(255,107,122,0.28);
+}
+.history-calendar-grid .calendar-day.has-anniversary:not(.has-record) {
+    background: linear-gradient(145deg, #FFFFFF, #FFF7FB);
+    color: var(--hm-premium-text);
+}
+.anniversary-calendar-icons {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 15px;
+    margin-top: 2px;
+    font-size: 0.76rem;
+    line-height: 1;
+    letter-spacing: -0.12em;
+    filter: drop-shadow(0 2px 4px rgba(255,107,122,0.18));
+}
+.history-calendar-grid .calendar-day .calendar-icons + .anniversary-calendar-icons {
+    margin-top: 1px;
+}
+@media (max-width: 480px) {
+    .anniversary-calendar-icons {
+        font-size: 0.68rem;
+        min-height: 13px;
+    }
+}
+
+/* =========================================================
+   RC2.10.8 Anniversary Selected Date Detail
+   - History Render 원본 수정 없이 선택 날짜 카드 아래 append
+   ========================================================= */
+.history-calendar-grid .calendar-day.anniversary-clickable-date {
+    cursor: pointer;
+}
+
+.history-calendar-grid .calendar-day.has-anniversary:not(.has-record) {
+    background: rgba(255, 246, 246, 0.98);
+    border-color: rgba(255, 118, 117, 0.34);
+    color: #b65f68;
+    font-weight: 900;
+}
+
+.anniversary-selected-detail-card {
+    margin-top: 12px;
+    padding: 14px;
+    border-radius: 18px;
+    border: 1px solid rgba(255, 118, 117, 0.22);
+    background: linear-gradient(135deg, #fff8f8 0%, #fffdfb 100%);
+    box-shadow: 0 10px 24px rgba(214, 112, 122, 0.10);
+    text-align: left;
+}
+
+.anniversary-selected-detail-head {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.anniversary-selected-detail-head > span {
+    width: 36px;
+    height: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 14px;
+    background: white;
+    box-shadow: 0 6px 16px rgba(214, 112, 122, 0.10);
+}
+
+.anniversary-selected-detail-head strong {
+    display: block;
+    color: #5d3f46;
+    font-size: 0.96rem;
+}
+
+.anniversary-selected-detail-head small {
+    display: block;
+    margin-top: 3px;
+    color: #9b7378;
+    font-size: 0.76rem;
+}
+
+.anniversary-selected-dday-line {
+    margin: 8px 0 10px;
+    padding: 9px 11px;
+    border-radius: 13px;
+    background: white;
+    color: #7b5058;
+    font-size: 0.83rem;
+}
+
+.anniversary-selected-detail-list {
+    display: grid;
+    gap: 8px;
+}
+
+.anniversary-selected-detail-item {
+    display: grid;
+    grid-template-columns: 34px 1fr;
+    gap: 9px;
+    align-items: center;
+    padding: 9px 10px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.82);
+    border: 1px solid rgba(255, 118, 117, 0.14);
+}
+
+.anniversary-selected-detail-icon {
+    width: 30px;
+    height: 30px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    background: #fff4f4;
+}
+
+.anniversary-selected-detail-item strong {
+    display: block;
+    color: #5d3f46;
+    font-size: 0.9rem;
+}
+
+.anniversary-selected-detail-item small,
+.anniversary-selected-detail-empty {
+    display: block;
+    color: #9b7378;
+    font-size: 0.74rem;
+    line-height: 1.45;
+}
+
+
+/* =========================================================
+   RC2.10.10 Responsive Popup QA Stabilization
+   - 기념일 설정 팝업 중앙 고정, 모바일 safe-area, 작은 화면 overflow 보강
+   - History Render / 저장 구조 변경 없음
+   ========================================================= */
+body.modal-open {
+    overflow: hidden !important;
+    touch-action: none;
+}
+body > .anniversary-settings-overlay {
+    isolation: isolate !important;
+    overscroll-behavior: none !important;
+}
+body > .anniversary-settings-overlay .anniversary-settings-modal {
+    width: min(620px, calc(100vw - 24px)) !important;
+    max-height: min(86dvh, 760px) !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain !important;
+    -webkit-overflow-scrolling: touch !important;
+}
+.anniversary-type-chip,
+.anniversary-primary-btn,
+.anniversary-modal-close,
+.anniversary-delete-btn,
+.anniversary-toggle-btn {
+    min-height: 44px;
+}
+.anniversary-settings-modal input[type="date"],
+.anniversary-settings-modal input[type="text"] {
+    min-height: 44px;
+}
+@media (max-width: 430px) {
+    body > .anniversary-settings-overlay {
+        padding: max(10px, env(safe-area-inset-top)) 8px max(10px, env(safe-area-inset-bottom)) !important;
+    }
+    body > .anniversary-settings-overlay .anniversary-settings-modal {
+        width: calc(100vw - 16px) !important;
+        max-height: calc(100dvh - 20px) !important;
+        border-radius: 24px !important;
+    }
+    .anniversary-custom-item {
+        grid-template-columns: 38px 1fr !important;
+    }
+    .anniversary-custom-item .anniversary-delete-btn {
+        grid-column: 1 / -1;
+        width: 100% !important;
+    }
+}
+@media (min-width: 431px) and (max-width: 820px) {
+    body > .anniversary-settings-overlay .anniversary-settings-modal {
+        max-height: calc(100dvh - 36px) !important;
+    }
+}
+
+/* =========================================================
+   RC2.10.13 HOTFIX: Auto anniversary card layout
+   - 자동 계산 기념일 안내문이 좁은 칸에 갇히는 문제 수정
+   - 저장 구조 / History Render / displayHistory() 변경 없음
+   ========================================================= */
+.anniversary-auto-list > .anniversary-empty-note {
+    grid-column: 1 / -1 !important;
+    width: 100% !important;
+    min-height: 0 !important;
+    padding: 18px 16px !important;
+    text-align: left !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    line-height: 1.6 !important;
+}
+.anniversary-auto-list:has(> .anniversary-empty-note) {
+    grid-template-columns: 1fr !important;
+}
+@media (max-width: 640px) {
+    .anniversary-auto-list > .anniversary-empty-note {
+        text-align: center !important;
+        padding: 16px 14px !important;
+    }
+}
+
+/* =========================================================
+   HearMe2nite RC2.11~RC2.15 Product Polish Pack
+   읽기 전용 대시보드 / 기록실 검색 / 타임라인 / 
+   ========================================================= */
+.hm-beta-dashboard{width:100%;box-sizing:border-box;margin:14px 0 18px;padding:16px;border:1px solid rgba(124,92,255,.18);border-radius:22px;background:linear-gradient(135deg,rgba(255,255,255,.95),rgba(247,244,255,.95));box-shadow:0 10px 30px rgba(93,69,180,.08)}
+.hm-beta-dashboard-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}.hm-beta-dashboard-head span{display:block;font-size:.68rem;text-transform:uppercase;letter-spacing:.08em;color:#a39ac1;font-weight:800}.hm-beta-dashboard-head strong{display:block;font-size:1.08rem;color:#2f2a3d}.hm-beta-dashboard-head button,.hm-beta-search-row button{border:0;border-radius:999px;background:#7c5cff;color:#fff;padding:10px 14px;font-weight:800;cursor:pointer;white-space:nowrap}.hm-beta-dashboard-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.hm-beta-tile{background:#fff;border:1px solid rgba(124,92,255,.12);border-radius:18px;padding:12px;min-width:0}.hm-beta-tile small{display:block;color:#8c83a8;font-weight:700;font-size:.74rem;margin-bottom:6px}.hm-beta-tile strong{display:block;color:#2f2a3d;font-size:.95rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.hm-beta-history-tools{margin:14px 0}.hm-beta-history-stats{border-radius:20px;background:#fff;border:1px solid rgba(124,92,255,.12);padding:14px;margin-bottom:10px}.hm-beta-history-title{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}.hm-beta-history-title span{font-size:.72rem;color:#a39ac1;font-weight:800}.hm-beta-history-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.hm-beta-history-grid div{border-radius:14px;background:#f9f7ff;padding:10px;text-align:center}.hm-beta-history-grid strong{display:block;color:#473c68;font-size:.96rem;word-break:keep-all}.hm-beta-history-grid small{display:block;color:#8c83a8;font-size:.72rem;margin-top:4px}.hm-beta-search-row{display:flex;gap:8px;margin:10px 0}.hm-beta-search-row input{flex:1;border:1px solid rgba(124,92,255,.18);border-radius:14px;padding:12px;background:#fff}.hm-beta-search-result{display:grid;gap:8px}.hm-beta-search-result button{display:flex;justify-content:space-between;gap:10px;text-align:left;border:1px solid rgba(124,92,255,.12);background:#fff;border-radius:14px;padding:11px;cursor:pointer}.hm-beta-search-result span{color:#7b7392;font-size:.82rem}.hm-beta-empty{padding:12px;border-radius:14px;background:#fff;color:#8c83a8;text-align:center}.hm-beta-timeline{display:flex;gap:8px;overflow-x:auto;padding:4px 0 10px}.hm-beta-timeline-title{flex:0 0 auto;align-self:center;font-weight:900;color:#6c5ce7;font-size:.84rem;padding:0 4px}.hm-beta-timeline button{flex:0 0 auto;border:1px solid rgba(124,92,255,.14);background:#fff;border-radius:999px;padding:9px 12px;display:flex;gap:6px;align-items:center;cursor:pointer}.hm-beta-timeline strong{font-size:.82rem;color:#3b3350}.hm-beta-timeline small{font-size:.72rem;color:#9a92b0}.hm-beta-panel-overlay{z-index:13050!important}.hm-beta-panel{max-width:520px}.hm-beta-check-list{display:grid;gap:10px}.hm-beta-check-list div{display:flex;align-items:center;gap:10px;background:#f8f6ff;border:1px solid rgba(124,92,255,.12);border-radius:14px;padding:12px}.hm-beta-note{color:#7b7392;line-height:1.55;font-size:.88rem;margin-top:14px}
+@media (max-width:640px){.hm-beta-dashboard-grid,.hm-beta-history-grid{grid-template-columns:1fr}.hm-beta-dashboard{border-radius:18px;padding:14px}.hm-beta-dashboard-head{align-items:flex-start}.hm-beta-search-row{flex-direction:column}.hm-beta-search-row button{width:100%}.hm-beta-search-result button{display:block}.hm-beta-search-result span{display:block;margin-top:4px}.hm-beta-timeline{padding-bottom:12px}}
+
+/* v0.9 Product polish: no internal test panels exposed */
+.app-version-badge{letter-spacing:.02em;}
+.hm-beta-dashboard-head button{display:none!important;}
+.hm-accessibility-polish button,.hm-accessibility-polish input,.hm-accessibility-polish select,.hm-accessibility-polish textarea{min-height:44px;}
+.hm-accessibility-polish :focus-visible{outline:3px solid rgba(124,92,255,.45);outline-offset:3px;}
+
+
+/* v0.9.10 Card Height Polish
+   기상 시간 / 체중 카드를 다른 홈 카드와 같은 폭과 높이 흐름으로 정리.
+   저장, Firebase, History 렌더링 로직에는 영향 없음. */
+.compact-metrics-row {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 14px !important;
+    margin-bottom: 14px !important;
+}
+.compact-metrics-row .input-group {
+    width: 100% !important;
+    margin-bottom: 0 !important;
+}
+.compact-metrics-row .metric-daily-card {
+    width: 100% !important;
+    min-height: 86px !important;
+    padding: 16px 18px !important;
+    grid-template-columns: auto 1fr auto !important;
+    align-items: center !important;
+}
+.compact-metrics-row .daily-card-title {
+    white-space: normal !important;
+    word-break: keep-all !important;
+}
+.compact-metrics-row .daily-card-sub {
+    display: -webkit-box !important;
+    -webkit-line-clamp: 1 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+    line-height: 1.35 !important;
+}
+@media (max-width: 430px) {
+    .compact-metrics-row {
+        gap: 14px !important;
+        margin-bottom: 14px !important;
+    }
+    .compact-metrics-row .metric-daily-card {
+        min-height: 86px !important;
+        padding: 16px 18px !important;
+    }
+    .compact-metrics-row .daily-card-title {
+        font-size: 0.92rem !important;
+        line-height: 1.25 !important;
+    }
+    .compact-metrics-row .daily-card-sub {
+        font-size: 0.78rem !important;
+    }
+}
+@media (max-width: 360px) {
+    .compact-metrics-row .metric-daily-card {
+        min-height: 84px !important;
+    }
+}
+
+
+/* =========================================================
+   HearMe2nite v0.9.11 Card Layout Normalize Hotfix
+   목표: PC / Tablet / Fold / Mobile 에서 홈 기록 카드 높이와 여백을 일률적으로 정리.
+   영향 범위: CSS only. Firebase / 저장 / History / Anniversary 로직 변경 없음.
+   ========================================================= */
+:root {
+    --hm-v0911-card-height: 96px;
+    --hm-v0911-card-padding-y: 16px;
+    --hm-v0911-card-padding-x: 18px;
+    --hm-v0911-icon-size: 52px;
+    --hm-v0911-card-gap: 14px;
+}
+
+/* 홈 입력 카드 기본 크기 통일 */
+.container .daily-card {
+    box-sizing: border-box !important;
+    width: 100% !important;
+    min-height: var(--hm-v0911-card-height) !important;
+    height: var(--hm-v0911-card-height) !important;
+    padding: var(--hm-v0911-card-padding-y) var(--hm-v0911-card-padding-x) !important;
+    display: grid !important;
+    grid-template-columns: auto minmax(0, 1fr) auto !important;
+    align-items: center !important;
+    column-gap: 14px !important;
+    overflow: hidden !important;
+}
+
+/* 기상/체중이 들어있는 row도 다른 카드와 같은 흐름으로 */
+.container > .row,
+.compact-metrics-row {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: var(--hm-v0911-card-gap) !important;
+    margin-bottom: var(--hm-v0911-card-gap) !important;
+    align-items: stretch !important;
+}
+
+.container > .row .input-group,
+.compact-metrics-row .input-group {
+    width: 100% !important;
+    margin: 0 !important;
+    height: auto !important;
+    display: block !important;
+}
+
+.container > .row .daily-card,
+.compact-metrics-row .metric-daily-card {
+    min-height: var(--hm-v0911-card-height) !important;
+    height: var(--hm-v0911-card-height) !important;
+    padding: var(--hm-v0911-card-padding-y) var(--hm-v0911-card-padding-x) !important;
+}
+
+.container .daily-card-icon {
+    width: var(--hm-v0911-icon-size) !important;
+    height: var(--hm-v0911-icon-size) !important;
+    min-width: var(--hm-v0911-icon-size) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 1.26rem !important;
+}
+
+.container .daily-card-title {
+    display: block !important;
+    margin: 0 0 4px 0 !important;
+    font-size: 1rem !important;
+    line-height: 1.22 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+}
+
+.container .daily-card-sub {
+    display: block !important;
+    margin: 0 !important;
+    font-size: 0.86rem !important;
+    line-height: 1.28 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    word-break: keep-all !important;
+}
+
+.container .daily-card-arrow {
+    align-self: center !important;
+    justify-self: end !important;
+    width: 22px !important;
+    min-width: 22px !important;
+}
+
+/* 태블릿/PC에서도 불필요하게 카드가 커지지 않게 고정 */
+@media (min-width: 768px) {
+    :root {
+        --hm-v0911-card-height: 92px;
+        --hm-v0911-card-padding-y: 16px;
+        --hm-v0911-card-padding-x: 18px;
+        --hm-v0911-icon-size: 50px;
+    }
+    .container > .row,
+    .compact-metrics-row {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+/* 모바일: 글자가 너무 커져 카드 높이를 밀지 않게 제한 */
+@media (max-width: 430px) {
+    :root {
+        --hm-v0911-card-height: 92px;
+        --hm-v0911-card-padding-y: 15px;
+        --hm-v0911-card-padding-x: 16px;
+        --hm-v0911-icon-size: 50px;
+    }
+    .container .daily-card {
+        column-gap: 12px !important;
+    }
+    .container .daily-card-title {
+        font-size: 0.95rem !important;
+    }
+    .container .daily-card-sub {
+        font-size: 0.82rem !important;
+    }
+}
+
+/* 아주 좁은 화면: 터치 영역은 유지하되 글자만 살짝 줄임 */
+@media (max-width: 360px) {
+    :root {
+        --hm-v0911-card-height: 90px;
+        --hm-v0911-card-padding-x: 14px;
+        --hm-v0911-icon-size: 48px;
+    }
+    .container .daily-card-title {
+        font-size: 0.9rem !important;
+    }
+    .container .daily-card-sub {
+        font-size: 0.78rem !important;
+    }
+}
+
+

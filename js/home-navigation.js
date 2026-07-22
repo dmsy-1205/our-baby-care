@@ -119,6 +119,16 @@
         return section;
     }
 
+    function createBrandSignature() {
+        if ($('hmHomeBrandSignature')) return $('hmHomeBrandSignature');
+        const signature = document.createElement('footer');
+        signature.id = 'hmHomeBrandSignature';
+        signature.className = 'hm-home-brand-signature';
+        signature.setAttribute('aria-label', 'HearMe2nite');
+        signature.innerHTML = '<span class="hm-home-brand-mark" aria-hidden="true">❤☾</span><strong>HearMe2nite</strong>';
+        return signature;
+    }
+
     function createCategoryOverlay() {
         if ($('hmAdaptiveCategoryOverlay')) return $('hmAdaptiveCategoryOverlay');
         const overlay = document.createElement('div');
@@ -156,6 +166,8 @@
         while (mountedEditors.length) {
             const item = mountedEditors.pop();
             if (item.momentsSaveButton) item.momentsSaveButton.textContent = item.momentsSaveText;
+            if (item.dialogRole) item.modal.setAttribute('role', item.dialogRole); else item.modal.removeAttribute('role');
+            if (item.dialogAriaModal) item.modal.setAttribute('aria-modal', item.dialogAriaModal); else item.modal.removeAttribute('aria-modal');
             item.modal.classList.remove('hm-route-embedded-editor');
             item.overlay.appendChild(item.modal);
         }
@@ -172,7 +184,11 @@
             if (!overlay || !modal) return;
             const momentsSaveButton = type === 'outing' ? modal.querySelector('#dailyMomentsSaveButton') : null;
             const momentsSaveText = momentsSaveButton?.textContent || '';
-            mountedEditors.push({ overlay, modal, momentsSaveButton, momentsSaveText });
+            const dialogRole = modal.getAttribute('role');
+            const dialogAriaModal = modal.getAttribute('aria-modal');
+            mountedEditors.push({ overlay, modal, momentsSaveButton, momentsSaveText, dialogRole, dialogAriaModal });
+            modal.setAttribute('role', 'region');
+            modal.removeAttribute('aria-modal');
             modal.classList.add('hm-route-embedded-editor');
             modal.querySelector('.card-conversation-panel')?.remove();
             if ((type === 'feedback' || type === 'reward') && typeof window.hmApplyManagerOnlyModalView === 'function') {
@@ -400,7 +416,7 @@
         if (!container) return;
         const keep = new Set([
             $('saveStatus'), container.querySelector('.app-title-row'), container.querySelector('.app-subtitle'), container.querySelector('.app-meta-row'),
-            $('hmAdaptiveProfileStrip'), dateGroup(), $('chatLaunchCard'), $('hmNotificationBar'), $('hmProductDashboard'), $('hmAdaptiveCategoryGrid')
+            $('hmAdaptiveProfileStrip'), dateGroup(), $('chatLaunchCard'), $('hmNotificationBar'), $('hmProductDashboard'), $('hmAdaptiveCategoryGrid'), $('hmHomeBrandSignature')
         ]);
         Array.from(container.children).forEach((node) => {
             if (keep.has(node) || node.classList.contains('daily-modal-overlay') || node.classList.contains('room-settings-overlay')) {
@@ -425,12 +441,14 @@
         const placeAfter = (anchor, node) => { if (anchor && node && anchor.nextElementSibling !== node) anchor.insertAdjacentElement('afterend', node); };
         const profile = createProfileStrip();
         const grid = createCategoryGrid();
+        const signature = createBrandSignature();
         placeAfter(meta, profile);
         placeAfter(profile, notice);
         if (summary) placeAfter(notice, summary);
         placeAfter(summary || notice, chat);
         placeAfter(chat, date);
         placeAfter(date, grid);
+        placeAfter(grid, signature);
         markOriginalHomeContent();
         updateRoleAwareCategoryGrid();
         updateProfileStrip();

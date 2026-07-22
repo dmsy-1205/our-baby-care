@@ -62,7 +62,18 @@ trees.forEach(copyTree);
 
 const requiredOutputs = [
   'index.html', 'admin.html', 'service-worker.js', 'manifest.webmanifest',
-  'js/config.js', 'js/moments.js', 'js/card-conversations.js', 'css/style.css', 'admin/admin-bootstrap.js'
+  'js/config.js', 'js/access-policy.js', 'js/save-state.js', 'js/ui-events.js', 'js/moments.js', 'js/card-conversations.js', 'css/style.css',
+  'css/tokens.css', 'css/legacy/base.css', 'css/legacy/release-foundation.css',
+  'css/components/app-shell.css', 'css/components/app-shell-layout.css', 'css/components/top-bar.css',
+  'css/components/app-shell-responsive.css', 'css/components/modal.css', 'css/components/modal-theme.css',
+  'css/components/modal-surfaces.css', 'css/components/modal-foundation.css',
+  'css/components/card.css', 'css/components/card-foundation.css',
+  'css/components/input.css', 'css/components/button.css',
+  'css/screens/home.css', 'css/screens/home-layout.css', 'css/screens/home-categories.css',
+  'css/screens/category-routes.css', 'css/screens/missions.css', 'css/screens/daily.css',
+  'css/screens/records.css', 'css/screens/records-theme.css', 'css/screens/records-gallery.css',
+  'css/screens/settings-data.css', 'css/screens/settings-account.css',
+  'css/screens/settings-data-requests.css', 'css/screens/relationship.css', 'admin/admin-bootstrap.js'
 ];
 requiredOutputs.forEach((relativePath) => {
   if (!fs.existsSync(path.join(output, relativePath))) {

@@ -1,0 +1,33 @@
+/* =========================================================
+   HearMe2nite v0.9.15 Beta - Button / Animation System
+   ========================================================= */
+:root {
+  --h2n-btn-radius: 16px;
+  --h2n-motion-fast: 150ms;
+  --h2n-motion-normal: 220ms;
+}
+button, .btn-main, .btn-connect, .daily-modal-save, .mission-open-btn, .room-open-btn, .guide-primary,
+.anniversary-save-btn, .anniversary-add-btn {
+  min-height: 44px;
+  border-radius: var(--h2n-btn-radius) !important;
+  transition: transform var(--h2n-motion-fast) ease, box-shadow var(--h2n-motion-fast) ease, opacity var(--h2n-motion-fast) ease !important;
+}
+button:active, .btn-main:active, .daily-card:active, .room-settings-card:active, .history-launch-card:active {
+  transform: scale(0.985) !important;
+}
+.daily-modal-overlay.is-open .daily-modal,
+.mission-modal-overlay.is-open .mission-modal,
+.room-settings-overlay.is-open .room-settings-modal,
+.history-panel-overlay.is-open .history-panel-modal,
+.anniversary-settings-overlay.is-open .anniversary-settings-modal {
+  animation: h2nPopupIn var(--h2n-motion-normal) ease both;
+}
+@keyframes h2nPopupIn {
+  from { opacity: 0; transform: translateY(10px) scale(.985); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; scroll-behavior: auto !important; }
+}
+
+

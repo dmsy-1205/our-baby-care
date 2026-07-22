@@ -91,6 +91,10 @@
         document.body.classList.remove('hm-booting');
     }
 
+    // Auth callbacks may overlap when Dom/Sub accounts are switched quickly in
+    // one browser tab. Only the newest callback may continue booting the app.
+    let hmAuthTransitionSequence = 0;
+
     window.onload = function() {
         const today = new Date();
         const dateInput = document.getElementById('recordDate');
@@ -103,7 +107,14 @@
         resetProtectedDataUI();
 
         babyAuth.onAuthStateChanged(async (user) => {
+            const authTransitionId = ++hmAuthTransitionSequence;
+            const isCurrentAuthTransition = () => (
+                authTransitionId === hmAuthTransitionSequence
+                && currentUser === user
+            );
             try { if (window.hmPresenceStop) window.hmPresenceStop(); } catch(e) { console.warn(e); }
+            try { if (typeof window.hmDiscardPendingMedia === 'function') window.hmDiscardPendingMedia(); } catch(e) { console.warn(e); }
+            try { if (typeof window.hmStopSubRoutines === 'function') window.hmStopSubRoutines(); } catch(e) { console.warn(e); }
             disconnectAllListeners();
             clearRoomInputs();
             clearFormFieldsExceptSync();
@@ -114,6 +125,7 @@
             if (user) {
                 // STEP5.2: 기존 사용자는 그대로 보호하고, 신규 가입 표시가 있는 계정만 이메일 인증을 요구한다.
                 const verificationPolicy = await hmGetEmailVerificationPolicy(user);
+                if (!isCurrentAuthTransition()) return;
                 if (verificationPolicy.required && !user.emailVerified) {
                     document.body.classList.remove('hm-authenticated');
                     document.getElementById('authBox').classList.remove('is-hidden');
@@ -136,6 +148,7 @@
                             emailVerifiedAt: firebase.database.ServerValue.TIMESTAMP
                         });
                     } catch (err) { console.warn('[STEP5.2] 인증 완료 기록 실패:', err); }
+                    if (!isCurrentAuthTransition()) return;
                     hmSignupFlowActive = false;
                 }
 
@@ -143,11 +156,17 @@
                 document.getElementById('authBox').classList.add('is-hidden');
                 document.getElementById('authBox').style.display = 'none';
                 if (typeof hmReactivateLifecycleOnLogin === 'function') await hmReactivateLifecycleOnLogin(user);
+                if (!isCurrentAuthTransition()) return;
                 if (typeof loadUserTheme === 'function') await loadUserTheme();
+                if (!isCurrentAuthTransition()) return;
                 if (typeof loadUserProfile === 'function') await loadUserProfile();
+                if (!isCurrentAuthTransition()) return;
                 if (typeof hmRefreshDataAdminAccess === 'function') await hmRefreshDataAdminAccess();
+                if (!isCurrentAuthTransition()) return;
                 await loadUserActiveRoom();
+                if (!isCurrentAuthTransition()) return;
                 await acceptPendingInviteIfAny();
+                if (!isCurrentAuthTransition()) return;
                 document.body.classList.add('hm-authenticated');
                 document.getElementById('appContent').style.display = 'flex';
                 hmFinishBooting();

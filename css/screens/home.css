@@ -1,0 +1,128 @@
+:root[data-hm-theme] .hm-adaptive-live-list .custom-routine-home-item,
+:root[data-hm-theme] .hm-adaptive-live-list .sub-routine-home-card{
+  background:var(--hm-surface-card,var(--theme-card,var(--card-color)))!important;
+  color:var(--hm-color-body,var(--theme-text,var(--text-color)))!important;
+  border-color:color-mix(in srgb,var(--hm-accent,var(--theme-accent)) 32%,transparent)!important;
+  box-shadow:0 8px 22px color-mix(in srgb,var(--hm-accent,var(--theme-accent)) 10%,transparent)!important;
+}
+:root[data-hm-theme] .hm-adaptive-live-list .custom-routine-home-item :is(strong,span,small),
+:root[data-hm-theme] .hm-adaptive-live-list .sub-routine-home-card :is(strong,span,small){color:inherit}
+:root[data-hm-theme][data-hm-display="dark"] .hm-adaptive-live-list .custom-routine-home-item,
+:root[data-hm-theme][data-hm-display="dark"] .hm-adaptive-live-list .sub-routine-home-card{
+  background:color-mix(in srgb,var(--hm-surface-card,var(--theme-card,#25283c)) 88%,var(--hm-accent,var(--theme-accent)) 12%)!important;
+  color:var(--hm-color-body,#f4efff)!important;
+  border-color:color-mix(in srgb,var(--hm-accent,var(--theme-accent)) 46%,transparent)!important;
+}
+
+:root[data-hm-theme] .water-counter-box{
+  background:color-mix(in srgb,var(--hm-surface-card,var(--card-color)) 88%,var(--hm-accent) 12%)!important;
+  border-color:color-mix(in srgb,var(--hm-accent) 42%,transparent)!important;
+}
+:root[data-hm-theme] .water-display{color:var(--hm-accent,var(--primary-color))!important}
+:root[data-hm-theme] .btn-water{
+  background:var(--hm-surface-card,var(--card-color))!important;
+  color:var(--hm-accent,var(--primary-color))!important;
+  border-color:color-mix(in srgb,var(--hm-accent) 38%,transparent)!important;
+}
+:root[data-hm-theme] .btn-water.reset{color:var(--hm-color-muted,var(--muted-color))!important}
+:root[data-hm-theme][data-hm-display="dark"] .water-counter-box{
+  background:color-mix(in srgb,var(--hm-surface-card,#25283c) 82%,var(--hm-accent) 18%)!important;
+}
+:root[data-hm-theme][data-hm-display="dark"] .btn-water{
+  background:color-mix(in srgb,var(--hm-surface-card,#25283c) 92%,var(--hm-accent) 8%)!important;
+  color:var(--hm-color-body,#f4efff)!important;
+  border-color:color-mix(in srgb,var(--hm-accent) 52%,transparent)!important;
+}
+
+/* STEP6.2.14.26 - quiet home brand signature. */
+.hm-home-brand-signature{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  margin:22px auto 4px;
+  padding:8px 12px;
+  color:color-mix(in srgb,var(--hm-color-muted,var(--muted-color)) 72%,transparent);
+  user-select:none;
+  pointer-events:none;
+}
+.hm-home-brand-signature .hm-home-brand-mark{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:30px;
+  height:30px;
+  border-radius:10px;
+  background:linear-gradient(135deg,var(--hm-accent,var(--primary-color)),color-mix(in srgb,var(--hm-accent,var(--primary-color)) 62%,#8d5cf6));
+  color:#fff;
+  font-size:.85rem;
+  letter-spacing:-.18em;
+  padding-right:.18em;
+  box-shadow:0 7px 18px color-mix(in srgb,var(--hm-accent,var(--primary-color)) 18%,transparent);
+}
+.hm-home-brand-signature strong{
+  color:inherit;
+  font-size:.83rem;
+  font-weight:800;
+  letter-spacing:-.02em;
+}
+:root[data-hm-display="dark"] .hm-home-brand-signature{
+  color:color-mix(in srgb,var(--hm-color-body,#f4efff) 54%,transparent);
+}
+@media(min-width:700px){
+  .hm-home-brand-signature{margin-top:26px}
+  .hm-home-brand-signature .hm-home-brand-mark{width:34px;height:34px;border-radius:11px;font-size:.92rem}
+  .hm-home-brand-signature strong{font-size:.88rem}
+}
+
+/* STEP6.2.14.27 - keep the signature at the real content bottom without
+   the retired bottom-navigation spacer. */
+body.hm-authenticated #appContent > .container,
+body.is-authenticated #appContent > .container{
+  padding-bottom:calc(14px + env(safe-area-inset-bottom))!important;
+}
+.hm-home-brand-signature{
+  margin:18px auto 0;
+  padding:6px 12px 0;
+}
+.hm-home-brand-signature .hm-home-brand-mark{
+  background:linear-gradient(135deg,#ff6f9f,#d9468f);
+  box-shadow:0 7px 18px rgba(217,70,143,.24);
+}
+@media(min-width:700px){
+  body.hm-authenticated #appContent > .container,
+  body.is-authenticated #appContent > .container{padding-bottom:18px!important}
+  .hm-home-brand-signature{margin-top:20px}
+}
+
+/* STEP6.2.14.34 - meaningful weekly/monthly flow statistics */
+.hm-home-stats-metrics-v2{grid-template-columns:repeat(3,minmax(0,1fr))}
+.hm-home-stats-metrics-v2>div{display:flex;min-width:0;min-height:72px;flex-direction:column;justify-content:center;gap:6px}
+.hm-home-stats-metrics-v2 small{color:var(--muted);font-size:11px;font-weight:800}
+.hm-home-stats-metrics-v2 strong{overflow-wrap:anywhere;font-size:16px;line-height:1.25}
+.hm-home-stats-comparison{display:flex;align-items:center;gap:9px;margin:10px 0;padding:12px 14px;border:1px solid color-mix(in srgb,var(--hm-accent,var(--primary-color)) 28%,transparent);border-radius:16px;background:color-mix(in srgb,var(--hm-accent-soft,var(--card-bg)) 55%,var(--card-bg));color:var(--text-color);font-size:13px;font-weight:800}
+.hm-home-stats-comparison b{display:grid;width:28px;height:28px;place-items:center;border-radius:10px;background:var(--hm-accent,var(--primary-color));color:#fff}
+.hm-flow-week-bars{display:grid;gap:11px;padding:12px 14px 16px}
+.hm-flow-week-bar{display:grid;grid-template-columns:38px minmax(0,1fr) 42px;align-items:center;gap:9px;font-size:12px}
+.hm-flow-week-bar b,.hm-flow-week-bar span{color:var(--text-color);font-weight:800}
+.hm-flow-week-bar span{text-align:right}
+.hm-flow-week-bar>i{display:block;height:11px;overflow:hidden;border-radius:999px;background:color-mix(in srgb,var(--hm-accent,var(--primary-color)) 12%,var(--card-bg))}
+.hm-flow-week-bar em{display:block;min-width:3px;height:100%;border-radius:inherit;background:linear-gradient(90deg,var(--hm-accent,var(--primary-color)),var(--hm-accent-2,#8b5cf6))}
+@media(max-width:420px){.hm-home-stats-metrics-v2{gap:7px}.hm-home-stats-metrics-v2>div{min-height:66px;padding:8px 6px}.hm-home-stats-metrics-v2 small{font-size:10px}.hm-home-stats-metrics-v2 strong{font-size:14px}}
+.hm-home-stats-modal,.hm-home-stats-modal-body{max-width:100%;overflow-x:hidden}
+.hm-home-stats-modal-body>*,.hm-home-stats-graph,.hm-flow-chart{min-width:0;max-width:100%}
+.hm-home-stats-graph svg{display:block;width:100%;max-width:100%}
+.hm-home-stats-modal .hm-home-stats-hero>em{display:none}
+.hm-home-stats-modal .hm-home-stats-hero>div:nth-child(2){min-width:0;flex:1}
+.hm-home-stats-modal .hm-home-stats-hero>div:nth-child(2)>span{white-space:normal;line-height:1.35}
+
+/* STEP6.2.14.37 - explicit AM/PM time records and grouped weekly changes */
+.hm-structured-time-entry{display:grid;gap:10px}
+.hm-time-row{display:grid;grid-template-columns:96px minmax(0,1fr);gap:10px}
+.hm-time-row select,.hm-time-row input,.hm-structured-time-entry>input[type="text"]{width:100%;min-height:48px;border:1px solid var(--hm-border-soft,var(--border-color));border-radius:14px;background:var(--hm-surface-card,var(--card-bg));color:var(--hm-color-body,var(--text-color));font:inherit;font-weight:800;padding:0 14px}
+.hm-structured-time-entry>input[type="text"]{font-weight:600}
+.hm-home-stats-graph>.hm-flow-week-bars{display:grid!important;align-items:stretch!important;justify-content:stretch!important;gap:10px!important;margin:0!important;padding:12px 4px 8px!important}
+.hm-home-stats-graph>.hm-flow-week-bars>.hm-flow-week-bar{display:grid!important;grid-template-columns:44px minmax(70px,1fr) 48px!important;width:100%;align-items:center;gap:10px;margin:0;padding:7px 8px;border:1px solid color-mix(in srgb,var(--hm-accent,var(--primary-color)) 14%,transparent);border-radius:12px;background:color-mix(in srgb,var(--hm-surface-card,var(--card-bg)) 92%,var(--hm-accent,var(--primary-color)) 8%)}
+.hm-flow-point-label{fill:var(--hm-accent,var(--primary-color))!important;font-size:8px!important;font-weight:900;text-anchor:middle}
+.hm-time-preview{margin-top:-2px;padding:8px 12px;border-radius:11px;background:color-mix(in srgb,var(--hm-accent,var(--primary-color)) 10%,transparent);color:var(--hm-accent,var(--primary-color));font-size:12px;font-weight:900}
+@media(max-width:420px){.hm-time-row{grid-template-columns:88px minmax(0,1fr)}.hm-home-stats-graph>.hm-flow-week-bars>.hm-flow-week-bar{grid-template-columns:38px minmax(60px,1fr) 42px!important;gap:7px;padding:6px}}

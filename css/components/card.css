@@ -1,0 +1,36 @@
+/* STEP6.2.14.22 - native-app floating cards.
+   The live app remains fully visible; depth comes from the modal card itself. */
+:root body.hm-authenticated :is(
+  .daily-modal-overlay,.mission-modal-overlay,.room-settings-overlay,
+  .history-panel-overlay,.history-detail-overlay,.guide-modal,.onboarding-modal,
+  .anniversary-settings-overlay,.record-deletion-modal-overlay,
+  .hm-record-date-picker-overlay,.card-conversation-dialog-overlay,
+  .hm-profile-overlay,.data-management-overlay,.data-admin-overlay,
+  .hm-chat-overlay,.hm-theme-overlay,.hm-pwa-ios-guide-overlay,
+  .hm-notification-overlay,.hm-adaptive-completion-overlay
+){
+  background:transparent!important;
+  -webkit-backdrop-filter:none!important;
+  backdrop-filter:none!important;
+}
+:root body.hm-authenticated :is(
+  .daily-modal-overlay,.mission-modal-overlay,.room-settings-overlay,
+  .history-panel-overlay,.history-detail-overlay,.guide-modal,.onboarding-modal,
+  .anniversary-settings-overlay,.record-deletion-modal-overlay,
+  .hm-record-date-picker-overlay,.card-conversation-dialog-overlay,
+  .hm-profile-overlay,.data-management-overlay,.data-admin-overlay,
+  .hm-chat-overlay,.hm-theme-overlay,.hm-pwa-ios-guide-overlay,
+  .hm-notification-overlay,.hm-adaptive-completion-overlay
+) > :is(
+  .daily-modal,.mission-modal,.room-settings-modal,.history-panel-modal,
+  .history-detail-modal,.guide-card,.onboarding-card,.anniversary-settings-modal,
+  .record-deletion-modal,.hm-record-date-picker-card,.card-conversation-dialog,
+  .hm-profile-modal,.data-management-modal,.data-admin-modal,.hm-chat-modal,
+  .hm-theme-modal,.hm-pwa-ios-guide-card,.hm-notification-modal,
+  .hm-adaptive-completion-modal
+){
+  box-shadow:
+    0 24px 72px color-mix(in srgb,var(--hm-color-body,#29233b) 30%,transparent),
+    0 0 0 1px color-mix(in srgb,var(--hm-primary,#8e5cf4) 12%,transparent)!important;
+}
+

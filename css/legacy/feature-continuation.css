@@ -1,0 +1,1925 @@
+/* =========================================================
+   HearMe2nite v0.9.16 Beta - Dashboard Polish
+   ========================================================= */
+.home-summary-card, .summary-tile, .dashboard-card, .today-summary-card {
+  border-radius: 22px !important;
+  border: 1px solid rgba(225, 215, 255, 0.92) !important;
+  background: rgba(255,255,255,0.86) !important;
+  box-shadow: 0 10px 28px rgba(109, 76, 255, 0.065) !important;
+}
+.summary-grid { gap: 12px !important; }
+.summary-tile { min-height: 86px !important; padding: 14px !important; }
+.summary-tile strong { line-height: 1.25 !important; }
+@media (max-width: 560px) { .summary-grid { grid-template-columns: 1fr !important; } }
+
+
+/* =========================================================
+   HearMe2nite v0.9.17 Beta - Timeline Polish
+   ========================================================= */
+.anniversary-timeline, .timeline-list { gap: 12px !important; }
+.anniversary-item, .timeline-item, .anniversary-card {
+  border-radius: 22px !important;
+  border: 1px solid rgba(225, 215, 255, 0.92) !important;
+  background: linear-gradient(145deg, rgba(255,255,255,.96), rgba(250,248,255,.96)) !important;
+  box-shadow: 0 10px 28px rgba(109, 76, 255, 0.065) !important;
+}
+.anniversary-icon, .timeline-icon {
+  width: 42px !important; height: 42px !important; min-width: 42px !important;
+  border-radius: 16px !important;
+  display: inline-flex !important; align-items: center !important; justify-content: center !important;
+}
+
+
+/* =========================================================
+   HearMe2nite v0.9.18 Beta - Statistics Polish
+   ========================================================= */
+#historySummary.summary-grid, .history-stats-grid, .stats-grid { gap: 12px !important; }
+#historySummary .summary-tile, .history-stat-card, .stat-card {
+  min-height: 82px !important;
+  border-radius: 20px !important;
+  padding: 14px !important;
+}
+.history-filter-card, .history-section-card {
+  border-radius: 24px !important;
+  border: 1px solid rgba(225, 215, 255, 0.92) !important;
+}
+
+
+/* =========================================================
+   HearMe2nite v0.9.19 Beta - Accessibility
+   ========================================================= */
+a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible, [tabindex]:focus-visible {
+  outline: 3px solid rgba(109, 76, 255, 0.5) !important;
+  outline-offset: 3px !important;
+}
+button, .daily-card, .room-settings-card, .history-launch-card, .calendar-day {
+  touch-action: manipulation;
+}
+.daily-card-title, .room-settings-title, .history-launch-title, h1, h2, h3 {
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+.daily-card-sub, .room-settings-sub, .history-launch-sub, p, .help-text {
+  overflow-wrap: anywhere;
+}
+@media (max-width: 360px) {
+  .daily-card, .room-settings-card, .history-launch-card { gap: 12px !important; padding: 14px !important; }
+  .daily-card-icon, .room-settings-icon, .history-launch-icon { width: 44px !important; height: 44px !important; min-width: 44px !important; }
+}
+
+
+/* =========================================================
+   HearMe2nite v0.9.20 Beta Release Candidate
+   Final CSS lock for v0.9 design system line.
+   ========================================================= */
+.app-version-badge, .history-launch-version, #historyPanelTitle span { letter-spacing: .04em; }
+.daily-card, .room-settings-card, .mission-compact-card, .history-launch-card {
+  will-change: transform;
+}
+@media print {
+  body { background: #fff !important; }
+  .modal-close-btn, .daily-card-arrow, .room-settings-arrow, .history-launch-arrow { display: none !important; }
+}
+
+
+/* v0.9.22 Chat Timestamp */
+.chat-message-line{display:flex;flex-direction:column;gap:3px;max-width:82%;}
+.chat-message-line.is-me{align-self:flex-end;align-items:flex-end;}
+.chat-message-line.is-other{align-self:flex-start;align-items:flex-start;}
+.chat-message-time{font-size:11px;line-height:1.2;color:#a39ab9;padding:0 4px;}
+.chat-message-line.is-me .chat-message-time{text-align:right;}
+.chat-message-line.is-other .chat-message-time{text-align:left;}
+
+
+/* v0.9.23 History Detail Polish */
+.history-detail-summary-card{display:flex;align-items:center;gap:14px;padding:16px;border:1px solid rgba(124,92,255,.14);border-radius:20px;background:linear-gradient(135deg,#fff,#f8f5ff);margin-bottom:14px;}
+.history-detail-summary-icon{width:52px;height:52px;border-radius:18px;background:#f7f0ff;display:flex;align-items:center;justify-content:center;font-size:24px;flex:0 0 auto;}
+.history-detail-summary-card strong{display:block;font-size:1rem;color:#2f2a3d;margin-bottom:6px;}
+.history-detail-summary-card span{display:flex;flex-wrap:wrap;gap:6px;color:#8c83a8;font-size:.82rem;}
+.history-detail-polished-block{border:1px solid rgba(124,92,255,.12)!important;border-radius:18px!important;background:#fff!important;padding:14px 15px!important;margin:10px 0!important;}
+.history-selected-hint{border-radius:20px!important;background:linear-gradient(135deg,#fff,#faf8ff)!important;border:1px solid rgba(124,92,255,.14)!important;}
+.history-day-card.history-premium-selected{min-height:92px!important;align-items:center!important;}
+
+
+/* v0.9.24 Home Header Polish */
+.container > .app-title-row{display:grid!important;grid-template-columns:54px 1fr 54px!important;align-items:center!important;gap:10px!important;margin-bottom:8px!important;}
+.container > .app-title-row h1{margin:0!important;font-size:clamp(1.55rem,4vw,2rem)!important;color:#2f2a3d!important;letter-spacing:-.04em!important;white-space:nowrap!important;}
+.container > .app-subtitle{text-align:center!important;color:#817895!important;font-weight:700!important;line-height:1.45!important;margin:10px auto 8px!important;max-width:92%!important;}
+.app-version-badge{display:block!important;width:max-content!important;margin:0 auto 18px!important;padding:6px 12px!important;border-radius:999px!important;background:#f2edff!important;color:#7c5cff!important;font-size:.76rem!important;font-weight:900!important;letter-spacing:.04em!important;}
+.user-bar{border-radius:22px!important;border:1px solid rgba(124,92,255,.14)!important;background:rgba(255,255,255,.92)!important;box-shadow:0 8px 24px rgba(93,69,180,.06)!important;}
+.room-settings-card{border-radius:24px!important;min-height:104px!important;}
+.room-settings-icon{width:58px!important;height:58px!important;border-radius:20px!important;}
+@media(max-width:520px){.container{padding:20px 18px!important;border-radius:28px!important}.container > .app-title-row{grid-template-columns:48px 1fr 48px!important}.container > .app-title-row h1{font-size:1.62rem!important}.user-bar{gap:10px!important}.user-bar .btn-small{width:auto!important;min-width:96px!important;padding-left:14px!important;padding-right:14px!important}}
+
+
+/* v0.9.25 Beta Stable Candidate Final UI Guard */
+.daily-card,.room-settings-card,.history-launch-card,.history-day-card{transition:transform .16s ease, box-shadow .16s ease, border-color .16s ease;}
+.daily-card:active,.room-settings-card:active,.history-launch-card:active,.history-day-card:active{transform:scale(.992);}
+button,input,textarea,select{-webkit-tap-highlight-color:transparent;}
+@media (prefers-reduced-motion: reduce){*,*::before,*::after{transition:none!important;animation:none!important;scroll-behavior:auto!important;}}
+@media(max-width:420px){body{padding-left:10px!important;padding-right:10px!important}.daily-card{padding-left:18px!important;padding-right:18px!important}.daily-card-title{font-size:1.02rem!important}.daily-card-sub{font-size:.84rem!important}}
+
+
+
+
+
+
+/* =========================================================
+   HearMe2nite v0.9.26 Card System Final
+   Scope: visual card normalization only. No data/Firebase logic.
+   ========================================================= */
+:root{
+  --hm-card-radius-final: 22px;
+  --hm-card-padding-final: 16px;
+  --hm-card-gap-final: 12px;
+  --hm-card-min-final: 82px;
+  --hm-card-icon-final: 52px;
+  --hm-card-shadow-final: 0 10px 26px rgba(142,92,244,.10);
+  --hm-card-border-final: 1px solid rgba(142,92,244,.12);
+}
+.daily-card,
+.room-settings-card,
+.mission-compact-card,
+.history-section-card,
+.history-day-card,
+.anniversary-card,
+.guide-card{
+  border-radius: var(--hm-card-radius-final) !important;
+  box-shadow: var(--hm-card-shadow-final) !important;
+  border: var(--hm-card-border-final) !important;
+}
+.daily-card,
+.room-settings-card,
+.mission-compact-card{
+  min-height: var(--hm-card-min-final) !important;
+  padding: var(--hm-card-padding-final) !important;
+  gap: var(--hm-card-gap-final) !important;
+  align-items: center !important;
+}
+.row .daily-card{ min-height: 112px !important; }
+.daily-card-icon,
+.room-settings-icon{
+  width: var(--hm-card-icon-final) !important;
+  height: var(--hm-card-icon-final) !important;
+  min-width: var(--hm-card-icon-final) !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  line-height: 1 !important;
+}
+.daily-card-title,
+.room-settings-title{
+  line-height: 1.22 !important;
+  letter-spacing: -0.02em !important;
+}
+.daily-card-sub,
+.room-settings-sub{
+  line-height: 1.35 !important;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 1 !important;
+  -webkit-box-orient: vertical !important;
+  overflow: hidden !important;
+}
+@media (max-width: 768px){
+  .daily-card,
+  .room-settings-card,
+  .mission-compact-card{ min-height: 78px !important; }
+  .row .daily-card{ min-height: 106px !important; }
+}
+@media (min-width: 769px){
+  .row .daily-card{ min-height: 108px !important; }
+}
+
+
+/* =========================================================
+   HearMe2nite v0.9.27 Popup System Final
+   Scope: popup layout/z-index/safe-area normalization only.
+   ========================================================= */
+.room-settings-overlay,
+.daily-popup-overlay,
+.mission-modal-overlay,
+.guide-modal,
+.history-detail-overlay,
+.anniversary-modal-overlay,
+.anniversary-settings-overlay{
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 99990 !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: max(14px, env(safe-area-inset-top)) max(14px, env(safe-area-inset-right)) max(14px, env(safe-area-inset-bottom)) max(14px, env(safe-area-inset-left)) !important;
+}
+.room-settings-modal,
+.daily-popup-modal,
+.mission-modal,
+.guide-modal-content,
+.history-detail-modal,
+.anniversary-modal,
+.anniversary-settings-modal{
+  width: min(100%, 520px) !important;
+  max-height: min(88vh, 760px) !important;
+  overflow-y: auto !important;
+  border-radius: 26px !important;
+  box-shadow: 0 24px 60px rgba(45,52,54,.24) !important;
+}
+.room-settings-head,
+.daily-popup-head,
+.mission-modal-head,
+.history-detail-head,
+.anniversary-modal-head,
+.anniversary-settings-head{
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 2 !important;
+  background: inherit !important;
+}
+.modal-close-btn,
+.popup-close-btn,
+.close-btn{
+  min-width: 44px !important;
+  min-height: 44px !important;
+  border-radius: 999px !important;
+}
+@media (max-width: 480px){
+  .room-settings-modal,
+  .daily-popup-modal,
+  .mission-modal,
+  .guide-modal-content,
+  .history-detail-modal,
+  .anniversary-modal,
+  .anniversary-settings-modal{
+    width: 100% !important;
+    max-height: calc(100dvh - 28px) !important;
+    border-radius: 24px !important;
+  }
+}
+
+
+/* =========================================================
+   HearMe2nite v0.9.28 Form System Final
+   Scope: input/select/textarea/button touch sizing only.
+   ========================================================= */
+input[type="text"], input[type="email"], input[type="password"], input[type="date"], input[type="time"], input[type="number"], textarea, select{
+  min-height: 46px !important;
+  border-radius: 16px !important;
+  border: 1px solid rgba(142,92,244,.16) !important;
+  background: #fff !important;
+  padding: 12px 14px !important;
+  font-size: 16px !important;
+  line-height: 1.35 !important;
+  box-sizing: border-box !important;
+}
+textarea{ min-height: 96px !important; resize: vertical !important; }
+input:focus, textarea:focus, select:focus{
+  outline: none !important;
+  border-color: rgba(142,92,244,.55) !important;
+  box-shadow: 0 0 0 4px rgba(142,92,244,.12) !important;
+}
+.input-group label,
+.form-label{
+  display:block !important;
+  margin-bottom: 8px !important;
+  font-weight: 800 !important;
+  color:#2d3436 !important;
+  letter-spacing:-.02em !important;
+}
+.form-row,
+.input-row{
+  gap: 10px !important;
+}
+
+
+/* =========================================================
+   HearMe2nite v0.9.29 Button & Animation System
+   Scope: gentle motion only. No logic changes.
+   ========================================================= */
+button,
+.daily-card,
+.room-settings-card,
+.mission-compact-card,
+.history-day-card,
+.anniversary-card{
+  transition: transform .18s ease, box-shadow .18s ease, background-color .18s ease, border-color .18s ease, opacity .18s ease !important;
+}
+button:active,
+.daily-card:active,
+.room-settings-card:active,
+.mission-compact-card:active,
+.history-day-card:active,
+.anniversary-card:active{
+  transform: scale(.985) !important;
+}
+.btn-main,
+.btn-connect,
+.btn-copy,
+.btn-secondary,
+.btn-small,
+.mission-clear-btn{
+  min-height: 44px !important;
+  border-radius: 16px !important;
+  font-weight: 800 !important;
+}
+.room-settings-modal,
+.daily-popup-modal,
+.mission-modal,
+.guide-modal-content,
+.history-detail-modal,
+.anniversary-modal,
+.anniversary-settings-modal{
+  animation: hmPopupIn .20s ease both;
+}
+@keyframes hmPopupIn{
+  from{ opacity:0; transform: translateY(8px) scale(.985); }
+  to{ opacity:1; transform: translateY(0) scale(1); }
+}
+@media (prefers-reduced-motion: reduce){
+  *, *::before, *::after{ animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+
+
+/* =========================================================
+   HearMe2nite v0.9.30 Beta Stable RC
+   Scope: final beta visual lock + deployment safety polish.
+   ========================================================= */
+.app-version-badge{
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  min-height:28px !important;
+  padding: 5px 12px !important;
+  border-radius: 999px !important;
+  background: rgba(142,92,244,.10) !important;
+  color:#6c4acb !important;
+  font-weight:800 !important;
+  letter-spacing:-.01em !important;
+}
+.empty-message{
+  border-radius: 18px !important;
+  background: rgba(142,92,244,.05) !important;
+  padding: 18px !important;
+}
+.autosave-status{
+  z-index: 90000 !important;
+}
+
+
+/* =========================================================
+   Login Rebuild v0.9.31+ — visible brand rebuild
+   Scope: login UI only. Auth/Firebase/Room/History logic unchanged.
+   ========================================================= */
+body:has(#authBox.hm-login-shell:not([style*="display: none"])) {
+    min-height: 100vh;
+    padding: clamp(18px, 3vw, 40px);
+    justify-content: center;
+    background:
+      radial-gradient(circle at 12% 12%, rgba(255, 214, 237, .88), transparent 30%),
+      radial-gradient(circle at 88% 10%, rgba(221, 205, 255, .82), transparent 34%),
+      radial-gradient(circle at 50% 100%, rgba(255, 246, 228, .55), transparent 38%),
+      linear-gradient(135deg, #fff8fc 0%, #f4edff 50%, #fffaf4 100%);
+}
+#authBox.hm-login-shell {
+    width: min(100%, 1040px) !important;
+    max-width: 1040px !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    border-radius: 38px !important;
+    overflow: hidden !important;
+    border: 1px solid rgba(221,210,255,.95) !important;
+    background: rgba(255,255,255,.88) !important;
+    box-shadow: 0 34px 90px rgba(111,76,255,.16) !important;
+    display: grid !important;
+    grid-template-columns: 1.02fr .98fr;
+    min-height: 590px;
+    backdrop-filter: blur(18px);
+}
+#authBox .hm-login-hero,
+#authBox .hm-login-panel {
+    padding: clamp(30px, 4.5vw, 58px);
+}
+#authBox .hm-login-hero {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    background:
+      radial-gradient(circle at 18% 18%, rgba(255, 217, 236, .98), transparent 35%),
+      radial-gradient(circle at 78% 24%, rgba(203, 184, 255, .88), transparent 38%),
+      linear-gradient(150deg, #fff5fb 0%, #f1eaff 55%, #fff7ee 100%);
+    border-right: 1px solid rgba(221,210,255,.86);
+}
+#authBox .hm-login-hero::after {
+    content: '';
+    position: absolute;
+    inset: 22px;
+    border-radius: 30px;
+    border: 1px solid rgba(255,255,255,.65);
+    pointer-events: none;
+}
+#authBox .hm-login-pill {
+    width: fit-content;
+    padding: 9px 14px;
+    border-radius: 999px;
+    background: rgba(255,255,255,.72);
+    color: #7657ef;
+    font-size: .78rem;
+    letter-spacing: .08em;
+    font-weight: 900;
+    box-shadow: 0 12px 28px rgba(109,76,255,.10);
+    margin-bottom: 24px;
+}
+#authBox .hm-login-mark {
+    width: 78px;
+    height: 78px;
+    border-radius: 28px;
+    display: grid;
+    place-items: center;
+    font-size: 2.3rem;
+    background: rgba(255,255,255,.72);
+    border: 1px solid rgba(255,255,255,.9);
+    box-shadow: 0 22px 44px rgba(142,92,244,.16);
+    margin-bottom: 22px;
+}
+#authBox .hm-login-title {
+    margin: 0 0 14px !important;
+    padding: 0 !important;
+    color: #242232 !important;
+    text-align: left !important;
+    font-size: clamp(3rem, 6vw, 5.25rem) !important;
+    line-height: .9 !important;
+    letter-spacing: -.075em !important;
+    font-weight: 950 !important;
+}
+#authBox .hm-login-copy {
+    margin: 0;
+    color: #5f5674;
+    font-size: clamp(1.05rem, 1.8vw, 1.34rem);
+    line-height: 1.62;
+    font-weight: 750;
+    letter-spacing: -.03em;
+}
+#authBox .hm-login-points {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 34px;
+}
+#authBox .hm-login-points span {
+    padding: 10px 13px;
+    border-radius: 999px;
+    background: rgba(255,255,255,.68);
+    border: 1px solid rgba(255,255,255,.84);
+    color: #6c6380;
+    font-weight: 850;
+    font-size: .86rem;
+}
+#authBox .hm-login-panel {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+#authBox .hm-login-panel-head {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 22px;
+}
+#authBox .hm-login-lock {
+    width: 56px;
+    height: 56px;
+    border-radius: 20px;
+    display: grid;
+    place-items: center;
+    background: linear-gradient(135deg, #fff4fb, #f3edff);
+    border: 1px solid rgba(221,210,255,.95);
+    box-shadow: 0 16px 30px rgba(142,92,244,.12);
+    font-size: 1.35rem;
+}
+#authBox .hm-login-kicker {
+    margin: 0 0 3px;
+    color: #9b8bbd;
+    font-size: .75rem;
+    letter-spacing: .14em;
+    font-weight: 950;
+}
+#authBox .hm-login-panel h2 {
+    margin: 0;
+    color: #242232;
+    font-size: 1.72rem;
+    letter-spacing: -.05em;
+    font-weight: 950;
+}
+#authBox .hm-login-trust {
+    display: grid;
+    gap: 6px;
+    margin: 0 0 22px;
+    padding: 18px 18px;
+    border-radius: 22px;
+    background: linear-gradient(135deg, rgba(248,244,255,.96), rgba(255,247,252,.96));
+    border: 1px solid rgba(221,210,255,.96);
+    color: #756c89;
+}
+#authBox .hm-login-trust strong {
+    color: #372f48;
+    font-size: .98rem;
+    font-weight: 950;
+}
+#authBox .hm-login-trust span {
+    font-size: .9rem;
+    line-height: 1.55;
+    font-weight: 650;
+}
+#authBox .hm-login-field {
+    margin-bottom: 18px !important;
+}
+#authBox .hm-login-field label {
+    display: block;
+    margin-bottom: 8px;
+    color: #332d40;
+    font-weight: 900;
+    font-size: .96rem;
+}
+#authBox .hm-login-field input {
+    width: 100%;
+    min-height: 60px;
+    border-radius: 20px;
+    border: 1px solid rgba(221,210,255,.98);
+    background: rgba(255,255,255,.96);
+    padding: 0 18px;
+    color: #252232;
+    font-size: 1rem;
+    font-weight: 650;
+    outline: none;
+    transition: border-color .18s ease, box-shadow .18s ease, background .18s ease;
+}
+#authBox .hm-login-field input:focus {
+    border-color: rgba(118,87,239,.82);
+    box-shadow: 0 0 0 5px rgba(142,92,244,.12);
+    background: #fff;
+}
+#authBox .hm-login-button.btn-main {
+    width: 100%;
+    min-height: 64px;
+    margin: 8px 0 0 !important;
+    border-radius: 22px;
+    border: 0;
+    color: white;
+    font-weight: 950;
+    font-size: 1.1rem;
+    background: linear-gradient(135deg, #6D4CFF 0%, #9B67FF 100%) !important;
+    box-shadow: 0 20px 42px rgba(109,76,255,.25) !important;
+    cursor: pointer;
+}
+#authBox .hm-login-small {
+    margin: 16px 0 0;
+    color: #8b829d;
+    line-height: 1.55;
+    font-size: .84rem;
+    font-weight: 650;
+    text-align: center;
+}
+
+
+/* v0.9.32 Responsive: PC/Tablet/Mobile split */
+@media (max-width: 860px) {
+    body:has(#authBox.hm-login-shell:not([style*="display: none"])) {
+        padding: 18px 14px max(22px, env(safe-area-inset-bottom));
+        justify-content: flex-start;
+    }
+    #authBox.hm-login-shell {
+        max-width: 520px !important;
+        grid-template-columns: 1fr;
+        min-height: auto;
+        border-radius: 34px !important;
+    }
+    #authBox .hm-login-hero {
+        border-right: 0;
+        border-bottom: 1px solid rgba(221,210,255,.86);
+        text-align: center;
+        align-items: center;
+        padding: 32px 26px 24px;
+    }
+    #authBox .hm-login-hero::after { inset: 16px; border-radius: 26px; }
+    #authBox .hm-login-pill { margin-bottom: 14px; }
+    #authBox .hm-login-mark {
+        width: 62px;
+        height: 62px;
+        border-radius: 22px;
+        font-size: 1.85rem;
+        margin-bottom: 14px;
+    }
+    #authBox .hm-login-title {
+        text-align: center !important;
+        font-size: clamp(2.2rem, 11vw, 3.05rem) !important;
+        letter-spacing: -.065em !important;
+    }
+    #authBox .hm-login-copy { font-size: .98rem; }
+    #authBox .hm-login-copy br { display: none; }
+    #authBox .hm-login-points {
+        width: 100%;
+        justify-content: center;
+        margin-top: 20px;
+    }
+    #authBox .hm-login-panel {
+        padding: 26px 24px 28px;
+    }
+    #authBox .hm-login-panel-head {
+        justify-content: center;
+        text-align: left;
+    }
+}
+@media (max-width: 430px) {
+    #authBox.hm-login-shell { border-radius: 30px !important; }
+    #authBox .hm-login-hero { padding: 28px 22px 20px; }
+    #authBox .hm-login-panel { padding: 24px 20px 26px; }
+    #authBox .hm-login-points span { font-size: .78rem; padding: 8px 10px; }
+    #authBox .hm-login-field input { min-height: 56px; font-size: 16px; }
+    #authBox .hm-login-button.btn-main { min-height: 60px; }
+}
+@media (min-width: 861px) and (max-width: 1180px) {
+    #authBox.hm-login-shell { width: min(100%, 900px) !important; }
+}
+
+
+/* v0.9.33 Trust copy polish */
+#authBox .hm-login-trust::before {
+    content: '💜';
+    width: 32px;
+    height: 32px;
+    display: grid;
+    place-items: center;
+    border-radius: 12px;
+    background: rgba(255,255,255,.72);
+    margin-bottom: 2px;
+}
+#authBox .hm-login-panel-head + .hm-login-trust {
+    box-shadow: 0 14px 30px rgba(142,92,244,.08);
+}
+
+
+/* v0.9.34 Form polish */
+#authBox .hm-login-field input::placeholder { color: #a39aaf; font-weight: 600; }
+#authBox .hm-login-field input:-webkit-autofill {
+    -webkit-box-shadow: 0 0 0 1000px #fff inset;
+    -webkit-text-fill-color: #252232;
+}
+#authBox .hm-login-field input:hover { border-color: rgba(190,174,244,.98); }
+
+
+/* v0.9.35 Motion */
+#authBox.hm-login-shell { animation: hmLoginEnter .26s ease-out both; }
+#authBox .hm-login-button.btn-main { transition: transform .18s ease, box-shadow .18s ease, filter .18s ease; }
+#authBox .hm-login-button.btn-main:hover { filter: brightness(1.02); box-shadow: 0 22px 48px rgba(109,76,255,.30) !important; }
+#authBox .hm-login-button.btn-main:active { transform: translateY(1px) scale(.995); }
+@keyframes hmLoginEnter { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+@media (prefers-reduced-motion: reduce) {
+    #authBox.hm-login-shell, #authBox .hm-login-button.btn-main { animation: none; transition: none; }
+}
+
+
+/* v0.9.36 Mobile browser QA */
+@media (max-height: 720px) and (max-width: 860px) {
+    #authBox .hm-login-points { display: none; }
+    #authBox .hm-login-mark { display: none; }
+    #authBox .hm-login-hero { padding-top: 24px; padding-bottom: 18px; }
+}
+@supports (-webkit-touch-callout: none) {
+    #authBox .hm-login-field input { font-size: 16px; }
+}
+
+
+/* v0.9.37 Tablet balance */
+@media (min-width: 700px) and (max-width: 1024px) and (orientation: portrait) {
+    #authBox.hm-login-shell { max-width: 620px !important; grid-template-columns: 1fr; }
+    #authBox .hm-login-hero { border-right: 0; border-bottom: 1px solid rgba(221,210,255,.86); min-height: 330px; }
+}
+
+
+/* v0.9.38 Desktop presence */
+@media (min-width: 1181px) {
+    #authBox.hm-login-shell { transform: translateY(-1.5vh); }
+    #authBox .hm-login-panel { padding-left: 52px; padding-right: 52px; }
+}
+
+
+/* v0.9.39 Accessibility */
+#authBox .hm-login-button:focus-visible,
+#authBox .hm-login-field input:focus-visible {
+    outline: 3px solid rgba(109,76,255,.34);
+    outline-offset: 3px;
+}
+#authBox .hm-login-points span,
+#authBox .hm-login-trust,
+#authBox .hm-login-small { word-break: keep-all; }
+
+
+/* v0.9.40 Final candidate marker */
+#authBox.hm-login-shell { isolation: isolate; }
+#authBox.hm-login-shell * { -webkit-tap-highlight-color: transparent; }
+
+
+
+/* =========================================================
+   v0.9 Login Final Polish Pack
+   - Typography / Spacing / Responsive / Brand / Motion / A11y
+   - Firebase/Auth logic untouched
+   ========================================================= */
+.hm-login-copy{line-height:1.55!important;word-break:keep-all!important;letter-spacing:-.03em!important}
+.hm-login-panel-head{align-items:center!important;gap:18px!important;margin-bottom:22px!important}
+.hm-login-lock{width:64px!important;height:64px!important;flex:0 0 64px!important;font-size:1.55rem!important}
+.hm-login-kicker{letter-spacing:.22em!important;margin-bottom:4px!important;color:#9c8abc!important}
+.hm-login-panel-head h2{line-height:1.05!important;letter-spacing:-.04em!important}
+.hm-login-field{margin-bottom:18px!important}.hm-login-field label{margin-bottom:9px!important;font-size:.92rem!important;letter-spacing:-.02em!important}
+.hm-login-field input{height:54px!important;min-height:54px!important;padding:0 18px!important;font-size:1rem!important;border-radius:18px!important;background:#fff!important;box-sizing:border-box!important}
+.hm-login-button{height:58px!important;min-height:58px!important;border-radius:18px!important;font-size:1.08rem!important;font-weight:900!important;letter-spacing:-.02em!important}
+.hm-login-trust{padding:22px!important;border-radius:24px!important;line-height:1.6!important}.hm-login-trust strong{margin-bottom:8px!important}.hm-login-trust span{word-break:keep-all!important}
+.hm-login-points{gap:12px!important}.hm-login-points span{min-height:38px!important;display:inline-flex!important;align-items:center!important}
+.hm-login-shell{max-width:1080px!important}.hm-login-hero,.hm-login-panel{min-width:0!important}
+.hm-login-title{letter-spacing:-.075em!important}.hm-login-mark{transform:scale(.92)!important}
+.hm-login-button:hover{filter:brightness(1.02);transform:translateY(-1px)}.hm-login-button:active{transform:translateY(1px) scale(.995)}
+.hm-login-field input:focus{outline:3px solid rgba(124,92,255,.18)!important;border-color:rgba(124,92,255,.55)!important;box-shadow:0 0 0 6px rgba(124,92,255,.08)!important}
+@media (max-width:760px){.hm-login-shell{width:100%!important;border-radius:0!important}.hm-login-hero{padding:34px 22px 28px!important}.hm-login-panel{padding:32px 22px 36px!important}.hm-login-title{font-size:clamp(3.1rem,13vw,4.35rem)!important;line-height:.96!important}.hm-login-copy{font-size:1.18rem!important;max-width:330px!important;margin-left:auto!important;margin-right:auto!important}.hm-login-pill{font-size:.76rem!important;padding:9px 14px!important}.hm-login-mark{width:92px!important;height:92px!important;font-size:2.25rem!important}.hm-login-panel-head{justify-content:flex-start!important}.hm-login-trust{padding:20px!important}.hm-login-field input{height:56px!important}.hm-login-button{height:60px!important}.hm-login-small{padding-bottom:max(14px,env(safe-area-inset-bottom))!important}}
+@media (min-width:761px) and (max-width:1180px){.hm-login-shell{width:min(880px,88vw)!important}.hm-login-title{font-size:clamp(3.8rem,7vw,5.5rem)!important}.hm-login-copy{font-size:1.08rem!important}.hm-login-panel{padding:56px 54px!important}.hm-login-hero{padding:56px 48px!important}}
+@media (min-width:1181px){.hm-login-shell{width:min(1080px,76vw)!important}.hm-login-panel{padding:62px 56px!important}.hm-login-hero{padding:62px 54px!important}.hm-login-title{font-size:4.9rem!important}}
+
+
+/* =========================================================
+   Login Final Hotfix v0.9.51 — Hero title one-line polish
+   Scope: login UI only. Auth/Firebase/Room/History logic unchanged.
+   ========================================================= */
+@media (min-width: 861px) {
+    #authBox.hm-login-shell {
+        width: min(100%, 1160px) !important;
+        max-width: 1160px !important;
+        grid-template-columns: 58% 42% !important;
+    }
+    #authBox .hm-login-hero,
+    #authBox .hm-login-panel {
+        padding: clamp(34px, 4vw, 54px) !important;
+    }
+    #authBox .hm-login-title {
+        white-space: nowrap !important;
+        word-break: keep-all !important;
+        overflow-wrap: normal !important;
+        font-size: clamp(3.3rem, 5vw, 5rem) !important;
+        line-height: .96 !important;
+        letter-spacing: -.078em !important;
+    }
+    #authBox .hm-login-copy {
+        max-width: 520px;
+        line-height: 1.56;
+    }
+    #authBox .hm-login-points {
+        gap: 12px;
+    }
+}
+
+@media (min-width: 861px) and (max-width: 1180px) {
+    #authBox.hm-login-shell {
+        width: min(100%, 1000px) !important;
+        max-width: 1000px !important;
+        grid-template-columns: 56% 44% !important;
+    }
+    #authBox .hm-login-hero,
+    #authBox .hm-login-panel {
+        padding: clamp(30px, 3.4vw, 46px) !important;
+    }
+    #authBox .hm-login-title {
+        font-size: clamp(3.1rem, 5.6vw, 4.45rem) !important;
+        letter-spacing: -.074em !important;
+    }
+}
+
+@media (max-width: 860px) {
+    #authBox .hm-login-title {
+        white-space: normal !important;
+        word-break: keep-all !important;
+    }
+    #authBox .hm-login-copy {
+        line-height: 1.48;
+    }
+}
+
+/* =========================================================
+   v0.9.52 Login/Home Visibility Hotfix
+   Fix: Login shell used display:grid !important, which overrode
+   inline display:none after authentication. Keep auth hidden when
+   appContent is active. UI-only; Firebase/Room/History unchanged.
+   ========================================================= */
+#authBox.hm-login-shell[style*="display: none"],
+#authBox.hm-login-shell.is-hidden,
+body.hm-authenticated #authBox.hm-login-shell {
+    display: none !important;
+}
+body.hm-authenticated {
+    justify-content: flex-start !important;
+}
+body.hm-authenticated #appContent {
+    display: flex !important;
+}
+body:not(.hm-authenticated) #appContent[style*="display: none"] {
+    display: none !important;
+}
+
+
+/* =========================================================
+   HearMe2nite v0.10.10 Home Visibility QA
+   UI only. Firebase / data structure preserved.
+   ========================================================= */
+body.hm-authenticated #authBox,
+body.is-authenticated #authBox,
+#authBox.hm-hidden {
+    display: none !important;
+}
+#appContent.hm-visible {
+    display: flex !important;
+}
+.container {
+    max-width: 640px;
+}
+.app-title-row {
+    gap: 12px;
+}
+.user-bar, .room-settings-card {
+    border-radius: 26px;
+}
+.daily-card {
+    min-height: 92px;
+    padding: 20px 22px;
+}
+.daily-card-icon {
+    width: 56px;
+    height: 56px;
+    flex: 0 0 56px;
+}
+.daily-card-title {
+    line-height: 1.2;
+}
+.daily-card-sub {
+    line-height: 1.35;
+}
+@media (max-width: 520px) {
+    .container {
+        max-width: 100%;
+        border-radius: 0;
+        padding-left: 22px;
+        padding-right: 22px;
+    }
+    .daily-card {
+        min-height: 88px;
+        padding: 18px 20px;
+    }
+    .daily-card-icon {
+        width: 52px;
+        height: 52px;
+        flex-basis: 52px;
+    }
+}
+
+
+/* =========================================================
+   HearMe2nite v0.10.11 Home Layout Polish
+   UI only. Firebase / data structure preserved.
+   ========================================================= */
+body.hm-authenticated #authBox,
+body.is-authenticated #authBox,
+#authBox.hm-hidden {
+    display: none !important;
+}
+#appContent.hm-visible {
+    display: flex !important;
+}
+.container {
+    max-width: 640px;
+}
+.app-title-row {
+    gap: 12px;
+}
+.user-bar, .room-settings-card {
+    border-radius: 26px;
+}
+.daily-card {
+    min-height: 92px;
+    padding: 20px 22px;
+}
+.daily-card-icon {
+    width: 56px;
+    height: 56px;
+    flex: 0 0 56px;
+}
+.daily-card-title {
+    line-height: 1.2;
+}
+.daily-card-sub {
+    line-height: 1.35;
+}
+@media (max-width: 520px) {
+    .container {
+        max-width: 100%;
+        border-radius: 0;
+        padding-left: 22px;
+        padding-right: 22px;
+    }
+    .daily-card {
+        min-height: 88px;
+        padding: 18px 20px;
+    }
+    .daily-card-icon {
+        width: 52px;
+        height: 52px;
+        flex-basis: 52px;
+    }
+}
+
+/* Home layout polish */
+.app-title-row h1 { letter-spacing: -0.04em; }
+.app-subtitle { max-width: 420px; margin-left: auto; margin-right: auto; }
+.room-settings-card { margin-top: 22px; }
+.mission-compact-card { border-radius: 28px; }
+.input-group { margin-bottom: 16px; }
+
+
+/* =========================================================
+   HearMe2nite v0.10.12 Record Card Polish
+   UI only. Firebase / data structure preserved.
+   ========================================================= */
+body.hm-authenticated #authBox,
+body.is-authenticated #authBox,
+#authBox.hm-hidden {
+    display: none !important;
+}
+#appContent.hm-visible {
+    display: flex !important;
+}
+.container {
+    max-width: 640px;
+}
+.app-title-row {
+    gap: 12px;
+}
+.user-bar, .room-settings-card {
+    border-radius: 26px;
+}
+.daily-card {
+    min-height: 92px;
+    padding: 20px 22px;
+}
+.daily-card-icon {
+    width: 56px;
+    height: 56px;
+    flex: 0 0 56px;
+}
+.daily-card-title {
+    line-height: 1.2;
+}
+.daily-card-sub {
+    line-height: 1.35;
+}
+@media (max-width: 520px) {
+    .container {
+        max-width: 100%;
+        border-radius: 0;
+        padding-left: 22px;
+        padding-right: 22px;
+    }
+    .daily-card {
+        min-height: 88px;
+        padding: 18px 20px;
+    }
+    .daily-card-icon {
+        width: 52px;
+        height: 52px;
+        flex-basis: 52px;
+    }
+}
+
+/* Home layout polish */
+.app-title-row h1 { letter-spacing: -0.04em; }
+.app-subtitle { max-width: 420px; margin-left: auto; margin-right: auto; }
+.room-settings-card { margin-top: 22px; }
+.mission-compact-card { border-radius: 28px; }
+.input-group { margin-bottom: 16px; }
+
+/* Record card polish */
+.home-section-title {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 12px;
+    margin: 26px 4px 12px;
+    color: #2b2938;
+}
+.home-section-title span {
+    font-weight: 900;
+    font-size: 1.05rem;
+    letter-spacing: -0.03em;
+}
+.home-section-title small {
+    font-size: 0.76rem;
+    font-weight: 800;
+    color: #9a91b9;
+    white-space: nowrap;
+}
+.compact-metrics-row .input-group { margin-bottom: 0; }
+.daily-card-arrow { opacity: .75; }
+@media (max-width: 520px) {
+    .home-section-title { margin-top: 24px; }
+    .home-section-title small { display:none; }
+}
+
+
+/* =========================================================
+   HearMe2nite v0.10.13 Home Final Candidate
+   UI only. Firebase / data structure preserved.
+   ========================================================= */
+body.hm-authenticated #authBox,
+body.is-authenticated #authBox,
+#authBox.hm-hidden {
+    display: none !important;
+}
+#appContent.hm-visible {
+    display: flex !important;
+}
+.container {
+    max-width: 640px;
+}
+.app-title-row {
+    gap: 12px;
+}
+.user-bar, .room-settings-card {
+    border-radius: 26px;
+}
+.daily-card {
+    min-height: 92px;
+    padding: 20px 22px;
+}
+.daily-card-icon {
+    width: 56px;
+    height: 56px;
+    flex: 0 0 56px;
+}
+.daily-card-title {
+    line-height: 1.2;
+}
+.daily-card-sub {
+    line-height: 1.35;
+}
+@media (max-width: 520px) {
+    .container {
+        max-width: 100%;
+        border-radius: 0;
+        padding-left: 22px;
+        padding-right: 22px;
+    }
+    .daily-card {
+        min-height: 88px;
+        padding: 18px 20px;
+    }
+    .daily-card-icon {
+        width: 52px;
+        height: 52px;
+        flex-basis: 52px;
+    }
+}
+
+/* Home layout polish */
+.app-title-row h1 { letter-spacing: -0.04em; }
+.app-subtitle { max-width: 420px; margin-left: auto; margin-right: auto; }
+.room-settings-card { margin-top: 22px; }
+.mission-compact-card { border-radius: 28px; }
+.input-group { margin-bottom: 16px; }
+
+/* Record card polish */
+.home-section-title {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 12px;
+    margin: 26px 4px 12px;
+    color: #2b2938;
+}
+.home-section-title span {
+    font-weight: 900;
+    font-size: 1.05rem;
+    letter-spacing: -0.03em;
+}
+.home-section-title small {
+    font-size: 0.76rem;
+    font-weight: 800;
+    color: #9a91b9;
+    white-space: nowrap;
+}
+.compact-metrics-row .input-group { margin-bottom: 0; }
+.daily-card-arrow { opacity: .75; }
+@media (max-width: 520px) {
+    .home-section-title { margin-top: 24px; }
+    .home-section-title small { display:none; }
+}
+
+/* Final candidate QA lock */
+:root { --hm-home-final: 'v0.10.13'; }
+.daily-card:focus-visible,
+.room-settings-card:focus-visible,
+.mission-open-btn:focus-visible {
+    outline: 3px solid rgba(124, 82, 255, .28);
+    outline-offset: 3px;
+}
+
+/* v0.10.21 Refresh Flicker Guard */
+body.hm-booting #authBox,
+body.hm-booting #appContent {
+    display: none !important;
+}
+
+body.hm-booting::before {
+    content: "💕 HearMe2nite";
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(circle at top left, rgba(255, 199, 226, .45), transparent 36%),
+                linear-gradient(135deg, #fff7fb 0%, #f5efff 48%, #eef8ff 100%);
+    color: #6d4cc2;
+    font-weight: 900;
+    letter-spacing: -0.03em;
+    z-index: 99999;
+}
+
+/* =========================================================
+   HearMe2nite v1.0 STEP6.2.12.14 - Custom Record Date Picker
+   Do not rely on native date UI because iPhone/desktop differ.
+   ========================================================= */
+.container .input-group:has(#recordDate) {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+    overflow: visible !important;
+}
+
+#recordDate {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    height: 58px !important;
+    min-height: 58px !important;
+    box-sizing: border-box !important;
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    border-radius: 18px !important;
+    padding: 0 46px 0 16px !important;
+    text-align: center !important;
+    font-size: clamp(16px, 4vw, 18px) !important;
+    line-height: 58px !important;
+    letter-spacing: -0.02em !important;
+    overflow: hidden !important;
+}
+
+#recordDate::-webkit-date-and-time-value {
+    display: block !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    text-align: center !important;
+    line-height: 58px !important;
+}
+
+#recordDate::-webkit-calendar-picker-indicator {
+    flex: 0 0 auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.hm-record-date-shell {
+    position: relative !important;
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    align-items: center !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    height: 58px !important;
+    min-height: 58px !important;
+    box-sizing: border-box !important;
+    padding: 0 15px !important;
+    border: 1px solid rgba(142,92,244,.22) !important;
+    border-radius: 18px !important;
+    background: var(--theme-input, rgba(255,255,255,.92)) !important;
+    color: var(--theme-text, #2f2940) !important;
+    overflow: hidden !important;
+}
+
+.hm-record-date-display-value {
+    position: relative !important;
+    z-index: 1 !important;
+    min-width: 0 !important;
+    width: 100% !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    text-align: center !important;
+    font-size: clamp(16px, 4vw, 18px) !important;
+    font-weight: 800 !important;
+    letter-spacing: -0.02em !important;
+    line-height: 1 !important;
+}
+
+.hm-record-date-display-icon {
+    position: absolute !important;
+    z-index: 1 !important;
+    right: 15px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    width: 28px !important;
+    min-width: 28px !important;
+    height: 28px !important;
+    display: grid !important;
+    place-items: center !important;
+    opacity: .86 !important;
+    line-height: 1 !important;
+}
+
+#recordDate.hm-record-date-native {
+    position: absolute !important;
+    z-index: -1 !important;
+    width: 1px !important;
+    height: 1px !important;
+    left: 0 !important;
+    top: 0 !important;
+    pointer-events: none !important;
+    visibility: hidden !important;
+}
+
+.hm-record-date-picker-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 13020;
+    display: grid;
+    place-items: center;
+    padding: 20px;
+    background: rgba(24, 20, 36, .58);
+    backdrop-filter: blur(14px);
+}
+
+.hm-record-date-picker-overlay[hidden] {
+    display: none !important;
+}
+
+.hm-record-date-picker-card {
+    width: min(420px, 100%);
+    padding: 18px;
+    border: 1px solid var(--hm-line-soft, var(--border-color));
+    border-radius: 26px;
+    background: radial-gradient(circle at 12% 0%, color-mix(in srgb, var(--hm-primary, var(--accent-purple)) 16%, transparent), transparent 36%), var(--hm-surface-card, var(--card-color));
+    color: var(--hm-color-body, var(--text-color));
+    box-shadow: 0 24px 70px rgba(45, 34, 64, .22);
+}
+
+.hm-record-date-picker-head {
+    display: grid;
+    grid-template-columns: 42px 1fr 42px;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.hm-record-date-picker-head strong {
+    text-align: center;
+    font-size: 1.08rem;
+    font-weight: 950;
+}
+
+.hm-record-date-picker-head button,
+.hm-record-date-picker-actions button,
+.hm-record-date-picker-grid button {
+    border: 0;
+    cursor: pointer;
+    font: inherit;
+}
+
+.hm-record-date-picker-head button {
+    width: 42px;
+    height: 42px;
+    border-radius: 15px;
+    background: var(--hm-primary-soft, var(--soft-purple));
+    color: var(--hm-primary, var(--accent-purple));
+    font-size: 1.6rem;
+    font-weight: 900;
+}
+
+.hm-record-date-weekdays,
+.hm-record-date-picker-grid {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 6px;
+}
+
+.hm-record-date-weekdays {
+    margin-bottom: 7px;
+}
+
+.hm-record-date-weekdays span {
+    text-align: center;
+    color: var(--hm-color-muted, #776f80);
+    font-size: .75rem;
+    font-weight: 900;
+}
+
+.hm-record-date-picker-grid button,
+.hm-record-date-picker-empty {
+    min-height: 42px;
+    border-radius: 14px;
+}
+
+.hm-record-date-picker-grid button {
+    background: color-mix(in srgb, var(--hm-primary-soft, var(--soft-purple)) 45%, var(--hm-surface-card, var(--card-color)));
+    color: var(--hm-color-body, var(--text-color));
+    font-weight: 900;
+}
+
+.hm-record-date-picker-grid button.is-today {
+    box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--hm-primary, var(--accent-purple)) 48%, transparent);
+}
+
+.hm-record-date-picker-grid button.is-selected {
+    background: linear-gradient(135deg, var(--hm-primary, var(--primary-color)), var(--hm-accent, var(--accent-purple)));
+    color: #fff;
+}
+
+.hm-record-date-picker-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 14px;
+}
+
+.hm-record-date-picker-actions button {
+    min-height: 46px;
+    border-radius: 15px;
+    background: var(--hm-primary-soft, var(--soft-purple));
+    color: var(--hm-primary, var(--accent-purple));
+    font-weight: 950;
+}
+
+.hm-record-date-picker-actions button:first-child {
+    background: linear-gradient(135deg, var(--hm-primary, var(--primary-color)), var(--hm-accent, var(--accent-purple)));
+    color: #fff;
+}
+
+@media (max-width: 420px) {
+    .hm-record-date-picker-card {
+        padding: 16px;
+        border-radius: 24px;
+    }
+    .hm-record-date-picker-grid button,
+    .hm-record-date-picker-empty {
+        min-height: 39px;
+        border-radius: 13px;
+    }
+}
+
+/*
+   Legacy native date rules kept below for non-wrapped fallbacks.
+   Wrapped #recordDate uses .hm-record-date-native above.
+*/
+#recordDate:not(.hm-record-date-native) {
+    position: relative !important;
+    z-index: auto !important;
+    inset: auto !important;
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: inherit !important;
+    background: transparent !important;
+    color: transparent !important;
+    opacity: 0 !important;
+    box-shadow: none !important;
+    cursor: pointer !important;
+    -webkit-tap-highlight-color: transparent !important;
+}
+
+:root[data-hm-theme][data-hm-display="dark"] .hm-record-date-shell {
+    background: var(--hm-dark-input, #353344) !important;
+    color: #f8f5fb !important;
+    border-color: var(--hm-dark-line, rgba(255,255,255,.12)) !important;
+}
+
+
+/* =========================================================
+   HearMe2nite RC2.11 STEP16 - Custom Routine Card MVP
+   ========================================================= */
+.custom-routine-title { margin-top: 18px; }
+.custom-routine-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin: 8px 0 10px;
+    padding: 10px 12px;
+    border-radius: 16px;
+    background: rgba(255,255,255,0.72);
+    border: 1px solid rgba(255, 171, 145, 0.25);
+}
+.custom-routine-manage-btn {
+    border: 0;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #ff8f8f, #ffb199);
+    color: white;
+    padding: 9px 13px;
+    font-weight: 800;
+    box-shadow: 0 8px 18px rgba(255, 118, 117, 0.18);
+}
+.custom-routine-help { font-size: 0.78rem; color: #8b6f6f; line-height: 1.35; }
+.custom-routine-list { width: 100%; }
+.custom-routine-empty {
+    padding: 14px;
+    border-radius: 16px;
+    background: rgba(255,255,255,0.7);
+    color: #8b6f6f;
+    font-size: 0.88rem;
+    text-align: center;
+    border: 1px dashed rgba(255, 171, 145, 0.55);
+}
+.custom-routine-empty.small { font-size: 0.78rem; padding: 10px; }
+.custom-routine-card-wrap { margin-bottom: 10px; }
+.custom-routine-card .daily-card-icon { background: linear-gradient(135deg, #ffeaa7, #fab1a0); }
+.custom-routine-modal { max-width: 560px; }
+.custom-routine-note {
+    margin: 6px 0 12px;
+    color: #7a6868;
+    font-size: 0.86rem;
+    line-height: 1.45;
+}
+.custom-routine-limit-line {
+    display: inline-flex;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: #fff3ef;
+    color: #d46a6a;
+    font-size: 0.8rem;
+    font-weight: 800;
+    margin-bottom: 12px;
+}
+.custom-routine-editor-box {
+    padding: 12px;
+    border-radius: 18px;
+    background: rgba(255,255,255,0.78);
+    border: 1px solid rgba(255, 171, 145, 0.28);
+    margin-bottom: 14px;
+}
+.custom-routine-template-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+    margin-bottom: 10px;
+}
+.custom-routine-template-row button,
+.custom-routine-item-editor-head button,
+.custom-routine-manager-actions button {
+    border: 0;
+    border-radius: 10px;
+    background: #ffe8e1;
+    color: #b65d5d;
+    padding: 8px 9px;
+    font-size: 0.78rem;
+    font-weight: 800;
+}
+.custom-routine-editor-box label,
+.custom-routine-input-line span {
+    display: block;
+    margin: 8px 0 5px;
+    font-size: 0.82rem;
+    font-weight: 800;
+    color: #7a4f4f;
+}
+.custom-routine-editor-box input[type="text"],
+.custom-routine-editor-box select,
+.custom-routine-input-line input {
+    width: 100%;
+    border: 1px solid #ffd7ca;
+    border-radius: 12px;
+    padding: 10px;
+    font-size: 0.9rem;
+    background: #fff;
+}
+.custom-routine-item-editor-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 12px 0 8px;
+}
+.custom-routine-draft-items { display: flex; flex-direction: column; gap: 8px; }
+.custom-routine-draft-row {
+    display: grid;
+    grid-template-columns: 24px 1.2fr 0.8fr 1fr auto auto;
+    gap: 6px;
+    align-items: center;
+    padding: 8px;
+    border-radius: 14px;
+    background: #fffaf8;
+}
+.custom-routine-drag-no { color: #d46a6a; font-weight: 900; text-align: center; }
+.custom-routine-required {
+    display: inline-flex !important;
+    align-items: center;
+    gap: 4px;
+    margin: 0 !important;
+    white-space: nowrap;
+    color: #8b6f6f !important;
+    font-size: 0.76rem !important;
+}
+.custom-routine-mini-danger {
+    background: #ffe1e1 !important;
+    color: #c0392b !important;
+}
+.custom-routine-editor-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 12px;
+}
+.custom-routine-manager-list { display: flex; flex-direction: column; gap: 8px; }
+.custom-routine-manager-item {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 12px;
+    border-radius: 16px;
+    background: rgba(255,255,255,0.75);
+    border: 1px solid rgba(255, 171, 145, 0.25);
+}
+.custom-routine-manager-item strong { display: block; color: #4d3d3d; }
+.custom-routine-manager-item small { display: block; color: #8b6f6f; margin-top: 4px; }
+.custom-routine-manager-item.is-inactive { opacity: 0.55; }
+.custom-routine-manager-actions { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+.custom-routine-input-body { display: flex; flex-direction: column; gap: 10px; }
+.custom-routine-check-line {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px;
+    border-radius: 14px;
+    background: #fff8f4;
+    color: #5b4545;
+    font-weight: 800;
+}
+.custom-routine-check-line input { width: 20px; height: 20px; accent-color: #ff7675; }
+.custom-routine-input-line { display: block; }
+@media (max-width: 640px) {
+    .custom-routine-toolbar { align-items: stretch; flex-direction: column; }
+    .custom-routine-template-row { grid-template-columns: repeat(2, 1fr); }
+    .custom-routine-draft-row { grid-template-columns: 22px 1fr; }
+    .custom-routine-draft-row select,
+    .custom-routine-draft-row input[data-draft-field="placeholder"],
+    .custom-routine-draft-row .custom-routine-required,
+    .custom-routine-draft-row button { grid-column: 2; }
+    .custom-routine-manager-item { flex-direction: column; }
+}
+
+/* =========================================================
+   RC2.11.3 Custom Routine Hub Page UI
+   - 홈 화면이 길어지지 않도록 맞춤 루틴은 한 줄 허브 카드로만 표시합니다.
+   - 루틴 목록과 입력은 전용 팝업 페이지에서 처리합니다.
+   ========================================================= */
+.custom-routine-home-wrap { margin-top: 10px; }
+.custom-routine-hub-card { min-height: 86px; }
+.custom-routine-toolbar.compact {
+    margin-top: 8px;
+    justify-content: space-between;
+    align-items: center;
+}
+.custom-routine-hub-modal { max-height: min(86vh, 720px); overflow-y: auto; }
+.custom-routine-hub-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin: 8px 0 12px;
+}
+.custom-routine-hub-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.custom-routine-hub-row {
+    width: 100%;
+    border: 1px solid rgba(181, 135, 255, 0.18);
+    background: rgba(255,255,255,0.82);
+    border-radius: 20px;
+    padding: 14px;
+    display: grid;
+    grid-template-columns: 48px 1fr 18px;
+    gap: 12px;
+    align-items: center;
+    text-align: left;
+    box-shadow: 0 10px 26px rgba(84, 52, 125, 0.06);
+}
+.custom-routine-hub-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 17px;
+    display: grid;
+    place-items: center;
+    background: #fff6ff;
+    font-size: 1.35rem;
+}
+.custom-routine-hub-text strong {
+    display: block;
+    color: #2d2740;
+    font-size: 0.96rem;
+    line-height: 1.3;
+}
+.custom-routine-hub-text small {
+    display: block;
+    margin-top: 4px;
+    color: #7e7892;
+    font-size: 0.82rem;
+    line-height: 1.45;
+}
+.custom-routine-hub-arrow {
+    color: #cbb4ff;
+    font-size: 1.4rem;
+    font-weight: 900;
+}
+@media (max-width: 640px) {
+    .custom-routine-toolbar.compact { flex-direction: column; align-items: stretch; }
+    .custom-routine-hub-row { grid-template-columns: 44px 1fr 16px; padding: 13px; }
+    .custom-routine-hub-icon { width: 44px; height: 44px; }
+}
+   RC2.11.1 Mobile Viewport Guard
+   - 일부 모바일 브라우저/데스크톱 사이트 모드에서 450px 컨테이너가
+     지나치게 작게 중앙 정렬되는 현상을 방지합니다.
+   - JS가 body.hm-phone-viewport와 --hm-mobile-safe-width를 설정합니다.
+   ========================================================= */
+body.hm-phone-viewport {
+    padding-left: 0;
+    padding-right: 0;
+    overflow-x: hidden;
+}
+
+body.hm-phone-viewport .container,
+body.hm-phone-viewport .auth-box,
+body.hm-phone-viewport .history-card,
+body.hm-phone-viewport .room-settings-panel,
+body.hm-phone-viewport .history-panel,
+body.hm-phone-viewport .custom-routine-panel {
+    width: min(calc(var(--hm-mobile-safe-width, 100vw) - 20px), 450px);
+    max-width: none;
+}
+
+body.hm-phone-viewport .daily-modal {
+    width: min(calc(var(--hm-mobile-safe-width, 100vw) - 20px), 460px);
+    max-width: none;
+}
+
+@media (max-width: 420px) {
+    body.hm-phone-viewport .container,
+    body.hm-phone-viewport .auth-box,
+    body.hm-phone-viewport .history-card {
+        padding-left: 18px;
+        padding-right: 18px;
+    }
+}
+
+/* =========================================================
+   HearMe2nite RC2.12 History 2.0 Stable Sprint
+   UI-only enhancement. Data/Firebase structure unchanged.
+   ========================================================= */
+.history-v2-toolbar {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    gap: 8px;
+    margin: 12px 0;
+    align-items: center;
+}
+.history-v2-toolbar input,
+.history-v2-toolbar select,
+.history-v2-toolbar button {
+    min-height: 38px;
+    border-radius: 14px;
+    border: 1px solid rgba(178, 106, 106, 0.18);
+    background: rgba(255, 255, 255, 0.86);
+    padding: 0 12px;
+    font-size: 0.86rem;
+}
+.history-v2-toolbar button {
+    cursor: pointer;
+    font-weight: 800;
+    color: var(--primary-color);
+}
+.history-v2-timeline {
+    display: grid;
+    gap: 8px;
+    margin: 10px 0 12px;
+}
+.history-v2-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #8a5a5a;
+    font-size: 0.85rem;
+    padding: 0 2px;
+}
+.history-v2-title span,
+.history-v2-row small {
+    color: #9a7a7a;
+}
+.history-v2-row {
+    width: 100%;
+    border: 1px solid rgba(255, 118, 117, 0.16);
+    background: linear-gradient(135deg, rgba(255,255,255,0.96), rgba(255,245,246,0.92));
+    border-radius: 18px;
+    padding: 11px 12px;
+    display: grid;
+    grid-template-columns: 82px minmax(0, 1fr) 18px;
+    gap: 10px;
+    align-items: center;
+    text-align: left;
+    cursor: pointer;
+    box-shadow: 0 10px 24px rgba(178, 106, 106, 0.08);
+}
+.history-v2-row.is-selected {
+    border-color: rgba(255, 118, 117, 0.42);
+    box-shadow: 0 14px 28px rgba(178, 106, 106, 0.14);
+}
+.history-v2-date {
+    font-size: 0.8rem;
+    font-weight: 900;
+    color: #b26a6a;
+}
+.history-v2-main {
+    min-width: 0;
+    display: grid;
+    gap: 3px;
+}
+.history-v2-main strong {
+    color: #5f3434;
+    font-size: 0.92rem;
+}
+.history-v2-main small {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.78rem;
+}
+.history-v2-main em {
+    font-style: normal;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+.history-v2-arrow {
+    color: #c77a7a;
+    font-size: 1.3rem;
+    font-weight: 900;
+}
+.history-v2-empty {
+    border-radius: 16px;
+    background: rgba(255,255,255,0.76);
+    border: 1px dashed rgba(178,106,106,0.25);
+    padding: 14px;
+    text-align: center;
+    color: #9a7a7a;
+    font-size: 0.86rem;
+}
+@media (max-width: 640px) {
+    .history-v2-toolbar {
+        grid-template-columns: 1fr;
+    }
+    .history-v2-row {
+        grid-template-columns: 72px minmax(0, 1fr) 14px;
+        padding: 10px;
+    }
+}
+
+
+/* RC2.12.1 History Calendar First Hotfix */
+.history-v2-timeline{display:none !important;}
+.history-v2-toolbar-below{margin-top:14px;}
+.history-selected-section-title{
+    margin:14px 4px 8px;
+    font-size:13px;
+    font-weight:900;
+    color:#7d6f9c;
+    letter-spacing:-0.01em;
+}
+.history-panel-modal #calendarBox{margin-top:10px;}
+
+
+/* RC2.12.2 History Popup First Hotfix */
+.history-detail-actions {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 10px;
+    align-items: center;
+    margin-top: 8px;
+}
+.history-detail-delete,
+.history-open-again {
+    border: 0;
+    border-radius: 14px;
+    padding: 12px 14px;
+    font-weight: 800;
+    cursor: pointer;
+}
+.history-detail-delete {
+    background: #FFE7EC;
+    color: #C85B6B;
+}
+.history-open-again {
+    margin-top: 10px;
+    background: linear-gradient(135deg, #F2ECFF, #FFF7FB);
+    color: #6D4CFF;
+    border: 1px solid rgba(109, 76, 255, 0.16);
+}
+.history-popup-hint {
+    text-align: center;
+}
+@media (max-width: 430px) {
+    .history-detail-actions {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+/* RC2.13.2 Room Presence - 실제 표시 카드 */
+.room-presence-box {
+    margin: 10px 0 12px;
+    padding: 12px;
+    border: 1px solid #dcd2ff;
+    border-radius: 16px;
+    background: linear-gradient(135deg, #ffffff, #f8f4ff);
+    box-shadow: 0 8px 20px rgba(142, 92, 244, 0.08);
+}
+.room-presence-title {
+    font-size: 0.84rem;
+    font-weight: 900;
+    color: #5f3dc4;
+    margin-bottom: 9px;
+}
+.room-presence-content {
+    display: grid;
+    gap: 8px;
+}
+.presence-empty {
+    color: #636e72;
+    font-size: 0.78rem;
+    line-height: 1.45;
+    background: #fff;
+    border: 1px dashed #dcd2ff;
+    border-radius: 13px;
+    padding: 10px;
+}
+.presence-user-card {
+    display: grid;
+    gap: 8px;
+    background: #fff;
+    border: 1px solid #eadcff;
+    border-radius: 14px;
+    padding: 10px;
+}
+.presence-user-main {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+}
+.presence-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 999px;
+    flex: 0 0 auto;
+    background: #b2bec3;
+    box-shadow: 0 0 0 4px rgba(178, 190, 195, 0.18);
+}
+.presence-dot.online {
+    background: #00b894;
+    box-shadow: 0 0 0 4px rgba(0, 184, 148, 0.16);
+}
+.presence-dot.offline {
+    background: #b2bec3;
+}
+.presence-user-title {
+    font-size: 0.84rem;
+    font-weight: 900;
+    color: #2d3436;
+}
+.presence-user-email {
+    font-size: 0.72rem;
+    color: #8b86a3;
+    word-break: break-all;
+}
+.presence-user-status {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    align-items: center;
+    font-size: 0.75rem;
+    color: #636e72;
+    border-top: 1px solid #f1ecff;
+    padding-top: 8px;
+}

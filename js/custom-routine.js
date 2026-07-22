@@ -234,7 +234,7 @@ function renderCustomRoutineCards() {
                 return saved.value !== undefined && saved.value !== null && String(saved.value).trim() !== '';
             }).length;
             const complete = items.length > 0 && doneCount === items.length;
-            cards.push(`<button type="button" class="custom-routine-home-item ${complete ? 'is-complete' : ''}" onclick="openCustomRoutineInput('${escapeHtml(card.id)}')">
+            cards.push(`<button type="button" class="custom-routine-home-item ${complete ? 'is-complete' : ''}" data-hm-action="open-custom-routine-input" data-hm-value="${escapeHtml(card.id)}">
                 <span class="custom-routine-home-icon">${escapeHtml(card.icon || (hmCustomCardKind(card) === 'weekly' ? '🔁' : '📌'))}</span>
                 <span class="custom-routine-home-text"><strong>${escapeHtml(card.title || '오늘의 약속')}</strong><small>${escapeHtml(hmCustomScheduleLabel(card))} · ${items.length ? `${doneCount}/${items.length} 완료` : '항목 없음'}</small></span>
                 <span class="custom-routine-home-check">${complete ? '✓' : '○'}</span>
@@ -242,7 +242,7 @@ function renderCustomRoutineCards() {
         });
 
         legacyEntries.forEach(({ card, item, complete }) => {
-            cards.push(`<button type="button" class="custom-routine-home-item ${complete ? 'is-complete' : ''}" onclick="openCustomRoutineInput('${escapeHtml(card.id)}')">
+            cards.push(`<button type="button" class="custom-routine-home-item ${complete ? 'is-complete' : ''}" data-hm-action="open-custom-routine-input" data-hm-value="${escapeHtml(card.id)}">
                 <span class="custom-routine-home-icon">🔁</span>
                 <span class="custom-routine-home-text"><strong>${escapeHtml(item.label || '기존 루틴')}</strong><small>기존 루틴 · ${complete ? '완료' : '미완료'}</small></span>
                 <span class="custom-routine-home-check">${complete ? '✓' : '○'}</span>
@@ -293,7 +293,7 @@ function renderCustomRoutineHub() {
         const items = hmCustomItemRows(card);
         const schedule = hmCustomScheduleLabel(card);
         const description = card.description || '설명 없음';
-        return `<button type="button" class="custom-routine-hub-list-row" onclick="openCustomRoutineManager(); editCustomRoutineCard('${escapeHtml(card.id)}')">
+        return `<button type="button" class="custom-routine-hub-list-row" data-hm-action="edit-custom-routine" data-hm-value="${escapeHtml(card.id)}">
             <span class="custom-routine-hub-list-icon">${escapeHtml(card.icon || '💜')}</span>
             <span class="custom-routine-hub-list-text"><strong>${escapeHtml(card.title || '오늘의 약속')}</strong><small>${escapeHtml(schedule)} · ${escapeHtml(description)} · 항목 ${items.length}개</small></span>
             <span class="custom-routine-hub-list-action">관리 ›</span>
@@ -301,7 +301,7 @@ function renderCustomRoutineHub() {
     });
 
     legacyEntries.forEach(({ card, item }) => {
-        hubRows.push(`<button type="button" class="custom-routine-hub-list-row is-legacy" onclick="openCustomRoutineManager()">
+        hubRows.push(`<button type="button" class="custom-routine-hub-list-row is-legacy" data-hm-action="open-custom-routine-manager">
             <span class="custom-routine-hub-list-icon">🔁</span>
             <span class="custom-routine-hub-list-text"><strong>${escapeHtml(item.label || '기존 루틴')}</strong><small>기존 루틴 · 관리 화면에서 삭제할 수 있습니다.</small></span>
             <span class="custom-routine-hub-list-action">관리 ›</span>
@@ -425,7 +425,7 @@ function renderCustomRoutineDraftItems() {
             </select>
             <input type="text" data-draft-field="placeholder" maxlength="40" placeholder="안내 문구" value="${escapeHtml(item.placeholder || '')}">
             <label class="custom-routine-required"><input type="checkbox" data-draft-field="required" ${item.required ? 'checked' : ''}>필수</label>
-            <button type="button" class="custom-routine-mini-danger" onclick="removeCustomRoutineDraftItem('${escapeHtml(item.id)}')">삭제</button>
+            <button type="button" class="custom-routine-mini-danger" data-hm-action="remove-custom-routine-item" data-hm-value="${escapeHtml(item.id)}">삭제</button>
         </div>
     `).join('');
 }
@@ -455,9 +455,9 @@ function renderCustomRoutineManager() {
                     <small>${escapeHtml(card.description || '설명 없음')} · ${escapeHtml(hmCustomScheduleLabel(card))} · 항목 ${items.length}/${HM_CUSTOM_MAX_ITEMS}</small>
                 </div>
                 <div class="custom-routine-manager-actions">
-                    <button type="button" onclick="openCustomRoutineManager(); editCustomRoutineCard('${escapeHtml(card.id)}')">수정</button>
-                    <button type="button" onclick="toggleCustomRoutineCard('${escapeHtml(card.id)}')">${card.active === false ? '복구' : '숨김'}</button>
-                    <button type="button" class="custom-routine-mini-danger" onclick="deleteCustomRoutineCard('${escapeHtml(card.id)}')">삭제</button>
+                    <button type="button" data-hm-action="edit-custom-routine" data-hm-value="${escapeHtml(card.id)}">수정</button>
+                    <button type="button" data-hm-action="toggle-custom-routine" data-hm-value="${escapeHtml(card.id)}">${card.active === false ? '복구' : '숨김'}</button>
+                    <button type="button" class="custom-routine-mini-danger" data-hm-action="delete-custom-routine" data-hm-value="${escapeHtml(card.id)}">삭제</button>
                 </div>
             </article>`;
     });
@@ -470,7 +470,7 @@ function renderCustomRoutineManager() {
                     <small>기존 루틴 · 과거 날짜의 완료 기록은 보존됩니다.</small>
                 </div>
                 <div class="custom-routine-manager-actions">
-                    <button type="button" class="custom-routine-mini-danger" onclick="deleteLegacyRoutineItem('${escapeHtml(card.id)}', '${escapeHtml(item.id)}')">삭제</button>
+                    <button type="button" class="custom-routine-mini-danger" data-hm-action="delete-legacy-routine-item" data-hm-value="${escapeHtml(card.id)}" data-hm-extra="${escapeHtml(item.id)}">삭제</button>
                 </div>
             </article>`);
     });
