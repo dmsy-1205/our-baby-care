@@ -161,6 +161,9 @@ const relationshipWriteRule = getRule(databaseRules, ['rooms', '$roomCode', 'met
 check(/roomMembers'\)\.child\(\$roomCode\)\.child\(auth\.uid\)\.exists\(\)/.test(relationshipWriteRule)
   && !/emailVerificationRequired/.test(relationshipWriteRule),
   'Existing Room participants can end or recover a relationship without a legacy email-verification gate');
+check(/!data\.child\('ownerUid'\)\.exists\(\)/.test(getRule(databaseRules, ['rooms', '$roomCode', 'meta', 'relationship', '.validate']) || '')
+  && /data\.child\('generation'\)\.exists\(\)\s*\?\s*data\.child\('generation'\)\.val\(\)\s*:\s*0/.test(getRule(databaseRules, ['rooms', '$roomCode', 'meta', 'relationship', '.validate']) || ''),
+  'Legacy relationship states can adopt canonical Room UIDs and generation zero during their first transition');
 check(/relationshipStateWritePending\s*=\s*true/.test(read('js/room.js'))
   && /confirmedSnapshot\s*=\s*await relationshipRef\.once\('value'\)/.test(read('js/room.js'))
   && /confirmedState\.status\s*!==\s*nextState\.status/.test(read('js/room.js')),
