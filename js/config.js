@@ -55,6 +55,10 @@
     let activeRoomCode = "";
     let activeRoomRole = "";
     let activeRelationshipRole = "";
+    let activeRelationshipStatus = "active";
+    let activeRelationshipState = null;
+    let relationshipStateRef = null;
+    let relationshipStateRoomCode = "";
     let pendingRelationshipRole = "";
     let currentWater = 0;
     let uploadedPhotoBase64 = "";

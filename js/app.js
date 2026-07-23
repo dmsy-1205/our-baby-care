@@ -174,6 +174,9 @@
             } else {
                 activeRoomCode = "";
                 activeRoomRole = "";
+                if (typeof hmStopRelationshipStateListener === 'function') hmStopRelationshipStateListener();
+                activeRelationshipStatus = "active";
+                activeRelationshipState = null;
                 activeRelationshipRole = "";
                 pendingRelationshipRole = "";
                 if (typeof hmCurrentNickname !== 'undefined') hmCurrentNickname = '';

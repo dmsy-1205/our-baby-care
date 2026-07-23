@@ -37,6 +37,9 @@
         if (invite) invite.value = '';
         activeRoomCode = '';
         activeRoomRole = '';
+        if (typeof hmStopRelationshipStateListener === 'function') hmStopRelationshipStateListener();
+        activeRelationshipStatus = 'active';
+        activeRelationshipState = null;
         activeRelationshipRole = '';
         setDataSectionsVisible(false);
         resetProtectedDataUI();
@@ -459,6 +462,9 @@
             disconnectAllListeners();
             activeRoomCode = "";
             activeRoomRole = "";
+            if (typeof hmStopRelationshipStateListener === 'function') hmStopRelationshipStateListener();
+            activeRelationshipStatus = "active";
+            activeRelationshipState = null;
             activeRelationshipRole = "";
             clearRoomInputs();
             clearFormFieldsExceptSync();
@@ -490,6 +496,7 @@
         activeRoomRole = await getCurrentUserRoomRole(roomCode) || 'member';
         activeRelationshipRole = await getCurrentUserRelationshipRole(roomCode) || defaultRelationshipRole || (activeRoomRole === 'owner' ? 'dom' : 'sub');
         pendingRelationshipRole = activeRelationshipRole;
+        if (typeof hmLoadRelationshipState === 'function') await hmLoadRelationshipState(roomCode);
 
         const roomInput = document.getElementById('roomCode');
         if (roomInput) roomInput.value = roomCode;

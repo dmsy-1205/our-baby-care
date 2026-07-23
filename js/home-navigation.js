@@ -286,12 +286,25 @@
             panel.addEventListener('click', openRecord);
             panel.addEventListener('keydown', (event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openRecord(); } });
         } else {
-            const roomCode = safeText(typeof window.getRoomCodeForData === 'function' ? window.getRoomCodeForData() : '');
+            const roomCode = safeText(typeof activeRoomCode === 'string' ? activeRoomCode : '');
             const role = typeof window.canManageRelationshipCards === 'function' && window.canManageRelationshipCards() ? '관리(Dom)' : '기록(Sub)';
             const themeNames = { lavender: '라벤더', blossom: '블라썸', ocean: '오션', forest: '포레스트', cream: '크림' };
             const theme = themeNames[document.documentElement.dataset.hmTheme] || '기본';
             const mode = document.documentElement.dataset.hmDisplay === 'dark' ? '다크' : '라이트';
-            panel.innerHTML = `<span class="hm-adaptive-route-context-icon">✨</span><div><small>현재 앱 상태</small><strong>${theme} 테마 · ${mode} 모드</strong><p><span>공간 연결</span><b>${roomCode ? '연결됨' : '연결 안 됨'}</b><span>현재 역할</span><b>${role}</b></p></div>`;
+            const relationshipStatus = typeof activeRelationshipStatus === 'string' ? activeRelationshipStatus : 'active';
+            const relationshipLabel = !roomCode
+                ? '연결된 관계 없음'
+                : relationshipStatus === 'ended'
+                    ? '관계 종료됨 · 데이터 잠김'
+                    : relationshipStatus === 'recovery_pending'
+                        ? '관계 회복 동의 대기 중'
+                        : '관계 연결됨 · 데이터 공유 중';
+            panel.dataset.hmAction = 'open-room-settings';
+            panel.dataset.hmKeypress = 'open-room-settings';
+            panel.setAttribute('role', 'button');
+            panel.setAttribute('tabindex', '0');
+            panel.setAttribute('aria-label', `${relationshipLabel}. 우리의 공간 열기`);
+            panel.innerHTML = `<span class="hm-adaptive-route-context-icon">✨</span><div><small>현재 앱 상태</small><strong>${theme} 테마 · ${mode} 모드</strong><p><span>공간 연결</span><b>${roomCode ? '연결됨' : '연결 안 됨'}</b><span>현재 역할</span><b>${role}</b></p><small class="hm-relationship-status-line">${relationshipLabel} · 눌러서 우리의 공간 열기</small></div>`;
         }
         body.appendChild(panel);
     }

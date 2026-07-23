@@ -54,7 +54,8 @@ check(policy.can('manageSubRoutine', 'dom') === false, 'Dom cannot manage Sub ro
 
 // 2. Realtime Database rule contract. These checks are deliberately structural:
 // UI hiding is never accepted as a privacy boundary.
-const databaseRules = JSON.parse(read('database.rules.json'));
+const databaseRulesSource = read('database.rules.json');
+const databaseRules = JSON.parse(databaseRulesSource);
 const ownerNotesRead = getRule(databaseRules, ['ownerNotes', '$roomCode', '.read']) || '';
 const ownerNotesWrite = getRule(databaseRules, ['ownerNotes', '$roomCode', '.write']) || '';
 const dayAdminWrite = getRule(databaseRules, ['rooms', '$roomCode', 'dayAdmin', '$date', '.write']) || '';
@@ -145,6 +146,23 @@ check(/sessionStorage\.getItem\('pendingInviteCode'\)[\s\S]{0,100}await acceptPe
 check(/모든 멤버는 본인의 userRooms와 roomMembers로 검증된 이전 방에 다시 연결 가능/.test(read('js/room.js'))
   && /if \(legacyRoomPanel\) \{ legacyRoomPanel\.open = false; legacyRoomPanel\.style\.display = ''; \}[\s\S]{0,100}if \(currentUser\) loadMyRoomList\(\);/.test(read('js/room.js')),
   'Dom and Sub can reopen previously joined rooms from the verified room list');
+const relationshipGateCount = (databaseRulesSource.match(/child\('relationship'\)\.child\('status'\)[\s\S]{0,180}val\(\) === 'active'/g) || []).length;
+check(relationshipGateCount >= 40, 'Ended relationships are denied across Room read and write rules');
+check(/"relationship"\s*:\s*\{[\s\S]{0,500}"\.read"[\s\S]{0,1000}"\.write"[\s\S]{0,2500}recovery_pending/.test(databaseRulesSource),
+  'Relationship state remains readable and mutually recoverable while Room data is locked');
+check(/id="relationshipLifecycleBox"[\s\S]{0,2200}관계를 종료하면 양쪽 모두 기존 데이터를 불러오거나 새 기록을 작성할 수 없습니다/.test(indexSource),
+  'Relationship settings explain the symmetric data lock before termination');
+check(/function hmEndRoomRelationship/.test(read('js/room.js'))
+  && /function hmRequestRoomRecovery/.test(read('js/room.js'))
+  && /function hmApproveRoomRecovery/.test(read('js/room.js'))
+  && /recoveryRequestedByUid === currentUser\.uid/.test(read('js/room.js')),
+  'Relationship termination and recovery require two distinct participant actions');
+const testRulesDeploySource = read('scripts/deploy-database-rules.ps1');
+check(/ValidateSet\('Test'\)/.test(testRulesDeploySource)
+  && /hearme2nite1205/.test(testRulesDeploySource)
+  && /deploy --only database --project test/.test(testRulesDeploySource)
+  && !/storage|functions|--project prod/i.test(testRulesDeploySource),
+  'Relationship rules have a test-only Database deployment path');
 check(/property="og:title"/.test(indexSource) && /property="og:image"/.test(indexSource) && /name="twitter:card"/.test(indexSource), 'Shared links define Open Graph and social preview metadata');
 check(/hmAccountChildReturnType\s*=\s*type/.test(profileSource) && /hmReturnToAccountMenu/.test(profileSource), 'Account child screens remember their parent menu');
 check(/hmReturnToAccountMenu\?\.\('theme'\)/.test(themeSource) && /hmReturnToAccountMenu\?\.\('data'\)/.test(dataManagementSource), 'Theme and data screens return to the account menu');
@@ -200,9 +218,9 @@ check(!/cache\.put\(request/.test(navigationFetchBody) && !/caches\.match\(reque
 check(/!\[HM_STATIC_CACHE, HM_RUNTIME_CACHE\]\.includes\(key\)/.test(serviceWorkerSource), 'Service-worker activation preserves current-version caches');
 check(/await clearOldPwaCachesIfNeeded\(\);[\s\S]{0,80}await registerServiceWorker\(\)/.test(pwaSource), 'PWA cache cleanup completes before service-worker registration');
 const releaseInfoSource = read('js/release-info.js');
-check(/베타 이전 공간 재연결 안정화/.test(releaseInfoSource)
-  && /Dom과 Sub가 자신이 이미 참여했던 이전 공간/.test(releaseInfoSource),
-  'Release metadata describes the current verified Room reconnection work');
+check(/베타 관계 종료·상호 회복 보호/.test(releaseInfoSource)
+  && /한쪽의 회복 요청을 다른 쪽이 동의/.test(releaseInfoSource),
+  'Release metadata describes the current relationship lifecycle protection');
 
 // 12. Generated role-label contract. Feedback and reward cards already expose
 // their role in the route UI; CSS must not append duplicate accessible text.

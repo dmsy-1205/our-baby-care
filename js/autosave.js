@@ -193,12 +193,22 @@
         try {
         const sessionUid = currentUser && currentUser.uid;
         if (!sessionUid) { showSaveStatus('🔒 로그인이 필요합니다.'); return; }
+        if (activeRoomCode && activeRelationshipStatus !== 'active') {
+            disconnectAllListeners();
+            if (typeof hmStartRelationshipStateListener === 'function') hmStartRelationshipStateListener(activeRoomCode);
+            setDataSectionsVisible(false);
+            resetProtectedDataUI('관계가 종료되어 이 공간의 데이터가 잠겼습니다.');
+            showSaveStatus(activeRelationshipStatus === 'recovery_pending' ? '💞 관계 회복 동의 대기 중' : '🔒 관계 종료 · 데이터 잠김');
+            updateCurrentRoomInfo();
+            return;
+        }
         const roomCode = getRoomCodeForData();
         const date = document.getElementById('recordDate').value;
 
         if (!hmIsOnline) showSaveStatus('📴 오프라인 상태입니다. 연결되면 다시 동기화됩니다.');
 
         disconnectAllListeners();
+        if (typeof hmStartRelationshipStateListener === 'function') hmStartRelationshipStateListener(roomCode);
         if (!roomCode || !hmIsSafeRoomCode(roomCode)) {
             setDataSectionsVisible(false);
             resetProtectedDataUI();
