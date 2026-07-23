@@ -1,7 +1,7 @@
 {
   "algorithm": "sha256",
-  "sourceHash": "269448c47cebc49a356e68136e8b79660e368eba0b83934c48e4ede3b7f2399b",
-  "sourceBytes": 610007,
+  "sourceHash": "86b0c0d996a1d11da05aebdbf67e35644ca08cc485b8585db2a9ae7da4f85832",
+  "sourceBytes": 610359,
   "layers": [
     {
       "name": "tokens.css",
@@ -100,8 +100,8 @@
     },
     {
       "name": "screens/home-categories.css",
-      "bytes": 10331,
-      "lines": 86
+      "bytes": 10683,
+      "lines": 91
     },
     {
       "name": "screens/category-routes.css",

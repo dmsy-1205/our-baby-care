@@ -5,15 +5,17 @@
 (function () {
     const release = Object.freeze({
         product: 'HearMe2nite',
-        version: 'v1.0 STEP6.2.14.60',
-        appVersion: 'HearMe2nite v1.0 STEP6.2.14.60',
-        step: 'STEP6.2.14.60',
+        version: 'v1.0 STEP6.2.14.61',
+        appVersion: 'HearMe2nite v1.0 STEP6.2.14.61',
+        step: 'STEP6.2.14.61',
         build: '20260723',
         releaseDate: '2026.07.23',
         stage: 'Beta',
         title: '메인 이전 전 환경·저장 안전성 보강',
         description: '테스트와 메인 Hosting의 Firebase 프로젝트 불일치를 차단하고, 요약 설정 동기화 실패와 계정 전환 문맥을 안전하게 처리합니다.',
         userChanges: Object.freeze([
+            '홈 카테고리와 주요 화면 이동 아이콘을 동일한 굵기와 형태의 선형 아이콘으로 통일했습니다.',
+            '기록 의미를 빠르게 구분하는 기분·수분·식사·사진 이모지는 유지했습니다.',
             '기록 카드와 기록 작성 화면의 코멘트 버튼에서 현재 코멘트 수를 바로 확인할 수 있습니다.',
             '상대가 남긴 새 코멘트가 있으면 숫자 배지가 강조되고, 확인하면 일반 숫자 배지로 바뀝니다.',
             '테스트와 메인 Hosting이 잘못된 Firebase 프로젝트를 향하면 데이터 연결을 중단하고 안내합니다.',

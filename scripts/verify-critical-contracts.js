@@ -219,8 +219,15 @@ check(/data-hm-display="light"[^\n]*\.hm-theme-modal/.test(settingsAccountSource
 check(/border-color:#bcaeba/.test(settingsAccountSource) && /color:#34283a/.test(settingsAccountSource), 'Light-mode controls retain visible text and borders');
 const homeCategoriesSource = read('css/screens/home-categories.css');
 const categoryRoutesSource = read('css/screens/category-routes.css');
+const uiIconsSource = read('js/ui-icons.js');
 check(/data-hm-display="light"[\s\S]*color:\s*#5f5366/.test(homeCategoriesSource) && /data-hm-display="light"[\s\S]*color:\s*#5f5366/.test(categoryRoutesSource), 'Light-mode support copy keeps the strengthened contrast');
 check(/hm-adaptive-category-icon[^}]*Segoe UI Symbol/.test(homeCategoriesSource) && /hm-adaptive-action\s*>\s*span:first-child[^}]*Segoe UI Symbol/.test(homeCategoriesSource), 'Home and route action icons share one symbol treatment');
+check(/viewBox="0 0 24 24"/.test(uiIconsSource)
+  && /stroke-width="1\.8"/.test(uiIconsSource)
+  && /currentColor/.test(uiIconsSource)
+  && !/https?:\/\//.test(uiIconsSource)
+  && /HM_UI_ICONS\?\.render/.test(homeNavigationSource),
+  'Navigation uses one offline 24px rounded SVG icon system');
 
 // 7. Responsive shell contract. Wide-screen polish must not redesign cards.
 const responsiveShellSource = read('css/components/app-shell-responsive.css');

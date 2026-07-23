@@ -4,53 +4,53 @@
 
     const CATEGORIES = [
         {
-            key: 'mission', icon: '◎', title: '커스텀 미션', subtitle: '오늘의 약속 · 나의 루틴',
+            key: 'mission', icon: 'target', title: '커스텀 미션', subtitle: '오늘의 약속 · 나의 루틴',
             actions: [
-                ['💜', '오늘의 약속', '함께 정한 미션을 확인하고 관리합니다.', () => window.openCustomRoutineHub?.()],
-                ['🌱', '나의 루틴', '기록하는 사람이 직접 만드는 개인 루틴입니다.', () => window.openSubRoutineHub?.()]
+                ['heart', '오늘의 약속', '함께 정한 미션을 확인하고 관리합니다.', () => window.openCustomRoutineHub?.()],
+                ['routine', '나의 루틴', '기록하는 사람이 직접 만드는 개인 루틴입니다.', () => window.openSubRoutineHub?.()]
             ]
         },
         {
-            key: 'condition', icon: '⌁', title: '오늘의 컨디션', subtitle: '기분 · 건강 · 수분',
+            key: 'condition', icon: 'pulse', title: '오늘의 컨디션', subtitle: '기분 · 건강 · 수분',
             actions: [
-                ['😊', '오늘의 기분', '지금의 기분을 기록합니다.', () => window.openDailyModal?.('mood')],
-                ['⚖️', '체중', '선택한 날짜의 체중을 입력합니다.', () => window.openDailyModal?.('weight')],
-                ['🏃', '오늘의 운동', '운동 여부와 내용을 기록합니다.', () => window.openDailyModal?.('exercise')],
-                ['💧', '오늘의 수분', '마신 물의 양을 추가합니다.', () => window.openDailyModal?.('water')]
+                ['smile', '오늘의 기분', '지금의 기분을 기록합니다.', () => window.openDailyModal?.('mood')],
+                ['scale', '체중', '선택한 날짜의 체중을 입력합니다.', () => window.openDailyModal?.('weight')],
+                ['activity', '오늘의 운동', '운동 여부와 내용을 기록합니다.', () => window.openDailyModal?.('exercise')],
+                ['droplet', '오늘의 수분', '마신 물의 양을 추가합니다.', () => window.openDailyModal?.('water')]
             ]
         },
         {
-            key: 'daily', icon: '▤', title: '오늘의 기록', subtitle: '하루 · 식사 · 사진',
+            key: 'daily', icon: 'note', title: '오늘의 기록', subtitle: '하루 · 식사 · 사진',
             actions: [
-                ['☀️', '기상 시간', '하루를 시작한 시간을 기록합니다.', () => window.openDailyModal?.('wake')],
-                ['🥗', '식사 기록', '아침·점심·저녁을 기록합니다.', () => window.openDailyModal?.('meal')],
-                ['📷', '오늘의 순간', '외출과 일상 사진을 남깁니다.', () => window.openDailyModal?.('outing')],
-                ['🌙', '취침 예정', '잠들 예정 시간을 기록합니다.', () => window.openDailyModal?.('sleep')],
-                ['📝', '오늘의 하루', '하루의 이야기와 코멘트를 남깁니다.', () => window.openDailyModal?.('diary')],
-                ['✨', '오늘 기록 완성', '오늘 기록을 정리하고 복사합니다.', openDailyCompletion]
+                ['sunrise', '기상 시간', '하루를 시작한 시간을 기록합니다.', () => window.openDailyModal?.('wake')],
+                ['meal', '식사 기록', '아침·점심·저녁을 기록합니다.', () => window.openDailyModal?.('meal')],
+                ['image', '오늘의 순간', '외출과 일상 사진을 남깁니다.', () => window.openDailyModal?.('outing')],
+                ['moon', '취침 예정', '잠들 예정 시간을 기록합니다.', () => window.openDailyModal?.('sleep')],
+                ['note', '오늘의 하루', '하루의 이야기와 코멘트를 남깁니다.', () => window.openDailyModal?.('diary')],
+                ['sparkles', '오늘 기록 완성', '오늘 기록을 정리하고 복사합니다.', openDailyCompletion]
             ]
         },
         {
-            key: 'feedback', icon: '◇', title: '관리와 피드백', subtitle: '피드백 · 선물 · 메모',
+            key: 'feedback', icon: 'diamond', title: '관리와 피드백', subtitle: '피드백 · 선물 · 메모',
             actions: [
-                ['💌', '주인의 피드백', 'Dom은 작성하고 Sub는 확인합니다.', () => window.openDailyModal?.('feedback')],
-                ['🎁', '오늘의 선물', '작은 보상이나 편안한 휴식을 전합니다.', () => window.openDailyModal?.('reward')],
-                ['👑', 'Dom 비공개 메모', 'Dom만 확인하는 관리 메모입니다.', () => window.openDailyModal?.('ownerNote')]
+                ['message', '주인의 피드백', 'Dom은 작성하고 Sub는 확인합니다.', () => window.openDailyModal?.('feedback')],
+                ['gift', '오늘의 선물', '작은 보상이나 편안한 휴식을 전합니다.', () => window.openDailyModal?.('reward')],
+                ['lock', 'Dom 비공개 메모', 'Dom만 확인하는 관리 메모입니다.', () => window.openDailyModal?.('ownerNote')]
             ]
         },
         {
-            key: 'records', icon: '▦', title: '우리의 기록', subtitle: '흐름 · 이야기 · 기념일',
+            key: 'records', icon: 'calendar', title: '우리의 기록', subtitle: '흐름 · 이야기 · 기념일',
             actions: [
-                ['📈', '우리의 흐름', '주간·월간 기록 변화를 확인합니다.', () => window.hmOpenHomeStatsModal?.('promise')],
-                ['💗', '우리의 이야기', '지난 기록·사진·코멘트를 함께 봅니다.', () => document.querySelector('.history-launch-card')?.click()]
+                ['trend', '우리의 흐름', '주간·월간 기록 변화를 확인합니다.', () => window.hmOpenHomeStatsModal?.('promise')],
+                ['history', '우리의 이야기', '지난 기록·사진·코멘트를 함께 봅니다.', () => document.querySelector('.history-launch-card')?.click()]
             ]
         },
         {
-            key: 'settings', icon: '⚙', title: '내 정보 · 설정', subtitle: '공간 · 테마 · 데이터',
+            key: 'settings', icon: 'settings', title: '내 정보 · 설정', subtitle: '공간 · 테마 · 데이터',
             actions: [
-                ['👤', '내 계정', '프로필·테마·데이터·로그아웃을 관리합니다.', () => window.openAccountMenuModal?.()],
-                ['🏠', '우리의 공간', '연결, 역할, 초대코드를 관리합니다.', () => window.openRoomSettingsModal?.()],
-                ['❔', '도움말과 문의', '가이드와 베타 문의를 확인합니다.', () => window.openGuideModal?.()]
+                ['user', '내 계정', '프로필·테마·데이터·로그아웃을 관리합니다.', () => window.openAccountMenuModal?.()],
+                ['home', '우리의 공간', '연결, 역할, 초대코드를 관리합니다.', () => window.openRoomSettingsModal?.()],
+                ['help', '도움말과 문의', '가이드와 베타 문의를 확인합니다.', () => window.openGuideModal?.()]
             ]
         }
     ];
@@ -65,6 +65,7 @@
         feedback: ['feedback', 'reward', 'ownerNote']
     });
     const $ = (id) => document.getElementById(id);
+    const icon = (name, className = 'hm-ui-icon') => window.HM_UI_ICONS?.render(name, className) || '';
 
     function safeText(value) {
         return String(value || '').trim();
@@ -108,7 +109,7 @@
         section.className = 'hm-adaptive-category-section';
         section.innerHTML = `<div class="hm-adaptive-category-head"><strong>오늘 무엇을 할까요?</strong><small>필요한 카테고리를 선택하세요.</small></div><div class="hm-adaptive-category-grid">${CATEGORIES.map((item, index) => `
             <button type="button" class="hm-adaptive-category" data-hm-category="${item.key}" data-tone="${index + 1}" aria-label="${item.title}: ${item.subtitle}">
-                <span class="hm-adaptive-category-icon" aria-hidden="true">${item.icon}</span>
+                <span class="hm-adaptive-category-icon" aria-hidden="true">${icon(item.icon)}</span>
                 <span><strong>${item.title}</strong><small>${item.subtitle}</small></span>
                 <span class="hm-adaptive-category-arrow" aria-hidden="true">›</span>
             </button>`).join('')}</div>`;
@@ -256,7 +257,7 @@
     function renderRouteActions(category, body) {
         const grid = document.createElement('div');
         grid.className = 'hm-adaptive-route-actions';
-        grid.innerHTML = category.actions.map((action, index) => `<button type="button" class="hm-adaptive-action" data-route-action-index="${index}"><span aria-hidden="true">${action[0]}</span><span><strong>${action[1]}</strong><small>${action[2]}</small></span><em aria-hidden="true">›</em></button>`).join('');
+        grid.innerHTML = category.actions.map((action, index) => `<button type="button" class="hm-adaptive-action" data-route-action-index="${index}"><span aria-hidden="true">${icon(action[0])}</span><span><strong>${action[1]}</strong><small>${action[2]}</small></span><em aria-hidden="true">›</em></button>`).join('');
         grid.addEventListener('click', (event) => {
             const button = event.target.closest('[data-route-action-index]');
             if (!button) return;
@@ -321,7 +322,7 @@
         $('hmAdaptiveRouteKicker').textContent = 'HearMe2nite';
         const isManager = typeof window.canManageRelationshipCards === 'function' && window.canManageRelationshipCards();
         const isSubFeedback = category.key === 'feedback' && !isManager;
-        $('hmAdaptiveRouteTitle').textContent = `${category.icon} ${isSubFeedback ? '주인의 메시지' : category.title}`;
+        $('hmAdaptiveRouteTitle').textContent = isSubFeedback ? '주인의 메시지' : category.title;
         $('hmAdaptiveRouteSubtitle').textContent = isSubFeedback ? '주인의 피드백 · 오늘의 선물' : category.subtitle;
         $('hmAdaptiveRouteSaveState').textContent = isSubFeedback ? '읽기 전용' : (EDITOR_ROUTES[category.key] ? '☁ 자동 저장' : '둘만의 공간');
         if (EDITOR_ROUTES[category.key]) mountRouteEditors(category.key, body);

@@ -53,6 +53,11 @@ button.hm-adaptive-person { width: 100%; padding: 0; border: 0; background: tran
 .hm-adaptive-category[data-tone="5"] { background: color-mix(in srgb, #fff7e8 48%, var(--hm-surface-card, var(--card-color))); }
 .hm-adaptive-category[data-tone="6"] { background: color-mix(in srgb, #f1eff5 52%, var(--hm-surface-card, var(--card-color))); }
 .hm-adaptive-category-icon { width: 40px; height: 40px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid color-mix(in srgb, var(--hm-primary, var(--accent-purple)) 18%, transparent); border-radius: 14px; background: color-mix(in srgb, var(--hm-primary-soft, var(--soft-purple)) 88%, var(--hm-surface-card, var(--card-color))); color: var(--hm-primary-strong, var(--hm-primary, var(--accent-purple))); font-family: "Segoe UI Symbol", "Apple Symbols", sans-serif; font-variant-emoji: text; font-size: 1.25rem; font-weight: 900; line-height: 1; box-shadow: inset 0 1px 0 rgba(255,255,255,.72); }
+.hm-ui-icon { width: 22px; height: 22px; display: block; flex: 0 0 auto; overflow: visible; }
+.hm-adaptive-category-icon .hm-ui-icon { width: 23px; height: 23px; }
+.hm-adaptive-action > span:first-child .hm-ui-icon { width: 21px; height: 21px; }
+.room-settings-icon .hm-ui-icon { width: 24px; height: 24px; }
+[data-hm-ui-icon] { color: currentColor; }
 .hm-adaptive-category strong,.hm-adaptive-category small { display: block; overflow-wrap: anywhere; }
 .hm-adaptive-category strong,.hm-adaptive-category small { word-break: keep-all; overflow-wrap: normal; }
 .hm-adaptive-category strong { font-size: .88rem; line-height: 1.3; }
