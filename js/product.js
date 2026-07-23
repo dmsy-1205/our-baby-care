@@ -107,6 +107,7 @@
     const HM_SUMMARY_CATALOG = [
         {key:'today',icon:'📝',label:'오늘 기록'}, {key:'water',icon:'💧',label:'수분'},
         {key:'weight',icon:'⚖️',label:'체중'}, {key:'promise',icon:'💜',label:'오늘의 약속'},
+        {key:'subRoutine',icon:'🌱',label:'나의 루틴'},
         {key:'mood',icon:'😊',label:'오늘의 기분'}, {key:'exercise',icon:'🏃',label:'오늘의 운동'},
         {key:'meal',icon:'🥗',label:'식사 기록'}, {key:'mealPhotos',icon:'📷',label:'식사 사진'},
         {key:'wake',icon:'☀️',label:'기상 시간'}, {key:'sleep',icon:'🌙',label:'취침 예정'},
@@ -140,12 +141,15 @@
     function hmSummaryMetric(key,rec){
         let w=0; try { w=Number(window.currentWater || currentWater || rec?.water || 0); } catch(e){ w=Number(rec?.water||0); }
         const promise=routineRatio(), moments=hmSummaryMomentRows(rec), together=getTogetherDay();
+        const subRoutines=Array.isArray(rec?.subRoutineSnapshot)?rec.subRoutineSnapshot:[];
+        const subRoutineDone=subRoutines.filter(item=>item?.done===true).length;
         const meals=[rec?.mealBreakfast,rec?.mealLunch,rec?.mealDinner].filter(v=>hmHomeStatIsFilled(v)).length;
         const weight=cleanNumberText($('weight')?.value||rec?.weight||'','-');
         const map={
             today:{short:rec?'✔':'-',value:rec?'작성 완료':'작성 전',sub:$('recordDate')?.value||''},
             water:{short:String(w||0),value:`${w||0} ml`,sub:'오늘 누적'}, weight:{short:weight,value:weight==='-'?'-':`${weight} kg`,sub:'오늘 기록'},
             promise:{short:promise.total?`${promise.done}/${promise.total}`:'-',value:promise.total?`${promise.done} / ${promise.total} 완료`:'등록 없음',sub:promise.cards?`${promise.cards}개 약속`:'등록된 약속이 없어요'},
+            subRoutine:{short:subRoutines.length?`${subRoutineDone}/${subRoutines.length}`:'-',value:subRoutines.length?`${subRoutineDone} / ${subRoutines.length} 완료`:'등록 없음',sub:'기록(Sub)의 오늘 루틴'},
             mood:{short:rec?.moodLabel||'-',value:rec?.moodLabel||'기록 없음',sub:'오늘의 기분'},
             exercise:{short:hmHomeStatIsFilled(rec?.exercise)?'✔':'-',value:hmHomeStatIsFilled(rec?.exercise)?String(rec.exercise):'기록 없음',sub:'오늘의 운동'},
             meal:{short:`${meals}/3`,value:`${meals} / 3 기록`,sub:'아침 · 점심 · 저녁'},

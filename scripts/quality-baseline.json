@@ -4,7 +4,7 @@
   "inlineHandlersMax": 0,
   "largeScriptLinesMax": {
     "js/history.js": 1383,
-    "js/product.js": 889,
+    "js/product.js": 893,
     "js/app.js": 896,
     "js/autosave.js": 600,
     "js/daily.js": 605

@@ -87,6 +87,11 @@ check(!/new Date\(\)\.toISOString\(\)\.slice\(0\s*,\s*10\)/.test(productSource),
 check(!/new Date\(\)\.toISOString\(\)\.slice\(0\s*,\s*10\)/.test(subRoutineSource), 'Sub routines do not use UTC ISO date fallback');
 check(/orderedItems=hmSummaryDraft\.map\(key=>byKey\.get\(key\)\)/.test(productSource), 'Summary settings render selected items in their saved order');
 check(/index===0\?'disabled'/.test(productSource) && /index===hmSummaryDraft\.length-1\?'disabled'/.test(productSource), 'Summary order arrows disable at their movement boundaries');
+check(/\{key:'subRoutine',icon:'🌱',label:'나의 루틴'\}/.test(productSource)
+  && /Array\.isArray\(rec\?\.subRoutineSnapshot\)/.test(productSource)
+  && /subRoutine:\{short:subRoutines\.length/.test(productSource)
+  && /\$\{subRoutineDone\}\/\$\{subRoutines\.length\}/.test(productSource),
+  'Today summary settings include My Routine completion from the saved daily snapshot');
 
 // 4. Save-context contract. A save must capture and re-check identity, room and date.
 const autosaveSource = read('js/autosave.js');
@@ -244,9 +249,9 @@ check(!/cache\.put\(request/.test(navigationFetchBody) && !/caches\.match\(reque
 check(/!\[HM_STATIC_CACHE, HM_RUNTIME_CACHE\]\.includes\(key\)/.test(serviceWorkerSource), 'Service-worker activation preserves current-version caches');
 check(/await clearOldPwaCachesIfNeeded\(\);[\s\S]{0,80}await registerServiceWorker\(\)/.test(pwaSource), 'PWA cache cleanup completes before service-worker registration');
 const releaseInfoSource = read('js/release-info.js');
-check(/우리의 공간 연결·관계 관리 위계 개선/.test(releaseInfoSource)
-  && /서버가 확정한 뒤에만 화면을 전환/.test(releaseInfoSource),
-  'Release metadata describes server-confirmed relationship locking');
+check(/오늘의 요약에 나의 루틴 추가/.test(releaseInfoSource)
+  && /완료 개수와 전체 루틴 수/.test(releaseInfoSource),
+  'Release metadata describes the My Routine summary option');
 
 // 12. Generated role-label contract. Feedback and reward cards already expose
 // their role in the route UI; CSS must not append duplicate accessible text.
