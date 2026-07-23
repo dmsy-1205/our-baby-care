@@ -264,6 +264,10 @@ check(!/['"]deploy['"]|database:set|database:update|database:remove/.test(rulesA
 // worker cache key must advance together without forcing an unsafe reload.
 const pwaSource = read('js/pwa.js');
 const serviceWorkerSource = read('service-worker.js');
+const manifestSource = read('manifest.webmanifest');
+const manifest = JSON.parse(manifestSource);
+check(manifest.start_url === '/index.html?source=pwa&v=step6-2-14-69', 'PWA install start URL matches the current release');
+check(manifest.scope === '/' && manifest.display === 'standalone', 'PWA installs into the full standalone app scope');
 const navigationFetchBody = functionBody(serviceWorkerSource, 'async function networkFirstNavigation(request)');
 check(/window\.HM_RELEASE\?\.step/.test(pwaSource), 'PWA registration derives its version from central release metadata');
 check(/service-worker\.js\?v=\$\{encodeURIComponent\(HM_PWA_APP_VERSION\)\}/.test(pwaSource), 'Service-worker registration URL follows the derived release version');

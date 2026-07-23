@@ -5,15 +5,16 @@
 (function () {
     const release = Object.freeze({
         product: 'HearMe2nite',
-        version: 'v1.0 STEP6.2.14.68',
-        appVersion: 'HearMe2nite v1.0 STEP6.2.14.68',
-        step: 'STEP6.2.14.68',
+        version: 'v1.0 STEP6.2.14.69',
+        appVersion: 'HearMe2nite v1.0 STEP6.2.14.69',
+        step: 'STEP6.2.14.69',
         build: '20260723',
         releaseDate: '2026.07.23',
         stage: 'Beta',
         title: '메인 이전 전 환경·저장 안전성 보강',
         description: '테스트와 메인 Hosting의 Firebase 프로젝트 불일치를 차단하고, 요약 설정 동기화 실패와 계정 전환 문맥을 안전하게 처리합니다.',
         userChanges: Object.freeze([
+            'PWA 새 설치가 현재 버전의 시작 주소로 실행되도록 설치 시작 경로를 최신 릴리스와 동기화했습니다.',
             '관계 종료를 실행한 기기는 서버 요청 전에 모든 Room 연결을 선제 종료하며, 실패한 경우에만 안전하게 다시 연결합니다.',
             '관계 회복 신청 후 상대방 동의 전까지 공유 테마와 월별 기록 동기화를 시작하거나 반영하지 않습니다.',
             '관계 종료 시 코멘트와 접속상태의 이전 읽기 요청을 즉시 정리하여 예상된 권한 차단 로그가 남지 않도록 했습니다.',
