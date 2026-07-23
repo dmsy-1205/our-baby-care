@@ -244,7 +244,7 @@ check(!/cache\.put\(request/.test(navigationFetchBody) && !/caches\.match\(reque
 check(/!\[HM_STATIC_CACHE, HM_RUNTIME_CACHE\]\.includes\(key\)/.test(serviceWorkerSource), 'Service-worker activation preserves current-version caches');
 check(/await clearOldPwaCachesIfNeeded\(\);[\s\S]{0,80}await registerServiceWorker\(\)/.test(pwaSource), 'PWA cache cleanup completes before service-worker registration');
 const releaseInfoSource = read('js/release-info.js');
-check(/베타 관계 종료 서버 확정·즉시 잠금/.test(releaseInfoSource)
+check(/우리의 공간 연결·관계 관리 위계 개선/.test(releaseInfoSource)
   && /서버가 확정한 뒤에만 화면을 전환/.test(releaseInfoSource),
   'Release metadata describes server-confirmed relationship locking');
 

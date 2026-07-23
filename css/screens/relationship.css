@@ -22,9 +22,31 @@
 }
 :root[data-hm-theme][data-hm-display="dark"] .room-settings-modal summary{color:color-mix(in srgb,var(--hm-primary) 62%,#fff 38%) !important;}
 
+.room-connection-tools{
+  margin-top:12px;padding:10px;border:1px solid color-mix(in srgb,var(--hm-primary) 22%,transparent);
+  border-radius:14px;background:color-mix(in srgb,var(--hm-primary) 4%,#fff);
+}
+.room-connection-tools-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin:0 2px 8px}
+.room-connection-tools-head strong{font-size:.86rem}
+.room-connection-tools-head small{max-width:52%;color:var(--hm-color-muted);font-size:.68rem;line-height:1.35;text-align:right}
+.room-connection-tools > .btn-connect{margin:0;min-height:42px}
+.room-connection-tools > details{
+  margin:0;padding:0 2px;border-top:1px solid color-mix(in srgb,var(--hm-primary) 14%,transparent);
+  color:var(--hm-color-muted);font-size:.78rem;
+}
+.room-connection-tools > details:first-of-type{margin-top:8px}
+.room-connection-tools > details > summary{
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
+  padding:10px 2px;cursor:pointer;font-weight:800;color:var(--hm-color-body);
+}
+.room-connection-tools > details > summary small{font-size:.66rem;font-weight:600;color:var(--hm-color-muted)}
+.room-connection-help{margin:0 2px 8px;line-height:1.45}
+.room-connection-tools .legacy-room-code-panel{margin-top:8px}
+.room-connection-tools .legacy-room-code-panel > summary{cursor:pointer;color:#9a5d68;font-weight:700}
+
 .relationship-lifecycle-box{
-  margin:12px 0;padding:14px;border:1px solid color-mix(in srgb,var(--hm-primary) 28%,transparent);
-  border-radius:16px;background:color-mix(in srgb,var(--hm-primary) 7%,#fff);
+  margin:12px 0 0;padding:10px 12px;border:1px solid color-mix(in srgb,#a65b68 24%,transparent);
+  border-radius:14px;background:color-mix(in srgb,#a65b68 3%,#fff);
 }
 .relationship-lifecycle-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
 .relationship-lifecycle-head strong{font-size:.92rem}
@@ -33,8 +55,8 @@
 }
 .relationship-lifecycle-box[data-status="ended"] .relationship-lifecycle-badge{background:#f7e3e7;color:#8b3042}
 .relationship-lifecycle-box[data-status="recovery_pending"] .relationship-lifecycle-badge{background:#fff1cc;color:#74510b}
-.relationship-lifecycle-box p{margin:8px 0;color:var(--hm-color-muted);font-size:.8rem;line-height:1.5}
-.relationship-lifecycle-box small{display:block;margin-top:9px;color:var(--hm-color-muted);font-size:.72rem;line-height:1.45}
+.relationship-lifecycle-box p{margin:6px 0;color:var(--hm-color-muted);font-size:.76rem;line-height:1.4}
+.relationship-lifecycle-box small{display:block;margin-top:7px;color:var(--hm-color-muted);font-size:.68rem;line-height:1.4}
 .relationship-lifecycle-actions{display:flex;flex-wrap:wrap;gap:8px}
 .relationship-lifecycle-btn{
   min-height:40px;padding:8px 12px;border:1px solid color-mix(in srgb,var(--hm-primary) 32%,transparent);
@@ -43,6 +65,9 @@
 .relationship-lifecycle-btn.is-danger{border-color:#d9919f;color:#9b3047;background:#fff5f7}
 .relationship-lifecycle-btn.is-primary{background:var(--hm-primary);color:#fff;border-color:var(--hm-primary)}
 :root[data-hm-theme][data-hm-display="dark"] .relationship-lifecycle-box{
+  background:linear-gradient(145deg,var(--hm-dark-card),var(--hm-dark-card-soft));border-color:var(--hm-dark-line);
+}
+:root[data-hm-theme][data-hm-display="dark"] .room-connection-tools{
   background:linear-gradient(145deg,var(--hm-dark-card),var(--hm-dark-card-soft));border-color:var(--hm-dark-line);
 }
 :root[data-hm-theme][data-hm-display="dark"] .relationship-lifecycle-btn{

@@ -425,7 +425,7 @@
             // - partner: 새 방 만들기/초대코드 생성/직접 공유코드 연결은 금지
             // - 모든 멤버는 본인의 userRooms와 roomMembers로 검증된 이전 방에 다시 연결 가능
             if (activeRoomRole === 'owner') {
-                if (createBtn) { createBtn.style.display = ''; createBtn.innerText = '🌱 새 공간 만들기 / 다른 공간으로 시작하기'; }
+                if (createBtn) { createBtn.style.display = ''; createBtn.innerText = '🌱 다른 공간으로 시작하기'; }
                 if (invitePanel) { invitePanel.open = false; invitePanel.style.display = ''; }
                 if (joinInvitePanel) { joinInvitePanel.open = false; joinInvitePanel.style.display = ''; }
                 if (legacyRoomPanel) { legacyRoomPanel.open = false; legacyRoomPanel.style.display = ''; }

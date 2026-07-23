@@ -55,7 +55,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
     <script src="/__/firebase/init.js"></script>
 
-    <link rel="stylesheet" href="css/style.css?v=step6-2-14-56-legacy-room-relationship-20260723">
+    <link rel="stylesheet" href="css/style.css?v=step6-2-14-57-room-relationship-layout-20260723">
 </head>
 <body class="hm-booting">
 
@@ -218,22 +218,6 @@
                     아직 연결된 공간이 없습니다. 혼자 사용할 공간을 만들거나 초대코드를 입력해 주세요.
                 </div>
 
-                <section class="relationship-lifecycle-box" id="relationshipLifecycleBox" aria-labelledby="relationshipLifecycleTitle" hidden>
-                    <div class="relationship-lifecycle-head">
-                        <strong id="relationshipLifecycleTitle">관계 상태</strong>
-                        <span class="relationship-lifecycle-badge" id="relationshipLifecycleBadge">연결됨</span>
-                    </div>
-                    <p id="relationshipLifecycleMessage">두 사용자가 이 공간의 기록을 함께 불러오고 있습니다.</p>
-                    <div class="relationship-lifecycle-actions">
-                        <button type="button" class="relationship-lifecycle-btn is-danger" id="endRelationshipBtn" data-hm-action="end-room-relationship">관계 종료</button>
-                        <button type="button" class="relationship-lifecycle-btn" id="requestRecoveryBtn" data-hm-action="request-room-recovery" hidden>관계 회복 요청</button>
-                        <button type="button" class="relationship-lifecycle-btn is-primary" id="approveRecoveryBtn" data-hm-action="approve-room-recovery" hidden>관계 회복 동의</button>
-                        <button type="button" class="relationship-lifecycle-btn" id="cancelRecoveryBtn" data-hm-action="cancel-room-recovery" hidden>회복 요청 취소</button>
-                    </div>
-                    <small>관계를 종료하면 양쪽 모두 기존 데이터를 불러오거나 새 기록을 작성할 수 없습니다. 데이터는 삭제되지 않으며, 두 사람이 회복에 동의하면 다시 사용할 수 있습니다.</small>
-                </section>
-
-
                 <div class="relationship-role-box" id="relationshipRoleBox">
                     <div class="relationship-role-title">👥 내 관계 역할 선택 <span id="relationshipRoleLockedBadge"></span></div>
                     <div class="relationship-role-note" id="relationshipRoleNote">
@@ -246,36 +230,58 @@
                     <div class="relationship-role-help" id="relationshipRoleHelp">처음 공간을 만들거나 초대코드로 참여하기 전에 역할을 선택해 주세요.</div>
                 </div>
 
-                <button type="button" class="btn-connect" id="createRoomBtn" data-hm-action="create-room">🌱 새로운 공간 시작하기</button>
-
-                <details id="invitePanel" style="margin-top:12px; font-size:0.8rem; color:#636e72;">
-                    <summary style="cursor:pointer; font-weight:bold; color:var(--primary-color);">💌 상대방 초대하기</summary>
-                    <div style="margin-top:8px; line-height:1.45;">
-                        내 방을 만든 뒤 초대코드를 생성하세요. 코드는 24시간 동안 유효하며 문자, 카톡, 이메일로 보낼 수 있습니다.
+                <section class="room-connection-tools" aria-labelledby="roomConnectionToolsTitle">
+                    <div class="room-connection-tools-head">
+                        <strong id="roomConnectionToolsTitle">🔗 공간 연결과 이동</strong>
+                        <small>처음 시작하거나 다른 공간으로 이동할 수 있어요.</small>
                     </div>
-                    <button type="button" class="btn-connect" data-hm-action="create-invite">🎟️ 초대코드 만들기</button>
-                    <div id="inviteResult" style="display:none; margin-top:10px; background:white; border:1px solid #fab1a0; border-radius:10px; padding:10px; font-size:0.85rem; line-height:1.45; word-break:break-all;"></div>
-                </details>
 
-                <details id="joinInvitePanel" style="margin-top:12px; font-size:0.8rem; color:#636e72;">
-                    <summary style="cursor:pointer; font-weight:bold; color:#636e72;">🎟️ 받은 초대코드 입력</summary>
-                    <div style="margin-top:8px; line-height:1.45;">상대방에게 받은 초대코드를 입력하면 같은 공간에 참여하거나 새 공간으로 이동할 수 있습니다.</div>
-                    <input type="text" id="inviteCodeInput" placeholder="예: A7KD92" style="text-transform:uppercase; margin-top:8px;">
-                    <button type="button" class="btn-connect" data-hm-action="accept-invite">🤝 초대코드로 참여하기</button>
-                </details>
+                    <button type="button" class="btn-connect" id="createRoomBtn" data-hm-action="create-room">🌱 새로운 공간 시작하기</button>
 
-                <details id="legacyRoomPanel" style="margin-top:12px; font-size:0.8rem; color:#636e72;">
-                    <summary style="cursor:pointer; font-weight:bold; color:#636e72;">📂 이전 공간 불러오기</summary>
-                    <div style="margin-top:8px; line-height:1.45;">내가 이미 참여했던 공간 목록을 보여줍니다. Dom과 Sub 모두 버튼으로 이전 공간에 다시 연결할 수 있어요.</div>
-                    <div id="ownedRoomsList" class="room-list-box">
-                        <div class="empty-message">목록을 불러오려면 이 영역을 열어주세요. ✨</div>
-                    </div>
-                    <details style="margin-top:10px;">
-                        <summary style="cursor:pointer; color:#b26a6a; font-weight:bold;">직접 방코드 입력이 필요한 경우</summary>
-                        <input type="text" id="roomCode" placeholder="기존 공유코드 예: dmsy" style="margin-top:8px;">
-                        <button type="button" class="btn-connect" data-hm-action="join-existing-room">🔗 기존 공유코드 연결하기</button>
+                    <details id="invitePanel">
+                        <summary>💌 상대방 초대하기 <small>초대코드 만들기</small></summary>
+                        <div class="room-connection-help">
+                            공간을 만든 뒤 초대코드를 생성하세요. 코드는 24시간 동안 유효하며 문자, 카톡, 이메일로 보낼 수 있습니다.
+                        </div>
+                        <button type="button" class="btn-connect" data-hm-action="create-invite">🎟️ 초대코드 만들기</button>
+                        <div id="inviteResult" style="display:none; margin-top:10px; background:white; border:1px solid #fab1a0; border-radius:10px; padding:10px; font-size:0.85rem; line-height:1.45; word-break:break-all;"></div>
                     </details>
-                </details>
+
+                    <details id="joinInvitePanel">
+                        <summary>🎟️ 받은 초대코드 입력 <small>초대받은 공간 참여</small></summary>
+                        <div class="room-connection-help">상대방에게 받은 초대코드를 입력하면 같은 공간에 참여하거나 새 공간으로 이동할 수 있습니다.</div>
+                        <input type="text" id="inviteCodeInput" placeholder="예: A7KD92" style="text-transform:uppercase; margin-top:8px;">
+                        <button type="button" class="btn-connect" data-hm-action="accept-invite">🤝 초대코드로 참여하기</button>
+                    </details>
+
+                    <details id="legacyRoomPanel">
+                        <summary>📂 이전 공간 불러오기 <small>참여했던 공간으로 이동</small></summary>
+                        <div class="room-connection-help">내가 이미 참여했던 공간 목록을 보여줍니다. Dom과 Sub 모두 버튼으로 이전 공간에 다시 연결할 수 있어요.</div>
+                        <div id="ownedRoomsList" class="room-list-box">
+                            <div class="empty-message">목록을 불러오려면 이 영역을 열어주세요. ✨</div>
+                        </div>
+                        <details class="legacy-room-code-panel">
+                            <summary>직접 방코드 입력이 필요한 경우</summary>
+                            <input type="text" id="roomCode" placeholder="기존 공유코드 예: dmsy" style="margin-top:8px;">
+                            <button type="button" class="btn-connect" data-hm-action="join-existing-room">🔗 기존 공유코드 연결하기</button>
+                        </details>
+                    </details>
+                </section>
+
+                <section class="relationship-lifecycle-box" id="relationshipLifecycleBox" aria-labelledby="relationshipLifecycleTitle" hidden>
+                    <div class="relationship-lifecycle-head">
+                        <strong id="relationshipLifecycleTitle">관계 관리</strong>
+                        <span class="relationship-lifecycle-badge" id="relationshipLifecycleBadge">연결됨</span>
+                    </div>
+                    <p id="relationshipLifecycleMessage">두 사용자가 이 공간의 기록을 함께 불러오고 있습니다.</p>
+                    <div class="relationship-lifecycle-actions">
+                        <button type="button" class="relationship-lifecycle-btn is-danger" id="endRelationshipBtn" data-hm-action="end-room-relationship">관계 종료</button>
+                        <button type="button" class="relationship-lifecycle-btn" id="requestRecoveryBtn" data-hm-action="request-room-recovery" hidden>관계 회복 요청</button>
+                        <button type="button" class="relationship-lifecycle-btn is-primary" id="approveRecoveryBtn" data-hm-action="approve-room-recovery" hidden>관계 회복 동의</button>
+                        <button type="button" class="relationship-lifecycle-btn" id="cancelRecoveryBtn" data-hm-action="cancel-room-recovery" hidden>회복 요청 취소</button>
+                    </div>
+                    <small>관계 종료는 최후의 수단입니다. 관계를 종료하면 양쪽 모두 기존 데이터를 불러오거나 새 기록을 작성할 수 없습니다. 데이터는 삭제되지 않으며, 두 사람이 회복에 동의하면 다시 사용할 수 있습니다.</small>
+                </section>
             </div>
         </div>
     </div>
@@ -1362,35 +1368,35 @@
 </div>
 
 <div class="toast" id="toast">기록이 복사되었습니다! 💕</div>
-    <script src="js/release-info.js?v=step6-2-14-56-legacy-room-relationship-20260723"></script>
-    <script src="js/config.js?v=step6-2-14-56-legacy-room-relationship-20260723"></script>
+    <script src="js/release-info.js?v=step6-2-14-57-room-relationship-layout-20260723"></script>
+    <script src="js/config.js?v=step6-2-14-57-room-relationship-layout-20260723"></script>
     <script src="js/access-policy.js?v=maintenance-baseline-20260722"></script>
     <script src="js/save-state.js?v=maintenance-baseline-20260722"></script>
     <script src="js/ui-events.js?v=step6-2-14-53-relationship-lifecycle-20260723"></script>
     <script src="js/utils.js?v=step6-2-12-7-notification-toast-message-fix-20260718"></script>
     <script src="js/popup.js?v=step6-2-14-5-role-mission-polish-20260721"></script>
     <script src="js/auth.js?v=step6-2-14-53-relationship-lifecycle-20260723"></script>
-    <script src="js/room.js?v=step6-2-14-56-legacy-room-relationship-20260723"></script>
+    <script src="js/room.js?v=step6-2-14-57-room-relationship-layout-20260723"></script>
     <script src="js/presence.js?v=step6-2-14-47-profile-context-20260723"></script>
     <script src="js/daily.js?v=step6-2-14-38-time-input-sync-20260722"></script>
     <script src="js/moments.js?v=step6-2-14-39-meal-photo-confirm-save-20260722"></script>
     <script src="js/mission.js?v=step6-2-13-8-shared-card-conversations-20260721"></script>
     <script src="js/custom-routine.js?v=step6-2-14-13-role-context-20260722"></script>
     <script src="js/sub-routine.js?v=step6-2-14-13-role-context-20260722"></script>
-    <script src="js/card-conversations.js?v=step6-2-14-56-legacy-room-relationship-20260723"></script>
+    <script src="js/card-conversations.js?v=step6-2-14-57-room-relationship-layout-20260723"></script>
     <script src="js/history.js?v=step6-2-14-32-history-meal-context-20260722"></script>
     <script src="js/anniversary.js?v=step6-2-10-11-history-center-layout-cleanup-20260718"></script>
     <script src="js/theme.js?v=step5-10-13-history-month-server-reconciliation-20260716"></script>
     <script src="js/profile.js?v=step6-2-14-47-profile-context-20260723"></script>
     <script src="js/chat.js?v=step5-10-13-history-month-server-reconciliation-20260716"></script>
-    <script src="js/autosave.js?v=step6-2-14-56-legacy-room-relationship-20260723"></script>
+    <script src="js/autosave.js?v=step6-2-14-57-room-relationship-layout-20260723"></script>
     <script src="js/qa.js?v=step6-2-14-50-no-eval-20260723"></script>
     <script src="js/motion.js?v=step5-10-13-history-month-server-reconciliation-20260716"></script>
     <script src="js/product.js?v=step6-2-14-43-fixed-together-summary-20260722"></script>
     <script src="js/help-center.js?v=step6-2-13-4-support-bridge-20260721"></script>
     <script src="js/data-management.js?v=step6-2-13-4-request-cancel-type-message-20260718"></script>
-    <script src="js/app.js?v=step6-2-14-56-legacy-room-relationship-20260723"></script>
-    <script src="js/home-navigation.js?v=step6-2-14-56-legacy-room-relationship-20260723"></script>
-    <script src="js/pwa.js?v=step6-2-14-56-legacy-room-relationship-20260723"></script>
+    <script src="js/app.js?v=step6-2-14-57-room-relationship-layout-20260723"></script>
+    <script src="js/home-navigation.js?v=step6-2-14-57-room-relationship-layout-20260723"></script>
+    <script src="js/pwa.js?v=step6-2-14-57-room-relationship-layout-20260723"></script>
 </body>
 </html>
