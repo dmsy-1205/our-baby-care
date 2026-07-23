@@ -194,10 +194,16 @@
         const sessionUid = currentUser && currentUser.uid;
         if (!sessionUid) { showSaveStatus('🔒 로그인이 필요합니다.'); return; }
         if (activeRoomCode && activeRelationshipStatus !== 'active') {
-            disconnectAllListeners();
             if (typeof hmStartRelationshipStateListener === 'function') hmStartRelationshipStateListener(activeRoomCode);
-            setDataSectionsVisible(false);
-            resetProtectedDataUI('관계가 종료되어 이 공간의 데이터가 잠겼습니다.');
+            if (typeof hmLockProtectedRoomUI === 'function') {
+                hmLockProtectedRoomUI(activeRelationshipStatus === 'locked'
+                    ? '관계 상태를 확인하지 못해 안전을 위해 데이터를 잠갔습니다.'
+                    : '관계가 종료되어 이 공간의 데이터가 잠겼습니다.');
+            } else {
+                disconnectAllListeners();
+                setDataSectionsVisible(false);
+                resetProtectedDataUI('관계가 종료되어 이 공간의 데이터가 잠겼습니다.');
+            }
             showSaveStatus(activeRelationshipStatus === 'recovery_pending' ? '💞 관계 회복 동의 대기 중' : '🔒 관계 종료 · 데이터 잠김');
             updateCurrentRoomInfo();
             return;

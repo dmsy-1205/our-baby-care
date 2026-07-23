@@ -59,6 +59,7 @@
     let activeRelationshipState = null;
     let relationshipStateRef = null;
     let relationshipStateRoomCode = "";
+    let relationshipStateWritePending = false;
     let pendingRelationshipRole = "";
     let currentWater = 0;
     let uploadedPhotoBase64 = "";

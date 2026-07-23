@@ -149,7 +149,7 @@
     function hmNormalizeRelationshipState(value, roomCode = activeRoomCode) {
         const state = value && typeof value === 'object' ? { ...value } : {};
         state.roomCode = roomCode || state.roomCode || '';
-        state.status = ['active', 'ended', 'recovery_pending'].includes(state.status) ? state.status : 'active';
+        state.status = ['active', 'ended', 'recovery_pending', 'locked'].includes(state.status) ? state.status : 'active';
         return state;
     }
 
@@ -178,8 +178,12 @@
             return state;
         } catch (error) {
             console.warn('[Relationship] state read failed', error);
-            activeRelationshipState = hmNormalizeRelationshipState(null, roomCode);
-            activeRelationshipStatus = 'active';
+            activeRelationshipState = {
+                ...(activeRelationshipState && activeRelationshipState.roomCode === roomCode ? activeRelationshipState : {}),
+                roomCode,
+                status: 'locked'
+            };
+            activeRelationshipStatus = 'locked';
             hmRenderRelationshipLifecycle();
             return activeRelationshipState;
         }
@@ -200,6 +204,7 @@
         relationshipStateRef = db.ref(`rooms/${roomCode}/meta/relationship`);
         relationshipStateRef.on('value', (snapshot) => {
             if (!currentUser || currentUser.uid !== sessionUid || activeRoomCode !== roomCode) return;
+            if (relationshipStateWritePending) return;
             const previousStatus = activeRelationshipStatus;
             const snapshotValue = snapshot.val();
             activeRelationshipState = snapshotValue
@@ -209,9 +214,9 @@
             hmRenderRelationshipLifecycle();
             updateCurrentRoomInfo();
             if (activeRelationshipStatus !== 'active') {
-                disconnectAllListeners();
-                setDataSectionsVisible(false);
-                resetProtectedDataUI('관계가 종료되어 이 공간의 데이터가 잠겼습니다.');
+                hmLockProtectedRoomUI(activeRelationshipStatus === 'locked'
+                    ? '관계 상태를 확인하지 못해 안전을 위해 데이터를 잠갔습니다.'
+                    : '관계가 종료되어 이 공간의 데이터가 잠겼습니다.');
                 showSaveStatus(activeRelationshipStatus === 'recovery_pending' ? '💞 관계 회복 동의 대기 중' : '🔒 관계 종료 · 데이터 잠김');
             } else if (previousStatus !== 'active') {
                 connectAndListenFirebase();
@@ -220,7 +225,28 @@
             }
         }, (error) => {
             console.warn('[Relationship] listener failed', error);
+            activeRelationshipStatus = 'locked';
+            activeRelationshipState = { ...(activeRelationshipState || {}), roomCode, status: 'locked' };
+            hmRenderRelationshipLifecycle();
+            updateCurrentRoomInfo();
+            hmLockProtectedRoomUI('관계 상태를 확인하지 못해 안전을 위해 데이터를 잠갔습니다.');
         });
+    }
+
+    function hmLockProtectedRoomUI(message) {
+        disconnectAllListeners();
+        setDataSectionsVisible(false);
+        resetProtectedDataUI(message);
+        if (typeof hmResetCardConversations === 'function') hmResetCardConversations();
+        if (typeof hmResetRoomNotifications === 'function') hmResetRoomNotifications();
+        if (typeof closeChatModal === 'function') closeChatModal();
+        if (typeof closeHistoryDetailModal === 'function') closeHistoryDetailModal();
+        if (typeof closeHistoryPanelModal === 'function') closeHistoryPanelModal();
+        if (typeof closeModalOverlayById === 'function') {
+            document.querySelectorAll('.daily-modal-overlay.show, .daily-modal-overlay[style*="display: flex"]').forEach((overlay) => {
+                if (overlay.id !== 'roomSettingsOverlay') closeModalOverlayById(overlay.id);
+            });
+        }
     }
 
     function hmRenderRelationshipLifecycle() {
@@ -237,13 +263,15 @@
         const approveBtn = document.getElementById('approveRecoveryBtn');
         const cancelBtn = document.getElementById('cancelRecoveryBtn');
         const requestedByMe = state.recoveryRequestedByUid === (currentUser && currentUser.uid);
-        if (badge) badge.textContent = state.status === 'ended' ? '관계 종료됨' : state.status === 'recovery_pending' ? '회복 동의 대기' : '연결됨';
+        if (badge) badge.textContent = state.status === 'ended' ? '관계 종료됨' : state.status === 'recovery_pending' ? '회복 동의 대기' : state.status === 'locked' ? '상태 확인 필요' : '연결됨';
         if (message) {
             message.textContent = state.status === 'ended'
                 ? '양쪽 모두 이 공간의 데이터를 불러오거나 새 기록을 작성할 수 없습니다.'
                 : state.status === 'recovery_pending'
                     ? (requestedByMe ? '상대방의 관계 회복 동의를 기다리고 있습니다.' : '상대방이 관계 회복을 요청했습니다. 동의하면 기존 기록이 다시 열립니다.')
-                    : '두 사용자가 이 공간의 기록을 함께 불러오고 있습니다.';
+                    : state.status === 'locked'
+                        ? '관계 상태를 확인하지 못해 안전을 위해 데이터를 잠갔습니다. 새로고침 후 다시 확인해 주세요.'
+                        : '두 사용자가 이 공간의 기록을 함께 불러오고 있습니다.';
         }
         if (endBtn) endBtn.hidden = state.status !== 'active';
         if (requestBtn) requestBtn.hidden = state.status !== 'ended';
@@ -255,19 +283,30 @@
         if (!currentUser || !activeRoomCode || !activeRelationshipState) return false;
         const roomCode = activeRoomCode;
         const uid = currentUser.uid;
+        const relationshipRef = db.ref(`rooms/${roomCode}/meta/relationship`);
+        relationshipStateWritePending = true;
         try {
-            await db.ref(`rooms/${roomCode}/meta/relationship`).set(nextState);
+            await relationshipRef.set(nextState);
             if (!currentUser || currentUser.uid !== uid || activeRoomCode !== roomCode) return false;
-            activeRelationshipState = hmNormalizeRelationshipState(nextState, roomCode);
+            const confirmedSnapshot = await relationshipRef.once('value');
+            const confirmedState = hmNormalizeRelationshipState(confirmedSnapshot.val(), roomCode);
+            if (confirmedState.status !== nextState.status) throw new Error('relationship/server-state-mismatch');
+            activeRelationshipState = confirmedState;
             activeRelationshipStatus = activeRelationshipState.status;
             hmRenderRelationshipLifecycle();
+            updateCurrentRoomInfo();
             showSaveStatus(successMessage);
             return true;
         } catch (error) {
             console.error('[Relationship] state update failed', error);
+            relationshipStateWritePending = false;
+            await hmLoadRelationshipState(roomCode);
+            updateCurrentRoomInfo();
             alert('관계 상태를 변경하지 못했습니다. 잠시 후 다시 시도해 주세요.');
             showSaveStatus('❌ 관계 상태 변경 실패');
             return false;
+        } finally {
+            relationshipStateWritePending = false;
         }
     }
 
@@ -294,9 +333,7 @@
             generation: Number(state.generation || 0)
         };
         if (await hmWriteRelationshipState(nextState, '🔒 관계 종료 · 데이터 잠김')) {
-            disconnectAllListeners();
-            setDataSectionsVisible(false);
-            resetProtectedDataUI('관계가 종료되어 이 공간의 데이터가 잠겼습니다.');
+            hmLockProtectedRoomUI('관계가 종료되어 이 공간의 데이터가 잠겼습니다.');
             updateCurrentRoomInfo();
         }
     }
@@ -366,7 +403,13 @@
             setDataSectionsVisible(activeRelationshipStatus === 'active');
             const roleLabel = activeRoomRole === 'owner' ? '방주인' : '초대받은 사용자';
             const relationshipLabel = getRelationshipRoleLabel(activeRelationshipRole || pendingRelationshipRole);
-            const lifecycleLabel = activeRelationshipStatus === 'ended' ? '관계 종료됨 · 데이터 잠김' : activeRelationshipStatus === 'recovery_pending' ? '관계 회복 동의 대기' : '실시간 동기화 중';
+            const lifecycleLabel = activeRelationshipStatus === 'ended'
+                ? '관계 종료됨 · 데이터 잠김'
+                : activeRelationshipStatus === 'recovery_pending'
+                    ? '관계 회복 동의 대기'
+                    : activeRelationshipStatus === 'locked'
+                        ? '관계 상태 확인 필요 · 안전 잠금'
+                        : '실시간 동기화 중';
             el.innerHTML = `현재 연결된 공간: <strong>${escapeHtml(activeRoomCode)}</strong><br>내 권한: <strong>${roleLabel}</strong> · 내 역할: <strong>${relationshipLabel}</strong><br>${lifecycleLabel}`;
             if (roomSettingsCardSub) roomSettingsCardSub.innerText = `현재: ${activeRoomCode} · ${relationshipLabel} · ${lifecycleLabel}`;
 

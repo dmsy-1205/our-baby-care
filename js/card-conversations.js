@@ -222,7 +222,7 @@
     }
 
     function openConversationDialog(cardKey) {
-        if (!CARD_LABELS[cardKey]) return;
+        if (!CARD_LABELS[cardKey] || !roomCode()) return;
         activeCardKey = cardKey;
         conversationDialogOpen = true;
         const overlay = ensureConversationDialog();
@@ -248,6 +248,23 @@
         if (returnTarget?.isConnected && returnTarget.getClientRects?.().length && typeof returnTarget.focus === 'function') {
             try { returnTarget.focus({ preventScroll: true }); } catch (error) { returnTarget.focus(); }
         }
+    }
+
+    function resetConversationsForLockedRoom() {
+        if (boundRef) boundRef.off();
+        if (remoteReadRef) remoteReadRef.off();
+        boundRef = null;
+        remoteReadRef = null;
+        boundPath = '';
+        remoteReadPath = '';
+        cache = {};
+        remoteReadMap = {};
+        activeCardKey = '';
+        activeOverlayId = '';
+        closeConversationDialog();
+        document.querySelectorAll('.card-conversation-panel, .history-card-conversations').forEach((element) => element.remove());
+        renderBadges();
+        if (typeof hmRefreshNotificationBar === 'function') hmRefreshNotificationBar();
     }
 
     function openCardConversation(cardKey, overlayId) {
@@ -374,4 +391,5 @@
     window.hmOpenConversationFromNotification = openFromNotification;
     window.hmRenderHistoryConversations = renderHistoryConversations;
     window.hmRefreshConversationBadges = renderBadges;
+    window.hmResetCardConversations = resetConversationsForLockedRoom;
 })();

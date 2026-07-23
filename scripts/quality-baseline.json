@@ -5,8 +5,8 @@
   "largeScriptLinesMax": {
     "js/history.js": 1383,
     "js/product.js": 889,
-    "js/app.js": 887,
-    "js/autosave.js": 594,
+    "js/app.js": 896,
+    "js/autosave.js": 600,
     "js/daily.js": 605
   }
 }

@@ -298,6 +298,8 @@
                     ? '관계 종료됨 · 데이터 잠김'
                     : relationshipStatus === 'recovery_pending'
                         ? '관계 회복 동의 대기 중'
+                        : relationshipStatus === 'locked'
+                            ? '관계 상태 확인 필요 · 안전 잠금'
                         : '관계 연결됨 · 데이터 공유 중';
             panel.dataset.hmAction = 'open-room-settings';
             panel.dataset.hmKeypress = 'open-room-settings';

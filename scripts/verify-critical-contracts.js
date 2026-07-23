@@ -157,6 +157,21 @@ check(/function hmEndRoomRelationship/.test(read('js/room.js'))
   && /function hmApproveRoomRecovery/.test(read('js/room.js'))
   && /recoveryRequestedByUid === currentUser\.uid/.test(read('js/room.js')),
   'Relationship termination and recovery require two distinct participant actions');
+const relationshipWriteRule = getRule(databaseRules, ['rooms', '$roomCode', 'meta', 'relationship', '.write']) || '';
+check(/roomMembers'\)\.child\(\$roomCode\)\.child\(auth\.uid\)\.exists\(\)/.test(relationshipWriteRule)
+  && !/emailVerificationRequired/.test(relationshipWriteRule),
+  'Existing Room participants can end or recover a relationship without a legacy email-verification gate');
+check(/relationshipStateWritePending\s*=\s*true/.test(read('js/room.js'))
+  && /confirmedSnapshot\s*=\s*await relationshipRef\.once\('value'\)/.test(read('js/room.js'))
+  && /confirmedState\.status\s*!==\s*nextState\.status/.test(read('js/room.js')),
+  'Relationship UI changes only after the server state is read back and confirmed');
+check(/state read failed[\s\S]{0,400}status:\s*'locked'/.test(read('js/room.js'))
+  && /listener failed[\s\S]{0,300}activeRelationshipStatus\s*=\s*'locked'/.test(read('js/room.js')),
+  'Relationship read and listener failures lock protected data instead of failing open');
+check(/function resetConversationsForLockedRoom/.test(read('js/card-conversations.js'))
+  && /hmResetCardConversations/.test(read('js/room.js'))
+  && /hmResetRoomNotifications/.test(read('js/room.js')),
+  'Relationship locking clears comment and notification listeners and cached UI');
 const testRulesDeploySource = read('scripts/deploy-database-rules.ps1');
 check(/ValidateSet\('Test'\)/.test(testRulesDeploySource)
   && /hearme2nite1205/.test(testRulesDeploySource)
@@ -218,9 +233,9 @@ check(!/cache\.put\(request/.test(navigationFetchBody) && !/caches\.match\(reque
 check(/!\[HM_STATIC_CACHE, HM_RUNTIME_CACHE\]\.includes\(key\)/.test(serviceWorkerSource), 'Service-worker activation preserves current-version caches');
 check(/await clearOldPwaCachesIfNeeded\(\);[\s\S]{0,80}await registerServiceWorker\(\)/.test(pwaSource), 'PWA cache cleanup completes before service-worker registration');
 const releaseInfoSource = read('js/release-info.js');
-check(/베타 관계 종료·상호 회복 보호/.test(releaseInfoSource)
-  && /한쪽의 회복 요청을 다른 쪽이 동의/.test(releaseInfoSource),
-  'Release metadata describes the current relationship lifecycle protection');
+check(/베타 관계 종료 서버 확정·즉시 잠금/.test(releaseInfoSource)
+  && /서버가 확정한 뒤에만 화면을 전환/.test(releaseInfoSource),
+  'Release metadata describes server-confirmed relationship locking');
 
 // 12. Generated role-label contract. Feedback and reward cards already expose
 // their role in the route UI; CSS must not append duplicate accessible text.

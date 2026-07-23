@@ -674,6 +674,15 @@
   }
 
   window.hmRefreshNotificationBar = renderNotificationBar;
+  window.hmResetRoomNotifications = function hmResetRoomNotifications() {
+    if (hmNotificationReadRef) hmNotificationReadRef.off();
+    hmNotificationReadRef = null;
+    hmNotificationReadPath = '';
+    hmRemoteNotificationReads = {};
+    hmCurrentNotificationItems = [];
+    closeNotificationOverlay();
+    renderNotificationBar();
+  };
   window.hmMarkNotificationCardRead = function hmMarkNotificationCardRead(key) {
     if (hmOpeningFromNotification) return;
     markItemsReadByKey(key);
