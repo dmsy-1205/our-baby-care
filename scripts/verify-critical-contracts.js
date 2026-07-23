@@ -92,6 +92,20 @@ check(/\{key:'subRoutine',icon:'🌱',label:'나의 루틴'\}/.test(productSourc
   && /subRoutine:\{short:subRoutines\.length/.test(productSource)
   && /\$\{subRoutineDone\}\/\$\{subRoutines\.length\}/.test(productSource),
   'Today summary settings include My Routine completion from the saved daily snapshot');
+check(/const requestedItems=hmSummaryNormalize\(hmSummaryDraft\.slice\(\)\)/.test(productSource)
+  && /currentUser\?\.uid\)\|\|'guest'\)!==uid/.test(productSource)
+  && /오늘의 요약 설정 동기화 실패/.test(productSource),
+  'Summary settings preserve request identity and report remote synchronization failures');
+
+const configSource = read('js/config.js');
+check(/'hearme2nite1205\.web\.app': 'hearme2nite1205'/.test(configSource)
+  && /'our-baby-care\.web\.app': 'our-baby-care'/.test(configSource)
+  && /hmExpectedHostingProject && hmHostingProjectId !== hmExpectedHostingProject/.test(configSource)
+  && /Firebase environment mismatch/.test(configSource),
+  'Known test and production Hosting domains fail closed on Firebase project mismatch');
+check(/\.hm-summary-setting-row>div button\{width:44px;height:44px/.test(read('css/legacy/release-foundation.css'))
+  && /\.relationship-lifecycle-btn\{[\s\S]{0,120}min-height:44px/.test(read('css/screens/relationship.css')),
+  'Summary ordering and relationship actions meet the 44px mobile touch target');
 
 // 4. Save-context contract. A save must capture and re-check identity, room and date.
 const autosaveSource = read('js/autosave.js');
@@ -249,9 +263,9 @@ check(!/cache\.put\(request/.test(navigationFetchBody) && !/caches\.match\(reque
 check(/!\[HM_STATIC_CACHE, HM_RUNTIME_CACHE\]\.includes\(key\)/.test(serviceWorkerSource), 'Service-worker activation preserves current-version caches');
 check(/await clearOldPwaCachesIfNeeded\(\);[\s\S]{0,80}await registerServiceWorker\(\)/.test(pwaSource), 'PWA cache cleanup completes before service-worker registration');
 const releaseInfoSource = read('js/release-info.js');
-check(/오늘의 요약에 나의 루틴 추가/.test(releaseInfoSource)
-  && /완료 개수와 전체 루틴 수/.test(releaseInfoSource),
-  'Release metadata describes the My Routine summary option');
+check(/메인 이전 전 환경·저장 안전성 보강/.test(releaseInfoSource)
+  && /Firebase 프로젝트 불일치를 차단/.test(releaseInfoSource),
+  'Release metadata describes pre-main environment and save safety');
 
 // 12. Generated role-label contract. Feedback and reward cards already expose
 // their role in the route UI; CSS must not append duplicate accessible text.

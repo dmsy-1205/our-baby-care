@@ -1,10 +1,10 @@
 {
-  "cssSourceBytesMax": 608850,
+  "cssSourceBytesMax": 609257,
   "indexLinesMax": 1403,
   "inlineHandlersMax": 0,
   "largeScriptLinesMax": {
     "js/history.js": 1383,
-    "js/product.js": 893,
+    "js/product.js": 912,
     "js/app.js": 896,
     "js/autosave.js": 600,
     "js/daily.js": 605

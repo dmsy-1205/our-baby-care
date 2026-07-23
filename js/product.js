@@ -828,9 +828,28 @@
     window.hmMoveSummaryItem=function(key,direction){ const index=hmSummaryDraft.indexOf(key),next=index+Number(direction); if(index<0||next<0||next>=hmSummaryDraft.length)return; [hmSummaryDraft[index],hmSummaryDraft[next]]=[hmSummaryDraft[next],hmSummaryDraft[index]];hmRenderSummarySettings(); };
     window.hmSaveSummarySettings=async function(){
         if(hmSummaryDraft.length!==4)return alert('홈에 표시할 항목을 4개 선택해 주세요.');
-        hmSummaryItems=hmSummaryNormalize(hmSummaryDraft); const uid=(typeof currentUser!=='undefined'&&currentUser?.uid)||'guest'; hmSummaryWriteLocal(uid,hmSummaryItems);
-        if(uid!=='guest'&&typeof db!=='undefined'){ try{await db.ref(`users/${uid}/preferences`).update({homeSummaryItems:hmSummaryItems});}catch(e){} }
-        updateDashboard(); openHomeSummaryModal(); if(typeof showSaveStatus==='function')showSaveStatus('⚙ 오늘의 요약 설정 저장 완료');
+        const requestedItems=hmSummaryNormalize(hmSummaryDraft.slice());
+        const uid=(typeof currentUser!=='undefined'&&currentUser?.uid)||'guest';
+        hmSummaryWriteLocal(uid,requestedItems);
+        if(uid!=='guest'&&typeof db!=='undefined'){
+            try{
+                await db.ref(`users/${uid}/preferences`).update({homeSummaryItems:requestedItems});
+            }catch(error){
+                if(((typeof currentUser!=='undefined'&&currentUser?.uid)||'guest')!==uid)return;
+                hmSummaryItems=requestedItems;
+                updateDashboard();
+                hmRenderSummarySettings();
+                console.error('[Summary] settings sync failed',error);
+                alert('오늘의 요약 설정을 서버에 저장하지 못했습니다. 이 기기에는 보관했으며, 연결을 확인한 뒤 다시 저장해 주세요.');
+                if(typeof showSaveStatus==='function')showSaveStatus('❌ 오늘의 요약 설정 동기화 실패');
+                return;
+            }
+        }
+        if(((typeof currentUser!=='undefined'&&currentUser?.uid)||'guest')!==uid)return;
+        hmSummaryItems=requestedItems;
+        updateDashboard();
+        openHomeSummaryModal();
+        if(typeof showSaveStatus==='function')showSaveStatus('⚙ 오늘의 요약 설정 저장 완료');
     };
 
     function renderMonthlyStats(){

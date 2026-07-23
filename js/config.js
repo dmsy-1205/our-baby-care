@@ -23,8 +23,22 @@
     };
 
     // Firebase Hosting의 /__/firebase/init.js가 현재 배포 프로젝트를 기본 앱으로 초기화합니다.
-    // Hosting 자동 설정을 사용할 수 없는 환경에서는 운영 설정으로 안전하게 대체합니다.
+    // 알려진 Hosting 도메인에서는 자동 설정이 없거나 다른 프로젝트를 가리키면 운영 데이터 오접속을 막기 위해 중단합니다.
+    const HM_HOST_PROJECTS = Object.freeze({
+        'hearme2nite1205.web.app': 'hearme2nite1205',
+        'hearme2nite1205.firebaseapp.com': 'hearme2nite1205',
+        'our-baby-care.web.app': 'our-baby-care',
+        'our-baby-care.firebaseapp.com': 'our-baby-care'
+    });
+    const hmCurrentHost = String(window.location?.hostname || '').toLowerCase();
+    const hmExpectedHostingProject = HM_HOST_PROJECTS[hmCurrentHost] || '';
     const hmHostingFirebaseApp = firebase.apps.find(app => app.name === '[DEFAULT]') || null;
+    const hmHostingProjectId = String(hmHostingFirebaseApp?.options?.projectId || '');
+    if (hmExpectedHostingProject && hmHostingProjectId !== hmExpectedHostingProject) {
+        document.documentElement.dataset.hmFirebaseEnv = 'blocked';
+        document.body.innerHTML = '<main class="hm-firebase-environment-error" role="alert"><h1>앱 연결을 확인할 수 없습니다</h1><p>안전을 위해 데이터 연결을 중단했습니다. 잠시 후 새로고침해 주세요.</p></main>';
+        throw new Error(`Firebase environment mismatch: expected ${hmExpectedHostingProject}, received ${hmHostingProjectId || 'none'}`);
+    }
     const babyFirebaseConfig = hmHostingFirebaseApp
         ? { ...hmHostingFirebaseApp.options }
         : { ...HM_PRODUCTION_FIREBASE_CONFIG };

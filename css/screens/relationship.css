@@ -59,7 +59,7 @@
 .relationship-lifecycle-box small{display:block;margin-top:7px;color:var(--hm-color-muted);font-size:.68rem;line-height:1.4}
 .relationship-lifecycle-actions{display:flex;flex-wrap:wrap;gap:8px}
 .relationship-lifecycle-btn{
-  min-height:40px;padding:8px 12px;border:1px solid color-mix(in srgb,var(--hm-primary) 32%,transparent);
+  min-height:44px;padding:8px 12px;border:1px solid color-mix(in srgb,var(--hm-primary) 32%,transparent);
   border-radius:12px;background:var(--hm-surface,#fff);color:var(--hm-color-body);font-weight:800;
 }
 .relationship-lifecycle-btn.is-danger{border-color:#d9919f;color:#9b3047;background:#fff5f7}
@@ -76,4 +76,10 @@
 :root[data-hm-theme][data-hm-display="dark"] .relationship-lifecycle-btn.is-danger{color:#ffb5c1;border-color:#8c4a59}
 :root[data-hm-theme][data-hm-display="dark"] .relationship-lifecycle-btn.is-primary{background:var(--hm-primary);color:#fff}
 
-
+.hm-firebase-environment-error{
+  width:min(520px,calc(100% - 32px));margin:12vh auto;padding:28px;box-sizing:border-box;
+  border:1px solid #e3b7c1;border-radius:20px;background:#fff8fa;color:#432f36;text-align:center;
+  box-shadow:0 18px 50px rgba(59,35,46,.14);
+}
+.hm-firebase-environment-error h1{margin:0 0 10px;font-size:1.25rem}
+.hm-firebase-environment-error p{margin:0;color:#6d535d;line-height:1.6}
