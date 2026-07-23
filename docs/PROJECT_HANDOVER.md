@@ -66,7 +66,7 @@ STEP5.6.4.7 is the security-stable baseline after Room path hardening, day-role 
 
 - Firebase Database Cleanup은 사용자가 수동으로 완료했습니다.
 - 사용자 가이드 메뉴 크기와 여백을 축소했습니다.
-- 앱 안의 업데이트 내용은 사용자에게 필요한 주요 변경사항만 표시합니다.
+- 앱 안의 업데이트 내용은 현재 버전에서 사용자에게 필요한 핵심 항목만 최대 8개로 표시하며 과거 목록을 누적하지 않습니다.
 - 관리자 콘솔과 Firebase 구조는 변경하지 않았습니다.
 
 ## Admin Console 2.0 Phase 1

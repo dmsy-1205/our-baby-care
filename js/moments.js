@@ -99,6 +99,13 @@
         return item?.pending === true || item?.legacy === true || (!!currentUser?.uid && item?.uploadedBy === currentUser.uid);
     }
 
+    function momentCaptionSegments() {
+        return String(document.getElementById('goingOut')?.value || '')
+            .split('/')
+            .map((value) => value.trim().slice(0, 120))
+            .filter(Boolean);
+    }
+
     function render() {
         const grid = document.getElementById('momentsPreviewGrid');
         const box = document.getElementById('previewBox');
@@ -123,15 +130,18 @@
         }
         if (!grid || !box) return;
         box.style.display = count ? 'block' : 'none';
-        grid.innerHTML = visibleMoments.map((item) => {
+        grid.dataset.count = String(count);
+        const captionSegments = momentCaptionSegments();
+        grid.innerHTML = visibleMoments.map((item, index) => {
             const src = escapeHtml(momentSource(item));
+            const caption = String(captionSegments[index] || item.caption || '').trim();
             const deleteButton = canDelete(item)
                 ? `<button type="button" class="moment-remove-btn" data-moment-delete="${escapeHtml(item.id)}" aria-label="사진 삭제">×</button>`
                 : '';
             return `<figure class="moment-preview-item${item.pending ? ' is-pending' : ''}">
                 <button type="button" class="moment-open-btn" data-moment-open="${escapeHtml(item.id)}" aria-label="사진 크게 보기">
-                    <img src="${src}" alt="오늘의 순간 사진" loading="lazy">
-                </button>${item.pending ? '<span class="moment-pending-badge">저장 대기</span>' : ''}${deleteButton}
+                    <img src="${src}" alt="${escapeHtml(caption ? `오늘의 순간: ${caption}` : '오늘의 순간 사진')}" loading="lazy">
+                </button>${caption ? `<figcaption class="moment-caption">${escapeHtml(caption)}</figcaption>` : ''}${item.pending ? '<span class="moment-pending-badge">저장 대기</span>' : ''}${deleteButton}
             </figure>`;
         }).join('');
         renderMealPhotos();
@@ -235,7 +245,7 @@
         return { blob: null, dataUrl };
     }
 
-    async function persistMoment(file, mealType = '', requestContext = mediaContext()) {
+    async function persistMoment(file, mealType = '', requestContext = mediaContext(), caption = '') {
         if (typeof window.hmGuardRelationshipDataAccess === 'function' && !window.hmGuardRelationshipDataAccess()) {
             throw new Error('relationship/data-locked');
         }
@@ -249,7 +259,7 @@
         if (!isMediaContextCurrent(requestContext)) throw new Error('media/context-changed');
         const payload = {
             storageType: env.usesStorage ? 'storage' : 'base64',
-            caption: '',
+            caption: String(caption || '').trim().slice(0, 120),
             uploadedBy: requestContext.uid,
             uploadedAt: firebase.database.ServerValue.TIMESTAMP
         };
@@ -444,9 +454,12 @@
         if (saveButton) saveButton.disabled = true;
         try {
             let savedCount = 0;
+            const captionSegments = momentCaptionSegments();
+            const savedOrdinaryCount = hmDailyMoments.filter((item) => !item.mealType).length;
             while (pendingMomentUploads.length) {
                 const pending = pendingMomentUploads[0];
-                const applied = await persistMoment(pending.file, '', pendingMomentContext);
+                const caption = captionSegments[savedOrdinaryCount + savedCount] || '';
+                const applied = await persistMoment(pending.file, '', pendingMomentContext, caption);
                 if (pending.previewUrl) URL.revokeObjectURL(pending.previewUrl);
                 pendingMomentUploads.shift();
                 if (!applied) {

@@ -167,8 +167,36 @@
         return labels[type] || '';
     }
 
+    function hmDomMoodLabel(value) {
+        return ({ good: '좋아요', calm: '편안해요', usual: '평범해요', tired: '지쳤어요', sensitive: '예민해요' })[value] || '';
+    }
+
+    function hmDomAvailabilityLabel(value) {
+        return ({ busy: '바빠요', normal: '보통이에요', free: '여유 있어요' })[value] || '';
+    }
+
     function hmRenderManagerReadonlyContent(name, container) {
         if (!container) return;
+
+        if (name === 'domToday') {
+            const wake = document.getElementById('domWakeTime')?.value || '';
+            const mood = hmDomMoodLabel(document.getElementById('domMood')?.value || '');
+            const availability = hmDomAvailabilityLabel(document.getElementById('domAvailability')?.value || '');
+            const sleep = document.getElementById('domSleepTime')?.value || '';
+            const message = document.getElementById('domTodayMessage')?.value?.trim() || '';
+            const items = [
+                wake && ['⏰', '기상', wake],
+                mood && ['😊', '기분', mood],
+                availability && ['🟢', '여유', availability],
+                sleep && ['🌙', '취침 예정', sleep]
+            ].filter(Boolean);
+            container.innerHTML = items.length || message
+                ? `<div class="hm-readonly-eyebrow">Dom의 오늘</div>
+                   ${items.length ? `<div class="dom-today-readonly-grid">${items.map(([icon, label, value]) => `<div><span>${icon}</span><small>${label}</small><strong>${hmEscapeReadonlyText(value)}</strong></div>`).join('')}</div>` : ''}
+                   ${message ? `<div class="dom-today-readonly-message"><span aria-hidden="true">💬</span><div><small>오늘의 한마디</small><p>${hmEscapeReadonlyText(message).replace(/\n/g, '<br>')}</p></div></div>` : ''}`
+                : '<div class="hm-readonly-empty-state"><span aria-hidden="true">🌤</span><strong>아직 작성된 Dom의 오늘이 없습니다.</strong><small>Dom이 작성하면 이곳에서 생활 리듬을 확인할 수 있습니다.</small></div>';
+            return;
+        }
 
         if (name === 'feedback') {
             const message = document.getElementById('replyMessage')?.value?.trim() || '';
@@ -198,7 +226,7 @@
     }
 
     function hmApplyManagerOnlyModalView(name) {
-        if (!['feedback', 'reward'].includes(name)) return;
+        if (!['domToday', 'feedback', 'reward'].includes(name)) return;
         const overlay = document.getElementById(`${name}ModalOverlay`);
         const modal = overlay?.querySelector('.daily-modal');
         if (!modal) return;
@@ -226,10 +254,11 @@
 
     function openDailyModal(name) {
         if (typeof window.hmGuardRelationshipDataAccess === 'function' && !window.hmGuardRelationshipDataAccess()) return;
+        document.querySelectorAll(`#${name}ModalOverlay .hm-route-comment-trigger`).forEach((trigger) => trigger.remove());
         if (typeof hmMarkNotificationCardRead === 'function') hmMarkNotificationCardRead(name);
         hmApplyManagerOnlyModalView(name);
         openModalOverlayById(`${name}ModalOverlay`);
-        if (typeof hmOpenCardConversation === 'function') hmOpenCardConversation(name, `${name}ModalOverlay`);
+        if (name !== 'domToday' && typeof hmOpenCardConversation === 'function') hmOpenCardConversation(name, `${name}ModalOverlay`);
         updateManagedFieldAccessControls();
         updateDailyCards();
     }
@@ -237,7 +266,7 @@
     function closeDailyModal(name) {
         closeModalOverlayById(`${name}ModalOverlay`);
         updateDailyCards();
-        if (!(['feedback', 'reward'].includes(name) && !canManageRelationshipCards())) {
+        if (!(['domToday', 'feedback', 'reward'].includes(name) && !canManageRelationshipCards())) {
             triggerAutoSave('daily-modal-save');
         }
     }

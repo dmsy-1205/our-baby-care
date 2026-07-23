@@ -59,6 +59,7 @@ const databaseRules = JSON.parse(databaseRulesSource);
 const ownerNotesRead = getRule(databaseRules, ['ownerNotes', '$roomCode', '.read']) || '';
 const ownerNotesWrite = getRule(databaseRules, ['ownerNotes', '$roomCode', '.write']) || '';
 const dayAdminWrite = getRule(databaseRules, ['rooms', '$roomCode', 'dayAdmin', '$date', '.write']) || '';
+const dayAdminDateRules = getRule(databaseRules, ['rooms', '$roomCode', 'dayAdmin', '$date']) || {};
 const subRoutineWrite = getRule(databaseRules, ['rooms', '$roomCode', 'subRoutines', '.write']) || '';
 const subRoutineDayWrite = getRule(databaseRules, ['rooms', '$roomCode', 'subRoutineDays', '$date', '$routineId', '.write']) || '';
 const userRoomsRead = getRule(databaseRules, ['userRooms', '$uid', '.read']) || '';
@@ -69,6 +70,9 @@ check(/relationshipRole'\)\.val\(\) === 'dom'/.test(ownerNotesRead), 'Owner-note
 check(!/relationshipRole'\)\.val\(\) === 'sub'/.test(ownerNotesRead), 'Owner-note reads never grant the Sub relationship role');
 check(/relationshipRole'\)\.val\(\) === 'dom'/.test(ownerNotesWrite), 'Owner-note writes require the Dom relationship role');
 check(/relationshipRole'\)\.val\(\) === 'dom'/.test(dayAdminWrite), 'Administrative day-record writes require Dom');
+check(['domWakeTime', 'domMood', 'domAvailability', 'domSleepTime', 'domTodayMessage']
+  .every((field) => Boolean(dayAdminDateRules[field] && dayAdminDateRules[field]['.validate'])),
+  'Dom daily context fields are explicitly validated');
 check(/relationshipRole'\)\.val\(\) === 'sub'/.test(subRoutineWrite), 'Sub-routine definitions are writable by Sub');
 check(/relationshipRole'\)\.val\(\) === 'sub'/.test(subRoutineDayWrite), 'Sub-routine day values are writable by Sub');
 check(/auth\.uid === \$uid/.test(userRoomsRead), 'Users can read their own Room index');
@@ -109,6 +113,8 @@ check(/\.hm-summary-setting-row>div button\{width:44px;height:44px/.test(read('c
 
 // 4. Save-context contract. A save must capture and re-check identity, room and date.
 const autosaveSource = read('js/autosave.js');
+const popupSource = read('js/popup.js');
+const indexSource = read('index.html');
 check(/const sessionUid\s*=\s*currentUser\s*&&\s*currentUser\.uid/.test(autosaveSource), 'Room listeners capture the login identity');
 check(/currentUser\.uid\s*!==\s*sessionUid/.test(autosaveSource), 'Room listeners reject a stale login identity');
 check(/roomCode\s*!==\s*activeRoomCode/.test(autosaveSource), 'Room listeners reject stale room responses');
@@ -118,10 +124,29 @@ const contextCheckBody = functionBody(autosaveSource, 'function hmIsAutoSaveCont
 check(executeAutoSaveBody.length > 0, 'Critical test can inspect the autosave implementation');
 check(/const\s+(?:save|request|context)[A-Za-z]*\s*=/.test(executeAutoSaveBody) && /roomCode/.test(executeAutoSaveBody) && /date/.test(executeAutoSaveBody), 'Each autosave captures an immutable room/date request context');
 check(/hmIsAutoSaveContextCurrent\(saveContext\)/.test(executeAutoSaveBody) && /activeRoomCode/.test(contextCheckBody) && /recordDate/.test(contextCheckBody), 'Autosave completion re-checks the active room and date');
+check(/HM_DAY_ADMIN_FIELDS[\s\S]{0,300}'domWakeTime'[\s\S]{0,300}'domTodayMessage'/.test(autosaveSource)
+  && /domWakeTime,[\s\S]{0,300}domTodayMessage/.test(autosaveSource),
+  'Dom daily context persists in the protected dayAdmin record');
+check(/id="domTodayModalOverlay"/.test(indexSource)
+  && ['domWakeTime', 'domMood', 'domAvailability', 'domSleepTime', 'domTodayMessage']
+    .every((field) => indexSource.includes(`id="${field}"`)),
+  'Dom daily context editor exposes five compact fields');
+check(/name === 'domToday'/.test(popupSource)
+  && /hmRenderManagerReadonlyContent\(name,\s*readonlyCard\)/.test(popupSource)
+  && /hm-sub-manager-readonly/.test(popupSource),
+  'Sub receives a read-only Dom daily context card');
+check(/\['domToday',\s*'feedback',\s*'reward'\]\.includes\(type\)/.test(read('js/home-navigation.js'))
+  && /type !== 'ownerNote' && type !== 'domToday'/.test(read('js/home-navigation.js')),
+  'Embedded Sub route renders Dom daily context read-only without a comment editor');
+check(/dom-today-readonly-message/.test(popupSource)
+  && /\.dom-today-readonly-message\{/.test(read('css/screens/records.css')),
+  'Dom daily message renders in a dedicated read-only callout');
+check(/restoreMountedEditors\(\)[\s\S]{0,300}hm-route-comment-trigger[\s\S]{0,80}\.remove\(\)/.test(read('js/home-navigation.js'))
+  && /openDailyModal\(name\)[\s\S]{0,300}hm-route-comment-trigger[\s\S]{0,80}\.remove\(\)/.test(popupSource),
+  'Temporary route comment controls are removed before standalone notification modals open');
 
 // 5. UI safety contract: save state must not float over the brand, and embedded
 // editors must stop announcing themselves as modal dialogs while in a route.
-const indexSource = read('index.html');
 const homeNavigationSource = read('js/home-navigation.js');
 const profileSource = read('js/profile.js');
 const presenceSource = read('js/presence.js');
@@ -249,7 +274,13 @@ check((appSource.match(/if \(!isCurrentAuthTransition\(\)\) return;/g) || []).le
 const momentsSource = read('js/moments.js');
 check(/function mediaContext\(\)[\s\S]*uid:[\s\S]*roomCode:[\s\S]*date:/.test(momentsSource), 'Pending media captures login, Room and date');
 check(/function isMediaContextCurrent\(context\)/.test(momentsSource), 'Pending media can reject a stale context');
-check(/persistMoment\(file, mealType = '', requestContext = mediaContext\(\)\)/.test(momentsSource), 'Each media upload receives an immutable request context');
+check(/persistMoment\(file, mealType = '', requestContext = mediaContext\(\), caption = ''\)/.test(momentsSource), 'Each media upload receives an immutable request context');
+check(/momentCaptionSegments\(\)[\s\S]{0,220}\.split\('\/'\)/.test(momentsSource)
+  && /captionSegments\[savedOrdinaryCount \+ savedCount\]/.test(momentsSource),
+  'Daily moments map slash-separated text to photo captions');
+check(/grid\.dataset\.count = String\(count\)/.test(momentsSource)
+  && /class="moment-caption"/.test(momentsSource),
+  'Daily moments expose centered-count layout and thumbnail captions');
 check((momentsSource.match(/isMediaContextCurrent\(requestContext\)/g) || []).length >= 4, 'Media uploads re-check context across asynchronous stages');
 check(/onAuthStateChanged[\s\S]{0,1000}hmDiscardPendingMedia/.test(appSource), 'Every auth-state change discards pending media previews');
 
@@ -266,7 +297,7 @@ const pwaSource = read('js/pwa.js');
 const serviceWorkerSource = read('service-worker.js');
 const manifestSource = read('manifest.webmanifest');
 const manifest = JSON.parse(manifestSource);
-check(manifest.start_url === '/index.html?source=pwa&v=step6-2-14-69', 'PWA install start URL matches the current release');
+check(manifest.start_url === '/index.html?source=pwa&v=step6-2-14-78', 'PWA install start URL matches the current release');
 check(manifest.scope === '/' && manifest.display === 'standalone', 'PWA installs into the full standalone app scope');
 const navigationFetchBody = functionBody(serviceWorkerSource, 'async function networkFirstNavigation(request)');
 check(/window\.HM_RELEASE\?\.step/.test(pwaSource), 'PWA registration derives its version from central release metadata');
@@ -278,9 +309,64 @@ check(!/cache\.put\(request/.test(navigationFetchBody) && !/caches\.match\(reque
 check(/!\[HM_STATIC_CACHE, HM_RUNTIME_CACHE\]\.includes\(key\)/.test(serviceWorkerSource), 'Service-worker activation preserves current-version caches');
 check(/await clearOldPwaCachesIfNeeded\(\);[\s\S]{0,80}await registerServiceWorker\(\)/.test(pwaSource), 'PWA cache cleanup completes before service-worker registration');
 const releaseInfoSource = read('js/release-info.js');
-check(/메인 이전 전 환경·저장 안전성 보강/.test(releaseInfoSource)
-  && /Firebase 프로젝트 불일치를 차단/.test(releaseInfoSource),
-  'Release metadata describes pre-main environment and save safety');
+check(/우리만의 역할 표시명/.test(releaseInfoSource)
+  && /실제 권한은 바뀌지 않습니다/.test(releaseInfoSource),
+  'Release metadata describes Room-scoped display role labels');
+const historySource = read('js/history.js');
+check(/buildHistoryDomTodayText/.test(historySource)
+  && ['domWakeTime', 'domSleepTime', 'domMood', 'domAvailability', 'domTodayMessage']
+    .every((field) => historySource.includes(field)),
+  'History details include the protected Dom daily context');
+check(/history-detail-moment/.test(historySource) && /<figcaption>/.test(historySource),
+  'History details retain daily-moment photo captions');
+const releaseSandbox = {
+  window: {},
+  document: {
+    readyState: 'complete',
+    title: '',
+    querySelectorAll: () => [],
+    getElementById: () => null
+  }
+};
+vm.runInNewContext(releaseInfoSource, releaseSandbox, { filename: 'js/release-info.js' });
+check(releaseSandbox.window.HM_RELEASE.userChanges.length <= 8,
+  'User guide keeps only a concise current-release summary');
+check(releaseSandbox.window.HM_RELEASE.changes.length <= 6,
+  'Internal release notes remain concise instead of accumulating indefinitely');
+
+// 11.1 Display-role label contract. User-selected labels only transform
+// visible copy; all authorization and persisted role keys remain dom/sub.
+const roleLabelsSource = read('js/role-labels.js');
+check(/const DEFAULTS = Object\.freeze\(\{ dom: 'Dom', sub: 'Sub' \}\)/.test(roleLabelsSource)
+  && /rooms\/\$\{room\}\/meta\/roleLabels/.test(roleLabelsSource),
+  'Role display labels are Room-scoped and retain Dom/Sub defaults');
+check(/relationshipRole/.test(read('database.rules.json'))
+  && /"roleLabels"/.test(read('database.rules.json'))
+  && /child\('relationshipRole'\)\.val\(\) === 'dom'/.test(read('database.rules.json'))
+  && /child\('relationshipRole'\)\.val\(\) === 'sub'/.test(read('database.rules.json')),
+  'Each participant can write only their own display-role label');
+check(/MutationObserver/.test(roleLabelsSource)
+  && /characterData/.test(roleLabelsSource)
+  && /attributeFilter: ATTRIBUTES/.test(roleLabelsSource)
+  && /\['alert', 'confirm', 'prompt'\]/.test(roleLabelsSource),
+  'Static and dynamic user-facing role copy share one display transformer');
+check(/관리\\\(Dom\\\)/.test(roleLabelsSource)
+  && /기록\\\(Sub\\\)/.test(roleLabelsSource)
+  && /replaceRoleToken\(output, 'Dom', 'dom'\)/.test(roleLabelsSource)
+  && /replaceRoleToken\(output, 'Sub', 'sub'\)/.test(roleLabelsSource),
+  'Role transformer covers plain and decorated Dom/Sub labels');
+check(/id="roleDisplayLabelsCard"/.test(indexSource)
+  && /data-hm-action="save-role-display-label"/.test(indexSource)
+  && /data-hm-action="reset-role-display-label"/.test(indexSource),
+  'Our Space exposes editable role display-label controls');
+check(/document\.activeElement !== domInput/.test(roleLabelsSource)
+  && /document\.activeElement !== subInput/.test(roleLabelsSource),
+  'Role display-label refresh preserves the field currently being edited');
+check(/주인의/.test(roleLabelsSource)
+  && /주인님/.test(roleLabelsSource)
+  && /주인에게/.test(roleLabelsSource)
+  && /비공개\\s\*메모/.test(roleLabelsSource),
+  'Owner-facing Korean labels follow the configured Dom display label');
 
 // 12. Generated role-label contract. Feedback and reward cards already expose
 // their role in the route UI; CSS must not append duplicate accessible text.

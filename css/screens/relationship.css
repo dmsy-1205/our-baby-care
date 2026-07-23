@@ -26,6 +26,25 @@
   margin-top:12px;padding:10px;border:1px solid color-mix(in srgb,var(--hm-primary) 22%,transparent);
   border-radius:14px;background:color-mix(in srgb,var(--hm-primary) 4%,#fff);
 }
+.role-display-labels-card{
+  display:grid;gap:10px;margin-top:12px;padding:13px;
+  border:1px solid color-mix(in srgb,var(--hm-primary) 24%,transparent);
+  border-radius:16px;background:color-mix(in srgb,var(--hm-surface-card) 90%,var(--hm-primary-soft) 10%);
+}
+.role-display-labels-card[hidden]{display:none!important}
+.role-display-labels-head{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.role-display-labels-head strong{font-size:.86rem;color:var(--hm-color-title)}
+.role-display-labels-head small,.role-display-labels-card>small{color:var(--hm-color-muted);font-size:.67rem;line-height:1.4}
+.role-display-labels-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.role-display-labels-grid label{display:grid;gap:5px;min-width:0}
+.role-display-labels-grid label span{font-size:.7rem;font-weight:850;color:var(--hm-color-title)}
+.role-display-labels-grid input{width:100%;min-width:0;min-height:42px;box-sizing:border-box;padding:9px 10px;border:1px solid var(--hm-line-soft);border-radius:12px;background:var(--hm-surface-input);color:var(--hm-color-body)}
+.role-display-labels-grid input:disabled{opacity:.62;cursor:not-allowed}
+.role-display-labels-card>p{margin:0;padding:9px 10px;border-radius:11px;background:color-mix(in srgb,var(--hm-primary-soft) 70%,transparent);color:var(--hm-color-title);font-size:.73rem;font-weight:800;text-align:center}
+.role-display-labels-actions{display:grid;grid-template-columns:1fr auto;gap:8px}
+.role-display-labels-actions button{min-height:42px;padding:8px 12px;border:1px solid color-mix(in srgb,var(--hm-primary) 34%,transparent);border-radius:12px;background:var(--hm-primary);color:#fff;font-size:.73rem;font-weight:850}
+.role-display-labels-actions .is-secondary{background:var(--hm-surface-card);color:var(--hm-color-title)}
+@media(max-width:360px){.role-display-labels-grid{grid-template-columns:1fr}.role-display-labels-actions{grid-template-columns:1fr}}
 .room-connection-tools-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin:0 2px 8px}
 .room-connection-tools-head strong{font-size:.86rem}
 .room-connection-tools-head small{max-width:52%;color:var(--hm-color-muted);font-size:.68rem;line-height:1.35;text-align:right}

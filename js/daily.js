@@ -282,10 +282,15 @@
         const feedbackConfirmedEl = document.getElementById('feedbackConfirmed');
         const feedbackTypeButtons = document.querySelectorAll('[data-feedback-type]');
         const rewardLock = document.getElementById('rewardLockNote');
-        [replyEl, rewardEl, ownerNoteEl, rewardBtn, restBtn, feedbackConfirmedEl].forEach((el) => { if (el) el.disabled = !canManage; });
+        const domTodayLock = document.getElementById('domTodayLockNote');
+        const domTodayFields = ['domWakeTime', 'domMood', 'domAvailability', 'domSleepTime', 'domTodayMessage']
+            .map((id) => document.getElementById(id))
+            .filter(Boolean);
+        [replyEl, rewardEl, ownerNoteEl, rewardBtn, restBtn, feedbackConfirmedEl, ...domTodayFields].forEach((el) => { if (el) el.disabled = !canManage; });
         feedbackTypeButtons.forEach((el) => { el.disabled = !canManage; });
         if (feedbackLock) feedbackLock.style.display = canManage ? 'none' : 'block';
         if (rewardLock) rewardLock.style.display = canManage ? 'none' : 'block';
+        if (domTodayLock) domTodayLock.style.display = canManage ? 'none' : 'block';
         updateMissionAccessControls();
     }
 
@@ -447,7 +452,7 @@
     // =========================================================
 
     function clearFormFieldsExceptSync() {
-        const fields = ['wakeTime', 'exercise', 'weight', 'mealBreakfast', 'mealLunch', 'mealDinner', 'goingOut', 'sleepTime', 'diary', 'replyMessage', 'moodNote', 'rewardNote'];
+        const fields = ['wakeTime', 'exercise', 'weight', 'mealBreakfast', 'mealLunch', 'mealDinner', 'goingOut', 'sleepTime', 'diary', 'replyMessage', 'moodNote', 'rewardNote', 'domWakeTime', 'domMood', 'domAvailability', 'domSleepTime', 'domTodayMessage'];
         fields.forEach(id => {
             const el = document.getElementById(id);
             if (el && document.activeElement !== el) el.value = '';

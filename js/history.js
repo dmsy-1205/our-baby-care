@@ -863,6 +863,17 @@ function historyMealDetailBlock(record, mealMoments) {
     if (!rows) return '';
     return `<section class="history-detail-block history-detail-polished-block history-meal-block"><div class="history-detail-block-title">🥗 식사 기록</div><div class="history-meal-list">${rows}</div></section>`;
 }
+function buildHistoryDomTodayText(record) {
+    const moodLabels = { good:'좋음', calm:'차분함', tired:'피곤함', hard:'힘듦' };
+    const availabilityLabels = { plenty:'여유 있음', normal:'보통', busy:'바쁨', rest:'휴식 필요' };
+    return [
+        record?.domWakeTime ? `⏰ 기상 ${record.domWakeTime}` : '',
+        record?.domSleepTime ? `🌙 취침 예정 ${record.domSleepTime}` : '',
+        record?.domMood ? `😊 기분 ${moodLabels[record.domMood] || record.domMood}` : '',
+        record?.domAvailability ? `🟢 여유 ${availabilityLabels[record.domAvailability] || record.domAvailability}` : '',
+        record?.domTodayMessage ? `💬 ${record.domTodayMessage}` : ''
+    ].filter(Boolean).join('\n');
+}
 async function openHistoryDetailModal(date) {
     const mergedCache = hmHistoryGetMergedData();
     let record = mergedCache && mergedCache[date] ? mergedCache[date] : null;
@@ -932,6 +943,7 @@ async function openHistoryDetailModal(date) {
     const detailMoments = typeof hmGetRecordMoments === 'function' ? hmGetRecordMoments(record) : (record.photo ? [{ dataUrl:record.photo }] : []);
     const mealMoments = detailMoments.filter((item) => item.mealType);
     const ordinaryMoments = detailMoments.filter((item) => !item.mealType);
+    const ordinaryMomentCaptions = String(record.goingOut || '').split('/').map((value) => value.trim()).filter(Boolean);
     if (summaryItems.length < 3 && ordinaryMoments.length) summaryItems.push(`📷 사진 ${ordinaryMoments.length}장`);
     else if (summaryItems.length < 3 && mealMoments.length) summaryItems.push(`🥗 식사 사진 ${mealMoments.length}장`);
     const summaryChips = summaryItems.slice(0, 3).map(makeHistoryChip).join('');
@@ -940,7 +952,11 @@ async function openHistoryDetailModal(date) {
             <div class="history-detail-summary-icon">${getHistoryMoodIcon(record)}</div>
             <div><strong>하루 한눈에 보기</strong><span>${summaryChips || '저장된 세부 내용을 확인해 주세요.'}</span></div>
         </div>
-        ${ordinaryMoments.length ? `<div class="history-detail-moments">${ordinaryMoments.map((item, index) => `<img src="${escapeHtml(item.url || item.dataUrl || '')}" class="history-detail-photo" alt="${date} 일상 사진 ${index + 1}">`).join('')}</div>` : ''}
+        ${ordinaryMoments.length ? `<div class="history-detail-moments">${ordinaryMoments.map((item, index) => {
+            const caption = String(ordinaryMomentCaptions[index] || item.caption || '').trim();
+            return `<figure class="history-detail-moment"><img src="${escapeHtml(item.url || item.dataUrl || '')}" class="history-detail-photo" alt="${date} 일상 사진 ${index + 1}${caption ? `: ${escapeHtml(caption)}` : ''}">${caption ? `<figcaption>${escapeHtml(caption)}</figcaption>` : ''}</figure>`;
+        }).join('')}</div>` : ''}
+        ${historyDetailBlock('🌤 Dom의 오늘', buildHistoryDomTodayText(record))}
         ${historyDetailBlock('💜 오늘의 약속', customRoutineText)}
         ${historyDetailBlock('🌱 나의 루틴', subRoutineText)}
         ${historyDetailBlock('😊 오늘의 기분', [record.moodLabel, record.moodNote].filter(Boolean).join('\n'))}

@@ -31,8 +31,9 @@
             ]
         },
         {
-            key: 'feedback', icon: 'diamond', title: '관리와 피드백', subtitle: '피드백 · 선물 · 메모',
+            key: 'feedback', icon: 'diamond', title: '관리와 피드백', subtitle: 'Dom의 오늘 · 피드백 · 선물',
             actions: [
+                ['sunrise', 'Dom의 오늘', '기분과 생활 리듬을 Sub에게 간단히 전합니다.', () => window.openDailyModal?.('domToday')],
                 ['message', '주인의 피드백', 'Dom은 작성하고 Sub는 확인합니다.', () => window.openDailyModal?.('feedback')],
                 ['gift', '오늘의 선물', '작은 보상이나 편안한 휴식을 전합니다.', () => window.openDailyModal?.('reward')],
                 ['lock', 'Dom 비공개 메모', 'Dom만 확인하는 관리 메모입니다.', () => window.openDailyModal?.('ownerNote')]
@@ -62,7 +63,7 @@
     const EDITOR_ROUTES = Object.freeze({
         condition: ['mood', 'weight', 'exercise', 'water'],
         daily: ['wake', 'meal', 'outing', 'sleep', 'diary'],
-        feedback: ['feedback', 'reward', 'ownerNote']
+        feedback: ['domToday', 'feedback', 'reward', 'ownerNote']
     });
     const $ = (id) => document.getElementById(id);
     const icon = (name, className = 'hm-ui-icon') => window.HM_UI_ICONS?.render(name, className) || '';
@@ -166,6 +167,7 @@
     function restoreMountedEditors() {
         while (mountedEditors.length) {
             const item = mountedEditors.pop();
+            item.modal.querySelectorAll('.hm-route-comment-trigger').forEach((trigger) => trigger.remove());
             if (item.momentsSaveButton) item.momentsSaveButton.textContent = item.momentsSaveText;
             if (item.dialogRole) item.modal.setAttribute('role', item.dialogRole); else item.modal.removeAttribute('role');
             if (item.dialogAriaModal) item.modal.setAttribute('aria-modal', item.dialogAriaModal); else item.modal.removeAttribute('aria-modal');
@@ -192,12 +194,12 @@
             modal.removeAttribute('aria-modal');
             modal.classList.add('hm-route-embedded-editor');
             modal.querySelector('.card-conversation-panel')?.remove();
-            if ((type === 'feedback' || type === 'reward') && typeof window.hmApplyManagerOnlyModalView === 'function') {
+            if (['domToday', 'feedback', 'reward'].includes(type) && typeof window.hmApplyManagerOnlyModalView === 'function') {
                 window.hmApplyManagerOnlyModalView(type);
             }
             if (momentsSaveButton) momentsSaveButton.textContent = '선택한 사진 저장';
             modal.querySelector('.hm-route-comment-trigger')?.remove();
-            if (type !== 'ownerNote') {
+            if (type !== 'ownerNote' && type !== 'domToday') {
                 const commentTrigger = document.createElement('button');
                 commentTrigger.type = 'button';
                 commentTrigger.className = 'hm-route-comment-trigger';
@@ -329,7 +331,7 @@
         const isManager = typeof window.canManageRelationshipCards === 'function' && window.canManageRelationshipCards();
         const isSubFeedback = category.key === 'feedback' && !isManager;
         $('hmAdaptiveRouteTitle').textContent = isSubFeedback ? '주인의 메시지' : category.title;
-        $('hmAdaptiveRouteSubtitle').textContent = isSubFeedback ? '주인의 피드백 · 오늘의 선물' : category.subtitle;
+        $('hmAdaptiveRouteSubtitle').textContent = isSubFeedback ? 'Dom의 오늘 · 피드백 · 선물' : category.subtitle;
         $('hmAdaptiveRouteSaveState').textContent = isSubFeedback ? '읽기 전용' : (EDITOR_ROUTES[category.key] ? '☁ 자동 저장' : '둘만의 공간');
         if (EDITOR_ROUTES[category.key]) mountRouteEditors(category.key, body);
         else renderRouteActions(category, body);
@@ -484,7 +486,7 @@
         const button = document.querySelector('[data-hm-category="feedback"]');
         if (!button) return;
         const title = isManager ? '관리와 피드백' : '주인의 메시지';
-        const subtitle = isManager ? '피드백 · 선물 · 메모' : '주인의 피드백 · 오늘의 선물';
+        const subtitle = 'Dom의 오늘 · 피드백 · 선물';
         button.setAttribute('aria-label', `${title}: ${subtitle}`);
         const strong = button.querySelector('strong');
         const small = button.querySelector('small');

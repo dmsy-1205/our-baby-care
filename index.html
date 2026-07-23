@@ -55,7 +55,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
     <script src="/__/firebase/init.js"></script>
 
-    <link rel="stylesheet" href="css/style.css?v=step6-2-14-69-pwa-start-sync-20260723">
+    <link rel="stylesheet" href="css/style.css?v=step6-2-14-78-owner-labels-20260723">
 </head>
 <body class="hm-booting">
 
@@ -229,6 +229,23 @@
                     </div>
                     <div class="relationship-role-help" id="relationshipRoleHelp">처음 공간을 만들거나 초대코드로 참여하기 전에 역할을 선택해 주세요.</div>
                 </div>
+
+                <section class="role-display-labels-card" id="roleDisplayLabelsCard" aria-labelledby="roleDisplayLabelsTitle" hidden>
+                    <div class="role-display-labels-head">
+                        <strong id="roleDisplayLabelsTitle">🏷️ 우리만의 역할 이름</strong>
+                        <small>화면에 보이는 문구만 변경됩니다.</small>
+                    </div>
+                    <div class="role-display-labels-grid">
+                        <label><span>Dom 표시명</span><input type="text" id="domDisplayRoleLabel" maxlength="12" autocomplete="off" placeholder="예: Sovereign"></label>
+                        <label><span>Sub 표시명</span><input type="text" id="subDisplayRoleLabel" maxlength="12" autocomplete="off" placeholder="예: Beloved"></label>
+                    </div>
+                    <p id="roleDisplayLabelsPreview">Dom님이 작성하고 Sub님이 확인합니다.</p>
+                    <small id="roleDisplayLabelsHelp">각 사용자는 자신의 화면 표시명만 변경할 수 있습니다.</small>
+                    <div class="role-display-labels-actions">
+                        <button type="button" data-hm-action="save-role-display-label">표시명 저장</button>
+                        <button type="button" class="is-secondary" data-hm-action="reset-role-display-label">기본 이름으로</button>
+                    </div>
+                </section>
 
                 <section class="room-connection-tools" aria-labelledby="roomConnectionToolsTitle">
                     <div class="room-connection-tools-head">
@@ -446,7 +463,7 @@
 
     <div class="home-section-title manage-title">
         <span>관리와 피드백</span>
-        <small>피드백 · 오늘의 선물 · 메모</small>
+        <small>Dom의 오늘 · 피드백 · 선물</small>
     </div>
 
     <div class="input-group">
@@ -882,7 +899,7 @@
             <section class="help-panel" data-help-panel="daily">
                 <article class="help-mini-card" data-help-keywords="오늘의 컨디션 기분 운동 체중 수분"><h3>😊 오늘의 컨디션</h3><p>기분, 운동, 체중, 수분을 기록합니다. 값이 없으면 요약에는 ‘-’로 표시됩니다.</p></article>
                 <article class="help-mini-card" data-help-keywords="오늘의 기록 기상 식사 외출 취침 하루"><h3>📝 오늘의 기록</h3><p>기상 시간, 식사, 외출, 취침 예정, 오늘의 하루 메모와 사진을 남길 수 있습니다.</p></article>
-                <article class="help-mini-card" data-help-keywords="관리 피드백 선물 Dom"><h3>💌 관리와 피드백</h3><p>관리(Dom)가 피드백과 선물 등의 내용을 작성합니다. 기록(Sub)은 내용을 확인합니다.</p></article>
+                <article class="help-mini-card" data-help-keywords="관리 피드백 선물 Dom"><h3>💌 관리와 피드백</h3><p>관리(Dom)가 자신의 오늘과 피드백, 선물을 기록합니다. 기록(Sub)은 내용을 확인합니다.</p></article>
             </section>
 
             <section class="help-panel" data-help-panel="history">
@@ -1054,7 +1071,8 @@
     <div class="daily-modal" role="dialog" aria-modal="true" aria-labelledby="outingModalTitle">
         <div class="daily-modal-head"><h2 id="outingModalTitle">📷 오늘의 순간</h2><button type="button" class="modal-close-btn" data-hm-action="cancel-daily-moments">닫기</button></div>
         <div class="input-group">
-            <input type="text" id="goingOut" placeholder="산책 30분" data-hm-input="daily-field-change">
+            <input type="text" id="goingOut" placeholder="예: 쇼핑하러 갈 때 / 외식하러 갈 때" data-hm-input="daily-field-change">
+            <p class="moments-caption-guide">여러 순간은 <strong>/</strong> 로 구분해 주세요. 입력한 순서대로 사진에 표시됩니다.</p>
             <label for="goingOutPhoto" class="file-label">📷 일상 사진 추가하기</label>
             <input type="file" id="goingOutPhoto" accept="image/*" multiple style="display:none;" data-hm-change="daily-photo-upload">
             <p class="moments-upload-guide" id="momentsUploadGuide">사진 저장 방식을 확인하는 중입니다.</p>
@@ -1177,6 +1195,45 @@
             <textarea id="rewardNote" rows="3" maxlength="1000" placeholder="예: 오늘 정말 잘했어요. 좋아하는 디저트 먹어요 😊" data-hm-input="daily-field-change"></textarea>
         </div>
         <button type="button" class="daily-modal-save" data-hm-action="close-daily" data-hm-value="reward">저장하고 닫기</button>
+    </div>
+</div>
+
+<div class="daily-modal-overlay" id="domTodayModalOverlay" data-hm-action="close-daily-overlay" data-hm-value="domToday">
+    <div class="daily-modal" role="dialog" aria-modal="true" aria-labelledby="domTodayModalTitle">
+        <div class="daily-modal-head">
+            <h2 id="domTodayModalTitle">🌤 Dom의 오늘</h2>
+            <button type="button" class="modal-close-btn" data-hm-action="close-daily" data-hm-value="domToday">닫기</button>
+        </div>
+        <div class="manager-lock-note" id="domTodayLockNote"><strong>관리(Dom)의 생활 리듬을 함께 보는 카드입니다.</strong><br>기록(Sub)은 작성된 내용을 읽을 수 있어요.</div>
+        <section class="dom-today-editor" aria-label="Dom의 오늘 기록">
+            <div class="dom-today-time-grid">
+                <label><span>⏰ 기상 시간</span><input type="time" id="domWakeTime" data-hm-input="daily-field-change"></label>
+                <label><span>🌙 취침 예정</span><input type="time" id="domSleepTime" data-hm-input="daily-field-change"></label>
+            </div>
+            <div class="dom-today-select-grid">
+                <label><span>😊 오늘의 기분</span>
+                    <select id="domMood" data-hm-change="daily-field-change">
+                        <option value="">선택하지 않음</option>
+                        <option value="good">좋아요</option>
+                        <option value="calm">편안해요</option>
+                        <option value="usual">평범해요</option>
+                        <option value="tired">지쳤어요</option>
+                        <option value="sensitive">예민해요</option>
+                    </select>
+                </label>
+                <label><span>🟢 오늘의 여유</span>
+                    <select id="domAvailability" data-hm-change="daily-field-change">
+                        <option value="">선택하지 않음</option>
+                        <option value="busy">바빠요</option>
+                        <option value="normal">보통이에요</option>
+                        <option value="free">여유 있어요</option>
+                    </select>
+                </label>
+            </div>
+            <label class="todays-gift-label" for="domTodayMessage">💬 오늘의 한마디</label>
+            <textarea id="domTodayMessage" rows="2" maxlength="300" placeholder="예: 오늘 저녁에는 천천히 이야기할 수 있어요." data-hm-input="daily-field-change"></textarea>
+        </section>
+        <button type="button" class="daily-modal-save" data-hm-action="close-daily" data-hm-value="domToday">저장하고 닫기</button>
     </div>
 </div>
 
@@ -1368,36 +1425,37 @@
 </div>
 
 <div class="toast" id="toast">기록이 복사되었습니다! 💕</div>
-    <script src="js/release-info.js?v=step6-2-14-69-pwa-start-sync-20260723"></script>
-    <script src="js/ui-icons.js?v=step6-2-14-69-pwa-start-sync-20260723"></script>
+    <script src="js/release-info.js?v=step6-2-14-78-owner-labels-20260723"></script>
+    <script src="js/ui-icons.js?v=step6-2-14-78-owner-labels-20260723"></script>
     <script src="js/config.js?v=step6-2-14-60-comment-count-20260723"></script>
     <script src="js/access-policy.js?v=maintenance-baseline-20260722"></script>
     <script src="js/save-state.js?v=maintenance-baseline-20260722"></script>
-    <script src="js/ui-events.js?v=step6-2-14-65-summary-lock-20260723"></script>
-    <script src="js/utils.js?v=step6-2-14-69-pwa-start-sync-20260723"></script>
-    <script src="js/popup.js?v=step6-2-14-64-relationship-ui-lock-20260723"></script>
+    <script src="js/role-labels.js?v=step6-2-14-78-owner-labels-20260723"></script>
+    <script src="js/ui-events.js?v=step6-2-14-78-owner-labels-20260723"></script>
+    <script src="js/utils.js?v=step6-2-14-78-owner-labels-20260723"></script>
+    <script src="js/popup.js?v=step6-2-14-78-owner-labels-20260723"></script>
     <script src="js/auth.js?v=step6-2-14-53-relationship-lifecycle-20260723"></script>
-    <script src="js/room.js?v=step6-2-14-69-pwa-start-sync-20260723"></script>
-    <script src="js/presence.js?v=step6-2-14-69-pwa-start-sync-20260723"></script>
-    <script src="js/daily.js?v=step6-2-14-38-time-input-sync-20260722"></script>
-    <script src="js/moments.js?v=step6-2-14-64-relationship-ui-lock-20260723"></script>
+    <script src="js/room.js?v=step6-2-14-78-owner-labels-20260723"></script>
+    <script src="js/presence.js?v=step6-2-14-78-owner-labels-20260723"></script>
+    <script src="js/daily.js?v=step6-2-14-78-owner-labels-20260723"></script>
+    <script src="js/moments.js?v=step6-2-14-78-owner-labels-20260723"></script>
     <script src="js/mission.js?v=step6-2-13-8-shared-card-conversations-20260721"></script>
     <script src="js/custom-routine.js?v=step6-2-14-13-role-context-20260722"></script>
     <script src="js/sub-routine.js?v=step6-2-14-13-role-context-20260722"></script>
     <script src="js/card-conversations.js?v=step6-2-14-66-lock-listener-cleanup-20260723"></script>
-    <script src="js/history.js?v=step6-2-14-69-pwa-start-sync-20260723"></script>
+    <script src="js/history.js?v=step6-2-14-78-owner-labels-20260723"></script>
     <script src="js/anniversary.js?v=step6-2-10-11-history-center-layout-cleanup-20260718"></script>
-    <script src="js/theme.js?v=step6-2-14-69-pwa-start-sync-20260723"></script>
+    <script src="js/theme.js?v=step6-2-14-78-owner-labels-20260723"></script>
     <script src="js/profile.js?v=step6-2-14-47-profile-context-20260723"></script>
     <script src="js/chat.js?v=step5-10-13-history-month-server-reconciliation-20260716"></script>
-    <script src="js/autosave.js?v=step6-2-14-57-room-relationship-layout-20260723"></script>
+    <script src="js/autosave.js?v=step6-2-14-78-owner-labels-20260723"></script>
     <script src="js/qa.js?v=step6-2-14-50-no-eval-20260723"></script>
     <script src="js/motion.js?v=step5-10-13-history-month-server-reconciliation-20260716"></script>
     <script src="js/product.js?v=step6-2-14-65-summary-lock-20260723"></script>
     <script src="js/help-center.js?v=step6-2-13-4-support-bridge-20260721"></script>
     <script src="js/data-management.js?v=step6-2-13-4-request-cancel-type-message-20260718"></script>
     <script src="js/app.js?v=step6-2-14-57-room-relationship-layout-20260723"></script>
-    <script src="js/home-navigation.js?v=step6-2-14-69-pwa-start-sync-20260723"></script>
-    <script src="js/pwa.js?v=step6-2-14-69-pwa-start-sync-20260723"></script>
+    <script src="js/home-navigation.js?v=step6-2-14-78-owner-labels-20260723"></script>
+    <script src="js/pwa.js?v=step6-2-14-78-owner-labels-20260723"></script>
 </body>
 </html>

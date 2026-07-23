@@ -100,7 +100,7 @@ const inlineHandlers = (index.match(/\bon(?:click|change|input|submit|keypress|b
 requireCheck(index.includes('id="hmNotificationBar" data-hm-action="open-notifications"'), 'Home notification button must use the shared UI event bridge');
 requireCheck(read('js/ui-events.js').includes("'open-notifications'"), 'Shared UI event bridge must register the home notification action');
 const dailyFieldInputs = (index.match(/data-hm-input="daily-field-change"/g) || []).length;
-requireCheck(dailyFieldInputs === 10, `Daily record inputs must use 10 shared input bindings, found ${dailyFieldInputs}`);
+requireCheck(dailyFieldInputs === 13, `Daily record inputs must use 13 shared input bindings, found ${dailyFieldInputs}`);
 const missionTemplateActions = (index.match(/data-hm-action="add-mission-template"/g) || []).length;
 requireCheck(missionTemplateActions === 10, `Mission templates must use 10 shared click bindings, found ${missionTemplateActions}`);
 requireCheck(index.includes('id="missionModalOverlay" data-hm-action="close-mission-overlay"'), 'Mission overlay must use the shared close action');
@@ -163,8 +163,8 @@ requireCheck((index.match(/data-hm-action="select-help-tab"/g) || []).length ===
 requireCheck((index.match(/data-hm-action="toggle-help-faq"/g) || []).length === 6, 'Help center must use 6 shared FAQ actions');
 requireCheck((index.match(/data-hm-action="open-guide"/g) || []).length === 2, 'Guide must use 2 shared open actions');
 requireCheck((helpSource.match(/data-hm-submit="support-(?:followup|rating)"/g) || []).length === 2, 'Help support dynamic forms must use 2 shared submit actions');
-requireCheck((index.match(/data-hm-action="close-daily-overlay"/g) || []).length === 11, 'Daily record modals must use 11 shared overlay-close actions');
-requireCheck((index.match(/data-hm-action="close-daily"/g) || []).length === 22, 'Daily record modals must use 22 shared close actions');
+requireCheck((index.match(/data-hm-action="close-daily-overlay"/g) || []).length === 12, 'Daily record modals must use 12 shared overlay-close actions');
+requireCheck((index.match(/data-hm-action="close-daily"/g) || []).length === 24, 'Daily record modals must use 24 shared close actions');
 requireCheck((index.match(/data-hm-action="select-mood"/g) || []).length === 5, 'Mood must use 5 shared selection actions');
 requireCheck((index.match(/data-hm-action="select-feedback-type"/g) || []).length === 4, 'Feedback must use 4 shared selection actions');
 requireCheck((index.match(/data-hm-action="toggle-daily-choice"/g) || []).length === 2, 'Rewards must use 2 shared choice actions');

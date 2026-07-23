@@ -49,7 +49,7 @@
 
     // STEP5.6.4.5B-2: 날짜 일반 기록과 Dom/Owner 전용 관리 기록을 논리적으로 분리한다.
     // 기존 days/{date} 안의 관리 필드는 읽기 fallback으로만 유지한다.
-    const HM_DAY_ADMIN_FIELDS = ['replyMessage', 'feedbackType', 'feedbackConfirmed', 'dailyChoice', 'dailyChoiceLabel', 'rewardNote'];
+    const HM_DAY_ADMIN_FIELDS = ['replyMessage', 'feedbackType', 'feedbackConfirmed', 'dailyChoice', 'dailyChoiceLabel', 'rewardNote', 'domWakeTime', 'domMood', 'domAvailability', 'domSleepTime', 'domTodayMessage'];
 
     function hmExtractLegacyDayAdmin(record) {
         const source = record || {};
@@ -283,6 +283,11 @@
                 if (typeof updateFeedbackTypeButtons === 'function') updateFeedbackTypeButtons();
                 safeUpdateField('moodNote', record.moodNote);
                 safeUpdateField('rewardNote', record.rewardNote);
+                safeUpdateField('domWakeTime', record.domWakeTime);
+                safeUpdateField('domMood', record.domMood);
+                safeUpdateField('domAvailability', record.domAvailability);
+                safeUpdateField('domSleepTime', record.domSleepTime);
+                safeUpdateField('domTodayMessage', record.domTodayMessage);
                 renderMissions(record.missions);
                 if (typeof hmSetCustomRoutineValues === 'function') hmSetCustomRoutineValues(record.customCardValues || {});
 
@@ -320,6 +325,11 @@
                 selectedFeedbackType = record.feedbackType || '';
                 feedbackConfirmed = record.feedbackConfirmed === true;
                 safeUpdateField('rewardNote', record.rewardNote);
+                safeUpdateField('domWakeTime', record.domWakeTime);
+                safeUpdateField('domMood', record.domMood);
+                safeUpdateField('domAvailability', record.domAvailability);
+                safeUpdateField('domSleepTime', record.domSleepTime);
+                safeUpdateField('domTodayMessage', record.domTodayMessage);
                 selectedDailyChoice = record.dailyChoice || '';
                 if (typeof updateFeedbackTypeButtons === 'function') updateFeedbackTypeButtons();
                 updateDailyChoiceButtons();
@@ -444,6 +454,11 @@
                 moodNote: record.moodNote,
                 dailyChoice: record.dailyChoice,
                 rewardNote: record.rewardNote,
+                domWakeTime: record.domWakeTime,
+                domMood: record.domMood,
+                domAvailability: record.domAvailability,
+                domSleepTime: record.domSleepTime,
+                domTodayMessage: record.domTodayMessage,
                 photo: record.photo ? record.photo.slice(0, 80) + ':' + record.photo.length : '',
                 customCardValues: (typeof hmCollectCustomRoutineValues === 'function') ? hmCollectCustomRoutineValues() : {},
                 subRoutineSnapshot: (typeof hmCurrentSubRoutineSnapshot === 'function') ? hmCurrentSubRoutineSnapshot() : []
@@ -503,6 +518,11 @@
         const dailyChoice = selectedDailyChoice || '';
         const dailyChoiceLabel = getDailyChoiceLabel(dailyChoice);
         const rewardNote = (document.getElementById('rewardNote').value || '').slice(0, 1000);
+        const domWakeTime = document.getElementById('domWakeTime')?.value || '';
+        const domMood = document.getElementById('domMood')?.value || '';
+        const domAvailability = document.getElementById('domAvailability')?.value || '';
+        const domSleepTime = document.getElementById('domSleepTime')?.value || '';
+        const domTodayMessage = (document.getElementById('domTodayMessage')?.value || '').slice(0, 300);
         const currentPhotoCount = Array.isArray(hmDailyMoments) ? hmDailyMoments.filter((item) => !item?.mealType).length : (uploadedPhotoBase64 ? 1 : 0);
         const hasPhotoText = currentPhotoCount ? `📷 사진 ${currentPhotoCount}장` : '사진 없음';
         const customRoutineReport = (typeof hmBuildCustomRoutineReportText === 'function') ? hmBuildCustomRoutineReportText() : '';
@@ -545,6 +565,7 @@
         const adminRecord = {
             replyMessage, feedbackType, feedbackConfirmed,
             dailyChoice, dailyChoiceLabel, rewardNote,
+            domWakeTime, domMood, domAvailability, domSleepTime, domTodayMessage,
             updatedBy: currentUser.uid,
             updatedByEmail: currentUser.email,
             updatedAt: firebase.database.ServerValue.TIMESTAMP
