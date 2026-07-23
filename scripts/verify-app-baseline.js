@@ -52,13 +52,19 @@ requireCheck(aliases.prod === 'our-baby-care', 'prod alias must be our-baby-care
 const firebaseConfig = readJson('firebase.json');
 requireCheck(firebaseConfig.hosting && firebaseConfig.hosting.public === 'public', 'Hosting public directory must remain public');
 const predeploy = (firebaseConfig.hosting && firebaseConfig.hosting.predeploy) || [];
+requireCheck(predeploy.includes('node scripts/verify-session-regressions.js'), 'Hosting must run the Dom/Sub session regression verifier');
 requireCheck(predeploy.includes('node scripts/verify-app-baseline.js'), 'Hosting must run the baseline verifier');
 requireCheck(predeploy.includes('node scripts/build-public.js'), 'Hosting must run the public whitelist build');
 
 const deployScript = read('scripts/deploy-hosting.ps1');
+const productionDeployScript = read('scripts/deploy-production-hosting.ps1');
 requireCheck(/\[string\]\$Target\s*=\s*'Test'/.test(deployScript), 'Deployment must default to Test, never All or Production');
+requireCheck(/\[ValidateSet\('Test'\)\]/.test(deployScript), 'Test deployment script must reject Production and All targets');
+requireCheck(!/projects\.prod|--project\s+prod|our-baby-care/.test(deployScript), 'Test deployment script must contain no production target');
 requireCheck(/firebaseCommand deploy --only hosting/.test(deployScript), 'Deployment script must deploy Hosting only');
 requireCheck(!/--only\s+(?:database|storage|functions)/i.test(deployScript), 'Deployment script must not deploy Database, Storage, or Functions');
+requireCheck(/\[ValidateSet\('our-baby-care'\)\]/.test(productionDeployScript), 'Production deployment requires the exact project confirmation');
+requireCheck(/--only hosting --project prod/.test(productionDeployScript), 'Production script remains Hosting-only and explicitly targets prod');
 
 Object.entries(adminFreeze.hashes || {}).forEach(([relativePath, expectedHash]) => {
   const file = absolute(relativePath);

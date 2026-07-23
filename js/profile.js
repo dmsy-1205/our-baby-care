@@ -6,6 +6,7 @@
 
 let hmCurrentNickname = '';
 let hmCurrentAvatar = '';
+window.hmCurrentNickname = '';
 window.hmCurrentAvatar = '';
 
 function hmNicknameFallback(user) {
@@ -27,6 +28,20 @@ function hmIsValidNickname(value) {
 
 function hmGetChatDisplayName() {
     return hmCurrentNickname || hmNicknameFallback(currentUser);
+}
+
+function hmCaptureProfileContext() {
+    const user = currentUser || null;
+    let roomCode = '';
+    try { roomCode = typeof getRoomCodeForData === 'function' ? getRoomCodeForData() : (activeRoomCode || ''); } catch (error) {}
+    return Object.freeze({ uid: user?.uid || '', roomCode, user });
+}
+
+function hmIsProfileContextCurrent(context) {
+    if (!context?.uid || !currentUser || currentUser.uid !== context.uid) return false;
+    let roomCode = '';
+    try { roomCode = typeof getRoomCodeForData === 'function' ? getRoomCodeForData() : (activeRoomCode || ''); } catch (error) {}
+    return roomCode === context.roomCode;
 }
 
 function hmApplyNicknameToUI() {
@@ -58,20 +73,26 @@ function hmApplyNicknameToUI() {
 
 async function loadUserProfile() {
     hmCurrentNickname = '';
+    window.hmCurrentNickname = '';
     if (!currentUser) {
         hmApplyNicknameToUI();
         return;
     }
+    const requestContext = hmCaptureProfileContext();
     try {
-        const snap = await db.ref(`users/${currentUser.uid}/profile`).once('value');
+        const snap = await db.ref(`users/${requestContext.uid}/profile`).once('value');
+        if (!hmIsProfileContextCurrent(requestContext)) return;
         const profile = snap.val() || {};
         const nickname = hmNormalizeNickname(profile.nickname);
         hmCurrentNickname = hmIsValidNickname(nickname) ? nickname : '';
-        hmCurrentAvatar = String(localStorage.getItem(`hmProfileAvatar:${currentUser.uid}`) || '').slice(0, 8);
+        window.hmCurrentNickname = hmCurrentNickname;
+        hmCurrentAvatar = String(localStorage.getItem(`hmProfileAvatar:${requestContext.uid}`) || '').slice(0, 8);
         window.hmCurrentAvatar = hmCurrentAvatar;
     } catch (err) {
+        if (!hmIsProfileContextCurrent(requestContext)) return;
         hmReportError('loadUserProfile', err, hmIsFirebasePermissionError(err) ? '프로필 읽기 권한을 확인해 주세요.' : '프로필을 불러오지 못했습니다.');
     }
+    if (!hmIsProfileContextCurrent(requestContext)) return;
     hmApplyNicknameToUI();
 }
 
@@ -129,6 +150,7 @@ function selectProfileAvatar(value) {
 
 async function saveProfileNickname() {
     if (!currentUser) { alert('로그인이 필요합니다.'); return; }
+    const requestContext = hmCaptureProfileContext();
     const input = document.getElementById('profileNicknameInput');
     const status = document.getElementById('profileStatus');
     const button = document.getElementById('profileSaveBtn');
@@ -140,23 +162,27 @@ async function saveProfileNickname() {
     }
     try {
         if (button) button.disabled = true;
-        await db.ref(`users/${currentUser.uid}/profile`).update({
+        await db.ref(`users/${requestContext.uid}/profile`).update({
             nickname,
             updatedAt: firebase.database.ServerValue.TIMESTAMP
         });
-        localStorage.setItem(`hmProfileAvatar:${currentUser.uid}`, hmCurrentAvatar);
-        try {
-            const roomCode = typeof getRoomCodeForData === 'function' ? getRoomCodeForData() : '';
-            if (roomCode) await db.ref(`roomMembers/${roomCode}/${currentUser.uid}/presence`).update({ avatar: hmCurrentAvatar });
-        } catch (avatarError) {
-            console.warn('[Profile] avatar presence sync skipped', avatarError);
-        }
+        if (!hmIsProfileContextCurrent(requestContext)) return;
         hmCurrentNickname = nickname;
+        window.hmCurrentNickname = nickname;
+        localStorage.setItem(`hmProfileAvatar:${requestContext.uid}`, hmCurrentAvatar);
+        try {
+            if (requestContext.roomCode) await db.ref(`roomMembers/${requestContext.roomCode}/${requestContext.uid}/presence`).update({ nickname, avatar: hmCurrentAvatar });
+            if (!hmIsProfileContextCurrent(requestContext)) return;
+        } catch (avatarError) {
+            if (!hmIsProfileContextCurrent(requestContext)) return;
+            console.warn('[Profile] shared presence profile sync skipped', avatarError);
+        }
         hmApplyNicknameToUI();
         updateChatAlignment();
         if (status) { status.textContent = '닉네임이 저장되었습니다. 새 채팅부터 이 이름으로 표시됩니다.'; status.className = 'hm-profile-status success'; }
         showSaveStatus('✅ 닉네임 저장 완료');
     } catch (err) {
+        if (!hmIsProfileContextCurrent(requestContext)) return;
         hmReportError('saveProfileNickname', err, hmIsFirebasePermissionError(err) ? '닉네임 저장 권한이 없습니다.' : '닉네임 저장에 실패했습니다.');
         if (status) { status.textContent = '닉네임을 저장하지 못했습니다. 잠시 후 다시 시도해 주세요.'; status.className = 'hm-profile-status error'; }
     } finally {

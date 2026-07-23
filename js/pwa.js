@@ -219,16 +219,15 @@
     window.hmPromptPwaInstall = promptInstall;
 
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', () => {
-            clearOldPwaCachesIfNeeded();
-            registerServiceWorker();
+        document.addEventListener('DOMContentLoaded', async () => {
+            await clearOldPwaCachesIfNeeded();
+            await registerServiceWorker();
             if (isIOSDevice() && !isStandaloneMode()) {
                 setTimeout(showInstallBanner, 900);
             }
         }, { once: true });
     } else {
-        clearOldPwaCachesIfNeeded();
-        registerServiceWorker();
+        clearOldPwaCachesIfNeeded().then(registerServiceWorker);
         if (isIOSDevice() && !isStandaloneMode()) {
             setTimeout(showInstallBanner, 900);
         }

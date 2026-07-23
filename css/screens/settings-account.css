@@ -497,3 +497,161 @@
 :root[data-hm-display="light"] .hm-theme-modal :is(.hm-theme-mode-option,.hm-display-mode-option).is-selected{background:#fff4f8!important;border-color:var(--hm-action-accent,#c24f83)!important;box-shadow:0 0 0 3px color-mix(in srgb,var(--hm-action-accent,#c24f83) 18%,transparent)!important}
 :root[data-hm-display="light"] .hm-theme-live-state{background:#fff8fb!important;color:#34283a!important;border-color:#cbbdca!important}
 
+/* STEP6.2.14.48 - Unified login face: contrast, responsive scale and accessible actions. */
+body:not(.hm-authenticated):has(#authBox.hm-login-shell:not(.is-hidden)) {
+    align-items: center !important;
+    min-height: 100dvh !important;
+    padding: max(24px, env(safe-area-inset-top)) 20px max(24px, env(safe-area-inset-bottom)) !important;
+    background: radial-gradient(circle at 18% 12%, rgba(244,119,164,.18), transparent 38%), radial-gradient(circle at 84% 14%, rgba(131,92,244,.18), transparent 38%), #171625 !important;
+}
+#authBox.hm-login-shell { width:min(1080px,calc(100vw - 40px))!important; max-width:1080px!important; }
+#authBox .hm-login-panel { background:linear-gradient(155deg,#fbf9ff 0%,#f7f3fb 100%)!important; color:#30283f!important; }
+#authBox .hm-login-panel h2 { color:#30283f!important; }
+#authBox .hm-login-kicker { color:#765db0!important; }
+#authBox .hm-login-field label { display:block!important; color:#4e435d!important; font-weight:850!important; }
+#authBox .hm-login-field input,
+#authBox .hm-password-control input {
+    width:100%!important; color:#30283f!important; background:#fff!important;
+    border:1px solid #cbbfd9!important; box-shadow:0 8px 22px rgba(61,45,82,.08)!important;
+    -webkit-text-fill-color:#30283f!important; caret-color:#7047e8!important;
+}
+#authBox .hm-login-field input::placeholder { color:#82778f!important; opacity:1!important; }
+#authBox .hm-login-field input:focus,
+#authBox .hm-login-field input:focus-visible {
+    border-color:#7249e8!important; outline:3px solid rgba(114,73,232,.16)!important;
+    box-shadow:0 0 0 6px rgba(114,73,232,.07)!important;
+}
+#authBox .hm-password-control { position:relative; }
+#authBox .hm-password-control input { padding-right:72px!important; }
+#authBox .hm-password-toggle {
+    position:absolute; right:9px; top:50%; translate:0 -50%; min-width:50px; min-height:36px;
+    border:0; border-radius:10px; background:#f1ecfb; color:#6245b6; font-weight:850; cursor:pointer;
+}
+#authBox .hm-password-toggle:focus-visible,
+#authBox .hm-forgot-password:focus-visible { outline:3px solid rgba(114,73,232,.25); outline-offset:2px; }
+#authBox .hm-login-utility { min-height:28px; display:flex; justify-content:flex-end; align-items:center; margin:-4px 2px 4px; }
+#authBox .hm-login-utility[hidden] { display:none!important; }
+#authBox .hm-forgot-password { border:0; background:transparent; color:#6144b2; padding:5px 2px; font-weight:800; cursor:pointer; }
+#authBox .hm-auth-form-status { min-height:1.5em; margin:2px 2px 10px; color:#62596d; font-size:.82rem; line-height:1.45; }
+#authBox .hm-auth-form-status.is-error { color:#a3283f; }
+#authBox .hm-auth-form-status.is-success { color:#21704a; }
+#authBox .hm-auth-form-status.is-info { color:#584294; }
+#authBox .hm-login-small { color:#645b70!important; }
+#authBox .hm-login-trust { background:rgba(255,255,255,.82)!important; }
+#authBox .hm-auth-mode-tab:not(.active) { color:#635a70!important; }
+#authBox .hm-login-button[aria-busy="true"] { cursor:wait; }
+
+@media (min-width:761px) and (max-width:1099px) {
+    #authBox.hm-login-shell { grid-template-columns:1fr!important; width:min(620px,calc(100vw - 48px))!important; }
+    #authBox .hm-login-hero { min-height:auto!important; padding:28px 42px!important; display:grid!important; grid-template-columns:auto 1fr!important; gap:7px 18px!important; text-align:left!important; }
+    #authBox .hm-login-pill,#authBox .hm-login-points { display:none!important; }
+    #authBox .hm-login-mark { grid-row:1/3!important; width:70px!important; height:70px!important; margin:0!important; }
+    #authBox .hm-login-title { font-size:2.45rem!important; margin:0!important; align-self:end!important; }
+    #authBox .hm-login-copy { font-size:.98rem!important; margin:0!important; }
+    #authBox .hm-login-copy br { display:none!important; }
+    #authBox .hm-login-panel { padding:34px 42px 38px!important; }
+}
+
+@media (max-width:760px) {
+    body:not(.hm-authenticated):has(#authBox.hm-login-shell:not(.is-hidden)) {
+        padding:max(14px,env(safe-area-inset-top)) 14px max(14px,env(safe-area-inset-bottom))!important;
+        background:linear-gradient(180deg,#f9f3ff 0%,#fff 48%)!important;
+    }
+    #authBox.hm-login-shell {
+        width:min(520px,100%)!important; max-width:520px!important; min-height:0!important; margin:0 auto!important;
+        border:1px solid rgba(211,196,233,.9)!important; border-radius:26px!important; overflow:hidden!important;
+        box-shadow:0 20px 54px rgba(72,50,96,.14)!important; background:#fff!important;
+    }
+    #authBox .hm-login-hero { padding:18px 20px 16px!important; }
+    #authBox .hm-login-title { font-size:1.7rem!important; }
+    #authBox .hm-login-copy { font-size:.82rem!important; }
+    #authBox .hm-login-panel { padding:20px 20px max(24px,env(safe-area-inset-bottom))!important; }
+    #authBox .hm-login-panel-head { margin-bottom:14px!important; }
+    #authBox .hm-login-panel h2 { font-size:1.35rem!important; }
+    #authBox .hm-login-trust { display:block!important; padding:13px 14px!important; margin-bottom:15px!important; }
+    #authBox .hm-login-trust strong { display:block; font-size:.86rem; }
+    #authBox .hm-login-trust span { display:block; margin-top:3px; font-size:.75rem; }
+    #authBox .hm-login-field { margin-bottom:13px!important; }
+    #authBox .hm-login-field input { height:52px!important; min-height:52px!important; }
+    #authBox .hm-login-small { display:block!important; }
+}
+
+@media (max-width:380px), (max-height:700px) and (max-width:760px) {
+    body:not(.hm-authenticated):has(#authBox.hm-login-shell:not(.is-hidden)) { padding-top:max(8px,env(safe-area-inset-top))!important; }
+    #authBox .hm-login-hero { padding:12px 16px 11px!important; }
+    #authBox .hm-login-panel { padding:14px 16px max(18px,env(safe-area-inset-bottom))!important; }
+    #authBox .hm-login-trust { display:none!important; }
+    #authBox .hm-login-panel-head { margin-bottom:10px!important; }
+    #authBox .hm-login-small { display:none!important; }
+}
+
+@media (prefers-color-scheme:dark) {
+    :root[data-hm-display="system"] #authBox .hm-login-panel,
+    :root[data-hm-display="dark"] #authBox .hm-login-panel { background:linear-gradient(155deg,#2d2638,#24202f)!important; color:#f6effb!important; }
+    :root[data-hm-display="system"] #authBox .hm-login-panel h2,
+    :root[data-hm-display="dark"] #authBox .hm-login-panel h2,
+    :root[data-hm-display="system"] #authBox .hm-login-field label,
+    :root[data-hm-display="dark"] #authBox .hm-login-field label { color:#f5eef9!important; }
+}
+
+:root[data-hm-display="dark"] #authBox .hm-login-panel { background:linear-gradient(155deg,#2d2638,#24202f)!important; color:#f6effb!important; }
+:root[data-hm-display="dark"] #authBox .hm-login-panel h2,
+:root[data-hm-display="dark"] #authBox .hm-login-field label { color:#f5eef9!important; }
+:root[data-hm-display="dark"] #authBox .hm-login-kicker { color:#c5b1f2!important; }
+:root[data-hm-display="dark"] #authBox .hm-login-field input,
+:root[data-hm-display="dark"] #authBox .hm-password-control input {
+    background:#393147!important; color:#fff!important; -webkit-text-fill-color:#fff!important;
+    border-color:#746487!important; box-shadow:0 8px 22px rgba(0,0,0,.2)!important;
+}
+:root[data-hm-display="dark"] #authBox .hm-login-field input::placeholder { color:#c2b7cb!important; }
+:root[data-hm-display="dark"] #authBox .hm-login-trust { background:rgba(255,255,255,.07)!important; color:#f1eaf6!important; }
+:root[data-hm-display="dark"] #authBox .hm-login-small,
+:root[data-hm-display="dark"] #authBox .hm-auth-form-status { color:#d1c7d8!important; }
+
+/* STEP6.2.14.49 - Password control collision and dark-surface contrast hotfix. */
+#authBox .hm-password-control { display:block!important; position:relative!important; width:100%!important; }
+#authBox .hm-password-control > input { display:block!important; width:100%!important; padding-right:76px!important; }
+#authBox .hm-password-control > .hm-password-toggle {
+    position:absolute!important; inset:auto 8px auto auto!important; top:50%!important; translate:0 -50%!important;
+    display:inline-flex!important; align-items:center!important; justify-content:center!important;
+    width:56px!important; min-width:56px!important; max-width:56px!important;
+    height:38px!important; min-height:38px!important; max-height:38px!important;
+    margin:0!important; padding:0 8px!important; border-radius:10px!important;
+    background:#eee8fa!important; color:#5836b7!important; box-shadow:none!important;
+    font-size:.78rem!important; line-height:1!important; z-index:2!important;
+}
+#authBox .hm-login-trust strong { color:#3e334d!important; }
+#authBox .hm-login-trust span { color:#62576f!important; }
+:root[data-hm-display="dark"] #authBox .hm-login-trust strong,
+:root[data-hm-display="dark"] #authBox .hm-login-trust span { color:#f3ebf8!important; }
+:root[data-hm-display="dark"] #authBox .hm-forgot-password { color:#bda4ff!important; }
+:root[data-hm-display="dark"] #authBox .hm-password-control > .hm-password-toggle { background:#493e5b!important; color:#e5d8ff!important; }
+
+@media (min-width:601px) and (max-width:1099px) {
+    #authBox.hm-login-shell { display:grid!important; grid-template-columns:1fr!important; width:min(560px,calc(100vw - 40px))!important; min-height:0!important; }
+    #authBox .hm-login-hero { min-height:0!important; padding:22px 32px!important; grid-template-columns:62px minmax(0,1fr)!important; }
+    #authBox .hm-login-mark { width:62px!important; height:62px!important; }
+    #authBox .hm-login-title { font-size:2.15rem!important; }
+    #authBox .hm-login-panel { min-height:0!important; padding:26px 32px 30px!important; }
+    #authBox .hm-login-panel-head { margin-bottom:14px!important; }
+    #authBox .hm-auth-mode-tabs { margin-bottom:14px!important; }
+    #authBox .hm-login-trust { min-height:0!important; padding:14px 16px!important; margin-bottom:16px!important; }
+    #authBox .hm-login-field { margin-bottom:13px!important; }
+    #authBox .hm-login-field input { height:52px!important; min-height:52px!important; }
+    #authBox .hm-login-button { height:54px!important; min-height:54px!important; }
+}
+
+@media (max-width:600px) {
+    body:not(.hm-authenticated):has(#authBox.hm-login-shell:not(.is-hidden)) { box-sizing:border-box!important; width:100%!important; }
+    #authBox.hm-login-shell { box-sizing:border-box!important; width:calc(100vw - 28px)!important; max-width:calc(100vw - 28px)!important; }
+    #authBox .hm-login-hero,
+    #authBox .hm-login-panel,
+    #authBox .hm-login-field,
+    #authBox .hm-password-control { box-sizing:border-box!important; width:100%!important; min-width:0!important; max-width:100%!important; }
+    #authBox .hm-login-field input,
+    #authBox .hm-password-control > input { box-sizing:border-box!important; min-width:0!important; max-width:100%!important; }
+    #authBox .hm-auth-mode-tabs,
+    #authBox .hm-login-trust,
+    #authBox #authEntryPanel { box-sizing:border-box!important; width:100%!important; max-width:100%!important; }
+}
+

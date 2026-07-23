@@ -91,6 +91,9 @@
         'auth-submit-enter': (element, event) => {
             if (event.key === 'Enter') global.handleAuthSubmit?.();
         },
+        'auth-email-enter': (element, event) => {
+            if (event.key === 'Enter') document.getElementById('authPassword')?.focus();
+        },
         'chat-send-enter': (element, event) => {
             if (event.key === 'Enter') global.sendChatMessage?.();
         },
@@ -154,6 +157,8 @@
         'save-custom-routine-input': () => global.saveCustomRoutineInput?.(),
         'set-auth-mode': (element) => global.setAuthMode?.(element.dataset.hmValue || ''),
         'auth-submit': () => global.handleAuthSubmit?.(),
+        'toggle-auth-password': (element) => global.toggleAuthPassword?.(element.dataset.hmTarget || '', element),
+        'reset-auth-password': () => global.resetAuthPassword?.(),
         'check-email-verification': () => global.checkEmailVerificationStatus?.(),
         'resend-email-verification': () => global.resendEmailVerification?.(),
         'logout-user': () => global.logoutUser?.(),

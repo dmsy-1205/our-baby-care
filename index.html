@@ -44,13 +44,13 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
     <script src="/__/firebase/init.js"></script>
 
-    <link rel="stylesheet" href="css/style.css?v=step6-2-14-45-light-icon-polish-20260723">
+    <link rel="stylesheet" href="css/style.css?v=step6-2-14-49-login-hotfix-20260723">
 </head>
 <body class="hm-booting">
 
 <main class="auth-box hm-login-shell" id="authBox" aria-label="HearMe2nite 로그인">
     <section class="hm-login-hero" aria-label="서비스 소개">
-        <div class="hm-login-pill">v1.0 First Stable 준비 중</div>
+        <div class="hm-login-pill">둘만의 하루를 잇는 안전한 공간</div>
         <div class="hm-login-mark hm-brand-mark" aria-hidden="true"><span>❤</span><span>☾</span></div>
         <h1 class="hm-login-title">HearMe2nite</h1>
         <p class="hm-login-copy">우리의 하루를,<br>함께 기록합니다.</p>
@@ -71,8 +71,8 @@
         </div>
 
         <div class="hm-auth-mode-tabs" role="tablist" aria-label="로그인 또는 회원가입 선택">
-            <button type="button" class="hm-auth-mode-tab active" id="authLoginTab" role="tab" aria-selected="true" data-hm-action="set-auth-mode" data-hm-value="login">로그인</button>
-            <button type="button" class="hm-auth-mode-tab" id="authSignupTab" role="tab" aria-selected="false" data-hm-action="set-auth-mode" data-hm-value="signup">회원가입</button>
+            <button type="button" class="hm-auth-mode-tab active" id="authLoginTab" role="tab" aria-selected="true" aria-controls="authEntryPanel" tabindex="0" data-hm-action="set-auth-mode" data-hm-value="login">로그인</button>
+            <button type="button" class="hm-auth-mode-tab" id="authSignupTab" role="tab" aria-selected="false" aria-controls="authEntryPanel" tabindex="-1" data-hm-action="set-auth-mode" data-hm-value="signup">회원가입</button>
         </div>
 
         <div class="hm-login-trust">
@@ -82,18 +82,28 @@
 
         <div class="input-group hm-login-field">
             <label for="authEmail">이메일</label>
-            <input type="email" id="authEmail" placeholder="email@example.com" autocomplete="email" inputmode="email">
+            <input type="email" id="authEmail" placeholder="email@example.com" autocomplete="email" inputmode="email" enterkeyhint="next" data-hm-keypress="auth-email-enter" aria-describedby="authFormStatus">
         </div>
         <div class="input-group hm-login-field">
             <label for="authPassword">비밀번호</label>
-            <input type="password" id="authPassword" placeholder="6자리 이상" autocomplete="current-password" data-hm-keypress="auth-submit-enter">
+            <div class="hm-password-control">
+                <input type="password" id="authPassword" placeholder="6자리 이상" autocomplete="current-password" data-hm-keypress="auth-submit-enter" aria-describedby="authFormStatus">
+                <button type="button" class="hm-password-toggle" data-hm-action="toggle-auth-password" data-hm-target="authPassword" aria-label="비밀번호 표시" aria-pressed="false">보기</button>
+            </div>
         </div>
         <div class="input-group hm-login-field hm-signup-only" id="authPasswordConfirmGroup" hidden>
             <label for="authPasswordConfirm">비밀번호 확인</label>
-            <input type="password" id="authPasswordConfirm" placeholder="비밀번호를 다시 입력" autocomplete="new-password" data-hm-keypress="auth-submit-enter">
+            <div class="hm-password-control">
+                <input type="password" id="authPasswordConfirm" placeholder="비밀번호를 다시 입력" autocomplete="new-password" data-hm-keypress="auth-submit-enter" aria-describedby="authFormStatus">
+                <button type="button" class="hm-password-toggle" data-hm-action="toggle-auth-password" data-hm-target="authPasswordConfirm" aria-label="비밀번호 표시" aria-pressed="false">보기</button>
+            </div>
         </div>
 
         <div id="authEntryPanel">
+            <div class="hm-login-utility" id="authLoginUtility">
+                <button type="button" class="hm-forgot-password" data-hm-action="reset-auth-password">비밀번호를 잊으셨나요?</button>
+            </div>
+            <p class="hm-auth-form-status" id="authFormStatus" role="status" aria-live="polite" aria-atomic="true"></p>
             <button type="button" class="btn-main hm-login-button" id="authSubmitBtn" data-hm-action="auth-submit">로그인하기</button>
             <p class="hm-login-small" id="authModeHelp">방을 만들거나 초대코드로 참여하면 연결된 사용자에게만 기록이 표시됩니다.</p>
         </div>
@@ -1320,26 +1330,26 @@
 </div>
 
 <div class="toast" id="toast">기록이 복사되었습니다! 💕</div>
-    <script src="js/release-info.js?v=step6-2-14-45-light-icon-polish-20260723"></script>
+    <script src="js/release-info.js?v=step6-2-14-49-login-hotfix-20260723"></script>
     <script src="js/config.js?v=step6-2-13-7-daily-moments-gallery-20260721"></script>
     <script src="js/access-policy.js?v=maintenance-baseline-20260722"></script>
     <script src="js/save-state.js?v=maintenance-baseline-20260722"></script>
-    <script src="js/ui-events.js?v=maintenance-baseline-20260722"></script>
+    <script src="js/ui-events.js?v=step6-2-14-48-login-usability-20260723"></script>
     <script src="js/utils.js?v=step6-2-12-7-notification-toast-message-fix-20260718"></script>
     <script src="js/popup.js?v=step6-2-14-5-role-mission-polish-20260721"></script>
-    <script src="js/auth.js?v=step6-2-13-5-lifecycle-reactivation-20260721"></script>
+    <script src="js/auth.js?v=step6-2-14-48-login-usability-20260723"></script>
     <script src="js/room.js?v=step6-2-13-8-1-invite-acceptance-hotfix-20260721"></script>
-    <script src="js/presence.js?v=step6-2-14-8-avatar-compact-shell-20260721"></script>
+    <script src="js/presence.js?v=step6-2-14-47-profile-context-20260723"></script>
     <script src="js/daily.js?v=step6-2-14-38-time-input-sync-20260722"></script>
     <script src="js/moments.js?v=step6-2-14-39-meal-photo-confirm-save-20260722"></script>
     <script src="js/mission.js?v=step6-2-13-8-shared-card-conversations-20260721"></script>
     <script src="js/custom-routine.js?v=step6-2-14-13-role-context-20260722"></script>
     <script src="js/sub-routine.js?v=step6-2-14-13-role-context-20260722"></script>
-    <script src="js/card-conversations.js?v=step6-2-14-13-role-context-20260722"></script>
+    <script src="js/card-conversations.js?v=step6-2-14-47-comment-safety-a11y-20260723"></script>
     <script src="js/history.js?v=step6-2-14-32-history-meal-context-20260722"></script>
     <script src="js/anniversary.js?v=step6-2-10-11-history-center-layout-cleanup-20260718"></script>
     <script src="js/theme.js?v=step5-10-13-history-month-server-reconciliation-20260716"></script>
-    <script src="js/profile.js?v=step6-2-14-8-avatar-compact-shell-20260721"></script>
+    <script src="js/profile.js?v=step6-2-14-47-profile-context-20260723"></script>
     <script src="js/chat.js?v=step5-10-13-history-month-server-reconciliation-20260716"></script>
     <script src="js/autosave.js?v=step6-2-14-13-role-context-20260722"></script>
     <script src="js/qa.js?v=step5-10-13-history-month-server-reconciliation-20260716"></script>
@@ -1349,6 +1359,6 @@
     <script src="js/data-management.js?v=step6-2-13-4-request-cancel-type-message-20260718"></script>
     <script src="js/app.js?v=step6-2-14-13-role-context-20260722"></script>
     <script src="js/home-navigation.js?v=step6-2-14-32-history-meal-context-20260722"></script>
-    <script src="js/pwa.js?v=step6-2-14-45-light-icon-polish-20260723"></script>
+    <script src="js/pwa.js?v=step6-2-14-49-login-hotfix-20260723"></script>
 </body>
 </html>

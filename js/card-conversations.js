@@ -12,16 +12,15 @@
         feedback:'💬', reward:'🎁', ownerNote:'📌'
     });
     const READ_PREFIX = 'hm_card_conversation_read_v2';
-    // 이 카드는 코멘트 입력/목록 창만 표시하지 않는다.
+    // 원본 메뉴카드에는 입력 목록 전체가 아닌 코멘트 대화창을 여는 간단한 버튼만 표시한다.
     // 기존 배지, 알림, 읽음 처리, 기록 대화 데이터는 그대로 유지한다.
-    const PANEL_DISABLED_KEYS = new Set(Object.keys(CARD_LABELS));
     let boundPath = '';
     let boundRef = null;
     let cache = {};
     let activeCardKey = '';
     let activeOverlayId = '';
-    let notificationOpenCardKey = '';
     let conversationDialogOpen = false;
+    let conversationReturnFocus = null;
     let remoteReadRef = null;
     let remoteReadPath = '';
     let remoteReadMap = {};
@@ -38,6 +37,13 @@
     }
     function roleLabel(role) { return role === 'dom' ? 'Dom' : 'Sub'; }
     function text(value) { return String(value == null ? '' : value).trim(); }
+    function authorDisplayName() {
+        try {
+            const nickname = text(window.hmCurrentNickname || (typeof hmGetChatDisplayName === 'function' ? hmGetChatDisplayName() : ''));
+            if (nickname) return nickname.slice(0, 80);
+        } catch (error) {}
+        return text(currentUser?.displayName || currentUser?.email || roleLabel(roleValue())).slice(0, 80);
+    }
     function escapeHtml(value) {
         return String(value == null ? '' : value)
             .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
@@ -138,10 +144,6 @@
 
     function ensurePanel(cardKey, overlayId) {
         const overlay = document.getElementById(overlayId);
-        if (PANEL_DISABLED_KEYS.has(cardKey)) {
-            overlay?.querySelector('.card-conversation-panel')?.remove();
-            return null;
-        }
         const modal = overlay?.querySelector('.daily-modal, .custom-routine-hub, .sub-routine-hub, [role="dialog"]') || overlay?.firstElementChild;
         if (!modal) return null;
         if (modal.classList.contains('hm-route-embedded-editor')) {
@@ -176,7 +178,9 @@
         overlay.id = 'cardConversationDialogOverlay';
         overlay.className = 'card-conversation-dialog-overlay';
         overlay.setAttribute('aria-hidden', 'true');
-        overlay.innerHTML = '<section class="card-conversation-dialog" role="dialog" aria-modal="true"><div class="card-conversation-dialog-content"></div></section>';
+        overlay.setAttribute('inert', '');
+        overlay.innerHTML = '<section class="card-conversation-dialog" role="dialog" aria-modal="true" aria-labelledby="cardConversationDialogTitle"><div class="card-conversation-dialog-content"></div></section>';
+        overlay.addEventListener('keydown', handleConversationDialogKeydown);
         document.body.appendChild(overlay);
         return overlay;
     }
@@ -187,7 +191,7 @@
         if (!content) return;
         const rows = commentsFor(cardKey);
         content.innerHTML = `
-            <header class="card-conversation-dialog-head"><div><strong>💞 함께 남긴 말</strong><small>${escapeHtml(CARD_LABELS[cardKey] || cardKey)} · Sub와 Dom의 코멘트</small></div><button type="button" data-card-conversation-close>닫기</button></header>
+            <header class="card-conversation-dialog-head"><div><strong id="cardConversationDialogTitle">💞 함께 남긴 말</strong><small>${escapeHtml(CARD_LABELS[cardKey] || cardKey)} · Sub와 Dom의 코멘트</small></div><button type="button" data-card-conversation-close>닫기</button></header>
             ${rows.length ? `<div class="card-conversation-list">${rows.map((item) => `
                 <article class="card-conversation-message role-${item.authorRole === 'dom' ? 'dom' : 'sub'}">
                     <div><strong>${roleLabel(item.authorRole)}</strong><small>${escapeHtml(item.authorName || '')} · ${escapeHtml(formatTime(item.createdAt))}</small>${item.authorUid === currentUser?.uid ? `<button type="button" data-card-comment-delete="${escapeHtml(item.id)}">삭제</button>` : ''}</div>
@@ -205,14 +209,29 @@
         }
     }
 
+    function handleConversationDialogKeydown(event) {
+        if (!conversationDialogOpen) return;
+        if (event.key === 'Escape') { event.preventDefault(); closeConversationDialog(); return; }
+        if (event.key !== 'Tab') return;
+        const overlay = document.getElementById('cardConversationDialogOverlay');
+        const controls = Array.from(overlay?.querySelectorAll('button:not([disabled]), textarea:not([disabled]), [href], [tabindex]:not([tabindex="-1"])') || []).filter((element) => element.getClientRects().length > 0);
+        if (!controls.length) return;
+        const first = controls[0], last = controls[controls.length - 1];
+        if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+        else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+    }
+
     function openConversationDialog(cardKey) {
         if (!CARD_LABELS[cardKey]) return;
         activeCardKey = cardKey;
         conversationDialogOpen = true;
         const overlay = ensureConversationDialog();
+        const active = document.activeElement;
+        conversationReturnFocus = active && active !== document.body && active.getClientRects?.().length ? active : document.getElementById('hmNotificationBar');
         renderConversationDialog(cardKey);
         overlay.classList.add('is-open');
-        overlay.setAttribute('aria-hidden', 'false');
+        if (typeof openModalOverlayById === 'function') openModalOverlayById('cardConversationDialogOverlay');
+        else { overlay.removeAttribute('inert'); overlay.setAttribute('aria-hidden', 'false'); }
         const latest = commentsFor(cardKey).reduce((max,item) => Math.max(max, Number(item.createdAt || 0)), Date.now());
         writeRead(cardKey, latest);
         renderBadges();
@@ -222,7 +241,13 @@
         const overlay = document.getElementById('cardConversationDialogOverlay');
         conversationDialogOpen = false;
         overlay?.classList.remove('is-open');
-        overlay?.setAttribute('aria-hidden', 'true');
+        if (typeof closeModalOverlayById === 'function') closeModalOverlayById('cardConversationDialogOverlay');
+        else { overlay?.setAttribute('inert', ''); overlay?.setAttribute('aria-hidden', 'true'); }
+        const returnTarget = conversationReturnFocus;
+        conversationReturnFocus = null;
+        if (returnTarget?.isConnected && returnTarget.getClientRects?.().length && typeof returnTarget.focus === 'function') {
+            try { returnTarget.focus({ preventScroll: true }); } catch (error) { returnTarget.focus(); }
+        }
     }
 
     function openCardConversation(cardKey, overlayId) {
@@ -230,34 +255,35 @@
         bind();
         activeCardKey = cardKey;
         activeOverlayId = overlayId;
-        const shouldOpenFromNotification = notificationOpenCardKey === cardKey;
-        notificationOpenCardKey = '';
         const latest = commentsFor(cardKey).reduce((max,item) => Math.max(max, Number(item.createdAt || 0)), Date.now());
         writeRead(cardKey, latest);
         renderPanel(cardKey, overlayId);
         renderBadges();
         if (typeof hmMarkNotificationCardRead === 'function') hmMarkNotificationCardRead(cardKey);
-        if (shouldOpenFromNotification) openConversationDialog(cardKey);
     }
 
     async function submitComment(cardKey, value, button) {
         const message = text(value).slice(0,500);
         const room = roomCode();
         const date = dateValue();
-        if (!message || !currentUser || !room || !date || !CARD_LABELS[cardKey]) return;
+        if (!message || !currentUser || !room || !date || !CARD_LABELS[cardKey]) return false;
+        const requestUid = currentUser.uid;
         button.disabled = true;
         const payload = {
             text: message,
-            authorUid: currentUser.uid,
-            authorName: text(currentUser.displayName || currentUser.email || roleLabel(roleValue())).slice(0,80),
+            authorUid: requestUid,
+            authorName: authorDisplayName(),
             authorRole: roleValue(),
             createdAt: firebase.database.ServerValue.TIMESTAMP
         };
         try {
             await db.ref(`rooms/${room}/cardComments/${date}/${cardKey}`).push(payload);
+            if (!currentUser || currentUser.uid !== requestUid || roomCode() !== room || dateValue() !== date) return false;
             if (typeof showSaveStatus === 'function') showSaveStatus('💞 함께 남긴 말 저장 완료');
+            return true;
         } catch (error) {
             if (typeof hmReportError === 'function') hmReportError('cardComments.write', error, '❌ 코멘트 저장 실패');
+            return false;
         } finally { button.disabled = false; }
     }
     async function deleteComment(commentId) {
@@ -285,11 +311,10 @@
         });
     }
     function openFromNotification(cardKey) {
-        notificationOpenCardKey = cardKey;
-        if (cardKey === 'promise' && typeof openCustomRoutineHub === 'function') return openCustomRoutineHub();
-        if (cardKey === 'subRoutine' && typeof openSubRoutineHub === 'function') return openSubRoutineHub();
-        if (cardKey === 'mission' && typeof openMissionModal === 'function') return openMissionModal();
-        if (typeof openDailyModal === 'function') return openDailyModal(cardKey);
+        if (!CARD_LABELS[cardKey]) return;
+        activeOverlayId = '';
+        bind();
+        openConversationDialog(cardKey);
     }
 
     async function renderHistoryConversations(date, container) {
@@ -327,7 +352,7 @@
         const textarea = form.querySelector('textarea');
         const button = form.querySelector('button[type="submit"]');
         if (!text(textarea?.value)) return;
-        submitComment(form.dataset.cardCommentForm, textarea.value, button).then(() => { textarea.value = ''; });
+        submitComment(form.dataset.cardCommentForm, textarea.value, button).then((saved) => { if (saved) textarea.value = ''; });
     });
     document.addEventListener('click', (event) => {
         const openButton = event.target.closest('[data-card-conversation-open]');

@@ -84,6 +84,8 @@ const productSource = read('js/product.js');
 const subRoutineSource = read('js/sub-routine.js');
 check(!/new Date\(\)\.toISOString\(\)\.slice\(0\s*,\s*10\)/.test(productSource), 'Home statistics do not use UTC ISO date fallback');
 check(!/new Date\(\)\.toISOString\(\)\.slice\(0\s*,\s*10\)/.test(subRoutineSource), 'Sub routines do not use UTC ISO date fallback');
+check(/orderedItems=hmSummaryDraft\.map\(key=>byKey\.get\(key\)\)/.test(productSource), 'Summary settings render selected items in their saved order');
+check(/index===0\?'disabled'/.test(productSource) && /index===hmSummaryDraft\.length-1\?'disabled'/.test(productSource), 'Summary order arrows disable at their movement boundaries');
 
 // 4. Save-context contract. A save must capture and re-check identity, room and date.
 const autosaveSource = read('js/autosave.js');
@@ -101,17 +103,39 @@ check(/hmIsAutoSaveContextCurrent\(saveContext\)/.test(executeAutoSaveBody) && /
 // editors must stop announcing themselves as modal dialogs while in a route.
 const indexSource = read('index.html');
 const homeNavigationSource = read('js/home-navigation.js');
+const profileSource = read('js/profile.js');
+const presenceSource = read('js/presence.js');
+const cardConversationSource = read('js/card-conversations.js');
+const notificationConversationBody = functionBody(cardConversationSource, 'function openFromNotification(cardKey)');
 const topBarSource = read('css/components/top-bar.css');
 check(/id="saveStatus"[^>]*role="status"[^>]*aria-live="polite"/.test(indexSource), 'Save state is announced as a polite live status');
 check(/\.container\s*>\s*\.autosave-status\{[^}]*position:static!important/.test(topBarSource), 'Authenticated save state occupies its own header row');
 check(/modal\.setAttribute\('role',\s*'region'\)/.test(homeNavigationSource) && /modal\.removeAttribute\('aria-modal'\)/.test(homeNavigationSource), 'Embedded route editors are regions, not modal dialogs');
 check(/item\.modal\.setAttribute\('role',\s*item\.dialogRole\)/.test(homeNavigationSource) && /item\.modal\.setAttribute\('aria-modal',\s*item\.dialogAriaModal\)/.test(homeNavigationSource), 'Editors restore dialog semantics when returned to overlays');
+check(/window\.hmCurrentNickname\s*=\s*hmCurrentNickname/.test(profileSource), 'Loaded nicknames are exposed to the shared Room presence layer');
+check(/presence`\)\.update\(\{ nickname, avatar: hmCurrentAvatar \}\)/.test(profileSource), 'Profile saves synchronize nickname and avatar into Room presence');
+check(/nickname:\s*String\(window\.hmCurrentNickname \|\| ''\)/.test(presenceSource), 'Presence heartbeats repair missing shared nicknames');
+check(/function hmCaptureProfileContext\(\)/.test(profileSource) && (profileSource.match(/hmIsProfileContextCurrent\(requestContext\)/g) || []).length >= 5, 'Profile reads and writes reject stale UID and Room contexts');
+check(/user\.uid !== activePresenceUid \|\| getRoomCode\(\) !== activePresenceRoom/.test(presenceSource), 'Presence heartbeats reject stale account and Room references');
+check(/openConversationDialog\(cardKey\)/.test(notificationConversationBody) && !/open(?:Daily|Mission|CustomRoutine|SubRoutine)/.test(notificationConversationBody), 'Comment notifications open only the conversation dialog');
+check(/data-card-conversation-open/.test(functionBody(cardConversationSource, 'function renderPanel(cardKey, overlayId)')) && !/PANEL_DISABLED_KEYS/.test(cardConversationSource), 'Standalone record cards retain a comment-dialog trigger');
+check(/authorName:\s*authorDisplayName\(\)/.test(cardConversationSource), 'Comment authors use the configured profile nickname');
+check(/then\(\(saved\) => \{ if \(saved\) textarea\.value = ''; \}\)/.test(cardConversationSource), 'Failed comment saves preserve the draft text');
+check(/aria-labelledby="cardConversationDialogTitle"/.test(cardConversationSource) && /event\.key === 'Escape'/.test(cardConversationSource) && /event\.key !== 'Tab'/.test(cardConversationSource), 'Comment dialog exposes a name and keyboard focus controls');
 
 // 6. Settings hierarchy and light-mode contrast contract.
-const profileSource = read('js/profile.js');
 const themeSource = read('js/theme.js');
 const dataManagementSource = read('js/data-management.js');
 const settingsAccountSource = read('css/screens/settings-account.css');
+const authSource = read('js/auth.js');
+const uiEventsSource = read('js/ui-events.js');
+check(/data-hm-action="toggle-auth-password"/.test(indexSource) && /function toggleAuthPassword/.test(authSource), 'Login supports accessible password reveal controls');
+check(/data-hm-action="reset-auth-password"/.test(indexSource) && /sendPasswordResetEmail\(email\)/.test(authSource), 'Login provides a password-reset email path');
+check(/id="authFormStatus"[^>]*role="status"[^>]*aria-live="polite"/.test(indexSource), 'Login progress and errors use an inline live status');
+check(/auth-email-enter/.test(uiEventsSource) && /auth-submit-enter/.test(uiEventsSource), 'Login keyboard flow advances from email and submits from password');
+check(/hm-login-field input[\s\S]{0,300}background:#fff!important/.test(settingsAccountSource) && /hm-login-field label[^{]*\{[^}]*color:#4e435d/.test(settingsAccountSource), 'Login fields and labels retain strong light-mode contrast');
+check(/min-width:761px\) and \(max-width:1099px/.test(settingsAccountSource) && /width:min\(620px/.test(settingsAccountSource), 'Fold login layout uses a bounded intermediate card width');
+check(/hm-password-control\s*>\s*\.hm-password-toggle[\s\S]{0,500}width:56px!important/.test(settingsAccountSource), 'Password reveal stays inside a bounded trailing control');
 check(/hmAccountChildReturnType\s*=\s*type/.test(profileSource) && /hmReturnToAccountMenu/.test(profileSource), 'Account child screens remember their parent menu');
 check(/hmReturnToAccountMenu\?\.\('theme'\)/.test(themeSource) && /hmReturnToAccountMenu\?\.\('data'\)/.test(dataManagementSource), 'Theme and data screens return to the account menu');
 check(/data-hm-display="light"[^\n]*\.hm-theme-modal/.test(settingsAccountSource), 'Theme settings define an explicit light-mode surface');
@@ -156,11 +180,17 @@ check(!/['"]deploy['"]|database:set|database:update|database:remove/.test(rulesA
 // worker cache key must advance together without forcing an unsafe reload.
 const pwaSource = read('js/pwa.js');
 const serviceWorkerSource = read('service-worker.js');
+const navigationFetchBody = functionBody(serviceWorkerSource, 'async function networkFirstNavigation(request)');
 check(/window\.HM_RELEASE\?\.step/.test(pwaSource), 'PWA registration derives its version from central release metadata');
 check(/service-worker\.js\?v=\$\{encodeURIComponent\(HM_PWA_APP_VERSION\)\}/.test(pwaSource), 'Service-worker registration URL follows the derived release version');
 check(!/controllerchange[\s\S]{0,400}window\.location\.reload/.test(pwaSource), 'Service-worker activation never forces an unsafe page reload');
 check(/hmPwaUpdateReady/.test(pwaSource), 'A ready service-worker update is exposed without interrupting current work');
 check((serviceWorkerSource.match(/return cached \|\| Response\.error\(\)/g) || []).length >= 1, 'Offline scripts and styles never receive the offline HTML document');
+check(!/cache\.put\(request/.test(navigationFetchBody) && !/caches\.match\(request\)/.test(navigationFetchBody), 'PWA navigation never reuses a cached app document');
+check(/!\[HM_STATIC_CACHE, HM_RUNTIME_CACHE\]\.includes\(key\)/.test(serviceWorkerSource), 'Service-worker activation preserves current-version caches');
+check(/await clearOldPwaCachesIfNeeded\(\);[\s\S]{0,80}await registerServiceWorker\(\)/.test(pwaSource), 'PWA cache cleanup completes before service-worker registration');
+const releaseInfoSource = read('js/release-info.js');
+check(/로그인 입력창 표시 안정화/.test(releaseInfoSource), 'Release metadata describes the current login display hotfix');
 
 // 12. Generated role-label contract. Feedback and reward cards already expose
 // their role in the route UI; CSS must not append duplicate accessible text.

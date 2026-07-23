@@ -168,13 +168,14 @@
     function writeSelfOnline(){
         try {
             const user = getUser();
-            if (!selfRef || !user) return;
+            if (!selfRef || !user || user.uid !== activePresenceUid || getRoomCode() !== activePresenceRoom) return;
             selfRef.update({
                 online: true,
                 lastSeen: firebase.database.ServerValue.TIMESTAMP,
                 updatedAt: firebase.database.ServerValue.TIMESTAMP,
                 email: emailOf(user),
                 relationshipRole: getRole(),
+                nickname: String(window.hmCurrentNickname || ''),
                 avatar: String(window.hmCurrentAvatar || '')
             }).catch(err => console.warn('[Presence] heartbeat skipped:', err && err.message ? err.message : err));
         } catch(e) {}

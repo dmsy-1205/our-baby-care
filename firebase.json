@@ -2,6 +2,7 @@
   "hosting": {
     "public": "public",
     "predeploy": [
+      "node scripts/verify-session-regressions.js",
       "node scripts/verify-app-baseline.js",
       "node scripts/build-public.js"
     ],

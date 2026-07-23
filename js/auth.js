@@ -65,6 +65,41 @@
     // 로그인 구조와 기존 계정 데이터는 변경하지 않는다.
     // =========================================================
     let hmAuthMode = 'login';
+
+    function setAuthFormStatus(message = '', type = '') {
+        const status = document.getElementById('authFormStatus');
+        if (!status) return;
+        status.textContent = message;
+        status.className = `hm-auth-form-status${type ? ` is-${type}` : ''}`;
+    }
+
+    function toggleAuthPassword(targetId, button) {
+        const input = document.getElementById(targetId);
+        if (!input || !button) return;
+        const reveal = input.type === 'password';
+        input.type = reveal ? 'text' : 'password';
+        button.textContent = reveal ? '숨김' : '보기';
+        button.setAttribute('aria-label', reveal ? '비밀번호 숨기기' : '비밀번호 표시');
+        button.setAttribute('aria-pressed', String(reveal));
+        input.focus({ preventScroll: true });
+    }
+
+    async function resetAuthPassword() {
+        const emailInput = document.getElementById('authEmail');
+        const email = normalizeEmail(emailInput ? emailInput.value : '');
+        if (!email) {
+            setAuthFormStatus('비밀번호 재설정 메일을 받을 이메일을 먼저 입력해 주세요.', 'error');
+            emailInput?.focus();
+            return;
+        }
+        setAuthFormStatus('비밀번호 재설정 메일을 보내는 중입니다.', 'info');
+        try {
+            await babyAuth.sendPasswordResetEmail(email);
+            setAuthFormStatus('비밀번호 재설정 메일을 보냈습니다. 받은편지함과 스팸함을 확인해 주세요.', 'success');
+        } catch (err) {
+            setAuthFormStatus(firebaseAuthErrorToKorean(String(err && (err.code || err.message) || '')), 'error');
+        }
+    }
     let hmSignupFlowActive = false;
     let hmVerificationEmailSentAt = 0;
     let hmVerificationCooldownTimer = null;
@@ -79,12 +114,13 @@
         const loginTab = document.getElementById('authLoginTab');
         const signupTab = document.getElementById('authSignupTab');
         const submitBtn = document.getElementById('authSubmitBtn');
+        const loginUtility = document.getElementById('authLoginUtility');
 
         if (confirmGroup) confirmGroup.hidden = !signup;
         if (!signup && confirmInput) confirmInput.value = '';
         if (passwordInput) passwordInput.autocomplete = signup ? 'new-password' : 'current-password';
-        if (loginTab) { loginTab.classList.toggle('active', !signup); loginTab.setAttribute('aria-selected', String(!signup)); }
-        if (signupTab) { signupTab.classList.toggle('active', signup); signupTab.setAttribute('aria-selected', String(signup)); }
+        if (loginTab) { loginTab.classList.toggle('active', !signup); loginTab.setAttribute('aria-selected', String(!signup)); loginTab.tabIndex = signup ? -1 : 0; }
+        if (signupTab) { signupTab.classList.toggle('active', signup); signupTab.setAttribute('aria-selected', String(signup)); signupTab.tabIndex = signup ? 0 : -1; }
 
         const values = signup ? {
             icon: '✨', kicker: 'SIGN UP', title: '회원가입',
@@ -107,6 +143,8 @@
         };
         Object.entries(bindings).forEach(([id, value]) => { const el = document.getElementById(id); if (el) el.textContent = value; });
         if (submitBtn) submitBtn.textContent = values.submit;
+        if (loginUtility) loginUtility.hidden = signup;
+        setAuthFormStatus('');
     }
 
 
@@ -331,11 +369,15 @@
         const passwordConfirm = confirmInput ? confirmInput.value : '';
         const signup = hmAuthMode === 'signup';
 
-        if (!email || !password) { alert('이메일과 비밀번호를 입력해 주세요.'); return; }
-        if (password.length < 6) { alert('비밀번호는 6자리 이상이어야 합니다.'); return; }
-        if (signup && password !== passwordConfirm) { alert('비밀번호 확인이 일치하지 않습니다.'); return; }
+        setAuthFormStatus('');
+
+        if (!email || !password) { setAuthFormStatus('이메일과 비밀번호를 입력해 주세요.', 'error'); (!email ? emailInput : passwordInput)?.focus(); return; }
+        if (password.length < 6) { setAuthFormStatus('비밀번호는 6자리 이상이어야 합니다.', 'error'); passwordInput?.focus(); return; }
+        if (signup && password !== passwordConfirm) { setAuthFormStatus('비밀번호 확인이 일치하지 않습니다.', 'error'); confirmInput?.focus(); return; }
 
         if (submitBtn) submitBtn.disabled = true;
+        if (submitBtn) submitBtn.setAttribute('aria-busy', 'true');
+        setAuthFormStatus(signup ? '회원가입을 처리하는 중입니다.' : '로그인하는 중입니다.', 'info');
         try {
             if (signup) {
                 showSaveStatus('✨ HearMe2nite 계정을 만드는 중...');
@@ -349,16 +391,18 @@
                 try { if (window.hmRefreshPresenceFromRoom) window.hmRefreshPresenceFromRoom('login-complete'); } catch(e) { console.warn(e); }
                 try { if (window.hmPresenceRefresh) setTimeout(window.hmPresenceRefresh, 600); } catch(e) { console.warn(e); }
                 showSaveStatus('☁️ 로그인 완료');
+                setAuthFormStatus('로그인되었습니다.', 'success');
             }
         } catch (err) {
             const authCode = String(err && (err.code || err.message) || '');
             const expectedAuthError = ['auth/invalid-credential', 'auth/wrong-password', 'auth/user-not-found', 'auth/invalid-email', 'auth/email-already-in-use', 'auth/weak-password'].some((code) => authCode.includes(code));
             if (expectedAuthError) console.warn('[HearMe2nite Auth] 인증 요청이 거절되었습니다:', authCode);
             else console.error('[HearMe2nite Auth] 예상하지 못한 인증 오류', err);
-            alert(firebaseAuthErrorToKorean(authCode));
+            setAuthFormStatus(firebaseAuthErrorToKorean(authCode), 'error');
             showSaveStatus(signup ? '❌ 회원가입 실패' : '❌ 로그인 실패');
         } finally {
             if (submitBtn) submitBtn.disabled = false;
+            if (submitBtn) submitBtn.removeAttribute('aria-busy');
         }
     }
 
@@ -389,6 +433,9 @@
         };
         return map[code] || `로그인 처리 중 오류가 생겼습니다. (${code})`;
     }
+
+    window.toggleAuthPassword = toggleAuthPassword;
+    window.resetAuthPassword = resetAuthPassword;
 
     // =========================================================
 
