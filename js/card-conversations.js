@@ -124,16 +124,35 @@
     function badgeTarget(cardKey) {
         if (cardKey === 'promise') return document.getElementById('customRoutineHubCard');
         if (cardKey === 'subRoutine') return document.getElementById('subRoutineHubCard');
-        return document.querySelector(`.daily-card[onclick*="openDailyModal('${cardKey}')"]`);
+        return document.querySelector(`.daily-card[data-hm-action="open-daily"][data-hm-value="${cardKey}"]`);
     }
     function renderBadges() {
         Object.keys(CARD_LABELS).forEach((cardKey) => {
             const card = badgeTarget(cardKey);
-            if (!card) return;
-            let badge = card.querySelector(`[data-card-conversation-badge="${cardKey}"]`);
             const comments = commentsFor(cardKey);
             const unread = unreadFor(cardKey);
-            if (badge) badge.remove();
+            if (card) {
+                let badge = card.querySelector(`[data-card-conversation-badge="${cardKey}"]`);
+                if (!comments.length) {
+                    badge?.remove();
+                } else {
+                    if (!badge) {
+                        badge = document.createElement('span');
+                        badge.className = 'daily-card-comment-count';
+                        badge.dataset.cardConversationBadge = cardKey;
+                        const arrow = card.querySelector('.daily-card-arrow');
+                        if (arrow) arrow.before(badge); else card.appendChild(badge);
+                    }
+                    badge.textContent = String(comments.length);
+                    badge.classList.toggle('has-unread', unread.length > 0);
+                    badge.setAttribute('aria-label', unread.length
+                        ? `코멘트 ${comments.length}개, 읽지 않은 코멘트 ${unread.length}개`
+                        : `코멘트 ${comments.length}개`);
+                    badge.title = unread.length
+                        ? `코멘트 ${comments.length}개 · 새 코멘트 ${unread.length}개`
+                        : `코멘트 ${comments.length}개`;
+                }
+            }
             document.querySelectorAll(`[data-hm-route-comment-count="${cardKey}"]`).forEach((count) => {
                 count.textContent = comments.length ? String(comments.length) : '›';
                 count.classList.toggle('has-unread', unread.length > 0);

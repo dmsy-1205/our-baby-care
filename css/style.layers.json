@@ -1,7 +1,7 @@
 {
   "algorithm": "sha256",
-  "sourceHash": "659be224eddd62a63e1e87a746e87f6da36a90f1e7f49f8c0268f693b45bba0a",
-  "sourceBytes": 609257,
+  "sourceHash": "269448c47cebc49a356e68136e8b79660e368eba0b83934c48e4ede3b7f2399b",
+  "sourceBytes": 610007,
   "layers": [
     {
       "name": "tokens.css",
@@ -130,8 +130,8 @@
     },
     {
       "name": "screens/daily.css",
-      "bytes": 2001,
-      "lines": 55
+      "bytes": 2751,
+      "lines": 78
     },
     {
       "name": "components/app-shell.css",

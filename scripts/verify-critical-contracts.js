@@ -139,6 +139,10 @@ check(/function hmCaptureProfileContext\(\)/.test(profileSource) && (profileSour
 check(/user\.uid !== activePresenceUid \|\| getRoomCode\(\) !== activePresenceRoom/.test(presenceSource), 'Presence heartbeats reject stale account and Room references');
 check(/openConversationDialog\(cardKey\)/.test(notificationConversationBody) && !/open(?:Daily|Mission|CustomRoutine|SubRoutine)/.test(notificationConversationBody), 'Comment notifications open only the conversation dialog');
 check(/data-card-conversation-open/.test(functionBody(cardConversationSource, 'function renderPanel(cardKey, overlayId)')) && !/PANEL_DISABLED_KEYS/.test(cardConversationSource), 'Standalone record cards retain a comment-dialog trigger');
+check(/data-hm-action="open-daily"/.test(functionBody(cardConversationSource, 'function badgeTarget(cardKey)'))
+  && /daily-card-comment-count/.test(functionBody(cardConversationSource, 'function renderBadges()'))
+  && /badge\.textContent = String\(comments\.length\)/.test(functionBody(cardConversationSource, 'function renderBadges()')),
+  'Record cards show the current comment count');
 check(/authorName:\s*authorDisplayName\(\)/.test(cardConversationSource), 'Comment authors use the configured profile nickname');
 check(/then\(\(saved\) => \{ if \(saved\) textarea\.value = ''; \}\)/.test(cardConversationSource), 'Failed comment saves preserve the draft text');
 check(/aria-labelledby="cardConversationDialogTitle"/.test(cardConversationSource) && /event\.key === 'Escape'/.test(cardConversationSource) && /event\.key !== 'Tab'/.test(cardConversationSource), 'Comment dialog exposes a name and keyboard focus controls');
