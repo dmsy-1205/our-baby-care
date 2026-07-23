@@ -44,7 +44,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
     <script src="/__/firebase/init.js"></script>
 
-    <link rel="stylesheet" href="css/style.css?v=step6-2-14-49-login-hotfix-20260723">
+    <link rel="stylesheet" href="css/style.css?v=step6-2-14-50-beta-security-20260723">
 </head>
 <body class="hm-booting">
 
@@ -87,9 +87,10 @@
         <div class="input-group hm-login-field">
             <label for="authPassword">비밀번호</label>
             <div class="hm-password-control">
-                <input type="password" id="authPassword" placeholder="6자리 이상" autocomplete="current-password" data-hm-keypress="auth-submit-enter" aria-describedby="authFormStatus">
+                <input type="password" id="authPassword" placeholder="비밀번호 입력" autocomplete="current-password" data-hm-keypress="auth-submit-enter" aria-describedby="authPasswordPolicy authFormStatus">
                 <button type="button" class="hm-password-toggle" data-hm-action="toggle-auth-password" data-hm-target="authPassword" aria-label="비밀번호 표시" aria-pressed="false">보기</button>
             </div>
+            <small class="hm-password-policy hm-signup-only" id="authPasswordPolicy" hidden>신규 가입 비밀번호는 8자리 이상으로 설정해 주세요.</small>
         </div>
         <div class="input-group hm-login-field hm-signup-only" id="authPasswordConfirmGroup" hidden>
             <label for="authPasswordConfirm">비밀번호 확인</label>
@@ -1330,7 +1331,7 @@
 </div>
 
 <div class="toast" id="toast">기록이 복사되었습니다! 💕</div>
-    <script src="js/release-info.js?v=step6-2-14-49-login-hotfix-20260723"></script>
+    <script src="js/release-info.js?v=step6-2-14-50-beta-security-20260723"></script>
     <script src="js/config.js?v=step6-2-13-7-daily-moments-gallery-20260721"></script>
     <script src="js/access-policy.js?v=maintenance-baseline-20260722"></script>
     <script src="js/save-state.js?v=maintenance-baseline-20260722"></script>
@@ -1352,13 +1353,13 @@
     <script src="js/profile.js?v=step6-2-14-47-profile-context-20260723"></script>
     <script src="js/chat.js?v=step5-10-13-history-month-server-reconciliation-20260716"></script>
     <script src="js/autosave.js?v=step6-2-14-13-role-context-20260722"></script>
-    <script src="js/qa.js?v=step5-10-13-history-month-server-reconciliation-20260716"></script>
+    <script src="js/qa.js?v=step6-2-14-50-no-eval-20260723"></script>
     <script src="js/motion.js?v=step5-10-13-history-month-server-reconciliation-20260716"></script>
     <script src="js/product.js?v=step6-2-14-43-fixed-together-summary-20260722"></script>
     <script src="js/help-center.js?v=step6-2-13-4-support-bridge-20260721"></script>
     <script src="js/data-management.js?v=step6-2-13-4-request-cancel-type-message-20260718"></script>
     <script src="js/app.js?v=step6-2-14-13-role-context-20260722"></script>
     <script src="js/home-navigation.js?v=step6-2-14-32-history-meal-context-20260722"></script>
-    <script src="js/pwa.js?v=step6-2-14-49-login-hotfix-20260723"></script>
+    <script src="js/pwa.js?v=step6-2-14-50-beta-security-20260723"></script>
 </body>
 </html>

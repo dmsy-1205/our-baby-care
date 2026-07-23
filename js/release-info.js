@@ -5,15 +5,18 @@
 (function () {
     const release = Object.freeze({
         product: 'HearMe2nite',
-        version: 'v1.0 STEP6.2.14.49',
-        appVersion: 'HearMe2nite v1.0 STEP6.2.14.49',
-        step: 'STEP6.2.14.49',
+        version: 'v1.0 STEP6.2.14.50',
+        appVersion: 'HearMe2nite v1.0 STEP6.2.14.50',
+        step: 'STEP6.2.14.50',
         build: '20260723',
         releaseDate: '2026.07.23',
         stage: 'Beta',
-        title: '로그인 입력창 표시 안정화',
-        description: '비밀번호 보기 버튼이 입력창을 덮지 않도록 고정하고, 다크 모드 안내 문구와 Fold 로그인 화면의 크기·간격을 보정했습니다.',
+        title: '베타 가입·기본 보안 강화',
+        description: '기존 사용자의 로그인을 유지하면서 신규 가입 비밀번호를 8자리 이상으로 강화하고, 안전한 Hosting 응답 헤더와 무평가식 QA 검사를 적용했습니다.',
         userChanges: Object.freeze([
+            '신규 회원가입 비밀번호는 8자리 이상으로 안내하고 검사합니다.',
+            '기존 계정은 이전 비밀번호 길이와 관계없이 정상 로그인을 계속 지원합니다.',
+            '테스트 Hosting 응답에 클릭재킹·MIME 스니핑·리퍼러 노출 방어 헤더를 적용했습니다.',
             'PC·Fold·휴대폰에서 로그인 카드의 폭과 여백이 화면에 맞게 정돈됩니다.',
             '밝은 입력창과 선명한 레이블로 이메일과 비밀번호를 쉽게 구분할 수 있습니다.',
             '비밀번호 보기·숨기기와 비밀번호 재설정 메일을 로그인 화면에서 사용할 수 있습니다.',

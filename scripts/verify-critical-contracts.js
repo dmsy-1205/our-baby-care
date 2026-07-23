@@ -136,6 +136,9 @@ check(/auth-email-enter/.test(uiEventsSource) && /auth-submit-enter/.test(uiEven
 check(/hm-login-field input[\s\S]{0,300}background:#fff!important/.test(settingsAccountSource) && /hm-login-field label[^{]*\{[^}]*color:#4e435d/.test(settingsAccountSource), 'Login fields and labels retain strong light-mode contrast');
 check(/min-width:761px\) and \(max-width:1099px/.test(settingsAccountSource) && /width:min\(620px/.test(settingsAccountSource), 'Fold login layout uses a bounded intermediate card width');
 check(/hm-password-control\s*>\s*\.hm-password-toggle[\s\S]{0,500}width:56px!important/.test(settingsAccountSource), 'Password reveal stays inside a bounded trailing control');
+check(/signup && password\.length < 8/.test(authSource) && !/if \(password\.length </.test(authSource), 'New signups require 8 characters without blocking legacy logins');
+check(/typeof window\[name\] === 'function'/.test(read('js/qa.js')) && !/\beval\s*\(/.test(read('js/qa.js')), 'QA function discovery avoids eval');
+check(/X-Content-Type-Options/.test(read('firebase.json')) && /X-Frame-Options/.test(read('firebase.json')) && /Referrer-Policy/.test(read('firebase.json')), 'Hosting defines safe non-breaking response headers');
 check(/hmAccountChildReturnType\s*=\s*type/.test(profileSource) && /hmReturnToAccountMenu/.test(profileSource), 'Account child screens remember their parent menu');
 check(/hmReturnToAccountMenu\?\.\('theme'\)/.test(themeSource) && /hmReturnToAccountMenu\?\.\('data'\)/.test(dataManagementSource), 'Theme and data screens return to the account menu');
 check(/data-hm-display="light"[^\n]*\.hm-theme-modal/.test(settingsAccountSource), 'Theme settings define an explicit light-mode surface');
@@ -190,7 +193,7 @@ check(!/cache\.put\(request/.test(navigationFetchBody) && !/caches\.match\(reque
 check(/!\[HM_STATIC_CACHE, HM_RUNTIME_CACHE\]\.includes\(key\)/.test(serviceWorkerSource), 'Service-worker activation preserves current-version caches');
 check(/await clearOldPwaCachesIfNeeded\(\);[\s\S]{0,80}await registerServiceWorker\(\)/.test(pwaSource), 'PWA cache cleanup completes before service-worker registration');
 const releaseInfoSource = read('js/release-info.js');
-check(/로그인 입력창 표시 안정화/.test(releaseInfoSource), 'Release metadata describes the current login display hotfix');
+check(/베타 가입·기본 보안 강화/.test(releaseInfoSource), 'Release metadata describes the current beta security work');
 
 // 12. Generated role-label contract. Feedback and reward cards already expose
 // their role in the route UI; CSS must not append duplicate accessible text.

@@ -117,8 +117,13 @@
         const loginUtility = document.getElementById('authLoginUtility');
 
         if (confirmGroup) confirmGroup.hidden = !signup;
+        const passwordPolicy = document.getElementById('authPasswordPolicy');
+        if (passwordPolicy) passwordPolicy.hidden = !signup;
         if (!signup && confirmInput) confirmInput.value = '';
-        if (passwordInput) passwordInput.autocomplete = signup ? 'new-password' : 'current-password';
+        if (passwordInput) {
+            passwordInput.autocomplete = signup ? 'new-password' : 'current-password';
+            passwordInput.placeholder = signup ? '8자리 이상' : '비밀번호 입력';
+        }
         if (loginTab) { loginTab.classList.toggle('active', !signup); loginTab.setAttribute('aria-selected', String(!signup)); loginTab.tabIndex = signup ? -1 : 0; }
         if (signupTab) { signupTab.classList.toggle('active', signup); signupTab.setAttribute('aria-selected', String(signup)); signupTab.tabIndex = signup ? 0 : -1; }
 
@@ -372,7 +377,7 @@
         setAuthFormStatus('');
 
         if (!email || !password) { setAuthFormStatus('이메일과 비밀번호를 입력해 주세요.', 'error'); (!email ? emailInput : passwordInput)?.focus(); return; }
-        if (password.length < 6) { setAuthFormStatus('비밀번호는 6자리 이상이어야 합니다.', 'error'); passwordInput?.focus(); return; }
+        if (signup && password.length < 8) { setAuthFormStatus('신규 가입 비밀번호는 8자리 이상이어야 합니다.', 'error'); passwordInput?.focus(); return; }
         if (signup && password !== passwordConfirm) { setAuthFormStatus('비밀번호 확인이 일치하지 않습니다.', 'error'); confirmInput?.focus(); return; }
 
         if (submitBtn) submitBtn.disabled = true;
@@ -427,7 +432,7 @@
             'auth/user-disabled': '사용이 중지된 계정입니다. 관리자에게 문의해 주세요.',
             'auth/quota-exceeded': '인증 메일 발송 한도를 초과했습니다. 잠시 후 다시 시도해 주세요.',
             'auth/internal-error': '인증 서버에서 일시적인 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.',
-            'auth/weak-password': '비밀번호는 6자리 이상으로 설정해 주세요.',
+            'auth/weak-password': '신규 가입 비밀번호는 8자리 이상으로 설정해 주세요.',
             'auth/operation-not-allowed': '현재 이메일 회원가입을 사용할 수 없습니다. 관리자에게 문의해 주세요.',
             'auth/user-not-created': '회원가입 계정을 생성하지 못했습니다. 잠시 후 다시 시도해 주세요.'
         };

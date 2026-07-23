@@ -67,9 +67,8 @@
             'loadUserTheme', 'openThemeModal', 'previewPersonalTheme', 'savePersonalTheme', 'selectThemeMode', 'hmRefreshThemeForActiveRoom'
         ];
         requiredFunctions.forEach((name) => {
-            // eval 결과가 function인지 확인한다. 일부 함수는 전역 프로퍼티가 아닌 스크립트 스코프에 존재한다.
-            let isFunction = false;
-            try { isFunction = eval(`typeof ${name}`) === 'function'; } catch (err) { isFunction = false; }
+            // 전역 함수 테이블을 직접 확인해 동적 코드 실행 없이 진단한다.
+            const isFunction = typeof window[name] === 'function';
             hmQaLog(isFunction ? 'info' : 'warn', 'FUNCTION', `${name} ${isFunction ? 'OK' : '누락 확인 필요'}`);
         });
 

@@ -536,6 +536,9 @@ body:not(.hm-authenticated):has(#authBox.hm-login-shell:not(.is-hidden)) {
 #authBox .hm-auth-form-status.is-error { color:#a3283f; }
 #authBox .hm-auth-form-status.is-success { color:#21704a; }
 #authBox .hm-auth-form-status.is-info { color:#584294; }
+#authBox .hm-password-policy { display:block; margin:7px 2px 0; color:#64596f; font-size:.76rem; line-height:1.4; }
+#authBox .hm-password-policy[hidden] { display:none!important; }
+:root[data-hm-display="dark"] #authBox .hm-password-policy { color:#d2c6dc; }
 #authBox .hm-login-small { color:#645b70!important; }
 #authBox .hm-login-trust { background:rgba(255,255,255,.82)!important; }
 #authBox .hm-auth-mode-tab:not(.active) { color:#635a70!important; }
