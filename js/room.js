@@ -242,6 +242,10 @@
 
     function hmLockProtectedRoomUI(message) {
         disconnectAllListeners();
+        if (typeof window.hmPresenceStop === 'function') window.hmPresenceStop();
+        if (typeof window.hmStopSharedThemeListener === 'function') window.hmStopSharedThemeListener();
+        if (typeof hmDiscardPendingMedia === 'function') hmDiscardPendingMedia();
+        if (typeof window.hmAdaptiveCloseRoute === 'function') window.hmAdaptiveCloseRoute();
         setDataSectionsVisible(false);
         resetProtectedDataUI(message);
         if (typeof hmResetCardConversations === 'function') hmResetCardConversations();
@@ -254,6 +258,34 @@
                 if (overlay.id !== 'roomSettingsOverlay') closeModalOverlayById(overlay.id);
             });
         }
+    }
+
+    function hmIsRelationshipDataLocked() {
+        return window.hmRelationshipLockTransitionPending === true
+            || ['ended', 'recovery_pending', 'locked'].includes(activeRelationshipStatus);
+    }
+
+    function hmGuardRelationshipDataAccess() {
+        if (!hmIsRelationshipDataLocked()) return true;
+        const message = activeRelationshipStatus === 'recovery_pending'
+            ? '관계 회복 동의가 완료될 때까지 기록과 사진을 사용할 수 없습니다.'
+            : '관계가 종료되어 기록과 사진을 사용할 수 없습니다.';
+        if (typeof showSaveStatus === 'function') showSaveStatus(`🔒 ${message}`);
+        return false;
+    }
+
+    window.hmIsRelationshipDataLocked = hmIsRelationshipDataLocked;
+    window.hmGuardRelationshipDataAccess = hmGuardRelationshipDataAccess;
+
+    function hmPrepareRelationshipLockTransition() {
+        window.hmRelationshipLockTransitionPending = true;
+        disconnectAllListeners();
+        if (typeof hmStopSubRoutines === 'function') hmStopSubRoutines();
+        if (typeof hmStopCustomRoutineCards === 'function') hmStopCustomRoutineCards();
+        if (typeof window.hmPresenceStop === 'function') window.hmPresenceStop();
+        if (typeof window.hmStopSharedThemeListener === 'function') window.hmStopSharedThemeListener();
+        if (typeof hmResetCardConversations === 'function') hmResetCardConversations();
+        if (typeof hmResetRoomNotifications === 'function') hmResetRoomNotifications();
     }
 
     function hmRenderRelationshipLifecycle() {
@@ -288,6 +320,8 @@
 
     async function hmWriteRelationshipState(nextState, successMessage) {
         if (!currentUser || !activeRoomCode || !activeRelationshipState) return false;
+        const preparingRelationshipLock = nextState?.status === 'ended';
+        if (preparingRelationshipLock) hmPrepareRelationshipLockTransition();
         const roomCode = activeRoomCode;
         const uid = currentUser.uid;
         const relationshipRef = db.ref(`rooms/${roomCode}/meta/relationship`);
@@ -309,11 +343,18 @@
             relationshipStateWritePending = false;
             await hmLoadRelationshipState(roomCode);
             updateCurrentRoomInfo();
+            if (preparingRelationshipLock) {
+                window.hmRelationshipLockTransitionPending = false;
+                connectAndListenFirebase();
+                if (typeof hmRefreshThemeForActiveRoom === 'function') hmRefreshThemeForActiveRoom();
+                hmRefreshPresenceFromRoom('relationship-end-rollback');
+            }
             alert('관계 상태를 변경하지 못했습니다. 잠시 후 다시 시도해 주세요.');
             showSaveStatus('❌ 관계 상태 변경 실패');
             return false;
         } finally {
             relationshipStateWritePending = false;
+            if (preparingRelationshipLock) window.hmRelationshipLockTransitionPending = false;
         }
     }
 

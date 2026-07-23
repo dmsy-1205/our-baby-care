@@ -117,6 +117,10 @@
             if (conversationDialogOpen && activeCardKey) renderConversationDialog(activeCardKey);
             if (typeof hmRefreshNotificationBar === 'function') hmRefreshNotificationBar();
         }, (error) => {
+            if (typeof window.hmIsRelationshipDataLocked === 'function' && window.hmIsRelationshipDataLocked()) {
+                resetConversationsForLockedRoom();
+                return;
+            }
             if (typeof hmReportError === 'function') hmReportError('cardComments.read', error, '❌ 함께 남긴 말을 불러오지 못했습니다.');
         });
     }

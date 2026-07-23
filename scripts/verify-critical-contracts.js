@@ -284,6 +284,31 @@ const legacyBaseSource = read('css/legacy/base.css');
 check(!/\.managed-card\s+\.daily-card-title::after\s*\{[^}]*content\s*:\s*['"]\s*관리 전용/.test(legacyBaseSource), 'Managed cards do not generate duplicate role-label text');
 check(/el\.hidden\s*=\s*!canManage/.test(read('js/daily.js')) && /toggleAttribute\('inert',\s*!canManage\)/.test(read('js/daily.js')), 'Dom-only sections synchronize visual and accessibility hiding');
 
+// 13. Relationship termination must lock every record path, including media
+// selection that can otherwise look successful before server persistence.
+const roomSource = read('js/room.js');
+const relationshipMomentsSource = read('js/moments.js');
+const relationshipUiEventsSource = read('js/ui-events.js');
+check(/function hmGuardRelationshipDataAccess\(\)/.test(roomSource), 'Relationship lifecycle exposes a shared record-access guard');
+check(/\['ended', 'recovery_pending', 'locked'\]\.includes\(activeRelationshipStatus\)/.test(roomSource), 'Relationship lock follows lifecycle status even without an active Room code');
+check(/hmDiscardPendingMedia/.test(functionBody(roomSource, 'function hmLockProtectedRoomUI(message)')), 'Relationship lock discards pending media previews');
+check((relationshipMomentsSource.match(/hmGuardRelationshipDataAccess/g) || []).length >= 5, 'Moment selection and persistence are relationship guarded');
+check(/relationshipProtectedActions[\s\S]*'open-daily'[\s\S]*'save-meal-photos'/.test(relationshipUiEventsSource), 'Daily record entry and media actions are relationship guarded');
+check(/beforeinput[\s\S]*relationshipAllowsEvent/.test(relationshipUiEventsSource), 'Relationship lock prevents protected text from entering form controls');
+check(/label\[for\][\s\S]*input\[type="file"\]\[data-hm-change\]/.test(relationshipUiEventsSource), 'Relationship lock prevents native file-picker labels from opening');
+check(/function openDailyModal\(name\)[\s\S]{0,220}hmGuardRelationshipDataAccess/.test(read('js/popup.js')), 'Direct daily modal entry is relationship guarded');
+check(/function openCategory\(key\)[\s\S]{0,300}hmGuardRelationshipDataAccess/.test(read('js/home-navigation.js')), 'Adaptive home categories are relationship guarded');
+check(/function openHomeSummaryModal\(\)[\s\S]{0,220}hmGuardRelationshipDataAccess/.test(read('js/product.js')), 'Today summary detail is relationship guarded');
+check(/hmPresenceStop/.test(functionBody(roomSource, 'function hmLockProtectedRoomUI(message)')), 'Relationship lock immediately stops Room presence');
+check(/function start\(\)[\s\S]{0,350}hmIsRelationshipDataLocked/.test(read('js/presence.js')), 'Presence cannot restart while relationship data is locked');
+check(/cardComments\.read[\s\S]{0,550}hmIsRelationshipDataLocked|hmIsRelationshipDataLocked[\s\S]{0,550}cardComments\.read/.test(read('js/card-conversations.js')), 'Expected locked-room comment denials are quietly detached');
+check(/function hmListenSharedThemeForActiveRoom\(\)[\s\S]{0,350}hmIsRelationshipDataLocked/.test(read('js/theme.js')), 'Shared theme cannot reconnect while recovery is pending');
+check(/async function hmHistorySyncVisibleMonthFromServer\(force\)[\s\S]{0,300}hmIsRelationshipDataLocked/.test(read('js/history.js')), 'History month synchronization cannot start while relationship data is locked');
+check((read('js/history.js').match(/hmIsRelationshipDataLocked/g) || []).length >= 3, 'History month synchronization rejects locked results and expected denials');
+check(/nextState\?\.status === 'ended'[\s\S]{0,180}hmPrepareRelationshipLockTransition/.test(roomSource), 'Relationship initiator detaches Room listeners before the server lock');
+check(/function hmPrepareRelationshipLockTransition\(\)[\s\S]{0,700}hmStopSubRoutines[\s\S]*hmStopCustomRoutineCards[\s\S]*hmPresenceStop[\s\S]*hmStopSharedThemeListener/.test(roomSource), 'Pre-lock cleanup covers independent Room listeners');
+check(/permission_denied[\s\S]{0,220}hmIsRelationshipDataLocked/.test(read('js/utils.js')), 'Expected permission revocations are silent during relationship lock transition');
+
 passes.forEach((message) => console.log(`[PASS] ${message}`));
 failures.forEach((message) => console.error(`[FAIL] ${message}`));
 

@@ -200,6 +200,11 @@
     function start(){
         const roomCode = getRoomCode();
         const user = getUser();
+        if (typeof window.hmIsRelationshipDataLocked === 'function' && window.hmIsRelationshipDataLocked()) {
+            stop();
+            render(null);
+            return;
+        }
         if (!roomCode || !user || typeof db === 'undefined' || !db) { render(null); return; }
         if (activePresenceRoom === roomCode && activePresenceUid === user.uid && membersRef) {
             writeSelfOnline();
@@ -215,7 +220,10 @@
             try { selfRef.onDisconnect().update({ online:false, lastSeen: firebase.database.ServerValue.TIMESTAMP, updatedAt: firebase.database.ServerValue.TIMESTAMP }); } catch(e) {}
             startHeartbeat();
             membersRef = db.ref(`roomMembers/${roomCode}`);
-            membersRef.on('value', snap => render(snap.val() || {}), err => { console.warn('[Presence] read skipped:', err && err.message ? err.message : err); render({}); });
+            membersRef.on('value', snap => render(snap.val() || {}), err => {
+                if (typeof window.hmIsRelationshipDataLocked === 'function' && window.hmIsRelationshipDataLocked()) { stop(); return; }
+                console.warn('[Presence] read skipped:', err && err.message ? err.message : err); render({});
+            });
         } catch(err) {
             console.warn('[Presence] start failed:', err);
             render({});

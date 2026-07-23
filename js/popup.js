@@ -225,6 +225,7 @@
     window.hmApplyManagerOnlyModalView = hmApplyManagerOnlyModalView;
 
     function openDailyModal(name) {
+        if (typeof window.hmGuardRelationshipDataAccess === 'function' && !window.hmGuardRelationshipDataAccess()) return;
         if (typeof hmMarkNotificationCardRead === 'function') hmMarkNotificationCardRead(name);
         hmApplyManagerOnlyModalView(name);
         openModalOverlayById(`${name}ModalOverlay`);

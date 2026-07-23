@@ -42,6 +42,10 @@ function escapeHtml(text) {
 // hmReportError
 // ---------------------------------------------------------
 function hmReportError(context, err, userMessage) {
+        const errorText = String(err && (err.code || err.message) ? (err.code || err.message) : err || '');
+        if (/permission_denied/i.test(errorText)
+            && typeof window.hmIsRelationshipDataLocked === 'function'
+            && window.hmIsRelationshipDataLocked()) return;
         const detail = err && (err.code || err.message) ? ` (${err.code || err.message})` : '';
         const payload = {
             context,

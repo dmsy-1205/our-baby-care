@@ -236,6 +236,9 @@
     }
 
     async function persistMoment(file, mealType = '', requestContext = mediaContext()) {
+        if (typeof window.hmGuardRelationshipDataAccess === 'function' && !window.hmGuardRelationshipDataAccess()) {
+            throw new Error('relationship/data-locked');
+        }
         const env = environment();
         const room = requestContext.roomCode;
         const date = requestContext.date;
@@ -269,6 +272,9 @@
 
         try {
             if (!isMediaContextCurrent(requestContext)) throw new Error('media/context-changed');
+            if (typeof window.hmGuardRelationshipDataAccess === 'function' && !window.hmGuardRelationshipDataAccess()) {
+                throw new Error('relationship/data-locked');
+            }
             await db.ref(`rooms/${room}/days/${date}/moments/${id}`).set(payload);
         } catch (error) {
             if (storageRef) storageRef.delete().catch(() => {});
@@ -285,6 +291,7 @@
     async function handleMealPhotoUpload(input, mealType) {
         const file = input?.files?.[0];
         input.value = '';
+        if (typeof window.hmGuardRelationshipDataAccess === 'function' && !window.hmGuardRelationshipDataAccess()) return;
         if (!file || !MEAL_LABELS[mealType] || mealUploadInProgress) return;
         if (!file.type?.startsWith('image/') || file.size > MAX_SOURCE_BYTES) {
             alert('이미지 파일만 선택할 수 있으며 원본 파일은 12MB 이하여야 합니다.');
@@ -322,6 +329,10 @@
     }
 
     async function saveMealPhotos() {
+        if (typeof window.hmGuardRelationshipDataAccess === 'function' && !window.hmGuardRelationshipDataAccess()) {
+            discardPendingMealUploads();
+            return;
+        }
         if (mealUploadInProgress || !pendingMealUploads.length) return;
         if (pendingMealDate !== selectedDate() || !isMediaContextCurrent(pendingMealContext)) {
             alert('날짜가 변경되었습니다. 식사 사진을 다시 선택해 주세요.');
@@ -360,6 +371,10 @@
     }
 
     async function handleUpload(input) {
+        if (typeof window.hmGuardRelationshipDataAccess === 'function' && !window.hmGuardRelationshipDataAccess()) {
+            if (input) input.value = '';
+            return;
+        }
         if (uploadInProgress) return;
         const files = Array.from(input?.files || []);
         if (!files.length) return;
@@ -408,6 +423,10 @@
     }
 
     async function saveDailyMomentsAndClose() {
+        if (typeof window.hmGuardRelationshipDataAccess === 'function' && !window.hmGuardRelationshipDataAccess()) {
+            discardPendingUploads();
+            return;
+        }
         if (uploadInProgress) return;
         if (!pendingMomentUploads.length) {
             closeDailyModal('outing');

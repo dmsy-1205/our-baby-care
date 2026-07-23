@@ -245,9 +245,53 @@
         'export-current-history': () => global.hmExportCurrentHistoryText?.()
     });
 
+    const relationshipProtectedActions = new Set([
+        'open-daily', 'open-mission', 'open-custom-routine-hub', 'open-custom-routine-manager',
+        'open-sub-routine-hub', 'open-sub-routine-editor', 'save-sub-routine',
+        'save-sub-routine-input', 'add-sub-routine-item', 'save-custom-routine-card',
+        'save-custom-routine-input', 'add-custom-routine-item', 'select-all-custom-routine-days',
+        'fill-custom-routine-template', 'reset-custom-routine-editor', 'add-water', 'reset-water',
+        'select-mood', 'select-feedback-type', 'toggle-daily-choice', 'save-daily-moments',
+        'save-meal-photos', 'finalize-report', 'toggle-summary-settings',
+        'toggle-summary-item', 'move-summary-item', 'save-summary-settings'
+    ]);
+    const relationshipProtectedInputs = new Set([
+        'daily-field-change', 'structured-time-change', 'owner-note-change',
+        'daily-photo-upload', 'meal-photo-upload', 'feedback-confirmed',
+        'mission-text-change', 'mission-completion-change', 'custom-routine-schedule'
+    ]);
+
+    function relationshipAllowsEvent(element, actionName) {
+        const isProtected = relationshipProtectedActions.has(actionName) || relationshipProtectedInputs.has(actionName);
+        if (!isProtected || typeof global.hmGuardRelationshipDataAccess !== 'function') return true;
+        const allowed = global.hmGuardRelationshipDataAccess();
+        if (!allowed && element?.matches?.('input[type="file"]')) element.value = '';
+        return allowed;
+    }
+
+    document.addEventListener('beforeinput', (event) => {
+        const element = event.target.closest?.('[data-hm-input], [data-hm-change]');
+        if (!element) return;
+        const actionName = element.dataset.hmInput || element.dataset.hmChange || '';
+        if (!relationshipAllowsEvent(element, actionName)) event.preventDefault();
+    }, true);
+
+    document.addEventListener('click', (event) => {
+        const label = event.target.closest?.('label[for]');
+        if (!label) return;
+        const inputId = label.getAttribute('for');
+        const input = inputId ? document.getElementById(inputId) : null;
+        if (!input?.matches?.('input[type="file"][data-hm-change]')) return;
+        if (!relationshipAllowsEvent(input, input.dataset.hmChange)) event.preventDefault();
+    }, true);
+
     document.addEventListener('click', (event) => {
         const element = event.target.closest('[data-hm-action]');
         if (!element || element.disabled) return;
+        if (!relationshipAllowsEvent(element, element.dataset.hmAction)) {
+            event.preventDefault();
+            return;
+        }
         const action = actions[element.dataset.hmAction];
         if (action) action(element, event);
     });
@@ -255,6 +299,7 @@
     document.addEventListener('change', (event) => {
         const element = event.target.closest('[data-hm-change]');
         if (!element) return;
+        if (!relationshipAllowsEvent(element, element.dataset.hmChange)) return;
         const action = actions[element.dataset.hmChange];
         if (action) action(element, event);
     });
@@ -262,6 +307,7 @@
     document.addEventListener('input', (event) => {
         const element = event.target.closest('[data-hm-input]');
         if (!element) return;
+        if (!relationshipAllowsEvent(element, element.dataset.hmInput)) return;
         const action = actions[element.dataset.hmInput];
         if (action) action(element, event);
     });
@@ -269,6 +315,7 @@
     document.addEventListener('blur', (event) => {
         const element = event.target.closest('[data-hm-blur]');
         if (!element) return;
+        if (!relationshipAllowsEvent(element, element.dataset.hmBlur)) return;
         const action = actions[element.dataset.hmBlur];
         if (action) action(element, event);
     }, true);

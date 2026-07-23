@@ -261,6 +261,12 @@
         grid.addEventListener('click', (event) => {
             const button = event.target.closest('[data-route-action-index]');
             if (!button) return;
+            if (category.key !== 'settings'
+                && typeof window.hmGuardRelationshipDataAccess === 'function'
+                && !window.hmGuardRelationshipDataAccess()) {
+                event.preventDefault();
+                return;
+            }
             category.actions[Number(button.dataset.routeActionIndex)]?.[3]?.();
         });
         body.appendChild(grid);
@@ -412,6 +418,9 @@
     function openCategory(key) {
         const category = CATEGORIES.find((item) => item.key === key);
         if (!category) return;
+        if (key !== 'settings'
+            && typeof window.hmGuardRelationshipDataAccess === 'function'
+            && !window.hmGuardRelationshipDataAccess()) return;
         openCategoryRoute(category);
     }
 

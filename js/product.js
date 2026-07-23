@@ -804,7 +804,7 @@
     function summaryRow(icon, label, value, sub){
         return `<div class="hm-summary-modal-row"><div class="hm-summary-modal-icon">${icon}</div><div><strong>${safe(label)}</strong>${sub ? `<small>${safe(sub)}</small>` : ''}</div><b>${safe(value)}</b></div>`;
     }
-    function openHomeSummaryModal(){
+    function openHomeSummaryModal(){ if (typeof window.hmGuardRelationshipDataAccess === 'function' && !window.hmGuardRelationshipDataAccess()) return;
         const rec = getCurrentRecord();
         const body = $('hmHomeSummaryModalBody') || ensureHomeSummaryModal().querySelector('#hmHomeSummaryModalBody');
         if (body) {

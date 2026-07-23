@@ -404,7 +404,7 @@ function openHistoryPanelModal() {
 
     const hmHistoryMonthSyncState = new Map();
 
-    async function hmHistorySyncVisibleMonthFromServer(force) {
+    async function hmHistorySyncVisibleMonthFromServer(force) { if (typeof window.hmIsRelationshipDataLocked === 'function' && window.hmIsRelationshipDataLocked()) return false;
         const roomCode = String(typeof activeRoomCode !== 'undefined' ? activeRoomCode || '' : '').trim();
         if (!roomCode || typeof db === 'undefined' || !db) return false;
         const base = hmHistoryGetCalendarViewBase(hmHistoryGetMergedData());
@@ -421,7 +421,7 @@ function openHistoryPanelModal() {
                 db.ref(`rooms/${roomCode}/days`).orderByKey().startAt(startKey).endAt(endKey).once('value'),
                 db.ref(`rooms/${roomCode}/dayAdmin`).orderByKey().startAt(startKey).endAt(endKey).once('value')
             ]);
-            if (roomCode !== activeRoomCode) return false;
+            if (roomCode !== activeRoomCode || (typeof window.hmIsRelationshipDataLocked === 'function' && window.hmIsRelationshipDataLocked())) { hmHistoryMonthSyncState.delete(monthKey); return false; }
             const monthDays = daysSnap.val() || {};
             const monthAdmin = adminSnap.val() || {};
             cachedDaysData = cachedDaysData || {};
@@ -440,7 +440,7 @@ function openHistoryPanelModal() {
             });
             return true;
         } catch (err) {
-            hmHistoryMonthSyncState.delete(monthKey);
+            hmHistoryMonthSyncState.delete(monthKey); if (typeof window.hmIsRelationshipDataLocked === 'function' && window.hmIsRelationshipDataLocked()) return false;
             if (typeof hmReportError === 'function') hmReportError('hmHistorySyncVisibleMonthFromServer', err, '❌ 기록실 월별 서버 확인 실패');
             else console.error('[HearMe2nite][HISTORY_MONTH_SYNC]', err);
             return false;

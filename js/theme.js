@@ -184,6 +184,12 @@ function hmStopSharedThemeListener() {
 }
 function hmListenSharedThemeForActiveRoom() {
     hmStopSharedThemeListener();
+    if (typeof window.hmIsRelationshipDataLocked === 'function' && window.hmIsRelationshipDataLocked()) {
+        hmSharedThemeEnabled = false;
+        hmSharedTheme = HM_THEME_DEFAULT;
+        hmApplyTheme(hmPersonalTheme);
+        return;
+    }
     if (!currentUser || !activeRoomCode) {
         hmSharedThemeEnabled = false;
         hmSharedTheme = HM_THEME_DEFAULT;
@@ -206,11 +212,18 @@ function hmListenSharedThemeForActiveRoom() {
             if (typeof showSaveStatus === 'function') showSaveStatus(hmSharedThemeEnabled ? `💞 ${HM_THEME_NAMES[hmSharedTheme]} 공용 테마가 적용되었습니다.` : '👤 공용 테마가 해제되어 개인 테마로 돌아왔습니다.');
         }
     }, (err) => {
+        if (typeof window.hmIsRelationshipDataLocked === 'function' && window.hmIsRelationshipDataLocked()) {
+            hmStopSharedThemeListener();
+            hmSharedThemeEnabled = false;
+            hmApplyTheme(hmPersonalTheme);
+            return;
+        }
         console.warn('[Theme] 공용 테마 listener 오류', err);
         hmSharedThemeEnabled = false;
         hmApplyTheme(hmPersonalTheme);
     });
 }
+window.hmStopSharedThemeListener = hmStopSharedThemeListener;
 function hmRefreshThemeForActiveRoom() { hmListenSharedThemeForActiveRoom(); }
 
 function hmRefreshThemeOptions() {
