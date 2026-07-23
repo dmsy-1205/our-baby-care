@@ -5,9 +5,9 @@
 (function () {
     const release = Object.freeze({
         product: 'HearMe2nite',
-        version: 'v1.0 STEP6.2.14.54',
-        appVersion: 'HearMe2nite v1.0 STEP6.2.14.54',
-        step: 'STEP6.2.14.54',
+        version: 'v1.0 STEP6.2.14.56',
+        appVersion: 'HearMe2nite v1.0 STEP6.2.14.56',
+        step: 'STEP6.2.14.56',
         build: '20260723',
         releaseDate: '2026.07.23',
         stage: 'Beta',

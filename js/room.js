@@ -166,11 +166,18 @@
             if (!currentUser || currentUser.uid !== sessionUid || roomCode !== activeRoomCode) return null;
             let state = hmNormalizeRelationshipState(relationshipSnap.val(), roomCode);
             if (!state.ownerUid || !state.partnerUid) {
-                const metaSnap = await db.ref(`rooms/${roomCode}/meta`).once('value');
+                const [metaSnap, membersSnap] = await Promise.all([
+                    db.ref(`rooms/${roomCode}/meta`).once('value'),
+                    db.ref(`roomMembers/${roomCode}`).once('value')
+                ]);
                 if (!currentUser || currentUser.uid !== sessionUid || roomCode !== activeRoomCode) return null;
                 const meta = metaSnap.val() || {};
-                state.ownerUid = state.ownerUid || meta.ownerUid || '';
-                state.partnerUid = state.partnerUid || meta.partnerUid || '';
+                const members = membersSnap.val() || {};
+                const memberEntries = Object.entries(members);
+                const ownerEntry = memberEntries.find(([, member]) => member && member.role === 'owner');
+                const partnerEntry = memberEntries.find(([, member]) => member && member.role === 'partner');
+                state.ownerUid = state.ownerUid || meta.ownerUid || ownerEntry?.[0] || '';
+                state.partnerUid = state.partnerUid || meta.partnerUid || partnerEntry?.[0] || '';
             }
             activeRelationshipState = state;
             activeRelationshipStatus = state.status;

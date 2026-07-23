@@ -164,6 +164,14 @@ check(/roomMembers'\)\.child\(\$roomCode\)\.child\(auth\.uid\)\.exists\(\)/.test
 check(/!data\.child\('ownerUid'\)\.exists\(\)/.test(getRule(databaseRules, ['rooms', '$roomCode', 'meta', 'relationship', '.validate']) || '')
   && /data\.child\('generation'\)\.exists\(\)\s*\?\s*data\.child\('generation'\)\.val\(\)\s*:\s*0/.test(getRule(databaseRules, ['rooms', '$roomCode', 'meta', 'relationship', '.validate']) || ''),
   'Legacy relationship states can adopt canonical Room UIDs and generation zero during their first transition');
+check(/!root\.child\('rooms'\)\.child\(\$roomCode\)\.child\('meta'\)\.child\('ownerUid'\)\.exists\(\)/.test(getRule(databaseRules, ['rooms', '$roomCode', 'meta', 'relationship', '.validate']) || '')
+  && /child\(newData\.child\('ownerUid'\)\.val\(\)\)\.child\('role'\)\.val\(\) === 'owner'/.test(getRule(databaseRules, ['rooms', '$roomCode', 'meta', 'relationship', '.validate']) || '')
+  && /child\(newData\.child\('partnerUid'\)\.val\(\)\)\.child\('role'\)\.val\(\) === 'partner'/.test(getRule(databaseRules, ['rooms', '$roomCode', 'meta', 'relationship', '.validate']) || ''),
+  'Legacy Rooms without meta ownerUid bind relationship participants to fixed owner and partner memberships');
+check(/db\.ref\(`roomMembers\/\$\{roomCode\}`\)\.once\('value'\)/.test(read('js/room.js'))
+  && /member\.role === 'owner'/.test(read('js/room.js'))
+  && /member\.role === 'partner'/.test(read('js/room.js')),
+  'Relationship loading recovers missing legacy participant UIDs from verified Room memberships');
 check(/relationshipStateWritePending\s*=\s*true/.test(read('js/room.js'))
   && /confirmedSnapshot\s*=\s*await relationshipRef\.once\('value'\)/.test(read('js/room.js'))
   && /confirmedState\.status\s*!==\s*nextState\.status/.test(read('js/room.js')),
