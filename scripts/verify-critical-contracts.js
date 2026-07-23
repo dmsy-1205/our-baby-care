@@ -142,6 +142,9 @@ check(/X-Content-Type-Options/.test(read('firebase.json')) && /X-Frame-Options/.
 check(/id="pendingInviteNotice"[^>]*aria-live="polite"/.test(indexSource) && /pendingInviteCodeText/.test(indexSource), 'Invite links expose a persistent accessible login notice');
 check(/\^\[A-Z0-9\]\{5,10\}\$/.test(authSource) && /codeText\.textContent = invite/.test(authSource), 'URL invite capture accepts only valid codes and renders them as text');
 check(/sessionStorage\.getItem\('pendingInviteCode'\)[\s\S]{0,100}await acceptPendingInviteIfAny\(\)/.test(read('js/room.js')), 'First role selection resumes a pending invite');
+check(/모든 멤버는 본인의 userRooms와 roomMembers로 검증된 이전 방에 다시 연결 가능/.test(read('js/room.js'))
+  && /if \(legacyRoomPanel\) \{ legacyRoomPanel\.open = false; legacyRoomPanel\.style\.display = ''; \}[\s\S]{0,100}if \(currentUser\) loadMyRoomList\(\);/.test(read('js/room.js')),
+  'Dom and Sub can reopen previously joined rooms from the verified room list');
 check(/property="og:title"/.test(indexSource) && /property="og:image"/.test(indexSource) && /name="twitter:card"/.test(indexSource), 'Shared links define Open Graph and social preview metadata');
 check(/hmAccountChildReturnType\s*=\s*type/.test(profileSource) && /hmReturnToAccountMenu/.test(profileSource), 'Account child screens remember their parent menu');
 check(/hmReturnToAccountMenu\?\.\('theme'\)/.test(themeSource) && /hmReturnToAccountMenu\?\.\('data'\)/.test(dataManagementSource), 'Theme and data screens return to the account menu');
@@ -197,7 +200,9 @@ check(!/cache\.put\(request/.test(navigationFetchBody) && !/caches\.match\(reque
 check(/!\[HM_STATIC_CACHE, HM_RUNTIME_CACHE\]\.includes\(key\)/.test(serviceWorkerSource), 'Service-worker activation preserves current-version caches');
 check(/await clearOldPwaCachesIfNeeded\(\);[\s\S]{0,80}await registerServiceWorker\(\)/.test(pwaSource), 'PWA cache cleanup completes before service-worker registration');
 const releaseInfoSource = read('js/release-info.js');
-check(/베타 초대·공유 진입 안정화/.test(releaseInfoSource), 'Release metadata describes the current invite and sharing work');
+check(/베타 이전 공간 재연결 안정화/.test(releaseInfoSource)
+  && /Dom과 Sub가 자신이 이미 참여했던 이전 공간/.test(releaseInfoSource),
+  'Release metadata describes the current verified Room reconnection work');
 
 // 12. Generated role-label contract. Feedback and reward cards already expose
 // their role in the route UI; CSS must not append duplicate accessible text.

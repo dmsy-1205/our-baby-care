@@ -5,15 +5,17 @@
 (function () {
     const release = Object.freeze({
         product: 'HearMe2nite',
-        version: 'v1.0 STEP6.2.14.51',
-        appVersion: 'HearMe2nite v1.0 STEP6.2.14.51',
-        step: 'STEP6.2.14.51',
+        version: 'v1.0 STEP6.2.14.52',
+        appVersion: 'HearMe2nite v1.0 STEP6.2.14.52',
+        step: 'STEP6.2.14.52',
         build: '20260723',
         releaseDate: '2026.07.23',
         stage: 'Beta',
-        title: '베타 초대·공유 진입 안정화',
-        description: '초대링크가 로그인·회원가입·이메일 인증과 최초 역할 선택을 지나서도 이어지도록 보강하고, 카카오톡·SNS 링크 미리보기 정보를 추가했습니다.',
+        title: '베타 이전 공간 재연결 안정화',
+        description: 'Dom과 Sub가 자신이 이미 참여했던 이전 공간을 목록에서 선택해 안전하게 다시 연결할 수 있도록 Room 전환 경로를 보강했습니다.',
         userChanges: Object.freeze([
+            'Dom과 Sub 모두 우리의 공간에서 자신이 참여했던 이전 공간으로 다시 이동할 수 있습니다.',
+            '이전 공간 전환 시 실제 Room 멤버십을 다시 확인해 가입하지 않은 공간에는 접근할 수 없습니다.',
             '초대링크로 들어오면 로그인 화면에서 초대코드 보존 상태를 확인할 수 있습니다.',
             '처음 역할을 선택한 뒤 보류 중인 초대 참여를 자동으로 다시 진행합니다.',
             '카카오톡·SNS에 링크를 공유할 때 HearMe2nite 제목과 설명, 아이콘이 표시됩니다.',

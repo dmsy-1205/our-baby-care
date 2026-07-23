@@ -165,9 +165,9 @@
             if (roomSettingsCardSub) roomSettingsCardSub.innerText = `현재: ${activeRoomCode} · ${relationshipLabel}`;
 
             // 정책:
-            // - owner: 새 방 만들기, 초대코드 생성, 초대코드 입력, 기존방 재연결 가능
-            // - partner: 새 방 만들기/초대코드 생성/기존 공유코드 연결은 금지
-            // - partner도 방주인이 새로 보낸 초대코드로는 방 이동 가능
+            // - owner: 새 방 만들기, 초대코드 생성, 초대코드 입력, 참여했던 방 재연결 가능
+            // - partner: 새 방 만들기/초대코드 생성/직접 공유코드 연결은 금지
+            // - 모든 멤버는 본인의 userRooms와 roomMembers로 검증된 이전 방에 다시 연결 가능
             if (activeRoomRole === 'owner') {
                 if (createBtn) { createBtn.style.display = ''; createBtn.innerText = '🌱 새 공간 만들기 / 다른 공간으로 시작하기'; }
                 if (invitePanel) { invitePanel.open = false; invitePanel.style.display = ''; }
@@ -178,7 +178,8 @@
                 if (createBtn) { createBtn.style.display = 'none'; }
                 if (invitePanel) { invitePanel.open = false; invitePanel.style.display = 'none'; }
                 if (joinInvitePanel) { joinInvitePanel.open = false; joinInvitePanel.style.display = ''; }
-                if (legacyRoomPanel) { legacyRoomPanel.open = false; legacyRoomPanel.style.display = 'none'; }
+                if (legacyRoomPanel) { legacyRoomPanel.open = false; legacyRoomPanel.style.display = ''; }
+                if (currentUser) loadMyRoomList();
             }
         } else {
             if (emptyState) emptyState.style.display = 'block';
