@@ -539,6 +539,14 @@ body:not(.hm-authenticated):has(#authBox.hm-login-shell:not(.is-hidden)) {
 #authBox .hm-password-policy { display:block; margin:7px 2px 0; color:#64596f; font-size:.76rem; line-height:1.4; }
 #authBox .hm-password-policy[hidden] { display:none!important; }
 :root[data-hm-display="dark"] #authBox .hm-password-policy { color:#d2c6dc; }
+#authBox .hm-pending-invite-notice { display:grid; gap:4px; margin:-4px 0 16px; padding:13px 15px; border:1px solid #bba7ed; border-radius:15px; background:#f5f0ff; color:#413354; }
+#authBox .hm-pending-invite-notice[hidden] { display:none!important; }
+#authBox .hm-pending-invite-notice strong { color:#5434a5; font-size:.88rem; }
+#authBox .hm-pending-invite-notice span { font-size:.77rem; line-height:1.45; }
+#authBox .hm-pending-invite-notice b { color:#a13d75; letter-spacing:.06em; }
+:root[data-hm-display="dark"] #authBox .hm-pending-invite-notice { background:#3a3048; border-color:#79669c; color:#eee6f5; }
+:root[data-hm-display="dark"] #authBox .hm-pending-invite-notice strong { color:#d1bdff; }
+:root[data-hm-display="dark"] #authBox .hm-pending-invite-notice b { color:#ff9cc5; }
 #authBox .hm-login-small { color:#645b70!important; }
 #authBox .hm-login-trust { background:rgba(255,255,255,.82)!important; }
 #authBox .hm-auth-mode-tab:not(.active) { color:#635a70!important; }

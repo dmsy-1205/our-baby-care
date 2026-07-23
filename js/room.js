@@ -84,6 +84,9 @@
                 }
                 await db.ref().update(updates);
                 showSaveStatus(`👥 역할 고정 완료: ${getRelationshipRoleLabel(role)}`);
+                if (sessionStorage.getItem('pendingInviteCode')) {
+                    await acceptPendingInviteIfAny();
+                }
             } catch (err) {
                 console.error(err);
                 showSaveStatus('❌ 역할 저장 실패');
@@ -1055,6 +1058,8 @@ HearMe2nite 계정으로 로그인한 뒤 초대코드를 입력하면 같은 �
             await db.ref(`rooms/${roomCode}/meta/partnerEmail`).set(myEmail);
 
             sessionStorage.removeItem('pendingInviteCode');
+            const pendingNotice = document.getElementById('pendingInviteNotice');
+            if (pendingNotice) pendingNotice.hidden = true;
             const inviteInput = document.getElementById('inviteCodeInput');
             if (inviteInput) inviteInput.value = '';
             activeRoomCode = roomCode;

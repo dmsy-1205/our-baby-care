@@ -4,6 +4,17 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💗</text></svg>">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="둘만의 하루와 약속, 기록을 안전한 Room에서 함께 나누는 HearMe2nite 베타">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="HearMe2nite">
+    <meta property="og:title" content="HearMe2nite | 우리의 하루를 함께 기록합니다">
+    <meta property="og:description" content="초대코드로 둘만의 공간을 연결하고 하루의 약속과 기록을 함께 나눠보세요.">
+    <meta property="og:url" content="https://hearme2nite1205.web.app/">
+    <meta property="og:image" content="https://hearme2nite1205.web.app/assets/icons/icon-512.png">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="HearMe2nite | 우리의 하루를 함께 기록합니다">
+    <meta name="twitter:description" content="초대코드로 둘만의 공간을 연결하고 하루의 약속과 기록을 함께 나눠보세요.">
+    <meta name="twitter:image" content="https://hearme2nite1205.web.app/assets/icons/icon-512.png">
     <meta name="theme-color" content="#8e5cf4">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -44,7 +55,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
     <script src="/__/firebase/init.js"></script>
 
-    <link rel="stylesheet" href="css/style.css?v=step6-2-14-50-beta-security-20260723">
+    <link rel="stylesheet" href="css/style.css?v=step6-2-14-51-invite-share-20260723">
 </head>
 <body class="hm-booting">
 
@@ -73,6 +84,11 @@
         <div class="hm-auth-mode-tabs" role="tablist" aria-label="로그인 또는 회원가입 선택">
             <button type="button" class="hm-auth-mode-tab active" id="authLoginTab" role="tab" aria-selected="true" aria-controls="authEntryPanel" tabindex="0" data-hm-action="set-auth-mode" data-hm-value="login">로그인</button>
             <button type="button" class="hm-auth-mode-tab" id="authSignupTab" role="tab" aria-selected="false" aria-controls="authEntryPanel" tabindex="-1" data-hm-action="set-auth-mode" data-hm-value="signup">회원가입</button>
+        </div>
+
+        <div class="hm-pending-invite-notice" id="pendingInviteNotice" role="status" aria-live="polite" hidden>
+            <strong>초대링크가 확인되었습니다.</strong>
+            <span>초대코드 <b id="pendingInviteCodeText"></b>는 로그인·회원가입·이메일 인증 후에도 유지됩니다.</span>
         </div>
 
         <div class="hm-login-trust">
@@ -1331,15 +1347,15 @@
 </div>
 
 <div class="toast" id="toast">기록이 복사되었습니다! 💕</div>
-    <script src="js/release-info.js?v=step6-2-14-50-beta-security-20260723"></script>
+    <script src="js/release-info.js?v=step6-2-14-51-invite-share-20260723"></script>
     <script src="js/config.js?v=step6-2-13-7-daily-moments-gallery-20260721"></script>
     <script src="js/access-policy.js?v=maintenance-baseline-20260722"></script>
     <script src="js/save-state.js?v=maintenance-baseline-20260722"></script>
     <script src="js/ui-events.js?v=step6-2-14-48-login-usability-20260723"></script>
     <script src="js/utils.js?v=step6-2-12-7-notification-toast-message-fix-20260718"></script>
     <script src="js/popup.js?v=step6-2-14-5-role-mission-polish-20260721"></script>
-    <script src="js/auth.js?v=step6-2-14-48-login-usability-20260723"></script>
-    <script src="js/room.js?v=step6-2-13-8-1-invite-acceptance-hotfix-20260721"></script>
+    <script src="js/auth.js?v=step6-2-14-51-invite-share-20260723"></script>
+    <script src="js/room.js?v=step6-2-14-51-invite-share-20260723"></script>
     <script src="js/presence.js?v=step6-2-14-47-profile-context-20260723"></script>
     <script src="js/daily.js?v=step6-2-14-38-time-input-sync-20260722"></script>
     <script src="js/moments.js?v=step6-2-14-39-meal-photo-confirm-save-20260722"></script>
@@ -1360,6 +1376,6 @@
     <script src="js/data-management.js?v=step6-2-13-4-request-cancel-type-message-20260718"></script>
     <script src="js/app.js?v=step6-2-14-13-role-context-20260722"></script>
     <script src="js/home-navigation.js?v=step6-2-14-32-history-meal-context-20260722"></script>
-    <script src="js/pwa.js?v=step6-2-14-50-beta-security-20260723"></script>
+    <script src="js/pwa.js?v=step6-2-14-51-invite-share-20260723"></script>
 </body>
 </html>

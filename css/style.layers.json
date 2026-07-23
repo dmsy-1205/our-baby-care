@@ -1,7 +1,7 @@
 {
   "algorithm": "sha256",
-  "sourceHash": "d0d98ccf6c41e1210838bacc361c97210e9e5414747aa3284c0b28c61b910174",
-  "sourceBytes": 604447,
+  "sourceHash": "2b790899a458a12edaf54897b2a133c31ca0aae85802a42e447985a34196d2a3",
+  "sourceBytes": 605240,
   "layers": [
     {
       "name": "tokens.css",
@@ -55,8 +55,8 @@
     },
     {
       "name": "screens/settings-account.css",
-      "bytes": 29828,
-      "lines": 661
+      "bytes": 30621,
+      "lines": 669
     },
     {
       "name": "screens/settings-data-requests.css",

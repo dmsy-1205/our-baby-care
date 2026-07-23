@@ -574,11 +574,11 @@
     function captureInviteFromUrl() {
         const params = new URLSearchParams(window.location.search);
         const invite = (params.get('invite') || '').trim().toUpperCase();
-        if (invite) {
+        if (/^[A-Z0-9]{5,10}$/.test(invite)) {
             sessionStorage.setItem('pendingInviteCode', invite);
-            const help = document.querySelector('#authBox .auth-help');
-            if (help) {
-                help.innerHTML = `초대코드 <strong>${escapeHtml(invite)}</strong>가 확인되었습니다.<br>HearMe2nite 계정으로 로그인하면 자동으로 방 참여를 진행합니다.`;
-            }
+            const notice = document.getElementById('pendingInviteNotice');
+            const codeText = document.getElementById('pendingInviteCodeText');
+            if (codeText) codeText.textContent = invite;
+            if (notice) notice.hidden = false;
         }
     }

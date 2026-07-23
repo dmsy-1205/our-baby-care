@@ -5,15 +5,18 @@
 (function () {
     const release = Object.freeze({
         product: 'HearMe2nite',
-        version: 'v1.0 STEP6.2.14.50',
-        appVersion: 'HearMe2nite v1.0 STEP6.2.14.50',
-        step: 'STEP6.2.14.50',
+        version: 'v1.0 STEP6.2.14.51',
+        appVersion: 'HearMe2nite v1.0 STEP6.2.14.51',
+        step: 'STEP6.2.14.51',
         build: '20260723',
         releaseDate: '2026.07.23',
         stage: 'Beta',
-        title: '베타 가입·기본 보안 강화',
-        description: '기존 사용자의 로그인을 유지하면서 신규 가입 비밀번호를 8자리 이상으로 강화하고, 안전한 Hosting 응답 헤더와 무평가식 QA 검사를 적용했습니다.',
+        title: '베타 초대·공유 진입 안정화',
+        description: '초대링크가 로그인·회원가입·이메일 인증과 최초 역할 선택을 지나서도 이어지도록 보강하고, 카카오톡·SNS 링크 미리보기 정보를 추가했습니다.',
         userChanges: Object.freeze([
+            '초대링크로 들어오면 로그인 화면에서 초대코드 보존 상태를 확인할 수 있습니다.',
+            '처음 역할을 선택한 뒤 보류 중인 초대 참여를 자동으로 다시 진행합니다.',
+            '카카오톡·SNS에 링크를 공유할 때 HearMe2nite 제목과 설명, 아이콘이 표시됩니다.',
             '신규 회원가입 비밀번호는 8자리 이상으로 안내하고 검사합니다.',
             '기존 계정은 이전 비밀번호 길이와 관계없이 정상 로그인을 계속 지원합니다.',
             '테스트 Hosting 응답에 클릭재킹·MIME 스니핑·리퍼러 노출 방어 헤더를 적용했습니다.',
