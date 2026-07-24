@@ -1,9 +1,10 @@
-// Room-scoped display labels for the fixed Dom/Sub permission roles.
+// Room participant nicknames for visible Dom/Sub guidance.
 // Internal role keys, Firebase paths and access checks always remain dom/sub.
 (function hmRoleLabelsModule(global) {
     'use strict';
 
-    const DEFAULTS = Object.freeze({ dom: 'Dom', sub: 'Sub' });
+    const DEFAULTS = Object.freeze({ dom: '관리 사용자', sub: '기록 사용자' });
+    const DISPLAY_NICKNAME_MAX = 8;
     const ATTRIBUTES = Object.freeze(['aria-label', 'title', 'placeholder']);
     const originalText = new WeakMap();
     const renderedText = new WeakMap();
@@ -35,8 +36,54 @@
     }
 
     function cleanRoleLabel(value, fallback) {
-        const normalized = String(value || '').replace(/\s+/g, ' ').trim().slice(0, 12);
+        const normalized = String(value || '').replace(/\s+/g, ' ').trim().slice(0, 20);
         return normalized || fallback;
+    }
+
+    function memberRole(member, uid) {
+        const explicit = String(member?.relationshipRole || member?.presence?.relationshipRole || '').toLowerCase();
+        if (explicit === 'dom' || explicit === 'sub') return explicit;
+        if (uid === String(currentAuthUser()?.uid || '')) return currentRelationshipRole();
+        if (member?.role === 'owner') return 'dom';
+        return '';
+    }
+
+    function memberNickname(member, uid) {
+        const ownNickname = uid === String(currentAuthUser()?.uid || '') ? global.hmCurrentNickname : '';
+        return cleanRoleLabel(
+            ownNickname || member?.nickname || member?.displayName || member?.name || member?.presence?.nickname,
+            ''
+        );
+    }
+
+    function displayNickname(value) {
+        const nickname = String(value || '').trim();
+        const characters = Array.from(nickname);
+        return characters.length > DISPLAY_NICKNAME_MAX
+            ? `${characters.slice(0, DISPLAY_NICKNAME_MAX).join('')}…`
+            : nickname;
+    }
+
+    function nicknameLabels(membersValue) {
+        const members = membersValue && typeof membersValue === 'object' ? membersValue : {};
+        const next = { ...DEFAULTS };
+        const unresolved = [];
+        Object.entries(members).forEach(([uid, memberValue]) => {
+            const member = memberValue || {};
+            const nickname = memberNickname(member, uid);
+            if (!nickname) return;
+            const role = memberRole(member, uid);
+            if (role === 'dom' || role === 'sub') next[role] = displayNickname(nickname);
+            else unresolved.push(displayNickname(nickname));
+        });
+        const ownRole = currentRelationshipRole();
+        const ownNickname = cleanRoleLabel(global.hmCurrentNickname, '');
+        if ((ownRole === 'dom' || ownRole === 'sub') && ownNickname) next[ownRole] = displayNickname(ownNickname);
+        const partnerRole = ownRole === 'dom' ? 'sub' : ownRole === 'sub' ? 'dom' : '';
+        if (partnerRole && next[partnerRole] === DEFAULTS[partnerRole] && unresolved.length) {
+            next[partnerRole] = unresolved[0];
+        }
+        return next;
     }
 
     function roleLabel(role) {
@@ -44,7 +91,8 @@
     }
 
     function roleHonorific(role) {
-        return `${roleLabel(role)}님`;
+        const label = roleLabel(role);
+        return label.endsWith('님') ? label : `${label}님`;
     }
 
     function replaceRoleToken(text, token, role) {
@@ -134,38 +182,12 @@
         }
     }
 
-    function renderEditor() {
-        const card = document.getElementById('roleDisplayLabelsCard');
-        const domInput = document.getElementById('domDisplayRoleLabel');
-        const subInput = document.getElementById('subDisplayRoleLabel');
-        const help = document.getElementById('roleDisplayLabelsHelp');
-        const role = currentRelationshipRole();
-        const hasRoom = !!currentRoom();
-        if (card) card.hidden = !hasRoom;
-        if (domInput) {
-            if (document.activeElement !== domInput) domInput.value = labels.dom;
-            domInput.disabled = role !== 'dom' || !hasRoom;
-        }
-        if (subInput) {
-            if (document.activeElement !== subInput) subInput.value = labels.sub;
-            subInput.disabled = role !== 'sub' || !hasRoom;
-        }
-        if (help) {
-            help.textContent = hasRoom
-                ? `${roleHonorific(role === 'sub' ? 'sub' : 'dom')}은 자신의 화면 표시명만 변경할 수 있습니다. 실제 권한은 Dom/Sub로 유지됩니다.`
-                : '공간을 연결하면 역할 표시명을 설정할 수 있습니다.';
-        }
-        const preview = document.getElementById('roleDisplayLabelsPreview');
-        if (preview) preview.textContent = `${roleHonorific('dom')}이 작성하고 ${roleHonorific('sub')}이 확인합니다.`;
-    }
-
     function applyLabels(next) {
         labels = {
             dom: cleanRoleLabel(next?.dom, DEFAULTS.dom),
             sub: cleanRoleLabel(next?.sub, DEFAULTS.sub)
         };
         applyTree(document.body);
-        renderEditor();
         document.dispatchEvent(new CustomEvent('hm-role-labels-changed', { detail: { ...labels } }));
     }
 
@@ -181,62 +203,20 @@
         if (!room || !uid) {
             detach();
             if (labels.dom !== DEFAULTS.dom || labels.sub !== DEFAULTS.sub) applyLabels(DEFAULTS);
-            else renderEditor();
             return;
         }
-        if (room === listenedRoom && activeRef) {
-            renderEditor();
-            return;
-        }
+        if (room === listenedRoom && activeRef) return;
         detach();
         listenedRoom = room;
-        activeRef = database().ref(`rooms/${room}/meta/roleLabels`);
+        activeRef = database().ref(`roomMembers/${room}`);
         activeRef.on('value', (snapshot) => {
             if (room !== currentRoom() || uid !== String(currentAuthUser()?.uid || '')) return;
-            applyLabels(snapshot.val() || DEFAULTS);
+            applyLabels(nicknameLabels(snapshot.val()));
         }, (error) => {
             if (room !== currentRoom()) return;
-            console.warn('[HearMe2nite][ROLE_LABELS] display-label read failed', error);
+            console.warn('[HearMe2nite][ROLE_LABELS] participant nickname read failed', error);
             applyLabels(DEFAULTS);
         });
-    }
-
-    function validateInput(value) {
-        const normalized = String(value || '').replace(/\s+/g, ' ').trim();
-        if (normalized.length < 2 || normalized.length > 12) return { ok: false, message: '역할 표시명은 2~12자로 입력해 주세요.' };
-        if (!/^[가-힣A-Za-z0-9][가-힣A-Za-z0-9 _-]*$/u.test(normalized)) return { ok: false, message: '한글, 영문, 숫자, 공백, -, _만 사용할 수 있습니다.' };
-        if (/dom|sub/i.test(normalized) || /님$/.test(normalized)) return { ok: false, message: 'Dom/Sub 또는 “님”을 포함하지 않은 역할 이름을 입력해 주세요.' };
-        return { ok: true, value: normalized };
-    }
-
-    async function saveOwnRoleLabel() {
-        const room = currentRoom();
-        const currentRole = currentRelationshipRole();
-        const role = currentRole === 'sub' ? 'sub' : currentRole === 'dom' ? 'dom' : '';
-        if (!room || !role || !currentAuthUser()) return alert('연결된 공간과 역할을 먼저 확인해 주세요.');
-        const input = document.getElementById(role === 'dom' ? 'domDisplayRoleLabel' : 'subDisplayRoleLabel');
-        const checked = validateInput(input?.value);
-        if (!checked.ok) return alert(checked.message);
-        try {
-            await database().ref(`rooms/${room}/meta/roleLabels/${role}`).set(checked.value);
-            if (typeof global.showSaveStatus === 'function') global.showSaveStatus('🏷️ 역할 표시명 저장 완료');
-        } catch (error) {
-            if (typeof global.hmReportError === 'function') global.hmReportError('roleLabels.save', error, '❌ 역할 표시명 저장 실패');
-            else alert('역할 표시명을 저장하지 못했습니다.');
-        }
-    }
-
-    async function resetOwnRoleLabel() {
-        const room = currentRoom();
-        const currentRole = currentRelationshipRole();
-        const role = currentRole === 'sub' ? 'sub' : currentRole === 'dom' ? 'dom' : '';
-        if (!room || !role || !currentAuthUser()) return;
-        try {
-            await database().ref(`rooms/${room}/meta/roleLabels/${role}`).remove();
-            if (typeof global.showSaveStatus === 'function') global.showSaveStatus('🏷️ 기본 역할 이름으로 복원');
-        } catch (error) {
-            if (typeof global.hmReportError === 'function') global.hmReportError('roleLabels.reset', error, '❌ 역할 표시명 초기화 실패');
-        }
     }
 
     function installDialogTransforms() {
@@ -281,8 +261,6 @@
         hmRoleText: roleText,
         hmGetRoleLabel: roleLabel,
         hmGetRoleHonorific: roleHonorific,
-        hmRefreshRoleLabelsForActiveRoom: refreshForActiveRoom,
-        hmSaveOwnRoleLabel: saveOwnRoleLabel,
-        hmResetOwnRoleLabel: resetOwnRoleLabel
+        hmRefreshRoleLabelsForActiveRoom: refreshForActiveRoom
     });
 })(window);

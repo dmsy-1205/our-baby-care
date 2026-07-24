@@ -87,4 +87,7 @@ body.is-authenticated #appContent > .container {
 @media (prefers-reduced-motion: reduce) {
     .hm-home-area-nav { backdrop-filter: none; -webkit-backdrop-filter: none; }
 }
-
+html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+}

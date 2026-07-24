@@ -40,6 +40,18 @@
         }
     }
 
+    async function revalidateCurrentStyleAssets() {
+        const styleUrls = [...document.querySelectorAll('link[rel="stylesheet"][href]')]
+            .map((link) => link.href)
+            .filter((href) => href && new URL(href, location.href).origin === location.origin);
+        await Promise.allSettled(
+            styleUrls.map((href) => fetch(href, {
+                cache: 'reload',
+                credentials: 'same-origin'
+            }))
+        );
+    }
+
     async function clearOldPwaCachesIfNeeded() {
         try {
             const previous = localStorage.getItem(HM_PWA_VERSION_KEY);
@@ -52,6 +64,7 @@
                         .map((key) => caches.delete(key))
                 );
             }
+            await revalidateCurrentStyleAssets();
             localStorage.setItem(HM_PWA_VERSION_KEY, HM_PWA_APP_VERSION);
             if (typeof console !== 'undefined') {
                 console.info('[HearMe2nite][PWA] old app caches cleared', { previous, current: HM_PWA_APP_VERSION });

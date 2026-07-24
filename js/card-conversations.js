@@ -21,6 +21,7 @@
     let activeOverlayId = '';
     let conversationDialogOpen = false;
     let conversationReturnFocus = null;
+    let suspendedParentOverlayId = '';
     let remoteReadRef = null;
     let remoteReadPath = '';
     let remoteReadMap = {};
@@ -216,8 +217,8 @@
         content.innerHTML = `
             <header class="card-conversation-dialog-head"><div><strong id="cardConversationDialogTitle">💞 함께 남긴 말</strong><small>${escapeHtml(CARD_LABELS[cardKey] || cardKey)} · Sub와 Dom의 코멘트</small></div><button type="button" data-card-conversation-close>닫기</button></header>
             ${rows.length ? `<div class="card-conversation-list">${rows.map((item) => `
-                <article class="card-conversation-message role-${item.authorRole === 'dom' ? 'dom' : 'sub'}">
-                    <div><strong>${roleLabel(item.authorRole)}</strong><small>${escapeHtml(item.authorName || '')} · ${escapeHtml(formatTime(item.createdAt))}</small>${item.authorUid === currentUser?.uid ? `<button type="button" data-card-comment-delete="${escapeHtml(item.id)}">삭제</button>` : ''}</div>
+                <article class="card-conversation-message role-${item.authorRole === 'dom' ? 'dom' : 'sub'}" data-hm-role-label-ignore>
+                    <div><strong>${escapeHtml(item.authorName || (item.authorRole === 'dom' ? '관리 사용자' : '기록 사용자'))}</strong><small>${item.authorRole === 'dom' ? '관리 역할' : '기록 역할'} · ${escapeHtml(formatTime(item.createdAt))}</small>${item.authorUid === currentUser?.uid ? `<button type="button" data-card-comment-delete="${escapeHtml(item.id)}">삭제</button>` : ''}</div>
                     <p>${escapeHtml(item.text).replace(/\n/g,'<br>')}</p>
                 </article>`).join('')}</div>` : '<div class="card-conversation-empty">아직 함께 남긴 말이 없습니다.</div>'}
             <form class="card-conversation-form" data-card-comment-form="${escapeHtml(cardKey)}">
@@ -248,9 +249,15 @@
         if (!CARD_LABELS[cardKey] || !roomCode()) return;
         activeCardKey = cardKey;
         conversationDialogOpen = true;
+        suspendedParentOverlayId = activeOverlayId && document.getElementById(activeOverlayId)
+            ? activeOverlayId
+            : '';
         const overlay = ensureConversationDialog();
         const active = document.activeElement;
         conversationReturnFocus = active && active !== document.body && active.getClientRects?.().length ? active : document.getElementById('hmNotificationBar');
+        if (suspendedParentOverlayId && typeof closeModalOverlayById === 'function') {
+            closeModalOverlayById(suspendedParentOverlayId);
+        }
         renderConversationDialog(cardKey);
         overlay.classList.add('is-open');
         if (typeof openModalOverlayById === 'function') openModalOverlayById('cardConversationDialogOverlay');
@@ -260,12 +267,17 @@
         renderBadges();
     }
 
-    function closeConversationDialog() {
+    function closeConversationDialog(restoreParent = true) {
         const overlay = document.getElementById('cardConversationDialogOverlay');
         conversationDialogOpen = false;
         overlay?.classList.remove('is-open');
         if (typeof closeModalOverlayById === 'function') closeModalOverlayById('cardConversationDialogOverlay');
         else { overlay?.setAttribute('inert', ''); overlay?.setAttribute('aria-hidden', 'true'); }
+        const parentOverlayId = suspendedParentOverlayId;
+        suspendedParentOverlayId = '';
+        if (restoreParent && parentOverlayId && document.getElementById(parentOverlayId) && typeof openModalOverlayById === 'function') {
+            openModalOverlayById(parentOverlayId);
+        }
         const returnTarget = conversationReturnFocus;
         conversationReturnFocus = null;
         if (returnTarget?.isConnected && returnTarget.getClientRects?.().length && typeof returnTarget.focus === 'function') {
@@ -410,6 +422,7 @@
     setInterval(bind, 1500);
 
     window.hmOpenCardConversation = openCardConversation;
+    window.hmCloseCardConversation = (restoreParent = true) => closeConversationDialog(restoreParent);
     window.hmGetConversationNotificationItems = notificationItems;
     window.hmOpenConversationFromNotification = openFromNotification;
     window.hmRenderHistoryConversations = renderHistoryConversations;

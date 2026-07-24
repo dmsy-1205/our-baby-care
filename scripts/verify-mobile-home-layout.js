@@ -1,0 +1,34 @@
+"use strict";
+const assert = require("node:assert/strict");
+const fs = require("node:fs");
+const path = require("node:path");
+const read = (name) => fs.readFileSync(path.resolve(__dirname, "..", name), "utf8");
+
+const home = read("js/home-navigation.js");
+const roles = read("js/role-labels.js");
+const categoryCss = read("css/screens/home-categories.css");
+const routeCss = read("css/screens/category-routes.css");
+const layoutCss = read("css/screens/home-layout.css");
+const missionCss = read("css/screens/missions.css");
+const index = read("index.html");
+
+assert.match(home, /data-hm-role-label-ignore/);
+assert.match(home, /const title = '관리와 피드백'/);
+assert.match(home, /const subtitle = '오늘 · 피드백 · 선물'/);
+assert.match(home, /class="hm-adaptive-category-copy"/);
+assert.match(roles, /DISPLAY_NICKNAME_MAX = 8/);
+assert.match(roles, /characters\.slice\(0, DISPLAY_NICKNAME_MAX\)\.join\(''\).*…/s);
+assert.match(categoryCss, /\.hm-adaptive-category-copy\s*\{[^}]*min-width:\s*0;[^}]*overflow:\s*hidden/s);
+assert.match(categoryCss, /container:\s*hm-category-card\s*\/\s*inline-size/);
+assert.match(categoryCss, /\.hm-adaptive-category strong\s*\{[^}]*text-overflow:\s*ellipsis;[^}]*white-space:\s*nowrap/s);
+assert.match(categoryCss, /\.hm-adaptive-category small\s*\{[^}]*text-overflow:\s*ellipsis;[^}]*white-space:\s*nowrap/s);
+assert.match(categoryCss, /@container hm-category-card \(max-width:\s*165px\)/);
+assert.match(categoryCss, /grid-template-areas:\s*"icon title" "icon description"/);
+assert.match(categoryCss, /\.onboarding-choice-card > small\s*\{[^}]*grid-area:\s*description/s);
+assert.match(routeCss, /height:\s*88px;\s*min-height:\s*88px !important/);
+assert.match(layoutCss, /text-size-adjust:\s*100%/);
+assert.match(missionCss, /container:\s*hm-sub-editor\s*\/\s*inline-size/);
+assert.match(missionCss, /@container hm-sub-editor \(max-width:620px\)/);
+assert.match(missionCss, /grid-template-columns:repeat\(4,minmax\(0,1fr\)\)!important/);
+assert.match(index, /css\/style\.css\?v=step6-2-14-89-device-layout-20260724/);
+console.log("Galaxy/iPhone home layout stability verification passed.");

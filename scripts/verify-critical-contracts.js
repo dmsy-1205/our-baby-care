@@ -158,7 +158,7 @@ check(/\.container\s*>\s*\.autosave-status\{[^}]*position:static!important/.test
 check(/modal\.setAttribute\('role',\s*'region'\)/.test(homeNavigationSource) && /modal\.removeAttribute\('aria-modal'\)/.test(homeNavigationSource), 'Embedded route editors are regions, not modal dialogs');
 check(/item\.modal\.setAttribute\('role',\s*item\.dialogRole\)/.test(homeNavigationSource) && /item\.modal\.setAttribute\('aria-modal',\s*item\.dialogAriaModal\)/.test(homeNavigationSource), 'Editors restore dialog semantics when returned to overlays');
 check(/window\.hmCurrentNickname\s*=\s*hmCurrentNickname/.test(profileSource), 'Loaded nicknames are exposed to the shared Room presence layer');
-check(/presence`\)\.update\(\{ nickname, avatar: hmCurrentAvatar \}\)/.test(profileSource), 'Profile saves synchronize nickname and avatar into Room presence');
+check(/presence`\)\.update\(\{[\s\S]{0,180}nickname:\s*clearingNickname \? null : nickname,[\s\S]{0,100}avatar:\s*hmCurrentAvatar/.test(profileSource), 'Profile saves synchronize nickname and avatar into Room presence');
 check(/nickname:\s*String\(window\.hmCurrentNickname \|\| ''\)/.test(presenceSource), 'Presence heartbeats repair missing shared nicknames');
 check(/function hmCaptureProfileContext\(\)/.test(profileSource) && (profileSource.match(/hmIsProfileContextCurrent\(requestContext\)/g) || []).length >= 5, 'Profile reads and writes reject stale UID and Room contexts');
 check(/user\.uid !== activePresenceUid \|\| getRoomCode\(\) !== activePresenceRoom/.test(presenceSource), 'Presence heartbeats reject stale account and Room references');
@@ -297,7 +297,7 @@ const pwaSource = read('js/pwa.js');
 const serviceWorkerSource = read('service-worker.js');
 const manifestSource = read('manifest.webmanifest');
 const manifest = JSON.parse(manifestSource);
-check(manifest.start_url === '/index.html?source=pwa&v=step6-2-14-78', 'PWA install start URL matches the current release');
+check(manifest.start_url === '/index.html?source=pwa&v=step6-2-14-89', 'PWA install start URL matches the current release');
 check(manifest.scope === '/' && manifest.display === 'standalone', 'PWA installs into the full standalone app scope');
 const navigationFetchBody = functionBody(serviceWorkerSource, 'async function networkFirstNavigation(request)');
 check(/window\.HM_RELEASE\?\.step/.test(pwaSource), 'PWA registration derives its version from central release metadata');
@@ -308,10 +308,17 @@ check((serviceWorkerSource.match(/return cached \|\| Response\.error\(\)/g) || [
 check(!/cache\.put\(request/.test(navigationFetchBody) && !/caches\.match\(request\)/.test(navigationFetchBody), 'PWA navigation never reuses a cached app document');
 check(/!\[HM_STATIC_CACHE, HM_RUNTIME_CACHE\]\.includes\(key\)/.test(serviceWorkerSource), 'Service-worker activation preserves current-version caches');
 check(/await clearOldPwaCachesIfNeeded\(\);[\s\S]{0,80}await registerServiceWorker\(\)/.test(pwaSource), 'PWA cache cleanup completes before service-worker registration');
+check(/function revalidateCurrentStyleAssets\(\)/.test(pwaSource)
+  && /cache:\s*'reload'/.test(pwaSource)
+  && /await revalidateCurrentStyleAssets\(\)/.test(pwaSource),
+  'PWA version recovery revalidates current styles after clearing old caches');
+check(/data-hm-display="dark"[\s\S]{0,900}hm-adaptive-category strong[\s\S]{0,260}-webkit-text-fill-color/.test(categoryRoutesSource)
+  && /hm-adaptive-category small[\s\S]{0,260}-webkit-text-fill-color/.test(categoryRoutesSource),
+  'iPhone standalone dark category cards retain readable title and support text');
 const releaseInfoSource = read('js/release-info.js');
-check(/우리만의 역할 표시명/.test(releaseInfoSource)
-  && /실제 권한은 바뀌지 않습니다/.test(releaseInfoSource),
-  'Release metadata describes Room-scoped display role labels');
+check(/약속·루틴 사진과 통합 보관/.test(releaseInfoSource)
+  && /같은 안전한 Storage 구조/.test(releaseInfoSource),
+  'Release metadata describes secured shared media storage');
 const historySource = read('js/history.js');
 check(/buildHistoryDomTodayText/.test(historySource)
   && ['domWakeTime', 'domSleepTime', 'domMood', 'domAvailability', 'domTodayMessage']
@@ -334,17 +341,17 @@ check(releaseSandbox.window.HM_RELEASE.userChanges.length <= 8,
 check(releaseSandbox.window.HM_RELEASE.changes.length <= 6,
   'Internal release notes remain concise instead of accumulating indefinitely');
 
-// 11.1 Display-role label contract. User-selected labels only transform
-// visible copy; all authorization and persisted role keys remain dom/sub.
+// 11.1 Participant nickname guidance. Visible Dom/Sub copy follows the
+// Room member nicknames; authorization and persisted role keys remain dom/sub.
 const roleLabelsSource = read('js/role-labels.js');
-check(/const DEFAULTS = Object\.freeze\(\{ dom: 'Dom', sub: 'Sub' \}\)/.test(roleLabelsSource)
-  && /rooms\/\$\{room\}\/meta\/roleLabels/.test(roleLabelsSource),
-  'Role display labels are Room-scoped and retain Dom/Sub defaults');
-check(/relationshipRole/.test(read('database.rules.json'))
-  && /"roleLabels"/.test(read('database.rules.json'))
-  && /child\('relationshipRole'\)\.val\(\) === 'dom'/.test(read('database.rules.json'))
-  && /child\('relationshipRole'\)\.val\(\) === 'sub'/.test(read('database.rules.json')),
-  'Each participant can write only their own display-role label');
+check(/const DEFAULTS = Object\.freeze\(\{ dom: '관리 사용자', sub: '기록 사용자' \}\)/.test(roleLabelsSource)
+  && /roomMembers\/\$\{room\}/.test(roleLabelsSource)
+  && /presence\?\.nickname/.test(roleLabelsSource),
+  'Visible role guidance uses Room participant nicknames with safe fallbacks');
+check(!/meta\/roleLabels/.test(roleLabelsSource)
+  && !/hmSaveOwnRoleLabel/.test(roleLabelsSource)
+  && !/hmResetOwnRoleLabel/.test(roleLabelsSource),
+  'Legacy editable role labels are ignored without changing stored data');
 check(/MutationObserver/.test(roleLabelsSource)
   && /characterData/.test(roleLabelsSource)
   && /attributeFilter: ATTRIBUTES/.test(roleLabelsSource)
@@ -355,13 +362,10 @@ check(/관리\\\(Dom\\\)/.test(roleLabelsSource)
   && /replaceRoleToken\(output, 'Dom', 'dom'\)/.test(roleLabelsSource)
   && /replaceRoleToken\(output, 'Sub', 'sub'\)/.test(roleLabelsSource),
   'Role transformer covers plain and decorated Dom/Sub labels');
-check(/id="roleDisplayLabelsCard"/.test(indexSource)
-  && /data-hm-action="save-role-display-label"/.test(indexSource)
-  && /data-hm-action="reset-role-display-label"/.test(indexSource),
-  'Our Space exposes editable role display-label controls');
-check(/document\.activeElement !== domInput/.test(roleLabelsSource)
-  && /document\.activeElement !== subInput/.test(roleLabelsSource),
-  'Role display-label refresh preserves the field currently being edited');
+check(!/id="roleDisplayLabelsCard"/.test(indexSource)
+  && !/data-hm-action="save-role-display-label"/.test(indexSource)
+  && !/data-hm-action="reset-role-display-label"/.test(indexSource),
+  'Our Space no longer exposes a redundant role-name settings card');
 check(/주인의/.test(roleLabelsSource)
   && /주인님/.test(roleLabelsSource)
   && /주인에게/.test(roleLabelsSource)

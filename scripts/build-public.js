@@ -62,7 +62,7 @@ trees.forEach(copyTree);
 
 const requiredOutputs = [
   'index.html', 'admin.html', 'service-worker.js', 'manifest.webmanifest',
-  'js/config.js', 'js/access-policy.js', 'js/save-state.js', 'js/ui-events.js', 'js/moments.js', 'js/card-conversations.js', 'css/style.css',
+  'js/config.js', 'js/access-policy.js', 'js/save-state.js', 'js/ui-events.js', 'js/room-media.js', 'js/moments.js', 'js/card-conversations.js', 'css/style.css',
   'css/tokens.css', 'css/legacy/base.css', 'css/legacy/release-foundation.css',
   'css/components/app-shell.css', 'css/components/app-shell-layout.css', 'css/components/top-bar.css',
   'css/components/app-shell-responsive.css', 'css/components/modal.css', 'css/components/modal-theme.css',

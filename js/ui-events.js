@@ -24,8 +24,6 @@
             if (event.target === element) global.closeRoomSettingsModal?.();
         },
         'set-relationship-role': (element) => global.setRelationshipRole?.(element.dataset.hmValue || ''),
-        'save-role-display-label': () => global.hmSaveOwnRoleLabel?.(),
-        'reset-role-display-label': () => global.hmResetOwnRoleLabel?.(),
         'create-room': () => global.createMyRoom?.(),
         'create-invite': () => global.createInviteCode?.(),
         'accept-invite': () => global.acceptInviteFromInput?.(),

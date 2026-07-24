@@ -1,7 +1,7 @@
 {
   "algorithm": "sha256",
-  "sourceHash": "863271f49cb68c57e0324e475b5a601ecd9c68d2033380cfa259207c2c049341",
-  "sourceBytes": 616940,
+  "sourceHash": "eaf8d7f83c6e5243265781d49b9d1fbb1f3c109fc8a17fed14fac43f0ea2d8dd",
+  "sourceBytes": 626117,
   "layers": [
     {
       "name": "tokens.css",
@@ -95,23 +95,23 @@
     },
     {
       "name": "screens/home-layout.css",
-      "bytes": 4017,
-      "lines": 91
+      "bytes": 4089,
+      "lines": 94
     },
     {
       "name": "screens/home-categories.css",
-      "bytes": 10683,
-      "lines": 91
+      "bytes": 12126,
+      "lines": 122
     },
     {
       "name": "screens/category-routes.css",
-      "bytes": 9643,
-      "lines": 98
+      "bytes": 10228,
+      "lines": 112
     },
     {
       "name": "screens/missions.css",
-      "bytes": 5124,
-      "lines": 51
+      "bytes": 12201,
+      "lines": 122
     },
     {
       "name": "components/app-shell-responsive.css",

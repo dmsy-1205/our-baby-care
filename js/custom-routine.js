@@ -118,6 +118,7 @@ function hmCustomSafeText(value, max = 120) {
     return String(value || '').trim().slice(0, max);
 }
 
+
 function hmCustomId(prefix = 'custom') {
     return `${prefix}_${Date.now().toString(36)}_${randomCode(4).toLowerCase()}`;
 }
@@ -319,7 +320,6 @@ function openCustomRoutineHub() {
     if (typeof hmMarkNotificationCardRead === 'function') hmMarkNotificationCardRead('promise');
     renderCustomRoutineHub();
     openModalOverlayById('customRoutineHubOverlay');
-    if (typeof hmOpenCardConversation === 'function') hmOpenCardConversation('promise', 'customRoutineHubOverlay');
 }
 
 function closeCustomRoutineHub() {
@@ -331,6 +331,8 @@ function openCustomRoutineManager() {
         alert('오늘의 약속 관리는 관리(Dom)만 사용할 수 있습니다.');
         return;
     }
+    if (typeof hmCloseCardConversation === 'function') hmCloseCardConversation(false);
+    closeModalOverlayById('customRoutineHubOverlay');
     renderCustomRoutineManager();
     openModalOverlayById('customRoutineManagerOverlay');
 }
@@ -383,7 +385,7 @@ function addCustomRoutineDraftItem() {
         alert(`카드 안 항목은 최대 ${HM_CUSTOM_MAX_ITEMS}개까지 가능합니다.`);
         return;
     }
-    hmCustomDraftItems.push({ id: hmCustomId('draft'), label: '', type: 'text', placeholder: '', required: false, order: hmCustomDraftItems.length + 1, active: true });
+    hmCustomDraftItems.push({ id: hmCustomId('draft'), label: '', type: 'text', placeholder: '', required: false, photoEnabled: false, order: hmCustomDraftItems.length + 1, active: true });
     renderCustomRoutineDraftItems();
 }
 
@@ -402,7 +404,8 @@ function syncCustomRoutineDraftFromDom() {
         const type = row.querySelector('[data-draft-field="type"]')?.value || 'text';
         const placeholder = row.querySelector('[data-draft-field="placeholder"]')?.value || '';
         const required = row.querySelector('[data-draft-field="required"]')?.checked || false;
-        return { id, label: hmCustomSafeText(label, HM_CUSTOM_ITEM_LABEL_MAX), type: HM_CUSTOM_ALLOWED_TYPES.includes(type) ? type : 'text', placeholder: hmCustomSafeText(placeholder, 40), required, order: idx + 1, active: true };
+        const photoEnabled = row.querySelector('[data-draft-field="photo"]')?.checked || false;
+        return { id, label: hmCustomSafeText(label, HM_CUSTOM_ITEM_LABEL_MAX), type: HM_CUSTOM_ALLOWED_TYPES.includes(type) ? type : 'text', placeholder: hmCustomSafeText(placeholder, 40), required, photoEnabled, order: idx + 1, active: true };
     });
 }
 
@@ -424,7 +427,10 @@ function renderCustomRoutineDraftItems() {
                 <option value="time" ${item.type === 'time' ? 'selected' : ''}>시간</option>
             </select>
             <input type="text" data-draft-field="placeholder" maxlength="40" placeholder="안내 문구" value="${escapeHtml(item.placeholder || '')}">
-            <label class="custom-routine-required"><input type="checkbox" data-draft-field="required" ${item.required ? 'checked' : ''}>필수</label>
+            <div class="routine-draft-flags">
+                <label class="custom-routine-required"><input type="checkbox" data-draft-field="required" ${item.required ? 'checked' : ''}>필수</label>
+                <label class="custom-routine-required"><input type="checkbox" data-draft-field="photo" ${item.photoEnabled ? 'checked' : ''}>사진</label>
+            </div>
             <button type="button" class="custom-routine-mini-danger" data-hm-action="remove-custom-routine-item" data-hm-value="${escapeHtml(item.id)}">삭제</button>
         </div>
     `).join('');
@@ -528,6 +534,7 @@ async function saveCustomRoutineCard() {
             type: HM_CUSTOM_ALLOWED_TYPES.includes(item.type) ? item.type : 'text',
             placeholder: hmCustomSafeText(item.placeholder, 40),
             required: item.required === true,
+            photoEnabled: item.photoEnabled === true,
             order: idx + 1,
             active: true
         };
@@ -550,6 +557,9 @@ async function saveCustomRoutineCard() {
     };
     try {
         await db.ref(`rooms/${roomCode}/customCards/${cardId}`).set(payload);
+        hmCustomCards[cardId] = { ...payload, createdAt: Number(prev.createdAt || Date.now()), updatedAt: Date.now() };
+        renderCustomRoutineCards();
+        renderCustomRoutineManager();
         resetCustomRoutineEditor();
         showSaveStatus('💜 오늘의 약속 저장 완료');
     } catch (err) {
@@ -632,6 +642,43 @@ function closeCustomRoutineInput() {
     renderCustomRoutineCards();
 }
 
+function hmCustomPhotoField(cardId, item, saved) {
+    if (item.photoEnabled !== true) return '';
+    const photo = saved?.photo && typeof saved.photo === 'object' ? saved.photo : null;
+    return `<div class="routine-item-photo" data-routine-photo-item="${escapeHtml(item.id)}">
+        <strong>📷 ${escapeHtml(item.label || '항목')} 사진</strong>
+        ${photo?.url ? `<img src="${escapeHtml(photo.url)}" alt="${escapeHtml(item.label || '항목')} 첨부 사진" loading="lazy">` : '<span class="routine-item-photo-empty">등록된 사진 없음</span>'}
+        <label class="routine-item-photo-select">사진 선택<input type="file" accept="image/*" data-custom-photo-file="${escapeHtml(item.id)}" hidden></label>
+        ${photo?.path ? `<label class="routine-item-photo-remove"><input type="checkbox" data-custom-photo-remove="${escapeHtml(item.id)}"> 기존 사진 삭제</label>` : ''}
+    </div>`;
+}
+
+function hmPreviewRoutinePhotoInput(input) {
+    const file = input?.files?.[0];
+    const box = input?.closest('.routine-item-photo');
+    if (!file || !box) return;
+    if (!file.type.startsWith('image/') || file.size > (window.hmRoomMedia?.MAX_SOURCE_BYTES || 12 * 1024 * 1024)) {
+        input.value = '';
+        alert('사진 파일은 12MB 이하만 선택할 수 있습니다.');
+        return;
+    }
+    const previousUrl = box.dataset.previewUrl;
+    if (previousUrl) URL.revokeObjectURL(previousUrl);
+    const previewUrl = URL.createObjectURL(file);
+    box.dataset.previewUrl = previewUrl;
+    box.querySelector('.routine-item-photo-empty')?.remove();
+    let image = box.querySelector('img');
+    if (!image) {
+        image = document.createElement('img');
+        image.alt = '선택한 사진 미리보기';
+        image.loading = 'lazy';
+        box.querySelector('strong')?.after(image);
+    }
+    image.src = previewUrl;
+    const select = box.querySelector('.routine-item-photo-select');
+    if (select) select.childNodes[0].textContent = '사진 다시 선택';
+}
+
 function renderCustomRoutineInput(cardId) {
     const card = hmCustomCards?.[cardId];
     const title = document.getElementById('customRoutineInputTitle');
@@ -649,27 +696,31 @@ function renderCustomRoutineInput(cardId) {
         const saved = hmCustomValues?.[cardId]?.[item.id] || {};
         const value = saved.value;
         if (item.type === 'checkbox') {
-            return `<label class="custom-routine-check-line"><input type="checkbox" data-custom-card="${escapeHtml(cardId)}" data-custom-item="${escapeHtml(item.id)}" ${value === true ? 'checked' : ''}> <span>${escapeHtml(item.label || '항목')}</span></label>`;
+            return `<div class="routine-item-input-group"><label class="custom-routine-check-line"><input type="checkbox" data-custom-card="${escapeHtml(cardId)}" data-custom-item="${escapeHtml(item.id)}" ${value === true ? 'checked' : ''}> <span>${escapeHtml(item.label || '항목')}</span></label>${hmCustomPhotoField(cardId, item, saved)}</div>`;
         }
         const inputType = item.type === 'number' ? 'number' : item.type === 'time' ? 'time' : 'text';
-        return `<label class="custom-routine-input-line"><span>${escapeHtml(item.label || '항목')}${item.required ? ' *' : ''}</span><input type="${inputType}" data-custom-card="${escapeHtml(cardId)}" data-custom-item="${escapeHtml(item.id)}" placeholder="${escapeHtml(item.placeholder || '')}" value="${escapeHtml(value || '')}"></label>`;
+        return `<div class="routine-item-input-group"><label class="custom-routine-input-line"><span>${escapeHtml(item.label || '항목')}${item.required ? ' *' : ''}</span><input type="${inputType}" data-custom-card="${escapeHtml(cardId)}" data-custom-item="${escapeHtml(item.id)}" placeholder="${escapeHtml(item.placeholder || '')}" value="${escapeHtml(value || '')}"></label>${hmCustomPhotoField(cardId, item, saved)}</div>`;
     }).join('');
 }
 
-function saveCustomRoutineInput() {
+async function saveCustomRoutineInput() {
     const cardId = hmCustomActiveInputCardId;
     const card = hmCustomCards?.[cardId];
     const body = document.getElementById('customRoutineInputBody');
-    if (!cardId || !card || !body) return;
+    const roomCode = getRoomCodeForData();
+    if (!cardId || !card || !body || !currentUser || !roomCode) return;
     const next = { ...(hmCustomValues || {}) };
     next[cardId] = { ...(next[cardId] || {}) };
     const requiredMissing = [];
-    hmCustomItemRows(card).forEach(item => {
+    const items = hmCustomItemRows(card);
+    items.forEach(item => {
         const el = body.querySelector(`[data-custom-item="${hmCustomCssEscape(item.id)}"]`);
         if (!el) return;
         const value = item.type === 'checkbox' ? el.checked : el.value;
         if (item.required && item.type !== 'checkbox' && !String(value || '').trim()) requiredMissing.push(item.label || '항목');
+        const previous = next[cardId][item.id] || {};
         next[cardId][item.id] = {
+            ...previous,
             value,
             label: item.label || '',
             type: item.type || 'text',
@@ -684,12 +735,43 @@ function saveCustomRoutineInput() {
         alert(`필수 항목을 입력해 주세요: ${requiredMissing.join(', ')}`);
         return;
     }
-    hmCustomValues = next;
-    renderCustomRoutineCards();
-    triggerAutoSave('custom-routine');
-    closeCustomRoutineInput();
-    showSaveStatus('💜 오늘의 약속 입력 저장 중...');
+    const date = document.getElementById('recordDate')?.value || '';
+    const context = { uid: currentUser.uid, roomCode };
+    const uploaded = [];
+    const removeAfterSave = [];
+    try {
+        for (const item of items) {
+            if (item.photoEnabled !== true) continue;
+            const file = body.querySelector(`[data-custom-photo-file="${hmCustomCssEscape(item.id)}"]`)?.files?.[0] || null;
+            const removeChecked = body.querySelector(`[data-custom-photo-remove="${hmCustomCssEscape(item.id)}"]`)?.checked === true;
+            const previousPhoto = next[cardId][item.id]?.photo || null;
+            if (file) {
+                const resourceId = `${date}_${cardId}_${item.id}_${Date.now().toString(36)}`;
+                const media = await window.hmRoomMedia.upload({ kind: 'routineEntry', resourceId, file, context });
+                const photo = { url: media.url, path: media.path, resourceId: media.resourceId || resourceId, uploadedBy: media.uploadedBy || currentUser.uid, uploadedAt: Number(media.updatedAt || Date.now()) };
+                next[cardId][item.id].photo = photo;
+                uploaded.push(photo);
+                if (previousPhoto?.path && previousPhoto.path !== photo.path) removeAfterSave.push(previousPhoto);
+            } else if (removeChecked && previousPhoto?.path) {
+                next[cardId][item.id].photo = null;
+                removeAfterSave.push(previousPhoto);
+            }
+        }
+        await db.ref(`rooms/${roomCode}/days/${date}/customCardValues/${cardId}`).set(next[cardId]);
+        removeAfterSave.forEach(photo => window.hmRoomMedia.remove({ kind: 'routineEntry', resourceId: photo.resourceId, path: photo.path, context }).catch(() => {}));
+        hmCustomValues = next;
+        renderCustomRoutineCards();
+        triggerAutoSave('custom-routine-photo');
+        closeCustomRoutineInput();
+        showSaveStatus('💜 오늘의 약속 입력 저장 완료');
+    } catch (error) {
+        uploaded.forEach(photo => window.hmRoomMedia.remove({ kind: 'routineEntry', resourceId: photo.resourceId, path: photo.path, context }).catch(() => {}));
+        hmReportError('saveCustomRoutineInput', error, '❌ 오늘의 약속 입력 저장 실패');
+    }
 }
 
 window.updateCustomRoutineScheduleUi = updateCustomRoutineScheduleUi;
 window.selectAllCustomRoutineDays = selectAllCustomRoutineDays;
+document.addEventListener('change', event => {
+    if (event.target?.matches?.('[data-custom-photo-file]')) hmPreviewRoutinePhotoInput(event.target);
+});

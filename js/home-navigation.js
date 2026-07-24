@@ -108,10 +108,11 @@
         const section = document.createElement('section');
         section.id = 'hmAdaptiveCategoryGrid';
         section.className = 'hm-adaptive-category-section';
+        section.setAttribute('data-hm-role-label-ignore', '');
         section.innerHTML = `<div class="hm-adaptive-category-head"><strong>오늘 무엇을 할까요?</strong><small>필요한 카테고리를 선택하세요.</small></div><div class="hm-adaptive-category-grid">${CATEGORIES.map((item, index) => `
             <button type="button" class="hm-adaptive-category" data-hm-category="${item.key}" data-tone="${index + 1}" aria-label="${item.title}: ${item.subtitle}">
                 <span class="hm-adaptive-category-icon" aria-hidden="true">${icon(item.icon)}</span>
-                <span><strong>${item.title}</strong><small>${item.subtitle}</small></span>
+                <span class="hm-adaptive-category-copy"><strong>${item.title}</strong><small>${item.subtitle}</small></span>
                 <span class="hm-adaptive-category-arrow" aria-hidden="true">›</span>
             </button>`).join('')}</div>`;
         section.addEventListener('click', (event) => {
@@ -335,6 +336,10 @@
         $('hmAdaptiveRouteSaveState').textContent = isSubFeedback ? '읽기 전용' : (EDITOR_ROUTES[category.key] ? '☁ 자동 저장' : '둘만의 공간');
         if (EDITOR_ROUTES[category.key]) mountRouteEditors(category.key, body);
         else renderRouteActions(category, body);
+        const visibleNotificationKeys = category.key === 'mission'
+            ? ['promise', 'subRoutine']
+            : (EDITOR_ROUTES[category.key] || []);
+        visibleNotificationKeys.forEach((key) => window.hmMarkNotificationCardRead?.(key));
         document.querySelector('#appContent > .container')?.classList.add('hm-adaptive-route-home-hidden');
         document.querySelector('#appContent > .history-launch-card')?.classList.add('hm-adaptive-route-home-hidden');
         route.hidden = false;
@@ -485,8 +490,8 @@
         const isManager = typeof window.canManageRelationshipCards === 'function' && window.canManageRelationshipCards();
         const button = document.querySelector('[data-hm-category="feedback"]');
         if (!button) return;
-        const title = isManager ? '관리와 피드백' : '주인의 메시지';
-        const subtitle = 'Dom의 오늘 · 피드백 · 선물';
+        const title = '관리와 피드백';
+        const subtitle = '오늘 · 피드백 · 선물';
         button.setAttribute('aria-label', `${title}: ${subtitle}`);
         const strong = button.querySelector('strong');
         const small = button.querySelector('small');

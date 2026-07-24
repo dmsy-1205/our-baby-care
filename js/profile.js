@@ -155,7 +155,8 @@ async function saveProfileNickname() {
     const status = document.getElementById('profileStatus');
     const button = document.getElementById('profileSaveBtn');
     const nickname = hmNormalizeNickname(input ? input.value : '');
-    if (!hmIsValidNickname(nickname)) {
+    const clearingNickname = nickname.length === 0;
+    if (!clearingNickname && !hmIsValidNickname(nickname)) {
         if (status) { status.textContent = '닉네임은 2~20자로 입력하고 / . # $ [ ] 문자는 사용하지 마세요.'; status.className = 'hm-profile-status error'; }
         if (input) input.focus();
         return;
@@ -163,7 +164,7 @@ async function saveProfileNickname() {
     try {
         if (button) button.disabled = true;
         await db.ref(`users/${requestContext.uid}/profile`).update({
-            nickname,
+            nickname: clearingNickname ? null : nickname,
             updatedAt: firebase.database.ServerValue.TIMESTAMP
         });
         if (!hmIsProfileContextCurrent(requestContext)) return;
@@ -171,7 +172,10 @@ async function saveProfileNickname() {
         window.hmCurrentNickname = nickname;
         localStorage.setItem(`hmProfileAvatar:${requestContext.uid}`, hmCurrentAvatar);
         try {
-            if (requestContext.roomCode) await db.ref(`roomMembers/${requestContext.roomCode}/${requestContext.uid}/presence`).update({ nickname, avatar: hmCurrentAvatar });
+            if (requestContext.roomCode) await db.ref(`roomMembers/${requestContext.roomCode}/${requestContext.uid}/presence`).update({
+                nickname: clearingNickname ? null : nickname,
+                avatar: hmCurrentAvatar
+            });
             if (!hmIsProfileContextCurrent(requestContext)) return;
         } catch (avatarError) {
             if (!hmIsProfileContextCurrent(requestContext)) return;
@@ -179,8 +183,13 @@ async function saveProfileNickname() {
         }
         hmApplyNicknameToUI();
         updateChatAlignment();
-        if (status) { status.textContent = '닉네임이 저장되었습니다. 새 채팅부터 이 이름으로 표시됩니다.'; status.className = 'hm-profile-status success'; }
-        showSaveStatus('✅ 닉네임 저장 완료');
+        if (status) {
+            status.textContent = clearingNickname
+                ? '닉네임이 해제되었습니다. 기본 사용자 이름으로 표시됩니다.'
+                : '닉네임이 저장되었습니다. 새 채팅부터 이 이름으로 표시됩니다.';
+            status.className = 'hm-profile-status success';
+        }
+        showSaveStatus(clearingNickname ? '✅ 닉네임 해제 완료' : '✅ 닉네임 저장 완료');
     } catch (err) {
         if (!hmIsProfileContextCurrent(requestContext)) return;
         hmReportError('saveProfileNickname', err, hmIsFirebasePermissionError(err) ? '닉네임 저장 권한이 없습니다.' : '닉네임 저장에 실패했습니다.');

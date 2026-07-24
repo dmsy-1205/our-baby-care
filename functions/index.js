@@ -4,9 +4,74 @@ const { onCall, HttpsError } = require("firebase-functions/v2/https");
 const { setGlobalOptions } = require("firebase-functions/v2");
 const admin = require("firebase-admin");
 const crypto = require("node:crypto");
+const { MEDIA_KINDS, parseImageDataUrl, mediaPath, downloadUrl, newDownloadToken } = require("./room-media");
 
 admin.initializeApp();
 setGlobalOptions({ region: "us-central1", maxInstances: 2, timeoutSeconds: 30, memory: "256MiB" });
+
+async function requireActiveRoomMediaAccess(request, kind) {
+  const uid = request.auth?.uid;
+  const roomCode = String(request.data?.roomCode || "").trim();
+  if (!uid) throw new HttpsError("unauthenticated", "로그인이 필요합니다.");
+  if (!MEDIA_KINDS.has(kind) || !/^[A-Za-z0-9_-]{3,60}$/.test(roomCode)) {
+    throw new HttpsError("invalid-argument", "사진 종류 또는 Room 코드가 올바르지 않습니다.");
+  }
+  const db = admin.database();
+  const [memberSnap, relationshipSnap] = await Promise.all([
+    db.ref(`roomMembers/${roomCode}/${uid}`).get(),
+    db.ref(`rooms/${roomCode}/meta/relationship/status`).get()
+  ]);
+  if (!memberSnap.exists() || (relationshipSnap.exists() && relationshipSnap.val() !== "active")) {
+    throw new HttpsError("permission-denied", "활성 Room 멤버만 사진을 관리할 수 있습니다.");
+  }
+  const member = memberSnap.val() || {};
+  const role = String(member.relationshipRole || (member.role === "owner" ? "dom" : member.role === "partner" ? "sub" : ""));
+  if (kind === "promise" && role !== "dom") throw new HttpsError("permission-denied", "오늘의 약속 사진은 관리 역할만 변경할 수 있습니다.");
+  if (kind === "subRoutine" && role !== "sub") throw new HttpsError("permission-denied", "나의 루틴 사진은 기록 역할만 변경할 수 있습니다.");
+  return { uid, roomCode, role };
+}
+
+async function handleUploadRoomMedia(request) {
+  const kind = String(request.data?.kind || "");
+  const resourceId = String(request.data?.resourceId || "").trim();
+  const caller = await requireActiveRoomMediaAccess(request, kind);
+  if (!/^[A-Za-z0-9_-]{1,160}$/.test(resourceId)) throw new HttpsError("invalid-argument", "사진 대상 ID가 올바르지 않습니다.");
+  let image;
+  try { image = parseImageDataUrl(request.data?.dataUrl); }
+  catch (error) { throw new HttpsError("invalid-argument", "압축된 JPEG/WebP 사진만 업로드할 수 있습니다."); }
+  const path = mediaPath({ ...caller, kind, resourceId, extension: image.extension });
+  const bucket = admin.storage().bucket();
+  const token = newDownloadToken();
+  await bucket.file(path).save(image.buffer, {
+    resumable: false,
+    metadata: {
+      contentType: image.contentType,
+      cacheControl: "private,max-age=3600",
+      metadata: { firebaseStorageDownloadTokens: token, ownerUid: caller.uid, roomCode: caller.roomCode, kind }
+    }
+  });
+  return { url: downloadUrl(bucket.name, path, token), path, kind, resourceId, uploadedBy: caller.uid, updatedAt: Date.now() };
+}
+
+async function handleDeleteRoomMedia(request) {
+  const kind = String(request.data?.kind || "");
+  const resourceId = String(request.data?.resourceId || "").trim();
+  const caller = await requireActiveRoomMediaAccess(request, kind);
+  const requestedPath = String(request.data?.path || "");
+  if (!/^[A-Za-z0-9_-]{1,160}$/.test(resourceId)) throw new HttpsError("invalid-argument", "사진 대상 ID가 올바르지 않습니다.");
+  const allowedPaths = new Set([
+    mediaPath({ ...caller, kind, resourceId, extension: "webp" }),
+    mediaPath({ ...caller, kind, resourceId, extension: "jpg" })
+  ]);
+  const legacyMomentPath = (kind === "moment" || kind === "meal") && /^\d{4}-\d{2}-\d{2}_[A-Za-z0-9_-]+$/.test(resourceId)
+    ? `rooms/${caller.roomCode}/moments/${resourceId.slice(0, 10)}/${caller.uid}/${resourceId.slice(11)}.jpg`
+    : "";
+  if ((!allowedPaths.has(requestedPath) && requestedPath !== legacyMomentPath) || requestedPath.includes("..")) {
+    throw new HttpsError("invalid-argument", "삭제할 사진 경로가 올바르지 않습니다.");
+  }
+  await admin.storage().bucket().file(requestedPath).delete({ ignoreNotFound: true });
+  return { ok: true };
+}
 
 function isActiveAdminValue(value) {
   if (value === true) return true;
@@ -15,6 +80,8 @@ function isActiveAdminValue(value) {
 }
 
 exports.executeApprovedRoomDisconnect = onCall(async (request) => {
+  if (request.data?.mediaAction === "uploadRoomMedia") return handleUploadRoomMedia(request);
+  if (request.data?.mediaAction === "deleteRoomMedia") return handleDeleteRoomMedia(request);
   const callerUid = request.auth?.uid;
   if (!callerUid) throw new HttpsError("unauthenticated", "로그인이 필요합니다.");
 

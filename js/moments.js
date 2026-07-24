@@ -1,10 +1,7 @@
 // HearMe2nite STEP6.2.13.7 - Daily Moments Gallery
 (function hmDailyMomentsGallery() {
-    const TEST_PROJECT_ID = 'hearme2nite1205';
-    const TEST_LIMIT = 10;
-    const LEGACY_LIMIT = 5;
+    const MOMENT_LIMIT = 10;
     const MAX_SOURCE_BYTES = 12 * 1024 * 1024;
-    const BASE64_TARGET_LENGTH = 470000;
     let uploadInProgress = false;
     let pendingMomentUploads = [];
     let pendingMomentDate = '';
@@ -19,8 +16,8 @@
         const projectId = String(window.HM_FIREBASE_ENV?.projectId || babyApp?.options?.projectId || '');
         return {
             projectId,
-            usesStorage: projectId === TEST_PROJECT_ID,
-            limit: projectId === TEST_PROJECT_ID ? TEST_LIMIT : LEGACY_LIMIT
+            usesStorage: true,
+            limit: MOMENT_LIMIT
         };
     }
 
@@ -187,98 +184,32 @@
         if (typeof updateDailyCards === 'function') updateDailyCards();
     }
 
-    function readFile(file) {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onerror = () => reject(reader.error || new Error('파일 읽기 실패'));
-            reader.onload = () => resolve(reader.result);
-            reader.readAsDataURL(file);
-        });
-    }
-
-    function loadImage(src) {
-        return new Promise((resolve, reject) => {
-            const image = new Image();
-            image.onerror = () => reject(new Error('이미지 형식 읽기 실패'));
-            image.onload = () => resolve(image);
-            image.src = src;
-        });
-    }
-
-    function canvasBlob(canvas, quality) {
-        return new Promise((resolve, reject) => {
-            canvas.toBlob((blob) => blob ? resolve(blob) : reject(new Error('이미지 압축 실패')), 'image/jpeg', quality);
-        });
-    }
-
-    async function compress(file, usesStorage) {
-        const src = await readFile(file);
-        const image = await loadImage(src);
-        const canvas = document.createElement('canvas');
-        const maxWidth = usesStorage ? 1600 : 900;
-        const scale = Math.min(1, maxWidth / Math.max(1, image.width));
-        canvas.width = Math.max(1, Math.round(image.width * scale));
-        canvas.height = Math.max(1, Math.round(image.height * scale));
-        canvas.getContext('2d', { alpha: false }).drawImage(image, 0, 0, canvas.width, canvas.height);
-
-        if (usesStorage) {
-            const blob = await canvasBlob(canvas, 0.8);
-            return { blob, dataUrl: '' };
-        }
-
-        let quality = 0.72;
-        let dataUrl = canvas.toDataURL('image/jpeg', quality);
-        while (dataUrl.length > BASE64_TARGET_LENGTH && canvas.width > 420) {
-            const width = Math.max(420, Math.round(canvas.width * 0.84));
-            const height = Math.max(1, Math.round(canvas.height * (width / canvas.width)));
-            const resized = document.createElement('canvas');
-            resized.width = width;
-            resized.height = height;
-            resized.getContext('2d', { alpha: false }).drawImage(canvas, 0, 0, width, height);
-            canvas.width = width;
-            canvas.height = height;
-            canvas.getContext('2d', { alpha: false }).drawImage(resized, 0, 0);
-            quality = Math.max(0.52, quality - 0.04);
-            dataUrl = canvas.toDataURL('image/jpeg', quality);
-        }
-        if (dataUrl.length > 600000) throw new Error('압축 후에도 사진 용량이 너무 큽니다.');
-        return { blob: null, dataUrl };
-    }
-
     async function persistMoment(file, mealType = '', requestContext = mediaContext(), caption = '') {
         if (typeof window.hmGuardRelationshipDataAccess === 'function' && !window.hmGuardRelationshipDataAccess()) {
             throw new Error('relationship/data-locked');
         }
-        const env = environment();
         const room = requestContext.roomCode;
         const date = requestContext.date;
         if (!isMediaContextCurrent(requestContext)) throw new Error('media/context-changed');
         if (!currentUser || !room || !date) throw new Error('Room과 날짜를 먼저 확인해 주세요.');
+        if (!window.hmRoomMedia) throw new Error('사진 저장 서비스를 불러오지 못했습니다.');
         const id = db.ref(`rooms/${room}/days/${date}/moments`).push().key;
-        const compressed = await compress(file, env.usesStorage);
-        if (!isMediaContextCurrent(requestContext)) throw new Error('media/context-changed');
+        const kind = MEAL_LABELS[mealType] ? 'meal' : 'moment';
+        const resourceId = `${date}_${id}`;
+        const media = await window.hmRoomMedia.upload({ kind, resourceId, file, context: requestContext });
+        if (!isMediaContextCurrent(requestContext)) {
+            window.hmRoomMedia.remove({ kind, resourceId, path: media.path, context: requestContext }).catch(() => {});
+            throw new Error('media/context-changed');
+        }
         const payload = {
-            storageType: env.usesStorage ? 'storage' : 'base64',
+            storageType: 'storage',
+            url: String(media.url || ''),
+            storagePath: String(media.path || ''),
             caption: String(caption || '').trim().slice(0, 120),
             uploadedBy: requestContext.uid,
             uploadedAt: firebase.database.ServerValue.TIMESTAMP
         };
         if (MEAL_LABELS[mealType]) payload.mealType = mealType;
-
-        let storageRef = null;
-        if (env.usesStorage) {
-            const path = `rooms/${room}/moments/${date}/${requestContext.uid}/${id}.jpg`;
-            storageRef = firebase.storage(babyApp).ref(path);
-            const snapshot = await storageRef.put(compressed.blob, { contentType: 'image/jpeg' });
-            if (!isMediaContextCurrent(requestContext)) {
-                await storageRef.delete().catch(() => {});
-                throw new Error('media/context-changed');
-            }
-            payload.url = await snapshot.ref.getDownloadURL();
-            payload.storagePath = path;
-        } else {
-            payload.dataUrl = compressed.dataUrl;
-        }
 
         try {
             if (!isMediaContextCurrent(requestContext)) throw new Error('media/context-changed');
@@ -287,7 +218,7 @@
             }
             await db.ref(`rooms/${room}/days/${date}/moments/${id}`).set(payload);
         } catch (error) {
-            if (storageRef) storageRef.delete().catch(() => {});
+            window.hmRoomMedia.remove({ kind, resourceId, path: payload.storagePath, context: requestContext }).catch(() => {});
             throw error;
         }
         if (!isMediaContextCurrent(requestContext)) return false;
@@ -520,7 +451,13 @@
                 uploadedPhotoBase64 = '';
             } else {
                 if (item.storageType === 'storage' && item.storagePath) {
-                    await firebase.storage(babyApp).ref(item.storagePath).delete();
+                    const kind = item.mealType ? 'meal' : 'moment';
+                    await window.hmRoomMedia.remove({
+                        kind,
+                        resourceId: `${date}_${id}`,
+                        path: item.storagePath,
+                        context: { uid: currentUser?.uid || '', roomCode: room }
+                    });
                 }
                 await db.ref(`rooms/${room}/days/${date}/moments/${id}`).remove();
             }
